@@ -37,5 +37,16 @@ The ejb can now be created using this home interface (standard ejb pattern):
 <p/>
 More information can be found in the <A href="ejbInterop.html">EJB interoperation tutorial</A>.
 
+<p/>
+<b>Known problems</b>
+<UL>
+<LI>The weblogic java to IDL generator generates incompatible IDL for jagged arrays (e.g. int[][]). <BR>
+To use jagged arrays from an IIOP.NET client, please generate the IDL for the jagged arrays with another java to
+IDL generator (e.g. included in java SDK 1.4). Compile these additional IDL files (e.g. org\omg\boxedRMI\seq2_long.idl) 
+together with those produced by the weblogic java to IDL generator with the IIOP.NET IDL to CLS compiler to create the
+CLS.
+</LI>
+</UL>
+
 
 
