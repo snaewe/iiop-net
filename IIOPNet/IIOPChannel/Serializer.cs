@@ -46,11 +46,11 @@ namespace Ch.Elca.Iiop.Marshalling {
     /// <summary>
     /// base class for all Serializer.
     /// </summary>
-    public abstract class Serialiser {
+    internal abstract class Serialiser {
 
         #region IConstructors
 
-        public Serialiser() {
+        internal Serialiser() {
         }
 
         #endregion IConstructors
@@ -59,7 +59,7 @@ namespace Ch.Elca.Iiop.Marshalling {
         /// <summary>
         /// serializes the actual value into the given stream
         /// </summary>
-        public abstract void Serialise(Type formal, object actual, AttributeExtCollection attributes, 
+        internal abstract void Serialise(Type formal, object actual, AttributeExtCollection attributes, 
                                        CdrOutputStream targetStream);
 
         /// <summary>
@@ -69,7 +69,7 @@ namespace Ch.Elca.Iiop.Marshalling {
         /// <param name="attributes">the attributes on the parameter/field/..., but not the attributes on the formal-type</param>
         /// <param name="sourceStream"></param>
         /// <returns></returns>
-        public abstract object Deserialise(Type formal, AttributeExtCollection attributes,
+        internal abstract object Deserialise(Type formal, AttributeExtCollection attributes,
                                            CdrInputStream sourceStream);
 
         /// <summary>
@@ -106,16 +106,16 @@ namespace Ch.Elca.Iiop.Marshalling {
     #region serializer for primitive types
 
     /// <summary>serializes instances of System.Byte</summary>
-    public class ByteSerialiser : Serialiser {
+    internal class ByteSerialiser : Serialiser {
 
         #region IMethods
 
-        public override void Serialise(Type formal, object actual, AttributeExtCollection attributes,
+        internal override void Serialise(Type formal, object actual, AttributeExtCollection attributes,
                                        CdrOutputStream targetStream) {
             targetStream.WriteOctet((byte)actual);
         }
 
-        public override object Deserialise(Type formal, AttributeExtCollection attributes, 
+        internal override object Deserialise(Type formal, AttributeExtCollection attributes, 
                                            CdrInputStream sourceStream) {
             return sourceStream.ReadOctet();
         }
@@ -125,16 +125,16 @@ namespace Ch.Elca.Iiop.Marshalling {
     }
 
     /// <summary>serializes instances of System.Boolean</summary> 
-    public class BooleanSerialiser : Serialiser {
+    internal class BooleanSerialiser : Serialiser {
 
         #region IMethods
 
-        public override void Serialise(Type formal, object actual, AttributeExtCollection attributes,
+        internal override void Serialise(Type formal, object actual, AttributeExtCollection attributes,
                                        CdrOutputStream targetStream) {
             targetStream.WriteBool((bool)actual);
         }
 
-        public override object Deserialise(Type formal, AttributeExtCollection attributes,
+        internal override object Deserialise(Type formal, AttributeExtCollection attributes,
                                            CdrInputStream sourceStream) {
             return sourceStream.ReadBool();
         }
@@ -144,16 +144,16 @@ namespace Ch.Elca.Iiop.Marshalling {
     }
 
     /// <summary>serializes instances of System.Int16</summary>
-    public class Int16Serialiser : Serialiser {
+    internal class Int16Serialiser : Serialiser {
 
         #region IMethods
         
-        public override void Serialise(Type formal, object actual, AttributeExtCollection attributes,
+        internal override void Serialise(Type formal, object actual, AttributeExtCollection attributes,
                                        CdrOutputStream targetStream) {
             targetStream.WriteShort((short)actual);
         }
 
-        public override object Deserialise(Type formal, AttributeExtCollection attributes,
+        internal override object Deserialise(Type formal, AttributeExtCollection attributes,
                                            CdrInputStream sourceStream) {
             return sourceStream.ReadShort();
         }
@@ -163,16 +163,16 @@ namespace Ch.Elca.Iiop.Marshalling {
     }
     
     /// <summary>serializes instances of System.Int32</summary>
-    public class Int32Serialiser : Serialiser {
+    internal class Int32Serialiser : Serialiser {
 
         #region IMethods
         
-        public override void Serialise(Type formal, object actual, AttributeExtCollection attributes,
+        internal override void Serialise(Type formal, object actual, AttributeExtCollection attributes,
                                        CdrOutputStream targetStream) {
             targetStream.WriteLong((int)actual);
         }
 
-        public override object Deserialise(Type formal, AttributeExtCollection attributes,
+        internal override object Deserialise(Type formal, AttributeExtCollection attributes,
                                            CdrInputStream sourceStream) {
             return sourceStream.ReadLong();
         }
@@ -182,16 +182,16 @@ namespace Ch.Elca.Iiop.Marshalling {
     }
 
     /// <summary>serializes instances of System.Int64</summary>
-    public class Int64Serialiser : Serialiser {
+    internal class Int64Serialiser : Serialiser {
 
         #region IMethods
 
-        public override void Serialise(Type formal, object actual, AttributeExtCollection attributes,
+        internal override void Serialise(Type formal, object actual, AttributeExtCollection attributes,
                                        CdrOutputStream targetStream) {
             targetStream.WriteLongLong((long)actual);
         }
 
-        public override object Deserialise(Type formal, AttributeExtCollection attributes,
+        internal override object Deserialise(Type formal, AttributeExtCollection attributes,
                                            CdrInputStream sourceStream) {
             return sourceStream.ReadLongLong();
         }
@@ -201,16 +201,16 @@ namespace Ch.Elca.Iiop.Marshalling {
     }
 
     /// <summary>serializes instances of System.Single</summary>
-    public class SingleSerialiser : Serialiser {
+    internal class SingleSerialiser : Serialiser {
 
         #region IMethods
     
-        public override void Serialise(Type formal, object actual, AttributeExtCollection attributes,
+        internal override void Serialise(Type formal, object actual, AttributeExtCollection attributes,
                                        CdrOutputStream targetStream) {
             targetStream.WriteFloat((float)actual);
         }
 
-        public override object Deserialise(Type formal, AttributeExtCollection attributes,
+        internal override object Deserialise(Type formal, AttributeExtCollection attributes,
                                            CdrInputStream sourceStream) {
             return sourceStream.ReadFloat();
         }
@@ -220,16 +220,16 @@ namespace Ch.Elca.Iiop.Marshalling {
     }
 
     /// <summary>serializes instances of System.Double</summary>
-    public class DoubleSerialiser : Serialiser {
+    internal class DoubleSerialiser : Serialiser {
 
         #region IMethods
 
-        public override void Serialise(Type formal, object actual, AttributeExtCollection attributes,
+        internal override void Serialise(Type formal, object actual, AttributeExtCollection attributes,
                                        CdrOutputStream targetStream) {
             targetStream.WriteDouble((double)actual);
         }
 
-        public override object Deserialise(Type formal, AttributeExtCollection attributes,
+        internal override object Deserialise(Type formal, AttributeExtCollection attributes,
                                            CdrInputStream sourceStream) {
             return sourceStream.ReadDouble();
         }
@@ -238,7 +238,7 @@ namespace Ch.Elca.Iiop.Marshalling {
 
     }
 
-    public abstract class CharStringBaseSer : Serialiser {
+    internal abstract class CharStringBaseSer : Serialiser {
 
         #region IMethods 
 
@@ -256,11 +256,11 @@ namespace Ch.Elca.Iiop.Marshalling {
     }
 
     /// <summary>serializes instances of System.Char</summary>
-    public class CharSerialiser : CharStringBaseSer {
+    internal class CharSerialiser : CharStringBaseSer {
 
         #region IMethods
 
-        public override void Serialise(Type formal, object actual, AttributeExtCollection attributes,
+        internal override void Serialise(Type formal, object actual, AttributeExtCollection attributes,
                                        CdrOutputStream targetStream) {
             bool useWide = UseWideOk(attributes);
             if (useWide) {
@@ -271,7 +271,7 @@ namespace Ch.Elca.Iiop.Marshalling {
             }
         }
 
-        public override object Deserialise(Type formal, AttributeExtCollection attributes,
+        internal override object Deserialise(Type formal, AttributeExtCollection attributes,
                                            CdrInputStream sourceStream) {
             bool useWide = UseWideOk(attributes);
             char result;
@@ -288,11 +288,11 @@ namespace Ch.Elca.Iiop.Marshalling {
     }
 
     /// <summary>serializes instances of System.String which are serialized as string values</summary>
-    public class StringSerialiser : CharStringBaseSer {
+    internal class StringSerialiser : CharStringBaseSer {
 
         #region IMethods
 
-        public override void Serialise(Type formal, object actual, AttributeExtCollection attributes,
+        internal override void Serialise(Type formal, object actual, AttributeExtCollection attributes,
                                        CdrOutputStream targetStream) {
             bool useWide = UseWideOk(attributes);
             if (actual == null) { 
@@ -307,7 +307,7 @@ namespace Ch.Elca.Iiop.Marshalling {
             }
         }
 
-        public override object Deserialise(Type formal, AttributeExtCollection attributes,
+        internal override object Deserialise(Type formal, AttributeExtCollection attributes,
                                            CdrInputStream sourceStream) {
             bool useWide = UseWideOk(attributes);
             object result = "";
@@ -330,7 +330,7 @@ namespace Ch.Elca.Iiop.Marshalling {
     #region serializer for marshalbyref types
     
     /// <summary>serializes object references</summary>
-    public class ObjRefSerializer : Serialiser {
+    internal class ObjRefSerializer : Serialiser {
 
         #region SFields
         
@@ -349,7 +349,7 @@ namespace Ch.Elca.Iiop.Marshalling {
         #endregion SConstructor        
         #region IMethods
         
-        public override void Serialise(Type formal, object actual, AttributeExtCollection attributes,
+        internal override void Serialise(Type formal, object actual, AttributeExtCollection attributes,
                                        CdrOutputStream targetStream) {
             if (actual == null) { 
                 WriteNullReference(targetStream); // null must be handled specially
@@ -399,7 +399,7 @@ namespace Ch.Elca.Iiop.Marshalling {
                 
 
 
-        public override object Deserialise(Type formal, AttributeExtCollection attributes,
+        internal override object Deserialise(Type formal, AttributeExtCollection attributes,
                                            CdrInputStream sourceStream) {
             // reads the encoded IOR from this stream
             Ior ior = new Ior(sourceStream);
@@ -467,7 +467,7 @@ namespace Ch.Elca.Iiop.Marshalling {
 
     /// <summary>standard serializer for pass by value object</summary>
     /// <remarks>if a CLS struct should be serialized as IDL struct and not as ValueType, use the IDLStruct Serializer</remarks>
-    public class ValueObjectSerializer : Serialiser {
+    internal class ValueObjectSerializer : Serialiser {
 
         #region IMethods
 
@@ -525,7 +525,7 @@ namespace Ch.Elca.Iiop.Marshalling {
             return typeHierarchy;
         }
 
-        public override void Serialise(Type formal, object actual, AttributeExtCollection attributes,
+        internal override void Serialise(Type formal, object actual, AttributeExtCollection attributes,
                                        CdrOutputStream targetStream) {
             if (actual == null) {
                 targetStream.WriteULong(0); // write a null-value
@@ -604,7 +604,7 @@ namespace Ch.Elca.Iiop.Marshalling {
         }
 
 
-        public override object Deserialise(Type formal, AttributeExtCollection attributes,
+        internal override object Deserialise(Type formal, AttributeExtCollection attributes,
                                            CdrInputStream sourceStream) {
             sourceStream.BeginReadNewValue();
             StreamPosition instanceStartPos;
@@ -757,8 +757,8 @@ namespace Ch.Elca.Iiop.Marshalling {
 
         /// <summary>reads in a field in a value-type instance</summary>
         /// <param name="containingInstance">the instance, in which the field should be set</param>
-        public void ReadAndSetField(FieldInfo field, object containingInstance, 
-                                    CdrInputStream sourceStream) {
+        internal void ReadAndSetField(FieldInfo field, object containingInstance, 
+                                      CdrInputStream sourceStream) {
             Marshaller marshaller = Marshaller.GetSingleton();
             AttributeExtCollection attrColl =
                 ReflectionHelper.GetCustomAttriutesForField(field, true);
@@ -785,7 +785,7 @@ namespace Ch.Elca.Iiop.Marshalling {
 
     /// <summary>serializes an non boxed value as an IDL boxed value and deserialize an IDL boxed value as an unboxed value</summary>
     /// <remarks>do not use this serializer with instances of BoxedValues which should not be boxed or unboxed</remarks>
-    public class BoxedValueSerializer : Serialiser {
+    internal class BoxedValueSerializer : Serialiser {
 
         #region IFields
 
@@ -794,8 +794,8 @@ namespace Ch.Elca.Iiop.Marshalling {
         #endregion IFields
         #region IMethods
         
-        public override void Serialise(Type formal, object actual, AttributeExtCollection attributes,
-                                       CdrOutputStream targetStream) {
+        internal override void Serialise(Type formal, object actual, AttributeExtCollection attributes,
+                                         CdrOutputStream targetStream) {
             if (!formal.IsSubclassOf(ReflectionHelper.BoxedValueBaseType)) { 
                 // BoxedValueSerializer can only serialize formal types, 
                 // which are subclasses of BoxedValueBase
@@ -809,8 +809,8 @@ namespace Ch.Elca.Iiop.Marshalling {
             m_valueSer.Serialise(formal, boxed, attributes, targetStream);
         }
 
-        public override object Deserialise(Type formal, AttributeExtCollection attributes, 
-                                           CdrInputStream sourceStream) {
+        internal override object Deserialise(Type formal, AttributeExtCollection attributes, 
+                                             CdrInputStream sourceStream) {
             Debug.WriteLine("deserialise boxed value, formal: " + formal);
             if (!formal.IsSubclassOf(ReflectionHelper.BoxedValueBaseType)) { 
                 // BoxedValueSerializer can only serialize formal types,
@@ -835,12 +835,12 @@ namespace Ch.Elca.Iiop.Marshalling {
     /// <summary>
     /// this class serializes .NET structs, which were mapped from an IDL-struct
     /// </summary>
-    public class IdlStructSerializer : Serialiser {
+    internal class IdlStructSerializer : Serialiser {
 
         #region IMethods
     
-        public override object Deserialise(System.Type formal, AttributeExtCollection attributes,
-                                           CdrInputStream sourceStream) {
+        internal override object Deserialise(System.Type formal, AttributeExtCollection attributes,
+                                             CdrInputStream sourceStream) {
             FieldInfo[] fields = ReflectionHelper.GetAllDeclaredInstanceFields(formal);
             Marshaller marshaller = Marshaller.GetSingleton();
                         
@@ -854,8 +854,8 @@ namespace Ch.Elca.Iiop.Marshalling {
             return instance;
         }
 
-        public override void Serialise(System.Type formal, object actual, AttributeExtCollection attributes,
-                                       CdrOutputStream targetStream) {
+        internal override void Serialise(System.Type formal, object actual, AttributeExtCollection attributes,
+                                         CdrOutputStream targetStream) {
             FieldInfo[] fields = ReflectionHelper.GetAllDeclaredInstanceFields(formal);
             Marshaller marshaller = Marshaller.GetSingleton();
             foreach (FieldInfo info in fields) {
@@ -869,7 +869,7 @@ namespace Ch.Elca.Iiop.Marshalling {
 
     }
 
-    public class IdlUnionSerializer : Serialiser {
+    internal class IdlUnionSerializer : Serialiser {
 
         #region Constants
 
@@ -910,7 +910,7 @@ namespace Ch.Elca.Iiop.Marshalling {
             return initalizedField;
         }
 
-        public override object Deserialise(System.Type formal, AttributeExtCollection attributes,
+        internal override object Deserialise(System.Type formal, AttributeExtCollection attributes,
                                            CdrInputStream sourceStream) {            
             // instantiate the resulting union
             object result = Activator.CreateInstance(formal);
@@ -929,7 +929,7 @@ namespace Ch.Elca.Iiop.Marshalling {
             return result;
         }
 
-        public override void Serialise(System.Type formal, object actual, AttributeExtCollection attributes,
+        internal override void Serialise(System.Type formal, object actual, AttributeExtCollection attributes,
                                        CdrOutputStream targetStream) {            
             FieldInfo initalizedField = GetInitalizedField(formal);
             bool isInit = (bool)initalizedField.GetValue(actual);
@@ -954,7 +954,7 @@ namespace Ch.Elca.Iiop.Marshalling {
     }
 
     /// <summary>serailizes an instances as IDL abstract-value</summary>
-    public class AbstractValueSerializer : Serialiser {
+    internal class AbstractValueSerializer : Serialiser {
 
         #region IFields
 
@@ -963,7 +963,7 @@ namespace Ch.Elca.Iiop.Marshalling {
         #endregion IFields
         #region IMethods
 
-        public override void Serialise(Type formal, object actual, AttributeExtCollection attributes,
+        internal override void Serialise(Type formal, object actual, AttributeExtCollection attributes,
                                        CdrOutputStream targetStream) {
             if (actual != null) {
                 // check if actual parameter is an IDL-struct: 
@@ -983,7 +983,7 @@ namespace Ch.Elca.Iiop.Marshalling {
             m_valObjectSer.Serialise(formal, actual, attributes, targetStream);
         }
 
-        public override object Deserialise(Type formal, AttributeExtCollection attributes,
+        internal override object Deserialise(Type formal, AttributeExtCollection attributes,
                                            CdrInputStream sourceStream) {
             // deserialise as IDL-value-type
             return m_valObjectSer.Deserialise(formal, attributes, sourceStream);
@@ -994,7 +994,7 @@ namespace Ch.Elca.Iiop.Marshalling {
     }
 
     /// <summary>serializes an instance of the class System.Type</summary>
-    public class TypeSerializer : Serialiser {
+    internal class TypeSerializer : Serialiser {
 
         #region IFields
         
@@ -1003,7 +1003,7 @@ namespace Ch.Elca.Iiop.Marshalling {
         #endregion IFields
         #region IMethods
 
-        public override void Serialise(Type formal, object actual, AttributeExtCollection attributes,
+        internal override void Serialise(Type formal, object actual, AttributeExtCollection attributes,
                                        CdrOutputStream targetStream) {
             string repId = "";
             if (actual != null) {
@@ -1013,7 +1013,7 @@ namespace Ch.Elca.Iiop.Marshalling {
             m_valObjectSer.Serialise(typeof(CorbaTypeDesc), desc, attributes, targetStream);
         }
 
-        public override object Deserialise(Type formal, AttributeExtCollection attributes,
+        internal override object Deserialise(Type formal, AttributeExtCollection attributes,
                                            CdrInputStream sourceStream) {
             // deserialise as IDL-value-type
             CorbaTypeDesc descRes = (CorbaTypeDesc)m_valObjectSer.Deserialise(typeof(CorbaTypeDesc), attributes, sourceStream);
@@ -1027,11 +1027,11 @@ namespace Ch.Elca.Iiop.Marshalling {
     }
     
     /// <summary>serializes enums</summary>
-    public class EnumSerializer : Serialiser {
+    internal class EnumSerializer : Serialiser {
         
         #region IMethods
 
-        public override void Serialise(Type formal, object actual, AttributeExtCollection attributes,
+        internal override void Serialise(Type formal, object actual, AttributeExtCollection attributes,
                                        CdrOutputStream targetStream) {
             // check for IDL-enum mapped to a .NET enum
             AttributeExtCollection attrs = ReflectionHelper.GetCustomAttributesForType(formal, true);
@@ -1049,7 +1049,7 @@ namespace Ch.Elca.Iiop.Marshalling {
         
         }
 
-        public override object Deserialise(Type formal, AttributeExtCollection attributes, 
+        internal override object Deserialise(Type formal, AttributeExtCollection attributes, 
                                            CdrInputStream sourceStream) {
             AttributeExtCollection attrs = ReflectionHelper.GetCustomAttributesForType(formal, true);
             if (attrs.IsInCollection(ReflectionHelper.IdlEnumAttributeType)) {
@@ -1074,7 +1074,7 @@ namespace Ch.Elca.Iiop.Marshalling {
     }
 
     /// <summary>serializes idl sequences</summary>
-    public class IdlSequenceSerializer : Serialiser {
+    internal class IdlSequenceSerializer : Serialiser {
 
         #region IMethods
 
@@ -1087,7 +1087,7 @@ namespace Ch.Elca.Iiop.Marshalling {
             }
         }
         
-        public override void Serialise(Type formal, object actual, AttributeExtCollection attributes,
+        internal override void Serialise(Type formal, object actual, AttributeExtCollection attributes,
                                        CdrOutputStream targetStream) {
             if (attributes.IsInCollection(ReflectionHelper.IdlSequenceAttributeType)) {                
                 // mapped from an IDL-sequence or CLS to IDL mapping
@@ -1116,7 +1116,7 @@ namespace Ch.Elca.Iiop.Marshalling {
             }
         }
 
-        public override object Deserialise(Type formal, AttributeExtCollection attributes,
+        internal override object Deserialise(Type formal, AttributeExtCollection attributes,
                                            CdrInputStream sourceStream) {
             if (attributes.IsInCollection(ReflectionHelper.IdlSequenceAttributeType)) {
                 // mapped from an IDL-sequence
@@ -1149,12 +1149,12 @@ namespace Ch.Elca.Iiop.Marshalling {
     }
 
     /// <summary>serializes an instance as IDL-any</summary>
-    public class AnySerializer : Serialiser {
+    internal class AnySerializer : Serialiser {
 
         #region SFields
 
         private static Type s_supInterfaceAttrType = typeof(SupportedInterfaceAttribute);
-    	private static Type s_anyType = typeof(omg.org.CORBA.Any);
+        private static Type s_anyType = typeof(omg.org.CORBA.Any);
 
         #endregion SFields
         #region IFields
@@ -1189,28 +1189,28 @@ namespace Ch.Elca.Iiop.Marshalling {
         }
         
         
-        public override void Serialise(Type formal, object actual, AttributeExtCollection attributes,
+        internal override void Serialise(Type formal, object actual, AttributeExtCollection attributes,
                                        CdrOutputStream targetStream) {
             TypeCodeImpl typeCode = new NullTC();
             Type actualType = null;            
             if (actual != null) {
-            	if (actual.GetType().Equals(s_anyType)) {
-            		// use user defined type code
-            		typeCode = ((Any)actual).Type as TypeCodeImpl;
-            		if (typeCode == null) {
-            			throw new INTERNAL(457, CompletionStatus.Completed_MayBe);
-            		}
-            		// type, which should be used to serialise value is determined by typecode!
-            		actualType = Repository.GetTypeForTypeCode(typeCode);
-            		actual = ((Any)actual).Value;
-            	} else {
-            		// automatic type code creation
+                if (actual.GetType().Equals(s_anyType)) {
+                    // use user defined type code
+                    typeCode = ((Any)actual).Type as TypeCodeImpl;
+                    if (typeCode == null) {
+                        throw new INTERNAL(457, CompletionStatus.Completed_MayBe);
+                    }
+                    // type, which should be used to serialise value is determined by typecode!
+                    actualType = Repository.GetTypeForTypeCode(typeCode);
+                    actual = ((Any)actual).Value;
+                } else {
+                    // automatic type code creation
                     actualType = DetermineTypeToUse(actual);
                     typeCode = Repository.CreateTypeCodeForType(actualType, attributes);
-            	}
+                }
             }
             m_typeCodeSer.Serialise(ReflectionHelper.CorbaTypeCodeType, typeCode, attributes, targetStream);
-            if (actual != null) {            	
+            if (actual != null) {               
                 Marshaller marshaller = Marshaller.GetSingleton();
                 attributes.RemoveAttributeOfType(typeof(ObjectIdlTypeAttribute));
                 AttributeExtCollection typeAttributes = Repository.GetAttrsForTypeCode(typeCode);
@@ -1219,7 +1219,7 @@ namespace Ch.Elca.Iiop.Marshalling {
             }
         }
 
-        public override object Deserialise(Type formal, AttributeExtCollection attributes,
+        internal override object Deserialise(Type formal, AttributeExtCollection attributes,
                                            CdrInputStream sourceStream) {
             omg.org.CORBA.TypeCode typeCode = (omg.org.CORBA.TypeCode)m_typeCodeSer.Deserialise(formal, 
                                                                                                 attributes, sourceStream);
@@ -1241,9 +1241,163 @@ namespace Ch.Elca.Iiop.Marshalling {
         #endregion IMethods
 
     }
+
+    /// <summary>serializes a typecode</summary>
+    internal class TypeCodeSerializer : Serialiser {
+        
+        #region IMethods
+
+        internal override object Deserialise(System.Type formal, AttributeExtCollection attributes, CdrInputStream sourceStream) {
+
+            bool isIndirection;
+            StreamPosition indirPos;
+            uint kindVal = (uint)sourceStream.ReadInstanceOrIndirectionTag(out indirPos, 
+                                                                           out isIndirection);
+            if (!isIndirection) {
+            
+                omg.org.CORBA.TCKind kind = (omg.org.CORBA.TCKind)Enum.ToObject(typeof(omg.org.CORBA.TCKind),
+                                                                                (int)kindVal);
+                omg.org.CORBA.TypeCodeImpl result;
+                switch(kind) {
+                    case omg.org.CORBA.TCKind.tk_abstract_interface :
+                        result = new omg.org.CORBA.AbstractIfTC();
+                        break;
+                    case omg.org.CORBA.TCKind.tk_alias:
+                        result = new omg.org.CORBA.AliasTC();
+                        break;
+                    case omg.org.CORBA.TCKind.tk_any:
+                        result = new omg.org.CORBA.AnyTC();
+                        break;
+                    case omg.org.CORBA.TCKind.tk_array:
+                        throw new NotImplementedException("array not implemented");
+                    case omg.org.CORBA.TCKind.tk_boolean:
+                        result = new omg.org.CORBA.BooleanTC();
+                        break;
+                    case omg.org.CORBA.TCKind.tk_char:
+                        result = new omg.org.CORBA.CharTC();
+                        break;
+                    case omg.org.CORBA.TCKind.tk_double:
+                        result = new omg.org.CORBA.DoubleTC();
+                        break;
+                    case omg.org.CORBA.TCKind.tk_enum:
+                        result = new omg.org.CORBA.EnumTC();
+                        break;
+                    case omg.org.CORBA.TCKind.tk_except:
+                        result = new omg.org.CORBA.ExceptTC();
+                        break;
+                    case omg.org.CORBA.TCKind.tk_fixed:
+                        throw new NotImplementedException("fixed not implemented");
+                    case omg.org.CORBA.TCKind.tk_float:
+                        result = new omg.org.CORBA.FloatTC();
+                        break;
+                    case omg.org.CORBA.TCKind.tk_local_interface :
+                        result = new omg.org.CORBA.LocalIfTC();
+                        break;
+                    case omg.org.CORBA.TCKind.tk_long:
+                        result = new omg.org.CORBA.LongTC();
+                        break;
+                    case omg.org.CORBA.TCKind.tk_longdouble:
+                        throw new NotImplementedException("long double not implemented");
+                    case omg.org.CORBA.TCKind.tk_longlong:
+                        result = new omg.org.CORBA.LongLongTC();
+                        break;
+                    case omg.org.CORBA.TCKind.tk_native:
+                        throw new NotSupportedException("native not supported");
+                    case omg.org.CORBA.TCKind.tk_null:
+                        result = new omg.org.CORBA.NullTC();
+                        break;
+                    case omg.org.CORBA.TCKind.tk_objref:
+                        result = new omg.org.CORBA.ObjRefTC();
+                        break;
+                    case omg.org.CORBA.TCKind.tk_octet:
+                        result = new omg.org.CORBA.OctetTC();
+                        break;
+                    case omg.org.CORBA.TCKind.tk_Principal:
+                        throw new NotImplementedException("Principal not implemented");
+                    case omg.org.CORBA.TCKind.tk_sequence:
+                        result = new omg.org.CORBA.SequenceTC();
+                        break;
+                    case omg.org.CORBA.TCKind.tk_short:
+                        result = new omg.org.CORBA.ShortTC();
+                        break;
+                    case omg.org.CORBA.TCKind.tk_string:
+                        result = new omg.org.CORBA.StringTC();
+                        break;
+                    case omg.org.CORBA.TCKind.tk_struct:
+                        result = new omg.org.CORBA.StructTC();
+                        break;
+                    case omg.org.CORBA.TCKind.tk_TypeCode:
+                        result = new omg.org.CORBA.TypeCodeTC();
+                        break;
+                    case omg.org.CORBA.TCKind.tk_ulong:
+                        result = new omg.org.CORBA.ULongTC();
+                        break;
+                    case omg.org.CORBA.TCKind.tk_ulonglong:
+                        result = new omg.org.CORBA.ULongLongTC();
+                        break;
+                    case omg.org.CORBA.TCKind.tk_union:
+                        result = new omg.org.CORBA.UnionTC();
+                        break;
+                    case omg.org.CORBA.TCKind.tk_ushort:
+                        result = new omg.org.CORBA.UShortTC();
+                        break;
+                    case omg.org.CORBA.TCKind.tk_value:
+                        result = new omg.org.CORBA.ValueTypeTC();
+                        break;
+                    case omg.org.CORBA.TCKind.tk_value_box:
+                        result = new omg.org.CORBA.ValueBoxTC();
+                        break;
+                    case omg.org.CORBA.TCKind.tk_void:
+                        result = new omg.org.CORBA.VoidTC();
+                        break;
+                    case omg.org.CORBA.TCKind.tk_wchar:
+                        result = new omg.org.CORBA.WCharTC();
+                        break;
+                    case omg.org.CORBA.TCKind.tk_wstring:
+                        result = new omg.org.CORBA.WStringTC();                                    
+                        break;
+                    default:
+                        // unknown typecode: kind
+                        throw new omg.org.CORBA.BAD_PARAM(1504, 
+                                                          omg.org.CORBA.CompletionStatus.Completed_MayBe);
+                }
+                // store indirection
+                IndirectionInfo indirInfo = new IndirectionInfo(indirPos.GlobalPosition, 
+                                                                IndirectionType.TypeCode,
+                                                                IndirectionUsage.TypeCode);
+                sourceStream.StoreIndirection(indirInfo, result);
+                // read additional parts of typecode, if present
+                result.ReadFromStream(sourceStream);                                
+                return result;
+            } else {
+                // resolve indirection:
+                StreamPosition indirectionPosition = sourceStream.ReadIndirectionOffset();                                
+                return sourceStream.GetObjectForIndir(new IndirectionInfo(indirectionPosition.GlobalPosition,
+                                                                          IndirectionType.TypeCode,        
+                                                                          IndirectionUsage.TypeCode), 
+                                                      true);
+            }
+        }
+
+        internal override void Serialise(System.Type formal, object actual, AttributeExtCollection attributes, CdrOutputStream targetStream) {
+            if (!(actual is omg.org.CORBA.TypeCodeImpl)) { 
+                // typecode not serializable
+                throw new omg.org.CORBA.INTERNAL(1654, omg.org.CORBA.CompletionStatus.Completed_MayBe);
+            }
+            omg.org.CORBA.TypeCodeImpl tcImpl = actual as omg.org.CORBA.TypeCodeImpl;
+            if (!targetStream.IsPreviouslyMarshalled(tcImpl, IndirectionType.TypeCode, IndirectionUsage.TypeCode)) {
+                tcImpl.WriteToStream(targetStream);
+            } else {
+                targetStream.WriteIndirection(tcImpl);
+            }
+        }
+
+        #endregion IMethods
+
+    }
     
     /// <summary>serializes an instance as IDL abstract-interface</summary>
-    public class AbstractInterfaceSerializer : Serialiser {
+    internal class AbstractInterfaceSerializer : Serialiser {
 
         #region IFields
 
@@ -1253,7 +1407,7 @@ namespace Ch.Elca.Iiop.Marshalling {
         #endregion IFields
         #region IMethods
 
-        public override void Serialise(Type formal, object actual, AttributeExtCollection attributes,
+        internal override void Serialise(Type formal, object actual, AttributeExtCollection attributes,
                                        CdrOutputStream targetStream) {
             // if actual is null it shall be encoded as a valuetype: 15.3.7
             if ((actual != null) && (ClsToIdlMapper.IsMarshalByRef(actual.GetType()))) {
@@ -1270,7 +1424,7 @@ namespace Ch.Elca.Iiop.Marshalling {
             }
         }
 
-        public override object Deserialise(Type formal, AttributeExtCollection attributes,
+        internal override object Deserialise(Type formal, AttributeExtCollection attributes,
                                            CdrInputStream sourceStream) {
             bool isObjRef = sourceStream.ReadBool();
             if (isObjRef) {
@@ -1288,11 +1442,11 @@ namespace Ch.Elca.Iiop.Marshalling {
 
     
     /// <summary>serializes .NET exceptions as IDL-Exceptions</summary>
-    public class ExceptionSerializer : Serialiser {
+    internal class ExceptionSerializer : Serialiser {
 
         #region IMethods
 
-        public override object Deserialise(System.Type formal, AttributeExtCollection attributes,
+        internal override object Deserialise(System.Type formal, AttributeExtCollection attributes,
                                            CdrInputStream sourceStream) {
             string repId = sourceStream.ReadString();
             Type exceptionType = Repository.GetTypeForId(repId);
@@ -1318,7 +1472,7 @@ namespace Ch.Elca.Iiop.Marshalling {
             }
         }
 
-        public override void Serialise(System.Type formal, object actual, AttributeExtCollection attributes,
+        internal override void Serialise(System.Type formal, object actual, AttributeExtCollection attributes,
                                        CdrOutputStream targetStream) {
             string repId = Repository.GetRepositoryID(formal);
             targetStream.WriteString(repId);
@@ -1349,7 +1503,7 @@ namespace Ch.Elca.Iiop.Marshalling {
 #if UnitTest
 
 namespace Ch.Elca.Iiop.Tests {
-	
+    
     using System.IO;
     using System.Runtime.Remoting.Channels;
     using NUnit.Framework;
@@ -1367,7 +1521,7 @@ namespace Ch.Elca.Iiop.Tests {
         }
 
         public void TestByteSerialise() {
-			MemoryStream outStream = new MemoryStream();
+            MemoryStream outStream = new MemoryStream();
             CdrOutputStream cdrOut = new CdrOutputStreamImpl(outStream, 0);
             Serialiser ser = new ByteSerialiser();
             ser.Serialise(ReflectionHelper.ByteType, (byte)11, new AttributeExtCollection(), cdrOut);
@@ -1379,22 +1533,22 @@ namespace Ch.Elca.Iiop.Tests {
         }
         
         public void TestByteDeserialise() {
-        	MemoryStream inStream = new MemoryStream();
-        	inStream.WriteByte(11);
-        	inStream.WriteByte(12);
-        	inStream.Seek(0, SeekOrigin.Begin);
-        	CdrInputStreamImpl cdrIn = new CdrInputStreamImpl(inStream);
-        	cdrIn.ConfigStream(0, new GiopVersion(1, 2));
-			Serialiser ser = new ByteSerialiser();			
-        	Assertion.AssertEquals(11, ser.Deserialise(ReflectionHelper.ByteType, 
-        	                                           new AttributeExtCollection(), cdrIn));        	
-        	Assertion.AssertEquals(12, ser.Deserialise(ReflectionHelper.ByteType, 
-        	                                           new AttributeExtCollection(), cdrIn));
-        	inStream.Close();        	
+            MemoryStream inStream = new MemoryStream();
+            inStream.WriteByte(11);
+            inStream.WriteByte(12);
+            inStream.Seek(0, SeekOrigin.Begin);
+            CdrInputStreamImpl cdrIn = new CdrInputStreamImpl(inStream);
+            cdrIn.ConfigStream(0, new GiopVersion(1, 2));
+            Serialiser ser = new ByteSerialiser();          
+            Assertion.AssertEquals(11, ser.Deserialise(ReflectionHelper.ByteType, 
+                                                       new AttributeExtCollection(), cdrIn));           
+            Assertion.AssertEquals(12, ser.Deserialise(ReflectionHelper.ByteType, 
+                                                       new AttributeExtCollection(), cdrIn));
+            inStream.Close();           
         }
         
         public void TestBooleanSerialise() {
-			MemoryStream outStream = new MemoryStream();
+            MemoryStream outStream = new MemoryStream();
             CdrOutputStream cdrOut = new CdrOutputStreamImpl(outStream, 0);
             Serialiser ser = new BooleanSerialiser();
             ser.Serialise(ReflectionHelper.BooleanType, true, new AttributeExtCollection(), cdrOut);
@@ -1406,28 +1560,28 @@ namespace Ch.Elca.Iiop.Tests {
         }
         
         public void TestBooleanDeserialise() {
-        	MemoryStream inStream = new MemoryStream();
-        	inStream.WriteByte(0);
-        	inStream.WriteByte(1);
-        	inStream.Seek(0, SeekOrigin.Begin);
-        	CdrInputStreamImpl cdrIn = new CdrInputStreamImpl(inStream);
-        	cdrIn.ConfigStream(0, new GiopVersion(1, 2));
-			Serialiser ser = new BooleanSerialiser();
-        	Assertion.AssertEquals(false, ser.Deserialise(ReflectionHelper.BooleanType, 
-        	                                              new AttributeExtCollection(), cdrIn));        	
-        	Assertion.AssertEquals(true, ser.Deserialise(ReflectionHelper.BooleanType, 
-        	                                             new AttributeExtCollection(), cdrIn));
-        	inStream.Close();        	
+            MemoryStream inStream = new MemoryStream();
+            inStream.WriteByte(0);
+            inStream.WriteByte(1);
+            inStream.Seek(0, SeekOrigin.Begin);
+            CdrInputStreamImpl cdrIn = new CdrInputStreamImpl(inStream);
+            cdrIn.ConfigStream(0, new GiopVersion(1, 2));
+            Serialiser ser = new BooleanSerialiser();
+            Assertion.AssertEquals(false, ser.Deserialise(ReflectionHelper.BooleanType, 
+                                                          new AttributeExtCollection(), cdrIn));            
+            Assertion.AssertEquals(true, ser.Deserialise(ReflectionHelper.BooleanType, 
+                                                         new AttributeExtCollection(), cdrIn));
+            inStream.Close();           
         }
         
         [ExpectedException(typeof(BAD_PARAM))]
         public void TestBooleanDeserialiseInvalidValue() {
-        	MemoryStream inStream = new MemoryStream();
-        	inStream.WriteByte(2);
-        	inStream.Seek(0, SeekOrigin.Begin);
-        	CdrInputStreamImpl cdrIn = new CdrInputStreamImpl(inStream);
-        	cdrIn.ConfigStream(0, new GiopVersion(1, 2));
-			Serialiser ser = new BooleanSerialiser();
+            MemoryStream inStream = new MemoryStream();
+            inStream.WriteByte(2);
+            inStream.Seek(0, SeekOrigin.Begin);
+            CdrInputStreamImpl cdrIn = new CdrInputStreamImpl(inStream);
+            cdrIn.ConfigStream(0, new GiopVersion(1, 2));
+            Serialiser ser = new BooleanSerialiser();
             try {
                 ser.Deserialise(ReflectionHelper.BooleanType, new AttributeExtCollection(), cdrIn);
             } catch (Exception e) {
@@ -1487,5 +1641,5 @@ namespace Ch.Elca.Iiop.Tests {
     }
 
 }
-   	
+    
 #endif
