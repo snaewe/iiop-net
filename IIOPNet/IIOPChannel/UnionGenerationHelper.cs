@@ -180,7 +180,7 @@ namespace Ch.Elca.Iiop.Idl {
         public UnionGenerationHelper(ModuleBuilder modBuilder, string fullName, 
                                      TypeAttributes visibility) {
             TypeAttributes typeAttrs = TypeAttributes.Class | TypeAttributes.Serializable | 
-                                       TypeAttributes.BeforeFieldInit | TypeAttributes.SequentialLayout |
+                                       TypeAttributes.BeforeFieldInit | /* TypeAttributes.SequentialLayout | */
                                        TypeAttributes.Sealed | visibility;
 
             m_builder = modBuilder.DefineType(fullName, typeAttrs, typeof(System.ValueType),
