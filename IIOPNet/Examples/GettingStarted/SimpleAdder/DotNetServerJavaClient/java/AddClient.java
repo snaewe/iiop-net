@@ -33,7 +33,7 @@ import javax.naming.Context;
 import javax.rmi.PortableRemoteObject;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
-import Tutorial.GettingStarted.AdderImpl;
+import Ch.Elca.Iiop.Tutorial.GettingStarted.AdderImpl;
 
 public class AddClient {
 
