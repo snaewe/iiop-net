@@ -1,0 +1,14 @@
+Prerequisites
+-------------
+
+nothing special.
+
+Building the test
+-----------------
+
+- use nmake to build the BenchmarkClient and the BenchmarkServer
+
+Running the test
+----------------
+
+- nmake benchmark

@@ -1,0 +1,7 @@
+This test is used to measure the IIOP.NET performance.
+In this scenario, a .NET client and a .NET server are used.
+
+
+
+
+
