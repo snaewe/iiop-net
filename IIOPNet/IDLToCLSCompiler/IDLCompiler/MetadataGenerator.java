@@ -329,6 +329,20 @@ public class MetaDataGenerator implements IDLParserVisitor {
         nestedScope.addSymbol(createdFor.getSymbolName());
         return nestedScope;
     }
+    
+    private void AddRepIdAttribute(TypeBuilder typebuild, String repId) {
+        if (repId != null) {
+            CustomAttributeBuilder repIdAttrBuilder = new RepositoryIDAttribute(repId).CreateAttributeBuilder();
+            typebuild.SetCustomAttribute(repIdAttrBuilder);
+        }
+    }
+    
+    private void AddSerializableAttribute(TypeBuilder typebuild) {
+        Type attrType = System.SerializableAttribute.class.ToType();
+        ConstructorInfo attrConstr = attrType.GetConstructor(Type.EmptyTypes);
+        CustomAttributeBuilder serAttr = new CustomAttributeBuilder(attrConstr, new Object[0]);    
+        typebuild.SetCustomAttribute(serAttr);
+    }
 
     /**
      * @see parser.IDLParserVisitor#visit(SimpleNode, Object)
@@ -388,13 +402,6 @@ public class MetaDataGenerator implements IDLParserVisitor {
     public Object visit(ASTinterfacex node, Object data) {
         node.childrenAccept(this, data);
         return null;
-    }
-
-    private void AddRepIdAttribute(TypeBuilder typebuild, String repId) {
-        if (repId != null) {
-            CustomAttributeBuilder repIdAttrBuilder = new RepositoryIDAttribute(repId).CreateAttributeBuilder();
-            typebuild.SetCustomAttribute(repIdAttrBuilder);
-        }
     }
 
     /** handles the declaration for the interface definition / fwd declaration
@@ -534,7 +541,6 @@ public class MetaDataGenerator implements IDLParserVisitor {
         node.childrenAccept(this, data);
         return null;
     }
-
     
     /** get the types for the scoped names specified in an inheritance relationship
      * @param data the buildinfo of the container of the type having this inheritance relationship
@@ -558,7 +564,6 @@ public class MetaDataGenerator implements IDLParserVisitor {
         return result;        
     }
     
-    
     /**
      * @see parser.IDLParserVisitor#visit(ASTinterface_inheritance_spec, Object)
      * @param data the buildinfo of the container for this interface (e.g. a module)
@@ -569,7 +574,6 @@ public class MetaDataGenerator implements IDLParserVisitor {
         Type[] result = parseInheritanceRelation(node, (BuildInfo)data);
         return result;
     }
-
 
     /**
      * @see parser.IDLParserVisitor#visit(ASTinterface_name, Object)
@@ -721,13 +725,6 @@ public class MetaDataGenerator implements IDLParserVisitor {
         }
     }
 
-    private void addSerializableAttribute(TypeBuilder typebuild) {
-        Type attrType = System.SerializableAttribute.class.ToType();
-        ConstructorInfo attrConstr = attrType.GetConstructor(Type.EmptyTypes);
-        CustomAttributeBuilder serAttr = new CustomAttributeBuilder(attrConstr, new Object[0]);    
-        typebuild.SetCustomAttribute(serAttr);
-    }
-
     /**
      * @see parser.IDLParserVisitor#visit(ASTvalue_decl, Object)
      * @param data an instance of the type buildinfo specifing the scope, this value is declared in
@@ -777,7 +774,7 @@ public class MetaDataGenerator implements IDLParserVisitor {
         // add implementation class attribute
         valueToBuild.SetCustomAttribute(new ImplClassAttribute(fullyQualName + "Impl").CreateAttributeBuilder());
         // add serializable attribute
-        addSerializableAttribute(valueToBuild);
+        AddSerializableAttribute(valueToBuild);
 
         // generate elements
         BuildInfo buildInfo = new BuildInfo(enclosingScope, valueToBuild);
