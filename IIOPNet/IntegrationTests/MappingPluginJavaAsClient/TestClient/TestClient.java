@@ -119,8 +119,7 @@ public class TestClient extends TestCase {
     }        
 
     public void testByRefArrayList() throws Exception {
-//        int nrOfElems = 4;
-        int nrOfElems = 2;
+        int nrOfElems = 4;
         ArrayList result = m_testService.CreateByRefTypeList(nrOfElems);
         assertEquals(nrOfElems, result.size());
         for (int i = 0; i < nrOfElems; i++) {
