@@ -87,7 +87,17 @@ namespace Ch.Elca.Iiop.Util {
                 InternetIiopProfile profile = new InternetIiopProfile(version, chanUri.Host,
                                                                      (ushort)chanUri.Port, objectKey);
                 ior = new Ior(repositoryId, new IorProfile[] { profile });
-        	} else {
+            } else if (url.StartsWith("corbaloc")) {
+            	Corbaloc loc = new Corbaloc(url);
+            	CorbaLocIiopAddr addr = loc.GetIiopAddr();
+            	if (addr == null) {
+            		throw new INV_OBJREF(8421, CompletionStatus.Completed_MayBe);
+            	}
+            	byte[] objectKey = loc.GetKeyAsByteArray();
+            	InternetIiopProfile profile = new InternetIiopProfile(addr.Version, addr.Host,
+                                                                     (ushort)addr.Port, objectKey);            	
+            	ior = new Ior(repositoryId, new IorProfile[] { profile });
+            } else {
         	    throw new INV_OBJREF(1963, CompletionStatus.Completed_MayBe);
         	}
             return ior;
@@ -113,7 +123,16 @@ namespace Ch.Elca.Iiop.Util {
                 Ior ior = new Ior(url);
                 uri = new Uri("iiop://"+ior.HostName+":"+ior.Port);
                 objectUri = GetObjUriForObjectInfo(ior.ObjectKey, ior.Version);
-            } else {
+            } else if (url.StartsWith("corbaloc:")) {
+            	Corbaloc loc = new Corbaloc(url);
+            	CorbaLocIiopAddr addr = loc.GetIiopAddr();            	
+            	if (addr == null) {
+            		throw new INTERNAL(8540, CompletionStatus.Completed_MayBe);
+            	}
+            	uri = new Uri("iiop://" + addr.Host + ":" + addr.Port);
+            	byte[] objectKey = loc.GetKeyAsByteArray();
+            	objectUri = GetObjUriForObjectInfo(objectKey, addr.Version);
+            }else {
                 // not possible
                 uri = null;
                 objectUri = null;

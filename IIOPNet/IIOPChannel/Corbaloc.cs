@@ -111,6 +111,23 @@ namespace Ch.Elca.Iiop.CorbaObjRef {
 	    	// not supported yet
 	    	throw new BAD_PARAM(11, CompletionStatus.Completed_No);
 	    }
+	    
+	    /// <summary>gets the first iiop-addr from obj-addrs or null if not present</summary>
+	    public CorbaLocIiopAddr GetIiopAddr() {
+	    	foreach (CorbaLocObjAddr addr in m_objAddrs) {
+	    		if (addr is CorbaLocIiopAddr) {
+	    			return (CorbaLocIiopAddr)addr;
+	    		}
+	    	}
+	    	return null;
+	    }
+	    
+	    /// <summary>converts the key string to a byte array, resolving escape sequences</summary>
+	    public byte[] GetKeyAsByteArray() {
+	    	System.Text.ASCIIEncoding enc = new System.Text.ASCIIEncoding();
+            // TODO: not really correct: need to resolve %HexHex escape sequences
+            return enc.GetBytes(KeyString);	
+	    }
     
     	#endregion IMethods
     
