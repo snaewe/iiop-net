@@ -59,9 +59,9 @@ namespace Ch.Elca.Iiop.Demo.ValueObjectDemo {
                 ValObjectDemoHome valDemoHome = (ValObjectDemoHome)nameService.resolve(name);
                 // create valObjectDemo
                 ValObjectDemo valDemo = valDemoHome.create();
-                // call getValObject
-                Console.WriteLine("calling getValObject");
-                ValObject resultVal = valDemo.getValObject();
+                // call retrieveValObject
+                Console.WriteLine("calling retrieveValObject");
+                ValObject resultVal = valDemo.retrieveValObject();
                 Console.WriteLine("test-string: " + resultVal.testString);
                 Console.WriteLine("test-int: " + resultVal.testValue);
 
