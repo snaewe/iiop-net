@@ -76,7 +76,11 @@ namespace Ch.Elca.Iiop.Idl {
 
             private Assembly LoadByRelativePath(string asmFileName) {
                 string candidate = Path.Combine(m_baseDir, asmFileName);
-                return Assembly.LoadFrom(candidate);
+                try {
+                    return Assembly.LoadFrom(candidate);
+                } catch (Exception) {
+                    return null;
+                }                
             }
         }
 
