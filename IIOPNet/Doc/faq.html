@@ -87,7 +87,7 @@ o"></A></TD></TR>
 <br>
   <strong><a href="#faq1_3">1.3 Does IIOP.NET support Visual Studio's Intellisense?</a></strong>
 <br>
-  <strong><a href="#faq1_4">1.4 Does IIOP.NET work with mono?</a></strong>
+  <strong><a href="#faq1_4">1.4 Does IIOP.NET work with Mono?</a></strong>
 <br>
   <H2 class="contentPart">2. ORB Compatibility</H2>
   <strong><a href="#faq2_1">2.1 Can IIOP.NET interoperate with BEA WebLogic 6.1?</a></strong>
@@ -111,6 +111,8 @@ o"></A></TD></TR>
   <strong><a href="#faq4_1">4.1 How do I use the IDLToCLSCompiler?</a></strong>
 <br>
   <strong><a href="#faq4_2">4.2 How do I configure IIOP.NET to generate debug information?</a></strong>
+<br>
+  <strong><a href="#faq4_3">4.3 How do I handle shared IDL files?</a></strong>
 <br>
   <H2 class="contentPart">5. Accessing CORBA objects from IIOP.NET</H2>
   <strong><a href="#faq5_1">5.1 How can I access an object using its stringified IOR?</a></strong>
@@ -145,6 +147,12 @@ o"></A></TD></TR>
 <br>
   <strong><a href="#faq7_5">7.5 omg.org.CORBA.OBJECT_NOT_EXIST</a></strong>
 <br>
+  <strong><a href="#faq7_6">7.6 scoped name not resolvable: TypeCode; currentscope: CORBA</a></strong>
+<br>
+  <strong><a href="#faq7_7">7.7 omg.org.CORBA.MARSHAL: CORBA system exception : omg.org.CORBA.MARSHAL, completed: Completed_MayBe minor: 901</a></strong>
+<br>
+  <strong><a href="#faq7_8">7.8 warning CS1595: 'I' is defined in multiple places</a></strong>
+<br>
   <H2 class="contentPart">8. About</H2>
   <strong><a href="#faq8_1">8.1 Who maintains this project?</a></strong>
 <br>
@@ -167,11 +175,8 @@ o"></A></TD></TR>
 	</td></tr></table>
 	<br><br>
 	<table width="100%" style="border: 1px solid #999966;" summary=""><tr><td>
-  <strong><a name="faq1_4">1.4 Does IIOP.NET work with mono?</a></strong>
-<p>
-Currently (mono 0.28) not, but only few features are missing.
-We are regularly testing IIOP.NET against the mono CVS and reporting the problems we find to the mono team.
-<p>We expect IIOP.NET to work on Mono pretty soon.
+  <strong><a name="faq1_4">1.4 Does IIOP.NET work with Mono?</a></strong>
+<p>Yes, IIOP.NET does work with Mono 1.0
 	</td></tr></table>
 	<br><br>
   <H2 class="contentPart">2. ORB Compatibility</H2>
@@ -361,6 +366,36 @@ generate <code>proxy.dll</code> from <code>def.idl</code> in the current directo
 <pre>
 	nmake rebuild-base
 </pre>
+	</td></tr></table>
+	<br><br>
+	<table width="100%" style="border: 1px solid #999966;" summary=""><tr><td>
+  <strong><a name="faq4_3">4.3 How do I handle shared IDL files?</a></strong>
+<p>Sometimes, some remote object definitions are factored into a shared IDL file, and used in multiple other IDL files. Generating the .NET proxies for each IDL file causes the definitions in the shared IDL to be generated twice, and .NET compilers complain with warning "X is defined in multiple places".
+<p>Let assume the following configuration:
+<pre>
+    common.idl
+    //common definitions
+    
+    a.idl
+    #include "common.idl"
+    ....
+    
+    b.idl
+    #include "common.idl"
+    ...
+    
+</pre>
+<p>The first approach is to compile all the idls into a single dll file; this assumes that the definitions in common.idl are protected with ifdefs to avoid their redefinition due to multiple imports:
+<pre>
+    IDLToCLSCompiler defs common.idl a.idl b.idl
+</pre>
+<p>If you need to have separate dlls for each idl file, common.idl must be compiled separatedly to avoid duplicating its definitions. This is done with:
+<pre>
+    IDLToCLSCompiler common common.idl
+    IDLToCLSCompiler -r common.dll a a.idl
+    IDLToCLSCompiler -r common.dll b b.idl
+</pre>
+<p>The -r option forces the compiler to check into the given assembly whether some definitions (in this case common.idl) are already available, in which case no further code is generated for them.
 	</td></tr></table>
 	<br><br>
   <H2 class="contentPart">5. Accessing CORBA objects from IIOP.NET</H2>
@@ -577,6 +612,26 @@ The most common errors are:
   <strong><a name="faq7_5">7.5 omg.org.CORBA.OBJECT_NOT_EXIST</a></strong>
 <p>This exception is thrown when an inexistent object is requested on a remote machine. The exception it thrown by the remote name resolver, thus the connection is fine.
 <p>Please check the object name used. The problem can also happen when accessing a CORBA service (they are also implemented as remote objects), like the naming service.
+	</td></tr></table>
+	<br><br>
+	<table width="100%" style="border: 1px solid #999966;" summary=""><tr><td>
+  <strong><a name="faq7_6">7.6 scoped name not resolvable: TypeCode; currentscope: CORBA</a></strong>
+<p>This error is issued when using the java orb.idl instead of the IIOP.NET orb.idl.
+<p>Since IIOP.NET 1.6.1, you don't need to copy any orb.idl into your idl
+directory, because the compiler does automatically use its own (found in directory IDLToCLSCompiler\IDL\).
+	</td></tr></table>
+	<br><br>
+	<table width="100%" style="border: 1px solid #999966;" summary=""><tr><td>
+  <strong><a name="faq7_7">7.7 omg.org.CORBA.MARSHAL: CORBA system exception : omg.org.CORBA.MARSHAL, completed: Completed_MayBe minor: 901</a></strong>
+<p>This error was reported using a java.util.ArrayList (mapped to a CORBA chunked value) with JBoss 3.2.3; it disappeared after changing the following section in the file jacorb.properties in $JBOSS_HOME/server/all/conf will make the ArrayList mapping work.
+<pre>
+jacorb.interop.chunk_custom_rmi_valuetypes=off
+</pre>
+	</td></tr></table>
+	<br><br>
+	<table width="100%" style="border: 1px solid #999966;" summary=""><tr><td>
+  <strong><a name="faq7_8">7.8 warning CS1595: 'I' is defined in multiple places</a></strong>
+<p>This warning is issued when a type is defined multiple times. This error is common when this type is defined in a shared IDL file, and thus included multiple times. See the FAQ entry on <a href="#faq4_3">how to deal with shared IDL files</a>.
 	</td></tr></table>
 	<br><br>
   <H2 class="contentPart">8. About</H2>
