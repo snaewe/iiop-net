@@ -64,6 +64,14 @@ namespace Ch.Elca.Iiop.IntegrationTests {
     
     }
 
+    [Serializable]
+    public class J_TestStartByUnderscoreImpl : J_TestStartByUnderscore {
+    
+    }
 
+    [Serializable]
+    public class _InImpl : _In {
+    
+    }
 
 }

@@ -394,6 +394,22 @@ namespace Ch.Elca.Iiop.IntegrationTests {
         }
 
         [Test]
+        public void TestArrayElemTypesWithSpecialMappedRmiNames() {
+            int nrOfElems = 5;
+            int val = 11;
+
+            _In[] result = m_testService.TestArrayWithIdlConflictingElemType(nrOfElems, val);
+            Assertion.AssertNotNull(result);
+            Assertion.AssertEquals(nrOfElems, result.Length);
+            Assertion.AssertEquals(val, result[0].Val);
+            J_TestStartByUnderscore[] result2 = 
+                m_testService.TestArrayWithElemTypeNameStartByUnderscore(nrOfElems, val);
+            Assertion.AssertNotNull(result2);
+            Assertion.AssertEquals(nrOfElems, result2.Length);
+            Assertion.AssertEquals(val, result2[0].Val);
+        }
+
+        [Test]
         public void TestFragments() {
             // use a really big argument to force fragmentation at server side
             int size = 16000;

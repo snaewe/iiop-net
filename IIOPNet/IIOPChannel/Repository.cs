@@ -192,6 +192,21 @@ namespace Ch.Elca.Iiop.Idl {
                 typeName = "org.omg.boxedRMI" + elemNameSpace + ".seq" + arrayRank + "_" + unqualElemType;
                 Debug.WriteLine("mapped rmi id to boxed value type name:" + typeName);
             } else {
+                if (typeName.LastIndexOf(".") >= 0)  {
+                    int lastPIndex = typeName.LastIndexOf(".");
+                    string elemNamespace = typeName.Substring(0, lastPIndex);
+                    string unqualName = typeName.Substring(lastPIndex + 1);
+                    if (unqualName.StartsWith("_")) {
+                        // rmi mapping adds a J before a class name starting with _
+                    	typeName = elemNamespace + ".J" + unqualName;
+                    }
+                } else {
+                    if (typeName.StartsWith("_")) {
+                        // rmi mapping adds a J before a class name starting with _
+                    	typeName = "J" + typeName;
+                    }
+                }
+                
                 // do name mapping (e.g. resolve clashes with CLS keywords)
                 typeName = IdlNaming.MapRmiNameToClsName(typeName);
             }
@@ -244,8 +259,16 @@ namespace Ch.Elca.Iiop.Idl {
                         unqualName = "WStringValue";
                     } else {
                         // map rmi name to cls name, handle e.g. clashes with cls keywords
+                        if (unqualName.StartsWith("_")) {
+                            unqualName = "J" + unqualName; // rmi mapping adds a J before a class name starting with _
+                        }
                         unqualName = IdlNaming.MapRmiNameToClsName(unqualName);
                         elemNamespace = IdlNaming.MapRmiNameToClsName(elemNamespace);
+                        if (unqualName.StartsWith("_")) {
+                            // remove _ added by IDL to CLS mapping, because class name follows a seq<n>_, therefore _ not added
+                            // in IDL to CLS mapping
+                            unqualName = unqualName.Substring(1);
+                        }
                     }
                     return unqualName;
                 default:

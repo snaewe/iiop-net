@@ -89,5 +89,9 @@ public interface TestService extends java.rmi.Remote {
     public void setTestProp(int val) throws RemoteException;
     
     public TestRecursiveValType TestRecursiveValueType(int nrOfChildren) throws RemoteException;
+    
+    public In[] TestArrayWithIdlConflictingElemType(int nrOfElems, int val) throws RemoteException;
+    
+    public _TestStartByUnderscore[] TestArrayWithElemTypeNameStartByUnderscore(int nrOfElems, int val) throws RemoteException;
 
 }

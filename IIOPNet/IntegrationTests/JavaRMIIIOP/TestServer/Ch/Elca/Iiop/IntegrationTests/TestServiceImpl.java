@@ -192,5 +192,22 @@ public class TestServiceImpl extends PortableRemoteObject implements TestService
         TestRecursiveValType result = new TestRecursiveValType(nrOfChildren);
         return result;
     }
+    
+    public In[] TestArrayWithIdlConflictingElemType(int nrOfElems, int val) throws RemoteException {
+        In[] result = new In[nrOfElems];
+        for (int i = 0; i < result.length; i++) {
+            result[i] = new In(val);
+        }
+        return result;
+    }
+    
+    public _TestStartByUnderscore[] TestArrayWithElemTypeNameStartByUnderscore(int nrOfElems, int val) throws RemoteException {
+        _TestStartByUnderscore[] result = new _TestStartByUnderscore[nrOfElems];
+        for (int i = 0; i < result.length; i++) {
+            result[i] = new _TestStartByUnderscore(val);
+        }
+        return result;
+    }
+
         
 }
