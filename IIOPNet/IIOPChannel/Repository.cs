@@ -88,13 +88,6 @@ namespace Ch.Elca.Iiop.Idl {
 
         }
 
-        #region SConstructor
-
-        static Repository() {
-            CreateAssemblyCache();
-        }
-
-        #endregion SConstructor
         #region IConstructors
 
         private Repository() {
@@ -103,7 +96,7 @@ namespace Ch.Elca.Iiop.Idl {
         #endregion IConstructors
         #region SFields
 
-        private static ArrayList s_asmCache = new ArrayList();
+        private static AssemblyCache s_asmCache = AssemblyCache.GetSingleton();
         private static TypeCache s_typeCache = new TypeCache();
 
         // for efficiency reason: the evaluation of the following expressions is cached
@@ -292,51 +285,7 @@ namespace Ch.Elca.Iiop.Idl {
         #endregion rep-id creation
         #region loading types
 
-        /// <summary>
-        /// loads the reachable assemblies into memory for fast access, otherwise the solution would be much too slow
-        /// </summary>
-        /// <remarks>
-        /// loading an assembly from disk takes very long --> load them to the beginning into memory
-        /// loading a type from an assembly with asm.GetType is a fast operation
-        /// </remarks>
-        private static void CreateAssemblyCache() {
-            MethodInfo curMethod = (MethodInfo)MethodBase.GetCurrentMethod();
-            Assembly curAsm = curMethod.DeclaringType.Assembly; // the channel assembly
-            s_asmCache.Add(curAsm); // add channel assembly to the asm cache
-            
-            // search for other assemblies
-            AppDomain curAppDomain = AppDomain.CurrentDomain;
-            DirectoryInfo dir = new DirectoryInfo(curAppDomain.BaseDirectory); // search appdomain directory for assemblies
-            
-            CacheAssembliesFromDir(dir, s_asmCache);
-            DirectoryInfo[] subdirs = dir.GetDirectories();    // search subdirectories for assemblies
-            for (int i = 0; i < subdirs.Length; i++) {
-                CacheAssembliesFromDir(subdirs[i], s_asmCache);
-            }
-        }
 
-        /// <summary>searches for assemblies in the specified directory, loads them and adds them to the cache</summary>
-        private static void CacheAssembliesFromDir(DirectoryInfo dir, ArrayList asmCache) {
-            FileInfo[] potAsmDll = dir.GetFiles("*.dll");
-            CacheAssemblies(potAsmDll, asmCache);
-            FileInfo[] potAsmExe = dir.GetFiles("*.exe");
-            CacheAssemblies(potAsmExe, asmCache);
-        }
-        /// <summary>loads the assemblies from the files and adds them to the cache</summary>
-        /// <param name="asms"></param>
-        /// <param name="asmCache"></param>
-        private static void CacheAssemblies(FileInfo[] asms, ArrayList asmCache) {
-            for (int i = 0; i < asms.Length; i++) {
-                try {
-                    Assembly asm = Assembly.LoadFrom(asms[i].FullName);
-                    if (!asmCache.Contains(asm)) {
-                        asmCache.Add(asm); // add assembly to cache
-                    }
-                } catch (Exception e) {
-                    Debug.WriteLine("invalid asm found, exception: " + e);
-                }
-            }
-        }
 
         /// <summary>
         /// searches for the CLS type with the specified fully qualified name 
@@ -366,8 +315,9 @@ namespace Ch.Elca.Iiop.Idl {
 
         private static Type LoadTypeFromAssemblies(string clsTypeName) {
             Type foundType = null;
-            for (int i = 0; i < s_asmCache.Count; i++) {
-                foundType = ((Assembly)s_asmCache[i]).GetType(clsTypeName);
+        	Assembly[] cachedAsms = s_asmCache.CachedAssemblies;
+            for (int i = 0; i < cachedAsms.Length; i++) {
+                foundType = cachedAsms[i].GetType(clsTypeName);
                 if (foundType != null) { 
                     break; 
                 }
