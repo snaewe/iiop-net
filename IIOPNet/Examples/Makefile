@@ -7,6 +7,18 @@ build: idl-files
 	cd GettingStarted
 	$(MAKE) build
 	cd ..
+	cd EJBChatroom
+	cd Websphere_5
+	@if not defined WAS_HOME echo WAS_HOME not set, skipping WAS5 example
+	@if defined WAS_HOME $(MAKE) build
+	cd ..
+	cd Jboss3.2.1
+	@if not defined JBOSS_HOME echo JBOSS_HOME not set, skipping JBOSS example
+	@if defined JBOSS_HOME $(MAKE) build
+	cd ..
+	cd ..
+
+	
 
 idl-files:        
 	if not exist ..\IDL\ir.idl echo You did not install IDL\ir.idl. Please check Readme.txt, Installation 
@@ -15,10 +27,19 @@ idl-files:
 	if not exist ..\IDL\orb.idl echo You did not install IDL\orb.idl. Please check Readme.txt, Installation
 	if not exist ..\IDL\orb.idl exit 2
 
+
 clean:
 	cd GenericCollections
 	$(MAKE) clean
 	cd ..
 	cd GettingStarted
 	$(MAKE) clean
+	cd ..
+	cd EJBChatroom
+	cd Websphere_5
+	nmake clean
+	cd ..
+	cd Jboss3.2.1
+	nmake clean
+	cd ..
 	cd ..
