@@ -30,11 +30,13 @@ using System;
 using System.Reflection;
 using System.Runtime.Remoting;
 using System.Runtime.Remoting.Channels;
+using System.Text;
 using NUnit.Framework;
 using Ch.Elca.Iiop;
 using Ch.Elca.Iiop.Services;
 using omg.org.CosNaming;
 using omg.org.CORBA;
+using Ch.Elca.Iiop.CorbaObjRef;
 
 namespace Ch.Elca.Iiop.IntegrationTests {
 
@@ -849,6 +851,40 @@ namespace Ch.Elca.Iiop.IntegrationTests {
             Assertion.AssertEquals(false, orb.non_existent(m_testService));
             object nonExObject = orb.string_to_object("iiop://localhost:8087/someNonExistingObject");
             Assertion.AssertEquals(true, orb.non_existent(nonExObject));
+        }
+        
+        [Test]
+        public void TestUserIdForMbr() {
+            string id = "myAdderId";
+            Adder adder = m_testService.CreateNewWithUserID(id);
+            string marshalUrl = RemotingServices.GetObjectUri(adder);
+            Ior adderIor = new Ior(marshalUrl);
+            byte[] objectKey = adderIor.ObjectKey;
+            ASCIIEncoding enc = new ASCIIEncoding();
+            string marshalUri = new String(enc.GetChars(objectKey));
+            Assertion.AssertEquals("wrong user id", id, marshalUri);
+            
+            // check if callable
+            int arg1 = 1;
+            int arg2 = 2;
+            Assertion.AssertEquals("wrong adder result", arg1 + arg2, adder.Add(arg1, arg2));
+        }
+        
+        [Test]
+        public void TestSystemIdForMbr() {
+            Adder adder = m_testService.CreateNewWithSystemID();
+            string marshalUrl = RemotingServices.GetObjectUri(adder);
+            Ior adderIor = new Ior(marshalUrl);
+            byte[] objectKey = adderIor.ObjectKey;
+            ASCIIEncoding enc = new ASCIIEncoding();
+            string marshalUri = new String(enc.GetChars(objectKey));
+            int indexOfSysId = marshalUri.IndexOf("IIOPNET_SYSTEM_ID/");
+            Assertion.Assert("sys-id tag not found", indexOfSysId >= 0);
+            
+            // check if callable
+            int arg1 = 1;
+            int arg2 = 2;
+            Assertion.AssertEquals("wrong adder result", arg1 + arg2, adder.Add(arg1, arg2));
         }
         
 
