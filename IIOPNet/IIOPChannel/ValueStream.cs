@@ -392,8 +392,7 @@ namespace Ch.Elca.Iiop.Cdr {
         }
 
         public CdrEncapsulationInputStream ReadEncapsulation() {
-            // a value-type doesn't contain encapsulations
-            throw new NotSupportedException("this operation is not supported for value-input streams");
+            return m_baseStream.ReadEncapsulation();
         }
 
         public void SkipRest() {
@@ -914,7 +913,7 @@ namespace Ch.Elca.Iiop.Cdr {
         }
         
         public void WriteEncapsulation(CdrEncapsulationOutputStream encap) {
-            throw new NotSupportedException("this operation is not supported for ValueOutput-streams");
+            m_baseStream.WriteEncapsulation(encap);
         }
     
         #endregion
