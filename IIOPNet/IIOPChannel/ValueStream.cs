@@ -947,6 +947,10 @@ namespace Ch.Elca.Iiop.Cdr {
             m_baseStream.WriteOpaque(data);
         }
         
+        public void WriteBytes(byte[] data, int offset, int count) {
+            m_baseStream.WriteBytes(data, offset, count);
+        }
+        
         public void ForceWriteAlign(Aligns align) {
             throw new NotSupportedException("this operation is not supported for ValueOutput-streams");
         }

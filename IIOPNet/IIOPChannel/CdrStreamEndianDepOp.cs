@@ -193,81 +193,43 @@ namespace Ch.Elca.Iiop.Cdr {
         #region IMethods
         
         #region write methods dependant on byte ordering
+
+	private void Write(byte[] data, int count, Aligns align) {
+		m_stream.ForceWriteAlign(align);
+                Array.Reverse(data, 0, count);
+		m_stream.WriteBytes(data, 0, count);
+	}
         
         public void WriteShort(short data) {
-            m_stream.ForceWriteAlign(Aligns.Align2);
-            if (data < 0) {
-                // calculate two complement
-                ushort positiveNumber = (ushort)(data * -1);
-                ushort invNumber = (ushort)(positiveNumber ^ 0xFFFF);
-                WriteUShort((ushort)(invNumber + 1));
-            } else {
-                WriteUShort((ushort)data);
-            }
+		Write(BitConverter.GetBytes(data), 2, Aligns.Align2);
         }
 
         public void WriteUShort(ushort data) {
-            m_stream.ForceWriteAlign(Aligns.Align2);
-            m_stream.WriteOctet((byte) ((data & 0xFF00) >> 8));
-            m_stream.WriteOctet((byte) ( data & 0x00FF));
+		Write(BitConverter.GetBytes(data), 2, Aligns.Align2);
         }
 
         public void WriteLong(int data) {
-            m_stream.ForceWriteAlign(Aligns.Align4);
-            if (data < 0) {
-                // calculate two complement
-                uint positiveNumber = (uint)(data * -1);
-                uint invNumber = (uint)(positiveNumber ^ 0xFFFFFFFF);
-                WriteULong((uint)(invNumber + 1));
-            } else {
-                WriteULong((uint)data);
-            }
+		Write(BitConverter.GetBytes(data), 4, Aligns.Align4);
         }
 
         public void WriteULong(uint data) {
-            m_stream.ForceWriteAlign(Aligns.Align4);
-            m_stream.WriteOctet((byte) ((data & 0xFF000000) >> 24));
-            m_stream.WriteOctet((byte) ((data & 0x00FF0000) >> 16));            
-            m_stream.WriteOctet((byte) ((data & 0x0000FF00) >> 8));
-            m_stream.WriteOctet((byte) ( data & 0x000000FF));
+		Write(BitConverter.GetBytes(data), 4, Aligns.Align4);
         }
 
         public void WriteLongLong(long data) {
-            m_stream.ForceWriteAlign(Aligns.Align8);
-            if (data < 0) {
-                // calculate two complement
-                ulong positiveNumber = (ulong)(data * -1);
-                ulong invNumber = (ulong)(positiveNumber ^ 0xFFFFFFFFFFFFFFFF);
-                WriteULongLong((ulong)(invNumber + 1));
-            } else {
-                WriteULongLong((ulong)data);
-            }
+		Write(BitConverter.GetBytes(data), 8, Aligns.Align8);
         }
 
         public void WriteULongLong(ulong data) {
-            m_stream.ForceWriteAlign(Aligns.Align8);
-            m_stream.WriteOctet((byte) ((data & 0xFF00000000000000) >> 56));
-            m_stream.WriteOctet((byte) ((data & 0x00FF000000000000) >> 48));
-            m_stream.WriteOctet((byte) ((data & 0x0000FF0000000000) >> 40));
-            m_stream.WriteOctet((byte) ((data & 0x000000FF00000000) >> 32));
-            m_stream.WriteOctet((byte) ((data & 0x00000000FF000000) >> 24));
-            m_stream.WriteOctet((byte) ((data & 0x0000000000FF0000) >> 16));            
-            m_stream.WriteOctet((byte) ((data & 0x000000000000FF00) >> 8));
-            m_stream.WriteOctet((byte) ( data & 0x00000000000000FF));
+		Write(BitConverter.GetBytes(data), 8, Aligns.Align8);
         }
 
         public void WriteFloat(float data) {
-            m_stream.ForceWriteAlign(Aligns.Align4);
-            byte[] byteRep = BitConverter.GetBytes(data);
-            Array.Reverse((Array)byteRep);
-            m_stream.WriteOpaque(byteRep);
+		Write(BitConverter.GetBytes(data), 4, Aligns.Align4);
         }
 
         public void WriteDouble(double data) {
-            m_stream.ForceWriteAlign(Aligns.Align8);
-            byte[] byteRep = BitConverter.GetBytes(data); // create the little endian representation of the double
-            Array.Reverse((Array)byteRep);
-            m_stream.WriteOpaque(byteRep);
+		Write(BitConverter.GetBytes(data), 8, Aligns.Align8);
         }
 
         public void WriteWChar(char data) {
@@ -462,81 +424,42 @@ namespace Ch.Elca.Iiop.Cdr {
         #region IMethods
         
         #region write methods dependant on byte ordering
+
+       	private void Write(byte[] data, int count, Aligns align) {
+		m_stream.ForceWriteAlign(align);
+		m_stream.WriteBytes(data, 0, count);
+	}
         
         public void WriteShort(short data) {
-            m_stream.ForceWriteAlign(Aligns.Align2);
-            if (data < 0) {
-                // calculate two complement
-                ushort positiveNumber = (ushort)(data * -1);
-                ushort invNumber = (ushort)(positiveNumber ^ 0xFFFF);
-                WriteUShort((ushort)(invNumber + 1));
-            } else {
-                WriteUShort((ushort)data);
-            }
+		Write(BitConverter.GetBytes(data), 2, Aligns.Align2);
         }
 
         public void WriteUShort(ushort data) {
-            m_stream.ForceWriteAlign(Aligns.Align2);
-            m_stream.WriteOctet((byte) ( data & 0x00FF));
-            m_stream.WriteOctet((byte) ((data & 0xFF00) >> 8));
+		Write(BitConverter.GetBytes(data), 2, Aligns.Align2);
         }
 
         public void WriteLong(int data) {
-            m_stream.ForceWriteAlign(Aligns.Align4);
-            if (data < 0) {
-                // calculate two complement
-                uint positiveNumber = (uint)(data * -1);
-                uint invNumber = (uint)(positiveNumber ^ 0xFFFFFFFF);
-                WriteULong((uint)(invNumber + 1));
-            } else {
-                WriteULong((uint)data);
-            }
+		Write(BitConverter.GetBytes(data), 4, Aligns.Align4);
         }
 
         public void WriteULong(uint data) {
-            m_stream.ForceWriteAlign(Aligns.Align4);                        
-            m_stream.WriteOctet((byte) ( data & 0x000000FF));
-            m_stream.WriteOctet((byte) ((data & 0x0000FF00) >> 8));
-            m_stream.WriteOctet((byte) ((data & 0x00FF0000) >> 16));
-            m_stream.WriteOctet((byte) ((data & 0xFF000000) >> 24));
+		Write(BitConverter.GetBytes(data), 4, Aligns.Align4);
         }
 
         public void WriteLongLong(long data) {
-            m_stream.ForceWriteAlign(Aligns.Align8);
-            if (data < 0) {
-                // calculate two complement
-                ulong positiveNumber = (ulong)(data * -1);
-                ulong invNumber = (ulong)(positiveNumber ^ 0xFFFFFFFFFFFFFFFF);
-                WriteULongLong((ulong)(invNumber + 1));
-            } else {
-                WriteULongLong((ulong)data);
-            }
+		Write(BitConverter.GetBytes(data), 8, Aligns.Align8);
         }
 
         public void WriteULongLong(ulong data) {
-            m_stream.ForceWriteAlign(Aligns.Align8);
-            m_stream.WriteOctet((byte) ( data & 0x00000000000000FF));
-            m_stream.WriteOctet((byte) ((data & 0x000000000000FF00) >> 8));
-            m_stream.WriteOctet((byte) ((data & 0x0000000000FF0000) >> 16));            
-            m_stream.WriteOctet((byte) ((data & 0x00000000FF000000) >> 24));
-            m_stream.WriteOctet((byte) ((data & 0x000000FF00000000) >> 32));
-            m_stream.WriteOctet((byte) ((data & 0x0000FF0000000000) >> 40));
-            m_stream.WriteOctet((byte) ((data & 0x00FF000000000000) >> 48));
-            m_stream.WriteOctet((byte) ((data & 0xFF00000000000000) >> 56));
+		Write(BitConverter.GetBytes(data), 8, Aligns.Align8);
         }
 
         public void WriteFloat(float data) {
-            m_stream.ForceWriteAlign(Aligns.Align4);
-            byte[] byteRep = BitConverter.GetBytes(data);
-            // byteRep is in little endian order
-            m_stream.WriteOpaque(byteRep);
+		Write(BitConverter.GetBytes(data), 4, Aligns.Align4);
         }
 
         public void WriteDouble(double data) {
-            m_stream.ForceWriteAlign(Aligns.Align8);
-            byte[] byteRep = BitConverter.GetBytes(data); // create the little endian representation of the double
-            // byteRep is in little endian order
-            m_stream.WriteOpaque(byteRep);
+		Write(BitConverter.GetBytes(data), 8, Aligns.Align8);
         }
 
         public void WriteWChar(char data) {

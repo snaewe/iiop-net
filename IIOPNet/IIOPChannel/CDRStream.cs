@@ -214,6 +214,9 @@ namespace Ch.Elca.Iiop.Cdr {
 
         /// <summary>writes opaque data to the stream</summary>        
         void WriteOpaque(byte[] data);
+
+	void WriteBytes(byte[] data, int offset, int count);
+
         /// <summary>
         /// forces the alignement on a boundary. Is for example useful in IIOP 1.2, where a request/response body
         /// must be 8-aligned.
@@ -894,11 +897,15 @@ namespace Ch.Elca.Iiop.Cdr {
         }
         
         public void WriteOpaque(byte[] data) {
+		WriteBytes(data, 0, data.Length);
+        }
+
+        public void WriteBytes(byte[] data, int offset, int count) {
             if (data == null) { 
                 return; 
             }
-            BaseStream.Write(data, 0, data.Length);
-            IncrementPosition((ulong)data.Length);
+            BaseStream.Write(data, offset, count);
+            IncrementPosition((ulong)count);
         }
 
         public void ForceWriteAlign(Aligns align) {
