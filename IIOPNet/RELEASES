@@ -1,3 +1,20 @@
+Version 1.5.0 (13 Octobre 2003)
+-------------------------------
+
+new features:
+
+- support for IDL unions
+- support for IDL constants
+
+changes:
+
+- IDL to CLS compiler is now implemented in C# instead of J#.
+
+new tests:
+
+- MICO integration test for IDL unions
+
+
 Version 1.4.1 (22 Septembre 2003)
 ---------------------------------
 

@@ -39,9 +39,6 @@ REQUIREMENTS
 IIOP.NET requires Microsoft's .NET Framework 1.0 or 1.1 and a
 a C# compiler.
 
-The IDLToCLSCompiler requires Microsoft's J# redistributable
-package.
-
 
 INSTALLATION
 ------------
@@ -55,17 +52,25 @@ environment variables to be set:
 	WAS_HOME	WebSphere 5 application server path
 			used by Examples\EBJChatRoom\WebSphere_5\
 			and the IntegrationTests
+			(set if installed)
 
 	JBOSS_HOME	JBoss 3.2.1 application server path
 			used by Examples\EBJChatRoom\JBoss3.2.1\
 			and the IntegrationTests
+			(set if installed)
+	
+	MICO_HOME	Mico 2.3.10, >= patch 103 directory
+			used by IntegrationTests
+			(set if installed)
 
 	NUNITV2_HOME	NUnit V2 path
 			used by IIOPChannel unit tests and for 
 			the IntegrationTests
+			(required for tests)
 
 	JUNIT_HOME	JUnit path
 			used by the IntegrationTests
+			(required for tests)
 
 
 
