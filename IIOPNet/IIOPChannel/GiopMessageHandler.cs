@@ -40,7 +40,7 @@ using Ch.Elca.Iiop.Util;
 namespace Ch.Elca.Iiop.MessageHandling {
 
 
-	/// <summary>
+    /// <summary>
     /// This class handles Giop-Messages
     /// </summary>
     /// <remarks>
@@ -427,8 +427,76 @@ namespace Ch.Elca.Iiop.Tests {
             Assertion.AssertEquals(3, cdrIn.ReadLong());
         }
         
-//        public void TestRequestDeserialisation() {
-//        }
+        public void TestRequestDeserialisation() {          
+            MemoryStream sourceStream = new MemoryStream();
+            // prepare msg
+            CdrOutputStreamImpl cdrOut = new CdrOutputStreamImpl(sourceStream, 0, new GiopVersion(1, 2));
+            cdrOut.WriteOpaque(m_giopMagic);
+            // version
+            cdrOut.WriteOctet(1);
+            cdrOut.WriteOctet(2);
+            // flags
+            cdrOut.WriteOctet(0);
+            // msg-type: request
+            cdrOut.WriteOctet(0);
+            // msg-length
+            cdrOut.WriteULong(68);
+            // request-id
+            cdrOut.WriteULong(5);
+            // response-flags
+            cdrOut.WriteOctet(3);
+            cdrOut.WritePadding(3);
+            // target: key type
+            cdrOut.WriteULong(0);
+            cdrOut.WriteULong(26); // key length
+            cdrOut.WriteOpaque(new byte[] { 0, 116, 0, 101, 0, 115, 0, 116, 0, 111, 0, 98, 0, 106, 0, 101, 0, 99, 0, 116, 44, 115, 116, 114, 61, 102 }); // testobject,str=f
+            // method name
+            cdrOut.WriteString("Add");
+            // no service contexts
+            cdrOut.WriteULong(0);
+            cdrOut.ForceWriteAlign(Aligns.Align8);
+            // parameters
+            cdrOut.WriteLong(1);
+            cdrOut.WriteLong(2);
+
+            // create a connection context: this is needed for request deserialisation
+            IiopServerConnectionManager.GetManager().RegisterActiveConnection();
+
+            // go to stream begin
+            sourceStream.Seek(0, SeekOrigin.Begin);
+ 
+            IMessage result = null;
+            TestService service = new TestService();
+            try {
+                // object which should be called
+                string uri = "testobject";
+                RemotingServices.Marshal(service, uri);
+
+
+                // deserialise request message
+                GiopMessageHandler handler = GiopMessageHandler.GetSingleton();
+                result = handler.ParseIncomingRequestMessage(sourceStream);
+            } catch (RequestDeserializationException e) {
+                Console.WriteLine("Request deser exception, reason: " + e.Reason);
+                throw e;
+            } finally {
+                RemotingServices.Disconnect(service);
+            }
+
+            // now check if values are correct
+            Assertion.Assert("deserialised message is null", result != null);
+            Assertion.AssertEquals(5, result.Properties[SimpleGiopMsg.REQUEST_ID_KEY]);
+            Assertion.AssertEquals(new GiopVersion(1, 2), result.Properties[SimpleGiopMsg.GIOP_VERSION_KEY]);
+            Assertion.AssertEquals(3, result.Properties[SimpleGiopMsg.RESPONSE_FLAGS_KEY]);
+            Assertion.AssertEquals("testobject", result.Properties[SimpleGiopMsg.URI_KEY]);
+            Assertion.AssertEquals("Ch.Elca.Iiop.Tests.TestService", result.Properties[SimpleGiopMsg.TYPENAME_KEY]);
+            Assertion.AssertEquals("Add", result.Properties[SimpleGiopMsg.METHODNAME_KEY]);
+            object[] args = (object[])result.Properties[SimpleGiopMsg.ARGS_KEY];
+            Assertion.Assert("args is null", args != null);
+            Assertion.AssertEquals(2, args.Length);
+            Assertion.AssertEquals(1, args[0]);
+            Assertion.AssertEquals(2, args[1]);
+        }
         
         public void TestReplyDeserialisation() {
             // request msg the reply is for
@@ -448,7 +516,7 @@ namespace Ch.Elca.Iiop.Tests {
             // msg-type: reply
             cdrOut.WriteOctet(1);
             // msg-length
-            cdrOut.WriteULong(100);
+            cdrOut.WriteULong(16);
             // request-id
             cdrOut.WriteULong(5);
             // reply-status: no-exception
