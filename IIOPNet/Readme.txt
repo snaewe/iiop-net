@@ -43,8 +43,8 @@ INSTALLATION
 ------------
 
 To compile the tutorials, you must copy the files "ir.idl" and "orb.idl"
-in the ./IDL directory. You will find these two files as part of your
-Java SDK in the %JAVAHOME%\lib directory.
+in the ./IDL directory before compiling the tutorials. You will find 
+these two files as part of your Java SDK in the %JAVAHOME%\lib directory.
 
 
 BUILDING IIOP.NET
