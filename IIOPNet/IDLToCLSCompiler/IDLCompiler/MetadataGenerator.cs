@@ -821,8 +821,9 @@ public class MetaDataGenerator : IDLParserVisitor {
 
         Type[] interfaces = ParseValueInheritSpec(node, (BuildInfo) data);
         if ((interfaces.Length > 0) && (interfaces[0].IsClass)) { 
-            throw new InvalidIdlException("invalid abstract value type, " + forSymbol.getSymbolName() + 
-                                          " can only inherit from abstract value types, but not from: " + interfaces[0]);
+            throw new InvalidIdlException("invalid " + node.GetIdentification() + 
+                                          ", can only inherit from abstract value types, but not from: " + 
+                                          interfaces[0].FullName);
         }
         int bodyNodeIndex = 0;
         for (int i = 0; i < node.jjtGetNumChildren(); i++) {
@@ -869,7 +870,11 @@ public class MetaDataGenerator : IDLParserVisitor {
         // get the boxed type
         TypeContainer boxedType = (TypeContainer)node.jjtGetChild(0).jjtAccept(this, data);
         if (boxedType == null) {
-            throw new InvalidIdlException(String.Format("boxed type not (yet) defined for boxed value type"));
+            throw new InvalidIdlException(
+                String.Format("boxed type " + 
+                              ((SimpleNode)node.jjtGetChild(0)).GetIdentification() +
+                              " not (yet) defined for boxed value type " +
+                              node.GetIdentification()));
         }
         boxedType = ReplaceByCustomMappedIfNeeded(boxedType);
         Trace.WriteLine("generating code for boxed value type: " + fullyQualName);
@@ -1000,7 +1005,10 @@ public class MetaDataGenerator : IDLParserVisitor {
         TypeContainer fieldType = (TypeContainer)typeSpecNode.jjtAccept(this, info);
         fieldType = ReplaceByCustomMappedIfNeeded(fieldType);
         if (fieldType == null) {
-            throw new InvalidIdlException(String.Format("field type not (yet) defined for state member in value type"));
+            throw new InvalidIdlException(
+                String.Format("field type {0} not (yet) defined for {1} in value type",
+                              typeSpecNode.GetIdentification(), 
+                              node.GetIdentification()));
         }
         String[] decl = (String[])node.jjtGetChild(1).jjtAccept(this, data);
 
@@ -1042,7 +1050,7 @@ public class MetaDataGenerator : IDLParserVisitor {
             if (attrs.IsInCollection(typeof(InterfaceTypeAttribute))) {
                 InterfaceTypeAttribute ifAttr = (InterfaceTypeAttribute)attrs.GetAttributeForType(typeof(InterfaceTypeAttribute));
                 if (!(ifAttr.IdlType.Equals(IdlTypeInterface.AbstractValueType))) {
-                    throw new Exception("invalid supertype: " + result[i].FullName + " for type: " + 
+                    throw new InvalidIdlException("invalid supertype: " + result[i].FullName + " for type: " + 
                                                ((BuildInfo)data).GetContainterType().FullName +
                                                " only abstract value types are allowed in value inheritance clause and no interfaces");
                 }
@@ -1692,7 +1700,10 @@ public class MetaDataGenerator : IDLParserVisitor {
         ASTtype_spec typeSpecNode = (ASTtype_spec)node.jjtGetChild(0);
         TypeContainer fieldType = (TypeContainer)typeSpecNode.jjtAccept(this, info);
         if (fieldType == null) {
-            throw new InvalidIdlException(String.Format("field type not (yet) defined for struct-member"));
+            throw new InvalidIdlException(
+                String.Format("field type {0} not (yet) defined for struct-{1}",
+                              typeSpecNode.GetIdentification(), 
+                              node.GetIdentification()));
         }
         fieldType = ReplaceByCustomMappedIfNeeded(fieldType);
         String[] decl = (String[])node.jjtGetChild(1).jjtAccept(this, info);
@@ -1708,36 +1719,42 @@ public class MetaDataGenerator : IDLParserVisitor {
         if (clsDiscrType.IsEnum) {
             if (!clsDiscrType.Equals(discrVal.GetType())) {
                 throw new InvalidIdlException(
-                    String.Format("discr val {0} not assignable to type: {1}", discrVal, clsDiscrType));
+                    String.Format("discr val {0} not assignable to type: {1}",
+                                  discrVal, clsDiscrType));
             }
         } else if (clsDiscrType.Equals(typeof(System.Int16))) {
             if ((!(discrVal is System.Int64)) || 
                 ((System.Int64)discrVal < System.Int16.MinValue) ||
                 ((System.Int64)discrVal > System.Int16.MaxValue)) {
                 throw new InvalidIdlException(
-                    String.Format("discr val {0} not assignable to type: {1}", discrVal, clsDiscrType));
+                    String.Format("discr val {0} not assignable to type: {1}",
+                                  discrVal, clsDiscrType));
             }
         } else if (clsDiscrType.Equals(typeof(System.Int32))) {
             if ((!(discrVal is System.Int64)) ||
                 ((System.Int64)discrVal < System.Int32.MinValue) ||
                 ((System.Int64)discrVal > System.Int32.MaxValue)) {
                 throw new InvalidIdlException(
-                    String.Format("discr val {0} not assignable to type: {1}", discrVal, clsDiscrType));
+                    String.Format("discr val {0} not assignable to type: {1}",
+                                  discrVal, clsDiscrType));
             }
         } else if (clsDiscrType.Equals(typeof(System.Int64))) {
             if (!clsDiscrType.Equals(discrVal.GetType())) {
                 throw new InvalidIdlException(
-                    String.Format("discr val {0} not assignable to type: {1}", discrVal, clsDiscrType));
+                    String.Format("discr val {0} not assignable to type: {1}",
+                                  discrVal, clsDiscrType));
             }
         } else if (clsDiscrType.Equals(typeof(System.Char))) {
             if (!clsDiscrType.Equals(discrVal.GetType())) {
                 throw new InvalidIdlException(
-                    String.Format("discr val {0} not assignable to type: {1}", discrVal, clsDiscrType));
+                    String.Format("discr val {0} not assignable to type: {1}",
+                                  discrVal, clsDiscrType));
             }
         } else if (clsDiscrType.Equals(typeof(System.Boolean))) {
             if (!clsDiscrType.Equals(discrVal.GetType())) {
                 throw new InvalidIdlException(
-                    String.Format("discr val {0} not assignable to type: {1}", discrVal, clsDiscrType));
+                    String.Format("discr val {0} not assignable to type: {1}",
+                                  discrVal, clsDiscrType));
             }
         } else {
             throw new InternalCompilerException("precond violation: discr type");
@@ -1752,7 +1769,9 @@ public class MetaDataGenerator : IDLParserVisitor {
             if (!((ASTcase_label)node.jjtGetChild(i)).isDefault()) {
                 Literal litVal = ((Literal)node.jjtGetChild(i).jjtAccept(this, unionInfo));
                 if (litVal == null) {
-                	throw new InvalidIdlException("invalid union, discrimitator value for case not retrievable");
+                	throw new InvalidIdlException(
+                	    String.Format("invalid {0}, discrimitator value for case not retrievable",
+                	                  node.GetIdentification()));
                 }
                 object discVal = litVal.GetValue();
                 // check if val ok ...
@@ -1780,7 +1799,9 @@ public class MetaDataGenerator : IDLParserVisitor {
                     continue; // do not add default case here
                 }
                 if (result.Contains(discrVal)) {
-                    throw new InvalidIdlException("discriminator value used more than once in union: " + discrVal);
+                    throw new InvalidIdlException(
+                        String.Format("discriminator value {0} used more than once in {1}",
+                                      discrVal, node.GetIdentification()));
                 }
                 result.Add(discrVal);
             }
@@ -1829,7 +1850,10 @@ public class MetaDataGenerator : IDLParserVisitor {
         Node switchBody = node.jjtGetChild(1);
         TypeContainer discrType = (TypeContainer)node.jjtGetChild(0).jjtAccept(this, thisInfo);
         if (discrType == null) {
-            throw new InvalidIdlException(String.Format("dicriminator type not (yet) defined for union"));
+            throw new InvalidIdlException(
+                String.Format("dicriminator type {0} not (yet) defined for union {1}",
+                              ((SimpleNode)node.jjtGetChild(0)).GetIdentification(),
+                              node.GetIdentification()));
         }
         discrType = ReplaceByCustomMappedIfNeeded(discrType);
         ArrayList coveredDiscriminatorRange = ExtractCoveredDiscriminatorRange((ASTswitch_body)switchBody, 
@@ -1890,7 +1914,9 @@ public class MetaDataGenerator : IDLParserVisitor {
         ASTtype_spec typeSpecNode = (ASTtype_spec)elemSpec.jjtGetChild(0);
         TypeContainer elemType = (TypeContainer)typeSpecNode.jjtAccept(this, buildInfo);
         if (elemType == null) {
-            throw new InvalidIdlException(String.Format("union elem type not defined for union"));
+            throw new InvalidIdlException(
+                String.Format("union elem type not defined for {0}",
+                              node.GetIdentification()));
         }
         elemType = ReplaceByCustomMappedIfNeeded(elemType);
         Node elemDecl = elemSpec.jjtGetChild(1).jjtGetChild(0);
@@ -2018,7 +2044,7 @@ public class MetaDataGenerator : IDLParserVisitor {
         m_typeManager.UnpublishTypeForSequenceRecursion();
         if (elemType == null) {
             throw new InvalidIdlException(
-                String.Format("sequence element type {0} not defined for sequence",
+                String.Format("sequence element type not defined for {0}",
                               elemTypeNode.GetIdentification()));
         }
         elemType = ReplaceByCustomMappedIfNeeded(elemType);
@@ -2103,7 +2129,10 @@ public class MetaDataGenerator : IDLParserVisitor {
         ASTparam_type_spec typeSpecNode = (ASTparam_type_spec)node.jjtGetChild(0);
         TypeContainer propType = (TypeContainer)typeSpecNode.jjtAccept(this, info);
         if (propType == null) {
-            throw new InvalidIdlException(String.Format("attribute type not defined for attribute(s)"));
+            throw new InvalidIdlException(
+                String.Format("attribute type {0} not defined for attribute(s) {1}",
+                              typeSpecNode.GetIdentification(), 
+                              node.GetIdentification()));
         }
         propType = ReplaceByCustomMappedIfNeeded(propType);
         for (int i = 1; i < node.jjtGetNumChildren(); i++) {
@@ -2252,7 +2281,10 @@ public class MetaDataGenerator : IDLParserVisitor {
             // <parameter type spec>
             returnType = (TypeContainer) node.jjtGetChild(0).jjtAccept(this, data);
             if (returnType == null) {
-                throw new InvalidIdlException(String.Format("type not (yet) defined for return paramter"));
+                throw new InvalidIdlException(
+                    String.Format("type {0} not (yet) defined for {1}",
+                                  ((SimpleNode)node.jjtGetChild(0)).GetIdentification(),
+                                  node.GetIdentification()));
             }
             returnType = ReplaceByCustomMappedIfNeeded(returnType);
         }
@@ -2283,7 +2315,8 @@ public class MetaDataGenerator : IDLParserVisitor {
         // determine name and type
         TypeContainer paramType = (TypeContainer)node.jjtGetChild(1).jjtAccept(this, data);
         if (paramType == null) {
-            throw new InvalidIdlException(String.Format("parameter type not (yet) defined for {0}", 
+            throw new InvalidIdlException(String.Format("parameter type {0} not (yet) defined for {1}", 
+                                                        ((SimpleNode)node.jjtGetChild(1)).GetIdentification(),
                                                         node.GetIdentification()));
         }
         paramType = ReplaceByCustomMappedIfNeeded(paramType);
