@@ -368,12 +368,13 @@ namespace omg.org.CORBA {
         internal override Type GetClsForTypeCode() {
             Type result = Repository.GetTypeForId(m_id);
             if (result == null) {
-                // create the type represented by this typeCode
-                string typeName = Repository.GetTypeNameForId(m_id);
-                result = TypeFromTypeCodeRuntimeGenerator.GetSingleton().CreateOrGetType(typeName, this);
+                // doesn't make sense to create a type, because interface methods not present in typecode
+                return GetUnknownInterfaceType();
             }
             return result;
         }
+
+        protected abstract Type GetUnknownInterfaceType();
 
         #endregion IMethods
 
@@ -390,6 +391,14 @@ namespace omg.org.CORBA {
         public ObjRefTC(string repositoryID, string name) : base(repositoryID, name, TCKind.tk_objref) { }
 
         #endregion IConstructors
+        #region IMethods
+
+        protected override Type GetUnknownInterfaceType() {
+            return ReflectionHelper.MarshalByRefObjectType;
+        }
+
+        #endregion IMethods
+
     }
 
     internal class AbstractIfTC : InterfaceTC {
@@ -403,6 +412,24 @@ namespace omg.org.CORBA {
         public AbstractIfTC(string repositoryID, string name) : base(repositoryID, name, TCKind.tk_abstract_interface) { }        
 
         #endregion IConstructors
+        #region IMethods
+
+        protected override Type GetUnknownInterfaceType() {
+            return ReflectionHelper.ObjectType;
+        }
+
+        internal override AttributeExtCollection GetClsAttributesForTypeCode() {
+            return new AttributeExtCollection(new Attribute[] { 
+                                                new ObjectIdlTypeAttribute(IdlTypeObject.AbstractBase) });
+        }
+
+        internal override CustomAttributeBuilder[] GetAttributes() {
+            return new CustomAttributeBuilder[] { 
+                new ObjectIdlTypeAttribute(IdlTypeObject.AbstractBase).CreateAttributeBuilder() };
+        }
+
+        #endregion IMethods
+
     }
 
     internal class LocalIfTC : InterfaceTC {
@@ -416,6 +443,15 @@ namespace omg.org.CORBA {
         public LocalIfTC(string repositoryID, string name) : base(repositoryID, name, TCKind.tk_local_interface) { }
 
         #endregion IConstructors
+        #region IMethods
+
+        protected override Type GetUnknownInterfaceType() {
+            // this operation is currently not possible for a local interface
+            throw new BAD_OPERATION(479, CompletionStatus.Completed_MayBe);
+        }
+
+        #endregion IMethods
+
     }
 
     internal class NullTC : TypeCodeImpl {
