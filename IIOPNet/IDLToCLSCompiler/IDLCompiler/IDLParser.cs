@@ -10,28 +10,28 @@ using System.Globalization;
 
 public class IDLParser{/*@bgen(jjtree)*/
   protected JJTIDLParserState jjtree = new JJTIDLParserState();
-        /** the symbol table */
-        private SymbolTable m_symbolTable = new SymbolTable();
+    /** the symbol table */
+    private SymbolTable m_symbolTable = new SymbolTable();
 
-        public SymbolTable getSymbolTable() {
-                return m_symbolTable;
-        }
+    public SymbolTable getSymbolTable() {
+        return m_symbolTable;
+    }
 
 
-        // used for interface qualifier parsing: no modifier
-        private const int IS_DEFAULT_IF = 0;
-        // used for interface qualifier parsing: abstract modifier
-        private const int IS_ABSTRACT_IF = 1;
-        // used for interface qualifier parsing: local modifier
-        private const int IS_LOCAL_IF = 2;
+    // used for interface qualifier parsing: no modifier
+    private const int IS_DEFAULT_IF = 0;
+    // used for interface qualifier parsing: abstract modifier
+    private const int IS_ABSTRACT_IF = 1;
+    // used for interface qualifier parsing: local modifier
+    private const int IS_LOCAL_IF = 2;
 
-        // stores the last #pragma prefix value found
-        private String m_lastPrefix = "";
+    // stores the last #pragma prefix value found
+    private String m_lastPrefix = "";
 
-        // stores reference to the module node inserted for a pragma prefix (if any)
-        private ASTmodule m_modForPrefix = null;
-        // stores reference to definition for the module node inserted for a pragma prefix (if any)
-        private ASTdefinition m_defForPrefix = null;
+    // stores reference to the module node inserted for a pragma prefix (if any)
+    private ASTmodule m_modForPrefix = null;
+    // stores reference to definition for the module node inserted for a pragma prefix (if any)
+    private ASTdefinition m_defForPrefix = null;
 
 
         private Char ParseCharLiteral(String charLiteral) {
@@ -90,13 +90,13 @@ public class IDLParser{/*@bgen(jjtree)*/
     jj_consume_token(IDLParserConstants.PRAGMAID);
     ident = identifier();
     val = repIdVal();
-                Scope currentScope = m_symbolTable.getCurrentScope();
-                if (!m_lastPrefix.Equals("")) {
-                        // prepend prefix
-                        val = val.Insert(val.IndexOf(":") + 1, m_lastPrefix + "/");
-                }
+        Scope currentScope = m_symbolTable.getCurrentScope();
+        if (!m_lastPrefix.Equals("")) {
+            // prepend prefix
+            val = val.Insert(val.IndexOf(":") + 1, m_lastPrefix + "/");
+        }
 
-                currentScope.addPragmaID(ident, val); // add pragma ID
+        currentScope.addPragmaID(ident, val); // add pragma ID
 
   }
 
@@ -107,14 +107,14 @@ public class IDLParser{/*@bgen(jjtree)*/
     jj_consume_token(IDLParserConstants.PRAGMAID);
     ident = identifier();
     val = repIdVal();
-                Scope currentScope = m_symbolTable.getCurrentScope();
-                currentScope = currentScope.getParentScope(); // get the scope this type is defined in, the id must be added to this scope
-                if (!m_lastPrefix.Equals("")) {
-                        // prepend prefix
-                        val = val.Insert(val.IndexOf(":") + 1, m_lastPrefix + "/");
-                }
+        Scope currentScope = m_symbolTable.getCurrentScope();
 
-                currentScope.addPragmaID(ident, val); // add pragma ID
+        if (!m_lastPrefix.Equals("")) {
+            // prepend prefix
+            val = val.Insert(val.IndexOf(":") + 1, m_lastPrefix + "/");
+        }
+
+        currentScope.addPragmaID(ident, val); // add pragma ID
 
   }
 
@@ -124,35 +124,35 @@ public class IDLParser{/*@bgen(jjtree)*/
     jj_consume_token(IDLParserConstants.PRAGMA);
     jj_consume_token(IDLParserConstants.PRAGMAPREFIX);
     val = string_literal();
-                val = val.Trim();
-                if (m_lastPrefix.Equals(val)) { {if (true) return;} } // same pragma prefix, nothing to do
+        val = val.Trim();
+        if (m_lastPrefix.Equals(val)) { {if (true) return;} } // same pragma prefix, nothing to do
 
-                if ( (!(val.Equals(""))) && (m_symbolTable.getCurrentScope() != m_symbolTable.getTopScope())) {
-                        {if (true) throw new ParseException("invalid scope for using a #pragma prefix, only usable outside of module declarations");}
-                }
+        if ( (!(val.Equals(""))) && (m_symbolTable.getCurrentScope() != m_symbolTable.getTopScope())) {
+            {if (true) throw new ParseException("invalid scope for using a #pragma prefix, only usable outside of module declarations");}
+        }
 
-                if (m_symbolTable.isPragmaScopeOpen()) {
-                        // close the scopes up to the pragma-scope (incl. pragma scope)
-                        m_symbolTable.closePragmaScope();
-                        // close module node for pragma
-                        jjtree.closeNodeScope(m_modForPrefix, true);
-                        jjtree.closeNodeScope(m_defForPrefix, true);
-                        m_modForPrefix = null;
-                        m_defForPrefix = null;
-                        // open scopes for new pragma, if val != ""
-                        m_symbolTable.openPragmaScope(val);
-                } else {
-                        m_symbolTable.openPragmaScope(val);
-                }
-                // open a defintion and an included module node into the parse tree if val != "" --> insert a module opening for pragma prefix
-                if (!(val.Equals(""))) {
-                        m_defForPrefix = new ASTdefinition(this, IDLParserTreeConstants.JJTDEFINITION);
-                        jjtree.openNodeScope(m_defForPrefix);
-                        m_modForPrefix = new ASTmodule(this, IDLParserTreeConstants.JJTMODULE);
-                        jjtree.openNodeScope(m_modForPrefix);
-                        m_modForPrefix.setIdent(val);
-                }
-                m_lastPrefix = val;
+        if (m_symbolTable.isPragmaScopeOpen()) {
+            // close the scopes up to the pragma-scope (incl. pragma scope)
+            m_symbolTable.closePragmaScope();
+            // close module node for pragma
+            jjtree.closeNodeScope(m_modForPrefix, true);
+            jjtree.closeNodeScope(m_defForPrefix, true);
+            m_modForPrefix = null;
+            m_defForPrefix = null;
+            // open scopes for new pragma, if val != ""
+            m_symbolTable.openPragmaScope(val);
+        } else {
+            m_symbolTable.openPragmaScope(val);
+        }
+        // open a defintion and an included module node into the parse tree if val != "" --> insert a module opening for pragma prefix
+        if (!(val.Equals(""))) {
+            m_defForPrefix = new ASTdefinition(this, IDLParserTreeConstants.JJTDEFINITION);
+            jjtree.openNodeScope(m_defForPrefix);
+            m_modForPrefix = new ASTmodule(this, IDLParserTreeConstants.JJTMODULE);
+            jjtree.openNodeScope(m_modForPrefix);
+            m_modForPrefix.setIdent(val);
+        }
+        m_lastPrefix = val;
   }
 
 /* Production 1, chapter 3.4 in CORBA 2.3.1 spec, pragma prefix handling added here */
@@ -213,17 +213,17 @@ public class IDLParser{/*@bgen(jjtree)*/
         
     jjtree.closeNodeScope(jjtn000, true);
     jjtc000 = false;
-        if (m_modForPrefix != null) {
-                jjtree.closeNodeScope(m_modForPrefix, true); // close inserted module node scope for prefix, if one is open after parse completition
-                jjtree.closeNodeScope(m_defForPrefix, true); // close inserted definition node scope for prefix
-        }
-        {if (true) return jjtn000;}
+    if (m_modForPrefix != null) {
+        jjtree.closeNodeScope(m_modForPrefix, true); // close inserted module node scope for prefix, if one is open after parse completition
+        jjtree.closeNodeScope(m_defForPrefix, true); // close inserted definition node scope for prefix
+    }
+    {if (true) return jjtn000;}
         break;
       case 0:
         jj_consume_token(0);
-                jjtree.closeNodeScope(jjtn000, true);
-                jjtc000 = false;
-                {if (true) return jjtn000;}
+            jjtree.closeNodeScope(jjtn000, true);
+            jjtc000 = false;
+            {if (true) return jjtn000;}
         break;
       default:
         jj_la1[2] = jj_gen;
@@ -371,9 +371,9 @@ public class IDLParser{/*@bgen(jjtree)*/
       jj_consume_token(15);
     jjtree.closeNodeScope(jjtn000, true);
     jjtc000 = false;
-        jjtn000.setIdent(ident);
-        // close scope for this module after parsing
-        m_symbolTable.closeScope();
+    jjtn000.setIdent(ident);
+    // close scope for this module after parsing
+    m_symbolTable.closeScope();
     } catch (Exception jjte000) {
     if (jjtc000) {
       jjtree.clearNodeScope(jjtn000);
@@ -439,12 +439,12 @@ public class IDLParser{/*@bgen(jjtree)*/
   jjtree.openNodeScope(jjtn000);
     try {
       interface_header();
-        // add the interface symbol, after the header is completed
-        // get the header node
-        SimpleNodeWithIdent header = (SimpleNodeWithIdent) jjtree.peekNode();
-        Scope currentScope = m_symbolTable.getCurrentScope();
-        currentScope.addSymbol(header.getIdent());
-        m_symbolTable.openScope(header.getIdent(), true); // open a scope for type declaration inside the interface
+    // add the interface symbol, after the header is completed
+    // get the header node
+    SimpleNodeWithIdent header = (SimpleNodeWithIdent) jjtree.peekNode();
+    Scope currentScope = m_symbolTable.getCurrentScope();
+    currentScope.addSymbol(header.getIdent());
+    m_symbolTable.openScope(header.getIdent(), true); // open a scope for type declaration inside the interface
 
       jj_consume_token(14);
       interface_body();
@@ -808,23 +808,23 @@ public class IDLParser{/*@bgen(jjtree)*/
     try {
       scoped_name();
     } catch (Exception jjte000) {
-          if (jjtc000) {
-            jjtree.clearNodeScope(jjtn000);
-            jjtc000 = false;
-          } else {
-            jjtree.popNode();
-          }
-          if (jjte000 is ParseException) {
-            {if (true) throw (ParseException)jjte000;}
-          }
-          if (jjte000 is System.SystemException) {
-            {if (true) throw (System.SystemException)jjte000;}
-          }
-          {if (true) throw (Error)jjte000;}
+      if (jjtc000) {
+        jjtree.clearNodeScope(jjtn000);
+        jjtc000 = false;
+      } else {
+        jjtree.popNode();
+      }
+      if (jjte000 is ParseException) {
+        {if (true) throw (ParseException)jjte000;}
+      }
+      if (jjte000 is System.SystemException) {
+        {if (true) throw (System.SystemException)jjte000;}
+      }
+      {if (true) throw (Error)jjte000;}
     } finally {
-          if (jjtc000) {
-            jjtree.closeNodeScope(jjtn000, true);
-          }
+      if (jjtc000) {
+        jjtree.closeNodeScope(jjtn000, true);
+      }
     }
   }
 
@@ -908,23 +908,23 @@ public class IDLParser{/*@bgen(jjtree)*/
         throw new ParseException();
       }
     } catch (Exception jjte000) {
-          if (jjtc000) {
-            jjtree.clearNodeScope(jjtn000);
-            jjtc000 = false;
-          } else {
-            jjtree.popNode();
-          }
-          if (jjte000 is ParseException) {
-            {if (true) throw (ParseException)jjte000;}
-          }
-          if (jjte000 is System.SystemException) {
-            {if (true) throw (System.SystemException)jjte000;}
-          }
-          {if (true) throw (Error)jjte000;}
+      if (jjtc000) {
+        jjtree.clearNodeScope(jjtn000);
+        jjtc000 = false;
+      } else {
+        jjtree.popNode();
+      }
+      if (jjte000 is ParseException) {
+        {if (true) throw (ParseException)jjte000;}
+      }
+      if (jjte000 is System.SystemException) {
+        {if (true) throw (System.SystemException)jjte000;}
+      }
+      {if (true) throw (Error)jjte000;}
     } finally {
-          if (jjtc000) {
-            jjtree.closeNodeScope(jjtn000, true);
-          }
+      if (jjtc000) {
+        jjtree.closeNodeScope(jjtn000, true);
+      }
     }
   }
 
@@ -939,7 +939,7 @@ public class IDLParser{/*@bgen(jjtree)*/
       switch ((jj_ntk==-1)?jj_ntk_calc():jj_ntk) {
       case 17:
         jj_consume_token(17);
-                      isAbstract = true;
+                  isAbstract = true;
         break;
       default:
         jj_la1[16] = jj_gen;
@@ -949,30 +949,30 @@ public class IDLParser{/*@bgen(jjtree)*/
       jj_consume_token(22);
       ident = identifier();
       jj_consume_token(12);
-          jjtree.closeNodeScope(jjtn000, true);
-          jjtc000 = false;
-          jjtn000.setIdent(ident);
-          jjtn000.setAbstract(isAbstract);
-          Scope currentScope = m_symbolTable.getCurrentScope();
-          currentScope.addFwdDecl(ident);
+      jjtree.closeNodeScope(jjtn000, true);
+      jjtc000 = false;
+      jjtn000.setIdent(ident);
+      jjtn000.setAbstract(isAbstract);
+      Scope currentScope = m_symbolTable.getCurrentScope();
+      currentScope.addFwdDecl(ident);
     } catch (Exception jjte000) {
-          if (jjtc000) {
-            jjtree.clearNodeScope(jjtn000);
-            jjtc000 = false;
-          } else {
-            jjtree.popNode();
-          }
-          if (jjte000 is ParseException) {
-            {if (true) throw (ParseException)jjte000;}
-          }
-          if (jjte000 is System.SystemException) {
-            {if (true) throw (System.SystemException)jjte000;}
-          }
-          {if (true) throw (Error)jjte000;}
+      if (jjtc000) {
+        jjtree.clearNodeScope(jjtn000);
+        jjtc000 = false;
+      } else {
+        jjtree.popNode();
+      }
+      if (jjte000 is ParseException) {
+        {if (true) throw (ParseException)jjte000;}
+      }
+      if (jjte000 is System.SystemException) {
+        {if (true) throw (System.SystemException)jjte000;}
+      }
+      {if (true) throw (Error)jjte000;}
     } finally {
-          if (jjtc000) {
-            jjtree.closeNodeScope(jjtn000, true);
-          }
+      if (jjtc000) {
+        jjtree.closeNodeScope(jjtn000, true);
+      }
     }
   }
 
@@ -987,30 +987,30 @@ public class IDLParser{/*@bgen(jjtree)*/
       ident = identifier();
       type_spec();
       jj_consume_token(12);
-          jjtree.closeNodeScope(jjtn000, true);
-          jjtc000 = false;
-                jjtn000.setIdent(ident);
-                // the symbol must not be added before the valuebox definition is completed, 3.8.2, CORBA 2.3.1 spec
-            Scope currentScope = m_symbolTable.getCurrentScope();
-            currentScope.addSymbol(ident);
+      jjtree.closeNodeScope(jjtn000, true);
+      jjtc000 = false;
+        jjtn000.setIdent(ident);
+        // the symbol must not be added before the valuebox definition is completed, 3.8.2, CORBA 2.3.1 spec
+        Scope currentScope = m_symbolTable.getCurrentScope();
+        currentScope.addSymbol(ident);
     } catch (Exception jjte000) {
-          if (jjtc000) {
-            jjtree.clearNodeScope(jjtn000);
-            jjtc000 = false;
-          } else {
-            jjtree.popNode();
-          }
-          if (jjte000 is ParseException) {
-            {if (true) throw (ParseException)jjte000;}
-          }
-          if (jjte000 is System.SystemException) {
-            {if (true) throw (System.SystemException)jjte000;}
-          }
-          {if (true) throw (Error)jjte000;}
+      if (jjtc000) {
+        jjtree.clearNodeScope(jjtn000);
+        jjtc000 = false;
+      } else {
+        jjtree.popNode();
+      }
+      if (jjte000 is ParseException) {
+        {if (true) throw (ParseException)jjte000;}
+      }
+      if (jjte000 is System.SystemException) {
+        {if (true) throw (System.SystemException)jjte000;}
+      }
+      {if (true) throw (Error)jjte000;}
     } finally {
-          if (jjtc000) {
-            jjtree.closeNodeScope(jjtn000, true);
-          }
+      if (jjtc000) {
+        jjtree.closeNodeScope(jjtn000, true);
+      }
     }
   }
 
@@ -1043,7 +1043,7 @@ public class IDLParser{/*@bgen(jjtree)*/
         break;
       }
       jj_consume_token(14);
-        jjtn000.setIdent(ident);
+    jjtn000.setIdent(ident);
         Scope currentScope = m_symbolTable.getCurrentScope();
         currentScope.addSymbol(ident);
         m_symbolTable.openScope(ident, true); // open a scope for type declaration inside this abstract value type
@@ -1093,25 +1093,25 @@ public class IDLParser{/*@bgen(jjtree)*/
       jj_consume_token(12);
           jjtree.closeNodeScope(jjtn000, true);
           jjtc000 = false;
-            m_symbolTable.closeScope();
+        m_symbolTable.closeScope();
     } catch (Exception jjte000) {
-          if (jjtc000) {
-            jjtree.clearNodeScope(jjtn000);
-            jjtc000 = false;
-          } else {
-            jjtree.popNode();
-          }
-          if (jjte000 is ParseException) {
-            {if (true) throw (ParseException)jjte000;}
-          }
-          if (jjte000 is System.SystemException) {
-            {if (true) throw (System.SystemException)jjte000;}
-          }
-          {if (true) throw (Error)jjte000;}
+      if (jjtc000) {
+        jjtree.clearNodeScope(jjtn000);
+        jjtc000 = false;
+      } else {
+        jjtree.popNode();
+      }
+      if (jjte000 is ParseException) {
+        {if (true) throw (ParseException)jjte000;}
+      }
+      if (jjte000 is System.SystemException) {
+        {if (true) throw (System.SystemException)jjte000;}
+      }
+      {if (true) throw (Error)jjte000;}
     } finally {
-          if (jjtc000) {
-            jjtree.closeNodeScope(jjtn000, true);
-          }
+      if (jjtc000) {
+        jjtree.closeNodeScope(jjtn000, true);
+      }
     }
   }
 
@@ -1123,10 +1123,10 @@ public class IDLParser{/*@bgen(jjtree)*/
   jjtree.openNodeScope(jjtn000);
     try {
       value_header();
-            // get the value header node
-            SimpleNodeWithIdent header = (SimpleNodeWithIdent) jjtree.peekNode();
-            // add the symbol for this value type to the symbol table
-            Scope currentScope = m_symbolTable.getCurrentScope();
+        // get the value header node
+        SimpleNodeWithIdent header = (SimpleNodeWithIdent) jjtree.peekNode();
+        // add the symbol for this value type to the symbol table
+        Scope currentScope = m_symbolTable.getCurrentScope();
             currentScope.addSymbol(header.getIdent());
             m_symbolTable.openScope(header.getIdent(), true); // open a scope for type declaration inside this concrete value type
 
@@ -1179,25 +1179,25 @@ public class IDLParser{/*@bgen(jjtree)*/
       jj_consume_token(12);
           jjtree.closeNodeScope(jjtn000, true);
           jjtc000 = false;
-            m_symbolTable.closeScope();
+        m_symbolTable.closeScope();
     } catch (Exception jjte000) {
-          if (jjtc000) {
-            jjtree.clearNodeScope(jjtn000);
-            jjtc000 = false;
-          } else {
-            jjtree.popNode();
-          }
-          if (jjte000 is ParseException) {
-            {if (true) throw (ParseException)jjte000;}
-          }
-          if (jjte000 is System.SystemException) {
-            {if (true) throw (System.SystemException)jjte000;}
-          }
-          {if (true) throw (Error)jjte000;}
+      if (jjtc000) {
+        jjtree.clearNodeScope(jjtn000);
+        jjtc000 = false;
+      } else {
+        jjtree.popNode();
+      }
+      if (jjte000 is ParseException) {
+        {if (true) throw (ParseException)jjte000;}
+      }
+      if (jjte000 is System.SystemException) {
+        {if (true) throw (System.SystemException)jjte000;}
+      }
+      {if (true) throw (Error)jjte000;}
     } finally {
-          if (jjtc000) {
-            jjtree.closeNodeScope(jjtn000, true);
-          }
+      if (jjtc000) {
+        jjtree.closeNodeScope(jjtn000, true);
+      }
     }
   }
 
@@ -1212,7 +1212,7 @@ public class IDLParser{/*@bgen(jjtree)*/
       switch ((jj_ntk==-1)?jj_ntk_calc():jj_ntk) {
       case 23:
         jj_consume_token(23);
-                     isCustom = true;
+                 isCustom = true;
         break;
       default:
         jj_la1[21] = jj_gen;
@@ -1239,27 +1239,27 @@ public class IDLParser{/*@bgen(jjtree)*/
         ;
         break;
       }
-                                                                                                                                                    jjtree.closeNodeScope(jjtn000, true);
-                                                                                                                                                    jjtc000 = false;
-                                                                                                                                                    jjtn000.setIdent(ident); jjtn000.setCustom(isCustom);
+                                                                                                                                                jjtree.closeNodeScope(jjtn000, true);
+                                                                                                                                                jjtc000 = false;
+                                                                                                                                                jjtn000.setIdent(ident); jjtn000.setCustom(isCustom);
     } catch (Exception jjte000) {
-          if (jjtc000) {
-            jjtree.clearNodeScope(jjtn000);
-            jjtc000 = false;
-          } else {
-            jjtree.popNode();
-          }
-          if (jjte000 is ParseException) {
-            {if (true) throw (ParseException)jjte000;}
-          }
-          if (jjte000 is System.SystemException) {
-            {if (true) throw (System.SystemException)jjte000;}
-          }
-          {if (true) throw (Error)jjte000;}
+      if (jjtc000) {
+        jjtree.clearNodeScope(jjtn000);
+        jjtc000 = false;
+      } else {
+        jjtree.popNode();
+      }
+      if (jjte000 is ParseException) {
+        {if (true) throw (ParseException)jjte000;}
+      }
+      if (jjte000 is System.SystemException) {
+        {if (true) throw (System.SystemException)jjte000;}
+      }
+      {if (true) throw (Error)jjte000;}
     } finally {
-          if (jjtc000) {
-            jjtree.closeNodeScope(jjtn000, true);
-          }
+      if (jjtc000) {
+        jjtree.closeNodeScope(jjtn000, true);
+      }
     }
   }
 
@@ -1297,23 +1297,23 @@ public class IDLParser{/*@bgen(jjtree)*/
       label_8: ;
       
     } catch (Exception jjte000) {
-          if (jjtc000) {
-            jjtree.clearNodeScope(jjtn000);
-            jjtc000 = false;
-          } else {
-            jjtree.popNode();
-          }
-          if (jjte000 is ParseException) {
-            {if (true) throw (ParseException)jjte000;}
-          }
-          if (jjte000 is System.SystemException) {
-            {if (true) throw (System.SystemException)jjte000;}
-          }
-          {if (true) throw (Error)jjte000;}
+      if (jjtc000) {
+        jjtree.clearNodeScope(jjtn000);
+        jjtc000 = false;
+      } else {
+        jjtree.popNode();
+      }
+      if (jjte000 is ParseException) {
+        {if (true) throw (ParseException)jjte000;}
+      }
+      if (jjte000 is System.SystemException) {
+        {if (true) throw (System.SystemException)jjte000;}
+      }
+      {if (true) throw (Error)jjte000;}
     } finally {
-          if (jjtc000) {
-            jjtree.closeNodeScope(jjtn000, true);
-          }
+      if (jjtc000) {
+        jjtree.closeNodeScope(jjtn000, true);
+      }
     }
   }
 
@@ -1341,23 +1341,23 @@ public class IDLParser{/*@bgen(jjtree)*/
       label_9: ;
       
     } catch (Exception jjte000) {
-          if (jjtc000) {
-            jjtree.clearNodeScope(jjtn000);
-            jjtc000 = false;
-          } else {
-            jjtree.popNode();
-          }
-          if (jjte000 is ParseException) {
-            {if (true) throw (ParseException)jjte000;}
-          }
-          if (jjte000 is System.SystemException) {
-            {if (true) throw (System.SystemException)jjte000;}
-          }
-          {if (true) throw (Error)jjte000;}
+      if (jjtc000) {
+        jjtree.clearNodeScope(jjtn000);
+        jjtc000 = false;
+      } else {
+        jjtree.popNode();
+      }
+      if (jjte000 is ParseException) {
+        {if (true) throw (ParseException)jjte000;}
+      }
+      if (jjte000 is System.SystemException) {
+        {if (true) throw (System.SystemException)jjte000;}
+      }
+      {if (true) throw (Error)jjte000;}
     } finally {
-          if (jjtc000) {
-            jjtree.closeNodeScope(jjtn000, true);
-          }
+      if (jjtc000) {
+        jjtree.closeNodeScope(jjtn000, true);
+      }
     }
   }
 
@@ -1370,23 +1370,23 @@ public class IDLParser{/*@bgen(jjtree)*/
     try {
       scoped_name();
     } catch (Exception jjte000) {
-          if (jjtc000) {
-            jjtree.clearNodeScope(jjtn000);
-            jjtc000 = false;
-          } else {
-            jjtree.popNode();
-          }
-          if (jjte000 is ParseException) {
-            {if (true) throw (ParseException)jjte000;}
-          }
-          if (jjte000 is System.SystemException) {
-            {if (true) throw (System.SystemException)jjte000;}
-          }
-          {if (true) throw (Error)jjte000;}
+      if (jjtc000) {
+        jjtree.clearNodeScope(jjtn000);
+        jjtc000 = false;
+      } else {
+        jjtree.popNode();
+      }
+      if (jjte000 is ParseException) {
+        {if (true) throw (ParseException)jjte000;}
+      }
+      if (jjte000 is System.SystemException) {
+        {if (true) throw (System.SystemException)jjte000;}
+      }
+      {if (true) throw (Error)jjte000;}
     } finally {
-          if (jjtc000) {
-            jjtree.closeNodeScope(jjtn000, true);
-          }
+      if (jjtc000) {
+        jjtree.closeNodeScope(jjtn000, true);
+      }
     }
   }
 
@@ -1442,23 +1442,23 @@ public class IDLParser{/*@bgen(jjtree)*/
         break;
       }
     } catch (Exception jjte000) {
-          if (jjtc000) {
-            jjtree.clearNodeScope(jjtn000);
-            jjtc000 = false;
-          } else {
-            jjtree.popNode();
-          }
-          if (jjte000 is ParseException) {
-            {if (true) throw (ParseException)jjte000;}
-          }
-          if (jjte000 is System.SystemException) {
-            {if (true) throw (System.SystemException)jjte000;}
-          }
-          {if (true) throw (Error)jjte000;}
+      if (jjtc000) {
+        jjtree.clearNodeScope(jjtn000);
+        jjtc000 = false;
+      } else {
+        jjtree.popNode();
+      }
+      if (jjte000 is ParseException) {
+        {if (true) throw (ParseException)jjte000;}
+      }
+      if (jjte000 is System.SystemException) {
+        {if (true) throw (System.SystemException)jjte000;}
+      }
+      {if (true) throw (Error)jjte000;}
     } finally {
-          if (jjtc000) {
-            jjtree.closeNodeScope(jjtn000, true);
-          }
+      if (jjtc000) {
+        jjtree.closeNodeScope(jjtn000, true);
+      }
     }
   }
 
@@ -1472,11 +1472,11 @@ public class IDLParser{/*@bgen(jjtree)*/
       switch ((jj_ntk==-1)?jj_ntk_calc():jj_ntk) {
       case 26:
         jj_consume_token(26);
-                     jjtn000.setIsPrivate(false);
+                 jjtn000.setIsPrivate(false);
         break;
       case 27:
         jj_consume_token(27);
-                                                                  jjtn000.setIsPrivate(true);
+                                                              jjtn000.setIsPrivate(true);
         break;
       default:
         jj_la1[28] = jj_gen;
@@ -1488,23 +1488,23 @@ public class IDLParser{/*@bgen(jjtree)*/
       declarators();
       jj_consume_token(12);
     } catch (Exception jjte000) {
-          if (jjtc000) {
-            jjtree.clearNodeScope(jjtn000);
-            jjtc000 = false;
-          } else {
-            jjtree.popNode();
-          }
-          if (jjte000 is ParseException) {
-            {if (true) throw (ParseException)jjte000;}
-          }
-          if (jjte000 is System.SystemException) {
-            {if (true) throw (System.SystemException)jjte000;}
-          }
-          {if (true) throw (Error)jjte000;}
+      if (jjtc000) {
+        jjtree.clearNodeScope(jjtn000);
+        jjtc000 = false;
+      } else {
+        jjtree.popNode();
+      }
+      if (jjte000 is ParseException) {
+        {if (true) throw (ParseException)jjte000;}
+      }
+      if (jjte000 is System.SystemException) {
+        {if (true) throw (System.SystemException)jjte000;}
+      }
+      {if (true) throw (Error)jjte000;}
     } finally {
-          if (jjtc000) {
-            jjtree.closeNodeScope(jjtn000, true);
-          }
+      if (jjtc000) {
+        jjtree.closeNodeScope(jjtn000, true);
+      }
     }
   }
 
@@ -1538,27 +1538,27 @@ public class IDLParser{/*@bgen(jjtree)*/
         break;
       }
       jj_consume_token(12);
-                                                                                              jjtree.closeNodeScope(jjtn000, true);
-                                                                                              jjtc000 = false;
-                                                                                              jjtn000.setIdent(ident);
+                                                                                          jjtree.closeNodeScope(jjtn000, true);
+                                                                                          jjtc000 = false;
+                                                                                          jjtn000.setIdent(ident);
     } catch (Exception jjte000) {
-          if (jjtc000) {
-            jjtree.clearNodeScope(jjtn000);
-            jjtc000 = false;
-          } else {
-            jjtree.popNode();
-          }
-          if (jjte000 is ParseException) {
-            {if (true) throw (ParseException)jjte000;}
-          }
-          if (jjte000 is System.SystemException) {
-            {if (true) throw (System.SystemException)jjte000;}
-          }
-          {if (true) throw (Error)jjte000;}
+      if (jjtc000) {
+        jjtree.clearNodeScope(jjtn000);
+        jjtc000 = false;
+      } else {
+        jjtree.popNode();
+      }
+      if (jjte000 is ParseException) {
+        {if (true) throw (ParseException)jjte000;}
+      }
+      if (jjte000 is System.SystemException) {
+        {if (true) throw (System.SystemException)jjte000;}
+      }
+      {if (true) throw (Error)jjte000;}
     } finally {
-          if (jjtc000) {
-            jjtree.closeNodeScope(jjtn000, true);
-          }
+      if (jjtc000) {
+        jjtree.closeNodeScope(jjtn000, true);
+      }
     }
   }
 
@@ -1586,23 +1586,23 @@ public class IDLParser{/*@bgen(jjtree)*/
       label_10: ;
       
     } catch (Exception jjte000) {
-          if (jjtc000) {
-            jjtree.clearNodeScope(jjtn000);
-            jjtc000 = false;
-          } else {
-            jjtree.popNode();
-          }
-          if (jjte000 is ParseException) {
-            {if (true) throw (ParseException)jjte000;}
-          }
-          if (jjte000 is System.SystemException) {
-            {if (true) throw (System.SystemException)jjte000;}
-          }
-          {if (true) throw (Error)jjte000;}
+      if (jjtc000) {
+        jjtree.clearNodeScope(jjtn000);
+        jjtc000 = false;
+      } else {
+        jjtree.popNode();
+      }
+      if (jjte000 is ParseException) {
+        {if (true) throw (ParseException)jjte000;}
+      }
+      if (jjte000 is System.SystemException) {
+        {if (true) throw (System.SystemException)jjte000;}
+      }
+      {if (true) throw (Error)jjte000;}
     } finally {
-          if (jjtc000) {
-            jjtree.closeNodeScope(jjtn000, true);
-          }
+      if (jjtc000) {
+        jjtree.closeNodeScope(jjtn000, true);
+      }
     }
   }
 
@@ -1617,23 +1617,23 @@ public class IDLParser{/*@bgen(jjtree)*/
       param_type_spec();
       simple_declarator();
     } catch (Exception jjte000) {
-          if (jjtc000) {
-            jjtree.clearNodeScope(jjtn000);
-            jjtc000 = false;
-          } else {
-            jjtree.popNode();
-          }
-          if (jjte000 is ParseException) {
-            {if (true) throw (ParseException)jjte000;}
-          }
-          if (jjte000 is System.SystemException) {
-            {if (true) throw (System.SystemException)jjte000;}
-          }
-          {if (true) throw (Error)jjte000;}
+      if (jjtc000) {
+        jjtree.clearNodeScope(jjtn000);
+        jjtc000 = false;
+      } else {
+        jjtree.popNode();
+      }
+      if (jjte000 is ParseException) {
+        {if (true) throw (ParseException)jjte000;}
+      }
+      if (jjte000 is System.SystemException) {
+        {if (true) throw (System.SystemException)jjte000;}
+      }
+      {if (true) throw (Error)jjte000;}
     } finally {
-          if (jjtc000) {
-            jjtree.closeNodeScope(jjtn000, true);
-          }
+      if (jjtc000) {
+        jjtree.closeNodeScope(jjtn000, true);
+      }
     }
   }
 
@@ -1646,9 +1646,9 @@ public class IDLParser{/*@bgen(jjtree)*/
     try {
       jj_consume_token(31);
     } finally {
-          if (jjtc000) {
-            jjtree.closeNodeScope(jjtn000, true);
-          }
+      if (jjtc000) {
+        jjtree.closeNodeScope(jjtn000, true);
+      }
     }
   }
 
@@ -1679,9 +1679,9 @@ public class IDLParser{/*@bgen(jjtree)*/
       const_exp();
                       jjtree.closeNodeScope(jjtn000, true);
                       jjtc000 = false;
-        jjtn000.setIdent(ident);
-        Scope currentScope = m_symbolTable.getCurrentScope();
-        currentScope.addSymbolValue(ident);
+    jjtn000.setIdent(ident);
+    Scope currentScope = m_symbolTable.getCurrentScope();
+    currentScope.addSymbolValue(ident);
     } catch (Exception jjte000) {
     if (jjtc000) {
       jjtree.clearNodeScope(jjtn000);
@@ -2477,15 +2477,15 @@ public class IDLParser{/*@bgen(jjtree)*/
       declarators();
                               jjtree.closeNodeScope(jjtn000, true);
                               jjtc000 = false;
-                Node declaratorNodes = jjtn000.jjtGetChild(1);
-                Scope currentScope = m_symbolTable.getCurrentScope();
-                for (int i = 0; i < declaratorNodes.jjtGetNumChildren(); i++) {
-                    ASTdeclarator decl = (ASTdeclarator) declaratorNodes.jjtGetChild(i);
-                    if (decl.jjtGetChild(0) is ASTsimple_declarator) {
-                            String ident = ((SimpleNodeWithIdent) decl.jjtGetChild(0)).getIdent();
-                            currentScope.addTypeDef(ident);
+        Node declaratorNodes = jjtn000.jjtGetChild(1);
+            Scope currentScope = m_symbolTable.getCurrentScope();
+        for (int i = 0; i < declaratorNodes.jjtGetNumChildren(); i++) {
+            ASTdeclarator decl = (ASTdeclarator) declaratorNodes.jjtGetChild(i);
+            if (decl.jjtGetChild(0) is ASTsimple_declarator) {
+                String ident = ((SimpleNodeWithIdent) decl.jjtGetChild(0)).getIdent();
+                    currentScope.addTypeDef(ident);
                     }
-                }
+        }
     } catch (Exception jjte000) {
     if (jjtc000) {
       jjtree.clearNodeScope(jjtn000);
@@ -3343,9 +3343,9 @@ public class IDLParser{/*@bgen(jjtree)*/
     try {
       jj_consume_token(61);
       ident = identifier();
-        // recursive definition using a sequence is permitted --> publish symbol already here
-        Scope currentScope = m_symbolTable.getCurrentScope();
-        currentScope.addSymbol(ident);
+    // recursive definition using a sequence is permitted --> publish symbol already here
+    Scope currentScope = m_symbolTable.getCurrentScope();
+    currentScope.addSymbol(ident);
       jj_consume_token(14);
       member_list();
       jj_consume_token(15);
@@ -3475,9 +3475,9 @@ public class IDLParser{/*@bgen(jjtree)*/
     try {
       jj_consume_token(62);
       ident = identifier();
-        // recursive definition using a sequence is permitted --> publish symbol already here
-        Scope currentScope = m_symbolTable.getCurrentScope();
-        currentScope.addSymbol(ident);
+    // recursive definition using a sequence is permitted --> publish symbol already here
+    Scope currentScope = m_symbolTable.getCurrentScope();
+    currentScope.addSymbol(ident);
       jj_consume_token(63);
       jj_consume_token(29);
       switch_type_spec();
@@ -3756,9 +3756,9 @@ public class IDLParser{/*@bgen(jjtree)*/
       jj_consume_token(15);
     jjtree.closeNodeScope(jjtn000, true);
     jjtc000 = false;
-        jjtn000.setIdent(ident);
-        Scope currentScope = m_symbolTable.getCurrentScope();
-        currentScope.addSymbol(ident);
+    jjtn000.setIdent(ident);
+    Scope currentScope = m_symbolTable.getCurrentScope();
+    currentScope.addSymbol(ident);
     } catch (Exception jjte000) {
     if (jjtc000) {
       jjtree.clearNodeScope(jjtn000);
@@ -4119,9 +4119,9 @@ public class IDLParser{/*@bgen(jjtree)*/
       jj_consume_token(15);
      jjtree.closeNodeScope(jjtn000, true);
      jjtc000 = false;
-        jjtn000.setIdent(ident);
-        Scope currentScope = m_symbolTable.getCurrentScope();
-        currentScope.addSymbol(ident);
+    jjtn000.setIdent(ident);
+    Scope currentScope = m_symbolTable.getCurrentScope();
+    currentScope.addSymbol(ident);
     } catch (Exception jjte000) {
     if (jjtc000) {
       jjtree.clearNodeScope(jjtn000);
@@ -4593,9 +4593,9 @@ public class IDLParser{/*@bgen(jjtree)*/
     try {
       jj_consume_token(83);
     } finally {
-          if (jjtc000) {
-            jjtree.closeNodeScope(jjtn000, true);
-          }
+      if (jjtc000) {
+        jjtree.closeNodeScope(jjtn000, true);
+      }
     }
   }
 
@@ -4608,9 +4608,9 @@ public class IDLParser{/*@bgen(jjtree)*/
     try {
       jj_consume_token(84);
     } finally {
-          if (jjtc000) {
-            jjtree.closeNodeScope(jjtn000, true);
-          }
+      if (jjtc000) {
+        jjtree.closeNodeScope(jjtn000, true);
+      }
     }
   }
 
@@ -4650,36 +4650,36 @@ public class IDLParser{/*@bgen(jjtree)*/
     switch ((jj_ntk==-1)?jj_ntk_calc():jj_ntk) {
     case IDLParserConstants.OCTALINT:
       intToken = jj_consume_token(IDLParserConstants.OCTALINT);
-                                                                String octVal = intToken.image;
-                                                                // remove leading 0
-                                                                octVal = octVal.Substring(1);
-                                                                // check for l, L, u, U at the end
-                                                                if (octVal.EndsWith("l") || octVal.EndsWith("L") || octVal.EndsWith("u") || octVal.EndsWith("U")) {
-                                                                        octVal = octVal.Substring(0, octVal.Length-1); // remove u, U, L, l
-                                                                }
-                                                                octVal = unaryOp + octVal;
-                                                                {if (true) return StringToIntConverter.Parse(octVal, 8);}
+                                String octVal = intToken.image;
+                                // remove leading 0
+                                octVal = octVal.Substring(1);
+                                // check for l, L, u, U at the end
+                                if (octVal.EndsWith("l") || octVal.EndsWith("L") || octVal.EndsWith("u") || octVal.EndsWith("U")) {
+                                    octVal = octVal.Substring(0, octVal.Length-1); // remove u, U, L, l
+                                }
+                                octVal = unaryOp + octVal;
+                                {if (true) return StringToIntConverter.Parse(octVal, 8);}
       break;
     case IDLParserConstants.DECIMALINT:
       intToken = jj_consume_token(IDLParserConstants.DECIMALINT);
-                                                                String val = unaryOp + intToken.image;
-                                                                // check for l, L, u, U at the end
-                                                                if (val.EndsWith("l") || val.EndsWith("L") || val.EndsWith("u") || val.EndsWith("U")) {
-                                                                        val = val.Substring(0, val.Length-1); // remove u, U, L, l
-                                                                }
-                                                                {if (true) return StringToIntConverter.Parse(val, 10);}
+                                String val = unaryOp + intToken.image;
+                                // check for l, L, u, U at the end
+                                if (val.EndsWith("l") || val.EndsWith("L") || val.EndsWith("u") || val.EndsWith("U")) {
+                                    val = val.Substring(0, val.Length-1); // remove u, U, L, l
+                                }
+                                {if (true) return StringToIntConverter.Parse(val, 10);}
       break;
     case IDLParserConstants.HEXADECIMALINT:
       intToken = jj_consume_token(IDLParserConstants.HEXADECIMALINT);
-                                                        String hexVal = intToken.image;
-                                                                // has leading leading 0x, remove it
-                                                                hexVal = hexVal.Substring(2);
-                                                                // check for l, L, u, U at the end
-                                                                if (hexVal.EndsWith("l") || hexVal.EndsWith("L") || hexVal.EndsWith("u") || hexVal.EndsWith("U")) {
-                                                                        hexVal = hexVal.Substring(0, hexVal.Length-1); // remove u, U, L, l
-                                                                }
-                                                                hexVal = unaryOp + hexVal;
-                                                                {if (true) return StringToIntConverter.Parse(hexVal, 16);}
+                                String hexVal = intToken.image;
+                                // has leading leading 0x, remove it
+                                hexVal = hexVal.Substring(2);
+                                // check for l, L, u, U at the end
+                                if (hexVal.EndsWith("l") || hexVal.EndsWith("L") || hexVal.EndsWith("u") || hexVal.EndsWith("U")) {
+                                    hexVal = hexVal.Substring(0, hexVal.Length-1); // remove u, U, L, l
+                                }
+                                hexVal = unaryOp + hexVal;
+                                {if (true) return StringToIntConverter.Parse(hexVal, 16);}
       break;
     default:
       jj_la1[89] = jj_gen;
@@ -4693,18 +4693,18 @@ public class IDLParser{/*@bgen(jjtree)*/
   public String string_literal() {
   Token stringToken;
     stringToken = jj_consume_token(IDLParserConstants.STRING);
-                                                                        String result = stringToken.image;
-                                                                        // remove "" around the literal
-                                                                        {if (true) return result.Substring(1, result.Length - 2);}
+                                    String result = stringToken.image;
+                                    // remove "" around the literal
+                                    {if (true) return result.Substring(1, result.Length - 2);}
     throw new Error("Missing return statement in function");
   }
 
   public String wide_string_literal() {
   Token stringToken;
     stringToken = jj_consume_token(IDLParserConstants.WIDESTRING);
-                                                                        String result = stringToken.image;
-                                                                        // remove L prefix and remove "" around the literal
-                                                                        {if (true) return result.Substring(2, result.Length - 3);}
+                                    String result = stringToken.image;
+                                    // remove L prefix and remove "" around the literal
+                                    {if (true) return result.Substring(2, result.Length - 3);}
     throw new Error("Missing return statement in function");
   }
 
@@ -4765,7 +4765,7 @@ public class IDLParser{/*@bgen(jjtree)*/
         throw new ParseException();
         break;
       }
-          String floatVal = unaryOp + floatLiteral.image;
+      String floatVal = unaryOp + floatLiteral.image;
       if (floatVal.EndsWith("f") || floatVal.EndsWith("F") || floatVal.EndsWith("l") || floatVal.EndsWith("L")) {
         floatVal = floatVal.Substring(0, floatVal.Length - 1);
       }
@@ -4884,11 +4884,11 @@ public class IDLParser{/*@bgen(jjtree)*/
         break;
       }
     }
-        String fixedVal = unaryOp + fixedLiteral.image;
-        if (fixedVal.EndsWith("d") || fixedVal.EndsWith("D")) {
-                fixedVal = fixedVal.Substring(0, fixedVal.Length - 1);
-        }
-        {if (true) return Decimal.Parse(fixedVal);}
+    String fixedVal = unaryOp + fixedLiteral.image;
+    if (fixedVal.EndsWith("d") || fixedVal.EndsWith("D")) {
+        fixedVal = fixedVal.Substring(0, fixedVal.Length - 1);
+    }
+    {if (true) return Decimal.Parse(fixedVal);}
     throw new Error("Missing return statement in function");
   }
 
@@ -5084,12 +5084,6 @@ public class IDLParser{/*@bgen(jjtree)*/
     return false;
   }
 
-  private bool jj_3_26() {
-    if (jj_scan_token(IDLParserConstants.FIXED)) return true;
-    if (jj_scan_token(86)) return true;
-    return false;
-  }
-
   private bool jj_3_19() {
     if (jj_scan_token(45)) return true;
     if (jj_scan_token(47)) return true;
@@ -5111,14 +5105,9 @@ public class IDLParser{/*@bgen(jjtree)*/
     return false;
   }
 
-  private bool jj_3R_79() {
+  private bool jj_3_26() {
     if (jj_scan_token(IDLParserConstants.FIXED)) return true;
-    Token xsp;
-    xsp = jj_scanpos;
-    if (jj_scan_token(87)) {
-    jj_scanpos = xsp;
-    if (jj_scan_token(88)) return true;
-    }
+    if (jj_scan_token(86)) return true;
     return false;
   }
 
@@ -5155,12 +5144,6 @@ public class IDLParser{/*@bgen(jjtree)*/
     return false;
   }
 
-  private bool jj_3R_78() {
-    if (jj_scan_token(86)) return true;
-    if (jj_scan_token(IDLParserConstants.FIXED)) return true;
-    return false;
-  }
-
   private bool jj_3R_229() {
     if (jj_scan_token(46)) return true;
     return false;
@@ -5182,9 +5165,20 @@ public class IDLParser{/*@bgen(jjtree)*/
     return false;
   }
 
-  private bool jj_3R_77() {
+  private bool jj_3R_79() {
     if (jj_scan_token(IDLParserConstants.FIXED)) return true;
+    Token xsp;
+    xsp = jj_scanpos;
+    if (jj_scan_token(87)) {
+    jj_scanpos = xsp;
+    if (jj_scan_token(88)) return true;
+    }
+    return false;
+  }
+
+  private bool jj_3R_78() {
     if (jj_scan_token(86)) return true;
+    if (jj_scan_token(IDLParserConstants.FIXED)) return true;
     return false;
   }
 
@@ -5204,6 +5198,12 @@ public class IDLParser{/*@bgen(jjtree)*/
       xsp = jj_scanpos;
       if (jj_3R_95()) { jj_scanpos = xsp; break; }
     }
+    return false;
+  }
+
+  private bool jj_3R_77() {
+    if (jj_scan_token(IDLParserConstants.FIXED)) return true;
+    if (jj_scan_token(86)) return true;
     return false;
   }
 
@@ -5587,11 +5587,6 @@ public class IDLParser{/*@bgen(jjtree)*/
     return false;
   }
 
-  private bool jj_3R_75() {
-    if (jj_scan_token(IDLParserConstants.HEXADECIMALINT)) return true;
-    return false;
-  }
-
   private bool jj_3R_172() {
     if (jj_3R_187()) return true;
     return false;
@@ -5604,14 +5599,14 @@ public class IDLParser{/*@bgen(jjtree)*/
     return false;
   }
 
-  private bool jj_3R_91() {
-    if (jj_scan_token(13)) return true;
-    if (jj_3R_60()) return true;
+  private bool jj_3R_75() {
+    if (jj_scan_token(IDLParserConstants.HEXADECIMALINT)) return true;
     return false;
   }
 
-  private bool jj_3R_74() {
-    if (jj_scan_token(IDLParserConstants.DECIMALINT)) return true;
+  private bool jj_3R_91() {
+    if (jj_scan_token(13)) return true;
+    if (jj_3R_60()) return true;
     return false;
   }
 
@@ -5623,6 +5618,11 @@ public class IDLParser{/*@bgen(jjtree)*/
   private bool jj_3R_51() {
     if (jj_scan_token(54)) return true;
     if (jj_scan_token(52)) return true;
+    return false;
+  }
+
+  private bool jj_3R_74() {
+    if (jj_scan_token(IDLParserConstants.DECIMALINT)) return true;
     return false;
   }
 
@@ -5652,11 +5652,6 @@ public class IDLParser{/*@bgen(jjtree)*/
     return false;
   }
 
-  private bool jj_3R_73() {
-    if (jj_scan_token(IDLParserConstants.OCTALINT)) return true;
-    return false;
-  }
-
   private bool jj_3_3() {
     if (jj_3R_30()) return true;
     return false;
@@ -5669,6 +5664,11 @@ public class IDLParser{/*@bgen(jjtree)*/
 
   private bool jj_3R_54() {
     if (jj_3R_90()) return true;
+    return false;
+  }
+
+  private bool jj_3R_73() {
+    if (jj_scan_token(IDLParserConstants.OCTALINT)) return true;
     return false;
   }
 
@@ -5762,11 +5762,6 @@ public class IDLParser{/*@bgen(jjtree)*/
     return false;
   }
 
-  private bool jj_3R_99() {
-    if (jj_3R_102()) return true;
-    return false;
-  }
-
   private bool jj_3R_149() {
     if (jj_3R_176()) return true;
     return false;
@@ -5800,13 +5795,8 @@ public class IDLParser{/*@bgen(jjtree)*/
     return false;
   }
 
-  private bool jj_3_2() {
-    if (jj_3R_29()) return true;
-    return false;
-  }
-
-  private bool jj_3R_208() {
-    if (jj_scan_token(84)) return true;
+  private bool jj_3R_99() {
+    if (jj_3R_102()) return true;
     return false;
   }
 
@@ -5820,8 +5810,8 @@ public class IDLParser{/*@bgen(jjtree)*/
     return false;
   }
 
-  private bool jj_3_1() {
-    if (jj_3R_28()) return true;
+  private bool jj_3R_208() {
+    if (jj_scan_token(84)) return true;
     return false;
   }
 
@@ -5833,6 +5823,16 @@ public class IDLParser{/*@bgen(jjtree)*/
   private bool jj_3R_48() {
     if (jj_scan_token(52)) return true;
     if (jj_scan_token(52)) return true;
+    return false;
+  }
+
+  private bool jj_3_1() {
+    if (jj_3R_28()) return true;
+    return false;
+  }
+
+  private bool jj_3_2() {
+    if (jj_3R_29()) return true;
     return false;
   }
 
@@ -5907,11 +5907,6 @@ public class IDLParser{/*@bgen(jjtree)*/
     return false;
   }
 
-  private bool jj_3R_98() {
-    if (jj_3R_101()) return true;
-    return false;
-  }
-
   private bool jj_3R_219() {
     if (jj_3R_110()) return true;
     return false;
@@ -5924,6 +5919,11 @@ public class IDLParser{/*@bgen(jjtree)*/
 
   private bool jj_3R_134() {
     if (jj_3R_170()) return true;
+    return false;
+  }
+
+  private bool jj_3R_98() {
+    if (jj_3R_101()) return true;
     return false;
   }
 
@@ -5981,11 +5981,6 @@ public class IDLParser{/*@bgen(jjtree)*/
     return false;
   }
 
-  private bool jj_3R_163() {
-    if (jj_scan_token(28)) return true;
-    return false;
-  }
-
   private bool jj_3R_67() {
     if (jj_3R_105()) return true;
     return false;
@@ -6001,14 +5996,30 @@ public class IDLParser{/*@bgen(jjtree)*/
     return false;
   }
 
+  private bool jj_3R_163() {
+    if (jj_scan_token(28)) return true;
+    return false;
+  }
+
   private bool jj_3R_29() {
     if (jj_scan_token(IDLParserConstants.PRAGMA)) return true;
     if (jj_scan_token(IDLParserConstants.PRAGMAPREFIX)) return true;
     return false;
   }
 
+  private bool jj_3R_115() {
+    if (jj_scan_token(52)) return true;
+    if (jj_scan_token(51)) return true;
+    return false;
+  }
+
   private bool jj_3R_183() {
     if (jj_scan_token(26)) return true;
+    return false;
+  }
+
+  private bool jj_3R_137() {
+    if (jj_scan_token(21)) return true;
     return false;
   }
 
@@ -6022,19 +6033,8 @@ public class IDLParser{/*@bgen(jjtree)*/
     return false;
   }
 
-  private bool jj_3R_115() {
-    if (jj_scan_token(52)) return true;
-    if (jj_scan_token(51)) return true;
-    return false;
-  }
-
   private bool jj_3R_64() {
     if (jj_3R_102()) return true;
-    return false;
-  }
-
-  private bool jj_3R_137() {
-    if (jj_scan_token(21)) return true;
     return false;
   }
 
@@ -6045,6 +6045,11 @@ public class IDLParser{/*@bgen(jjtree)*/
 
   private bool jj_3R_131() {
     if (jj_3R_163()) return true;
+    return false;
+  }
+
+  private bool jj_3R_116() {
+    if (jj_scan_token(50)) return true;
     return false;
   }
 
@@ -6071,18 +6076,8 @@ public class IDLParser{/*@bgen(jjtree)*/
     return false;
   }
 
-  private bool jj_3R_116() {
-    if (jj_scan_token(50)) return true;
-    return false;
-  }
-
   private bool jj_3R_182() {
     if (jj_scan_token(IDLParserConstants.PRAGMA)) return true;
-    return false;
-  }
-
-  private bool jj_3R_161() {
-    if (jj_3R_110()) return true;
     return false;
   }
 
@@ -6093,6 +6088,11 @@ public class IDLParser{/*@bgen(jjtree)*/
 
   private bool jj_3R_85() {
     if (jj_3R_116()) return true;
+    return false;
+  }
+
+  private bool jj_3R_161() {
+    if (jj_3R_110()) return true;
     return false;
   }
 
@@ -6120,23 +6120,14 @@ public class IDLParser{/*@bgen(jjtree)*/
     return false;
   }
 
-  private bool jj_3R_92() {
-    if (jj_scan_token(IDLParserConstants.PRAGMA)) return true;
-    if (jj_scan_token(IDLParserConstants.PRAGMAID)) return true;
-    return false;
-  }
-
   private bool jj_3R_47() {
     if (jj_3R_87()) return true;
     return false;
   }
 
-  private bool jj_3R_101() {
-    if (jj_scan_token(19)) return true;
-    Token xsp;
-    xsp = jj_scanpos;
-    if (jj_scan_token(24)) jj_scanpos = xsp;
-    if (jj_3R_161()) return true;
+  private bool jj_3R_92() {
+    if (jj_scan_token(IDLParserConstants.PRAGMA)) return true;
+    if (jj_scan_token(IDLParserConstants.PRAGMAID)) return true;
     return false;
   }
 
@@ -6155,18 +6146,32 @@ public class IDLParser{/*@bgen(jjtree)*/
     return false;
   }
 
+  private bool jj_3R_101() {
+    if (jj_scan_token(19)) return true;
+    Token xsp;
+    xsp = jj_scanpos;
+    if (jj_scan_token(24)) jj_scanpos = xsp;
+    if (jj_3R_161()) return true;
+    return false;
+  }
+
   private bool jj_3R_63() {
     if (jj_3R_101()) return true;
     return false;
   }
 
-  private bool jj_3R_97() {
-    if (jj_scan_token(23)) return true;
+  private bool jj_3R_144() {
+    if (jj_3R_60()) return true;
     return false;
   }
 
-  private bool jj_3R_144() {
-    if (jj_3R_60()) return true;
+  private bool jj_3R_204() {
+    if (jj_scan_token(77)) return true;
+    return false;
+  }
+
+  private bool jj_3R_97() {
+    if (jj_scan_token(23)) return true;
     return false;
   }
 
@@ -6183,16 +6188,6 @@ public class IDLParser{/*@bgen(jjtree)*/
     return false;
   }
 
-  private bool jj_3R_204() {
-    if (jj_scan_token(77)) return true;
-    return false;
-  }
-
-  private bool jj_3R_62() {
-    if (jj_3R_100()) return true;
-    return false;
-  }
-
   private bool jj_3_21() {
     if (jj_3R_47()) return true;
     return false;
@@ -6203,11 +6198,21 @@ public class IDLParser{/*@bgen(jjtree)*/
     return false;
   }
 
+  private bool jj_3R_62() {
+    if (jj_3R_100()) return true;
+    return false;
+  }
+
   private bool jj_3R_181() {
     Token xsp;
     xsp = jj_scanpos;
     if (jj_3R_189()) jj_scanpos = xsp;
     if (jj_3R_190()) return true;
+    return false;
+  }
+
+  private bool jj_3R_169() {
+    if (jj_3R_143()) return true;
     return false;
   }
 
@@ -6220,11 +6225,6 @@ public class IDLParser{/*@bgen(jjtree)*/
       if (jj_3R_62()) { jj_scanpos = xsp; break; }
     }
     if (jj_scan_token(15)) return true;
-    return false;
-  }
-
-  private bool jj_3R_169() {
-    if (jj_3R_143()) return true;
     return false;
   }
 
@@ -6285,19 +6285,6 @@ public class IDLParser{/*@bgen(jjtree)*/
     return false;
   }
 
-  private bool jj_3R_35() {
-    if (jj_scan_token(17)) return true;
-    if (jj_scan_token(22)) return true;
-    if (jj_3R_60()) return true;
-    Token xsp;
-    xsp = jj_scanpos;
-    if (jj_3R_63()) jj_scanpos = xsp;
-    xsp = jj_scanpos;
-    if (jj_3R_64()) jj_scanpos = xsp;
-    if (jj_scan_token(14)) return true;
-    return false;
-  }
-
   private bool jj_3R_200() {
     if (jj_3R_176()) return true;
     return false;
@@ -6321,6 +6308,19 @@ public class IDLParser{/*@bgen(jjtree)*/
     }
     }
     }
+    return false;
+  }
+
+  private bool jj_3R_35() {
+    if (jj_scan_token(17)) return true;
+    if (jj_scan_token(22)) return true;
+    if (jj_3R_60()) return true;
+    Token xsp;
+    xsp = jj_scanpos;
+    if (jj_3R_63()) jj_scanpos = xsp;
+    xsp = jj_scanpos;
+    if (jj_3R_64()) jj_scanpos = xsp;
+    if (jj_scan_token(14)) return true;
     return false;
   }
 
@@ -6355,14 +6355,6 @@ public class IDLParser{/*@bgen(jjtree)*/
     return false;
   }
 
-  private bool jj_3R_36() {
-    if (jj_scan_token(22)) return true;
-    if (jj_3R_60()) return true;
-    if (jj_3R_65()) return true;
-    if (jj_scan_token(12)) return true;
-    return false;
-  }
-
   private bool jj_3R_196() {
     if (jj_3R_206()) return true;
     return false;
@@ -6375,6 +6367,14 @@ public class IDLParser{/*@bgen(jjtree)*/
 
   private bool jj_3R_195() {
     if (jj_3R_179()) return true;
+    return false;
+  }
+
+  private bool jj_3R_36() {
+    if (jj_scan_token(22)) return true;
+    if (jj_3R_60()) return true;
+    if (jj_3R_65()) return true;
+    if (jj_scan_token(12)) return true;
     return false;
   }
 
@@ -6445,13 +6445,13 @@ public class IDLParser{/*@bgen(jjtree)*/
     return false;
   }
 
-  private bool jj_3R_66() {
-    if (jj_scan_token(17)) return true;
+  private bool jj_3_20() {
+    if (jj_3R_46()) return true;
     return false;
   }
 
-  private bool jj_3_20() {
-    if (jj_3R_46()) return true;
+  private bool jj_3R_66() {
+    if (jj_scan_token(17)) return true;
     return false;
   }
 
@@ -6509,13 +6509,28 @@ public class IDLParser{/*@bgen(jjtree)*/
     return false;
   }
 
-  private bool jj_3_8() {
-    if (jj_3R_35()) return true;
+  private bool jj_3R_104() {
+    if (jj_3R_133()) return true;
     return false;
   }
 
-  private bool jj_3R_104() {
-    if (jj_3R_133()) return true;
+  private bool jj_3R_65() {
+    Token xsp;
+    xsp = jj_scanpos;
+    if (jj_3R_103()) {
+    jj_scanpos = xsp;
+    if (jj_3R_104()) return true;
+    }
+    return false;
+  }
+
+  private bool jj_3R_103() {
+    if (jj_3R_132()) return true;
+    return false;
+  }
+
+  private bool jj_3_8() {
+    if (jj_3R_35()) return true;
     return false;
   }
 
@@ -6537,21 +6552,6 @@ public class IDLParser{/*@bgen(jjtree)*/
     }
     }
     }
-    return false;
-  }
-
-  private bool jj_3R_65() {
-    Token xsp;
-    xsp = jj_scanpos;
-    if (jj_3R_103()) {
-    jj_scanpos = xsp;
-    if (jj_3R_104()) return true;
-    }
-    return false;
-  }
-
-  private bool jj_3R_103() {
-    if (jj_3R_132()) return true;
     return false;
   }
 
@@ -6583,13 +6583,13 @@ public class IDLParser{/*@bgen(jjtree)*/
     return false;
   }
 
-  private bool jj_3R_154() {
-    if (jj_3R_110()) return true;
+  private bool jj_3R_94() {
+    if (jj_3R_125()) return true;
     return false;
   }
 
-  private bool jj_3R_94() {
-    if (jj_3R_125()) return true;
+  private bool jj_3R_154() {
+    if (jj_3R_110()) return true;
     return false;
   }
 

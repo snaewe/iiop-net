@@ -353,6 +353,20 @@ public class MetaDataGenerator : IDLParserVisitor {
         return (System.Type[])result.ToArray(typeof(Type));
     }
     
+    /// <summary>finds the repository id attribute for the symbol starting the search in startInScope</summary>
+    private string FindRepositoryId(string forName, Scope startInScope) {
+        string result = startInScope.getRepositoryIdFor(forName);
+        if (result == null) {
+            // try inside scope to find it
+            Scope innerScope = startInScope.getChildScope(forName);
+            if (innerScope != null) {
+                result = innerScope.getRepositoryIdFor(forName);
+            }
+        }
+        return result;
+    }
+    
+    
     private void AddRepIdAttribute(TypeBuilder typebuild, String repId) {
         if (repId != null) {
             CustomAttributeBuilder repIdAttrBuilder = new RepositoryIDAttribute(repId).CreateAttributeBuilder();
@@ -455,7 +469,7 @@ public class MetaDataGenerator : IDLParserVisitor {
                 ifType = IdlTypeInterface.LocalInterface;
             }
             if ((isLocal) && (isAbstract)) {
-            	throw new InternalCompilerException("internal error: iftype precondition");
+                throw new InternalCompilerException("internal error: iftype precondition");
             }
             // add interface type
             CustomAttributeBuilder interfaceTypeAttrBuilder = new InterfaceTypeAttribute(ifType).CreateAttributeBuilder();
@@ -504,7 +518,7 @@ public class MetaDataGenerator : IDLParserVisitor {
         TypeBuilder interfaceToBuild = CreateOrGetInterfaceDcl(fullyQualName, interfaces, 
                                                                header.isAbstract(), header.isLocal(),
                                                                forSymbol, 
-                                                               enclosingScope.getRepositoryIdFor(header.getIdent()));
+                                                               FindRepositoryId(header.getIdent(), enclosingScope));
 
         // generate body
         ASTinterface_body body = (ASTinterface_body)node.jjtGetChild(1);
@@ -538,7 +552,7 @@ public class MetaDataGenerator : IDLParserVisitor {
             // here: specify no interface inheritance, because not known at this point
             CreateOrGetInterfaceDcl(fullyQualName, Type.EmptyTypes, 
                                     node.isAbstract(), node.isLocal(), forSymbol, 
-                                    enclosingScope.getRepositoryIdFor(node.getIdent()));
+                                    FindRepositoryId(node.getIdent(), enclosingScope));
         }
         return null;
     }
@@ -603,14 +617,14 @@ public class MetaDataGenerator : IDLParserVisitor {
      */
     private Symbol ResolveScopedName(Scope searchScope, ArrayList parts) {
         if ((parts == null) || (parts.Count == 0)) {
-        	return null;
+            return null;
         }
         Scope currentScope = searchScope;
         for (int i = 0; i < parts.Count - 1; i++) {
             // resolve scopes
             currentScope = currentScope.getChildScope((String)parts[i]);
             if (currentScope == null) { 
-            	return null; // not found within this searchScope
+                return null; // not found within this searchScope
             }
         }
         // resolve symbol
@@ -826,7 +840,7 @@ public class MetaDataGenerator : IDLParserVisitor {
         String fullyQualName = enclosingScope.getFullyQualifiedNameForSymbol(forSymbol.getSymbolName());
         TypeBuilder valueToBuild = CreateOrGetValueDcl(fullyQualName, inheritFrom, baseClass, 
                                                        false, forSymbol, 
-                                                       enclosingScope.getRepositoryIdFor(header.getIdent()));
+                                                       FindRepositoryId(header.getIdent(), enclosingScope));
         
         // add implementation class attribute
         valueToBuild.SetCustomAttribute(new ImplClassAttribute(fullyQualName + "Impl").CreateAttributeBuilder());
@@ -888,7 +902,7 @@ public class MetaDataGenerator : IDLParserVisitor {
         String fullyQualName = enclosingScope.getFullyQualifiedNameForSymbol(forSymbol.getSymbolName());
         TypeBuilder valueToBuild = CreateOrGetValueDcl(fullyQualName, interfaces, null,
                                                        true, forSymbol, 
-                                                       enclosingScope.getRepositoryIdFor(node.getIdent()));
+                                                       FindRepositoryId(node.getIdent(), enclosingScope));
 
         // generate elements
         BuildInfo buildInfo = new BuildInfo(enclosingScope.getChildScope(forSymbol.getSymbolName()), 
@@ -934,7 +948,7 @@ public class MetaDataGenerator : IDLParserVisitor {
         // do use fusioned type + attributes on fusioned type for boxed value;
         TypeBuilder resultType = boxedValueGen.CreateBoxedType(boxedType.GetCompactClsType(), m_modBuilder,
                                                                fullyQualName, boxedType.GetCompactTypeAttrs());
-        AddRepIdAttribute(resultType, enclosingScope.getRepositoryIdFor(node.getIdent()));
+        AddRepIdAttribute(resultType, FindRepositoryId(node.getIdent(), enclosingScope));
         resultType.AddInterfaceImplementation(typeof(IIdlEntity));
         Type result = resultType.CreateType();
         m_typeManager.RegisterTypeDefinition(result, forSymbol);
@@ -961,7 +975,7 @@ public class MetaDataGenerator : IDLParserVisitor {
             // it's no problem to add later on interfaces this type should implement and the base class this type should inherit from with AddInterfaceImplementation / set parent
             // here: specify no inheritance, because not known at this point
             CreateOrGetValueDcl(fullyQualName, Type.EmptyTypes, null, node.isAbstract(),
-                                forSymbol, enclosingScope.getRepositoryIdFor(node.getIdent()));
+                                forSymbol, FindRepositoryId(node.getIdent(), enclosingScope));
         }
         return null;
     }
@@ -1261,7 +1275,7 @@ public class MetaDataGenerator : IDLParserVisitor {
      */
     public Object visit(ASTor_expr node, Object data) {
         if (node.jjtGetNumChildren() > 1) {
-        	throw new NotImplementedException("only simple expressions are supported yet");
+            throw new NotImplementedException("only simple expressions are supported yet");
         }
         // evaluate the xor-expr
         Object result = node.jjtGetChild(0).jjtAccept(this, data);
@@ -1273,7 +1287,7 @@ public class MetaDataGenerator : IDLParserVisitor {
      */
     public Object visit(ASTxor_expr node, Object data) {
         if (node.jjtGetNumChildren() > 1) {
-        	throw new NotImplementedException("only simple expressions are supported yet");
+            throw new NotImplementedException("only simple expressions are supported yet");
         }
         // evaluate the and-expr
         Object result = node.jjtGetChild(0).jjtAccept(this, data);
@@ -1285,7 +1299,7 @@ public class MetaDataGenerator : IDLParserVisitor {
      */
     public Object visit(ASTand_expr node, Object data) {
         if (node.jjtGetNumChildren() > 1) {
-        	throw new NotImplementedException("only simple expressions are supported yet");
+            throw new NotImplementedException("only simple expressions are supported yet");
         }
         // evaluate the shift-expr
         Object result = node.jjtGetChild(0).jjtAccept(this, data);
@@ -1296,8 +1310,8 @@ public class MetaDataGenerator : IDLParserVisitor {
      * @see parser.IDLParserVisitor#visit(ASTshift_expr, Object)
      */
     public Object visit(ASTshift_expr node, Object data) {
-		if (node.jjtGetNumChildren() > 1) {
-        	throw new NotImplementedException("only simple expressions are supported yet");
+        if (node.jjtGetNumChildren() > 1) {
+            throw new NotImplementedException("only simple expressions are supported yet");
         }
         // evaluate the add-expr
         Object result = node.jjtGetChild(0).jjtAccept(this, data);
@@ -1308,8 +1322,8 @@ public class MetaDataGenerator : IDLParserVisitor {
      * @see parser.IDLParserVisitor#visit(ASTadd_expr, Object)
      */
     public Object visit(ASTadd_expr node, Object data) {
-		if (node.jjtGetNumChildren() > 1) {
-        	throw new NotImplementedException("only simple expressions are supported yet");
+        if (node.jjtGetNumChildren() > 1) {
+            throw new NotImplementedException("only simple expressions are supported yet");
         }
         // evaluate the mult-expr
         Object result = node.jjtGetChild(0).jjtAccept(this, data);
@@ -1320,8 +1334,8 @@ public class MetaDataGenerator : IDLParserVisitor {
      * @see parser.IDLParserVisitor#visit(ASTmult_expr, Object)
      */
     public Object visit(ASTmult_expr node, Object data) {
-   		if (node.jjtGetNumChildren() > 1) {
-        	throw new NotImplementedException("only simple expressions are supported yet");
+        if (node.jjtGetNumChildren() > 1) {
+            throw new NotImplementedException("only simple expressions are supported yet");
         }
         // evaluate the unary-expr
         Object result = node.jjtGetChild(0).jjtAccept(this, data);
@@ -1331,7 +1345,7 @@ public class MetaDataGenerator : IDLParserVisitor {
     /**
      * @see parser.IDLParserVisitor#visit(ASTunary_expr, Object)
      */
-    public Object visit(ASTunary_expr node, Object data) {   		
+    public Object visit(ASTunary_expr node, Object data) {          
         // evaluate the primary-expr
         Literal result = (Literal)node.jjtGetChild(0).jjtAccept(this, data);
         switch (node.GetUnaryOperation()) {
@@ -1861,9 +1875,9 @@ public class MetaDataGenerator : IDLParserVisitor {
             if (!((ASTcase_label)node.jjtGetChild(i)).isDefault()) {
                 Literal litVal = ((Literal)node.jjtGetChild(i).jjtAccept(this, unionInfo));
                 if (litVal == null) {
-                	throw new InvalidIdlException(
-                	    String.Format("invalid {0}, discrimitator value for case not retrievable",
-                	                  node.GetIdentification()));
+                    throw new InvalidIdlException(
+                        String.Format("invalid {0}, discrimitator value for case not retrievable",
+                                      node.GetIdentification()));
                 }
                 object discVal = litVal.GetValue();
                 // check if val ok ...
@@ -2322,7 +2336,7 @@ public class MetaDataGenerator : IDLParserVisitor {
         // ready to create method
         TypeBuilder typeAtBuild = buildInfo.GetContainterType();
         m_ilEmitHelper.AddMethod(typeAtBuild, methodName, parameters, returnType, 
-        	                     MethodAttributes.Virtual | MethodAttributes.Abstract | MethodAttributes.Public | MethodAttributes.HideBySig);
+                                 MethodAttributes.Virtual | MethodAttributes.Abstract | MethodAttributes.Public | MethodAttributes.HideBySig);
         return null;
     }
         
@@ -2331,15 +2345,15 @@ public class MetaDataGenerator : IDLParserVisitor {
      * present. Else Returns the unmodified one.
      **/
     internal static TypeContainer ReplaceByCustomMappedIfNeeded(TypeContainer specType) {
-    	Type clsType = specType.GetCompactClsType(); // do the mapping on the fusioned type!
-    	// check for custom Mapping here:
-    	CompilerMappingPlugin plugin = CompilerMappingPlugin.GetSingleton();
-    	if (plugin.IsCustomMappingPresentForIdl(clsType.FullName)) {
-    	    Type mappedType = plugin.GetMappingForIdl(clsType.FullName);
+        Type clsType = specType.GetCompactClsType(); // do the mapping on the fusioned type!
+        // check for custom Mapping here:
+        CompilerMappingPlugin plugin = CompilerMappingPlugin.GetSingleton();
+        if (plugin.IsCustomMappingPresentForIdl(clsType.FullName)) {
+            Type mappedType = plugin.GetMappingForIdl(clsType.FullName);
             return new TypeContainer(mappedType);
-    	} else {
+        } else {
             return specType;
-    	}    	
+        }       
     }
 
     /**

@@ -24,28 +24,28 @@ using System.Globalization;
 
 public class IDLParser {
 
-	/** the symbol table */
-	private SymbolTable m_symbolTable = new SymbolTable();
-	
-	public SymbolTable getSymbolTable() {
-		return m_symbolTable;
-	}
+    /** the symbol table */
+    private SymbolTable m_symbolTable = new SymbolTable();
+    
+    public SymbolTable getSymbolTable() {
+        return m_symbolTable;
+    }
 
-	
-	// used for interface qualifier parsing: no modifier
-	private const int IS_DEFAULT_IF = 0;
-	// used for interface qualifier parsing: abstract modifier
-	private const int IS_ABSTRACT_IF = 1;
-	// used for interface qualifier parsing: local modifier
-	private const int IS_LOCAL_IF = 2;
+    
+    // used for interface qualifier parsing: no modifier
+    private const int IS_DEFAULT_IF = 0;
+    // used for interface qualifier parsing: abstract modifier
+    private const int IS_ABSTRACT_IF = 1;
+    // used for interface qualifier parsing: local modifier
+    private const int IS_LOCAL_IF = 2;
 
-	// stores the last #pragma prefix value found
-	private String m_lastPrefix = "";
+    // stores the last #pragma prefix value found
+    private String m_lastPrefix = "";
 
-	// stores reference to the module node inserted for a pragma prefix (if any)
-	private ASTmodule m_modForPrefix = null;
-	// stores reference to definition for the module node inserted for a pragma prefix (if any)
-	private ASTdefinition m_defForPrefix = null;
+    // stores reference to the module node inserted for a pragma prefix (if any)
+    private ASTmodule m_modForPrefix = null;
+    // stores reference to definition for the module node inserted for a pragma prefix (if any)
+    private ASTdefinition m_defForPrefix = null;
 
 
         private Char ParseCharLiteral(String charLiteral) {
@@ -140,16 +140,16 @@ String repIdVal() #void :
 void pragmaID() #void :
 { String ident = ""; String val = ""; }
 {
-	< PRAGMA > < PRAGMAID > ident = identifier() val = repIdVal()
-	{
-		Scope currentScope = m_symbolTable.getCurrentScope();
-		if (!m_lastPrefix.Equals("")) {
-			// prepend prefix
-			val = val.Insert(val.IndexOf(":") + 1, m_lastPrefix + "/");
-		}
+    < PRAGMA > < PRAGMAID > ident = identifier() val = repIdVal()
+    {
+        Scope currentScope = m_symbolTable.getCurrentScope();
+        if (!m_lastPrefix.Equals("")) {
+            // prepend prefix
+            val = val.Insert(val.IndexOf(":") + 1, m_lastPrefix + "/");
+        }
 
-		currentScope.addPragmaID(ident, val); // add pragma ID
-	}
+        currentScope.addPragmaID(ident, val); // add pragma ID
+    }
 
 }
 
@@ -157,17 +157,17 @@ void pragmaID() #void :
 void pragmaIDInside() #void :
 { String ident = ""; String val = ""; }
 {
-	< PRAGMA > < PRAGMAID > ident = identifier() val = repIdVal()
-	{
-		Scope currentScope = m_symbolTable.getCurrentScope();
-		currentScope = currentScope.getParentScope(); // get the scope this type is defined in, the id must be added to this scope
-		if (!m_lastPrefix.Equals("")) {
-			// prepend prefix
-			val = val.Insert(val.IndexOf(":") + 1, m_lastPrefix + "/");
-		}
+    < PRAGMA > < PRAGMAID > ident = identifier() val = repIdVal()
+    {
+        Scope currentScope = m_symbolTable.getCurrentScope();
+        
+        if (!m_lastPrefix.Equals("")) {
+            // prepend prefix
+            val = val.Insert(val.IndexOf(":") + 1, m_lastPrefix + "/");
+        }
 
-		currentScope.addPragmaID(ident, val); // add pragma ID
-	}
+        currentScope.addPragmaID(ident, val); // add pragma ID
+    }
 
 }
 
@@ -176,37 +176,37 @@ void pragmaIDInside() #void :
 void pragmaPrefix() #void :
 { String val = ""; }
 {
-	< PRAGMA > < PRAGMAPREFIX > val = string_literal() {
-		val = val.Trim();
-		if (m_lastPrefix.Equals(val)) { return; } // same pragma prefix, nothing to do
+    < PRAGMA > < PRAGMAPREFIX > val = string_literal() {
+        val = val.Trim();
+        if (m_lastPrefix.Equals(val)) { return; } // same pragma prefix, nothing to do
 
-		if ( (!(val.Equals(""))) && (m_symbolTable.getCurrentScope() != m_symbolTable.getTopScope())) {
-			throw new ParseException("invalid scope for using a #pragma prefix, only usable outside of module declarations");
-		}
+        if ( (!(val.Equals(""))) && (m_symbolTable.getCurrentScope() != m_symbolTable.getTopScope())) {
+            throw new ParseException("invalid scope for using a #pragma prefix, only usable outside of module declarations");
+        }
 
-		if (m_symbolTable.isPragmaScopeOpen()) {
-			// close the scopes up to the pragma-scope (incl. pragma scope)
-			m_symbolTable.closePragmaScope();
-			// close module node for pragma
-			jjtree.closeNodeScope(m_modForPrefix, true);
-			jjtree.closeNodeScope(m_defForPrefix, true);
-			m_modForPrefix = null;
-			m_defForPrefix = null;
-			// open scopes for new pragma, if val != ""
-			m_symbolTable.openPragmaScope(val);
-		} else {
-			m_symbolTable.openPragmaScope(val);
-		}
-		// open a defintion and an included module node into the parse tree if val != "" --> insert a module opening for pragma prefix
-		if (!(val.Equals(""))) {
-			m_defForPrefix = new ASTdefinition(this, IDLParserTreeConstants.JJTDEFINITION);
- 			jjtree.openNodeScope(m_defForPrefix);
-			m_modForPrefix = new ASTmodule(this, IDLParserTreeConstants.JJTMODULE);
- 			jjtree.openNodeScope(m_modForPrefix);
-			m_modForPrefix.setIdent(val);
-		}
-		m_lastPrefix = val;
-	}
+        if (m_symbolTable.isPragmaScopeOpen()) {
+            // close the scopes up to the pragma-scope (incl. pragma scope)
+            m_symbolTable.closePragmaScope();
+            // close module node for pragma
+            jjtree.closeNodeScope(m_modForPrefix, true);
+            jjtree.closeNodeScope(m_defForPrefix, true);
+            m_modForPrefix = null;
+            m_defForPrefix = null;
+            // open scopes for new pragma, if val != ""
+            m_symbolTable.openPragmaScope(val);
+        } else {
+            m_symbolTable.openPragmaScope(val);
+        }
+        // open a defintion and an included module node into the parse tree if val != "" --> insert a module opening for pragma prefix
+        if (!(val.Equals(""))) {
+            m_defForPrefix = new ASTdefinition(this, IDLParserTreeConstants.JJTDEFINITION);
+            jjtree.openNodeScope(m_defForPrefix);
+            m_modForPrefix = new ASTmodule(this, IDLParserTreeConstants.JJTMODULE);
+            jjtree.openNodeScope(m_modForPrefix);
+            m_modForPrefix.setIdent(val);
+        }
+        m_lastPrefix = val;
+    }
 }
 
 
@@ -215,25 +215,25 @@ void pragmaPrefix() #void :
 ASTspecification specification() :
 {}
 {
-(    ( 		LOOKAHEAD(2)
-		definition() 
-	|
-		 /* pragma prefix added here */
-		LOOKAHEAD(2)
-	        pragmaPrefix()
+(    (      LOOKAHEAD(2)
+        definition() 
+    |
+         /* pragma prefix added here */
+        LOOKAHEAD(2)
+            pragmaPrefix()
     )+ 
 
   { 
-	if (m_modForPrefix != null) {
-		jjtree.closeNodeScope(m_modForPrefix, true); // close inserted module node scope for prefix, if one is open after parse completition
-		jjtree.closeNodeScope(m_defForPrefix, true); // close inserted definition node scope for prefix
-	}
-  	return jjtThis; 
+    if (m_modForPrefix != null) {
+        jjtree.closeNodeScope(m_modForPrefix, true); // close inserted module node scope for prefix, if one is open after parse completition
+        jjtree.closeNodeScope(m_defForPrefix, true); // close inserted definition node scope for prefix
+    }
+    return jjtThis; 
   }
 ) |
 /* added for accepting files with only ignored content */
 (
-	<EOF> { return jjtThis; }
+    <EOF> { return jjtThis; }
 )  
 
 }
@@ -268,9 +268,9 @@ void module() :
 {
   "module" ident = identifier() { m_symbolTable.openScope(ident, false); } "{" ( definition() )+ "}" 
   { 
-  	jjtThis.setIdent(ident);
-	// close scope for this module after parsing
-  	m_symbolTable.closeScope();
+    jjtThis.setIdent(ident);
+    // close scope for this module after parsing
+    m_symbolTable.closeScope();
   
   }
 }
@@ -294,12 +294,12 @@ void interface_dcl() :
 {
   interface_header() 
   {
-  	// add the interface symbol, after the header is completed
-  	// get the header node
-  	SimpleNodeWithIdent header = (SimpleNodeWithIdent) jjtree.peekNode();
-  	Scope currentScope = m_symbolTable.getCurrentScope();
-  	currentScope.addSymbol(header.getIdent());
-	m_symbolTable.openScope(header.getIdent(), true); // open a scope for type declaration inside the interface
+    // add the interface symbol, after the header is completed
+    // get the header node
+    SimpleNodeWithIdent header = (SimpleNodeWithIdent) jjtree.peekNode();
+    Scope currentScope = m_symbolTable.getCurrentScope();
+    currentScope.addSymbol(header.getIdent());
+    m_symbolTable.openScope(header.getIdent(), true); // open a scope for type declaration inside the interface
   }
   
   "{" interface_body() "}"
@@ -399,7 +399,7 @@ void interface_inheritance_spec() :
 void interface_name() : 
 {}
 { 
-	scoped_name()
+    scoped_name()
 }
 
 /* Production 12: chapter 3.4, CORBA 2.3.1 */
@@ -421,17 +421,17 @@ void scoped_name() :
 void value() :
 {}
 {
-	LOOKAHEAD(4)
-	value_decl()
+    LOOKAHEAD(4)
+    value_decl()
 |
-	LOOKAHEAD(4)
-	value_abs_decl()
+    LOOKAHEAD(4)
+    value_abs_decl()
 |
-	LOOKAHEAD(4)
-	value_box_decl()
+    LOOKAHEAD(4)
+    value_box_decl()
 |
-	LOOKAHEAD(4)
-	value_forward_decl()
+    LOOKAHEAD(4)
+    value_forward_decl()
 }
 
 
@@ -442,13 +442,13 @@ void value_forward_decl() :
   bool isAbstract = false;
 }
 {
-	["abstract" { isAbstract = true; } ]  "valuetype" ident = identifier() ";"
-	{ 
-	  jjtThis.setIdent(ident);
-	  jjtThis.setAbstract(isAbstract);
-	  Scope currentScope = m_symbolTable.getCurrentScope();
-	  currentScope.addFwdDecl(ident);
-	}
+    ["abstract" { isAbstract = true; } ]  "valuetype" ident = identifier() ";"
+    { 
+      jjtThis.setIdent(ident);
+      jjtThis.setAbstract(isAbstract);
+      Scope currentScope = m_symbolTable.getCurrentScope();
+      currentScope.addFwdDecl(ident);
+    }
 }
 
 
@@ -457,13 +457,13 @@ void value_forward_decl() :
 void value_box_decl() :
 { String ident = ""; }
 {
-	"valuetype" ident = identifier() type_spec() ";"
-	{ 
-		jjtThis.setIdent(ident); 
-		// the symbol must not be added before the valuebox definition is completed, 3.8.2, CORBA 2.3.1 spec
-	    Scope currentScope = m_symbolTable.getCurrentScope();
-	    currentScope.addSymbol(ident);
-	}
+    "valuetype" ident = identifier() type_spec() ";"
+    { 
+        jjtThis.setIdent(ident); 
+        // the symbol must not be added before the valuebox definition is completed, 3.8.2, CORBA 2.3.1 spec
+        Scope currentScope = m_symbolTable.getCurrentScope();
+        currentScope.addSymbol(ident);
+    }
 }
 
 /* Production 16, chapter 3.4, CORBA 2.3.1 */
@@ -471,16 +471,16 @@ void value_box_decl() :
 void value_abs_decl() :
 { String ident = ""; }
 {
-	"abstract" "valuetype" ident = identifier() [ value_base_inheritance_spec() ] [ value_support_inheritance_spec() ] "{" 
-	{ 
-	jjtThis.setIdent(ident); 
+    "abstract" "valuetype" ident = identifier() [ value_base_inheritance_spec() ] [ value_support_inheritance_spec() ] "{" 
+    { 
+    jjtThis.setIdent(ident); 
         Scope currentScope = m_symbolTable.getCurrentScope();
         currentScope.addSymbol(ident);
         m_symbolTable.openScope(ident, true); // open a scope for type declaration inside this abstract value type
-	}
+    }
         ( export() )* "}" ";"
         {
- 	    m_symbolTable.closeScope();
+        m_symbolTable.closeScope();
         }
 }
 
@@ -489,19 +489,19 @@ void value_abs_decl() :
 void value_decl() :
 {}
 {
-	value_header() 
-	{
-	    // get the value header node
-	    SimpleNodeWithIdent header = (SimpleNodeWithIdent) jjtree.peekNode();		
-	    // add the symbol for this value type to the symbol table
-	    Scope currentScope = m_symbolTable.getCurrentScope();
+    value_header() 
+    {
+        // get the value header node
+        SimpleNodeWithIdent header = (SimpleNodeWithIdent) jjtree.peekNode();       
+        // add the symbol for this value type to the symbol table
+        Scope currentScope = m_symbolTable.getCurrentScope();
             currentScope.addSymbol(header.getIdent());
             m_symbolTable.openScope(header.getIdent(), true); // open a scope for type declaration inside this concrete value type
-	}
-	
-	"{" ( value_element() ) * "}" ";"
+    }
+    
+    "{" ( value_element() ) * "}" ";"
         {
- 	    m_symbolTable.closeScope();
+        m_symbolTable.closeScope();
         }
 }
 
@@ -511,7 +511,7 @@ void value_header() :
 { String ident = "";
   bool isCustom = false; }
 {
-	[ "custom" { isCustom = true; } ] "valuetype" ident = identifier() [ value_base_inheritance_spec() ] [ value_support_inheritance_spec() ] { jjtThis.setIdent(ident); jjtThis.setCustom(isCustom); }
+    [ "custom" { isCustom = true; } ] "valuetype" ident = identifier() [ value_base_inheritance_spec() ] [ value_support_inheritance_spec() ] { jjtThis.setIdent(ident); jjtThis.setCustom(isCustom); }
 }
 
 /* Production 19, chapter 3.4, CORBA 2.3.1, separated into two productions */
@@ -519,13 +519,13 @@ void value_header() :
 void value_base_inheritance_spec() :
 {}
 {
-	":" [ "truncatable" ] value_name() ( "," value_name() )*
+    ":" [ "truncatable" ] value_name() ( "," value_name() )*
 }
 
 void value_support_inheritance_spec() :
 {}
 {
-	"supports" interface_name() ( "," interface_name() )*
+    "supports" interface_name() ( "," interface_name() )*
 }
 
 /* Production 20, chapter 3.4, CORBA 2.3.1 */
@@ -533,7 +533,7 @@ void value_support_inheritance_spec() :
 void value_name() :
 {}
 {
-	scoped_name()
+    scoped_name()
 }
 
 /* Production 21, chapter 3.4, CORBA 2.3.1 */
@@ -541,11 +541,11 @@ void value_name() :
 void value_element() :
 {}
 {
-	export() 
+    export() 
 |
-	state_member()
+    state_member()
 |
-	init_decl()	
+    init_decl() 
 }
 
 /* Production 22, chapter 3.4, CORBA 2.3.1 */
@@ -553,7 +553,7 @@ void value_element() :
 void state_member() :
 {}
 {
-	( "public" { jjtThis.setIsPrivate(false); } | "private" { jjtThis.setIsPrivate(true); } ) type_spec() declarators() ";"
+    ( "public" { jjtThis.setIsPrivate(false); } | "private" { jjtThis.setIsPrivate(true); } ) type_spec() declarators() ";"
 }
 
 /* Production 23, chapter 3.4, CORBA 2.3.1 */
@@ -561,7 +561,7 @@ void state_member() :
 void init_decl() :
 { String ident = ""; }
 {
-	"factory" ident = identifier() "(" [ init_param_delcs() ] ")" [ raises_expr() ] ";" { jjtThis.setIdent(ident); }
+    "factory" ident = identifier() "(" [ init_param_delcs() ] ")" [ raises_expr() ] ";" { jjtThis.setIdent(ident); }
 }
 
 /* Production 24, chapter 3.4, CORBA 2.3.1 */
@@ -569,7 +569,7 @@ void init_decl() :
 void init_param_delcs() :
 {}
 {
-	init_param_decl() ( "," init_param_decl() )* 
+    init_param_decl() ( "," init_param_decl() )* 
 }
 
 /* Production 25, chapter 3.4, CORBA 2.3.1 */
@@ -577,7 +577,7 @@ void init_param_delcs() :
 void init_param_decl() :
 {}
 {
-	init_param_attribute() param_type_spec() simple_declarator()
+    init_param_attribute() param_type_spec() simple_declarator()
 }
 
 /* Production 26, chapter 3.4, CORBA 2.3.1 */
@@ -585,7 +585,7 @@ void init_param_decl() :
 void init_param_attribute() :
 {}
 {
-	"in"
+    "in"
 }
 
 /* Production 27 chapter 3.4, corba 2.3.1 */
@@ -597,9 +597,9 @@ void const_dcl() :
                            ident = identifier() | 
                            ( "NaN" { ident = "NotANumber"; } ) 
   ) "=" const_exp() { 
-	jjtThis.setIdent(ident);
-	Scope currentScope = m_symbolTable.getCurrentScope();
-	currentScope.addSymbolValue(ident);
+    jjtThis.setIdent(ident);
+    Scope currentScope = m_symbolTable.getCurrentScope();
+    currentScope.addSymbolValue(ident);
  }
 }
 
@@ -793,15 +793,15 @@ void type_declarator() :
 { }
 {
   type_spec() declarators() { 
-		Node declaratorNodes = jjtThis.jjtGetChild(1);	
-  	        Scope currentScope = m_symbolTable.getCurrentScope();
-		for (int i = 0; i < declaratorNodes.jjtGetNumChildren(); i++) {
-		    ASTdeclarator decl = (ASTdeclarator) declaratorNodes.jjtGetChild(i);
-		    if (decl.jjtGetChild(0) is ASTsimple_declarator) {
-			    String ident = ((SimpleNodeWithIdent) decl.jjtGetChild(0)).getIdent();
-		            currentScope.addTypeDef(ident);
+        Node declaratorNodes = jjtThis.jjtGetChild(1);  
+            Scope currentScope = m_symbolTable.getCurrentScope();
+        for (int i = 0; i < declaratorNodes.jjtGetNumChildren(); i++) {
+            ASTdeclarator decl = (ASTdeclarator) declaratorNodes.jjtGetChild(i);
+            if (decl.jjtGetChild(0) is ASTsimple_declarator) {
+                String ident = ((SimpleNodeWithIdent) decl.jjtGetChild(0)).getIdent();
+                    currentScope.addTypeDef(ident);
                     }
-		}
+        }
   }
 }
 
@@ -1092,9 +1092,9 @@ void struct_type() :
 { String ident = ""; }
 {
   "struct" ident = identifier() {
-  	// recursive definition using a sequence is permitted --> publish symbol already here
-  	Scope currentScope = m_symbolTable.getCurrentScope();
-  	currentScope.addSymbol(ident);  	
+    // recursive definition using a sequence is permitted --> publish symbol already here
+    Scope currentScope = m_symbolTable.getCurrentScope();
+    currentScope.addSymbol(ident);      
   }
   "{" member_list() "}" { jjtThis.setIdent(ident); }
 }
@@ -1121,9 +1121,9 @@ void union_type() :
 { String ident = ""; }
 {
   "union" ident = identifier() {
-  	// recursive definition using a sequence is permitted --> publish symbol already here
-  	Scope currentScope = m_symbolTable.getCurrentScope();
-  	currentScope.addSymbol(ident);  	
+    // recursive definition using a sequence is permitted --> publish symbol already here
+    Scope currentScope = m_symbolTable.getCurrentScope();
+    currentScope.addSymbol(ident);      
   } "switch" "(" switch_type_spec() ")" "{" switch_body() "}" { jjtThis.setIdent(ident); }
 }
 
@@ -1184,9 +1184,9 @@ void enum_type() :
 {
   "enum" ident = identifier() "{" enumerator() ( "," enumerator() )* "}" 
   { 
-  	jjtThis.setIdent(ident); 
-  	Scope currentScope = m_symbolTable.getCurrentScope();
-  	currentScope.addSymbol(ident);
+    jjtThis.setIdent(ident); 
+    Scope currentScope = m_symbolTable.getCurrentScope();
+    currentScope.addSymbol(ident);
   }
 }
 
@@ -1258,9 +1258,9 @@ void except_dcl() :
 {
   "exception" ident = identifier() "{" ( member() )* "}" 
    { 
-	jjtThis.setIdent(ident); 
-  	Scope currentScope = m_symbolTable.getCurrentScope();
-  	currentScope.addSymbol(ident);
+    jjtThis.setIdent(ident); 
+    Scope currentScope = m_symbolTable.getCurrentScope();
+    currentScope.addSymbol(ident);
    }
 }
 
@@ -1367,7 +1367,7 @@ void fixed_pt_type() :
 void fixed_pt_const_type() :
 {}
 {
-	"fixed"
+    "fixed"
 }
 
 /* Production 98, chapter 3.4, corba 2.3.1 */
@@ -1375,7 +1375,7 @@ void fixed_pt_const_type() :
 void value_base_type() :
 {}
 {
-	"ValueBase"
+    "ValueBase"
 }
 
 
@@ -1392,38 +1392,38 @@ System.Int64 integer_literal() #void :
 { Token intToken; string unaryOp = ""; }
 {
 [ "+" | "-" { unaryOp = "-"; } ]
-(	  intToken = <OCTALINT> { 
-  								String octVal = intToken.image;
-								// remove leading 0
-  								octVal = octVal.Substring(1);
-  								// check for l, L, u, U at the end
-  								if (octVal.EndsWith("l") || octVal.EndsWith("L") || octVal.EndsWith("u") || octVal.EndsWith("U")) {
-  									octVal = octVal.Substring(0, octVal.Length-1); // remove u, U, L, l
-  								}
-  								octVal = unaryOp + octVal;
-  								return StringToIntConverter.Parse(octVal, 8);
-  						    }
+(     intToken = <OCTALINT> { 
+                                String octVal = intToken.image;
+                                // remove leading 0
+                                octVal = octVal.Substring(1);
+                                // check for l, L, u, U at the end
+                                if (octVal.EndsWith("l") || octVal.EndsWith("L") || octVal.EndsWith("u") || octVal.EndsWith("U")) {
+                                    octVal = octVal.Substring(0, octVal.Length-1); // remove u, U, L, l
+                                }
+                                octVal = unaryOp + octVal;
+                                return StringToIntConverter.Parse(octVal, 8);
+                            }
 |
-	  intToken = <DECIMALINT> { 
-  								String val = unaryOp + intToken.image;
-  								// check for l, L, u, U at the end
-  								if (val.EndsWith("l") || val.EndsWith("L") || val.EndsWith("u") || val.EndsWith("U")) {
-  									val = val.Substring(0, val.Length-1); // remove u, U, L, l
-  								}
-  								return StringToIntConverter.Parse(val, 10);
-  							  }
+      intToken = <DECIMALINT> { 
+                                String val = unaryOp + intToken.image;
+                                // check for l, L, u, U at the end
+                                if (val.EndsWith("l") || val.EndsWith("L") || val.EndsWith("u") || val.EndsWith("U")) {
+                                    val = val.Substring(0, val.Length-1); // remove u, U, L, l
+                                }
+                                return StringToIntConverter.Parse(val, 10);
+                              }
 |
- 	  intToken = <HEXADECIMALINT> { 
- 	    						String hexVal = intToken.image;
-								// has leading leading 0x, remove it
-								hexVal = hexVal.Substring(2);
-  								// check for l, L, u, U at the end
-  								if (hexVal.EndsWith("l") || hexVal.EndsWith("L") || hexVal.EndsWith("u") || hexVal.EndsWith("U")) {
-  									hexVal = hexVal.Substring(0, hexVal.Length-1); // remove u, U, L, l
-  								}
-  								hexVal = unaryOp + hexVal;
-  								return StringToIntConverter.Parse(hexVal, 16);
- 	  						  }  
+      intToken = <HEXADECIMALINT> { 
+                                String hexVal = intToken.image;
+                                // has leading leading 0x, remove it
+                                hexVal = hexVal.Substring(2);
+                                // check for l, L, u, U at the end
+                                if (hexVal.EndsWith("l") || hexVal.EndsWith("L") || hexVal.EndsWith("u") || hexVal.EndsWith("U")) {
+                                    hexVal = hexVal.Substring(0, hexVal.Length-1); // remove u, U, L, l
+                                }
+                                hexVal = unaryOp + hexVal;
+                                return StringToIntConverter.Parse(hexVal, 16);
+                              }  
 )  
 }
 
@@ -1431,20 +1431,20 @@ String string_literal() #void :
 { Token stringToken; }
 {
   stringToken = <STRING> { 
-  									String result = stringToken.image; 
-  									// remove "" around the literal
-  									return result.Substring(1, result.Length - 2);
-  						 }
+                                    String result = stringToken.image; 
+                                    // remove "" around the literal
+                                    return result.Substring(1, result.Length - 2);
+                         }
 }
 
 String wide_string_literal() #void :
 { Token stringToken; }
 {
    stringToken = <WIDESTRING> { 
-   									String result = stringToken.image; 
-  									// remove L prefix and remove "" around the literal
-   									return result.Substring(2, result.Length - 3);
-   							  }
+                                    String result = stringToken.image; 
+                                    // remove L prefix and remove "" around the literal
+                                    return result.Substring(2, result.Length - 3);
+                              }
 }
 
 char character_literal() #void :
@@ -1454,7 +1454,7 @@ char character_literal() #void :
           // char is enclosed by ''
           return ParseCharLiteral(charToken.image.Substring(1, charToken.image.Length - 2));
   }
-  								
+                                
 }
 
 char wide_character_literal() #void :
@@ -1473,13 +1473,13 @@ System.Double floating_pt_literal() #void :
 (
  ( 
   (
-	     floatLiteral = <FLOATONE> 
-	 |
-    	 floatLiteral = <FLOATTWO>
+         floatLiteral = <FLOATONE> 
+     |
+         floatLiteral = <FLOATTWO>
   ) { 
-	  String floatVal = unaryOp + floatLiteral.image;
+      String floatVal = unaryOp + floatLiteral.image;
       if (floatVal.EndsWith("f") || floatVal.EndsWith("F") || floatVal.EndsWith("l") || floatVal.EndsWith("L")) {
-      	floatVal = floatVal.Substring(0, floatVal.Length - 1);
+        floatVal = floatVal.Substring(0, floatVal.Length - 1);
       }
       return Double.Parse(floatVal);
     }
@@ -1507,18 +1507,18 @@ System.Decimal fixed_pt_literal() #void :
 {
     [ "+" | "-" { unaryOp = "-"; } ]
 (
-	   LOOKAHEAD(<FIXED> ".")
-	   fixedLiteral = <FIXED> "." [ <FIXED> ] ( "d" | "D" ) 
-	|
-	   fixedLiteral = "." <FIXED> ( "d" | "D" ) 
-	|
-	   fixedLiteral = <FIXED> ( "d" | "D" )
+       LOOKAHEAD(<FIXED> ".")
+       fixedLiteral = <FIXED> "." [ <FIXED> ] ( "d" | "D" ) 
+    |
+       fixedLiteral = "." <FIXED> ( "d" | "D" ) 
+    |
+       fixedLiteral = <FIXED> ( "d" | "D" )
 ) {
-	String fixedVal = unaryOp + fixedLiteral.image;
-	if (fixedVal.EndsWith("d") || fixedVal.EndsWith("D")) {
-		fixedVal = fixedVal.Substring(0, fixedVal.Length - 1);
-	}
-	return Decimal.Parse(fixedVal);
+    String fixedVal = unaryOp + fixedLiteral.image;
+    if (fixedVal.EndsWith("d") || fixedVal.EndsWith("D")) {
+        fixedVal = fixedVal.Substring(0, fixedVal.Length - 1);
+    }
+    return Decimal.Parse(fixedVal);
 }
 
 }
