@@ -1,3 +1,33 @@
+Version 1.5.1 (02 Decembre 2003)
+-------------------------------
+
+new features:
+- added custom mapping: java.util.Hashmap <-> System.Collections.Hashtable
+- code set conversion sets are now also considered by IIOP.NET clients (not only native sets)
+- use _is_a call, when deserialising a object reference, when type information in IOR is not enough to
+  determine assignablity to formal parameter.
+- improved debugging support (channel creates debug output file in debug mode)
+
+changes:
+- Custom mapping: renamed java collection mapping dll from customCollectionMappings.dll to IIOPNetCustomJavaTypeMapping.dll
+- IDLTOCLSCompiler: ignore inheritance from java.io.Serializable in IDL, because this is illegal in IDL; (rmic creates this illegal IDL)
+
+bugs fixed:
+- IDLToCLSCompiler crashed when generating big unions (bug #831611)
+- IDLToCLSCompiler crashes on some recursive type definitions: TypeLoadException (bug #837808)
+- constant values not usable in other IDL definitions (bug #840585)
+- incorrect handling of char constants (bug #841774)
+- incorrect serialisation/deserialisation of some idl sequences (bug #845223)
+- passing null for idl abstract value types causes exception (bug #841258)
+- IDLToCLSCompiler: ID, prefix are no longer considered as grammar keywords in IDL
+
+partly fixed:
+- IDLToCLSCompiler: character / string literals bug (bug #794060)
+
+new tests:
+- OmniORB 4.0.2 integration test for IDL unions
+
+
 Version 1.5.0 (13 Octobre 2003)
 -------------------------------
 
