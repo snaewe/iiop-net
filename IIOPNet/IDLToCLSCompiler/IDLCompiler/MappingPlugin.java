@@ -30,6 +30,14 @@
 
 package Ch.Elca.Iiop.IdlCompiler.Action;
 
+import System.Xml.XmlDocument;
+import System.Xml.XmlNode;
+import System.Xml.XmlElement;
+import System.Xml.XmlNodeList;
+import System.IO.FileInfo;
+import System.IO.FileStream;
+import System.IO.FileMode;
+
 public class CompilerMappingPlugin {
 	
 	#region SIFields
@@ -73,6 +81,24 @@ public class CompilerMappingPlugin {
      	if (!m_mappingTable.Contains(idlFullName)) {
      		m_mappingTable.Add(idlFullName, clsType);
      	}
+     }
+     
+     public void AddMappingsFromFile(FileInfo configFile) {
+         // load the xml-file
+         XmlDocument doc = new XmlDocument();
+         doc.Load(new FileStream(configFile.get_FullName(), FileMode.Open));
+         // process the file
+         XmlNodeList elemList = doc.GetElementsByTagName("mapping");
+         for (int i = 0; i < elemList.get_Count(); i++) {
+             XmlNode elem = elemList.get_ItemOf(i);
+             XmlElement idlTypeName = elem.get_Item("idlTypeName");
+             XmlElement clsTypeAsqName = elem.get_Item("clsType");
+             // idl-type name:
+             System.String idlType = idlTypeName.get_InnerText();
+             // clsType:
+             System.Type clsType = System.Type.GetType(clsTypeAsqName.get_InnerText(), true);
+             AddMapping(idlType, clsType);
+         }
      }
      
      /**

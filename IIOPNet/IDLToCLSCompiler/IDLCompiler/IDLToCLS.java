@@ -33,6 +33,7 @@ package Ch.Elca.Iiop.IdlCompiler;
 import java.io.*;
 
 import Ch.Elca.Iiop.IdlCompiler.Action.MetaDataGenerator;
+import Ch.Elca.Iiop.IdlCompiler.Action.CompilerMappingPlugin;
 import parser.IDLParser;
 import parser.ASTspecification;
 
@@ -131,6 +132,12 @@ public class IDLToCLS {
                     System.out.println("can't load assembly: " + args[i]);
                     System.exit(3);
                 }                
+            } else if (args[i].equals("-c")) {
+                i++;
+                System.IO.FileInfo configFile = new System.IO.FileInfo(args[i++]);
+                // add custom mappings from file
+            	CompilerMappingPlugin plugin = CompilerMappingPlugin.GetSingleton();
+            	plugin.AddMappingsFromFile(configFile);
             } else {
                 Error(String.Format("Error: invalid option {0}", args[i]));
             }
