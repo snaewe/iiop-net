@@ -1,4 +1,4 @@
-IDLTOCLSCOMPILER=..\..\ExperimentalCS\ 
+IDLTOCLSCOMPILER=..\..\IDLCompiler\ 
 
 all: build deploy
 
