@@ -69,23 +69,6 @@ namespace Ch.Elca.Iiop {
         private IiopServerChannel m_serverChannel;
 
         #endregion IFields
-	#region SConstructor
-
-	#if TRACE
-	static IiopChannel() {
-		Stream log = File.Create("IIOPNET_DebugOutput_"+
-				         DateTime.Now.ToString("yyyyMMdd_HHmmss")+
-					 ".txt");
- 
-		TextWriterTraceListener logListener = new TextWriterTraceListener(log);
-		
-		Trace.Listeners.Add(logListener);
-		Trace.AutoFlush = true;
-		Debug.AutoFlush = true;
-	}
-	#endif
-
-	#endregion SConstructor
         #region IConstructors
         
         public IiopChannel() {
@@ -224,6 +207,23 @@ namespace Ch.Elca.Iiop {
         private IClientChannelSinkProvider m_providerChain;
 
         #endregion IFields
+	#region SConstructor
+
+	#if TRACE
+	static IiopClientChannel() {
+		Stream log = File.Create("IIOPNET_DebugOutputClientChannel_"+
+				         DateTime.Now.ToString("yyyyMMdd_HHmmss")+
+					 ".txt");
+ 
+		TextWriterTraceListener logListener = new TextWriterTraceListener(log);
+		
+		Trace.Listeners.Add(logListener);
+		Trace.AutoFlush = true;
+		Debug.AutoFlush = true;
+	}
+	#endif
+
+	#endregion SConstructor
         #region IConstructors
         
         public IiopClientChannel() {
@@ -368,6 +368,23 @@ namespace Ch.Elca.Iiop {
         private bool m_listenActive = false;
 
         #endregion IFields
+	#region SConstructor
+
+	#if TRACE
+	static IiopServerChannel() {
+		Stream log = File.Create("IIOPNET_DebugOutputServerChannel_"+
+				         DateTime.Now.ToString("yyyyMMdd_HHmmss")+
+					 ".txt");
+ 
+		TextWriterTraceListener logListener = new TextWriterTraceListener(log);
+		
+		Trace.Listeners.Add(logListener);
+		Trace.AutoFlush = true;
+		Debug.AutoFlush = true;
+	}
+	#endif
+
+	#endregion SConstructor
         #region IConstructors
 
         public IiopServerChannel() {
