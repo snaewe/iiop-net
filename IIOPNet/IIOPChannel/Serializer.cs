@@ -913,6 +913,7 @@ namespace Ch.Elca.Iiop.Marshalling {
 
         private static Type s_supInterfaceAttrType = typeof(SupportedInterfaceAttribute);
     	private static Type s_anyType = typeof(omg.org.CORBA.Any);
+        private static Type s_typeCodeType = typeof(omg.org.CORBA.TypeCode);
 
         #endregion SFields
         #region IFields
@@ -954,7 +955,7 @@ namespace Ch.Elca.Iiop.Marshalling {
             if (actual != null) {
             	if (actual.GetType().Equals(s_anyType)) {
             		// use user defined type code
-            		typeCode = ((Any)actual).Type as TypeCodeImpl;            		
+            		typeCode = ((Any)actual).Type as TypeCodeImpl;
             		if (typeCode == null) {
             			throw new INTERNAL(457, CompletionStatus.Completed_MayBe);
             		}
@@ -967,7 +968,7 @@ namespace Ch.Elca.Iiop.Marshalling {
                     typeCode = Repository.CreateTypeCodeForType(actualType, attributes);
             	}
             }
-            typeCode.WriteToStream(targetStream);
+            m_typeCodeSer.Serialise(s_typeCodeType, typeCode, attributes, targetStream);
             if (actual != null) {            	
                 Marshaller marshaller = Marshaller.GetSingleton();
                 attributes.RemoveAttributeOfType(typeof(ObjectIdlTypeAttribute));

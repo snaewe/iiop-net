@@ -208,9 +208,14 @@ namespace omg.org.CORBA {
         /// <summary>serialize the whole type-code to the stream</summary>
         /// <param name="cdrStream"></param>
         internal virtual void WriteToStream(CdrOutputStream cdrStream) {
+            StreamPosition indirPos = new StreamPosition(cdrStream); 
             uint val = Convert.ToUInt32(kind());
             cdrStream.WriteULong(val);
-        }
+            cdrStream.StoreIndirection(this, 
+                                       new IndirectionInfo(indirPos.Position, 
+                                                           IndirectionType.TypeCode,
+                                                           IndirectionUsage.TypeCode));
+        }        
 
         /// <summary>reads the type-code content from the stream, without the TCKind at the beginning</summary>
         /// <remarks>helper which is used by the constructor with arg CdrInputStream</remarks>
@@ -308,7 +313,7 @@ namespace omg.org.CORBA {
             throw new BAD_OPERATION(0, CompletionStatus.Completed_No);
         }
     
-        #endregion Implementation of TypeCode
+        #endregion Implementation of TypeCode                
 
         #endregion IMethods
 
@@ -355,10 +360,10 @@ namespace omg.org.CORBA {
 
         internal override void WriteToStream(CdrOutputStream cdrStream) {
             base.WriteToStream(cdrStream);
-            CdrEncapsulationOutputStream encap = new CdrEncapsulationOutputStream(0);
+            CdrEncapsulationOutputStream encap = new CdrEncapsulationOutputStream(0, cdrStream);
             encap.WriteString(m_id);
             encap.WriteString(m_name);
-            cdrStream.WriteEncapsulation(encap);
+            encap.WriteToTargetStream();
         }
 
         internal override Type GetClsForTypeCode() {
@@ -860,14 +865,14 @@ namespace omg.org.CORBA {
 
         internal override void WriteToStream(CdrOutputStream cdrStream) {
             base.WriteToStream(cdrStream);
-            CdrEncapsulationOutputStream encap = new CdrEncapsulationOutputStream(0);
+            CdrEncapsulationOutputStream encap = new CdrEncapsulationOutputStream(0, cdrStream);
             encap.WriteString(m_id);
             encap.WriteString(m_name);
             encap.WriteULong((uint)m_members.Length);
             foreach(string member in m_members) {
                 encap.WriteString(member);
             }
-            cdrStream.WriteEncapsulation(encap);
+            encap.WriteToTargetStream();
         }
 
         internal override Type GetClsForTypeCode() {
@@ -954,12 +959,12 @@ namespace omg.org.CORBA {
 
         internal override void WriteToStream(CdrOutputStream cdrStream) {
             base.WriteToStream(cdrStream);
-            CdrEncapsulationOutputStream encap = new CdrEncapsulationOutputStream(0);
+            CdrEncapsulationOutputStream encap = new CdrEncapsulationOutputStream(0, cdrStream);
             encap.WriteString(m_id);
             encap.WriteString(m_name);
             TypeCodeSerializer ser = new TypeCodeSerializer();
             ser.Serialise(typeof(TypeCode), m_boxed, new AttributeExtCollection(new Attribute[0]), encap);
-            cdrStream.WriteEncapsulation(encap);
+            encap.WriteToTargetStream();
         }
 
         internal override Type GetClsForTypeCode() {
@@ -1030,11 +1035,11 @@ namespace omg.org.CORBA {
 
         internal override void WriteToStream(CdrOutputStream cdrStream) {
             base.WriteToStream(cdrStream);
-            CdrEncapsulationOutputStream encap = new CdrEncapsulationOutputStream(0);
+            CdrEncapsulationOutputStream encap = new CdrEncapsulationOutputStream(0, cdrStream);
             TypeCodeSerializer ser = new TypeCodeSerializer();
             ser.Serialise(typeof(TypeCode), m_seqType, new AttributeExtCollection(new Attribute[0]), encap);
             encap.WriteULong((uint)m_length);
-            cdrStream.WriteEncapsulation(encap);
+            encap.WriteToTargetStream();
         }
 
         internal override Type GetClsForTypeCode() {
@@ -1142,7 +1147,7 @@ namespace omg.org.CORBA {
 
         internal override void WriteToStream(CdrOutputStream cdrStream) {
             base.WriteToStream(cdrStream);
-            CdrEncapsulationOutputStream encap = new CdrEncapsulationOutputStream(0);
+            CdrEncapsulationOutputStream encap = new CdrEncapsulationOutputStream(0, cdrStream);
             encap.WriteString(m_id);
             encap.WriteString(m_name);
             encap.WriteULong((uint)m_members.Length);
@@ -1151,7 +1156,7 @@ namespace omg.org.CORBA {
                 encap.WriteString(member.m_name);
                 ser.Serialise(typeof(TypeCode), member.m_type, new AttributeExtCollection(new Attribute[0]), encap);
             }
-            cdrStream.WriteEncapsulation(encap);
+            encap.WriteToTargetStream();
         }
 
         internal override Type GetClsForTypeCode() {
@@ -1322,7 +1327,7 @@ namespace omg.org.CORBA {
             // write common part: typecode nr
             base.WriteToStream(cdrStream);
             // complex type-code: in encapsulation
-            CdrEncapsulationOutputStream encap = new CdrEncapsulationOutputStream(0);
+            CdrEncapsulationOutputStream encap = new CdrEncapsulationOutputStream(0, cdrStream);
             encap.WriteString(m_id);
             encap.WriteString(m_name);
             Marshaller marshaller = Marshaller.GetSingleton();
@@ -1341,7 +1346,7 @@ namespace omg.org.CORBA {
                              new AttributeExtCollection(new Attribute[0]), encap);
             }            
 
-            cdrStream.WriteEncapsulation(encap);
+            encap.WriteToTargetStream();
         }
 
         internal override Type GetClsForTypeCode() {
@@ -1527,7 +1532,7 @@ namespace omg.org.CORBA {
 
         internal override void WriteToStream(CdrOutputStream cdrStream) {
             base.WriteToStream(cdrStream);
-            CdrEncapsulationOutputStream encap = new CdrEncapsulationOutputStream(0);
+            CdrEncapsulationOutputStream encap = new CdrEncapsulationOutputStream(0, cdrStream);
             encap.WriteString(m_id);
             encap.WriteString(m_name);
             encap.WriteShort(m_typeMod);
@@ -1541,7 +1546,7 @@ namespace omg.org.CORBA {
                 ser.Serialise(typeof(TypeCode), member.m_type, new AttributeExtCollection(new Attribute[0]), encap);
                 encap.WriteShort(member.m_visibility);
             }
-            cdrStream.WriteEncapsulation(encap);
+            encap.WriteToTargetStream();
         }
 
         internal override Type GetClsForTypeCode() {
@@ -1732,7 +1737,11 @@ namespace Ch.Elca.Iiop.Marshalling {
                 throw new omg.org.CORBA.INTERNAL(1654, omg.org.CORBA.CompletionStatus.Completed_MayBe);
             }
             omg.org.CORBA.TypeCodeImpl tcImpl = actual as omg.org.CORBA.TypeCodeImpl;
-            tcImpl.WriteToStream(targetStream);
+            if (!targetStream.IsPreviouslyMarshalled(tcImpl, IndirectionType.TypeCode, IndirectionUsage.TypeCode)) {
+                tcImpl.WriteToStream(targetStream);
+            } else {
+                targetStream.WriteIndirection(tcImpl);
+            }
         }
 
         #endregion IMethods

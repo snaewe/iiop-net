@@ -140,7 +140,7 @@ namespace Ch.Elca.Iiop.Cdr {
     /// Base class for ValueInputStream and ValueOutputStream. 
     /// Provides some common functionality
     /// </summary>
-    public abstract class ValueBaseStream {
+    public abstract class ValueBaseStream : CdrStreamBase {
 
         #region Constants
                 
@@ -154,6 +154,14 @@ namespace Ch.Elca.Iiop.Cdr {
         protected Stack m_chunkStack = new Stack();
 
         #endregion IFields
+        #region IProperties
+        
+        /// <summary>returns the base stream used as target for the valuestreams</summary>
+        protected abstract CdrStreamBase BaseStream {
+            get;
+        }
+        
+        #endregion IProperties
         #region IMethods
 
         /// <summary>
@@ -212,6 +220,27 @@ namespace Ch.Elca.Iiop.Cdr {
                 return false;
             }
         }                
+                
+        
+        #region CdrStreamBase
+
+        public ulong GetPosition() {
+            return BaseStream.GetPosition();
+        }
+        
+        public ulong GetGlobalOffset() {
+            return BaseStream.GetGlobalOffset();
+        }
+        
+        public ulong GetNextAlignedPosition(Aligns align) {
+            return BaseStream.GetNextAlignedPosition(align);
+        }
+        
+        public void MarkNextAlignedPosition(StreamPosition streamPosition) {
+            BaseStream.MarkNextAlignedPosition(streamPosition);
+        }
+        
+        #endregion CdrStreamBase        
 
         #endregion IMethods
     
@@ -245,6 +274,12 @@ namespace Ch.Elca.Iiop.Cdr {
             }
             set {
                 throw new NotSupportedException("not supported for value-stream");
+            }
+        }
+         
+        protected override CdrStreamBase BaseStream {
+            get {
+                return m_baseStream;
             }
         }
 
@@ -782,22 +817,6 @@ namespace Ch.Elca.Iiop.Cdr {
             return m_baseStream.GetObjectForIndir(indirOffset, false, indirType, indirUsage);
         }
         
-        public ulong GetPosition() {
-            return m_baseStream.GetPosition();
-        }
-        
-        public ulong GetGlobalOffset() {
-            return m_baseStream.GetGlobalOffset();
-        }
-        
-        public ulong GetNextAlignedPosition(Aligns align) {
-            return m_baseStream.GetNextAlignedPosition(align);
-        }
-        
-        public void MarkNextAlignedPosition(StreamPosition streamPosition) {
-            m_baseStream.MarkNextAlignedPosition(streamPosition);
-        }
-
         #endregion IMethods
 
     }
@@ -831,6 +850,12 @@ namespace Ch.Elca.Iiop.Cdr {
             }
             set {
                 throw new NotSupportedException("not supported for value-stream");
+            }
+        }
+        
+        protected override CdrStreamBase BaseStream {
+            get {
+                return m_baseStream;
             }
         }
 
@@ -1057,18 +1082,10 @@ namespace Ch.Elca.Iiop.Cdr {
             return m_baseStream.CalculateIndirectionOffset(indirInfo);
         }
         
-        public ulong GetPosition() {
-            return m_baseStream.GetPosition();
+        public IndirectionInfo GetIndirectionInfoFor(object val) {
+            return m_baseStream.GetIndirectionInfoFor(val);
         }
-        
-        public ulong GetNextAlignedPosition(Aligns align) {
-            return m_baseStream.GetNextAlignedPosition(align);
-        }
-        
-        public void MarkNextAlignedPosition(StreamPosition streamPosition) {
-            m_baseStream.MarkNextAlignedPosition(streamPosition);
-        }
-        
+                
         #endregion IMethods
     }
 

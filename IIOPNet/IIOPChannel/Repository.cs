@@ -522,17 +522,19 @@ namespace Ch.Elca.Iiop.Idl {
         
         private TypeCodeImpl CreateOrGetTypeCodeForType(Type forType,
                                                         AttributeExtCollection attributes) {
-            if (m_alreadyCreatedTypeCodes[new TypecodeForTypeKey(forType, attributes)] == null) {
+            TypecodeForTypeKey key = new TypecodeForTypeKey(forType, attributes);
+            if (m_alreadyCreatedTypeCodes[key] == null) {
                 return Repository.CreateTypeCodeForTypeInternal(forType, attributes, this);
             } else {
-                return (TypeCodeImpl)m_alreadyCreatedTypeCodes[new TypecodeForTypeKey(forType, attributes)];
+                return (TypeCodeImpl)m_alreadyCreatedTypeCodes[key];
             }
         }
         
         private void RegisterCreatedTypeCodeForType(Type forType,
                                                     AttributeExtCollection attributes,
                                                     TypeCodeImpl typeCode) {
-            m_alreadyCreatedTypeCodes[new TypecodeForTypeKey(forType, attributes)] = typeCode;
+            TypecodeForTypeKey key = new TypecodeForTypeKey(forType, attributes);    
+            m_alreadyCreatedTypeCodes[key] = typeCode;
         }
         
         #region Implementation of MappingAction
