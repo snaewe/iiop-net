@@ -37,6 +37,7 @@ using symboltable;
 using Ch.Elca.Iiop.Idl;
 using Ch.Elca.Iiop.Util;
 using omg.org.CORBA;
+using Ch.Elca.Iiop.IdlCompiler.Exceptions;
 
 
 namespace Ch.Elca.Iiop.IdlCompiler.Action {
@@ -63,15 +64,21 @@ namespace Ch.Elca.Iiop.IdlCompiler.Action {
         #region IFields
 
         private Hashtable m_typesInCreation = new Hashtable();
-        private Hashtable m_typeTable = new Hashtable();
+        /// <summary>
+        /// a subset of types in creation, lists all the fwd declarations not completed
+        /// </summary>
+        private Hashtable m_fwdDeclaredTypes = new Hashtable();
+        private Hashtable m_completeTypeTable = new Hashtable();
         private Hashtable m_typedefTable = new Hashtable();
         /// <summary>
         /// for structs, union: only recursion allowed is through an idl sequence -> handle special
         /// </summary>
         private TypeSymbolPair m_sequenceRecursionAllowedType = null;        
+        
         private ModuleBuilder m_modBuilder;
-
         private TypesInAssemblyManager m_refAsmTypes;        
+        
+        private BoxedValueTypeGenerator m_boxedValueTypeGenerator = new BoxedValueTypeGenerator();
 
         #endregion IFields
         #region IConstructors
@@ -84,17 +91,243 @@ namespace Ch.Elca.Iiop.IdlCompiler.Action {
         #endregion IConstructors
         #region IMethods
         
+        
+        #region TypeCreation
+        
+        /// <summary>finds the repository id attribute for the symbol starting the search in startInScope</summary>
+        private string FindRepositoryId(Symbol forSymbol) {
+            Scope startInScope = forSymbol.getDeclaredIn();
+            string forName = forSymbol.getSymbolName();
+            string result = startInScope.getRepositoryIdFor(forName);
+            if (result == null) {
+                // try inside scope to find it
+                Scope innerScope = startInScope.getChildScope(forName);
+                if (innerScope != null) {
+                    result = innerScope.getRepositoryIdFor(forName);
+                }
+            }
+            return result;
+        }
+               
         /// <summary>
-        /// creates a typename for a nested type, which is not nestable
-        /// directly in containing type.
-        /// These types are defined in a special namespace.
-        /// </summary>
-        public string GetFullTypeNameForNestedNotInOuterType(Symbol forSymbol) {
-            Scope declIn = forSymbol.getDeclaredIn();
-            return declIn.getFullyQualifiedNameForNested(forSymbol.getSymbolName());
+        /// start a type definition for a type
+        /// </summary>        
+        /// <param name="isForwardDeclaration">specifies, if this type is created from an idl forward declaration</param>
+        public TypeBuilder StartTypeDefinition(Symbol typeSymbol, string fullyQualName,
+                                               TypeAttributes typeAttributes, Type parent, Type[] interfaces,
+                                               bool isForwardDeclaration) {                                   
+                                              
+             if (IsTypeDeclarded(typeSymbol)) {
+                 // was not skipped, tried to redeclare -> internal error
+                 throw new InternalCompilerException("A type with the name " + 
+                                                     GetKnownType(typeSymbol).GetCompactClsType().FullName +
+                                                     " is already declared for symbol: " + typeSymbol);
+             }            
+            
+            TypeBuilder result = m_modBuilder.DefineType(fullyQualName, typeAttributes, parent, interfaces);
+            // book-keeping
+            TypeContainer container = new CompileTimeTypeContainer(this, result);
+            m_typesInCreation[typeSymbol] = container;
+                                                                                         
+            if (isForwardDeclaration) {
+                // store type-fwd declaration in a special place, to allow searching only those when trying to complete a fwd declaration.
+                m_fwdDeclaredTypes[typeSymbol] = container;
+            }
+                                                   
+            return result;
+        }
+
+        
+        /// <summary>
+        /// start a type definition for a type
+        /// </summary>        
+        /// <param name="isForwardDeclaration">specifies, if this type is created from an idl forward declaration</param>
+        public TypeBuilder StartTypeDefinition(Symbol typeSymbol,
+                                               TypeAttributes typeAttributes, Type parent, Type[] interfaces,
+                                               bool isForwardDeclaration) {
+            Scope enclosingScope = typeSymbol.getDeclaredIn();
+            String fullyQualName = enclosingScope.getFullyQualifiedNameForSymbol(typeSymbol.getSymbolName());
+            return StartTypeDefinition(typeSymbol, fullyQualName, 
+                                       typeAttributes, parent, interfaces, isForwardDeclaration);
         }
         
-        public string GetFullTypeNameForSymbol(Symbol forSymbol) {
+        /// <summary>
+        /// start a type definition for a type with System.Object as parent
+        /// </summary>        
+        /// <param name="isForwardDeclaration">specifies, if this type is created from an idl forward declaration</param>
+        public TypeBuilder StartTypeDefinition(Symbol typeSymbol,
+                                               TypeAttributes typeAttributes, Type[] interfaces,
+                                               bool isForwardDeclaration) {
+            return StartTypeDefinition(typeSymbol, typeAttributes, typeof(System.Object), interfaces,
+                                       isForwardDeclaration);        
+        }
+        
+        /// <summary>
+        /// Start a type definition for a boxed value type
+        /// Adds also repository id and IIdlEntity inheritance.
+        /// </summary>
+        public TypeBuilder StartBoxedValueTypeDefinition(Symbol typeSymbol, Type boxedType, 
+                                                         CustomAttributeBuilder[] boxedTypeAttributes) {            
+
+            if (IsTypeDeclarded(typeSymbol)) {
+                // was not skipped, tried to redeclare -> internal error
+                throw new InternalCompilerException("A type with the name " + 
+                                                    GetKnownType(typeSymbol).GetCompactClsType().FullName +
+                                                    " is already declared for symbol: " + typeSymbol);
+            }
+
+            Scope enclosingScope = typeSymbol.getDeclaredIn();
+            String fullyQualName = enclosingScope.getFullyQualifiedNameForSymbol(typeSymbol.getSymbolName());
+                                                    
+            Trace.WriteLine("generating code for boxed value type: " + fullyQualName);
+            
+            TypeBuilder result =
+                m_boxedValueTypeGenerator.CreateBoxedType(boxedType, m_modBuilder,
+                                                          fullyQualName, boxedTypeAttributes);
+                                                            
+            // book-keeping
+            TypeContainer container = new CompileTimeTypeContainer(this, result);
+            m_typesInCreation[typeSymbol] = container;
+            
+            // repository and iidlentiry inheritance
+            result.AddInterfaceImplementation(typeof(IIdlEntity));
+            AddRepositoryIdAttribute(result, typeSymbol);            
+            
+            return result;            
+        }    
+        
+        public UnionGenerationHelper StartUnionTypeDefinition(Symbol typeSymbol, string fullyQualName) {            
+            
+            if (IsTypeDeclarded(typeSymbol)) {
+                // was not skipped, tried to redeclare -> internal error
+                throw new InternalCompilerException("A type with the name " + 
+                                                    GetKnownType(typeSymbol).GetCompactClsType().FullName +
+                                                    " is already declared for symbol: " + typeSymbol);
+            }            
+            
+            UnionGenerationHelper genHelper = new UnionGenerationHelper(m_modBuilder, fullyQualName,
+                                                                        TypeAttributes.Public);
+            
+            // book-keeping
+            TypeContainer container = new CompileTimeTypeContainer(this, genHelper.Builder);
+            m_typesInCreation[typeSymbol] = container;
+
+            return genHelper;
+        }
+                               
+        public Type EndUnionTypeDefinition(Symbol typeSymbol, UnionGenerationHelper helper) {
+            Type resultType = helper.FinalizeType();
+            
+            // book-keeping
+            m_typesInCreation.Remove(typeSymbol);
+            AddCompleteTypeDefinition(typeSymbol, new CompileTimeTypeContainer(this, resultType));
+            
+            return resultType;            
+        }
+        
+        
+        /// <summary>
+        /// completed the type definiton by creation toComplete.CreateType and
+        /// updates internal state used to tell about status of types
+        /// </summary>
+        /// <param name="toComplete"></param>
+        /// <returns></returns>
+        public Type EndTypeDefinition(Symbol typeSymbol) {                                                
+            TypeBuilder toComplete = GetTypeFromTypesInCreation(typeSymbol);                                                
+            Type resultType = toComplete.CreateType();
+            
+            // update the book-keeping
+            m_typesInCreation.Remove(typeSymbol);
+            m_fwdDeclaredTypes.Remove(typeSymbol);
+            AddCompleteTypeDefinition(typeSymbol,new CompileTimeTypeContainer(this, resultType));
+            return resultType;                        
+        }                
+        
+        #endregion TypeCreation
+        
+        public TypeBuilder GetIncompleteForwardDeclaration(Symbol typeSymbol) {
+            TypeBuilder result = GetIncompleteForwardDeclartionUnchecked(typeSymbol);
+            if (result != null) {
+                return result;
+            } else {
+                // must be found, otherwise an implementation error ...
+                throw new InternalCompilerException("forward decl not retrieved again for " + typeSymbol);
+            }
+        }
+        
+        /// <summary>
+        /// the same as GetIncompleteForwardDeclaration, but throws no exception if not found
+        /// </summary>
+        private TypeBuilder GetIncompleteForwardDeclartionUnchecked(Symbol typeSymbol) {
+            TypeContainer container = (TypeContainer)m_fwdDeclaredTypes[typeSymbol];
+            TypeBuilder result = (container != null ? container.GetCompactClsType() as TypeBuilder : null);
+            return result;
+        }
+        
+        /// <summary>
+        /// returns the typebuilder if found among types in creation, otherwise throws exception
+        /// </summary>                
+        private TypeBuilder GetTypeFromTypesInCreation(Symbol typeSymbol) {
+            TypeContainer container = (TypeContainer)m_typesInCreation[typeSymbol];
+            TypeBuilder toComplete = (container != null ? container.GetCompactClsType() as TypeBuilder : null);
+            if (toComplete != null) {
+                return toComplete;            
+            } else {
+                throw new InternalCompilerException("type in creation not found: " + typeSymbol);
+            }
+        }
+        
+        /// <summary>add a fully defined type to the known types</summary>
+        private void AddCompleteTypeDefinition(Symbol typeSymbol, TypeContainer fullDecl) {
+            if (m_typesInCreation.ContainsKey(typeSymbol)) { 
+                throw new InternalCompilerException("type can't be registered, an incomplete declaration exists; symbol: " + typeSymbol);  // should not occur, check by sym table
+            }
+            if (m_completeTypeTable.ContainsKey(typeSymbol)) { 
+                throw new InternalCompilerException("type already defined; symbol: " + typeSymbol); // should not occur, checked by sym table
+            }
+            
+            m_completeTypeTable[typeSymbol] = fullDecl;
+        }
+        
+        private bool IsIncompleteDeclarationPresent(Symbol typeSymbol) {
+            return m_typesInCreation[typeSymbol] != null;
+        }                        
+        
+        /// <summary>
+        /// is at least a forward declaration for the type represented by the symbol present
+        /// </summary>
+        public bool IsTypeDeclarded(Symbol forSymbol) {
+            TypeContainer type = GetKnownType(forSymbol);
+            return (type != null);
+        }
+        
+        public bool IsFwdDeclared(Symbol forSymbol) {
+            return GetIncompleteForwardDeclartionUnchecked(forSymbol) != null;
+        }
+
+        #region respositoryIds
+        
+        public void AddRepositoryIdAttribute(Symbol typeSymbol) {                        
+            TypeBuilder inCreation = GetTypeFromTypesInCreation(typeSymbol);
+            AddRepositoryIdAttribute(inCreation, typeSymbol);            
+        }
+        
+        private void AddRepositoryIdAttribute(TypeBuilder typeBuild, Symbol typeSymbol) {
+            string repositoryId = FindRepositoryId(typeSymbol);    
+            AddRepositoryIdAttribute(typeBuild, repositoryId);
+        }
+                
+        public void AddRepositoryIdAttribute(TypeBuilder typebuild, string repId) {
+            if (repId != null) {
+                CustomAttributeBuilder repIdAttrBuilder = 
+                    new RepositoryIDAttribute(repId).CreateAttributeBuilder();
+                typebuild.SetCustomAttribute(repIdAttrBuilder);
+            }
+        }                
+        
+        #endregion respositoryIds
+                
+        private string GetFullTypeNameForSymbol(Symbol forSymbol) {
             Scope declIn = forSymbol.getDeclaredIn();
             if (!(IsNestedType(forSymbol) && !IsNestableDirectlyInParent(forSymbol))) {
                 String fullName = declIn.getFullyQualifiedNameForSymbol(forSymbol.getSymbolName());
@@ -107,60 +340,9 @@ namespace Ch.Elca.Iiop.IdlCompiler.Action {
         }
 
         /// <summary>
-        /// register a not fully created type
-        /// </summary>
-        public void RegisterTypeFwdDecl(TypeBuilder type, Symbol forSymbol) {
-            if (forSymbol == null) { 
-                throw new Exception("register error for type: " + 
-                                    type.FullName + ", symbol may not be null"); 
-            }
-            if (IsTypeDeclarded(forSymbol)) {
-                throw new Exception("internal error; a type with the name " + 
-                                    GetKnownType(forSymbol).GetCompactClsType().FullName +
-                                    " is already declared for symbol: " + forSymbol);
-            }
-            TypeContainer container = new CompileTimeTypeContainer(this, type);
-            m_typesInCreation[forSymbol] = container;
-        }
-
-        /// <summary>
-        /// is at least a forward declaration for the type represented by the symbol present
-        /// </summary>
-        public bool IsTypeDeclarded(Symbol forSymbol) {
-            TypeContainer type = GetKnownType(forSymbol);
-            if (type == null) { 
-                return false; 
-            } else {
-                return true;
-            }
-        }
-        
-        /// <summary>
-        /// is a full definitaion present for the type represented by the symbol forSymbol
-        /// </summary>
-        /// <param name="forSymbol"></param>
-        /// <returns></returns>
-        public bool IsTypeFullyDeclarded(Symbol forSymbol) {
-            if ((!IsFwdDeclared(forSymbol)) && (IsTypeDeclarded(forSymbol))) { 
-                return true; 
-            } else {
-                return false;    
-            }
-        }
-
-        public bool IsFwdDeclared(Symbol forSymbol) {
-            TypeContainer result = (TypeContainer)m_typesInCreation[forSymbol];
-            if (result == null) {
-                return false;
-            } else {
-                return true;
-            }
-        }
-
-        /// <summary>
         /// checks, if a type is already declared in a referenced assembly
         /// </summary>
-        public bool IsTypeDeclaredInRefAssemblies(Symbol forSymbol) {           
+        public bool IsTypeDeclaredInRefAssemblies(Symbol forSymbol) {
            return GetTypeFromRefAssemblies(forSymbol) != null;
         }
         
@@ -187,8 +369,12 @@ namespace Ch.Elca.Iiop.IdlCompiler.Action {
                 return true;
             }
         
-            if (CheckInBuildModulesForType(forSymbol)) { 
-                // safe to skip, because type is already fully declared in a previous run
+            // check here directly on module, to find out about runs of the compiler for
+            // previous files (for every run over a new file on the IDL To CLS argument line, 
+            // a new TypeManager is used)
+            Type inBuildModule = GetTypeFromBuildModule(forSymbol);
+            if (inBuildModule != null && !IsIncompleteDeclarationPresent(forSymbol)) { 
+                // safe to skip, because type is already fully declared in this run
                 return true;
             }
                 
@@ -197,19 +383,12 @@ namespace Ch.Elca.Iiop.IdlCompiler.Action {
         }
         
         /// <summary>
-        /// checks if a type is fully declared in a module of the resulting assembly.
-        /// Does only return fully defined types, others are not interesting here.
+        /// checks if a type is known by ModuleBuilder and if yes, returns it; otherwise; returns null        
         /// </summary>  
         private Type GetTypeFromBuildModule(Symbol forSymbol) {
             string fullName = GetFullTypeNameForSymbol(forSymbol);
-            Debug.WriteLine("check type already defined in buildmodule: " + fullName + "; symbol: " + forSymbol.getSymbolName());
             Type result = GetTypeFromBuildModule(fullName);
-            Debug.WriteLine("type found: " + (result != null));
-            if (!(result is TypeBuilder)) {  // type is fully defined (do not return not fully defined types here)
-                Debug.WriteLine("type is already complete");
-                return result;
-            }
-            return null;
+            return result;
         }
         
         /// <summary>
@@ -221,43 +400,19 @@ namespace Ch.Elca.Iiop.IdlCompiler.Action {
             return result;
         }
         
-        /// <summary>
-        ///  checks, if a type is already defined in a previous run
-        /// </summary>
-        public bool CheckInBuildModulesForType(Symbol forSymbol) {
-            if (GetTypeFromBuildModule(forSymbol) != null) {
-                return true;
-            } else {
-                return false;
-            }
-        }
-
         #endregion methods for supporting generation for more than one parse result
-
-        /// <summary> 
-        /// check, that no types not defined left; if so this is an internal error, 
-        /// because already checked during symbol table build.
-        /// </summary>
-        public void AssertAllTypesDefined() {
-            if (m_typesInCreation.Count > 0) {
-                foreach (TypeContainer container in m_typesInCreation.Values) {
-                    Console.WriteLine("internal error, only forward declared: " + 
-                                      container.GetCompactClsType());
-                    // this should not occur, because checked by symbol table
-                }
-                throw new Exception("internal error occured, not all types fully defined");
-            }
-        }
 
         /// <summary> 
         /// get the full defined Type or the fwd decl
         /// </summary>
         public TypeContainer GetKnownType(Symbol forSymbol) {
-            TypeContainer result = (TypeContainer)m_typeTable[forSymbol];
+            // search in all complete types from this run, also typesdefs, ...
+            TypeContainer result = (TypeContainer)m_completeTypeTable[forSymbol];
             if (result == null) {
                 result = (TypeContainer)m_typesInCreation[forSymbol];
             }
             if (result == null) {
+                // search in build-module to get also types from a run over a previous root idl-file (one specified on the command line)
                 Type fromBuildMod = GetTypeFromBuildModule(forSymbol);
                 if (fromBuildMod != null) {
                     result = new CompileTimeTypeContainer(this, fromBuildMod);
@@ -274,41 +429,31 @@ namespace Ch.Elca.Iiop.IdlCompiler.Action {
             }
             if ((result == null) && (m_sequenceRecursionAllowedType != null) &&
                 m_sequenceRecursionAllowedType.SymbolPart.Equals(forSymbol)) {
-                result = m_sequenceRecursionAllowedType.TypePart;                
+                result = m_sequenceRecursionAllowedType.TypePart;
             }
             return result;
         }
-        
-        /// <summary>add a fully defined type to the known types</summary>
-        private void AddTypeDefinition(TypeContainer fullDecl, Symbol forSymbol) {
-            if (m_typesInCreation.ContainsKey(forSymbol)) { 
-                throw new Exception("type can't be registered, a fwd declaration exists");  // should not occur, check by sym table
-            }
-            if (m_typeTable.ContainsKey(forSymbol)) { 
-                throw new Exception("type already defined"); // should not occur, checked by sym table
-            }
-            m_typeTable[forSymbol] = fullDecl;
-        }
-        
-        /// <summary>register a full type definition (CreateType() already called)</summary>
-        public void RegisterTypeDefinition(Type fullDecl, Symbol forSymbol) {
-            TypeContainer container = new CompileTimeTypeContainer(this, fullDecl);
-            AddTypeDefinition(container, forSymbol);
-        }
-
+                
         /// <summary>
-        /// use this to tell the type manager, that a type is now fully created.
-        /// The typemanager checks at the end, if not fully declared types exists and throw an error, if so
+        /// register a resolved typedef
         /// </summary>
-        public void ReplaceFwdDeclWithFullDecl(Type fullDecl, Symbol forSymbol) {
-            m_typesInCreation.Remove(forSymbol);
-            // add to the fully created types
-            TypeContainer container = new CompileTimeTypeContainer(this, fullDecl);
-            m_typeTable[forSymbol] = container;
-        }
-
         public void RegisterTypeDef(TypeContainer fullDecl, Symbol forSymbol) {
-            AddTypeDefinition(fullDecl, forSymbol);
+            AddCompleteTypeDefinition(forSymbol, fullDecl);
+        }
+        
+        /// <summary> 
+        /// check, that no types not defined left; if so this is an internal error, 
+        /// because already checked during symbol table build.
+        /// </summary>
+        public void AssertAllTypesDefined() {
+            if (m_typesInCreation.Count > 0) {
+                foreach (TypeContainer container in m_typesInCreation.Values) {
+                    Console.WriteLine("internal error, not fully declared: " + 
+                                      container.GetCompactClsType());
+                    // this should not occur, because checked by symbol table
+                }
+                throw new Exception("internal error occured, not all types fully defined");
+            }
         }
         
         /// <summary>
@@ -330,6 +475,17 @@ namespace Ch.Elca.Iiop.IdlCompiler.Action {
             m_sequenceRecursionAllowedType = null;
         }
                
+        
+        /// <summary>
+        /// creates a typename for a nested type, which is not nestable
+        /// directly in containing type.
+        /// These types are defined in a special namespace.
+        /// </summary>
+        private string GetFullTypeNameForNestedNotInOuterType(Symbol forSymbol) {
+            Scope declIn = forSymbol.getDeclaredIn();
+            return declIn.getFullyQualifiedNameForNested(forSymbol.getSymbolName());
+        }
+        
         /// <summary>
         /// is the type represented by forSymbol nested in another type?
         /// </summary>

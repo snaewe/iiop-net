@@ -352,28 +352,7 @@ public class MetaDataGenerator : IDLParserVisitor {
         
         return (System.Type[])result.ToArray(typeof(Type));
     }
-    
-    /// <summary>finds the repository id attribute for the symbol starting the search in startInScope</summary>
-    private string FindRepositoryId(string forName, Scope startInScope) {
-        string result = startInScope.getRepositoryIdFor(forName);
-        if (result == null) {
-            // try inside scope to find it
-            Scope innerScope = startInScope.getChildScope(forName);
-            if (innerScope != null) {
-                result = innerScope.getRepositoryIdFor(forName);
-            }
-        }
-        return result;
-    }
-    
-    
-    private void AddRepIdAttribute(TypeBuilder typebuild, String repId) {
-        if (repId != null) {
-            CustomAttributeBuilder repIdAttrBuilder = new RepositoryIDAttribute(repId).CreateAttributeBuilder();
-            typebuild.SetCustomAttribute(repIdAttrBuilder);
-        }
-    }
-    
+        
     private void AddSerializableAttribute(TypeBuilder typebuild) {
         Type attrType = typeof(System.SerializableAttribute);
         ConstructorInfo attrConstr = attrType.GetConstructor(Type.EmptyTypes);
@@ -451,15 +430,14 @@ public class MetaDataGenerator : IDLParserVisitor {
     /** handles the declaration for the interface definition / fwd declaration
      * @return the TypeBuilder for this interface
      */
-    private TypeBuilder CreateOrGetInterfaceDcl(String fullyQualName, System.Type[] interfaces, 
-                                                bool isAbstract, bool isLocal,
-                                                Symbol forSymbol, String repId) {
+    private TypeBuilder CreateOrGetInterfaceDcl(Symbol forSymbol, System.Type[] interfaces, 
+                                                bool isAbstract, bool isLocal, bool isForward) {
         TypeBuilder interfaceToBuild = null;
         if (!m_typeManager.IsFwdDeclared(forSymbol)) {
-            Trace.WriteLine("generating code for interface: " + fullyQualName);
-            interfaceToBuild = m_modBuilder.DefineType(fullyQualName, 
-                                                       TypeAttributes.Interface | TypeAttributes.Public | TypeAttributes.Abstract,
-                                                       null, interfaces);
+            Trace.WriteLine("generating code for interface: " + forSymbol.getSymbolName());
+            interfaceToBuild = m_typeManager.StartTypeDefinition(forSymbol, 
+                                                                 TypeAttributes.Interface | TypeAttributes.Public | TypeAttributes.Abstract,
+                                                                 null, interfaces, isForward);
             // add InterfaceTypeAttribute
             IdlTypeInterface ifType = IdlTypeInterface.ConcreteInterface;
             if (isAbstract) { 
@@ -475,14 +453,12 @@ public class MetaDataGenerator : IDLParserVisitor {
             CustomAttributeBuilder interfaceTypeAttrBuilder = new InterfaceTypeAttribute(ifType).CreateAttributeBuilder();
             interfaceToBuild.SetCustomAttribute(interfaceTypeAttrBuilder);
             // add repository ID
-            AddRepIdAttribute(interfaceToBuild, repId);
+            m_typeManager.AddRepositoryIdAttribute(forSymbol);
             interfaceToBuild.AddInterfaceImplementation(typeof(IIdlEntity));
-            // register type with type manager as not fully declared
-            m_typeManager.RegisterTypeFwdDecl(interfaceToBuild, forSymbol);    
         } else {
             // get incomplete type
-            Trace.WriteLine("complete interface: " + fullyQualName);
-            interfaceToBuild = (TypeBuilder)(m_typeManager.GetKnownType(forSymbol).GetCompactClsType());
+            Trace.WriteLine("complete interface: " + forSymbol.getSymbolName());
+            interfaceToBuild = m_typeManager.GetIncompleteForwardDeclaration(forSymbol);
             // add inheritance relationship:
             for (int i = 0; i < interfaces.Length; i++) {
                 interfaceToBuild.AddInterfaceImplementation(interfaces[i]);
@@ -515,10 +491,9 @@ public class MetaDataGenerator : IDLParserVisitor {
         System.Type[] interfaces = (System.Type[])header.jjtAccept(this, data);
         String fullyQualName = enclosingScope.getFullyQualifiedNameForSymbol(forSymbol.getSymbolName());
 
-        TypeBuilder interfaceToBuild = CreateOrGetInterfaceDcl(fullyQualName, interfaces, 
+        TypeBuilder interfaceToBuild = CreateOrGetInterfaceDcl(forSymbol, interfaces, 
                                                                header.isAbstract(), header.isLocal(),
-                                                               forSymbol, 
-                                                               FindRepositoryId(header.getIdent(), enclosingScope));
+                                                               false);
 
         // generate body
         ASTinterface_body body = (ASTinterface_body)node.jjtGetChild(1);
@@ -527,8 +502,7 @@ public class MetaDataGenerator : IDLParserVisitor {
         body.jjtAccept(this, buildInfo);
     
         // create the type
-        Type resultType = interfaceToBuild.CreateType();
-        m_typeManager.ReplaceFwdDeclWithFullDecl(resultType, forSymbol);
+        m_typeManager.EndTypeDefinition(forSymbol);
         return null;
     }
     
@@ -550,9 +524,8 @@ public class MetaDataGenerator : IDLParserVisitor {
         if (!(m_typeManager.IsTypeDeclarded(forSymbol))) { // ignore fwd-decl if type is already declared, if not generate type for fwd decl
             // it's no problem to add later on interfaces this type should implement with AddInterfaceImplementation,
             // here: specify no interface inheritance, because not known at this point
-            CreateOrGetInterfaceDcl(fullyQualName, Type.EmptyTypes, 
-                                    node.isAbstract(), node.isLocal(), forSymbol, 
-                                    FindRepositoryId(node.getIdent(), enclosingScope));
+            CreateOrGetInterfaceDcl(forSymbol, Type.EmptyTypes, 
+                                    node.isAbstract(), node.isLocal(), true);
         }
         return null;
     }
@@ -645,26 +618,29 @@ public class MetaDataGenerator : IDLParserVisitor {
     /** handles the declaration for the value definition / fwd declaration
      * @return the TypeBuilder for this interface
      */
-    private TypeBuilder CreateOrGetValueDcl(String fullyQualName, System.Type[] interfaces, 
-                                            System.Type parent, bool isAbstract, Symbol forSymbol, 
-                                            String repId) {
+    private TypeBuilder CreateOrGetValueDcl(Symbol forSymbol,
+                                            System.Type parent, System.Type[] interfaces,
+                                            bool isAbstract, bool isForwardDecl) {
         TypeBuilder valueToBuild;
         if (!m_typeManager.IsFwdDeclared(forSymbol)) {
-            Trace.WriteLine("generating code for value type: " + fullyQualName);
+            Trace.WriteLine("generating code for value type: " + forSymbol.getSymbolName());
             TypeAttributes attrs = TypeAttributes.Public | TypeAttributes.Abstract;
             if (isAbstract) {
                 attrs |= TypeAttributes.Interface;
                 if (parent != null) { 
+                    // classes are considered as concrete value types
                     throw new InvalidIdlException("not possible for an abstract value type " +
-                                                  fullyQualName + " to inherit from a concrete one " +
+                                                  forSymbol.getDeclaredIn().getFullyQualifiedNameForSymbol(forSymbol.getSymbolName()) + 
+                                                  " to inherit from a concrete one " +
                                                   parent.FullName);
                 }
             } else {
                 attrs |= TypeAttributes.Class;
             }
-            valueToBuild = m_modBuilder.DefineType(fullyQualName, attrs, parent, interfaces);
+            valueToBuild = m_typeManager.StartTypeDefinition(forSymbol, attrs, parent, interfaces, 
+                                                             isForwardDecl);            
             // add repository ID
-            AddRepIdAttribute(valueToBuild, repId);
+            m_typeManager.AddRepositoryIdAttribute(forSymbol);
             if (isAbstract) {
                 // add InterfaceTypeAttribute
                 IdlTypeInterface ifType = IdlTypeInterface.AbstractValueType;
@@ -672,18 +648,16 @@ public class MetaDataGenerator : IDLParserVisitor {
                 valueToBuild.SetCustomAttribute(interfaceTypeAttrBuilder);
             }
             valueToBuild.AddInterfaceImplementation(typeof(IIdlEntity)); // implement IDLEntity
-            // register type with type manager as not fully declared
-            m_typeManager.RegisterTypeFwdDecl(valueToBuild, forSymbol);    
         } else {
             // get incomplete type
-            Trace.WriteLine("complete valuetype: " + fullyQualName);
-            valueToBuild = (TypeBuilder)m_typeManager.GetKnownType(forSymbol).GetCompactClsType();
+            Trace.WriteLine("complete valuetype: " + forSymbol.getSymbolName());
+            valueToBuild = m_typeManager.GetIncompleteForwardDeclaration(forSymbol);
             // add inheritance relationship:
             for (int i = 0; i < interfaces.Length; i++) {
                 valueToBuild.AddInterfaceImplementation(interfaces[i]);
             }
             if (parent != null) { 
-                valueToBuild.SetParent(parent); 
+                valueToBuild.SetParent(parent);
             }
         }
         // add abstract methods for all interface methods, a class inherit from (only if valueToBuild is a class an not an interface)
@@ -818,14 +792,13 @@ public class MetaDataGenerator : IDLParserVisitor {
             Array.Copy(inheritFrom, 1, tmp, 0, tmp.Length);
             inheritFrom = tmp;
         }
-
-        String fullyQualName = enclosingScope.getFullyQualifiedNameForSymbol(forSymbol.getSymbolName());
-        TypeBuilder valueToBuild = CreateOrGetValueDcl(fullyQualName, inheritFrom, baseClass, 
-                                                       false, forSymbol, 
-                                                       FindRepositoryId(header.getIdent(), enclosingScope));
+        
+        TypeBuilder valueToBuild = CreateOrGetValueDcl(forSymbol, 
+                                                       baseClass, inheritFrom,
+                                                       false, false);
         
         // add implementation class attribute
-        valueToBuild.SetCustomAttribute(new ImplClassAttribute(fullyQualName + "Impl").CreateAttributeBuilder());
+        valueToBuild.SetCustomAttribute(new ImplClassAttribute(valueToBuild.FullName + "Impl").CreateAttributeBuilder());
         // add serializable attribute
         AddSerializableAttribute(valueToBuild);
         
@@ -843,9 +816,7 @@ public class MetaDataGenerator : IDLParserVisitor {
         }
 
         // finally create the type
-        Type resultType = valueToBuild.CreateType();
-        m_typeManager.ReplaceFwdDeclWithFullDecl(resultType, forSymbol);
-        
+        Type resultType = m_typeManager.EndTypeDefinition(forSymbol);        
         
         // add to list of value types generated for informing the user of need for implementation class
         m_valueTypesDefined.Add(resultType);
@@ -882,9 +853,8 @@ public class MetaDataGenerator : IDLParserVisitor {
         }
 
         String fullyQualName = enclosingScope.getFullyQualifiedNameForSymbol(forSymbol.getSymbolName());
-        TypeBuilder valueToBuild = CreateOrGetValueDcl(fullyQualName, interfaces, null,
-                                                       true, forSymbol, 
-                                                       FindRepositoryId(node.getIdent(), enclosingScope));
+        TypeBuilder valueToBuild = CreateOrGetValueDcl(forSymbol, null, interfaces,
+                                                       true, false); 
 
         // generate elements
         BuildInfo buildInfo = new BuildInfo(enclosingScope.getChildScope(forSymbol.getSymbolName()), 
@@ -895,8 +865,7 @@ public class MetaDataGenerator : IDLParserVisitor {
         }
 
         // finally create the type
-        Type resultType = valueToBuild.CreateType();
-        m_typeManager.ReplaceFwdDeclWithFullDecl(resultType, forSymbol);
+        m_typeManager.EndTypeDefinition(forSymbol);
         return null;
     }
     
@@ -914,7 +883,6 @@ public class MetaDataGenerator : IDLParserVisitor {
         }
         
         Debug.WriteLine("begin boxed value type: " + node.getIdent());
-        String fullyQualName = enclosingScope.getFullyQualifiedNameForSymbol(forSymbol.getSymbolName());
         // get the boxed type
         TypeContainer boxedType = (TypeContainer)node.jjtGetChild(0).jjtAccept(this, data);
         if (boxedType == null) {
@@ -924,16 +892,14 @@ public class MetaDataGenerator : IDLParserVisitor {
                               " not (yet) defined for boxed value type " +
                               node.GetIdentification()));
         }
-        boxedType = ReplaceByCustomMappedIfNeeded(boxedType);
-        Trace.WriteLine("generating code for boxed value type: " + fullyQualName);
-        BoxedValueTypeGenerator boxedValueGen = new BoxedValueTypeGenerator();
+        boxedType = ReplaceByCustomMappedIfNeeded(boxedType);        
+
         // do use fusioned type + attributes on fusioned type for boxed value;
-        TypeBuilder resultType = boxedValueGen.CreateBoxedType(boxedType.GetCompactClsType(), m_modBuilder,
-                                                               fullyQualName, boxedType.GetCompactTypeAttrs());
-        AddRepIdAttribute(resultType, FindRepositoryId(node.getIdent(), enclosingScope));
-        resultType.AddInterfaceImplementation(typeof(IIdlEntity));
-        Type result = resultType.CreateType();
-        m_typeManager.RegisterTypeDefinition(result, forSymbol);
+        TypeBuilder resultType = 
+            m_typeManager.StartBoxedValueTypeDefinition(forSymbol, boxedType.GetCompactClsType(),
+                                                        boxedType.GetCompactTypeAttrs());
+
+        m_typeManager.EndTypeDefinition(forSymbol);
         return null;
     }
 
@@ -952,12 +918,11 @@ public class MetaDataGenerator : IDLParserVisitor {
         }
         
         // create only the type-builder, but don't call createType()
-        String fullyQualName = enclosingScope.getFullyQualifiedNameForSymbol(node.getIdent());
         if (!(m_typeManager.IsTypeDeclarded(forSymbol))) { // if the full type declaration already exists, ignore fwd decl
             // it's no problem to add later on interfaces this type should implement and the base class this type should inherit from with AddInterfaceImplementation / set parent
             // here: specify no inheritance, because not known at this point
-            CreateOrGetValueDcl(fullyQualName, Type.EmptyTypes, null, node.isAbstract(),
-                                forSymbol, FindRepositoryId(node.getIdent(), enclosingScope));
+            CreateOrGetValueDcl(forSymbol, null, Type.EmptyTypes, 
+                                node.isAbstract(), true);
         }
         return null;
     }
@@ -1210,13 +1175,12 @@ public class MetaDataGenerator : IDLParserVisitor {
         }
         
         String constContainerName = targetScope.getFullyQualifiedNameForSymbol(constSymbol.getSymbolName());
-        TypeBuilder constContainer = m_modBuilder.DefineType(constContainerName, 
-                                                             TypeAttributes.Class | TypeAttributes.Sealed | TypeAttributes.Public, 
-                                                             typeof(System.Object), new System.Type[] { typeof(IIdlEntity) });
-
-        IlEmitHelper emitHelper = IlEmitHelper.GetSingleton();
-        FieldBuilder constField = emitHelper.AddFieldWithCustomAttrs(constContainer, "ConstVal", constType, 
-                                                                     FieldAttributes.Static | FieldAttributes.InitOnly | FieldAttributes.Public);
+        TypeBuilder constContainer = m_typeManager.StartTypeDefinition(constSymbol, constContainerName,
+                                                                       TypeAttributes.Class | TypeAttributes.Sealed | TypeAttributes.Public, 
+                                                                       typeof(System.Object), new System.Type[] { typeof(IIdlEntity) }, false);
+                
+        FieldBuilder constField = m_ilEmitHelper.AddFieldWithCustomAttrs(constContainer, "ConstVal", constType, 
+                                                                         FieldAttributes.Static | FieldAttributes.InitOnly | FieldAttributes.Public);
         
         // add private default constructor
         constContainer.DefineDefaultConstructor(MethodAttributes.Private);
@@ -1229,7 +1193,7 @@ public class MetaDataGenerator : IDLParserVisitor {
         constrIl.Emit(OpCodes.Ret);
 
         // create the type
-        constContainer.CreateType();
+        m_typeManager.EndTypeDefinition(constSymbol);
         return null;
     }
 
@@ -1753,9 +1717,10 @@ public class MetaDataGenerator : IDLParserVisitor {
         TypeAttributes typeAttrs = TypeAttributes.Class | TypeAttributes.Public | TypeAttributes.Serializable | TypeAttributes.BeforeFieldInit | 
                                    /* TypeAttributes.SequentialLayout | */ TypeAttributes.Sealed;
 
-        TypeBuilder structToCreate = m_modBuilder.DefineType(fullyQualName, typeAttrs, 
-                                                             typeof(System.ValueType),
-                                                             new System.Type[] { typeof(IIdlEntity) });
+        
+        TypeBuilder structToCreate = m_typeManager.StartTypeDefinition(forSymbol, fullyQualName,
+                                                                       typeAttrs,
+                                                                       typeof(System.ValueType), new System.Type[] { typeof(IIdlEntity) }, false);
         BuildInfo thisTypeInfo = new BuildInfo(buildInfo.GetBuildScope(), structToCreate,
                                                forSymbol);
 
@@ -1766,9 +1731,7 @@ public class MetaDataGenerator : IDLParserVisitor {
         structToCreate.SetCustomAttribute(new IdlStructAttribute().CreateAttributeBuilder());
         
         // create the type
-        Type resultType = structToCreate.CreateType();
-        // type must be registered with the type-manager
-        m_typeManager.RegisterTypeDefinition(resultType, forSymbol);
+        Type resultType = m_typeManager.EndTypeDefinition(forSymbol);
         return new TypeContainer(resultType);
     }
 
@@ -1926,9 +1889,10 @@ public class MetaDataGenerator : IDLParserVisitor {
             Scope nestedScope = buildInfo.GetBuildScope().GetScopeForNested(forSymbol);
             fullyQualName = nestedScope.getFullyQualifiedNameForSymbol(forSymbol.getSymbolName());
         }
-        UnionGenerationHelper genHelper = new UnionGenerationHelper(m_modBuilder, fullyQualName, 
-                                                                   TypeAttributes.Public);
-
+        
+        UnionGenerationHelper genHelper = 
+            m_typeManager.StartUnionTypeDefinition(forSymbol, fullyQualName);
+        
         UnionBuildInfo thisInfo = new UnionBuildInfo(buildInfo.GetBuildScope(), genHelper,
                                                      forSymbol);
 
@@ -1948,9 +1912,7 @@ public class MetaDataGenerator : IDLParserVisitor {
         switchBody.jjtAccept(this, thisInfo);        
         
         // create the resulting type
-        Type resultType = genHelper.FinalizeType();
-        // type must be registered with the type-manager
-        m_typeManager.RegisterTypeDefinition(resultType, forSymbol);
+        Type resultType = m_typeManager.EndUnionTypeDefinition(forSymbol, genHelper);
         return new TypeContainer(resultType);
     }
 
@@ -2055,9 +2017,9 @@ public class MetaDataGenerator : IDLParserVisitor {
             fullyQualName = nestedScope.getFullyQualifiedNameForSymbol(forSymbol.getSymbolName());
         }
         TypeAttributes typeAttrs = TypeAttributes.Class | TypeAttributes.Public | TypeAttributes.Sealed;        
-        TypeBuilder enumToCreate = m_modBuilder.DefineType(fullyQualName, typeAttrs,
-                                                           typeof(System.Enum));
-        
+        TypeBuilder enumToCreate = 
+            m_typeManager.StartTypeDefinition(forSymbol, fullyQualName, typeAttrs,
+                                              typeof(System.Enum), Type.EmptyTypes, false);                                                                                     
         
         // add value__ field, see DefineEnum method of ModuleBuilder
         enumToCreate.DefineField("value__", typeof(System.Int32), 
@@ -2075,7 +2037,7 @@ public class MetaDataGenerator : IDLParserVisitor {
         enumToCreate.SetCustomAttribute(new IdlEnumAttribute().CreateAttributeBuilder());
         
         // create the type
-        Type resultType = enumToCreate.CreateType();
+        Type resultType = m_typeManager.EndTypeDefinition(forSymbol);         
 
         // update the symbol values:
         for (int i = 0; i < node.jjtGetNumChildren(); i++) {
@@ -2086,8 +2048,6 @@ public class MetaDataGenerator : IDLParserVisitor {
             symbol.SetValueAsLiteral(new EnumValLiteral(enumVal));
         }
 
-        // type must be registered with the type-manager
-        m_typeManager.RegisterTypeDefinition(resultType, forSymbol);
         return new TypeContainer(resultType);
     }
 
@@ -2261,22 +2221,23 @@ public class MetaDataGenerator : IDLParserVisitor {
             Scope nestedScope = buildInfo.GetBuildScope().GetScopeForNested(forSymbol);
             fullyQualName = nestedScope.getFullyQualifiedNameForSymbol(forSymbol.getSymbolName());
         }
-        TypeBuilder exceptToCreate = m_modBuilder.DefineType(fullyQualName, 
-                                                             TypeAttributes.Class | TypeAttributes.Public, 
-                                                             typeof(AbstractUserException));
+        TypeBuilder exceptToCreate = 
+            m_typeManager.StartTypeDefinition(forSymbol, fullyQualName,
+                                              TypeAttributes.Class | TypeAttributes.Public,
+                                              typeof(AbstractUserException), Type.EmptyTypes, 
+                                              false);
+                                                                               
         BuildInfo thisTypeInfo = new BuildInfo(buildInfo.GetBuildScope(), exceptToCreate,
                                                forSymbol);
 
         String repId = GetRepIdForException(forSymbol);
-        AddRepIdAttribute(exceptToCreate, repId);
+        m_typeManager.AddRepositoryIdAttribute(exceptToCreate, repId);
 
         // add fileds ...
         node.childrenAccept(this, thisTypeInfo); // let the members add themself to the typeBuilder
         
         // create the type
-        Type resultType = exceptToCreate.CreateType();
-        // type must be registered with the type-manager
-        m_typeManager.RegisterTypeDefinition(resultType, forSymbol);
+        m_typeManager.EndTypeDefinition(forSymbol);
         return null;
     }
 
