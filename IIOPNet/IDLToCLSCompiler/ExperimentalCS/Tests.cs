@@ -100,10 +100,23 @@ namespace Ch.Elca.Iiop.IDLCompiler.Tests {
                                    ifAttr.IdlType);            
         }
         
+        private void CheckImplClassAttr(Type toCheck, string implClassName) {
+            object[] attrs = toCheck.GetCustomAttributes(typeof(ImplClassAttribute), 
+                                                         false);
+            Assertion.AssertEquals("wrong number of ImplClassAttribute", 1, attrs.Length);
+            ImplClassAttribute attr = (ImplClassAttribute) attrs[0];
+            Assertion.AssertEquals("wrong implclass attr", implClassName,
+                                   attr.ImplClass);            
+        }        
+        
         private void CheckIdlEnumAttributePresent(Type enumType) {
             object[] attrs = enumType.GetCustomAttributes(typeof(IdlEnumAttribute), 
                                                           false);
             Assertion.AssertEquals("wrong number of IdlEnumAttribute", 1, attrs.Length);
+        }
+        
+        private void CheckSerializableAttributePresent(Type toCheck) {
+            Assertion.AssertEquals("not serializable", true, toCheck.IsSerializable);
         }
         
         private void CheckMethodPresent(Type testType, string methodName, 
@@ -174,7 +187,7 @@ namespace Ch.Elca.Iiop.IDLCompiler.Tests {
         [Test]
         public void TestLocalInterfaces() {
             CheckInterfaceDefinitions("local", IdlTypeInterface.LocalInterface);
-        }
+        } 
         
         [Test]
         public void TestEnum() {
@@ -208,6 +221,40 @@ namespace Ch.Elca.Iiop.IDLCompiler.Tests {
             CheckEnumField(fields[2], "C");
             
             writer.Close();            
+        }
+        
+        [Test]
+        public void TestConcreteValueType() {
+            MemoryStream testSource = new MemoryStream();
+            StreamWriter writer = new StreamWriter(testSource, s_latin1);
+            
+            // idl:
+            writer.WriteLine("module testmod {");
+            writer.WriteLine("    valuetype Test {");
+            writer.WriteLine("        private octet x;");
+            writer.WriteLine("        octet EchoOctet(in octet arg);");
+            writer.WriteLine("        attribute octet attr;");
+            writer.WriteLine("    };");
+            writer.WriteLine("    #pragma ID Test \"IDL:testmod/Test:1.0\"");
+            writer.WriteLine("};");
+            
+            writer.Flush();
+            testSource.Seek(0, SeekOrigin.Begin);
+            Assembly result = CreateIdl(testSource);
+                       
+            // check if val-type is correctly created
+            Type valType = result.GetType("testmod.Test", true);
+                       
+            CheckImplClassAttr(valType, "testmod.TestImpl");
+            CheckSerializableAttributePresent(valType);
+            CheckRepId(valType, "IDL:testmod/Test:1.0");
+            
+            CheckIIdlEntityInheritance(valType);
+            
+            CheckMethodPresent(valType, "EchoOctet",
+                               typeof(System.Byte), new Type[] { typeof(System.Byte) });
+                        
+            writer.Close();
         }
         
         #endregion IMethods
