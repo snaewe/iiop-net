@@ -82,7 +82,8 @@ namespace Ch.Elca.Iiop {
         #endregion IFields
         #region IConstructors
 
-        /// <param name="transport">needed to allocate a connection for this request</param>
+        /// <param name="nextSink">the next sink in the channel. Precondition: in this sink chain, a
+        /// IiopClientTransportSink must be present.</param>
         internal IiopClientFormatterSink(IClientChannelSink nextSink) {
             m_nextSink = nextSink;            
             
