@@ -71,6 +71,9 @@ interface TestService {
     any RetrieveStructWithTypedefMember(in long elemVal);
     any RetrieveTypedefedSeq(in long nrOfElems, in long memberVal);
 
+    unsigned long ExtractFromULongAny(in any arg);
+    any RetrieveULongAsAny(in unsigned long arg);
+
     wchar EchoWChar(in wchar arg);
     wstring EchoWString(in wstring arg);
 

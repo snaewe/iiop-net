@@ -28,6 +28,8 @@ public:
   CORBA::Any* EchoAny(const CORBA::Any& arg);
   CORBA::Any* RetrieveStructWithTypedefMember(CORBA::Long elemVal);
   CORBA::Any* RetrieveTypedefedSeq(CORBA::Long nrOfElems, CORBA::Long memberVal);  
+  CORBA::ULong ExtractFromULongAny(const CORBA::Any& arg);
+  CORBA::Any* RetrieveULongAsAny(CORBA::ULong arg);
   ::wstringSeq* RetrieveWstringSeq(const CORBA::WChar * val, CORBA::Long nrOrElems);
   ::wstringSeq* EchoWstringSeq(const ::wstringSeq& arg);
   ::seqOfWStringSeq* EchoSeqOfWStringSeq(const ::seqOfWStringSeq& arg);
@@ -84,6 +86,21 @@ TestService_impl::RetrieveWStringAsAny(const CORBA::WChar* arg) {
     *resultAny <<= argVal;
     return resultAny;
 }
+
+CORBA::ULong 
+TestService_impl::ExtractFromULongAny(const CORBA::Any& arg) {
+    CORBA::ULong result;
+    arg >>= result;
+    return result;    
+}
+
+CORBA::Any*
+TestService_impl::RetrieveULongAsAny(CORBA::ULong arg) {
+    CORBA::Any* resultAny = new CORBA::Any;
+    *resultAny <<= arg;
+    return resultAny;    
+}
+
 
 CORBA::Any*
 TestService_impl::EchoAny (const CORBA::Any& arg) {

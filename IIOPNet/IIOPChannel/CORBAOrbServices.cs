@@ -151,6 +151,18 @@ namespace omg.org.CORBA {
 		
 		#region Typecode creation operations
 		
+		public TypeCode create_ulong_tc() {
+		    return new ULongTC();
+		}
+		
+    	public TypeCode create_ushort_tc() {
+		    return new UShortTC();
+		}
+		
+		public TypeCode create_ulonglong_tc() {
+		    return new ULongLongTC();
+		}
+		
 		public TypeCode create_string_tc(int bound) {
 			return new StringTC(bound);
 		}

@@ -357,6 +357,20 @@ namespace Ch.Elca.Iiop.IntegrationTests {
             Assertion.AssertEquals("wrong result octet-call", arg, result);
         }
 
+        [Test]
+        public void TestULongAsAny() {
+            int arg = 74;
+            int result = (int) m_testService.RetrieveULongAsAny(arg);
+            Assertion.AssertEquals("wrong result of retrieveULongAsAny", arg, result);
+            
+            OrbServices orb = OrbServices.GetSingleton();
+            int arg2 = 89;
+            omg.org.CORBA.TypeCode ulongTC = orb.create_ulong_tc();
+            Any any = new Any(arg2, ulongTC);
+            int result2 = m_testService.ExtractFromULongAny(any);
+            Assertion.AssertEquals("wrong result of ExtractFromULongAny", arg2, result2);
+        }
+
     }
 
 }
