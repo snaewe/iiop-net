@@ -212,7 +212,7 @@ namespace Ch.Elca.Iiop.Idl {
             // define the constructor which transforms a .NET array to the form assignable to the valField, if types are different
             if (!valField.FieldType.Equals(arrayType)) {
                 // need a constructor which transforms instance before assigning
-                DefineTransformAndAssignConstr(boxBuilder, valField, arrayType);
+                DefineTransformAndAssignConstrForArray(boxBuilder, valField, arrayType);
             }    
         }
         
@@ -265,7 +265,41 @@ namespace Ch.Elca.Iiop.Idl {
             if ((fullUnboxed.IsArray) && (fullUnboxed.GetElementType().IsArray))  { 
                 // add a constructor, which takes a CLS array (with an element type which is also an array) and creates the boxed value type for the instance
                 // for arrays with an element type, which is not an array, such a constructor already exists
-                DefineTransformAndAssignConstr(boxBuilder, valField, fullUnboxed);
+                DefineTransformAndAssignConstrForArray(boxBuilder, valField, fullUnboxed);
+            }
+            
+            if ((boxedType.IsArray) && (!boxedType.GetElementType().IsArray) && (boxedType.GetElementType().IsSubclassOf(typeof(BoxedValueBase)))) { 
+                
+                Type boxedElemType;
+                try {
+                    // get the type boxed in the element
+                    boxedElemType = (Type)boxedType.GetElementType().InvokeMember(
+                        BoxedValueBase.GET_BOXED_TYPE_METHOD_NAME, 
+                        BindingFlags.InvokeMethod | BindingFlags.Public | BindingFlags.NonPublic |
+                        BindingFlags.Static | BindingFlags.DeclaredOnly, 
+                        null, null, new object[0]);
+                } catch (Exception) {
+                    // invalid type found: boxedType.GetElementType(),
+                    // static method missing or not callable:
+                    // BoxedValueBase.GET_BOXED_TYPE_METHOD_NAME
+                    throw new INTERNAL(10044, CompletionStatus.Completed_MayBe);
+                }
+
+                if (!boxedElemType.IsArray) {
+                    // The boxed type which should be defined, has type of the following form boxed:
+                    // a sequence of BoxedValues, but these boxed values do not box arrays itself 
+                    // for this boxed type an additional transform constructor is needed, which boxes the elements
+                    // of the sequence
+                    Array boxedInnerArray = Array.CreateInstance(boxedElemType, 0);
+                    DefineTransformAndAssignConstrForArray(boxBuilder, valField, boxedInnerArray.GetType());
+                }
+
+            }
+
+            if ((!boxedType.IsArray) && (boxedType.IsSubclassOf(typeof(BoxedValueBase)))) {
+                // The boxed value type boxes another boxed value type --> need a transform constructor,
+                // which takes an unboxed value and boxes it, before assigning it to the field
+                throw new NO_IMPLEMENT(12345, CompletionStatus.Completed_MayBe);
             }
 
             DefineGetFirstNonBoxedType(boxBuilder, fullUnboxed);
@@ -415,7 +449,7 @@ namespace Ch.Elca.Iiop.Idl {
         /// <summary>defines a constructor which takes a .NET array and transforms it to an instance of type assignable to the valField</summary>
         /// <remarks>this constructor is needed for automatic boxing support while serializing, e.g. an int[][] should be boxed: 
         /// in this case, a tansformation is needed: box the inner arrays in seq1_long --> seq1_long[] </remarks>
-        private void DefineTransformAndAssignConstr(TypeBuilder boxBuilder, FieldBuilder valField, Type arrayType) {
+        private void DefineTransformAndAssignConstrForArray(TypeBuilder boxBuilder, FieldBuilder valField, Type arrayType) {
             ConstructorBuilder assignConstrBuilder = boxBuilder.DefineConstructor(MethodAttributes.Public, CallingConventions.Standard, new Type[] { arrayType } );
             ILGenerator bodyGen = assignConstrBuilder.GetILGenerator();
             // define one local variable:
