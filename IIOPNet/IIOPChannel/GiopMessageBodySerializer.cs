@@ -831,9 +831,9 @@ namespace Ch.Elca.Iiop.MessageHandling {
                                                                 cdrStream);
             
             if (result == null) { 
-                throw new Exception("received system error from peer orb, but error was not deserializable");
+                return new Exception("received system error from peer orb, but error was not deserializable");
             } else {
-                throw result;
+                return result;
             }
         }
 
@@ -846,9 +846,9 @@ namespace Ch.Elca.Iiop.MessageHandling {
                                                                 Util.AttributeExtCollection.EmptyCollection,
                                                                 cdrStream);
             if (result == null) {
-                throw new Exception("user exception received from peer orb, but was not deserializable");
+                return new Exception("user exception received from peer orb, but was not deserializable");
             } else {
-                throw result;
+                return result;
             }
         }
         
