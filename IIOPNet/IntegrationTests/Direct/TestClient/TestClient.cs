@@ -34,6 +34,7 @@ using NUnit.Framework;
 using Ch.Elca.Iiop;
 using Ch.Elca.Iiop.Services;
 using omg.org.CosNaming;
+using omg.org.CORBA;
 
 namespace Ch.Elca.Iiop.IntegrationTests {
 
@@ -457,6 +458,16 @@ namespace Ch.Elca.Iiop.IntegrationTests {
             System.Int32 arg4 = 89;
             System.Int32 result4 = (System.Int32) m_testService.EchoAnything(arg4);
             Assertion.AssertEquals(arg4, result4);
+        }
+        
+        [Test]
+        public void TestCustomAnyTypeCode() {
+        	System.String testString = "abcd";
+        	OrbServices orb = OrbServices.GetSingleton();
+        	omg.org.CORBA.TypeCode wstringTc = orb.create_wstring_tc(0);
+        	Any any = new Any(testString, wstringTc);
+        	System.String echo = (System.String)m_testService.EchoAnything(any);
+        	Assertion.AssertEquals(testString, echo);
         }
 
         [Test]

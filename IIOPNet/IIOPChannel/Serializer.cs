@@ -912,6 +912,7 @@ namespace Ch.Elca.Iiop.Marshalling {
         #region SFields
 
         private static Type s_supInterfaceAttrType = typeof(SupportedInterfaceAttribute);
+    	private static Type s_anyType = typeof(omg.org.CORBA.Any);
 
         #endregion SFields
         #region IFields
@@ -951,8 +952,20 @@ namespace Ch.Elca.Iiop.Marshalling {
             TypeCodeImpl typeCode = new NullTC();
             Type actualType = null;            
             if (actual != null) {
-                actualType = DetermineTypeToUse(actual);
-                typeCode = Repository.CreateTypeCodeForType(actualType, attributes);
+            	if (actual.GetType().Equals(s_anyType)) {
+            		// use user defined type code
+            		typeCode = ((Any)actual).Type as TypeCodeImpl;            		
+            		if (typeCode == null) {
+            			throw new INTERNAL(457, CompletionStatus.Completed_MayBe);
+            		}
+            		// type, which should be used to serialise value is determined by typecode!
+            		actualType = Repository.GetTypeForTypeCode(typeCode);
+            		actual = ((Any)actual).Value;
+            	} else {
+            		// automatic type code creation
+                    actualType = DetermineTypeToUse(actual);
+                    typeCode = Repository.CreateTypeCodeForType(actualType, attributes);
+            	}
             }
             typeCode.WriteToStream(targetStream);
             if (actual != null) {            	

@@ -416,7 +416,7 @@ namespace Ch.Elca.Iiop.Idl {
         /// <summary>gets the CLS type for the Typecode</summary>
         public static Type GetTypeForTypeCode(omg.org.CORBA.TypeCode typeCode) {
             if (!(typeCode is omg.org.CORBA.TypeCodeImpl)) { 
-                return null; 
+                throw new INTERNAL(567, CompletionStatus.Completed_MayBe); 
             } else {
                 return (typeCode as TypeCodeImpl).GetClsForTypeCode();
             }

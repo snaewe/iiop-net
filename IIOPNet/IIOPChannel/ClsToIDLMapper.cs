@@ -193,6 +193,8 @@ namespace Ch.Elca.Iiop.Idl {
 
         private static Type s_corbaTypeCodeImplType = typeof(TypeCodeImpl);
         private static Type s_corbaTypeCodeType = typeof(omg.org.CORBA.TypeCode);
+    	
+    	private static Type s_anyType = typeof(omg.org.CORBA.Any);
 
         #endregion SFields
         #region IConstructors
@@ -369,19 +371,21 @@ namespace Ch.Elca.Iiop.Idl {
             } else if (clsType.IsSubclassOf(s_boxedValBaseType)) {
                 // a boxed value type, which needs not to be boxed/unboxed but should be handled like a normal value type
                 return action.MapToIdlBoxedValueType(clsType, attributes, true);
-            } else if (clsType.Equals(s_objectType)) {
-                return CallActionForDNObject(ref clsType, attributes, action);
             } else if (clsType.IsSubclassOf(s_exceptType) || clsType.Equals(s_exceptType)) {
                 return action.MapException(clsType);
+            } else if (IsMarshalledAsStruct(clsType)) {
+                 return action.MapToIdlStruct(clsType);
+            } else if (IsMarshalledAsUnion(clsType)) {
+                return action.MapToIdlUnion(clsType);
+            } else if (clsType.Equals(s_objectType)) {
+                return CallActionForDNObject(ref clsType, attributes, action);
+            } else if (clsType.Equals(s_anyType)) {
+            	return action.MapToIdlAny(clsType);
             } else if (clsType.Equals(s_typeType) || clsType.IsSubclassOf(s_typeType)) {
                 return action.MapToTypeDesc(clsType);
             } else if (clsType.Equals(s_corbaTypeCodeImplType) || clsType.IsSubclassOf(s_corbaTypeCodeImplType) ||
                        clsType.Equals(s_corbaTypeCodeType)) {
                 return action.MapToTypeCode(clsType);
-            } else if (IsMarshalledAsStruct(clsType)) {
-                 return action.MapToIdlStruct(clsType);
-            } else if (IsMarshalledAsUnion(clsType)) {
-                return action.MapToIdlUnion(clsType);
             } else if (IsDefaultMarshalByVal(clsType)) {
                 return action.MapToIdlConcreateValueType(clsType);
             } else if (!UnmappableType(clsType)) {

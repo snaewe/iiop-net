@@ -417,7 +417,8 @@ namespace omg.org.CORBA {
         #region IMethods
         
         internal override Type GetClsForTypeCode() {
-            throw new NotSupportedException("this operation is not supported for a NullTC");
+            // this operation is not supported for a NullTC
+            throw new BAD_OPERATION(478, CompletionStatus.Completed_MayBe);
         }
 
         #endregion IMethods
