@@ -81,7 +81,7 @@ namespace Ch.Elca.Iiop.MessageHandling {
             CdrInputStream msgBody = msgInput.GetMessageContentReadingStream();
             // deserialize message body
             GiopMessageBodySerialiser ser = GiopMessageBodySerialiser.GetSingleton();
-            return ser.DeserialiseReply(msgInput, msgBody, msgInput.Header.Version, requestMessage);
+            return ser.DeserialiseReply(msgBody, msgInput.Header.Version, requestMessage);
         }
 
         /// <summary>reads an incoming Giop request-message from the Stream sourceStream</summary>
@@ -91,7 +91,7 @@ namespace Ch.Elca.Iiop.MessageHandling {
             CdrInputStream msgBody = msgInput.GetMessageContentReadingStream();
             // deserialize the message body (the GIOP-request id is included in this message)
             GiopMessageBodySerialiser ser = GiopMessageBodySerialiser.GetSingleton();
-            return ser.DeserialiseRequest(msgInput, msgBody, msgInput.Header.Version);
+            return ser.DeserialiseRequest(msgBody, msgInput.Header.Version);
         }
 
         /// <summary>serialises an outgoing .NET request Message on client side</summary>

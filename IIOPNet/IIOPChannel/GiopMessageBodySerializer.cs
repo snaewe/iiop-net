@@ -374,12 +374,10 @@ namespace Ch.Elca.Iiop.MessageHandling {
         /// <summary>
         /// Deserialises the Giop Message body for a request
         /// </summary>
-        /// <param name="msgInput"></param>
         /// <param name="cdrStream"></param>
         /// <param name="version"></param>
         /// <returns></returns>
-        public IMessage DeserialiseRequest(CdrMessageInputStream msgInput, CdrInputStream cdrStream,
-                                           GiopVersion version) {
+        public IMessage DeserialiseRequest(CdrInputStream cdrStream, GiopVersion version) {
             SimpleGiopMsg msg = new SimpleGiopMsg();
             msg.Properties.Add(SimpleGiopMsg.GIOP_VERSION_KEY, version);
             try {
@@ -391,7 +389,6 @@ namespace Ch.Elca.Iiop.MessageHandling {
                 // read the request-ID and set it as a message property
                 uint requestId = cdrStream.ReadULong(); 
                 msg.Properties.Add(SimpleGiopMsg.REQUEST_ID_KEY, requestId);
-                msgInput.RequestId = requestId; // msgInput needs to know request-id for fragment support
                 Trace.WriteLine("received a message with reqId: " + requestId);
                 // read response-flags:
                 byte respFlags = cdrStream.ReadOctet(); Debug.WriteLine("response-flags: " + respFlags);
@@ -562,7 +559,7 @@ namespace Ch.Elca.Iiop.MessageHandling {
         }
 
 
-        public IMessage DeserialiseReply(CdrMessageInputStream msgInput, CdrInputStream cdrStream, 
+        public IMessage DeserialiseReply(CdrInputStream cdrStream, 
                                          GiopVersion version, IMethodCallMessage methodCall) {
             if ((version.Major == 1) && (version.Minor <= 1)) { // for GIOP 1.0 / 1.1, the service context is placed here
                 ServiceContextCollection coll = DeserialiseContext(cdrStream); // deserialize the service contexts
@@ -570,7 +567,6 @@ namespace Ch.Elca.Iiop.MessageHandling {
             }
             
             uint forRequestId = cdrStream.ReadULong();
-            msgInput.RequestId = forRequestId; // set the request-id for this message
             uint responseStatus = cdrStream.ReadULong();
             if (!((version.Major == 1) && (version.Minor <= 1))) { // for GIOP 1.2 and later, service context is here
                 ServiceContextCollection coll = DeserialiseContext(cdrStream); // deserialize the service contexts

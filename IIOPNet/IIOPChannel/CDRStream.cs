@@ -305,7 +305,6 @@ namespace Ch.Elca.Iiop.Cdr {
 
         private CdrInputStreamImpl m_inputStream;
         private GiopHeader m_header;
-        private uint m_reqId = 0;
 
         #endregion IFields
         #region IConstructors
@@ -325,15 +324,6 @@ namespace Ch.Elca.Iiop.Cdr {
             }
         }
         
-        public uint RequestId {
-            get { 
-                return m_reqId; 
-            }
-            set { 
-                m_reqId = value; 
-            }
-        }
-
         #endregion IProperties
         #region IMethods
         
