@@ -54,6 +54,7 @@ namespace Ch.Elca.Iiop.CodeSet {
             // add the non-endian dependant encodings here
             AddEncoding(CodeSetService.LATIN1_SET, new Latin1Encoding());
             AddEncoding(CodeSetService.ISO646IEC_SINGLE, new ASCIIEncoding());
+            AddEncoding(CodeSetService.UTF8_SET, new UTF8Encoding());
         }
 
         #endregion IConstructors

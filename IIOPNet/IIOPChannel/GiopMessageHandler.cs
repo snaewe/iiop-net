@@ -382,6 +382,9 @@ namespace Ch.Elca.Iiop.Tests {
             object[] args = new object[] { ((Int32) 1), ((Int32) 2) };
             string uri = "iiop://localhost:8087/testuri"; // Giop 1.2 will be used because no version spec in uri
             TestMessage msg = new TestMessage(methodToCall, args, uri);
+            // create a connection context
+            IiopServerConnectionManager.GetManager().RegisterActiveConnection();
+
             // create the reply
             ReturnMessage retMsg = new ReturnMessage((Int32) 3, new object[0], 0, null, msg);
             
@@ -423,6 +426,9 @@ namespace Ch.Elca.Iiop.Tests {
             cdrIn.ForceReadAlign(Aligns.Align8);
             // now return value is following
             Assertion.AssertEquals(3, cdrIn.ReadLong());
+
+            // release connection context
+            IiopServerConnectionManager.GetManager().UnregisterActiveConnection();
         }
         
         public void TestRequestDeserialisation() {          
@@ -494,7 +500,7 @@ namespace Ch.Elca.Iiop.Tests {
             Assertion.AssertEquals(2, args.Length);
             Assertion.AssertEquals(1, args[0]);
             Assertion.AssertEquals(2, args[1]);
-            // release connection
+            // release connection context
             IiopServerConnectionManager.GetManager().UnregisterActiveConnection();
         }
         
@@ -504,6 +510,9 @@ namespace Ch.Elca.Iiop.Tests {
             object[] args = new object[] { ((Int32) 1), ((Int32) 2) };
             string uri = "iiop://localhost:8087/testuri"; // Giop 1.2 will be used because no version spec in uri
             TestMessage requestMsg = new TestMessage(methodToCall, args, uri);
+            // prepare connection context
+            IiopClientConnectionManager manager = IiopClientConnectionManager.GetManager();
+			GiopClientConnectionContext context = manager.AllocateConnection(requestMsg);            
             // create the reply
             MemoryStream sourceStream = new MemoryStream();
             CdrOutputStreamImpl cdrOut = new CdrOutputStreamImpl(sourceStream, 0, new GiopVersion(1, 2));
@@ -533,6 +542,9 @@ namespace Ch.Elca.Iiop.Tests {
             ReturnMessage result = (ReturnMessage) handler.ParseIncomingReplyMessage(sourceStream, requestMsg);
             Assertion.AssertEquals(3, result.ReturnValue);
             Assertion.AssertEquals(0, result.OutArgCount);
+            // release connection context
+            manager.ReleaseConnection(requestMsg);
+
         }
     
     }

@@ -42,7 +42,7 @@ namespace Ch.Elca.Iiop.CorbaObjRef {
     /// Interface supported by all tagged-components. 
     /// Tagged Components are used in IorProfiles.
     /// </summary>
-    internal interface TaggedComponent {
+    public interface TaggedComponent {
         
         #region IProperties
 
@@ -287,6 +287,9 @@ namespace Ch.Elca.Iiop.CorbaObjRef {
         protected ushort m_port;
 
         protected byte[] m_objectKey;
+        
+        /// <summary>the tagged components in this profile</summary>
+        protected TaggedComponent[] m_taggedComponents;
 
         #endregion IFields
         #region IConstructors
@@ -335,6 +338,16 @@ namespace Ch.Elca.Iiop.CorbaObjRef {
                 return m_objectKey; 
             }
         }
+        
+        /// <summary>the tagged components in this profile</summary>
+        public TaggedComponent[] TaggedComponents {
+            get { 
+                return m_taggedComponents; 
+            }
+            set {
+                m_taggedComponents = value; 
+            }
+        }
 
         /// <summary>
         /// the id of the profile
@@ -361,12 +374,6 @@ namespace Ch.Elca.Iiop.CorbaObjRef {
     /// </summary>
     public class InternetIiopProfile : IorProfile {
         
-        #region IFields
-
-        /// <summary>the tagged components in this profile</summary>
-        private TaggedComponent[] m_taggedComponents;        
-
-        #endregion IFields
         #region IConstructors
 
         public InternetIiopProfile(GiopVersion version, string hostName, ushort port, byte[] objectKey) : base(version, hostName, port, objectKey) {
@@ -390,16 +397,6 @@ namespace Ch.Elca.Iiop.CorbaObjRef {
 
         #endregion IConstructors
         #region IProperties
-
-        /// <summary>the tagged components in this profile</summary>
-        internal TaggedComponent[] TaggedComponents {
-            get { 
-                return m_taggedComponents; 
-            }
-            set {
-                m_taggedComponents = value; 
-            }
-        }
 
         /// <summary>returns the profile-id for this profile</summary>
         public override ulong ProfileId {
@@ -487,12 +484,6 @@ namespace Ch.Elca.Iiop.CorbaObjRef {
     /// </remarks>
     public class MultipleComponentsProfile : IorProfile {
     
-        #region IFields
-
-        /// <summary>the tagged components in this profile</summary>
-        private TaggedComponent[] m_taggedComponents;
-
-        #endregion IFields
         #region IConstructors
 
         public MultipleComponentsProfile() : base(new GiopVersion(1,2), null, 0, null) {
@@ -515,16 +506,6 @@ namespace Ch.Elca.Iiop.CorbaObjRef {
 
         #endregion IConstructors
         #region IProperties
-
-        /// <summary>the tagged components in this profile</summary>
-        internal TaggedComponent[] TaggedComponents {
-            get { 
-                return m_taggedComponents; 
-            }
-            set {
-                m_taggedComponents = value; 
-            }
-        }
 
         /// <summary>returns the profile-id for this profile</summary>
         public override ulong ProfileId {
@@ -580,7 +561,7 @@ namespace Ch.Elca.Iiop.CorbaObjRef {
     /// <summary>
     /// generic tagged component
     /// </summary>
-    internal class GenericTaggedComponent : TaggedComponent {
+    public class GenericTaggedComponent : TaggedComponent {
         
         #region IFields
         
@@ -620,7 +601,7 @@ namespace Ch.Elca.Iiop.CorbaObjRef {
     /// <summary>
     /// this tagged-component in an IOR responsible for CodeSet-Information
     /// </summary>
-    internal class CodeSetComponent : TaggedComponent {
+    public class CodeSetComponent : TaggedComponent {
     
         #region Constants
 

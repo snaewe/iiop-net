@@ -331,6 +331,10 @@ namespace Ch.Elca.Iiop.MessageHandling {
             ServiceContextCollection cntxColl = CosServices.GetSingleton().
                                                     InformInterceptorsRequestToSend(methodCall, targetIor, 
                                                                                     IiopConnectionManager.GetCurrentConnectionContext());
+
+            // set code-set for the stream
+            SetCodeSet(targetStream);
+                        
             if ((version.Major == 1) && (version.Minor <= 1)) { // for GIOP 1.0 / 1.1
                 SerialiseContext(targetStream, cntxColl); // service context                
             }
@@ -474,6 +478,9 @@ namespace Ch.Elca.Iiop.MessageHandling {
             
             ServiceContextCollection cntxColl = CosServices.GetSingleton().
                                                     InformInterceptorsReplyToSend();
+            // set codeset for stream
+            SetCodeSet(targetStream);
+
             if ((version.Major == 1) && (version.Minor <= 1)) { // for GIOP 1.0 / 1.1
                 SerialiseContext(targetStream, cntxColl); // serialize the context
             }
@@ -565,6 +572,7 @@ namespace Ch.Elca.Iiop.MessageHandling {
 
         public IMessage DeserialiseReply(CdrInputStream cdrStream, 
                                          GiopVersion version, IMethodCallMessage methodCall) {
+
             if ((version.Major == 1) && (version.Minor <= 1)) { // for GIOP 1.0 / 1.1, the service context is placed here
                 ServiceContextCollection coll = DeserialiseContext(cdrStream); // deserialize the service contexts
                 CosServices.GetSingleton().InformInterceptorsReceivedReply(coll);
@@ -576,7 +584,10 @@ namespace Ch.Elca.Iiop.MessageHandling {
                 ServiceContextCollection coll = DeserialiseContext(cdrStream); // deserialize the service contexts
                 CosServices.GetSingleton().InformInterceptorsReceivedReply(coll);
             }
-
+            
+            // set codeset for stream
+            SetCodeSet(cdrStream);
+            
             IMessage response = null;
             try {
                 switch (responseStatus) {

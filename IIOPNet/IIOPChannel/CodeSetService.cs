@@ -47,6 +47,7 @@ namespace Ch.Elca.Iiop.Services {
 
         internal const uint UTF16_SET = 0x10109;
         internal const uint LATIN1_SET = 0x10001;
+        internal const uint UTF8_SET = 0x5010001;
 
         internal const uint ISO646IEC_MULTI = 0x10100; // compatible with UTF-16
         internal const uint ISO646IEC_SINGLE = 0x10020; // compatible with ASCII
@@ -76,20 +77,24 @@ namespace Ch.Elca.Iiop.Services {
             // nothing to do at the moment
         }
 
+        private void CheckCodeSetCompatible(uint charSet, uint wcharSet) {
+            // check if acceptable: at the moment, the code-set establishment algorithm is not implemented
+            if ((charSet != LATIN1_SET) && (charSet != ISO646IEC_SINGLE) && (charSet != UTF8_SET)) { 
+                throw new CODESET_INCOMPATIBLE(9501, CompletionStatus.Completed_No); 
+            }
+            if ((wcharSet != UTF16_SET) && (wcharSet != ISO646IEC_MULTI)) { 
+                throw new CODESET_INCOMPATIBLE(9502, CompletionStatus.Completed_No); 
+            }            
+        }
+
         public override void HandleContextForReceivedRequest(ServiceContext context) {
             if (context == null) { 
                 return; 
             }
             uint charSet = ((CodeSetServiceContext) context).CharSet;
             uint wcharSet = ((CodeSetServiceContext) context).WCharSet;
+            CheckCodeSetCompatible(charSet, wcharSet);
 
-            // check if acceptable: at the moment, the code-set establishment algorithm is not implemented
-            if ((charSet != LATIN1_SET) && (charSet != ISO646IEC_SINGLE)) { 
-                throw new CODESET_INCOMPATIBLE(9501, CompletionStatus.Completed_No); 
-            }
-            if ((wcharSet != UTF16_SET) && (wcharSet != ISO646IEC_MULTI)) { 
-                throw new CODESET_INCOMPATIBLE(9502, CompletionStatus.Completed_No); 
-            }
             // TODO: implement code set establishment-alg
             GiopConnectionContext conContext = IiopConnectionManager.GetCurrentConnectionContext();
             conContext.CharSet = charSet;
@@ -103,8 +108,25 @@ namespace Ch.Elca.Iiop.Services {
 
         public override ServiceContext InsertContextForRequestToSend(IMethodCallMessage msg, Ior targetIor,
                                                                      GiopConnectionContext conContext) {
-            // add default codesets ?!
-            return new CodeSetServiceContext(DEFAULT_CHAR_SET, DEFAULT_WCHAR_SET);
+            uint charSet = DEFAULT_CHAR_SET;
+            uint wcharSet = DEFAULT_WCHAR_SET;
+            // check for code-set component in Ior:
+            IorProfile[] profiles = targetIor.Profiles;
+            foreach (IorProfile profile in profiles) {
+                TaggedComponent[] components = profile.TaggedComponents;
+                foreach (TaggedComponent taggedComp in components) {
+                    if (taggedComp is CodeSetComponent) {
+                        charSet = (taggedComp as CodeSetComponent).NativeCharSet;
+                        wcharSet = (taggedComp as CodeSetComponent).NativeWCharSet;
+                        break;
+                    }
+                }
+            }
+
+            CheckCodeSetCompatible(charSet, wcharSet);
+            conContext.CharSet = charSet;
+            conContext.WCharSet = wcharSet;
+            return new CodeSetServiceContext(charSet, wcharSet);            
         }
 
         #endregion IMethods
