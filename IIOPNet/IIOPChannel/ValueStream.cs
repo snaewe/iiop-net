@@ -214,13 +214,9 @@ namespace Ch.Elca.Iiop.Cdr {
 
         /// <summary>checks, if custom marshalling must be used</summary>
         protected bool CheckForCustomMarshalled(Type forType) {
-            if (typeof(ICustomMarshalled).IsAssignableFrom(forType)) { // subclasses of a custom marshalled type are automatically also custom marshalled: CORBA-spec-99-10-07: page 3-27
-                return true; 
-            } else {
-                return false;
-            }
+            // subclasses of a custom marshalled type are automatically also custom marshalled: CORBA-spec-99-10-07: page 3-27
+            return ReflectionHelper.ICustomMarshalledType.IsAssignableFrom(forType);
         }                
-                
         
         #region CdrStreamBase
 
@@ -490,7 +486,7 @@ namespace Ch.Elca.Iiop.Cdr {
                                            IndirectionUsage.ValueType);
                 // here a problem is possible: in the indirection table, the boxed from is present for boxed values, 
                 // but for setting the field, the unboxed version may be needed
-                if ((result is BoxedValueBase) && (!field.FieldType.IsSubclassOf(typeof(BoxedValueBase)))) {
+                if ((result is BoxedValueBase) && (!field.FieldType.IsSubclassOf(ReflectionHelper.BoxedValueBaseType))) {
                     result = ((BoxedValueBase)result).Unbox();
                 }
                 

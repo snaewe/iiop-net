@@ -554,7 +554,7 @@ namespace Ch.Elca.Iiop.Marshalling {
         
         public override void Serialise(Type formal, object actual, AttributeExtCollection attributes,
                                        CdrOutputStream targetStream) {
-            if (!formal.IsSubclassOf(typeof(BoxedValueBase))) { 
+            if (!formal.IsSubclassOf(ReflectionHelper.BoxedValueBaseType)) { 
                 // BoxedValueSerializer can only serialize formal types, 
                 // which are subclasses of BoxedValueBase
                 throw new INTERNAL(10041, CompletionStatus.Completed_MayBe);
@@ -570,7 +570,7 @@ namespace Ch.Elca.Iiop.Marshalling {
         public override object Deserialise(Type formal, AttributeExtCollection attributes, 
                                            CdrInputStream sourceStream) {
             Debug.WriteLine("deserialise boxed value, formal: " + formal);
-            if (!formal.IsSubclassOf(typeof(BoxedValueBase))) { 
+            if (!formal.IsSubclassOf(ReflectionHelper.BoxedValueBaseType)) { 
                 // BoxedValueSerializer can only serialize formal types,
                 // which are subclasses of BoxedValueBase
                 throw new INTERNAL(10041, CompletionStatus.Completed_MayBe);

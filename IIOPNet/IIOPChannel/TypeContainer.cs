@@ -96,7 +96,7 @@ namespace Ch.Elca.Iiop.Idl {
         	m_separatedClsType = m_clsType;
         	m_separatedAttrs = m_compactTypeAttrs;
         	// check for splittable
-            if (m_clsType.IsSubclassOf(typeof(BoxedValueBase))) {
+            if (m_clsType.IsSubclassOf(ReflectionHelper.BoxedValueBaseType)) {
                 AttributeExtCollection attrColl = AttributeExtCollection.
                     ConvertToAttributeCollection(m_clsType.GetCustomAttributes(true));
                 if (!(attrColl.IsInCollection(typeof(RepositoryIDAttribute)))) {

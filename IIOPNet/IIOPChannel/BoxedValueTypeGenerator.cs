@@ -131,7 +131,7 @@ namespace Ch.Elca.Iiop.Idl {
                                            CustomAttributeBuilder[] attrsOnBoxedType) {
             TypeBuilder boxBuilder = modBuilder.DefineType(fullyQualifiedName, 
                                                            TypeAttributes.Class | TypeAttributes.Public,
-                                                           typeof(BoxedValueBase));
+                                                           ReflectionHelper.BoxedValueBaseType);
             DefineBoxedType(boxBuilder, toBox, attrsOnBoxedType);
             return boxBuilder;
         }
@@ -143,7 +143,7 @@ namespace Ch.Elca.Iiop.Idl {
             string boxedTypeFullName = CreateBoxedFullTypeName(arrayType);
             TypeBuilder boxBuilder = modBuilder.DefineType(boxedTypeFullName,
                                                            TypeAttributes.Class | TypeAttributes.Public,
-                                                           typeof(BoxedValueBase));
+                                                           ReflectionHelper.BoxedValueBaseType);
             DefineBoxedTypeForCLSArray(boxBuilder, arrayType, gen);
             return boxBuilder;
         }
@@ -233,7 +233,7 @@ namespace Ch.Elca.Iiop.Idl {
             DefineGetBoxedType(boxBuilder, valField);
             DefineGetBoxedTypeAttributes(boxBuilder, valField);
             Type fullUnboxed = boxedType;
-            if ((fullUnboxed.IsArray) && (fullUnboxed.GetElementType().IsSubclassOf(typeof(BoxedValueBase)))) {
+            if ((fullUnboxed.IsArray) && (fullUnboxed.GetElementType().IsSubclassOf(ReflectionHelper.BoxedValueBaseType))) {
                 // call GetFirstNonBoxed static method on element type 
                 try {
                     Type unboxedElemType = (Type)fullUnboxed.GetElementType().InvokeMember(
@@ -248,7 +248,7 @@ namespace Ch.Elca.Iiop.Idl {
                     throw new INTERNAL(10045, CompletionStatus.Completed_MayBe);
                 }
                 
-            } else if (fullUnboxed.IsSubclassOf(typeof(BoxedValueBase))) {
+            } else if (fullUnboxed.IsSubclassOf(ReflectionHelper.BoxedValueBaseType)) {
                 // call GetFirstNonBoxed static method on type 
                 try {
                     fullUnboxed = (Type)fullUnboxed.InvokeMember(
@@ -270,7 +270,8 @@ namespace Ch.Elca.Iiop.Idl {
                 DefineTransformAndAssignConstrForArray(boxBuilder, valField, fullUnboxed);
             }
             
-            if ((boxedType.IsArray) && (!boxedType.GetElementType().IsArray) && (boxedType.GetElementType().IsSubclassOf(typeof(BoxedValueBase)))) { 
+            if ((boxedType.IsArray) && (!boxedType.GetElementType().IsArray) && 
+                (boxedType.GetElementType().IsSubclassOf(ReflectionHelper.BoxedValueBaseType))) {
                 
                 Type boxedElemType;
                 try {
@@ -298,7 +299,7 @@ namespace Ch.Elca.Iiop.Idl {
 
             }
 
-            if ((!boxedType.IsArray) && (boxedType.IsSubclassOf(typeof(BoxedValueBase)))) {
+            if ((!boxedType.IsArray) && (boxedType.IsSubclassOf(ReflectionHelper.BoxedValueBaseType))) {
                 // The boxed value type boxes another boxed value type --> need a transform constructor,
                 // which takes an unboxed value and boxes it, before assigning it to the field
                 // TODO: implement this
@@ -445,7 +446,7 @@ namespace Ch.Elca.Iiop.Idl {
             ILGenerator bodyGen = assignConstrBuilder.GetILGenerator();
             // call the base constructor with no args
             bodyGen.Emit(OpCodes.Ldarg_0); // load this
-            ConstructorInfo baseConstr = typeof(BoxedValueBase).GetConstructor(Type.EmptyTypes);
+            ConstructorInfo baseConstr = ReflectionHelper.BoxedValueBaseType.GetConstructor(Type.EmptyTypes);
             bodyGen.Emit(OpCodes.Call, baseConstr);
             // check if arg is null --> ArgumentException
             Label afterNullTest = bodyGen.DefineLabel();
@@ -473,7 +474,7 @@ namespace Ch.Elca.Iiop.Idl {
             LocalBuilder local = bodyGen.DeclareLocal(ReflectionHelper.ObjectType);
             // call the base constructor with no args
             bodyGen.Emit(OpCodes.Ldarg_0); // load this
-            ConstructorInfo baseConstr = typeof(BoxedValueBase).GetConstructor(Type.EmptyTypes);
+            ConstructorInfo baseConstr = ReflectionHelper.BoxedValueBaseType.GetConstructor(Type.EmptyTypes);
             bodyGen.Emit(OpCodes.Call, baseConstr);
                 
             // check if arg is null --> ArgumentException

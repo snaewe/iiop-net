@@ -31,8 +31,9 @@
 using System;
 using System.Reflection;
 using omg.org.CORBA;
+using Ch.Elca.Iiop.Util;
 
-namespace Ch.Elca.Iiop.Idl {		
+namespace Ch.Elca.Iiop.Idl {
     
     public sealed class BoxedArrayHelper {
         
@@ -86,7 +87,7 @@ namespace Ch.Elca.Iiop.Idl {
                     }                    
                     ((Array)boxContent).SetValue(boxedElement, i);
                 }
-            } else if (!boxed.GetElementType().IsSubclassOf(typeof(BoxedValueBase))) {
+            } else if (!boxed.GetElementType().IsSubclassOf(ReflectionHelper.BoxedValueBaseType)) {
                 // array elements are non boxed / no arrays
                 boxContent = array;
             } else {

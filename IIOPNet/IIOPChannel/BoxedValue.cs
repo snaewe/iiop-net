@@ -73,7 +73,7 @@ namespace Ch.Elca.Iiop.Idl {
                 // unbox array
                 Type elemType = val.GetType().GetElementType();
                 // an array of boxed values --> unbox elems?
-                if (elemType.IsSubclassOf(typeof(BoxedValueBase))) {
+                if (elemType.IsSubclassOf(ReflectionHelper.BoxedValueBaseType)) {
                     int length = ((Array)val).Length;
                     // determine the Type, which is boxed in boxed array element
                     Type boxedType;

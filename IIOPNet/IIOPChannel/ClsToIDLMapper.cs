@@ -166,8 +166,6 @@ namespace Ch.Elca.Iiop.Idl {
 
         private static Type s_mByValComponentType = typeof(MarshalByValueComponent);
 
-        private static Type s_boxedValBaseType = typeof(BoxedValueBase);
-
         private static Type s_boxedValAttrType = typeof(BoxedValueAttribute);
         private static Type s_widecharAttrType = typeof(WideCharAttribute);
         private static Type s_stringValueAttrType = typeof(StringValueAttribute);
@@ -340,7 +338,7 @@ namespace Ch.Elca.Iiop.Idl {
                 return action.MapToIdlEnum(clsType);
             } else if (IsArray(clsType)) { 
                 return CallActionForDNArray(ref clsType, attributes, action);
-            } else if (clsType.IsSubclassOf(s_boxedValBaseType)) {
+            } else if (clsType.IsSubclassOf(ReflectionHelper.BoxedValueBaseType)) {
                 // a boxed value type, which needs not to be boxed/unboxed but should be handled like a normal value type
                 return action.MapToIdlBoxedValueType(clsType, attributes, true);
             } else if (clsType.IsSubclassOf(s_exceptType) || clsType.Equals(s_exceptType)) {

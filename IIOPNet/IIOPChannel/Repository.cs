@@ -712,7 +712,7 @@ namespace Ch.Elca.Iiop.Idl {
         
         public object MapToIdlBoxedValueType(Type clsType, AttributeExtCollection attributes, bool isAlreadyBoxed) {
             // dotNetType is subclass of BoxedValueBase
-            if (!clsType.IsSubclassOf(typeof(BoxedValueBase))) {
+            if (!clsType.IsSubclassOf(ReflectionHelper.BoxedValueBaseType)) {
                 // mapper error: MapToIdlBoxedValue found incorrect type
                 throw new INTERNAL(1929, CompletionStatus.Completed_MayBe);
             }

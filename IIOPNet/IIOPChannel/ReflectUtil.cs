@@ -41,7 +41,9 @@ namespace Ch.Elca.Iiop.Util {
         #region SFields
         
         private static Type s_iIdlEntityType = typeof(IIdlEntity);
+        private static Type s_iCustomMarshalledType = typeof(Ch.Elca.Iiop.Marshalling.ICustomMarshalled);
         private static Type s_corbaTypeCodeType = typeof(omg.org.CORBA.TypeCode);
+        private static Type s_boxedValueBaseType = typeof(BoxedValueBase);
         
         private static Type s_idlEnumAttributeType = typeof(IdlEnumAttribute);
         private static Type s_implClassAttributeType = typeof(ImplClassAttribute);
@@ -77,10 +79,24 @@ namespace Ch.Elca.Iiop.Util {
             }
         }
         
+        /// <summary>caches typeof(Ch.Elca.Iiop.Marshalling.ICustomMarshalled)</summary>
+        public static Type ICustomMarshalledType {
+            get {
+                return s_iCustomMarshalledType;
+            }
+        }
+               
         /// <summary>caches typeof(omg.org.CORBA.TypeCode)</summary>
         public static Type CorbaTypeCodeType {
             get {
                 return s_corbaTypeCodeType;
+            }
+        }
+        
+        /// <summary>caches typeof(Ch.Elca.Iiop.Idl.BoxedValueBase)</summary>
+        public static Type BoxedValueBaseType {
+            get {
+                return s_boxedValueBaseType;
             }
         }
 
