@@ -1022,11 +1022,19 @@ namespace omg.org.CORBA {
         }
 
         internal override AttributeExtCollection GetClsAttributesForTypeCode() {
-            return new AttributeExtCollection(new Attribute[] { new IdlSequenceAttribute() });
+            if (m_length == 0) {
+                return new AttributeExtCollection(new Attribute[] { new IdlSequenceAttribute() });
+            } else {
+                return new AttributeExtCollection(new Attribute[] { new IdlSequenceAttribute(m_length) });
+            }
         }
 
         internal override CustomAttributeBuilder[] GetAttributes() {
-            return new CustomAttributeBuilder[] { new IdlSequenceAttribute().CreateAttributeBuilder() };
+            if (m_length == 0) {
+                return new CustomAttributeBuilder[] { new IdlSequenceAttribute().CreateAttributeBuilder() };
+            } else {
+                return new CustomAttributeBuilder[] { new IdlSequenceAttribute(m_length).CreateAttributeBuilder() };
+            }
         }
 
         #endregion IMethods

@@ -610,10 +610,10 @@ namespace Ch.Elca.Iiop.Idl {
             
             return new ValueBoxTC(Repository.GetRepositoryID(clsType), clsType.FullName, boxed);
         }
-        public object MapToIdlSequence(Type clsType) {
+        public object MapToIdlSequence(Type clsType, int bound) {
             omg.org.CORBA.TypeCode elementTC = Repository.CreateTypeCodeForType(clsType.GetElementType(),
                                                    new AttributeExtCollection(new Attribute[0]));
-            return new SequenceTC(elementTC, 0); // no bound specified
+            return new SequenceTC(elementTC, bound);
         }
         public object MapToIdlAny(Type clsType) {
             return new AnyTC();

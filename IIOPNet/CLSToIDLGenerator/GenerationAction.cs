@@ -843,7 +843,7 @@ namespace Ch.Elca.Iiop.Idl {
             throw new NotSupportedException("is a standard type, not redifinable");
         }
 
-        public object MapToIdlSequence(Type clsType) {
+        public object MapToIdlSequence(Type clsType, int bound) {
             throw new NotSupportedException("no type declaration possible for IDL-Sequence");
         }
 
@@ -1034,7 +1034,7 @@ namespace Ch.Elca.Iiop.Idl {
             throw new NotSupportedException("no fwd declaration possible for this IDL-type");
         }
 
-        public object MapToIdlSequence(System.Type dotNetType) {
+        public object MapToIdlSequence(System.Type dotNetType, int bound) {
             throw new NotSupportedException("no fwd declaration possible for this IDL-type");
         }
 

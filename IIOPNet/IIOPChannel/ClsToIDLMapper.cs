@@ -74,8 +74,9 @@ namespace Ch.Elca.Iiop.Idl {
         /// <param name="isAlreadyBoxed">tells, if the dotNetType is boxed in a boxed value type, or if a native Boxed value type is mapped</param>
         object MapToIdlBoxedValueType(Type clsType, AttributeExtCollection attributes, bool isAlreadyBoxed);
 
+        /// <param name="bound">for unbounded sequences: 0, else max nr of elems</param>
         /// <returns>an optional result of the mapping, null may be possible</returns>
-        object MapToIdlSequence(Type clsType);
+        object MapToIdlSequence(Type clsType, int bound);
 
         /// <summary>map to the IDL-type any</summary>
         /// <returns>an optional result of the mapping, null may be possible</returns>
@@ -499,7 +500,9 @@ namespace Ch.Elca.Iiop.Idl {
         private object CallActionForDNArray(ref Type clsType, AttributeExtCollection attributes, MappingAction action) {
             // distinguish the different cases here
             if (attributes.IsInCollection(s_idlSequenceAttrType)) {
-                return action.MapToIdlSequence(clsType);
+                int bound = (int)
+                    ((IdlSequenceAttribute)attributes.GetAttributeForType(s_idlSequenceAttrType)).Bound;                
+                return action.MapToIdlSequence(clsType, bound);
             } else {
                 Type boxed = Repository.GetBoxedArrayType(clsType);
                 clsType = boxed; // transform
@@ -570,7 +573,7 @@ namespace Ch.Elca.Iiop.Idl {
         public object MapToIdlBoxedValueType(System.Type clsType, AttributeExtCollection attributes, bool isAlreadyBoxed) {
             return false;
         }
-        public object MapToIdlSequence(System.Type clsType) {
+        public object MapToIdlSequence(System.Type clsType, int bound) {
             return false;
         }
         public object MapToIdlAny(System.Type clsType) {
@@ -705,7 +708,7 @@ namespace Ch.Elca.Iiop.Tests {
         public object MapToIdlBoxedValueType(System.Type clsType, AttributeExtCollection attributes, bool isAlreadyBoxed) {
             return MappingToResult.IdlBoxedValue;
         }
-        public object MapToIdlSequence(System.Type clsType) {
+        public object MapToIdlSequence(System.Type clsType, int bound) {
             return MappingToResult.IdlSequence;
         }
         public object MapToIdlAny(System.Type clsType) {

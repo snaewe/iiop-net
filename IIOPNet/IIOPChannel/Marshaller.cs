@@ -313,7 +313,7 @@ namespace Ch.Elca.Iiop.Marshalling {
                 return m_marshalByValSer;
             }
         }
-        public object MapToIdlSequence(System.Type clsType) {
+        public object MapToIdlSequence(System.Type clsType, int bound) {
             return m_seqSer; // IDLSequnceSerializer
         }
         public object MapToIdlAny(System.Type clsType) {

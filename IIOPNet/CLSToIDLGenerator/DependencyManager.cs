@@ -551,7 +551,7 @@ namespace Ch.Elca.Iiop.Idl {
         public object MapToIdlWChar(System.Type clsType) {
             return clsType;
         }
-        public object MapToIdlSequence(System.Type clsType) {
+        public object MapToIdlSequence(System.Type clsType, int bound) {
             return clsType;
         }
         public object MapToIdlBoolean(System.Type clsType) {
