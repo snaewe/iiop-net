@@ -6,24 +6,30 @@ DELAY = ..\..\Utils\delay.exe
 
 bin         = bin\ 
 IDL         = IDL\ 
+TestServiceDir = Ch\Elca\Iiop\IntegrationTests\ 
 
 build: build-server build-stubs build-idl
 
-$(bin):
-        if not exist $@nul mkdir $@
 
-build-server: $(bin) *.java Ch\Elca\Iiop\IntegrationTests\*.java
+build-server: $(bin)\TestServer.class $(bin)$(TestServiceDir)TestService.class $(bin)$(TestServiceDir)TestServiceImpl.class $(bin)$(TestServiceDir)Adder.class $(bin)$(TestServiceDir)AdderImpl.class
+
+$(bin)\TestServer.class $(bin)$(TestServiceDir)TestService.class $(bin)$(TestServiceDir)TestServiceImpl.class $(bin)$(TestServiceDir)Adder.class $(bin)$(TestServiceDir)AdderImpl.class: TestServer.java $(TestServiceDir)TestService.java $(TestServiceDir)TestServiceImpl.java $(TestServiceDir)Adder.java $(TestServiceDir)AdderImpl.java
+    if not exist $(bin)nul mkdir $(bin)
     javac -d bin Ch\Elca\Iiop\IntegrationTests\*.java
     javac -d bin TestServer.java    
     
 
-build-stubs:
+build-stubs: $(bin)$(TestServiceDir)_TestServiceImpl_Tie.class $(bin)$(TestServiceDir)_TestService_Stub.class $(bin)$(TestServiceDir)_AdderImpl_Tie.class $(bin)$(TestServiceDir)_Adder_Stub.class
+
+$(bin)$(TestServiceDir)_TestServiceImpl_Tie.class $(bin)$(TestServiceDir)_TestService_Stub.class $(bin)$(TestServiceDir)_AdderImpl_Tie.class $(bin)$(TestServiceDir)_Adder_Stub.class: $(bin)$(TestServiceDir)TestService.class $(bin)$(TestServiceDir)TestServiceImpl.class $(bin)$(TestServiceDir)Adder.class $(bin)$(TestServiceDir)AdderImpl.class
     cd bin
     rmic -iiop Ch.Elca.Iiop.IntegrationTests.TestServiceImpl
     rmic -iiop Ch.Elca.Iiop.IntegrationTests.AdderImpl
     cd ..
 
-build-idl:
+build-idl: $(IDL)$(TestServiceDir)TestService.idl $(IDL)$(TestServiceDir)Adder.idl
+
+$(IDL)$(TestServiceDir)TestService.idl $(IDL)$(TestServiceDir)Adder.idl: $(bin)$(TestServiceDir)TestServiceImpl.class $(bin)$(TestServiceDir)AdderImpl.class
     if not exist $(IDL) mkdir $(IDL)
     cd bin
     rmic -d ..\$(IDL) -idl Ch.Elca.Iiop.IntegrationTests.TestServiceImpl
