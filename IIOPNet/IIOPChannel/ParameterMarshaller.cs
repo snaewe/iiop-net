@@ -40,6 +40,7 @@ namespace Ch.Elca.Iiop.Marshalling {
     /// <summary>
     /// Marshalles and Unmarshalles method parameters
     /// </summary>
+    [CLSCompliant(false)]
     public class ParameterMarshaller {
 
         #region SFields
