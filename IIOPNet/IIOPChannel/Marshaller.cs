@@ -238,15 +238,15 @@ namespace Ch.Elca.Iiop.Marshalling {
         /// </summary>
         private void CreateBaseTypeSerializer() {
             // for primitive types
-            m_baseTypeSerializer.Add(typeof(System.Byte), new ByteSerializer());
-            m_baseTypeSerializer.Add(typeof(System.Boolean), new BooleanSerializer());
-            m_baseTypeSerializer.Add(typeof(System.Int16), new Int16Serializer());
-            m_baseTypeSerializer.Add(typeof(System.Int32), new Int32Serializer());
-            m_baseTypeSerializer.Add(typeof(System.Int64), new Int64Serializer());
-            m_baseTypeSerializer.Add(typeof(System.Single), new SingleSerializer());
-            m_baseTypeSerializer.Add(typeof(System.Double), new DoubleSerializer());
-            m_baseTypeSerializer.Add(typeof(System.Char), new CharSerializer());
-            m_baseTypeSerializer.Add(typeof(System.String), new StringSerializer());
+            m_baseTypeSerializer.Add(typeof(System.Byte), new ByteSerialiser());
+            m_baseTypeSerializer.Add(typeof(System.Boolean), new BooleanSerialiser());
+            m_baseTypeSerializer.Add(typeof(System.Int16), new Int16Serialiser());
+            m_baseTypeSerializer.Add(typeof(System.Int32), new Int32Serialiser());
+            m_baseTypeSerializer.Add(typeof(System.Int64), new Int64Serialiser());
+            m_baseTypeSerializer.Add(typeof(System.Single), new SingleSerialiser());
+            m_baseTypeSerializer.Add(typeof(System.Double), new DoubleSerialiser());
+            m_baseTypeSerializer.Add(typeof(System.Char), new CharSerialiser());
+            m_baseTypeSerializer.Add(typeof(System.String), new StringSerialiser());
         }
         
         #region Implementation of MappingAction

@@ -80,7 +80,7 @@ namespace Ch.Elca.Iiop.Marshalling {
     #region serializer for primitive types
 
     /// <summary>serializes instances of System.Byte</summary>
-    public class ByteSerializer : Serialiser {
+    public class ByteSerialiser : Serialiser {
 
         #region IMethods
 
@@ -99,7 +99,7 @@ namespace Ch.Elca.Iiop.Marshalling {
     }
 
     /// <summary>serializes instances of System.Boolean</summary> 
-    public class BooleanSerializer : Serialiser {
+    public class BooleanSerialiser : Serialiser {
 
         #region IMethods
 
@@ -118,7 +118,7 @@ namespace Ch.Elca.Iiop.Marshalling {
     }
 
     /// <summary>serializes instances of System.Int16</summary>
-    public class Int16Serializer : Serialiser {
+    public class Int16Serialiser : Serialiser {
 
         #region IMethods
         
@@ -137,7 +137,7 @@ namespace Ch.Elca.Iiop.Marshalling {
     }
     
     /// <summary>serializes instances of System.Int32</summary>
-    public class Int32Serializer : Serialiser {
+    public class Int32Serialiser : Serialiser {
 
         #region IMethods
         
@@ -156,7 +156,7 @@ namespace Ch.Elca.Iiop.Marshalling {
     }
 
     /// <summary>serializes instances of System.Int64</summary>
-    public class Int64Serializer : Serialiser {
+    public class Int64Serialiser : Serialiser {
 
         #region IMethods
 
@@ -175,7 +175,7 @@ namespace Ch.Elca.Iiop.Marshalling {
     }
 
     /// <summary>serializes instances of System.Single</summary>
-    public class SingleSerializer : Serialiser {
+    public class SingleSerialiser : Serialiser {
 
         #region IMethods
     
@@ -194,7 +194,7 @@ namespace Ch.Elca.Iiop.Marshalling {
     }
 
     /// <summary>serializes instances of System.Double</summary>
-    public class DoubleSerializer : Serialiser {
+    public class DoubleSerialiser : Serialiser {
 
         #region IMethods
 
@@ -231,7 +231,7 @@ namespace Ch.Elca.Iiop.Marshalling {
     }
 
     /// <summary>serializes instances of System.Char</summary>
-    public class CharSerializer : CharStringBaseSer {
+    public class CharSerialiser : CharStringBaseSer {
 
         #region IMethods
 
@@ -263,7 +263,7 @@ namespace Ch.Elca.Iiop.Marshalling {
     }
 
     /// <summary>serializes instances of System.String which are serialized as string values</summary>
-    public class StringSerializer : CharStringBaseSer {
+    public class StringSerialiser : CharStringBaseSer {
 
         #region IMethods
 
@@ -870,3 +870,100 @@ namespace Ch.Elca.Iiop.Marshalling {
     }
 
 }
+
+#if UnitTest
+
+namespace Ch.Elca.Iiop.Tests {
+	
+    using System.IO;
+    using NUnit.Framework;
+    using Ch.Elca.Iiop.Marshalling;
+    using Ch.Elca.Iiop.Cdr;
+    using Ch.Elca.Iiop.Util;
+    using omg.org.CORBA;
+    
+    /// <summary>
+    /// Unit-tests for the serialisers
+    /// </summary>
+    public class SerialiserTest : TestCase {
+        
+        public SerialiserTest() {
+        }
+
+        public void TestByteSerialise() {
+			MemoryStream outStream = new MemoryStream();
+            CdrOutputStream cdrOut = new CdrOutputStreamImpl(outStream, 0);
+            Serialiser ser = new ByteSerialiser();
+            ser.Serialise(typeof(Byte), (byte)11, new AttributeExtCollection(), cdrOut);
+            ser.Serialise(typeof(Byte), (byte)12, new AttributeExtCollection(), cdrOut);
+            outStream.Seek(0, SeekOrigin.Begin);
+            Assertion.AssertEquals(11, outStream.ReadByte());
+            Assertion.AssertEquals(12, outStream.ReadByte());
+            outStream.Close();
+        }
+        
+        public void TestByteDeserialise() {
+        	MemoryStream inStream = new MemoryStream();
+        	inStream.WriteByte(11);
+        	inStream.WriteByte(12);
+        	inStream.Seek(0, SeekOrigin.Begin);
+        	CdrInputStreamImpl cdrIn = new CdrInputStreamImpl(inStream);
+        	cdrIn.ConfigStream(0, new GiopVersion(1, 2));
+			Serialiser ser = new ByteSerialiser();			
+        	Assertion.AssertEquals(11, ser.Deserialise(typeof(Byte), 
+        	                                           new AttributeExtCollection(), cdrIn));        	
+        	Assertion.AssertEquals(12, ser.Deserialise(typeof(Byte), 
+        	                                           new AttributeExtCollection(), cdrIn));
+        	inStream.Close();        	
+        }
+        
+        public void TestBooleanSerialise() {
+			MemoryStream outStream = new MemoryStream();
+            CdrOutputStream cdrOut = new CdrOutputStreamImpl(outStream, 0);
+            Serialiser ser = new BooleanSerialiser();
+            ser.Serialise(typeof(Boolean), true, new AttributeExtCollection(), cdrOut);
+            ser.Serialise(typeof(Boolean), false, new AttributeExtCollection(), cdrOut);
+            outStream.Seek(0, SeekOrigin.Begin);
+            Assertion.AssertEquals(1, outStream.ReadByte());
+            Assertion.AssertEquals(0, outStream.ReadByte());
+            outStream.Close();
+        }
+        
+        public void TestBooleanDeserialise() {
+        	MemoryStream inStream = new MemoryStream();
+        	inStream.WriteByte(0);
+        	inStream.WriteByte(1);
+        	inStream.Seek(0, SeekOrigin.Begin);
+        	CdrInputStreamImpl cdrIn = new CdrInputStreamImpl(inStream);
+        	cdrIn.ConfigStream(0, new GiopVersion(1, 2));
+			Serialiser ser = new BooleanSerialiser();
+        	Assertion.AssertEquals(false, ser.Deserialise(typeof(Boolean), 
+        	                                              new AttributeExtCollection(), cdrIn));        	
+        	Assertion.AssertEquals(true, ser.Deserialise(typeof(Boolean), 
+        	                                             new AttributeExtCollection(), cdrIn));
+        	inStream.Close();        	
+        }
+        
+        [ExpectedException(typeof(BAD_PARAM))]
+        public void TestBooleanDeserialiseInvalidValue() {
+        	MemoryStream inStream = new MemoryStream();
+        	inStream.WriteByte(2);
+        	inStream.Seek(0, SeekOrigin.Begin);
+        	CdrInputStreamImpl cdrIn = new CdrInputStreamImpl(inStream);
+        	cdrIn.ConfigStream(0, new GiopVersion(1, 2));
+			Serialiser ser = new BooleanSerialiser();
+            try {
+                ser.Deserialise(typeof(Boolean), new AttributeExtCollection(), cdrIn);
+            } catch (Exception e) {
+                inStream.Close();
+                throw e;
+            }
+        }
+
+
+
+    }
+
+}
+   	
+#endif

@@ -612,3 +612,213 @@ namespace Ch.Elca.Iiop.Idl {
 
     }
 }
+
+
+
+
+#if UnitTest
+
+namespace Ch.Elca.Iiop.Tests {
+	
+    using NUnit.Framework;
+    using Ch.Elca.Iiop.Idl;
+    using Ch.Elca.Iiop.Util;
+    using omg.org.CORBA;
+    
+    public enum MappingToResult {
+        IdlStruct, IdlAbstractIf, IdlConcreteIf, IdlConcreteValue, IdlAbstractValue, 
+        IdlBoxedValue, IdlSequence, IdlAny, IdlAbstractBase, IdlValueBase,
+        IdlException, IdlEnum, IdlWstringValue, IdlStringValue, IdlTypeCode,
+        IdlTypeDesc, IdlBool, IdlFloat, IdlDouble, IdlShort, IdlUShort, IdlLong, IdlULong,
+        IdlLongLong, IdlULongLong, IdlOctet, IdlVoid, IdlChar, IdlWChar, IdlString, IdlWString
+    }
+
+    /// <summary>
+    /// Test class for helping to test ClsToIdlMapper
+    /// </summary>
+    public class TestMappingAction : MappingAction {
+        
+        #region IMethods
+        public object MapToIdlStruct(System.Type clsType) {
+            return MappingToResult.IdlStruct;
+        }
+        public object MapToIdlAbstractInterface(System.Type clsType) {
+            return MappingToResult.IdlAbstractIf;
+        }
+        public object MapToIdlConcreteInterface(System.Type clsType) {
+            return MappingToResult.IdlConcreteIf;
+        }
+        public object MapToIdlConcreateValueType(System.Type clsType) {
+            return MappingToResult.IdlConcreteValue;
+        }
+        public object MapToIdlAbstractValueType(System.Type clsType) {
+            return MappingToResult.IdlAbstractValue;
+        }
+        public object MapToIdlBoxedValueType(System.Type clsType, AttributeExtCollection attributes, bool isAlreadyBoxed) {
+            return MappingToResult.IdlBoxedValue;
+        }
+        public object MapToIdlSequence(System.Type clsType) {
+            return MappingToResult.IdlSequence;
+        }
+        public object MapToIdlAny(System.Type clsType) {
+            return MappingToResult.IdlAny;
+        }
+        public object MapToAbstractBase(System.Type clsType) {
+            return MappingToResult.IdlAbstractBase;
+        }
+        public object MapToValueBase(System.Type clsType) {
+            return MappingToResult.IdlValueBase;
+        }
+        public object MapException(System.Type clsType) {
+            return MappingToResult.IdlException;
+        }
+        public object MapToIdlEnum(System.Type clsType) {
+            return MappingToResult.IdlEnum;
+        }
+        public object MapToWStringValue(System.Type clsType) {
+            return MappingToResult.IdlWstringValue;
+        }
+        public object MapToStringValue(System.Type clsType) {
+            return MappingToResult.IdlStringValue;
+        }
+        public object MapToTypeCode(System.Type clsType) {
+            return MappingToResult.IdlTypeCode;
+        }
+        public object MapToTypeDesc(System.Type clsType) {
+            return MappingToResult.IdlTypeDesc;
+        }
+        public object MapToIdlBoolean(System.Type clsType) {
+            return MappingToResult.IdlBool;
+        }
+        public object MapToIdlFloat(System.Type clsType) {
+            return MappingToResult.IdlFloat;
+        }
+        public object MapToIdlDouble(System.Type clsType) {
+            return MappingToResult.IdlDouble;
+        }
+        public object MapToIdlShort(System.Type clsType) {
+            return MappingToResult.IdlShort;
+        }
+        public object MapToIdlUShort(System.Type clsType) {
+            return MappingToResult.IdlUShort;
+        }
+        public object MapToIdlLong(System.Type clsType) {
+            return MappingToResult.IdlLong;
+        }
+        public object MapToIdlULong(System.Type clsType) {
+            return MappingToResult.IdlULong;
+        }
+        public object MapToIdlLongLong(System.Type clsType) {
+            return MappingToResult.IdlLongLong;
+        }
+        public object MapToIdlULongLong(System.Type clsType) {
+            return MappingToResult.IdlULongLong;
+        }
+        public object MapToIdlOctet(System.Type clsType) {
+            return MappingToResult.IdlOctet;
+        }
+        public object MapToIdlVoid(System.Type clsType) {
+            return MappingToResult.IdlVoid;
+        }
+        public object MapToIdlChar(System.Type clsType) {
+            return MappingToResult.IdlChar;
+        }
+        public object MapToIdlWChar(System.Type clsType) {
+            return MappingToResult.IdlWChar;
+        }
+        public object MapToIdlString(System.Type clsType) {
+            return MappingToResult.IdlString;
+        }
+        public object MapToIdlWString(System.Type clsType) {
+            return MappingToResult.IdlWString;
+        }            
+        #endregion IMethods
+
+    }    
+    
+    [IdlStruct]
+    [Serializable]
+    public struct TestIdlStruct {
+    }
+    
+    [Serializable]
+    public struct TestClsSerializableStruct {
+    }
+    
+    [Serializable]
+    public class TestClsSerializableClass {    
+    }
+    
+    public struct TestClsNonSerializableStruct {
+    }
+    
+    public class TestClsNonSerializableClass {
+    }
+    
+    /// <summary>
+    /// Unit-tests for testing the ClsToIdlMapper
+    /// </summary>
+    public class ClsToIdlMapperTest : TestCase {
+        
+        #region SFields
+        
+        private static TestMappingAction s_testAction = new TestMappingAction();
+        
+        #endregion SFields
+        
+        public ClsToIdlMapperTest() {
+        }
+
+        public void TestMapToIdlOctet() {
+            ClsToIdlMapper mapper = ClsToIdlMapper.GetSingleton();
+            MappingToResult mapResult = (MappingToResult)mapper.MapClsType(typeof(Byte), 
+                                                                           new AttributeExtCollection(),
+                                                                           s_testAction);
+			Assertion.AssertEquals(MappingToResult.IdlOctet, mapResult);
+        }
+        
+        public void TestMapToIdlBoolean() {
+            ClsToIdlMapper mapper = ClsToIdlMapper.GetSingleton();
+            MappingToResult mapResult = (MappingToResult)mapper.MapClsType(typeof(Boolean), 
+                                                                           new AttributeExtCollection(),
+                                                                           s_testAction);
+			Assertion.AssertEquals(MappingToResult.IdlBool, mapResult);
+        }
+        
+        public void TestMapToIdlStruct() {
+            ClsToIdlMapper mapper = ClsToIdlMapper.GetSingleton();
+            MappingToResult mapResult = (MappingToResult)mapper.MapClsType(typeof(TestIdlStruct), 
+                                                                           new AttributeExtCollection(),
+                                                                           s_testAction);
+			Assertion.AssertEquals(MappingToResult.IdlStruct, mapResult);
+        }
+        
+        public void TestMapToIdlConcreteValueType() {
+            ClsToIdlMapper mapper = ClsToIdlMapper.GetSingleton();
+            MappingToResult mapResult = (MappingToResult)mapper.MapClsType(typeof(TestClsSerializableStruct), 
+                                                                           new AttributeExtCollection(),
+                                                                           s_testAction);
+			Assertion.AssertEquals(MappingToResult.IdlConcreteValue, mapResult);
+            mapResult = (MappingToResult)mapper.MapClsType(typeof(TestClsSerializableClass), 
+                                                           new AttributeExtCollection(),
+                                                           s_testAction);
+			Assertion.AssertEquals(MappingToResult.IdlConcreteValue, mapResult);						
+        }
+        
+        public void TestMapToIdlAbstractValueType() {
+            ClsToIdlMapper mapper = ClsToIdlMapper.GetSingleton();
+            MappingToResult mapResult = (MappingToResult)mapper.MapClsType(typeof(TestClsNonSerializableStruct), 
+                                                                           new AttributeExtCollection(),
+                                                                           s_testAction);
+			Assertion.AssertEquals(MappingToResult.IdlAbstractValue, mapResult);
+            mapResult = (MappingToResult)mapper.MapClsType(typeof(TestClsNonSerializableClass), 
+                                                           new AttributeExtCollection(),
+                                                           s_testAction);
+			Assertion.AssertEquals(MappingToResult.IdlAbstractValue, mapResult);						
+        }
+        
+    }
+
+}
+
+#endif
