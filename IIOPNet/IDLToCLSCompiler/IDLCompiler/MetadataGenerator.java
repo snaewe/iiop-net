@@ -1970,7 +1970,7 @@ public class MetaDataGenerator implements IDLParserVisitor {
             paramTypes[i] = GetParamType(params[i]); 
         }
         // name
-        String methodName = node.getIdent();
+        String methodName = IdlNaming.MapIdlNameToClsName(node.getIdent());
         // ready to create method
         TypeBuilder typeAtBuild = buildInfo.GetContainterType();
         MethodBuilder methodBuild = typeAtBuild.DefineMethod(methodName,  
