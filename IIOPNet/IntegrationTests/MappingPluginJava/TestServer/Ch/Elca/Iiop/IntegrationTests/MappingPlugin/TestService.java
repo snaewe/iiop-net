@@ -37,6 +37,8 @@ public interface TestService extends java.rmi.Remote {
     public ArrayList createShortList(short val, int nrOfElems) throws RemoteException;
 
     public ArrayList createIntList(int val, int nrOfElems) throws RemoteException;
+    
+    public ArrayList createLongList(long val, int nrOfElems) throws RemoteException;
 
     public ArrayList createByteList(byte val, int nrOfElems) throws RemoteException;
 
@@ -58,6 +60,8 @@ public interface TestService extends java.rmi.Remote {
     public HashMap createHashMapWithShortVals(short val, int nrOfElems) throws RemoteException;
 
     public HashMap createHashMapWithIntVals(int val, int nrOfElems) throws RemoteException;
+    
+    public HashMap createHashMapWithLongVals(long val, int nrOfElems) throws RemoteException;
 
     public HashMap createHashMapWithByteVals(byte val, int nrOfElems) throws RemoteException;
 

@@ -156,6 +156,17 @@ namespace Ch.Elca.Iiop.IntegrationTests.MappingPlugin {
             ArrayList result2 = m_testService.echoList(result);
             CheckArrayListElems(result2, val, nrOfElems + 1);
         }
+        
+        [Test]
+        public void TestInt64ArrayList() {
+            System.Int64 val = 782997;
+            int nrOfElems = 4;
+            ArrayList result = m_testService.createLongList(val, nrOfElems);
+            CheckArrayListElems(result, val, nrOfElems);
+            result.Add(val);
+            ArrayList result2 = m_testService.echoList(result);
+            CheckArrayListElems(result2, val, nrOfElems + 1);
+        }
 
         [Test]
         public void TestBooleanArrayList() {
@@ -276,6 +287,17 @@ namespace Ch.Elca.Iiop.IntegrationTests.MappingPlugin {
             System.Int32 val = 82997;
             int nrOfElems = 4;
             Hashtable result = m_testService.createHashMapWithIntVals(val, nrOfElems);
+            CheckHashtableElems(result, val, nrOfElems);
+            result[nrOfElems] = val;
+            Hashtable result2 = m_testService.echoHashMap(result);
+            CheckHashtableElems(result2, val, nrOfElems + 1);
+        }
+        
+        [Test]
+        public void TestHashMapWithInt64Vals() {
+            System.Int64 val = 782997;
+            int nrOfElems = 4;
+            Hashtable result = m_testService.createHashMapWithLongVals(val, nrOfElems);
             CheckHashtableElems(result, val, nrOfElems);
             result[nrOfElems] = val;
             Hashtable result2 = m_testService.echoHashMap(result);

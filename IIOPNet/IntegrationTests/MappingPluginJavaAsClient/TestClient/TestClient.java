@@ -98,6 +98,16 @@ public class TestClient extends TestCase {
         ArrayList result2 = m_testService.EchoList(result);
         CheckArrayListElems(result2, new Integer(val), nrOfElems + 1);
     }
+    
+    public void testInt64ArrayList() throws Exception {
+        long val = 782997;
+        int nrOfElems = 4;
+        ArrayList result = m_testService.CreateLongList(val, nrOfElems);
+        CheckArrayListElems(result, new Long(val), nrOfElems);
+        result.add(new Long(val));
+        ArrayList result2 = m_testService.EchoList(result);
+        CheckArrayListElems(result2, new Long(val), nrOfElems + 1);
+    }
 
     public void testBooleanArrayList() throws Exception {
         boolean val = true;

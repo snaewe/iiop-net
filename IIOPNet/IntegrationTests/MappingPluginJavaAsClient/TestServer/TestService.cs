@@ -58,6 +58,14 @@ namespace Ch.Elca.Iiop.IntegrationTests.MappingPlugin {
     	    }
             return result;
         }
+        
+        public ArrayList CreateLongList(long val, int nrOfElems) {
+            ArrayList result = new ArrayList();
+            for (int i = 0; i < nrOfElems; i++) {
+                result.Add(val);
+    	    }
+            return result;
+        }
 
         public ArrayList CreateByteList(byte val, int nrOfElems) {
             ArrayList result = new ArrayList();
@@ -165,6 +173,8 @@ namespace Ch.Elca.Iiop.IntegrationTests.MappingPlugin {
         ArrayList CreateShortList(short val, int nrOfElems);
 
         ArrayList CreateIntList(int val, int nrOfElems);
+        
+        ArrayList CreateLongList(long val, int nrOfElems);
 
         ArrayList CreateByteList(byte val, int nrOfElems);
 

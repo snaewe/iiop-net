@@ -54,6 +54,14 @@ public class TestServiceImpl extends PortableRemoteObject implements TestService
     	}
     	return result;
     }
+    
+    public ArrayList createLongList(long val, int nrOfElems) throws RemoteException {
+    	ArrayList result = new ArrayList();
+    	for (int i = 0; i < nrOfElems; i++) {
+    	    result.add(new Long(val));
+    	}
+    	return result;
+    }
 
     public ArrayList createByteList(byte val, int nrOfElems) throws RemoteException {
     	ArrayList result = new ArrayList();
@@ -129,6 +137,14 @@ public class TestServiceImpl extends PortableRemoteObject implements TestService
         HashMap result = new HashMap();
         for (int i = 0; i < nrOfElems; i++) {
             result.put(new Integer(i), new Integer(val));
+        }
+        return result;
+    }
+    
+    public HashMap createHashMapWithLongVals(long val, int nrOfElems) throws RemoteException {
+        HashMap result = new HashMap();
+        for (int i = 0; i < nrOfElems; i++) {
+            result.put(new Integer(i), new Long(val));
         }
         return result;
     }
