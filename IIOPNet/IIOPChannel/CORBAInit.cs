@@ -130,8 +130,14 @@ namespace Ch.Elca.Iiop.Services {
         /// <returns>a reference to the naming service</returns>
         /// <remarks>This method is only useful, for communication with the RMI/IIOP SUN JDK ORB</remarks>
         public omg.org.CosNaming.NamingContext GetNameService() {
-            return (omg.org.CosNaming.NamingContext)m_initService._get(CORBAInitServiceImpl.NAMESERVICE_NAME);
-            
+            return (omg.org.CosNaming.NamingContext)m_initService._get(CORBAInitServiceImpl.NAMESERVICE_NAME);            
+        }
+        
+        /// <summary>
+        /// gets a reference to the initial service with the name name, e.g. TradingService or NameServiceServerRoot.
+        /// </summary>
+        public MarshalByRefObject GetService(string name) {
+            return m_initService._get(name);
         }
         
         /// <summary>gets a reference to the init service running at the specified host at the specified port</summary>

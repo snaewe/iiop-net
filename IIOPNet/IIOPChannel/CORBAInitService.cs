@@ -44,7 +44,7 @@ namespace Ch.Elca.Iiop.Services {
 
         #region IMethods
 
-        NamingContext _get([WideCharAttribute(false)][StringValueAttribute] string serviceName);
+        MarshalByRefObject _get([WideCharAttribute(false)][StringValueAttribute] string serviceName);
 
         #endregion IMethods
 
@@ -109,7 +109,7 @@ namespace Ch.Elca.Iiop.Services {
                                                                         new GiopVersion(1, 0)));    
         }
 
-        public NamingContext _get([WideCharAttribute(false)][StringValueAttribute] string serviceName) {
+        public MarshalByRefObject _get([WideCharAttribute(false)][StringValueAttribute] string serviceName) {
             if (serviceName.Equals(NAMESERVICE_NAME)) {
                 return m_initalContext;
             }
