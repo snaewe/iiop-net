@@ -93,18 +93,18 @@ namespace Ch.Elca.Iiop.Util {
                                                                      iiopLoc.GetKeyAsByteArray());
                 ior = new Ior(repositoryId, new IorProfile[] { profile });
             } else if (url.StartsWith("corbaloc")) {
-            	Corbaloc loc = new Corbaloc(url);
-            	CorbaLocIiopAddr addr = loc.GetIiopAddr();
-            	if (addr == null) {
-            		throw new INV_OBJREF(8421, CompletionStatus.Completed_MayBe);
-            	}
-            	byte[] objectKey = loc.GetKeyAsByteArray();
-            	InternetIiopProfile profile = new InternetIiopProfile(addr.Version, addr.Host,
-                                                                     (ushort)addr.Port, objectKey);            	
-            	ior = new Ior(repositoryId, new IorProfile[] { profile });
+                Corbaloc loc = new Corbaloc(url);
+                CorbaLocIiopAddr addr = loc.GetIiopAddr();
+                if (addr == null) {
+                    throw new INV_OBJREF(8421, CompletionStatus.Completed_MayBe);
+                }
+                byte[] objectKey = loc.GetKeyAsByteArray();
+                InternetIiopProfile profile = new InternetIiopProfile(addr.Version, addr.Host,
+                                                                     (ushort)addr.Port, objectKey);                
+                ior = new Ior(repositoryId, new IorProfile[] { profile });
             } else {
-        	    throw new INV_OBJREF(1963, CompletionStatus.Completed_MayBe);
-        	}
+                throw new INV_OBJREF(1963, CompletionStatus.Completed_MayBe);
+            }
             return ior;
         }
         
@@ -130,11 +130,11 @@ namespace Ch.Elca.Iiop.Util {
                 objectUri = GetObjectUriForObjectKey(ior.ObjectKey);
                 version = ior.Version;
             } else if (url.StartsWith("corbaloc")) {
-            	Corbaloc loc = new Corbaloc(url);
-            	CorbaLocIiopAddr addr = loc.GetIiopAddr();            	
-            	if (addr == null) {
-            		throw new INTERNAL(8540, CompletionStatus.Completed_MayBe);
-            	}
+                Corbaloc loc = new Corbaloc(url);
+                CorbaLocIiopAddr addr = loc.GetIiopAddr();                
+                if (addr == null) {
+                    throw new INTERNAL(8540, CompletionStatus.Completed_MayBe);
+                }
                 objectUri = loc.ObjectUri;
                 version = addr.Version;
                 uri = new Uri("iiop" + 
@@ -174,7 +174,7 @@ namespace Ch.Elca.Iiop.Util {
                 // to support user-id policy, this appdomain-guid must be removed!
                 if (objectUri.StartsWith("/")) {
                     objectUri = objectUri.Substring(1);
-            }
+                }
                 int appdomainGuidEndIndex = objectUri.IndexOf("/");
                 if (appdomainGuidEndIndex >= 0) {
                     // remove appdomain-guid part
@@ -191,14 +191,14 @@ namespace Ch.Elca.Iiop.Util {
             // use ASCII-encoder + unicode escaped to encode uri string
             objectUri = EscapeNonAscii(objectUri);
             return s_asciiEncoder.GetBytes(objectUri);
-                }
+        }
         
         /// <summary>
         /// generates an IIOP.NET CORBA System-ID
         /// </summary>
         internal static string GenerateSystemId() {
             return s_sysIdGenerator.GenerateId();
-            }
+        }
 
         /// <summary>
         /// get the key-bytes for the id; doesn't any more transformations
@@ -207,7 +207,7 @@ namespace Ch.Elca.Iiop.Util {
         /// <returns></returns>
         internal static byte[] GetKeyBytesForId(string id) {
             return s_asciiEncoder.GetBytes(id);
-                }
+        }
         
         /// <summary>
         /// escape characters, which are not part of the ASCII set
@@ -327,7 +327,7 @@ namespace Ch.Elca.Iiop.Util {
         
         private long GetNextSeqNr() {            
             return System.Threading.Interlocked.Increment(ref m_seqNr);
-                }                
+        }                
         
         public string GenerateId() {            
             byte[] rndPart = new byte[RND_PART_LENGTH];
@@ -335,7 +335,7 @@ namespace Ch.Elca.Iiop.Util {
             string rndString = Convert.ToBase64String(rndPart);
             rndString.Replace('/', '_');
             return SYSTEM_ID_MARKER + rndString + "_" + GetNextSeqNr();
-            }            
+        }            
         
         public bool IsSystemId(string id) {
             return (id.IndexOf(SYSTEM_ID_MARKER) >= 0);
