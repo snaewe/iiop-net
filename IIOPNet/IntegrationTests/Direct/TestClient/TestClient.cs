@@ -58,12 +58,8 @@ namespace Ch.Elca.Iiop.IntegrationTests {
             m_channel = new IiopClientChannel();
             ChannelServices.RegisterChannel(m_channel);
 
-            // access COS nameing service
-            CorbaInit init = CorbaInit.GetInit();
-            NamingContext nameService = init.GetNameService("localhost", 8087);
-            NameComponent[] name = new NameComponent[] { new NameComponent("test", "") };
             // get the reference to the test-service
-            m_testService = (TestService)nameService.resolve(name);
+            m_testService = (TestService)RemotingServices.Connect(typeof(TestService), "corbaloc:iiop:1.2@localhost:8087/test");
         }
 
         [TearDown]

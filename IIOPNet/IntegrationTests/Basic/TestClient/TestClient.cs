@@ -64,12 +64,9 @@ namespace Ch.Elca.Iiop.IntegrationTests {
             m_channel = new IiopClientChannel();
             ChannelServices.RegisterChannel(m_channel);
 
-            NamingContext nameService = GetNameService();
-            NameComponent[] name = new NameComponent[] { new NameComponent("test", "") };
             // get the reference to the test-service
-            m_testService = (TestService)nameService.resolve(name);
-            m_testExService = (TestExceptionService)nameService.resolve(new NameComponent[] {
-                                                                           new NameComponent("testExService") });            
+            m_testService = (TestService)RemotingServices.Connect(typeof(TestService), "corbaloc:iiop:1.2@localhost:8087/test");
+            m_testExService = (TestExceptionService)RemotingServices.Connect(typeof(TestExceptionService), "corbaloc:iiop:1.2@localhost:8087/testExService");
         }
 
         [TearDown]
