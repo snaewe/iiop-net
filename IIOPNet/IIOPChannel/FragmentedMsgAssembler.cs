@@ -118,10 +118,19 @@ namespace Ch.Elca.Iiop {
 				target.Write(content, 0, content.Length);
 				// write adapted header
 				target.Seek(0, SeekOrigin.Begin);
-				fragmentDesc.Header.WriteToStream(target, 
-				                                  ((uint)target.Length) - GiopHeader.HEADER_LENGTH);
+                GiopHeader newHeader = new GiopHeader(fragmentDesc.Header.Version.Major, 
+                                                      fragmentDesc.Header.Version.Minor,
+                                                      (byte)(fragmentDesc.Header.GiopFlags ^ GiopHeader.FRAGMENT_MASK),
+                                                      fragmentDesc.Header.GiopType);
+
+				newHeader.WriteToStream(target, 
+				                        ((uint)target.Length) - GiopHeader.HEADER_LENGTH);
 				target.Seek(0, SeekOrigin.Begin);
-				// return the complete result msg
+				
+                // remove for unfinished msg table
+                m_fragmentedMsgs.Remove(fragmentDesc);
+                
+                // return the complete result msg
 				return target;
 			}
 		}
@@ -154,6 +163,9 @@ namespace Ch.Elca.Iiop {
 				// write content to target stream
 				byte[] content = source.ReadOpaque(contentLength);
 				cdrOut.WriteOpaque(content);
+
+                // add to unfinished message table
+                m_fragmentedMsgs[descKey] = fragmentDesc;
 			}
 			
 		}

@@ -83,7 +83,7 @@ namespace Ch.Elca.Iiop {
         /// <summary>the length of the header in bytes</summary>
         internal const int HEADER_LENGTH = 12;
     	
-    	internal const int FRAGMENT_MASK = 0x02;
+    	internal const byte FRAGMENT_MASK = 0x02;
         
         #endregion Constants
         #region IFields

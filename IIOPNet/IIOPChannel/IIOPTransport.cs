@@ -139,14 +139,14 @@ namespace Ch.Elca.Iiop {
                                      out ITransportHeaders responseHeaders) {  
             responseHeaders = new TransportHeaders();
             responseStream = null;
-			
-			CdrInputStreamImpl reader = new CdrInputStreamImpl(networkStream);
-            GiopHeader msgHeader = new GiopHeader(reader);
-            
+			          
             FragmentedMsgAssembler fragmentAssembler = new FragmentedMsgAssembler();
             bool fullyRead = false;
             
             while (!fullyRead) {
+                // create a stream for reading a new message
+                CdrInputStreamImpl reader = new CdrInputStreamImpl(networkStream);
+                GiopHeader msgHeader = new GiopHeader(reader);
              
             	switch(msgHeader.GiopType) {
             		case GiopMsgTypes.Reply:
@@ -278,11 +278,6 @@ namespace Ch.Elca.Iiop {
         /// </param>
         internal void Process(NetworkStream networkStream, 
                               FragmentedMsgAssembler fragmentAssembler) {
-            // create the sink stack for async processing
-            ServerChannelSinkStack sinkStack = new ServerChannelSinkStack();
-            sinkStack.Push(this, networkStream);
-            // empty transport headers for this protocol
-            ITransportHeaders requestHeaders = new TransportHeaders();
             
             // the out params returned form later sinks
             IMessage responseMsg;
@@ -325,6 +320,13 @@ namespace Ch.Elca.Iiop {
                                           msgHeader.GiopType);
             }
             msgStream.Seek(0, SeekOrigin.Begin); // assure stream is read from beginning in formatter
+
+
+            // create the sink stack for async processing of message
+            ServerChannelSinkStack sinkStack = new ServerChannelSinkStack();
+            sinkStack.Push(this, networkStream);
+            // empty transport headers for this protocol
+            ITransportHeaders requestHeaders = new TransportHeaders();
             
             // next sink will process the request-message
             ServerProcessing result = m_nextSink.ProcessMessage(sinkStack, null, /* no RequestMessage in transport handler */
