@@ -51,6 +51,8 @@ namespace Ch.Elca.Iiop.Idl {
     	
     	/// <summary>used as helper to map type names to idl for Cls types</summary>
     	private static GenerationActionReference s_genIdlNameforClsType = new GenerationActionReference();
+    	
+    	private static Type s_idlEntityType = typeof(IIdlEntity);
 
         #endregion SFields
         #region SConstructor
@@ -235,7 +237,7 @@ namespace Ch.Elca.Iiop.Idl {
         /// <param name="forType"></param>
         /// <returns></returns>
         public static string MapFullTypeNameToIdlRepIdTypePart(Type forType) {
-            string nameSpaceInIdl = MapNamespaceToIdl(forType, "/");
+            string nameSpaceInIdl = MapNamespaceToIdl(forType, "/", false);
             if (!nameSpaceInIdl.Equals("")) {
                 nameSpaceInIdl += "/";
             }
@@ -249,14 +251,16 @@ namespace Ch.Elca.Iiop.Idl {
         /// <returns></returns>
         // generator needs scoped form
         public static string MapFullTypeNameToIdlScoped(Type forType) {
-            string result = MapNamespaceToIdl(forType, "::");
+            bool isTypeMappedFromIdl = s_idlEntityType.IsAssignableFrom(forType);
+            string result = MapNamespaceToIdl(forType, "::", isTypeMappedFromIdl);
             if (result.Length > 0) { 
                 result += "::"; 
             }
             result = "::" + result;
-            result += MapShortTypeNameToIdl(forType);
+            result += ((!isTypeMappedFromIdl) ? MapShortTypeNameToIdl(forType) :
+            	                                ReverseIdlToClsNameMapping(forType.Name));
             return result;
-        }
+        }        
 
         /// <summary>
         /// maps the CLS typename (without namespace name) to an IDL name
@@ -275,8 +279,9 @@ namespace Ch.Elca.Iiop.Idl {
         /// <summary>
         /// maps a namespace name to an IDL name
         /// </summary>
-        /// <param name="separator">separator between module parts, e.g. / or ::</param>
-        private static string MapNamespaceToIdl(Type forType, string separator) {
+        /// <param name="separator">separator between module parts, e.g. / or ::</param>        
+        private static string MapNamespaceToIdl(Type forType, string separator, 
+                                                bool isMappedFromIdlToCls) {
             string namespaceName = forType.Namespace;
             string result = "";
             if (namespaceName == null) { 
@@ -284,7 +289,9 @@ namespace Ch.Elca.Iiop.Idl {
             }
             string[] parts = namespaceName.Split('.');
             foreach (string part in parts) {
-                result = result + separator + MapClsNameToIdlName(part);
+                result = result + separator + 
+                             ((!isMappedFromIdlToCls) ? MapClsNameToIdlName(part) :
+                             	                        ReverseIdlToClsNameMapping(part));
             }
             if (result.StartsWith(separator)) {
                 result = result.Substring(separator.Length);
