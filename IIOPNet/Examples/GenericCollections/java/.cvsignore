@@ -2,3 +2,5 @@
 .project
 .classpath
 *.class
+IDL
+org
