@@ -8,6 +8,9 @@ build:
 	cd CLSToIDLGenerator
 	$(MAKE) build
 	cd ..
+	cd IDLToCLSCompiler
+	$(MAKE) build
+	cd ..
 
 clean:
 	cd IIOPChannel
@@ -15,5 +18,8 @@ clean:
 	cd ..
 	cd CLSToIDLGenerator
 	$(MAKE) clean
+	cd ..
+	cd IDLToCLSCompiler
+	$(MAKE) build
 	cd ..
 
