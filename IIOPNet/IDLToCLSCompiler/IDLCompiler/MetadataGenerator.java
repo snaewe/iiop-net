@@ -943,7 +943,6 @@ public class MetaDataGenerator implements IDLParserVisitor {
         return result;
     }
     
-    
     /**
      * @see parser.IDLParserVisitor#visit(ASTvalue_header, Object)
      * @param data the buildinfo of the container for this valuetype
@@ -961,7 +960,6 @@ public class MetaDataGenerator implements IDLParserVisitor {
         node.jjtGetChild(0).jjtAccept(this, data); // generate for an export, state or init_dcl member
         return null;
     }
-
 
     #region constructor definition, at the moment not supported
     /**
@@ -1018,7 +1016,9 @@ public class MetaDataGenerator implements IDLParserVisitor {
                 String privateName = decl[i];
                 // compensate a problem in the java rmi compiler, which can produce illegal idl:
                 // it produces idl-files with name clashes if a method getx() and a field x exists
-                if (!privateName.startsWith("m_")) { privateName = "m_" + privateName; }
+                if (!privateName.startsWith("m_")) { 
+                    privateName = "m_" + privateName; 
+                }
                 fieldBuild = builder.DefineField(privateName, fieldType.getCLSType(), FieldAttributes.Family);
             } else { // map to public field
                 fieldBuild = builder.DefineField(decl[i], fieldType.getCLSType(), FieldAttributes.Public);
@@ -1222,7 +1222,7 @@ public class MetaDataGenerator implements IDLParserVisitor {
      *  @param currentInfo the buildinfo for the scope, this type is specified in
      *  @return a TypeContainer for the represented type
      */
-    private TypeContainer resovleTypeSpec(SimpleNode node, BuildInfo currentInfo) {    
+    private TypeContainer ResovleTypeSpec(SimpleNode node, BuildInfo currentInfo) {    
         Object result = node.jjtAccept(this, currentInfo);
         TypeContainer resultingType = null;
         if (result instanceof Symbol) { // case <scoped_name>
@@ -1233,7 +1233,6 @@ public class MetaDataGenerator implements IDLParserVisitor {
         }
         return resultingType;
     }
-    
     
     /**
      * @see parser.IDLParserVisitor#visit(ASTtype_spec, Object)
@@ -1254,7 +1253,7 @@ public class MetaDataGenerator implements IDLParserVisitor {
     public Object visit(ASTsimple_type_spec node, Object data) {
         CheckParameterForBuildInfo(data, node);
         SimpleNode child = (SimpleNode)node.jjtGetChild(0);
-        return resovleTypeSpec(child, (BuildInfo) data);
+        return ResovleTypeSpec(child, (BuildInfo) data);
     }
 
     /**
@@ -1739,7 +1738,8 @@ public class MetaDataGenerator implements IDLParserVisitor {
         }
         
         Debug.WriteLine("created array type: " + arrayType);        
-        TypeContainer result = new TypeContainer(arrayType, new CustomAttributeBuilder[] { new IdlSequenceAttribute().CreateAttributeBuilder() } );
+        TypeContainer result = new TypeContainer(arrayType, 
+                                                 new CustomAttributeBuilder[] { new IdlSequenceAttribute().CreateAttributeBuilder() } );
         return result;
     }
 
@@ -1928,7 +1928,9 @@ public class MetaDataGenerator implements IDLParserVisitor {
         // parameters
         ParameterSpec[] params = (ParameterSpec[])node.jjtGetChild(1).jjtAccept(this, buildInfo);
         Type[] paramTypes = new Type[params.length];
-        for (int i = 0; i < params.length; i++) { paramTypes[i] = getParamType(params[i]); }
+        for (int i = 0; i < params.length; i++) { 
+            paramTypes[i] = GetParamType(params[i]); 
+        }
         // name
         String methodName = node.getIdent();
         // ready to create method
@@ -1938,7 +1940,7 @@ public class MetaDataGenerator implements IDLParserVisitor {
                                                              returnType.getCLSType(), paramTypes);
         // define the paramter-names / attributes
         for (int i = 0; i < params.length; i++) {
-            defineParamter(methodBuild, params[i], i+1);
+            DefineParamter(methodBuild, params[i], i+1);
         }
         // add custom attributes for the return type
         ParameterBuilder paramBuild = CreateParamBuilderForRetParam(methodBuild);
@@ -1949,7 +1951,7 @@ public class MetaDataGenerator implements IDLParserVisitor {
     }
 
     /** retrieve the correct type out of ParameterSpec. Consider parameter-direction too */
-    private Type getParamType(ParameterSpec spec) {
+    private Type GetParamType(ParameterSpec spec) {
         TypeContainer specType = spec.GetParamType();
         // special handling for BoxedValue types --> unbox it
         if (specType.getCLSType().IsSubclassOf(BoxedValueBase.class.ToType())) {
@@ -1966,7 +1968,7 @@ public class MetaDataGenerator implements IDLParserVisitor {
         return resultType;
     }
 
-    private void defineParamter(MethodBuilder methodBuild, ParameterSpec spec, int paramNr) {
+    private void DefineParamter(MethodBuilder methodBuild, ParameterSpec spec, int paramNr) {
         ParameterAttributes paramAttr = ParameterAttributes.None;
         if (spec.IsOut()) { 
             paramAttr = paramAttr | ParameterAttributes.Out; 
@@ -2058,7 +2060,7 @@ public class MetaDataGenerator implements IDLParserVisitor {
     public Object visit(ASTparam_type_spec node, Object data) {
         CheckParameterForBuildInfo(data, node);
         SimpleNode child = (SimpleNode)node.jjtGetChild(0); // get the node representing <base_type_spec> or <string_type> or <widestring_type> or <scoped_name>
-        return resovleTypeSpec(child, (BuildInfo)data);
+        return ResovleTypeSpec(child, (BuildInfo)data);
     }
     
     #region fixed pt not supported by this compiler
@@ -2110,7 +2112,8 @@ public class MetaDataGenerator implements IDLParserVisitor {
             return new TypeContainer(fullUnboxed, attrs);
         } catch (Exception e) {
             throw new RuntimeException("invalid type found: " + boxedValueType + 
-                                       ", static method missing or not callable: " + BoxedValueBase.GET_FIRST_NONBOXED_TYPE_METHODNAME);
+                                       ", static method missing or not callable: " + 
+                                       BoxedValueBase.GET_FIRST_NONBOXED_TYPE_METHODNAME);
         }
     }
 
