@@ -207,23 +207,23 @@ namespace Ch.Elca.Iiop {
         private IClientChannelSinkProvider m_providerChain;
 
         #endregion IFields
-	#region SConstructor
+        #region SConstructor
 
-	#if TRACE
-	static IiopClientChannel() {
-		Stream log = File.Create("IIOPNET_DebugOutputClientChannel_"+
-				         DateTime.Now.ToString("yyyyMMdd_HHmmss")+
-					 ".txt");
+        #if TRACE
+        static IiopClientChannel() {
+            Stream log = File.Create("IIOPNET_DebugOutputClientChannel_"+
+                             DateTime.Now.ToString("yyyyMMdd_HHmmss")+
+                         ".txt");
  
-		TextWriterTraceListener logListener = new TextWriterTraceListener(log);
-		
-		Trace.Listeners.Add(logListener);
-		Trace.AutoFlush = true;
-		Debug.AutoFlush = true;
-	}
-	#endif
+            TextWriterTraceListener logListener = new TextWriterTraceListener(log);
+            
+            Trace.Listeners.Add(logListener);
+            Trace.AutoFlush = true;
+            Debug.AutoFlush = true;
+        }
+        #endif
 
-	#endregion SConstructor
+        #endregion SConstructor
         #region IConstructors
         
         public IiopClientChannel() {
@@ -371,26 +371,27 @@ namespace Ch.Elca.Iiop {
         /// <summary>the standard transport sink for this channel</summary>
         private IiopServerTransportSink m_transportSink;
 
-        private bool m_listenActive = false;
+	// flag needed because TcpListener.Active is protected and cannot be accessed from the channel
+	private bool m_listenerActive = false;
 
         #endregion IFields
-	#region SConstructor
+        #region SConstructor
 
-	#if TRACE
-	static IiopServerChannel() {
-		Stream log = File.Create("IIOPNET_DebugOutputServerChannel_"+
-				         DateTime.Now.ToString("yyyyMMdd_HHmmss")+
-					 ".txt");
+        #if TRACE
+        static IiopServerChannel() {
+            Stream log = File.Create("IIOPNET_DebugOutputServerChannel_"+
+                                     DateTime.Now.ToString("yyyyMMdd_HHmmss")+
+                                     ".txt";
  
-		TextWriterTraceListener logListener = new TextWriterTraceListener(log);
-		
-		Trace.Listeners.Add(logListener);
-		Trace.AutoFlush = true;
-		Debug.AutoFlush = true;
-	}
-	#endif
+            TextWriterTraceListener logListener = new TextWriterTraceListener(log);
+            
+            Trace.Listeners.Add(logListener);
+            Trace.AutoFlush = true;
+            Debug.AutoFlush = true;
+        }
+        #endif
 
-	#endregion SConstructor
+        #endregion SConstructor
         #region IConstructors
 
         public IiopServerChannel() {
@@ -516,17 +517,21 @@ namespace Ch.Elca.Iiop {
 
         #region Implementation of IChannelReceiver
         public void StartListening(object data) {
-            SetupListenerThread();
-            // start TCP-Listening
-            m_listener.Start();
-            if (m_port == 0) { 
-                // auto-assign port selected -> update data for this port
-                m_port = ((IPEndPoint)m_listener.LocalEndpoint).Port; 
-                SetupChannelData();
+            if (m_listener == null) {
+                SetupListenerThread();
             }
-            m_listenActive = true;
-            // start the handler thread
-            m_listenerThread.Start();
+            // start TCP-Listening
+	    if (!m_listenerActive) {
+                m_listener.Start();
+                if (m_port == 0) { 
+                    // auto-assign port selected -> update data for this port
+                    m_port = ((IPEndPoint)m_listener.LocalEndpoint).Port; 
+                    SetupChannelData();
+                }
+    	        m_listenerActive = true;
+                // start the handler thread
+                m_listenerThread.Start();
+	    }
         }
 
         private void SetupListenerThread() {
@@ -541,7 +546,7 @@ namespace Ch.Elca.Iiop {
         /// this method handles the incoming messages
         /// </summary>
         private void ListenForMessages() {
-            while (m_listenActive) {
+            while (m_listenerActive) {
                 // receive messages
                 TcpClient client = null;
                 try {
@@ -568,9 +573,10 @@ namespace Ch.Elca.Iiop {
         }
             
         public void StopListening(object data) {
+	    m_listenerActive = false;
             if (m_listenerThread != null) { 
                 try {
-                m_listenerThread.Interrupt(); m_listenerThread.Abort(); 
+                    m_listenerThread.Interrupt(); m_listenerThread.Abort(); 
                 } catch (Exception) { }
             }
             if (m_listener != null) { m_listener.Stop(); }
