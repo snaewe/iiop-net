@@ -154,6 +154,15 @@ namespace Ch.Elca.Iiop.IDLCompiler.Tests {
                                    expected, fields.Length);        
         }
         
+        private void CheckOnlySpecificCustomAttrInCollection(object[] testAttrs, 
+                                                             Type attrType) {
+            Assertion.AssertEquals("wrong nr of custom attrs found",
+                                   1, testAttrs.Length);
+            Assertion.AssertEquals("wrong custom attr found",
+                                   attrType,
+                                   testAttrs[0].GetType());                                                             
+        }
+        
         private void CheckIIdlEntityInheritance(Type testType) {
             Type idlEntityIf = testType.GetInterface("IIdlEntity");
             Assertion.AssertNotNull(String.Format("type {0} doesn't inherit from IIdlEntity", testType.FullName),
@@ -317,6 +326,42 @@ namespace Ch.Elca.Iiop.IDLCompiler.Tests {
                 
         #endregion IMethods
     
+        
+        [Test]
+        public void TestIdlSequenceParamters() {
+            MemoryStream testSource = new MemoryStream();
+            StreamWriter writer = new StreamWriter(testSource, s_latin1);
+            
+            // idl:
+            writer.WriteLine("module testmod {");
+            writer.WriteLine("    typedef sequence<long> seqLong;");
+            writer.WriteLine("    interface Test {");
+            writer.WriteLine("        seqLong EchoSeqLong(in seqLong arg);");
+            writer.WriteLine("    };");
+            writer.WriteLine("};");
+            
+            writer.Flush();
+            testSource.Seek(0, SeekOrigin.Begin);
+            Assembly result = CreateIdl(testSource);
+                       
+            // check if sequence as method parameters is created correctly
+            Type ifContainerType = result.GetType("testmod.Test", true);
+            
+            MethodInfo seqMethod = ifContainerType.GetMethod("EchoSeqLong",
+                                                             BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly);                            
+            Assertion.AssertNotNull("method not found in seqTest", seqMethod);
+            ParameterInfo[] parameters = seqMethod.GetParameters();
+            Assertion.AssertEquals("wrong number of paramters; seqTestMethod", 
+                                   1, parameters.Length);
+            Assertion.AssertEquals("wrong parameter type; seqTestMethod",
+                                   typeof(int[]), parameters[0].ParameterType);
+            Assertion.AssertEquals("wrong return type; seqTestMethod",
+                                   typeof(int[]), seqMethod.ReturnType);
+            object[] paramAttrs = parameters[0].GetCustomAttributes(false);
+            CheckOnlySpecificCustomAttrInCollection(paramAttrs, typeof(IdlSequenceAttribute));
+            object[] returnAttrs = seqMethod.ReturnTypeCustomAttributes.GetCustomAttributes(false);
+            CheckOnlySpecificCustomAttrInCollection(returnAttrs, typeof(IdlSequenceAttribute));            
+        }        
         
     }
         
