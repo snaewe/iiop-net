@@ -33,17 +33,20 @@ using System.Diagnostics;
 
 public class Launch {
 	public static void Main(String[] args) {
+		ProcessStartInfo startInfo = null;
 		if (args.Length <= 0) {
 			Console.WriteLine("Usage:");
 			Console.WriteLine("Lauch name [args]");
 			Environment.Exit(2);
 		} else if (args.Length == 1) {
-			Process p = Process.Start(args[0]);
-			Console.WriteLine(p.Id.ToString());
+			startInfo = new ProcessStartInfo(args[0]);
 		} else {
 			String parameters = String.Join(" ", args, 1, args.Length-1);
-			Process p = Process.Start(args[0], parameters);
-			Console.WriteLine(p.Id.ToString());
+			startInfo = new ProcessStartInfo(args[0], parameters);
 		}
+		startInfo.WindowStyle = ProcessWindowStyle.Minimized;
+		Process p = Process.Start(startInfo);
+		Console.WriteLine(p.Id.ToString());
+
 	}
 }
