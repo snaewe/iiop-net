@@ -1,5 +1,9 @@
 IIOPCHANNEL = ..\..\..\IIOPChannel\bin\IIOPChannel.dll
 IIOPCHANNELPDB = ..\..\..\IIOPChannel\bin\IIOPChannel.pdb
+LAUNCH = ..\..\Utils\launch.exe
+KILL = ..\..\Utils\kill.exe
+DELAY = ..\..\Utils\delay.exe
+
 bin         = bin\ 
 
 build: build-server build-idl
@@ -17,6 +21,15 @@ build-server: $(bin)IIOPChannel.dll *.cs
 
 build-idl:
     ..\..\..\CLSToIDLGenerator\bin\CLSIDLGenerator.exe -o IDL Ch.Elca.Iiop.IntegrationTests.TestService bin\testServer.exe
+
+
+start-server:
+	@$(LAUNCH) bin\TestServer.exe >> pid
+#	for /F "usebackq" %%r in (`..\..\Utils\launch.exe bin\TestServer.exe`) do set pid=%%r
+
+stop-server:
+	@for /F %%p in (pid) do @$(KILL) %%p
+	@del pid
 
 clean:
 	if exist IDL del /s /q IDL

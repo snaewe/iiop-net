@@ -28,6 +28,14 @@ build-tests: build-base
         $(MAKE) build
         cd ..
 
+test:
+	cd IIOPChannel
+	$(MAKE) test
+	cd ..
+	cd IntegrationTests
+	$(MAKE) test
+	cd ..	
+
 clean:
 	cd IIOPChannel
 	$(MAKE) clean

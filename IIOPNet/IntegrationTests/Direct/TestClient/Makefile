@@ -22,7 +22,13 @@ build-client: $(bin)IIOPChannel.dll $(bin)TestServiceCommon.dll *.cs
 	if not exist bin\nul mkdir bin
 	csc $(CSFLAGS) /t:library /r:$(NUNIT) /r:$(bin)TestServiceCommon.dll /r:$(bin)IIOPChannel.dll /out:bin\ClientTest.dll TestClient.cs
 
+start-client:
+	@echo "Direct IntegrationTest"
+	%NUNITV2_HOME%\bin\nunit-console.exe /assembly:bin\ClientTest.dll
+
 clean:
 	if exist bin del /s /q bin
 	if exist bin rmdir /s /q bin
+
+
 

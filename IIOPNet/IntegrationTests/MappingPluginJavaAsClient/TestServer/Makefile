@@ -1,6 +1,11 @@
 IIOPCHANNEL = ..\..\..\IIOPChannel\bin\IIOPChannel.dll
 IIOPCHANNELPDB = ..\..\..\IIOPChannel\bin\IIOPChannel.pdb
 MAPPINGPLUGINDIR = ..\..\..\MappingPlugin\java\ 
+
+LAUNCH=..\..\Utils\launch.exe
+KILL = ..\..\Utils\kill.exe
+DELAY = ..\..\Utils\delay.exe
+
 bin         = bin\ 
 
 build: build-plugin build-server build-idl
@@ -38,9 +43,28 @@ build-plugin:
         $(MAKE) build
         cd ..\..\IntegrationTests\MappingPluginJavaAsClient\TestServer
 
-clean:
+clean-plugin:
+	cd $(MAPPINGPLUGINDIR)
+	$(MAKE) clean
+        cd ..\..\IntegrationTests\MappingPluginJavaAsClient\TestServer
+
+start-server:
+	@$(LAUNCH) bin\TestServer.exe >> pid
+#	for /F "usebackq" %%r in (`..\..\Utils\launch.exe bin\TestServer.exe`) do set pid=%%r
+
+stop-server:
+	@for /F %%p in (pid) do @$(KILL) %%p
+	@del pid
+
+clean: clean-plugin
 	if exist IDL del /s /q IDL
 	if exist bin del /s /q bin
 	if exist IDL rmdir /s /q IDL
 	if exist bin rmdir /s /q bin
 	if exist customMapping.xml del customMapping.xml
+
+
+
+
+
+

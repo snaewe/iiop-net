@@ -46,9 +46,20 @@ build-plugin:
 	$(MAKE) build
 	cd ..\..\IntegrationTests\MappingPluginJava\TestClient
 
-clean:
+start-client:
+	@echo "Mapping plugin java server IntegrationTest"
+	%NUNITV2_HOME%\bin\nunit-console.exe /assembly:bin\ClientTest.dll
+
+clean-plugin:
+	cd $(MAPPINGPLUGINDIR)
+	$(MAKE) clean
+	cd ..\..\IntegrationTests\MappingPluginJava\TestClient
+
+clean: clean-plugin
 	if exist IDL del /s /q IDL
 	if exist bin del /s /q bin
 	if exist IDL rmdir /s /q IDL
 	if exist bin rmdir /s /q bin
+
+
 

@@ -1,5 +1,5 @@
 
-build: nunit-var
+build: nunit-var junit-var
 	cd Utils
 	$(MAKE) build
 	cd ..
@@ -12,10 +12,45 @@ build: nunit-var
         cd JavaRMIIIOP
 	$(MAKE) build
 	cd ..
+	cd JavaRMIIIOPAsClient
+	$(MAKE) build
+	cd ..
+	cd MappingPluginJava
+	$(MAKE) build
+	cd ..
+	cd MappingPluginJavaAsClient
+	$(MAKE) build
+	cd ..
+
 
 nunit-var:        
 	@if not defined NUNITV2_HOME echo Set the NUNITV2_HOME variable to the NUnit V2 home directory. Please check TestInstructions.txt.
 	@if not defined NUNITV2_HOME exit 2
+
+junit-var:
+	@if not defined JUNIT_HOME echo set the JUNIT_HOME variable to the JUNIT home directory. Please check TestInstructions.txt.
+	@if not defined JUNIT_HOME exit 2
+
+
+test: nunit-var junit-var
+	cd Basic
+	$(MAKE) test
+	cd ..
+        cd Direct
+	$(MAKE) test
+        cd ..
+	cd JavaRMIIIOP
+	$(MAKE) test
+	cd ..
+	cd JavaRMIIIOPAsClient
+	$(MAKE) test
+	cd ..
+	cd MappingPluginJava
+	$(MAKE) test
+	cd ..
+	cd MappingPluginJavaAsClient
+	$(MAKE) test
+	cd ..
 
 clean:
 	cd Utils
@@ -30,3 +65,14 @@ clean:
 	cd JavaRMIIIOP
 	$(MAKE) clean
 	cd ..
+	cd JavaRMIIIOPAsClient
+	$(MAKE) clean
+	cd ..
+	cd MappingPluginJava
+	$(MAKE) clean
+	cd ..
+	cd MappingPluginJavaAsClient
+	$(MAKE) clean
+	cd ..
+
+

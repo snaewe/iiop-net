@@ -1,3 +1,9 @@
+
+
+LAUNCH = ..\..\Utils\launch.exe
+KILL = ..\..\Utils\kill.exe
+DELAY = ..\..\Utils\delay.exe
+
 bin         = bin\ 
 IDL         = IDL\ 
 
@@ -24,8 +30,27 @@ build-idl:
     rmic -d ..\$(IDL) -idl Ch.Elca.Iiop.IntegrationTests.AdderImpl
     cd ..
 
+start-server:
+	@$(LAUNCH) orbd.exe -ORBInitialPort 1050 >> pid
+	@$(DELAY) 10
+	@cd bin
+	@..\$(LAUNCH) java -Djava.naming.factory.initial=com.sun.jndi.cosnaming.CNCtxFactory -Djava.naming.provider.url=iiop://localhost:1050 -cp . TestServer >> ..\pid
+	@cd ..
+
+
+stop-server:
+	@for /F %%p in (pid) do @$(KILL) %%p
+	@del pid
+
 clean:
 	if exist IDL del /s /q IDL
 	if exist bin del /s /q bin
 	if exist IDL rmdir /s /q IDL
 	if exist bin rmdir /s /q bin
+
+
+
+
+
+
+

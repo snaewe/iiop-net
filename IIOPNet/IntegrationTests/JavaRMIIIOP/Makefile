@@ -1,3 +1,5 @@
+DELAY = ..\Utils\delay.exe
+
 build: build-server build-client
 
 build-server:
@@ -10,6 +12,26 @@ build-client:
 	$(MAKE) build	
 	cd ..
 
+start-server:
+	@cd TestServer
+	@$(MAKE) /C start-server
+	@cd ..
+
+stop-server:
+	@cd TestServer
+	@$(MAKE) /C stop-server
+	@cd ..	
+
+start-client:
+	@cd TestClient
+	@$(MAKE) /C /I start-client
+	@cd ..
+
+test:
+	@$(MAKE) /C start-server
+	@$(DELAY) 10
+	@$(MAKE) /C start-client
+	@$(MAKE) /C stop-server
 
 clean:
 	cd TestServer
