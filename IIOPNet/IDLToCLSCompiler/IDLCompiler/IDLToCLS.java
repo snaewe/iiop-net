@@ -41,8 +41,17 @@ import Ch.Elca.Iiop.IdlPreprocessor.IDLPreprocessor;
 
 import System.Diagnostics.*;
 import System.IO.Directory;
+import System.IO.FileInfo;
+import System.IO.MemoryStream;
+import System.IO.SeekOrigin;
 import System.Reflection.Assembly;
 import java.util.LinkedList;
+
+import System.Convert;
+import System.IO.StreamReader;
+import System.IO.FileStream;
+import System.IO.FileMode;
+import System.Text.Encoding;
 
 /**
  * 
@@ -66,9 +75,9 @@ public class IDLToCLS {
     #endregion IFields
     #region IConstructors
 
-	public IDLToCLS(String[] args) {
-		ParseArgs(args);
-	}
+    public IDLToCLS(String[] args) {
+        ParseArgs(args);
+    }
 
     #endregion IConstructors
     #region SMethods
@@ -80,9 +89,9 @@ public class IDLToCLS {
         // Trace.Indent();
         
         try {
-			IDLToCLS mapper = new IDLToCLS(args);
-			mapper.MapIdl();
-        } catch (Exception e) {
+            IDLToCLS mapper = new IDLToCLS(args);
+            mapper.MapIdl();
+        } catch (System.Exception e) {
             System.err.println("exception encountered: " + e);
             System.exit(2);
         }
@@ -101,6 +110,7 @@ public class IDLToCLS {
         System.out.println("-o directory    output directory (default is `-o .`)");
         System.out.println("-r assembly     assemblys to check for types in, instead of generating them");
         System.out.println("-c xmlfile      specifies custom mappings");
+        System.out.println("-d define       defines a preprocessor symbol");
     }
     
     public static void Error(String message) {
@@ -114,13 +124,13 @@ public class IDLToCLS {
     #region IMethods
     
     private void ParseArgs(String[] args) {
-    	int i = 0;
+        int i = 0;
 
         while ((i < args.length) && (args[i].startsWith("-"))) {
-        	if (args[i].equals("-h")) {
+            if (args[i].equals("-h")) {
                 HowTo();
                 i++;
-    			System.exit(0);
+                System.exit(0);
             } else if (args[i].equals("-o")) {
                 i++;
                 m_destination = args[i++];
@@ -137,8 +147,11 @@ public class IDLToCLS {
                 i++;
                 System.IO.FileInfo configFile = new System.IO.FileInfo(args[i++]);
                 // add custom mappings from file
-            	CompilerMappingPlugin plugin = CompilerMappingPlugin.GetSingleton();
-            	plugin.AddMappingsFromFile(configFile);
+                CompilerMappingPlugin plugin = CompilerMappingPlugin.GetSingleton();
+                plugin.AddMappingsFromFile(configFile);
+            } else if (args[i].equals("-d")) {
+                i++;
+                IDLPreprocessor.AddDefine(args[i++].Trim());
             } else {
                 Error(String.Format("Error: invalid option {0}", args[i]));
             }
@@ -155,23 +168,40 @@ public class IDLToCLS {
         m_asmPrefix = args[i];
         i++;
         
-		m_inputFileNames = new String[args.length - i];
+        m_inputFileNames = new String[args.length - i];
         System.arraycopy(args, i, m_inputFileNames, 0, m_inputFileNames.length);
     }
     
     private InputStream Preprocess(String fileName) throws Exception {
-        File file = new File(fileName);
+        FileInfo file = new FileInfo(fileName);
         // all Preprocessor instances share the same symbol definitions
         IDLPreprocessor preproc = new IDLPreprocessor(file);
         preproc.Process();
-        InputStream result = preproc.GetProcessed();
-        BufferedReader reader = new BufferedReader(new InputStreamReader(result));
+        MemoryStream resultProc = preproc.GetProcessed();
+        Encoding latin1 = Encoding.GetEncoding("ISO-8859-1");
+        StreamReader stReader = new StreamReader(resultProc, latin1);
         String line = "";
         while (line != null) {
             Debug.WriteLine(line);
-            line = reader.readLine();
+            line = stReader.ReadLine();
         }
-        result.reset();
+        resultProc.Seek(0, SeekOrigin.Begin);
+        ByteArrayInputStream result = new ByteArrayInputStream(
+                                              ConvertUByteArray(resultProc.ToArray()));
+        return result;
+    }
+    
+    /**
+     * converts a byte[] to an sbyte[]
+     **/
+    private byte[] ConvertUByteArray(ubyte[] arg) {
+        if (arg == null) {
+            return null;
+        }
+        byte[] result = new byte[arg.get_Length()];
+        for (int i = 0; i < arg.get_Length(); i++) {
+            result[i] = (byte)(arg[i]);
+        }
         return result;
     }
     

@@ -2,3 +2,6 @@ bin
 obj
 IDLPreprocessor.vjsproj.user
 .#*
+*.cmbx
+*.prjx
+

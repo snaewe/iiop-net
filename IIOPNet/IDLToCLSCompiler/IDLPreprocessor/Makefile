@@ -4,9 +4,9 @@ build: build-dll
 
 build-dll: bin\IDLPreprocessor.dll
 
-$(Dest)IDLPreprocessor.dll: *.java *.jsl
+$(Dest)IDLPreprocessor.dll: *.cs
 	if not exist $(Dest)nul mkdir $(Dest)
-	vjc $(CSFLAGS) /t:library /out:$@ *.java *.jsl 
+	csc $(CSFLAGS) /t:library /out:$@ *.cs
 
 
 clean:
