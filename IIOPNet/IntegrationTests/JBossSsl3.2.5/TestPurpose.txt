@@ -1,4 +1,4 @@
-This integration test tests the basic interoperability of IIOP.NET with JBoss 3.2.1.
+This integration test tests the basic interoperability of IIOP.NET Ssl support with JBoss 3.2.5.
 
 
 
