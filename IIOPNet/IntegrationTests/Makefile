@@ -53,7 +53,7 @@ build-ssl:
     cd JBossSsl3.2.5
     @if not defined JBOSS_HOME_3_2_5 echo JBOSS_HOME_3_2_5 not set, skipping JBOSS SSL integration test
     @if not defined JAVA_HOME echo JAVA_HOME not set, skipping JBOSS SSL integration test
-    @if defined JBOSS_HOME_3_2_5 @if defined JAVA_HOME $(MAKE) /C build 
+    @if defined JBOSS_HOME_3_2_5 @if defined JAVA_HOME $(MAKE) /C build-with-setup 
     cd ..
 
 
