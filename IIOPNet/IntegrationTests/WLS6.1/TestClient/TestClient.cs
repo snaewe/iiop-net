@@ -202,8 +202,9 @@ namespace ch.elca.iiop.integrationTests {
             Assertion.AssertEquals("hik", result[0]);
         }
         
-/// jagged array are not correctly mapped to IDL by Weblogic java to IDL compiler -> does not work
-/*        [Test]
+        // jagged array are not correctly mapped to IDL by Weblogic java to IDL compiler!
+        // work only, if correct idl is also mapped from IDL to CLS 
+        [Test]
         public void TestJaggedArrays() {
             System.Int32[][] arg1 = new System.Int32[2][];
             arg1[0] = new System.Int32[] { 1 };
@@ -226,9 +227,9 @@ namespace ch.elca.iiop.integrationTests {
             Assertion.AssertNotNull(result2[1]);
             Assertion.AssertNotNull(result2[2]);
             Assertion.AssertEquals(arg2[0][0][0], result2[0][0][0]);
-        } */
+        }
 
-/*        [Test]
+        [Test]
         public void TestJaggedArraysWithNullElems() {
 	    System.Int32[][] arg1 = null;
             System.Int32[][] result1 = m_test.EchoJaggedIntArray(arg1);
@@ -249,10 +250,10 @@ namespace ch.elca.iiop.integrationTests {
             Assertion.AssertNotNull(result4[1]);
             Assertion.AssertEquals(result4[1][0], arg4[1][0]);
             Assertion.AssertEquals(result4[1][1], arg4[1][1]);
-        } */
+        }
 
         
-/*        [Test]
+        [Test]
         public void TestJaggedStringArrays() {
             System.String[][] arg1 = new System.String[2][];
             arg1[0] = new System.String[] { "test" };
@@ -264,7 +265,7 @@ namespace ch.elca.iiop.integrationTests {
             Assertion.AssertEquals(arg1[0][0], result1[0][0]);
             Assertion.AssertEquals(arg1[1][0], result1[1][0]);
             Assertion.AssertEquals(arg1[1][1], result1[1][1]);                        
-        } */
+        }
         
         [Test]
         public void TestGetAndUseRemoteObject() {

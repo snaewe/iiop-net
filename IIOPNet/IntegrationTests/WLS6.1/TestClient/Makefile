@@ -21,11 +21,15 @@ copy-idl:
     cd IDL
     copy ..\..\..\..\IDLToCLSCompiler\IDL\*.idl .
     xcopy /s /q /y ..\..\TestBeans\IDL .
+    REM copy correct idl for jagged arrays
+    copy ..\CorrectIDL\org\omg\boxedRMI\seq2*.idl org\omg\boxedRMI\ 
+    copy ..\CorrectIDL\org\omg\boxedRMI\seq3*.idl org\omg\boxedRMI\ 
+    copy ..\CorrectIDL\org\omg\boxedRMI\CORBA\seq2*.idl org\omg\boxedRMI\CORBA\ 
     cd ..
 
 compile-idl:
 	cd IDL 
-	..\..\..\..\IDLToCLSCompiler\IDLCompiler\bin\IDLToCLSCompiler.exe -o ..\bin client $(BEANPATH)Test.idl $(BEANPATH)TestHome.idl $(BEANPATH)IntAdder.idl $(BEANPATH)IntAdderHome.idl
+	..\..\..\..\IDLToCLSCompiler\IDLCompiler\bin\IDLToCLSCompiler.exe -o ..\bin client $(BEANPATH)Test.idl $(BEANPATH)TestHome.idl $(BEANPATH)IntAdder.idl $(BEANPATH)IntAdderHome.idl org\omg\boxedRMI\seq2_long.idl org\omg\boxedRMI\seq2_octet.idl org\omg\boxedRMI\seq3_octet.idl org\omg\boxedRMI\CORBA\seq2_WStringValue.idl
 	cd ..
 
 clean:
