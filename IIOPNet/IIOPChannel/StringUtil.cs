@@ -48,23 +48,6 @@ namespace Ch.Elca.Iiop.Util {
         #region SMethods
 
         /// <summary>
-        /// cut off the high 8 bits of every character in the string and return a byte[] representation
-        /// of this 8bit character string
-        /// </summary>
-        /// <param name="data"></param>
-        /// <returns></returns>
-        public static byte[] GetCutOffByteArrForString(string data) {
-            if (data == null) { 
-                return new byte[0]; 
-            }
-            byte[] result = new byte[data.Length];
-            for (int i = 0; i < data.Length; i++) {
-                result[i] = (byte)data[i];
-            }
-            return result;
-        }
-
-        /// <summary>
         /// creates a byte arr representation for a string, without loosing information:
         /// one char is encoded as two bytes
         /// </summary>

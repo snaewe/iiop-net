@@ -32,6 +32,8 @@ using System;
 using System.Diagnostics;
 using System.IO;
 using System.Collections;
+using System.Text;
+
 using Ch.Elca.Iiop.Cdr;
 using Ch.Elca.Iiop.Util;
 using omg.org.CORBA;
@@ -84,9 +86,16 @@ namespace Ch.Elca.Iiop.CorbaObjRef {
         /// </summary>
         public Ior(string iorAsString) {
             // iorAsString contains only characters 0-9, A-F and IOR --> all of this are short characters
-            byte[] asByteArray = StringUtil.GetCutOffByteArrForString(iorAsString);
-            MemoryStream memStream = new MemoryStream(asByteArray);
+            byte[] data;
+            if (iorAsString == null) {
+                data = new byte[0];
+            } else {
+                ASCIIEncoding ae = new ASCIIEncoding();
+                data = ae.GetBytes(iorAsString);
+            }
+            MemoryStream memStream = new MemoryStream(data);
             IorStream iorStream = new IorStream(memStream);
+
             ParseIOR(iorStream);
         }
 
