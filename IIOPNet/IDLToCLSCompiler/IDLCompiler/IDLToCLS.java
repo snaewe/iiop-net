@@ -35,6 +35,8 @@ import action.MetaDataGenerator;
 import parser.IDLParser;
 import parser.ASTspecification;
 
+import Ch.Elca.Iiop.IdlPreprocessor.IDLPreprocessor;
+
 import System.Diagnostics.*;
 
 /**
@@ -103,7 +105,7 @@ public class IDLToCLS {
     private static InputStream Preprocess(String fileName) throws Exception {
         File file = new File(fileName);
         // all Preprocessor instances share the same symbol definitions
-        IDLPreprocessor.IDLPreprocessor preproc = new IDLPreprocessor.IDLPreprocessor(file);
+        IDLPreprocessor preproc = new IDLPreprocessor(file);
         preproc.process();
         InputStream result = preproc.getProcessed();
         BufferedReader reader = new BufferedReader(new InputStreamReader(result));

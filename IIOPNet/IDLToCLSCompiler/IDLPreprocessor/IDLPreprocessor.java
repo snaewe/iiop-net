@@ -27,7 +27,8 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
-package IDLPreprocessor;
+package Ch.Elca.Iiop.IdlPreprocessor;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
@@ -47,7 +48,22 @@ import java.util.StringTokenizer;
  */
 public class IDLPreprocessor {
 	
+    #region IFields
+
 	private BufferedReader m_fileStream;
+
+    private InputStream m_processed = null;
+
+    	/** stores the preprocessor result */
+	private PrintWriter m_outputStream;
+	private ByteArrayOutputStream m_outData;
+
+    private int m_ifOpen = 0;
+
+    private Hashtable m_defined;
+
+    #endregion IFields
+    #region IConstructors
 	
 	/** @param resolveInclude should includefiles be included or not
 	 */
@@ -62,15 +78,14 @@ public class IDLPreprocessor {
 		init(toProcess);
 	}
 
+    #endregion IConstructors
+    #region IMethods
+
 	private void init(File toProcess) throws Exception, java.io.IOException {
 		m_fileStream = new BufferedReader(new FileReader(toProcess));
 		m_outData = new ByteArrayOutputStream();
 		m_outputStream = new PrintWriter(new OutputStreamWriter(m_outData), true);
 	}
-
-	/** stores the preprocessor result */
-	private PrintWriter m_outputStream;
-	private ByteArrayOutputStream m_outData;
 
 	/** processes the file */
 	public void process() throws Exception, java.io.IOException {
@@ -96,7 +111,7 @@ public class IDLPreprocessor {
 		m_processed = new ByteArrayInputStream(m_outData.toByteArray());
 	}
 
-	private InputStream m_processed = null;
+	
 
 	/** gets the preprocessed file for further processing */
 	public InputStream getProcessed() {
@@ -112,7 +127,6 @@ public class IDLPreprocessor {
 	public LinkedList notincludedFiles() {
 		return null;
 	}
-
 
 	#region implementation of the preprocessing actions
 
@@ -140,10 +154,7 @@ public class IDLPreprocessor {
 			currentLine = resultReader.readLine();
 		}
 		resultReader.close();
-	}
-
-	
-	private Hashtable m_defined;
+	}	
 	
 	private void processDefine(String currentLine) throws Exception {
 
@@ -162,9 +173,7 @@ public class IDLPreprocessor {
 		}
 		m_defined.put(define, value);
 		System.Diagnostics.Debug.WriteLine("defined symbol in preproc: " + define);
-	}
-
-	private int m_ifOpen = 0;
+	}	
 	
 	private void processIfNDef(String currentLine) throws Exception {
 		m_ifOpen++;
@@ -193,12 +202,11 @@ public class IDLPreprocessor {
 			if (currentLine.startsWith("#endif")) { moreIfs--; }
 			if (moreIfs > 0) { currentLine = m_fileStream.readLine().trim(); }
 		}
-	}
-	
+	}	
 
+	#endregion implementation of the preprocessing actions
 
-
-	#endregion
+    #endregion IMethods
 
 }
 
