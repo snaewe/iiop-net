@@ -638,7 +638,6 @@ namespace Ch.Elca.Iiop.Cdr {
                         // can't deserialise custom value type, because ICustomMarshalled not implented
                         throw new INTERNAL(909, CompletionStatus.Completed_MayBe);
                     }
-//                    HandleChunks(null, chunked);
                     ((ICustomMarshalled) instance).Deserialise(new DataInputStreamImpl(this));
                 }
             }
@@ -665,34 +664,10 @@ namespace Ch.Elca.Iiop.Cdr {
             FieldInfo[] fields = ofType.GetFields(BindingFlags.DeclaredOnly | BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
             foreach (FieldInfo fieldInfo in fields) {
                 if (!fieldInfo.IsNotSerialized) { // do not serialize transient fields
-//                    HandleChunks(fieldInfo, chunkedRep);    
                     ReadAndSetField(fieldInfo, instance);
                 }
             }
         }
-
-//        /// <summary>check for chunk-starts, continuation chunks</summary>
-//        private void HandleChunks(FieldInfo info, bool chunked) {
-//            if (!chunked) { 
-//                return; 
-//            }
-//            
-//            ChunkInfo chunk = (ChunkInfo) m_chunkStack.Peek();    
-//            if ((info == null) || (!CheckForInnerValueType(info))) {
-//                if (!chunk.IsContinuationExpected && chunk.IsDataAvailable()) { return; } // chunk is active at the moment, no chunk length follows
-//                // the chunk starts/continues here; if the last chunk is finished, i.e. no more data is available, the chunk must continue with a new chunk length
-//                int chunkLength = ReadLong(); 
-//                chunk.SetContinuationLength(chunkLength);
-//                chunk.IsContinuationExpected = false;
-//            } else {
-//                if (chunk.IsDataAvailable()) { 
-//                    // chunk can't end here, data is present in chunk
-//                    throw new MARSHAL(912, CompletionStatus.Completed_MayBe);
-//                }
-//                chunk.IsContinuationExpected = true;
-//            }
-//        }
-
 
         /// <summary>ends chunk(s) here</summary>
         private void EndChunk() {
@@ -891,24 +866,6 @@ namespace Ch.Elca.Iiop.Cdr {
             }
             return true;
         }
-
-/*        /// <summary>checks, if an inner value type follows</summary>
-        private bool CheckForInnerValueType(FieldInfo fieldInfo) {
-            if ((!ClsToIdlMapper.IsDefaultMarshalByVal(fieldInfo.FieldType))
-                || (ClsToIdlMapper.IsMarshalByRef(fieldInfo.FieldType))) {
-                // can't be a inner value type
-                return false;
-            }
-            
-            m_baseStream.StartPeeking();
-            ulong tag = m_baseStream.ReadULong();
-            m_baseStream.StopPeeking();    
-            if ((tag >= ValueBaseStream.MIN_VALUE_TAG) && (tag <= ValueBaseStream.MAX_VALUE_TAG)) {            
-                return true; // inner value starting, because of value tag
-            } else {
-                return false;
-            }
-        } */
 
         /// <summary>reads codebase-URL</summary>
         private void HandleCodeBaseURL(long valueTag) {
