@@ -32,18 +32,28 @@ using System.Runtime.Remoting;
 using System.Runtime.Remoting.Channels;
 using System.Collections;
 using System.Threading;
+using System.Text;
 using NUnit.Framework;
 using Ch.Elca.Iiop;
 using Ch.Elca.Iiop.Services;
 using omg.org.CosNaming;
 
 namespace Ch.Elca.Iiop.IntegrationTests {
+    
+    
+    public class TestFailedException : Exception {
+        
+        public TestFailedException(string msg) : base(msg) {
+        }
+        
+    }
+    
 
     [TestFixture]
     public class TestClient {
 
         private const int NR_OF_THREADS = 5;
-    	private const int NR_OF_CALLS = 150;    	
+        private const int NR_OF_CALLS = 150;        
 
         #region IFields
 
@@ -51,8 +61,8 @@ namespace Ch.Elca.Iiop.IntegrationTests {
 
         private TestService m_testService1;
         private TestService m_testService2;
-    	
-    	private Random m_random = new Random();
+        
+        private Random m_random = new Random();
 
 
         #endregion IFields
@@ -77,34 +87,52 @@ namespace Ch.Elca.Iiop.IntegrationTests {
         }
         
         private void RunMultithreaded(PerformCallDelegate remoteMethodCaller) {
+            ArrayList methodRunners = new ArrayList();
             ArrayList threads = new ArrayList();
-        	for (int i = 0; i < NR_OF_THREADS; i++) {
-        		TimeSpan delay = TimeSpan.FromMilliseconds(m_random.Next(200));
-        		RepeatedMethodCaller rmc1 = new RepeatedMethodCaller(NR_OF_CALLS,
-        		                                                     delay, remoteMethodCaller,
-        		                                                     m_testService1);
-        		Thread sv1 = new Thread(new ThreadStart(rmc1.PerformCalls));
-        		threads.Add(sv1);
-        		sv1.Start();
-        		
-        		delay = TimeSpan.FromMilliseconds(m_random.Next(200));
-        		RepeatedMethodCaller rmc2 = new RepeatedMethodCaller(NR_OF_CALLS,
-        		                                                     delay, remoteMethodCaller,
-        		                                                     m_testService2);
-        		
-        		Thread sv2 = new Thread(new ThreadStart(rmc2.PerformCalls));
-        		threads.Add(sv2);
-        		sv2.Start();
-        	}
-        	
-        	foreach (Thread t in threads) {
-        		t.Join(); // wait for thread to finish
-        	}   
+            for (int i = 0; i < NR_OF_THREADS; i++) {
+                TimeSpan delay = TimeSpan.FromMilliseconds(m_random.Next(200));
+                RepeatedMethodCaller rmc1 = new RepeatedMethodCaller(NR_OF_CALLS,
+                                                                     delay, remoteMethodCaller,
+                                                                     m_testService1);
+                methodRunners.Add(rmc1);
+                Thread sv1 = new Thread(new ThreadStart(rmc1.PerformCalls));
+                threads.Add(sv1);
+                sv1.Start();
+                
+                delay = TimeSpan.FromMilliseconds(m_random.Next(200));
+                RepeatedMethodCaller rmc2 = new RepeatedMethodCaller(NR_OF_CALLS,
+                                                                     delay, remoteMethodCaller,
+                                                                     m_testService2);
+                methodRunners.Add(rmc2);
+                Thread sv2 = new Thread(new ThreadStart(rmc2.PerformCalls));
+                threads.Add(sv2);
+                sv2.Start();
+            }
+            
+            foreach (Thread t in threads) {
+                t.Join(); // wait for thread to finish
+            }
+            
+            StringBuilder exceptionMsg = new StringBuilder();
+            bool foundEx = false;
+            foreach (RepeatedMethodCaller rmc in methodRunners) {
+                Exception[] exceptions = rmc.ExceptionsEncountered;
+                if (exceptions.Length > 0) {
+                    foundEx = true;
+                    foreach (Exception ex in exceptions) {
+                        exceptionMsg.Append(ex.ToString() + "\n");    
+                    }
+                }                
+            }
+            if (foundEx) {
+                throw new TestFailedException("the following exceptions were encountered while running the test:\n" + 
+                                              exceptionMsg.ToString());
+            }
 
         }
 
         [Test]
-        public void TestWithNoParamsSync() {        	        	
+        public void TestWithNoParamsSync() {                        
             RunMultithreaded(new PerformCallDelegate(this.CallNoParamsMethodSync));                
         }
         
@@ -114,7 +142,7 @@ namespace Ch.Elca.Iiop.IntegrationTests {
         }
         
         private void CallNoParamsMethodSync(TestService serviceToUse) {
-        	serviceToUse.TestVoid();
+            serviceToUse.TestVoid();
         }
         
         private delegate void NoParamsCallDelegate();
@@ -129,12 +157,12 @@ namespace Ch.Elca.Iiop.IntegrationTests {
 
         [Test]
         public void TestWithOctetParamsSync() {
-            RunMultithreaded(new PerformCallDelegate(this.CallOctetParamsMethod));        	
+            RunMultithreaded(new PerformCallDelegate(this.CallOctetParamsMethod));          
         }
         
         [Test]
         public void TestWithOctetParamsAsync() {
-            RunMultithreaded(new PerformCallDelegate(this.CallOctetParamsMethodAsync));        	
+            RunMultithreaded(new PerformCallDelegate(this.CallOctetParamsMethodAsync));         
         }
         
         private void CallOctetParamsMethod(TestService serviceToUse) {
@@ -159,12 +187,12 @@ namespace Ch.Elca.Iiop.IntegrationTests {
 
         [Test]
         public void TestWithRemoteCreatedObjectsSync() {
-        	RunMultithreaded(new PerformCallDelegate(this.CallWithCreateObject));
+            RunMultithreaded(new PerformCallDelegate(this.CallWithCreateObject));
         }
         
         [Test]
         public void TestWithRemoteCreatedObjectsAsync() {
-        	RunMultithreaded(new PerformCallDelegate(this.CallWithCreateObjectAsync));
+            RunMultithreaded(new PerformCallDelegate(this.CallWithCreateObjectAsync));
         }
         
         private void CallWithCreateObject(TestService serviceToUse) {
@@ -176,40 +204,40 @@ namespace Ch.Elca.Iiop.IntegrationTests {
         }
         
         private delegate Adder RetrieveAdderDelegate();
-    	private delegate int AddCallDelegate(int arg1, int arg2);
-    	
-    	private void CallWithCreateObjectAsync(TestService serviceToUse) {
+        private delegate int AddCallDelegate(int arg1, int arg2);
+        
+        private void CallWithCreateObjectAsync(TestService serviceToUse) {
             RetrieveAdderDelegate rad = new RetrieveAdderDelegate(serviceToUse.RetrieveAdder);
             // async call
             IAsyncResult ar1 = rad.BeginInvoke(null, null);
             
             System.Int32 arg1 = m_random.Next(100);
             System.Int32 arg2 = m_random.Next(100);
-    		
+            
             // wait for response
             Adder result1 = rad.EndInvoke(ar1);
             Assertion.AssertNotNull(result1);
-    		    		
-    		AddCallDelegate acd = new AddCallDelegate(result1.Add);
-    		// async call
+                        
+            AddCallDelegate acd = new AddCallDelegate(result1.Add);
+            // async call
             IAsyncResult ar2 = acd.BeginInvoke(arg1, arg2, null, null);
             // wait for response
             System.Int32 result2 = acd.EndInvoke(ar2);                                                         
             Assertion.AssertEquals((System.Int32) arg1 + arg2, result2);
-        }    	
+        }       
 
         [Test]
         public void TestWithStructParamsSync() {
-            RunMultithreaded(new PerformCallDelegate(this.CallStructParamsMethod));        	
+            RunMultithreaded(new PerformCallDelegate(this.CallStructParamsMethod));         
         }
         
         [Test]
         public void TestWithStructParamsAsync() {
-            RunMultithreaded(new PerformCallDelegate(this.CallStructParamsMethodAsync));        	
+            RunMultithreaded(new PerformCallDelegate(this.CallStructParamsMethodAsync));            
         }
         
         private void CallStructParamsMethod(TestService serviceToUse) {
-        	TestStructA arg = new TestStructAImpl();
+            TestStructA arg = new TestStructAImpl();
             arg.X = m_random.Next(100);
             arg.Y = -1 * m_random.Next(100);
             TestStructA result = m_testService1.TestEchoStruct(arg);
@@ -220,10 +248,10 @@ namespace Ch.Elca.Iiop.IntegrationTests {
         private delegate TestStructA StructParamsCallDelegate(TestStructA arg);
 
         private void CallStructParamsMethodAsync(TestService serviceToUse) {
-        	TestStructA arg = new TestStructAImpl();
+            TestStructA arg = new TestStructAImpl();
             arg.X = m_random.Next(100);
             arg.Y = -1 * m_random.Next(100);
-        	
+            
             StructParamsCallDelegate scd = new StructParamsCallDelegate(serviceToUse.TestEchoStruct);
             // async call
             IAsyncResult ar = scd.BeginInvoke(arg, null, null);
@@ -238,41 +266,60 @@ namespace Ch.Elca.Iiop.IntegrationTests {
     
     
     delegate void PerformCallDelegate(TestService serviceToUse);
-	
-	
-	internal class RepeatedMethodCaller {
-		
-		#region IFields
-		
-		private TimeSpan m_delay;
-		private int m_nrOfCalls;
-		private PerformCallDelegate m_callPerformer;
-		private TestService m_serviceToUse;
-		
-		#endregion IFields
-		#region IConstructors
-		
-		public RepeatedMethodCaller(int nrOfCalls, TimeSpan delay,
-		                            PerformCallDelegate callPerformer,
-		                            TestService serviceToUse) {
+    
+    
+    internal class RepeatedMethodCaller {
+        
+        #region IFields
+        
+        private TimeSpan m_delay;
+        private int m_nrOfCalls;
+        private PerformCallDelegate m_callPerformer;
+        private TestService m_serviceToUse;
+        
+        private ArrayList m_exceptionsEncountered = new ArrayList();
+        
+        #endregion IFields
+        #region IConstructors
+        
+        public RepeatedMethodCaller(int nrOfCalls, TimeSpan delay,
+                                    PerformCallDelegate callPerformer,
+                                    TestService serviceToUse) {
             m_delay = delay;
-		    m_nrOfCalls = nrOfCalls;
-		    m_callPerformer = callPerformer;
-		    m_serviceToUse = serviceToUse;
+            m_nrOfCalls = nrOfCalls;
+            m_callPerformer = callPerformer;
+            m_serviceToUse = serviceToUse;
         }
-		
-		#endregion IConstructors
-		#region IMethods
-		
-		public void PerformCalls() {
-			for (int i = 0; i < m_nrOfCalls; i++) {
-				m_callPerformer(m_serviceToUse);			
-				Thread.Sleep((int)m_delay.TotalMilliseconds);
-			}
-		}
-		
-		#endregion IMethods
-		
-	}
+        
+        #endregion IConstructors
+        #region IProperties
+        
+        public Exception[] ExceptionsEncountered {
+            get {
+                lock(m_exceptionsEncountered.SyncRoot) {
+                    return (Exception[])m_exceptionsEncountered.ToArray(typeof(Exception));
+                }                
+            }
+        }
+        
+        #endregion IProperties
+        #region IMethods
+        
+        public void PerformCalls() {
+            for (int i = 0; i < m_nrOfCalls; i++) {
+                try {
+                    m_callPerformer(m_serviceToUse);
+                } catch (Exception e) {
+                    lock (m_exceptionsEncountered.SyncRoot) {
+                        m_exceptionsEncountered.Add(e);
+                    }
+                }
+                Thread.Sleep((int)m_delay.TotalMilliseconds);
+            }
+        }
+        
+        #endregion IMethods
+        
+    }
 
 }
