@@ -1,4 +1,4 @@
-NUNIT=$(MONO_SRCDIR)/runtime/NUnit.Framework.dll
+NUNIT=${NUNITV2_HOME}/bin/nunit.framework.dll
 IIOPCHANNEL = ../../../IIOPChannel/bin/IIOPChannel.dll
 TestService = ../TestServer/bin/TestServiceCommon.dll
 TestUnion = ../TestServer/bin/TestUnion.dll
@@ -23,7 +23,7 @@ $(bin)ClientTest.dll: $(bin)IIOPChannel.dll $(bin)TestUnion.dll $(bin)TestServic
 
 start-client:
 	@echo "Direct IntegrationTest"
-	mono ${MONO_SRCDIR}/bin/nunit-console.exe /assembly:bin/ClientTest.dll
+	mono ${NUNITV2_HOME}/bin/nunit-console.exe bin/ClientTest.dll
 
 clean:
 	rm -rf bin

@@ -20,3 +20,4 @@ clean:
 	$(MAKE) -C CLSToIDLGenerator -f Makefile.mono clean
 	$(MAKE) -C IDLToCLSCompiler -f Makefile.mono clean
 	$(MAKE) -C Examples -f Makefile.mono clean
+	$(MAKE) -C IntegrationTests -f Makefile.mono clean

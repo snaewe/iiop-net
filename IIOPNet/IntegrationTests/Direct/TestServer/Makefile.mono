@@ -11,23 +11,23 @@ $(bin)IIOPChannel.dll: $(IIOPCHANNEL)
 	[ -d $(bin) ] || mkdir $(bin)
 	cp $(IIOPCHANNEL) $(bin)
 
-$(bin)testUnion.dll: TestUnionAndConst.idl
-	mono ../../../IDLToCLSCompiler/IDLCompiler/bin/IDLToCLSCompiler.exe -o $(bin) testUnion TestUnionAndConst.idl
+$(bin)TestUnion.dll: TestUnionAndConst.idl
+	mono ../../../IDLToCLSCompiler/IDLCompiler/bin/IDLToCLSCompiler.exe -o $(bin) TestUnion TestUnionAndConst.idl
 
-$(bin)testUnionNotForClient.dll: TestUnionNotPresentClient.idl
-	mono ../../../IDLToCLSCompiler/IDLCompiler/bin/IDLToCLSCompiler.exe -o $(bin) testUnionNotForClient TestUnionNotPresentClient.idl
+$(bin)TestUnionNotForClient.dll: TestUnionNotPresentClient.idl
+	mono ../../../IDLToCLSCompiler/IDLCompiler/bin/IDLToCLSCompiler.exe -o $(bin) TestUnionNotForClient TestUnionNotPresentClient.idl
 
-$(bin)TestServiceCommon.dll: $(bin)IIOPChannel.dll $(bin)testUnion.dll TestServiceCommon.cs
-	mcs $(CSFLAGS) /t:library /r:$(bin)testUnion.dll /r:$(bin)IIOPChannel.dll /out:$(bin)TestServiceCommon.dll TestServiceCommon.cs
+$(bin)TestServiceCommon.dll: $(bin)IIOPChannel.dll $(bin)TestUnion.dll TestServiceCommon.cs
+	mcs $(CSFLAGS) /t:library /r:$(bin)TestUnion.dll /r:$(bin)IIOPChannel.dll /out:$(bin)TestServiceCommon.dll TestServiceCommon.cs
 
-$(bin)TestServer.exe: $(bin)IIOPChannel.dll $(bin)TestServiceCommon.dll $(bin)testUnion.dll $(bin)testUnionNotForClient.dll TestServer.cs TestService.cs
-	mcs $(CSFLAGS) /t:exe /r:$(bin)IIOPChannel.dll /r:$(bin)testUnion.dll /r:$(bin)testUnionNotForClient.dll /r:$(bin)TestServiceCommon.dll /out:$(bin)TestServer.exe TestServer.cs TestService.cs
+$(bin)TestServer.exe: $(bin)IIOPChannel.dll $(bin)TestServiceCommon.dll $(bin)TestUnion.dll $(bin)TestUnionNotForClient.dll TestServer.cs TestService.cs
+	mcs $(CSFLAGS) /t:exe /r:$(bin)IIOPChannel.dll /r:$(bin)TestUnion.dll /r:$(bin)TestUnionNotForClient.dll /r:$(bin)TestServiceCommon.dll /out:$(bin)TestServer.exe TestServer.cs TestService.cs
 
 start-server:
-	@$(LAUNCH) bin/TestServer.exe >> pid
+	@mono $(LAUNCH) bin/TestServer.exe >> pid
 
 stop-server:
-	@for p in $(cat pid); done do $(KILL) $A; done
+	@for p in $(cat pid); do mono $(KILL) $p; done
 	@rm pid
 
 clean:

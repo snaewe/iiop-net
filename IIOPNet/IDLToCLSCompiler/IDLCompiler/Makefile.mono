@@ -1,14 +1,11 @@
 IIOPChannel = ../../IIOPChannel/bin/IIOPChannel.dll
 IDLPreprocessor = ../IDLPreprocessor/bin/IDLPreprocessor.dll
 Dest = bin/
-TestDest = TestBin/
+DestUt = bin/UnitTest/
 
 build: build-exe
 
-build-test: $(TestDest)IDLToCLSCompiler.exe
-
 build-exe: $(Dest)IDLToCLSCompiler.exe
-
 
 $(Dest)IIOPChannel.dll: $(IIOPChannel)
 	[ -d $(Dest) ] || mkdir $(Dest)
@@ -21,18 +18,27 @@ $(Dest)IDLPreprocessor.dll: $(IDLPreprocessor)
 $(Dest)IDLToCLSCompiler.exe: $(Dest)IIOPChannel.dll $(Dest)IDLPreprocessor.dll *.cs
 	mcs -nowarn:0162 $(CSFLAGS) /res:MappingPluginSchema.xsd /r:$(Dest)IIOPChannel.dll /r:$(Dest)IDLPreprocessor.dll /t:exe /out:$(Dest)IDLToCLSCompiler.exe *.cs
 
-$(TestDest)IIOPChannel.dll: $(IIOPChannel)
-	[ -d $(TestDest) ] || mkdir $(TestDest)
-	cp $(IIOPChannel) $(TestDest)IIOPChannel.dll
+nunit-var:
+	@[ ! -z ${NUNITV2_HOME} ] || echo "Define NUNITV2_HOME as the root directory of your Nunit installation"
+	@[ ! -z ${NUNITV2_HOME} ] || exit 2
 
-$(TestDest)IDLPreprocessor.dll: $(IDLPreprocessor)
-	[ -d $(TestDest) ] || mkdir $(TestDest)
-	cp $(IDLPreprocessor) $(TestDest)IDLPreprocessor.dll
+build-tests: nunit-var $(DestUt)IDLToCLSCompiler.exe
 
-$(TestDest)IDLToCLSCompiler.exe: $(TestDest)IIOPChannel.dll $(TestDest)IDLPreprocessor.dll *.cs
-	mcs $(CSFLAGS) /d:UnitTest /res:MappingPluginSchema.xsd /r:${MONO_SRCDIR}/runtime/NUnit.Framework.dll /r:$(TestDest)IIOPChannel.dll /r:$(TestDest)IDLPreprocessor.dll /t:exe /out:$(TestDest)IDLToCLSCompiler.exe *.cs
+$(DestUt)IIOPChannel.dll: $(IIOPChannel)
+	[ -d $(DestUt) ] || mkdir $(DestUt)
+	cp $(IIOPChannel) $(DestUt)IIOPChannel.dll
+
+$(DestUt)IDLPreprocessor.dll: $(IDLPreprocessor)
+	[ -d $(DestUt) ] || mkdir $(DestUt)
+	cp $(IDLPreprocessor) $(DestUt)IDLPreprocessor.dll
+
+$(DestUt)IDLToCLSCompiler.exe: $(DestUt)IIOPChannel.dll $(DestUt)IDLPreprocessor.dll *.cs
+	mcs $(CSFLAGS) /d:UnitTest /res:MappingPluginSchema.xsd /r:${NUNITV2_HOME}/bin/nunit.framework.dll /r:$(DestUt)IIOPChannel.dll /r:$(DestUt)IDLPreprocessor.dll /t:exe /out:$(DestUt)IDLToCLSCompiler.exe *.cs
+
+test: build-tests
+	mono ${NUNITV2_HOME}/bin/nunit-console.exe $(DestUt)IDLToCLSCompiler.exe
 
 clean:
 	rm -fr $(Dest) 
-	rm -fr $(TestDest) 
+	rm -fr $(DestUt) 
 
