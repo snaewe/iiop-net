@@ -29,6 +29,7 @@
 
 
 using System;
+using System.Reflection;
 using System.Reflection.Emit;
 using Ch.Elca.Iiop.Idl;
 using Ch.Elca.Iiop.Marshalling;
@@ -629,7 +630,7 @@ namespace omg.org.CORBA {
         #region IConstructors
         
         public WStringTC(CdrInputStream cdrStream) : base(cdrStream, TCKind.tk_wstring) { }
-        public WStringTC(int length) : base(TCKind.tk_string) {
+        public WStringTC(int length) : base(TCKind.tk_wstring) {
             m_length = length;
         }
 
@@ -1122,6 +1123,32 @@ namespace omg.org.CORBA {
                 result = TypeFromTypeCodeRuntimeGenerator.GetSingleton().CreateOrGetType(typeName, this);
             }
             return result;
+        }
+
+        internal override Type CreateType(ModuleBuilder modBuilder, string fullTypeName) {
+            Type baseType = typeof(object);
+            if (!(m_baseClass is NullTC)) {
+                baseType = ((TypeCodeImpl)m_baseClass).GetClsForTypeCode();
+            }
+            string typeName = Repository.GetTypeNameForId(m_id);
+            TypeAttributes attrs = TypeAttributes.Class | TypeAttributes.Serializable;
+            attrs = attrs | TypeAttributes.Public;
+            TypeBuilder result = modBuilder.DefineType(typeName, attrs ,baseType);
+            // add rep-id Attr
+            RepositoryIDAttribute repIdAttr = new RepositoryIDAttribute(m_id);
+            result.SetCustomAttribute(repIdAttr.CreateAttributeBuilder());
+            // define members
+            foreach (ValueTypeMember member in m_members) {
+                Type memberType = ((TypeCodeImpl) (member.m_type)).GetClsForTypeCode();                
+                FieldAttributes fieldAttrs = FieldAttributes.Public;
+                FieldBuilder field = result.DefineField(member.m_name, memberType, fieldAttrs);
+                CustomAttributeBuilder[] cAttrs = ((TypeCodeImpl) (member.m_type)).GetAttributes();
+                foreach (CustomAttributeBuilder cAttr in cAttrs) {
+                    field.SetCustomAttribute(cAttr);
+                }
+            }
+            // create the type
+            return result.CreateType();
         }
 
         #endregion IMethods
