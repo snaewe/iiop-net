@@ -4,6 +4,9 @@ using System;
 public class IDLParserConstants {
 
   int EOF = 0;
+  public const int PRAGMA = 89;
+  public const int PRAGMAID = 90;
+  public const int PRAGMAPREFIX = 91;
   public const int ID = 92;
   public const int OCTALINT = 93;
   public const int DECIMALINT = 94;
@@ -18,8 +21,9 @@ public class IDLParserConstants {
   public const int FIXED = 103;
 
   public const int DEFAULT = 0;
-  public const int IN_LINE_COMMENT = 1;
-  public const int IN_COMMENT = 2;
+  public const int PRAGMA_DIRECTIVE = 1;
+  public const int IN_LINE_COMMENT = 2;
+  public const int IN_COMMENT = 3;
 
   public static String[] tokenImage = {
     "<EOF>",
@@ -34,9 +38,6 @@ public class IDLParserConstants {
     "<token of kind 9>",
     "\"*/\"",
     "<token of kind 11>",
-    "\"#pragma\"",
-    "\"ID\"",
-    "\"prefix\"",
     "\";\"",
     "\"module\"",
     "\"{\"",
@@ -114,6 +115,9 @@ public class IDLParserConstants {
     "\".\"",
     "\"d\"",
     "\"D\"",
+    "\"#pragma\"",
+    "\"ID\"",
+    "\"prefix\"",
     "<ID>",
     "<OCTALINT>",
     "<DECIMALINT>",

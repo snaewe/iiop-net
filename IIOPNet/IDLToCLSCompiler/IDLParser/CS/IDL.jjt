@@ -85,7 +85,7 @@ PARSER_END(IDLParser)
  * Tokens to ignore in the BNF follow.
  */
 
-SKIP :
+< DEFAULT, PRAGMA_DIRECTIVE> SKIP :
 {
   < " " >
 | < "\t" >
@@ -140,7 +140,7 @@ String repIdVal() #void :
 void pragmaID() #void :
 { String ident = ""; String val = ""; }
 {
-	"#pragma" "ID" ident = identifier() val = repIdVal()
+	< PRAGMA > < PRAGMAID > ident = identifier() val = repIdVal()
 	{
 		Scope currentScope = m_symbolTable.getCurrentScope();
 		if (!m_lastPrefix.Equals("")) {
@@ -157,7 +157,7 @@ void pragmaID() #void :
 void pragmaIDInside() #void :
 { String ident = ""; String val = ""; }
 {
-	"#pragma" "ID" ident = identifier() val = repIdVal()
+	< PRAGMA > < PRAGMAID > ident = identifier() val = repIdVal()
 	{
 		Scope currentScope = m_symbolTable.getCurrentScope();
 		currentScope = currentScope.getParentScope(); // get the scope this type is defined in, the id must be added to this scope
@@ -176,7 +176,7 @@ void pragmaIDInside() #void :
 void pragmaPrefix() #void :
 { String val = ""; }
 {
-	"#pragma" "prefix" val = string_literal() {
+	< PRAGMA > < PRAGMAPREFIX > val = string_literal() {
 		val = val.Trim();
 		if (m_lastPrefix.Equals(val)) { return; } // same pragma prefix, nothing to do
 
@@ -1504,6 +1504,15 @@ System.Decimal fixed_pt_literal() #void :
 	return Decimal.Parse(fixedVal);
 }
 
+}
+
+TOKEN : {
+  < PRAGMA : "#pragma" > : PRAGMA_DIRECTIVE
+}
+
+<PRAGMA_DIRECTIVE> TOKEN : {
+  <  PRAGMAID : "ID" > : DEFAULT |
+  <  PRAGMAPREFIX : "prefix" > : DEFAULT
 }
 
 TOKEN :
