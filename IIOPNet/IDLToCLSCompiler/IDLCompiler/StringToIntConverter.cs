@@ -148,8 +148,6 @@ namespace Ch.Elca.Iiop.IDLCompiler.Tests {
     /// </summary>
     [TestFixture]
     public class StringToIntConverterTest {
-            
-        #region IMethods
 
         [SetUp]
         public void SetupEnvironment() {
@@ -201,8 +199,6 @@ namespace Ch.Elca.Iiop.IDLCompiler.Tests {
         	Assertion.AssertEquals("parse error", -1, StringToIntConverter.Parse("-1", 8));
         	Assertion.AssertEquals("parse error", -57, StringToIntConverter.Parse("-71", 8));
         }        
-        
-        #endregion IMethods
 
     }
     
