@@ -79,12 +79,40 @@ namespace Ch.Elca.Iiop.Services {
 
         private void CheckCodeSetCompatible(uint charSet, uint wcharSet) {
             // check if acceptable: at the moment, the code-set establishment algorithm is not implemented
-            if ((charSet != LATIN1_SET) && (charSet != ISO646IEC_SINGLE) && (charSet != UTF8_SET)) { 
+            if (!IsCharSetCompatible(charSet)) { 
                 throw new CODESET_INCOMPATIBLE(9501, CompletionStatus.Completed_No); 
             }
-            if ((wcharSet != UTF16_SET) && (wcharSet != ISO646IEC_MULTI)) { 
+            if (!IsWCharSetCompatible(wcharSet)) { 
                 throw new CODESET_INCOMPATIBLE(9502, CompletionStatus.Completed_No); 
             }            
+        }
+        
+        private bool IsWCharSetCompatible(uint wcharSet) {
+            if ((wcharSet == UTF16_SET) || (wcharSet == ISO646IEC_MULTI)) { 
+                return true;
+            } else {
+                return false;
+            }
+        }
+        
+        private bool IsCharSetCompatible(uint charSet) {
+            if ((charSet == LATIN1_SET) || (charSet == ISO646IEC_SINGLE) || (charSet == UTF8_SET)) {
+                return true;
+            } else {
+                return false;
+            }
+        }
+        
+        private CodeSetComponent FindCodeSetComponent(IorProfile[] profiles) {
+            foreach (IorProfile profile in profiles) {
+                TaggedComponent[] components = profile.TaggedComponents;
+                foreach (TaggedComponent taggedComp in components) {
+                    if (taggedComp is CodeSetComponent) {
+                    	return (CodeSetComponent)taggedComp;
+                    }
+                }
+            }
+            return null;
         }
 
         public override void HandleContextForReceivedRequest(ServiceContext context) {
@@ -100,6 +128,56 @@ namespace Ch.Elca.Iiop.Services {
             conContext.CharSet = charSet;
             conContext.WCharSet = wcharSet;
         }
+        
+        private uint ChooseCharSet(CodeSetComponent codeSetComponent) {
+            if (codeSetComponent.NativeCharSet == DEFAULT_CHAR_SET) {
+                // the same native char sets
+                return DEFAULT_CHAR_SET;
+            }
+            if (IsCharSetCompatible(codeSetComponent.NativeCharSet)) {
+                // client converts to server's native char set
+                return codeSetComponent.NativeCharSet;
+            }
+            uint[] serverConvSets = codeSetComponent.CharConvSet;
+            foreach (uint serverConvSet in serverConvSets) {
+                if (serverConvSet == DEFAULT_CHAR_SET) {
+                    // server convert's from client's native char set
+                    return DEFAULT_CHAR_SET;
+                }
+            }
+            foreach (uint serverConvSet in serverConvSets) {
+                if (IsCharSetCompatible(serverConvSet)) {
+                    // use a conversion code set which is available for client and server
+                    return serverConvSet;
+                }
+            }
+            throw new CODESET_INCOMPATIBLE(9501, CompletionStatus.Completed_No);
+        }
+        
+        private uint ChooseWCharSet(CodeSetComponent codeSetComponent) {
+            if (codeSetComponent.NativeWCharSet == DEFAULT_WCHAR_SET) {
+                // the same native wchar sets
+                return DEFAULT_WCHAR_SET;
+            }
+            if (IsWCharSetCompatible(codeSetComponent.NativeWCharSet)) {
+                // client converts to server's native wchar set
+                return codeSetComponent.NativeWCharSet;
+            }
+            uint[] serverConvSets = codeSetComponent.WCharConvSet;
+            foreach (uint serverConvSet in serverConvSets) {
+                if (serverConvSet == DEFAULT_WCHAR_SET) {
+                    // server convert's from client's native wchar set
+                    return DEFAULT_WCHAR_SET;
+                }
+            }
+            foreach (uint serverConvSet in serverConvSets) {
+                if (IsWCharSetCompatible(serverConvSet)) {
+                    // use a conversion code set which is available for client and server
+                    return serverConvSet;
+                }
+            }
+            throw new CODESET_INCOMPATIBLE(9502, CompletionStatus.Completed_No);
+        }
 
         public override ServiceContext InsertContextForReplyToSend() {
             // nothing to do ?
@@ -110,23 +188,16 @@ namespace Ch.Elca.Iiop.Services {
                                                                      GiopConnectionContext conContext) {
             uint charSet = DEFAULT_CHAR_SET;
             uint wcharSet = DEFAULT_WCHAR_SET;
-            // check for code-set component in Ior:
-            IorProfile[] profiles = targetIor.Profiles;
-            foreach (IorProfile profile in profiles) {
-                TaggedComponent[] components = profile.TaggedComponents;
-                foreach (TaggedComponent taggedComp in components) {
-                    if (taggedComp is CodeSetComponent) {
-                        charSet = (taggedComp as CodeSetComponent).NativeCharSet;
-                        wcharSet = (taggedComp as CodeSetComponent).NativeWCharSet;
-                        break;
-                    }
-                }
+            
+            CodeSetComponent codeSetComponent = FindCodeSetComponent(targetIor.Profiles);
+            if (codeSetComponent != null) {
+                charSet = ChooseCharSet(codeSetComponent);
+                wcharSet = ChooseWCharSet(codeSetComponent);
             }
-
-            CheckCodeSetCompatible(charSet, wcharSet);
+            
             conContext.CharSet = charSet;
             conContext.WCharSet = wcharSet;
-            return new CodeSetServiceContext(charSet, wcharSet);            
+            return new CodeSetServiceContext(charSet, wcharSet);
         }
 
         #endregion IMethods
