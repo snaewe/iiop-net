@@ -26,6 +26,25 @@ module IntegrationTests {
     
     const long MyConstant = 11;
 
+    
+
+    // IDLToCLSCompiler regression test:
+    // IDLToCLSCompiler's handling of char constants
+    // fixing bug 841774
+    typedef char LoginSessionMode;
+
+    const LoginSessionMode STAND_ALONE_TEST = '1';
+    const LoginSessionMode NETWORK_TEST = '2';
+    const LoginSessionMode PRODUCTION = '3';
+
+    
+
+    // IDLToCLSCompiler regression test:
+    // constant values not usable in other IDL definitions 
+    // fxing bug 840585
+    const long AVAL = 1;
+
+    const long BVAL = AVAL;
 
 
 	// IDLToCLSCompiler regressino test:

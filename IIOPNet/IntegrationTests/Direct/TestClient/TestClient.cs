@@ -683,6 +683,26 @@ namespace Ch.Elca.Iiop.IntegrationTests {
             Assertion.AssertEquals("type name", "Ch.Elca.Iiop.IntegrationTests.TestUnionE2", result.GetType().FullName);
         }
 
+
+        [Test]
+        public void TestReferenceOtherConstant() {
+            Int32 constValA = AVAL.ConstVal;
+            Assertion.AssertEquals("wrong constant value", 1, constValA);
+            Int32 constValB = BVAL.ConstVal;
+            Assertion.AssertEquals("wrong constant value", 1, constValB);
+        }
+
+        [Test]
+        public void TestCharacterConstant() {
+            Char constValStandAlone = STAND_ALONE_TEST.ConstVal;
+            Assertion.AssertEquals("wrong constant value", '1', constValStandAlone);
+            Char constValNetWork = NETWORK_TEST.ConstVal;
+            Assertion.AssertEquals("wrong constant value", '2', constValNetWork);
+            Char constValProduction = PRODUCTION.ConstVal;
+            Assertion.AssertEquals("wrong constant value", '3', constValProduction);
+        }
+        
+
     }
 
 }
