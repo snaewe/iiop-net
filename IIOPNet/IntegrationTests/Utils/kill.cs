@@ -38,8 +38,12 @@ public class Kill {
 			Console.WriteLine("Kill pid");
 			Environment.Exit(2);
 		} else {
-			Process p = Process.GetProcessById(Int32.Parse(args[0]));
-			p.Kill();
+			try {
+				Process p = Process.GetProcessById(Int32.Parse(args[0]));
+				p.Kill();
+			} catch (Exception e) {
+				Console.WriteLine("Exception: "+e);
+			}
 		}
 	}
 }
