@@ -495,6 +495,139 @@ namespace Ch.Elca.Iiop.Cdr {
 
 
     /// <summary>
+    /// this is a little-endian implementation for the endian dependent operation for CDROutput-streams
+    /// </summary>
+    /// <remarks>
+    /// this class is not intended for use by CDRStream users
+    /// </remarks>
+    internal class CdrStreamLittleEndianWriteOP : CdrEndianDepOutputStreamOp {
+
+        #region IFields
+
+        private CdrOutputStream m_stream;
+        private GiopVersion m_version;
+
+        #endregion IFields
+        #region IConstructors
+        
+        public CdrStreamLittleEndianWriteOP(CdrOutputStream stream, GiopVersion version) {
+            m_stream = stream;
+            m_version = version;
+        }
+
+        #endregion IConstructors
+        #region IMethods
+        
+        #region write methods dependant on byte ordering
+        
+        public void WriteShort(short data) {
+            m_stream.ForceWriteAlign(Aligns.Align2);
+            if (data < 0) {
+                // calculate two complement
+                ushort positiveNumber = (ushort)(data * -1);
+                ushort invNumber = (ushort)(positiveNumber ^ 0xFFFF);
+                WriteUShort((ushort)(invNumber + 1));
+            } else {
+                WriteUShort((ushort)data);
+            }
+        }
+
+        public void WriteUShort(ushort data) {
+            m_stream.ForceWriteAlign(Aligns.Align2);
+            m_stream.WriteOctet((byte) ( data & 0x00FF));
+            m_stream.WriteOctet((byte) ((data & 0xFF00) >> 8));
+        }
+
+        public void WriteLong(int data) {
+            m_stream.ForceWriteAlign(Aligns.Align4);
+            if (data < 0) {
+                // calculate two complement
+                uint positiveNumber = (uint)(data * -1);
+                uint invNumber = (uint)(positiveNumber ^ 0xFFFFFFFF);
+                WriteULong((uint)(invNumber + 1));
+            } else {
+                WriteULong((uint)data);
+            }
+        }
+
+        public void WriteULong(uint data) {
+            m_stream.ForceWriteAlign(Aligns.Align4);                        
+            m_stream.WriteOctet((byte) ( data & 0x000000FF));
+            m_stream.WriteOctet((byte) ((data & 0x0000FF00) >> 8));
+            m_stream.WriteOctet((byte) ((data & 0x00FF0000) >> 16));
+            m_stream.WriteOctet((byte) ((data & 0xFF000000) >> 24));
+        }
+
+        public void WriteLongLong(long data) {
+            m_stream.ForceWriteAlign(Aligns.Align8);
+            if (data < 0) {
+                // calculate two complement
+                ulong positiveNumber = (ulong)(data * -1);
+                ulong invNumber = (ulong)(positiveNumber ^ 0xFFFFFFFFFFFFFFFF);
+                WriteULongLong((ulong)(invNumber + 1));
+            } else {
+                WriteULongLong((ulong)data);
+            }
+        }
+
+        public void WriteULongLong(ulong data) {
+            m_stream.ForceWriteAlign(Aligns.Align8);
+            m_stream.WriteOctet((byte) ( data & 0x00000000000000FF));
+            m_stream.WriteOctet((byte) ((data & 0x000000000000FF00) >> 8));
+            m_stream.WriteOctet((byte) ((data & 0x0000000000FF0000) >> 16));            
+            m_stream.WriteOctet((byte) ((data & 0x00000000FF000000) >> 24));
+            m_stream.WriteOctet((byte) ((data & 0x000000FF00000000) >> 32));
+            m_stream.WriteOctet((byte) ((data & 0x0000FF0000000000) >> 40));
+            m_stream.WriteOctet((byte) ((data & 0x00FF000000000000) >> 48));
+            m_stream.WriteOctet((byte) ((data & 0xFF00000000000000) >> 56));
+        }
+
+        public void WriteFloat(float data) {
+            m_stream.ForceWriteAlign(Aligns.Align4);
+            byte[] byteRep = BitConverter.GetBytes(data);
+            // byteRep is in little endian order
+            m_stream.WriteOpaque(byteRep);
+        }
+
+        public void WriteDouble(double data) {
+            m_stream.ForceWriteAlign(Aligns.Align8);
+            byte[] byteRep = BitConverter.GetBytes(data); // create the little endian representation of the double
+            // byteRep is in little endian order
+            m_stream.WriteOpaque(byteRep);
+        }
+
+        public void WriteWChar(char data) {
+            Encoding encoding = CdrStreamHelper.GetWCharEncoding(m_stream.WCharSet,
+                                                                 CodeSetConversionRegistryLittleEndian.GetRegistry());
+            byte[] toSend = encoding.GetBytes(new char[] { data } );
+            m_stream.WriteOpaque(toSend);
+        }
+
+        public void WriteWString(string data) {
+            Encoding encoding = CdrStreamHelper.GetWCharEncoding(m_stream.WCharSet,
+                                                                 CodeSetConversionRegistryLittleEndian.GetRegistry());
+            byte[] toSend = encoding.GetBytes(data);
+            if ((m_version.Major == 1) && (m_version.Minor <= 1)) { // GIOP 1.0, 1.1
+                byte[] sendNew = new byte[toSend.Length + 2];
+                Array.Copy((Array)toSend, 0, (Array)sendNew, 0, toSend.Length);
+                sendNew[toSend.Length] = 0; // trailing zero: a wide char
+                sendNew[toSend.Length + 1] = 0; // trailing zero: a wide char
+                m_stream.WriteULong(((uint)toSend.Length / 2) + 1); // number of chars instead of number of bytes, only 2 bytes character supported
+                m_stream.WriteOpaque(sendNew);
+            } else {
+                m_stream.WriteULong((uint)toSend.Length);
+                m_stream.WriteOpaque(toSend);
+            }
+        }
+
+        #endregion write methods dependant on byte ordering
+
+        #endregion IMethods
+
+    }
+
+
+    /// <summary>
     /// An Instance of this class is used, if the endian flag is not yet specified in a CdrStream.
     /// </summary>
     internal class CdrEndianOpNotSpecified : CdrEndianDepInputStreamOp, CdrEndianDepOutputStreamOp {
