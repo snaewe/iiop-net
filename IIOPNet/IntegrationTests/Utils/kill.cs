@@ -41,6 +41,9 @@ public class Kill {
 			try {
 				Process p = Process.GetProcessById(Int32.Parse(args[0]));
 				p.Kill();
+			} catch (FormatException e) {
+				// ignore, caused by text in pid file
+				// Console.WriteLine("FormatException for >{0}<: {1}", args[0], e.ToString());
 			} catch (Exception e) {
 				Console.WriteLine("Exception: "+e);
 			}
