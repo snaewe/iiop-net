@@ -264,27 +264,50 @@ namespace Ch.Elca.Iiop.Cdr {
      
         #region IFields
  
-        private ulong m_position = 0;
-        
+        private ulong m_position = 0;        
         private ulong m_globalOffset = 0;
  
         #endregion IFields
         #region IConstructors
          
-        public StreamPosition(CdrStreamBase stream) {
-            m_globalOffset = stream.GetGlobalOffset();
-            stream.MarkNextAlignedPosition(this);
+        public StreamPosition(CdrStreamBase stream) : this (stream, 0, false) {
+        }
+
+        /// <summary>
+        /// constructs the stream position from the position in the currentstream + adding offsetFromCurrent.
+        /// </summary>
+        /// <param name="stream">the stream to get positon from</param>
+        /// <param name="offsetFromCurrent">the offset to add to the current position</param>
+        /// <param name="isNegativeOffset">specifies, if the offset should be in positive or negative direction</param>
+        public StreamPosition(CdrStreamBase stream, ulong offsetFromCurrent, bool isNegativeOffset) {
+            m_globalOffset = stream.GetGlobalOffset();            
+            m_position = stream.GetPosition();
+            if (isNegativeOffset) {
+                m_position -= offsetFromCurrent;
+            } else {
+                m_position += offsetFromCurrent;
+            }
         }
  
         #endregion IConstructors
         #region IProperties
        
-        public ulong Position {
+        /// <summary>
+        /// returns the position relative to the beginning of the stream used to create the postion.
+        /// </summary>
+        /// <value></value>
+        public ulong LocalPosition {
             get { 
                 return m_position; 
             }
-            set {
-                m_position = m_globalOffset + value;                
+        }
+
+        /// <summary>
+        /// returns the global position (i.e. relative to the outermost stream)
+        /// </summary>       
+        public ulong GlobalPosition {
+            get {
+                return m_globalOffset + m_position;
             }
         }
  
@@ -308,8 +331,8 @@ namespace Ch.Elca.Iiop.Cdr {
         /// <summary>gets the next aligned position in the stream</summary>
         ulong GetNextAlignedPosition(Aligns align);
         
-        /// <summary>stores the aligned position reached by next read/write call in StreamPosition</summary>
-        void MarkNextAlignedPosition(StreamPosition streamPos);                        
+//        /// <summary>stores the aligned position reached by next read/write call in StreamPosition</summary>
+//        void MarkNextAlignedPosition(StreamPosition streamPos);                        
         
     }
     
@@ -403,13 +426,11 @@ namespace Ch.Elca.Iiop.Cdr {
         /// <remarks>throws an exception if length not known</remarks>
         void SkipRest();
                 
-        /// <summary>checks, if an indirection tag follows in the stream;
-        /// if yes, it reads also the indirection offset and returns it in indirOffset.</summary>
-        bool CheckForIndirection(out long indirOffset);
-        
-        /// <summary>reads the indirection tag and indirection offset</summary>
-        /// <returns>the indirecitonOffset</returns>
-        long ReadIndirection();
+        /// <summary>
+        /// reads the indirection info from the stream.
+        /// </summary>
+        /// <returns>the position, the indirection is pointing to</returns>
+        StreamPosition ReadIndirectionOffset();
         
         ///<summary>stores an indirection described by indirDesc</summary>
         void StoreIndirection(IndirectionInfo indirDesc, object valueAtIndirPos);
@@ -418,25 +439,42 @@ namespace Ch.Elca.Iiop.Cdr {
         /// throws MarshalException, if not present</summary>
         /// <param name="reolveGlobal">specify, if indirection should be reolved 
         /// relative to the local stream or to the outermost (global) stream</param>
-        object GetObjectForIndir(long indirectionOffset, bool resolveGlobal, 
-                                 IndirectionType indirType,
-                                 IndirectionUsage indirUsage);
+        object GetObjectForIndir(IndirectionInfo indirInfo, bool resolveGlobal); 
         
-        /// <summary>returns true, if indirection is resolvable, otherwise false</summary>
-        /// <param name="reolveGlobal">specify, if indirection should be reolved 
-        /// relative to the local stream or to the outermost (global) stream</param>
-        bool IsIndirectionResolvable(long indirectionOffset, bool resolveGlobal,
-                                     IndirectionType indirType,
-                                     IndirectionUsage indirUsage);
-        
-        
-        /// <summary>throws exception, if indirection is not resolvable, otherwise does nothing</summary>
-        /// <param name="reolveGlobal">specify, if indirection should be reolved 
-        /// relative to the local stream or to the outermost (global) stream</param>
-        void CheckIndirectionResolvable(long indirectionOffset, bool resolveGlobal,
-                                        IndirectionType indirType,
-                                        IndirectionUsage indirUsage);        
-        
+        /// <summary>
+        /// reads an indirection tag or instance start tag and returns:
+        /// - the tag read (either indirection or instance tag)
+        /// - the stream position just before the tag (out-param instanceStartPosition)
+        /// - a bool specifying, if a indirection tag has been read
+        /// </summary>
+        /// <returns></returns>
+        uint ReadInstanceOrIndirectionTag(out StreamPosition instanceStartPosition, 
+                                          out bool isIndirection);
+
+        /// <summary>
+        /// read a string, which may be indirected; the arguments indirType, indirUsage, resolveGlobal are
+        /// used for resolving an indirection.
+        /// </summary>        
+        string ReadIndirectableString(IndirectionType indirType, IndirectionUsage indirUsage,
+                                      bool resolveGlobal);
+
+        /// <summary> 
+        /// tells the stream, that a new valuetype is starting now       
+        /// </summary>
+        /// <remarks>needed to handle chunking correctly</remarks>
+        void BeginReadNewValue();
+
+        /// <summary>
+        /// starts the body of a value type, which started with tag valueTag.
+        /// </summary>
+        /// <param name="valueTag">the tag, which started the value type</param>
+        void BeginReadValueBody(uint valueTag);
+
+        /// <summary>
+        /// ends reading the value type
+        /// </summary>
+        void EndReadValue(uint valueTag);
+
         #endregion IMethods
 
     }
@@ -529,7 +567,24 @@ namespace Ch.Elca.Iiop.Cdr {
 
         /// <summary>writes an encapsulation to this stream</summary>
         void WriteEncapsulation(CdrEncapsulationOutputStream encap);
-        
+
+        /// <summary> 
+        /// writes a tag for an instance, which is indirectable;
+        /// returns the StreamPosition to store for the instance for later indirections.       
+        /// </summary>
+        /// <remarks>if an direction should be written, use WriteIndirection</remarks>
+        /// <param name="tag">the tag to write; must be != INDIRECTION_TAG</param>
+        StreamPosition WriteIndirectableInstanceTag(uint tag);
+
+        /// <summary>
+        /// writes either an indirection to a string or the string value itself, if not previously marshalled.
+        /// </summary>
+        /// <param name="val">the string to write; 
+        /// if already marshalled, write a indirection to the already marshalled string</param>
+        /// <param name="indirType">a value describing how the string is used</param>
+        /// <param name="indirUsage">a value describing by whom the string is used</param>
+        void WriteIndirectableString(string val, IndirectionType indirType, IndirectionUsage indirUsage);
+
         /// <summary>wirtes the indirection to the stream</summary>
         void WriteIndirection(object forVal);
         
@@ -654,8 +709,10 @@ namespace Ch.Elca.Iiop.Cdr {
         
         #region Constants
         
-        internal const uint INDIRECTION_TAG = 0xffffffff;
-        
+        internal const uint INDIRECTION_TAG = 0xffffffff;           
+        internal const uint MIN_VALUE_TAG = 0x7fffff00;
+        internal const uint MAX_VALUE_TAG = 0x7fffffff;
+
         #endregion Constants
         #region IFields
 
@@ -663,11 +720,6 @@ namespace Ch.Elca.Iiop.Cdr {
         private Stream m_stream;                
 
         private ulong m_index = 0;
-
-        #region for informing about next aligned pos
-        private StreamPosition m_storeNextAlignedPos;
-        private bool m_memNextAlign = false;
-        #endregion for informing about next aligned pos
 
         protected uint m_charSet = CodeSetService.DEFAULT_CHAR_SET;
         protected uint m_wcharSet = CodeSetService.DEFAULT_WCHAR_SET;
@@ -702,14 +754,7 @@ namespace Ch.Elca.Iiop.Cdr {
 
         /// <summary>gets the nr of bytes which are missing to next aligned position</summary>
         protected ulong GetAlignBytes(byte requiredAlignement) {
-            ulong alignBytes = GetAlignedBytesInternal(requiredAlignement);
-            
-            // helper code for informing about next aligned position
-            if (m_memNextAlign) {
-                m_memNextAlign = false;
-                m_storeNextAlignedPos.Position = GetPosition() + alignBytes;
-            }
-
+            ulong alignBytes = GetAlignedBytesInternal(requiredAlignement);            
             return alignBytes;
         }                
         
@@ -725,8 +770,7 @@ namespace Ch.Elca.Iiop.Cdr {
 
         /// <summary>update the bookkeeping</summary>
         /// <param name="bytes"></param>
-        protected void IncrementPosition(ulong bytes) {
-            m_memNextAlign = false; // after incrementing position, do not further update m_storeNextAlignPos
+        protected void IncrementPosition(ulong bytes) {            
             m_index += bytes;
         }
         public ulong GetPosition() {
@@ -736,27 +780,14 @@ namespace Ch.Elca.Iiop.Cdr {
         public virtual ulong GetGlobalOffset() {
             return 0;
         }
-        
+
         public ulong GetNextAlignedPosition(Aligns align) {
-            return GetPosition() + GetAlignedBytesInternal((byte)align);                        
+            return GetPosition() + GetAlignedBytesInternal((byte)align);
         }
-        
+
         protected void SetPosition(ulong position) {
             m_index = position;
         }
-
-        #region helper methods for informing about next aligned position
-
-        
-        /// <summary>set streamPos to the next aligned position, after reaching it</summary>
-        /// <param name="streamPos"></param>
-        public void MarkNextAlignedPosition(StreamPosition streamPos) {
-            m_memNextAlign = true;
-            m_storeNextAlignedPos = streamPos;
-            m_storeNextAlignedPos.Position = GetPosition();
-        }
-
-        #endregion helper methods for informing about next aligned position
 
         /// <summary>determines, if big/little endian should be used</summary>
         /// <returns>true for big endian, false for little endian</returns>
@@ -786,8 +817,105 @@ namespace Ch.Elca.Iiop.Cdr {
         
         #endregion IMethods
     }
-    
-    
+
+    /// <summary>contains information about a chunck</summary>
+    internal class ChunkInfo {
+
+        #region IFields
+
+        /// <summary>the starting position in the stream</summary>
+        private ulong m_streamStartPos;
+        /// <summary>the stream, this chunk is in</summary>
+        private CdrInputStreamImpl m_stream;
+
+        private ulong m_chunkLength;
+        private bool m_continuationExpected;
+        private bool m_finished = false;
+
+        #endregion IFields
+        #region IConstructors
+
+        /// <param name="length">the length of the chunk</param>
+        /// <param name="inStream">the stream this chunk is in</param>
+        public ChunkInfo(int length, CdrInputStreamImpl inStream) {
+            m_chunkLength = (ulong)length;
+            m_stream = inStream;
+            m_streamStartPos = inStream.GetPosition();
+        }
+
+        #endregion IConstructors
+        #region IProperties
+
+        /// <summary>
+        /// the length of this chunk
+        /// </summary>
+        public int ChunkLength {
+            get {
+                return (int)m_chunkLength;
+            }
+        }
+
+        /// <summary>
+        /// is the chunk finished?
+        /// </summary>
+        public bool IsFinished {
+            get {
+                return m_finished;
+            }
+            set {
+                m_finished = value;
+            }
+        }
+
+        /// <summary>
+        /// if this chunk is intercepted by an inner value, a continuation of this chunk is expected
+        /// </summary>
+        public bool IsContinuationExpected {
+            get {
+                return m_continuationExpected;
+            }
+            set {
+                m_continuationExpected = value;
+            }
+        }
+
+        #endregion IProperties
+        #region IMethods
+
+        /// <summary>after reading a continuation chunk begin, this method is used to set the chunk length</summary>
+        public void SetContinuationLength(int length) {
+            m_chunkLength = (ulong)length;
+            m_streamStartPos = m_stream.GetPosition();
+        }
+
+        public bool IsDataAvailable() {
+            if (m_streamStartPos + m_chunkLength > m_stream.GetPosition()) {
+                return true;
+            } else {
+                return false;
+            }
+        }
+
+        public bool IsBorderCrossed() {
+            return (GetBytesAvailable() < 0);
+        }
+
+        public bool WillBorderBeCrossed(int nrOfBytesToRead) {
+            return ((GetBytesAvailable() - nrOfBytesToRead) < 0);
+        }
+
+        public bool IsBorderReached() {
+            return (GetBytesAvailable() == 0);
+        }
+
+        public int GetBytesAvailable() {
+            return (int)(m_streamStartPos + m_chunkLength - m_stream.GetPosition());
+        }
+
+        #endregion IMethods
+
+    }
+
     /// <summary>the base class for streams, reading CDR data</summary>
     public class CdrInputStreamImpl : CdrStreamHelper, CdrInputStream {
         
@@ -812,6 +940,12 @@ namespace Ch.Elca.Iiop.Cdr {
         
         /// <summary>used to store indirections encountered in this stream</summary>
         private IndirectionStoreIndirKey m_indirections = new IndirectionStoreIndirKey();
+
+        /// <summary>this stack holds the chunking information</summary>
+        private Stack m_chunkStack = new Stack();
+        private bool m_skipChunkCheck = false;
+        private int m_chunkLevel = 0;
+
         
         #endregion IFields
         #region IConstructors
@@ -924,15 +1058,22 @@ namespace Ch.Elca.Iiop.Cdr {
         #region helper methods
 
         /// <summary>switch to peeking mode</summary>
-        public void StartPeeking() {
+        private void StartPeeking() {
             m_startPeekPosition = GetPosition(); // store postion to be able to go back to this position
             ((PeekSupportingStream)BaseStream).StartPeeking();
         }
 
         /// <summary>stops peeking, switch back to normal mode</summary>
-        public void StopPeeking() {
+        private void StopPeeking() {
             SetPosition(m_startPeekPosition);
             ((PeekSupportingStream)BaseStream).EndPeeking();
+        }
+
+        /// <summary>
+        /// returns true, if in peeking mode
+        /// </summary>
+        private bool IsPeeking() {
+            return ((PeekSupportingStream)BaseStream).IsPeeking();
         }
 
         /// <summary>
@@ -947,7 +1088,12 @@ namespace Ch.Elca.Iiop.Cdr {
             }
         }
                 
-        private void CheckEndOfStream(ulong bytesToRead) {
+        /// <summary>
+        /// check reading past end of stream; in case of chunked valuetypes, 
+        /// check also reading over chunk border
+        /// </summary>
+        /// <param name="bytesToRead"></param>
+        private void CheckStreamPosition(ulong bytesToRead) {            
             if (m_bytesToFollowSet) {
                 if (GetPosition() + bytesToRead > m_indexForBytesToF + m_bytesToFollow) {
                     // no more bytes readable in this message
@@ -955,11 +1101,18 @@ namespace Ch.Elca.Iiop.Cdr {
                     throw new MARSHAL(1207, CompletionStatus.Completed_MayBe);
                 }
             }
+            UpdateAndCheckChunking(bytesToRead);
         }                
         
         /// <summary>read padding for an aligned read with the requiredAlignement</summary>
         /// <param name="requiredAlignment">align to which size</param>
         protected void AlignRead(byte requiredAlignment) {
+            // do a chunk-start check here, because it's possible, that
+            // the value, for which we align, is in a new chunk 
+            // -> therefore a chunk length tag could be in between ->
+            // the alignement must be check after the chunk-length tag.
+            UpdateAndCheckChunking(0); 
+
             // nr of bytes the index is after the last aligned index
             ulong align = GetAlignBytes(requiredAlignment);
             if (align != 0) {
@@ -978,7 +1131,7 @@ namespace Ch.Elca.Iiop.Cdr {
         #region Implementation of CDRInputStream
 
         public byte ReadOctet() {
-            CheckEndOfStream(1);
+            CheckStreamPosition(1);
             byte read = (byte)BaseStream.ReadByte();
             IncrementPosition(1);
             return read;
@@ -1046,7 +1199,11 @@ namespace Ch.Elca.Iiop.Cdr {
 
         public string ReadString() {
             uint length = ReadULong(); // nr of bytes used including the terminating 0
-            byte[] charData = ReadOpaque((int)length-1); // read string data
+            return ReadStringData(length);
+        }
+
+        private string ReadStringData(uint length) {
+            byte[] charData = ReadOpaque((int)length - 1); // read string data
             ReadOctet(); // read terminating 0
             Encoding encoding = CdrStreamHelper.GetCharEncoding(CharSet, CodeSetConversionRegistry.GetRegistry());
             if (encoding == null) {
@@ -1057,8 +1214,8 @@ namespace Ch.Elca.Iiop.Cdr {
             return result;
         }
 
-        public byte[] ReadOpaque(int nrOfBytes)    {
-            CheckEndOfStream((ulong)nrOfBytes);
+        public byte[] ReadOpaque(int nrOfBytes) {
+            CheckStreamPosition((ulong)nrOfBytes);
             byte[] data = new byte[nrOfBytes];
             BaseStream.Read(data, 0, nrOfBytes);
             IncrementPosition((ulong)nrOfBytes);
@@ -1066,7 +1223,7 @@ namespace Ch.Elca.Iiop.Cdr {
         }
 
         public void ReadBytes(byte[] buf, int offset, int count) {
-            CheckEndOfStream((ulong)count);
+            CheckStreamPosition((ulong)count);
             BaseStream.Read(buf, offset, count);
             IncrementPosition((ulong)count);
         }
@@ -1085,70 +1242,229 @@ namespace Ch.Elca.Iiop.Cdr {
                 // only possible to call skipRest, if nrOfBytes set
                 throw new INTERNAL(976, CompletionStatus.Completed_MayBe);
             }
-            ReadPadding(GetBytesToFollow());
+            try {
+                // disable chunk checking, because skip-rest should ignore the rest of the stream -> don't want chunk cross exceptions
+                m_skipChunkCheck = true;                 
+                ReadPadding(GetBytesToFollow());
+            } finally {
+                m_skipChunkCheck = false;
+            }
         }
+
+        #region ValueTypeHandling
+
+        private void UpdateAndCheckChunking(ulong nrOfBytesToRead) {
+            // only do something, if chunking is active            
+            // ignore chunking, if in peeking mode or if chunking check deactivated while in this method
+            if ((IsChunkActive()) && !IsPeeking() && !m_skipChunkCheck) {
+                try {
+                    m_skipChunkCheck = true; // ignore chunking check during this method call
+                    ChunkInfo chunkInfo = (ChunkInfo)m_chunkStack.Peek();
+                    if (chunkInfo.IsBorderReached()) {
+                        StartPeeking();
+                        int tagOrChunkLength = ReadLong();
+                        StopPeeking();
+                        if ((tagOrChunkLength > 0) && (tagOrChunkLength < MIN_VALUE_TAG)) {
+                            // a chunk starts here
+                            ReadLong();
+                            chunkInfo.IsContinuationExpected = false;
+                            // set chunk to start after tag and contains tag bytes
+                            chunkInfo.SetContinuationLength(tagOrChunkLength);
+                        } else if ((tagOrChunkLength >= MIN_VALUE_TAG) && 
+                                   (tagOrChunkLength <= MAX_VALUE_TAG)) {
+                            // a value type starting here -> current chunk is deactived while nested val type is read
+                            chunkInfo.IsContinuationExpected = true;                    
+                        }
+                    }
+                    // for non-valuetypes following, we need to check, if the chunk border is not crossed
+                    // embedded valuetypes deactivate the current chunk, therefore no checking
+                    if ((!chunkInfo.IsContinuationExpected) &&
+                        (chunkInfo.WillBorderBeCrossed((int)nrOfBytesToRead))) {                              
+                        // invlaid serialized value-type, try to read over the chunk border
+                        throw new MARSHAL(901, CompletionStatus.Completed_MayBe);                        
+                    }
+                } finally {
+                    m_skipChunkCheck = false;
+                }
+            }
+        }
+
+        /// <summary>check if a chunk is active</summary>        
+        private bool IsChunkActive() {
+            if (m_chunkStack.Count == 0) { 
+                return false; 
+            }
+            ChunkInfo info = (ChunkInfo)m_chunkStack.Peek(); // chunks are not nested -> check only topmost
+            if (info.IsContinuationExpected || info.IsFinished) { // not active
+                // is continuationExpected means, that a chunk of a nested value type follows;
+                // the current chunk is inactive up to end of inner value type chunk.
+                return false;
+            } else {
+                return true;
+            }
+        }
+
+        private bool isChunked(uint valueTag) {
+            return ((valueTag & 0x00000008) > 0);
+        }
+
+        public void BeginReadNewValue() {
+            // nothing to do yet
+        }
+
+        public void BeginReadValueBody(uint valueTag) {
+            if (isChunked(valueTag)) {
+                m_chunkLevel++;
+                // add a chunkinfo for this value type
+                ChunkInfo info = new ChunkInfo(0, this);
+                info.IsContinuationExpected = false;
+                // store chunk-info
+                m_chunkStack.Push(info);
+
+            }               
+        }
+
+        public void EndReadValue(uint valueTag) {
+            if (isChunked(valueTag)) {
+                EndChunk(); 
+                if (m_chunkLevel == 1) {
+                    // outermost value: no chunks must be on the stack
+                    if (m_chunkStack.Count > 0) { 
+                        // not all chunks closed at the ending of the value-type
+                        throw new MARSHAL(911, CompletionStatus.Completed_MayBe);
+                    }
+                }
+                m_chunkLevel--;
+            }
+        }
+
+        /// <summary>ends chunk(s) here</summary>
+        private void EndChunk() {
+            // end chunk(s) here
+            ChunkInfo top = (ChunkInfo)m_chunkStack.Pop();
+            if (top.IsFinished) {
+                return; // more than one level was ended for an inner value-type --> this chunk is already finished
+            }
+            FinishChunk(top);
+            CheckChunkInfoAtEnd(top); // check if chunk is completely read here
+            top.IsFinished = true; // chunk is finished
+            // read-endTag for this chunk and possibly for outer chunks
+            int endTag = ReadLong(); // not part of chunk -> do not check if over border; IsFinished = true deactivated chunk border checking
+
+            if (endTag >= 0) {
+                // end-tag for a chunk must be < 0
+                throw new MARSHAL(914, CompletionStatus.Completed_MayBe);
+            }
+            int levelsToEnd = m_chunkStack.Count + 2 + endTag; // already removed topmost element --> add 2 here
+            if (levelsToEnd <= 0) {
+                // invalid end-chunk tag
+                throw new MARSHAL(915, CompletionStatus.Completed_MayBe);
+            }
+            // set for the chunks, that are not removed here the IsFinished property to true!
+            IEnumerator enumerator = m_chunkStack.GetEnumerator();
+            for (int i = 1; i < levelsToEnd; i++) {
+                enumerator.MoveNext();
+                CheckChunkInfoAtEnd((ChunkInfo)enumerator.Current); // check if chunk can end here!
+                ((ChunkInfo)enumerator.Current).IsFinished = true;
+            }
+            if (enumerator.MoveNext()) {
+                // was a nested value, continue chunk if no val type follows ...
+                ChunkInfo continuation = (ChunkInfo)enumerator.Current;
+                continuation.IsContinuationExpected = false; // inner value has ended here, reactivate outer chunk
+                // set chunk start position to current position, length 0 
+                // -> either a chunk length or a embedded valuetype must follow now!
+                continuation.SetContinuationLength(0);
+            }
+        }
+
+        /// <summary>checks, if a chunk can end at the specified position</summary>
+        private void CheckChunkInfoAtEnd(ChunkInfo chunkInfo) {
+            if (chunkInfo.IsDataAvailable()) {
+                // a chunk containing unread data couldn't be eneded here
+                throw new MARSHAL(917, CompletionStatus.Completed_MayBe);
+            }
+        }
+
+        /// <summary>read the unread data bytes of the chunk here</summary>
+        /// <param name="chunk"></param>
+        private void FinishChunk(ChunkInfo chunk) {
+            int toRead = chunk.GetBytesAvailable();
+            if (toRead > 0) {
+                ReadPadding((ulong)toRead);
+            }
+        }
+
+        #endregion ValueTypeHandling
                 
         #region Indirection Handling
         
-        public bool CheckForIndirection(out long indirectionOffset) {
-            StartPeeking();
-            uint indirTag = ReadULong();
-            StopPeeking();    
-            if (indirTag == INDIRECTION_TAG) {    
-                indirectionOffset = ReadIndirection();
-                if (indirectionOffset >= -4) { 
-                    // indirection-offset is not ok: indirectionOffset
-                    throw new MARSHAL(949, CompletionStatus.Completed_MayBe);
-                }
-                return true;
+//        
+//                
+//
+//        public bool IsIndirectionResolvable(long indirectionOffset, bool allowEncapBoundryCross,
+//                                            IndirectionType indirType,
+//                                            IndirectionUsage indirUsage) {
+//            
+//            // indirection-offset is negative --> therefore add to stream-position; -4, because indirectionoffset itself doesn't count --> stream-pos too high
+//            IndirectionInfo info = new IndirectionInfo(CalculateIndirectionPos(indirectionOffset),
+//                                                       indirType, indirUsage);
+//            return m_indirections.IsIndirectionResolvable(info, allowEncapBoundryCross);
+//        }
+//                
+//        private ulong CalculateIndirectionPos(long indirectionOffset) {
+//            // indirection-offset is negative --> therefore add to stream-position; -4, because indirectionoffset itself doesn't count --> stream-pos too high
+//            long streamPosition = (long)GetPosition();
+//            streamPosition += (long)GetGlobalOffset();
+//            return (ulong)(streamPosition + indirectionOffset - 4);
+//        }        
+
+        public uint ReadInstanceOrIndirectionTag(out StreamPosition instanceStartPosition,
+                                                 out bool isIndirection) {
+
+            uint tag = ReadULong();
+            instanceStartPosition = new StreamPosition(this, 4, true);
+            isIndirection = (tag == INDIRECTION_TAG);
+            return tag;
+        }
+
+        public string ReadIndirectableString(IndirectionType indirType, IndirectionUsage indirUsage,
+                                             bool resolveGlobal) {
+            uint lengthOrTag = ReadULong();
+            if (lengthOrTag == INDIRECTION_TAG) {
+                StreamPosition indirPos = ReadIndirectionOffset();
+                return (string)GetObjectForIndir(new IndirectionInfo(indirPos.GlobalPosition,
+                                                                     indirType, indirUsage),
+                                         resolveGlobal);
             } else {
-                indirectionOffset = 0;
-                return false;
+                StreamPosition beforeStringPos = new StreamPosition(this, 4, true);
+                string result = ReadStringData(lengthOrTag);
+                StoreIndirection(new IndirectionInfo(beforeStringPos.GlobalPosition,
+                                                     indirType, indirUsage),
+                                 result);
+                return result;
             }
         }
-        
-        public long ReadIndirection() {
-            ReadPadding(4); // read indir tag
-            return ReadLong();
+
+        public StreamPosition ReadIndirectionOffset() {            
+            int indirectionOffset = ReadLong();
+            if (indirectionOffset >= -4) { 
+                // indirection-offset is not ok: indirectionOffset
+               throw new MARSHAL(949, CompletionStatus.Completed_MayBe);
+            }
+            // indirection-offset is negative --> therefore add to stream-position; 
+            // -4, because indirectionoffset itself doesn't count --> stream-pos too high
+            StreamPosition result = new StreamPosition(this, (uint)Math.Abs(indirectionOffset) + 4, 
+                                                       true);
+            return result;
         }
-                
+
+        public object GetObjectForIndir(IndirectionInfo indirInfo, bool resolveGlobal) {
+            return m_indirections.GetObjectForIndir(indirInfo, resolveGlobal);
+        }
+
         public void StoreIndirection(IndirectionInfo indirDesc, object valueAtIndirPos) {
             m_indirections.StoreIndirection(indirDesc, valueAtIndirPos);
         }
-        
-        /// <summary>resolves indirection, if not possible throws marshal excpetion</summary>
-        public object GetObjectForIndir(long indirectionOffset, bool allowEncapBoundryCross,
-                                        IndirectionType indirType,
-                                        IndirectionUsage indirUsage) {
-            IndirectionInfo info = new IndirectionInfo(CalculateIndirectionPos(indirectionOffset),
-                                                       indirType, indirUsage);
-            return m_indirections.GetObjectForIndir(info, allowEncapBoundryCross);
-        }
-
-        public bool IsIndirectionResolvable(long indirectionOffset, bool allowEncapBoundryCross,
-                                            IndirectionType indirType,
-                                            IndirectionUsage indirUsage) {
-            
-            // indirection-offset is negative --> therefore add to stream-position; -4, because indirectionoffset itself doesn't count --> stream-pos too high
-            IndirectionInfo info = new IndirectionInfo(CalculateIndirectionPos(indirectionOffset),
-                                                       indirType, indirUsage);
-            return m_indirections.IsIndirectionResolvable(info, allowEncapBoundryCross);
-        }
-                
-        public void CheckIndirectionResolvable(long indirectionOffset, bool allowEncapBoundryCross,
-                                               IndirectionType indirType,
-                                               IndirectionUsage indirUsage) {            
-             IndirectionInfo info = new IndirectionInfo(CalculateIndirectionPos(indirectionOffset),
-                                                        indirType, indirUsage);
-             m_indirections.CheckIndirectionResolvable(info, allowEncapBoundryCross);
-        }
-        
-        private ulong CalculateIndirectionPos(long indirectionOffset) {
-            // indirection-offset is negative --> therefore add to stream-position; -4, because indirectionoffset itself doesn't count --> stream-pos too high
-            long streamPosition = (long)GetPosition();
-            streamPosition += (long)GetGlobalOffset();
-            return (ulong)(streamPosition + indirectionOffset - 4);
-        }        
         
         #endregion IndirectionHandling
         #endregion Implementation of CDRInputStream
@@ -1344,7 +1660,33 @@ namespace Ch.Elca.Iiop.Cdr {
         public void WriteEncapsulation(CdrEncapsulationOutputStream encap) {
             encap.WriteToStream(this);
         }
-                
+
+        public StreamPosition WriteIndirectableInstanceTag(uint tag) {
+            WriteULong(tag);
+            return new StreamPosition(this, 4, true); // position just before tag
+        }
+
+        public void WriteIndirectableString(string val,
+                                            IndirectionType indirType,
+                                            IndirectionUsage indirUsage) {
+
+            if (IsPreviouslyMarshalled(val,
+                                       indirType, indirUsage)) {
+                // write indirection
+                WriteIndirection(val);
+            } else {
+                // prepare to add repId to indirection table
+                ForceWriteAlign(Aligns.Align4);
+                StreamPosition indirPos = new StreamPosition(this); 
+                WriteString(val);
+
+                IndirectionInfo indirInfo = new IndirectionInfo(indirPos.GlobalPosition,
+                                                                indirType,
+                                                                indirUsage);
+                StoreIndirection(val, indirInfo);
+            }
+        }
+
         public void WriteIndirection(object forVal) {
             object indirInfo = GetIndirectionInfoFor(forVal);
             if (indirInfo != null) {                
@@ -1394,7 +1736,7 @@ namespace Ch.Elca.Iiop.Cdr {
         #endregion Implementation of CDROutputStream
 
         #endregion IMethods
-    
+        
     }
 
 
@@ -1409,11 +1751,11 @@ namespace Ch.Elca.Iiop.Cdr {
         
         internal CdrEncapsulationInputStream(CdrInputStream stream, 
                                              IndirectionStoreIndirKey indirStore) : base(indirStore) {
-            Stream baseStream = new MemoryStream();
-            // store aligned position of encapsulation relative to stream beginning
-            StreamPosition streamPos = new StreamPosition(stream);             
+            Stream baseStream = new MemoryStream();                        
             // read the encapsulation from the input stream
             ulong encapsLength = stream.ReadULong();
+            StreamPosition streamPos = new StreamPosition(stream); // also include encaps length in global offset, because not in GetPosition() considered
+            m_globalOffset = streamPos.GlobalPosition;  // global position of this stream beginning (GetPosition() on this stream doesn't consider length field read -> global offset is just after lenght)
             byte[] data = stream.ReadOpaque((int)encapsLength);
             // copy the data into the underlying stream
             baseStream.Write(data, 0, data.Length);
@@ -1422,9 +1764,7 @@ namespace Ch.Elca.Iiop.Cdr {
             SetStream(baseStream);
             byte flags = ReadOctet(); // read the flags out of the encapsulation
             ConfigStream(flags, new GiopVersion(1,2)); // for encapsulation, the GIOP-dependant operation must be compatible with GIOP-1.2
-            SetMaxLength(encapsLength-1); // flags are already read --> minus 1
-            
-            m_globalOffset = streamPos.Position + 4; // also include encaps length in global offset, because not in GetPosition() considered
+            SetMaxLength(encapsLength-1); // flags are already read --> minus 1                        
         }
 
         #endregion IConstructor

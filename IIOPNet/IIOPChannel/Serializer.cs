@@ -514,29 +514,313 @@ namespace Ch.Elca.Iiop.Marshalling {
 
         #region IMethods
 
+        /// <summary>checks, if custom marshalling must be used</summary>
+        private bool CheckForCustomMarshalled(Type forType) {
+            // subclasses of a custom marshalled type are automatically also custom marshalled: CORBA-spec-99-10-07: page 3-27
+            return ReflectionHelper.ICustomMarshalledType.IsAssignableFrom(forType);
+        }
+
+        /// <summary>checks, if the type is an implementation of a value-type</summary>
+        /// <remarks>fields of implementation classes are not serialized/deserialized</remarks>
+        private bool IsImplClass(Type forType) {
+            Type baseType = forType.BaseType;
+            if (baseType != null) {
+                AttributeExtCollection attrs = AttributeExtCollection.ConvertToAttributeCollection(
+                                                    baseType.GetCustomAttributes(false));
+                if (attrs.IsInCollection(ReflectionHelper.ImplClassAttributeType)) {
+                    ImplClassAttribute implAttr = (ImplClassAttribute)
+                                                  attrs.GetAttributeForType(ReflectionHelper.ImplClassAttributeType);
+                    Type implClass = Repository.LoadType(implAttr.ImplClass);
+                    if (implClass == null) {
+                        Trace.WriteLine("implementation class : " + implAttr.ImplClass +
+                                    " of value-type: " + baseType + " couldn't be found");
+                        throw new NO_IMPLEMENT(1, CompletionStatus.Completed_MayBe);
+                    }
+                    if (implClass.Equals(forType)) {
+                        return true;
+                    }
+                }
+            }
+            return false;
+        }
+
+        /// <summary>
+        /// creates a Stack with the inheritance information for the Type forType.
+        /// </summary>
+        private Stack CreateTypeHirarchyStack(Type forType) {
+            Stack typeHierarchy = new Stack();
+            Type currentType = forType;
+            while (currentType != null) {
+                if (!IsImplClass(currentType)) { // ignore impl-classes in serialization code
+                    typeHierarchy.Push(currentType);
+                    if (CheckForCustomMarshalled(currentType)) {
+                        break;
+                    }
+                }
+
+                currentType = currentType.BaseType;
+                if (currentType == ReflectionHelper.ObjectType || currentType == ReflectionHelper.ValueTypeType ||
+                   (ClsToIdlMapper.IsMappedToAbstractValueType(currentType,
+                                                               new AttributeExtCollection()))) { // abstract value types are not serialized
+                    break;
+                }
+            }
+            return typeHierarchy;
+        }
+
         public override void Serialise(Type formal, object actual, AttributeExtCollection attributes,
                                        CdrOutputStream targetStream) {
-            // standard value types
-            ValueOutputStream serStream = null;            
-            if (targetStream is ValueOutputStream) { // nested value
-                serStream = (ValueOutputStream) targetStream;
-            } else { 
-                serStream = new ValueOutputStream((CdrOutputStreamImpl) targetStream);
+            if (actual == null) {
+                targetStream.WriteULong(0); // write a null-value
+                return;
             }
-            serStream.WriteValue(actual, formal);
+
+            // if value is already in indirection table, write indirection
+            if (targetStream.IsPreviouslyMarshalled(actual,
+                                                    IndirectionType.IndirValue,
+                                                    IndirectionUsage.ValueType)) {
+                // write indirection
+                targetStream.WriteIndirection(actual);
+                return; // write completed
+            } else {
+
+                uint valueTag = CdrStreamHelper.MIN_VALUE_TAG; // value-tag with no option set
+                // attentition here: if formal type represents an IDL abstract interface, writing no type information is not ok.
+                // do not use no typing information option, because java orb can't handle it
+                valueTag = valueTag | 0x00000002;
+                StreamPosition indirPos = targetStream.WriteIndirectableInstanceTag(valueTag);
+                string repId = "";
+                if (!IsImplClass(actual.GetType())) {
+                    repId = Repository.GetRepositoryID(actual.GetType());
+                } else { // an impl-class is not serialized, because it's not known at the receiving ORB
+                    repId = Repository.GetRepositoryID(actual.GetType().BaseType);
+                }
+                targetStream.WriteIndirectableString(repId, IndirectionType.IndirRepId,
+                                                     IndirectionUsage.ValueType);
+
+                // add instance to indirection table
+                targetStream.StoreIndirection(actual,
+                                              new IndirectionInfo(indirPos.GlobalPosition,
+                                                                  IndirectionType.IndirValue,
+                                                                  IndirectionUsage.ValueType));
+
+                Stack typeHierarchy = CreateTypeHirarchyStack(actual.GetType());
+                while (typeHierarchy.Count > 0) {
+                    Type marshalType = (Type)typeHierarchy.Pop();
+                    if (!CheckForCustomMarshalled(marshalType)) {
+                        WriteFieldsForType(actual, marshalType, targetStream);
+                    } else { // custom marshalled
+                        if (!(actual is ICustomMarshalled)) {
+                            // can't serialise custom value type, because ICustomMarshalled not implemented
+                            throw new INTERNAL(909, CompletionStatus.Completed_MayBe);
+                        }
+                        ((ICustomMarshalled)actual).Serialize(new DataOutputStreamImpl(targetStream));
+                    }
+                }
+            }
         }
+
+        /// <summary>writes the fields delcared in the type ofType of the instance instance</summary>
+        /// <param name="chunkedRep">use chunked representation</param>
+        private void WriteFieldsForType(object instance, Type ofType, 
+                                        CdrOutputStream targetStream) {
+            FieldInfo[] fields = ReflectionHelper.GetAllDeclaredInstanceFields(ofType);
+            foreach (FieldInfo fieldInfo in fields) {
+                if (!fieldInfo.IsNotSerialized) { // do not serialize transient fields
+                    WriteField(fieldInfo, instance, 
+                               targetStream);
+                }
+            }
+        }
+
+        /// <summary>write the value of the field to the underlying stream</summary>
+        private void WriteField(FieldInfo field, object instance,
+                                CdrOutputStream targetStream) {
+            Marshaller marshaller = Marshaller.GetSingleton();
+
+            object fieldVal = field.GetValue(instance);
+            AttributeExtCollection attrColl =
+                ReflectionHelper.GetCustomAttriutesForField(field, true);
+            // write value                
+            marshaller.Marshal(field.FieldType, attrColl, fieldVal, 
+                               targetStream);
+        }
+
 
         public override object Deserialise(Type formal, AttributeExtCollection attributes,
                                            CdrInputStream sourceStream) {
-            ValueInputStream deserStream = null;
-            if (sourceStream is ValueInputStream) { // nested value
-                deserStream = (ValueInputStream) sourceStream;
-            } else { 
-                deserStream = new ValueInputStream((CdrInputStreamImpl) sourceStream);
+            sourceStream.BeginReadNewValue();
+            StreamPosition instanceStartPos;
+            bool isIndirection;
+            uint valueTag = sourceStream.ReadInstanceOrIndirectionTag(out instanceStartPos, 
+                                                                      out isIndirection);
+            if (isIndirection) {
+                // return indirected value
+                // resolve indirection:
+                StreamPosition indirectionPosition = sourceStream.ReadIndirectionOffset();
+                return sourceStream.GetObjectForIndir(new IndirectionInfo(indirectionPosition.GlobalPosition,
+                                                                          IndirectionType.IndirValue,
+                                                                          IndirectionUsage.ValueType),
+                                                      true);
+            } else {             
+                if (IsNullValue(valueTag)) {
+                    return null;
+                }
+                
+                // non-null value
+                if (HasCodeBaseUrl(valueTag)) {
+                    HandleCodeBaseUrl(sourceStream);
+                }
+
+                Type actualType = GetActualType(formal, sourceStream, valueTag);
+                object result = CreateInstance(actualType);
+                if (!(formal.IsInstanceOfType(result))) {
+                    // invalid implementation class of value type: 
+                    // instance.GetType() is incompatible with: formal
+                    throw new BAD_PARAM(903, CompletionStatus.Completed_MayBe);
+                }
+                // store indirection info for this instance, if another instance contains a reference to this one
+                sourceStream.StoreIndirection(new IndirectionInfo(instanceStartPos.GlobalPosition,
+                                                                  IndirectionType.IndirValue,
+                                                                  IndirectionUsage.ValueType), 
+                                              result);
+
+                // now the value fields follow
+                sourceStream.BeginReadValueBody(valueTag);
+                DeserialiseValueBody(actualType, sourceStream, result);
+                sourceStream.EndReadValue(valueTag);
+                return result;
             }
-            object result = deserStream.ReadValue(formal);
-            return result;
         }
+
+        private bool IsNullValue(uint valueTag) {
+            return valueTag == 0;
+        }
+
+        private bool HasCodeBaseUrl(uint valueTag) {
+            return ((valueTag & 0x00000001) > 0);
+        }
+
+        private void HandleCodeBaseUrl(CdrInputStream sourceStream) {
+            sourceStream.ReadIndirectableString(IndirectionType.CodeBaseUrl,
+                                                IndirectionUsage.ValueType,
+                                                false);
+        }
+
+        private void DeserialiseValueBody(Type actualType, CdrInputStream sourceStream,
+                                          object instance) {
+            Stack typeHierarchy = CreateTypeHirarchyStack(actualType);
+            while (typeHierarchy.Count > 0) {
+                Type demarshalType = (Type)typeHierarchy.Pop();
+                if (!CheckForCustomMarshalled(demarshalType)) {
+                    ReadFieldsForType(instance, demarshalType, 
+                                      sourceStream);
+                } else { // custom marshalled
+                    if (!(instance is ICustomMarshalled)) {
+                        // can't deserialise custom value type, because ICustomMarshalled not implented
+                        throw new INTERNAL(909, CompletionStatus.Completed_MayBe);
+                    }
+                    ((ICustomMarshalled)instance).Deserialise(new DataInputStreamImpl(sourceStream));
+                }
+            }
+        }
+
+        /// <summary>
+        /// gets the type of which the actual parameter is / should be ...
+        /// </summary>
+        private Type GetActualType(Type formal, CdrInputStream sourceStream, uint valueTag) {            
+            Type actualType = null;
+            switch (valueTag & 0x00000006) {
+                case 0: 
+                    // actual = formal-type
+                    actualType = formal;
+                    break;
+                case 2:
+                    // single repository-id follows
+                    string repId = sourceStream.ReadIndirectableString(IndirectionType.IndirRepId,
+                                                                       IndirectionUsage.ValueType,
+                                                                       false);
+                    actualType = Repository.GetTypeForId(repId);
+                    if (actualType == null) { 
+                        // repository id used is unknown: repId
+                        throw new NO_IMPLEMENT(941, CompletionStatus.Completed_MayBe);
+                    }
+                    break;
+                case 6:
+                    // TODO: handle indirections here
+                    // a list of repository-id's
+                    int nrOfIds = sourceStream.ReadLong();
+                    if (nrOfIds == 0) { 
+                        // a list of repository-id's for type-information must contain at least one element
+                        throw new MARSHAL(935, CompletionStatus.Completed_MayBe);
+                    }
+                    string mostDerived = sourceStream.ReadString(); // use only the most derived type, no truncation allowed
+                    for (int i = 1; i < nrOfIds; i++) { 
+                        sourceStream.ReadString(); 
+                    }
+                    actualType = Repository.GetTypeForId(mostDerived);
+                    break;
+                default:
+                    // invalid value-tag found: " + valueTag
+                    throw new MARSHAL(937, CompletionStatus.Completed_MayBe);
+            }
+            if (ClsToIdlMapper.IsInterface(actualType)) { 
+                // can't instantiate value-type of type: actualType
+                throw new NO_IMPLEMENT(945, CompletionStatus.Completed_MayBe);
+            }
+            return actualType;
+        }
+
+        /// <summary>creates an instance of the given type via reflection</summary>
+        private object CreateInstance(Type actualType) {
+            object[] implAttr = actualType.GetCustomAttributes(ReflectionHelper.ImplClassAttributeType, false);
+            if ((implAttr != null) && (implAttr.Length > 0)) {
+                if (implAttr.Length > 1) {
+                    // invalid type: actualType, only one ImplClassAttribute allowed
+                    throw new INTERNAL(923, CompletionStatus.Completed_MayBe);
+                }
+                ImplClassAttribute implCl = (ImplClassAttribute)implAttr[0];
+                // get the type
+                actualType = Repository.LoadType(implCl.ImplClass);
+                if (actualType == null) {
+                    Trace.WriteLine("implementation class : " + implCl.ImplClass +
+                                    " of value-type: " + actualType + " couldn't be found");
+                    throw new NO_IMPLEMENT(1, CompletionStatus.Completed_MayBe);
+                }
+            }
+            // type must not be abstract for beeing instantiable
+            if (actualType.IsAbstract) {
+                // value-type couln't be instantiated: actualType
+                throw new NO_IMPLEMENT(931, CompletionStatus.Completed_MayBe);
+            }
+            // instantiate            
+            object instance = Activator.CreateInstance(actualType);
+            return instance;
+        }
+
+        /// <summary>reads in a field in a value-type instance</summary>
+        /// <param name="containingInstance">the instance, in which the field should be set</param>
+        public void ReadAndSetField(FieldInfo field, object containingInstance, 
+                                    CdrInputStream sourceStream) {
+            Marshaller marshaller = Marshaller.GetSingleton();
+            AttributeExtCollection attrColl =
+                ReflectionHelper.GetCustomAttriutesForField(field, true);
+            object result = marshaller.Unmarshal(field.FieldType, attrColl, sourceStream);
+            field.SetValue(containingInstance, result);
+        }
+
+        /// <summary>reads and sets the field declared in the type ofType.</summary>
+        private void ReadFieldsForType(object instance, Type ofType, 
+                                       CdrInputStream sourceStream) {
+            // reads all fields declared in the Type: no inherited fields
+            FieldInfo[] fields = ReflectionHelper.GetAllDeclaredInstanceFields(ofType);
+            foreach (FieldInfo fieldInfo in fields) {
+                if (!fieldInfo.IsNotSerialized) { // do not serialize transient fields
+                    ReadAndSetField(fieldInfo, instance, sourceStream);
+                }
+            }
+        }
+
 
         #endregion IMethods
 
@@ -785,10 +1069,6 @@ namespace Ch.Elca.Iiop.Marshalling {
 
     }
     
-    // **************************************************************************************************
-    // ********************************* Serializer for special types *********************************** 
-    // **************************************************************************************************
-
     /// <summary>serializes enums</summary>
     public class EnumSerializer : Serialiser {
         

@@ -219,7 +219,12 @@ namespace Ch.Elca.Iiop.Util {
                 }
             }
         }
-        
+
+        public bool IsPeeking() {
+            lock (this) {
+                return (m_isPeeking);
+            }
+        }
 
         public override long Seek(long offset, System.IO.SeekOrigin origin) {
             lock(this) {

@@ -207,12 +207,11 @@ namespace omg.org.CORBA {
 
         /// <summary>serialize the whole type-code to the stream</summary>
         /// <param name="cdrStream"></param>
-        internal virtual void WriteToStream(CdrOutputStream cdrStream) {
-            StreamPosition indirPos = new StreamPosition(cdrStream); 
+        internal virtual void WriteToStream(CdrOutputStream cdrStream) {            
             uint val = Convert.ToUInt32(kind());
-            cdrStream.WriteULong(val);
+            StreamPosition indirPos = cdrStream.WriteIndirectableInstanceTag(val);
             cdrStream.StoreIndirection(this, 
-                                       new IndirectionInfo(indirPos.Position, 
+                                       new IndirectionInfo(indirPos.GlobalPosition, 
                                                            IndirectionType.TypeCode,
                                                            IndirectionUsage.TypeCode));
         }        
@@ -1683,11 +1682,12 @@ namespace Ch.Elca.Iiop.Marshalling {
         #region IMethods
 
         public override object Deserialise(System.Type formal, AttributeExtCollection attributes, CdrInputStream sourceStream) {
-            // indirPos will contain the next aligned position in the base stream, after next read-op is performed
-            StreamPosition indirPos = new StreamPosition(sourceStream);
-            
-            uint kindVal = (uint)sourceStream.ReadULong();
-            if (kindVal != CdrStreamHelper.INDIRECTION_TAG) {
+
+            bool isIndirection;
+            StreamPosition indirPos;
+            uint kindVal = (uint)sourceStream.ReadInstanceOrIndirectionTag(out indirPos, 
+                                                                           out isIndirection);
+            if (!isIndirection) {
             
                 omg.org.CORBA.TCKind kind = (omg.org.CORBA.TCKind)Enum.ToObject(typeof(omg.org.CORBA.TCKind),
                                                                                 (int)kindVal);
@@ -1796,7 +1796,7 @@ namespace Ch.Elca.Iiop.Marshalling {
                                                           omg.org.CORBA.CompletionStatus.Completed_MayBe);
                 }
                 // store indirection
-                IndirectionInfo indirInfo = new IndirectionInfo(indirPos.Position, 
+                IndirectionInfo indirInfo = new IndirectionInfo(indirPos.GlobalPosition, 
                                                                 IndirectionType.TypeCode,
                                                                 IndirectionUsage.TypeCode);
                 sourceStream.StoreIndirection(indirInfo, result);
@@ -1805,13 +1805,11 @@ namespace Ch.Elca.Iiop.Marshalling {
                 return result;
             } else {
                 // resolve indirection:
-                long indirectionOffset = sourceStream.ReadLong();
-                sourceStream.CheckIndirectionResolvable(indirectionOffset, true,
-                                                        IndirectionType.TypeCode,
-                                                        IndirectionUsage.TypeCode);
-                return sourceStream.GetObjectForIndir(indirectionOffset, true,
-                                                      IndirectionType.TypeCode,
-                                                      IndirectionUsage.TypeCode);
+                StreamPosition indirectionPosition = sourceStream.ReadIndirectionOffset();                                
+                return sourceStream.GetObjectForIndir(new IndirectionInfo(indirectionPosition.GlobalPosition,
+                                                                          IndirectionType.TypeCode,        
+                                                                          IndirectionUsage.TypeCode), 
+                                                      true);
             }
         }
 
