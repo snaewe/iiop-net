@@ -17,11 +17,43 @@ union TestUnionE switch(TestEnumForU) {
     case C: TestEnumForU valE1;
 };
 
+enum TestEnumForU2 {
+    A1, B1, C1
+};
+
+
+union TestUnionE2 switch(TestEnumForU2) {
+    case A1: short valE0;
+    case B1:
+    case C1: TestEnumForU2 valE1;
+};
+
+typedef sequence<wstring> wstringSeq;
+
+typedef sequence<wstringSeq> seqOfWStringSeq;
+
+typedef sequence<long, 3> boundedLongSeq;
+
+
 interface TestService {
     TestUnion EchoTestUnion(in TestUnion arg);
     TestUnionE EchoTestUnionE(in TestUnionE arg);   
     any EchoAny(in any arg);
     any RetrieveUnknownUnion();
+
+    wchar EchoWChar(in wchar arg);
+    wstring EchoWString(in wstring arg);
+    char EchoChar(in char arg);
+    string EchoString(in string arg);
+
+    // test for forum bug report: idl wstring sequences
+    wstringSeq RetrieveWstringSeq(in wstring val, in long nrOfElems);
+    wstringSeq EchoWstringSeq(in wstringSeq arg);
+    seqOfWStringSeq EchoSeqOfWStringSeq(in seqOfWStringSeq arg);
+
+    boundedLongSeq EchoBoundedSeq(in boundedLongSeq arg);
+
+
 }; 
 
 

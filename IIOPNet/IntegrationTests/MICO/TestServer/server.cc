@@ -15,12 +15,53 @@ class TestService_impl : virtual public POA_TestService
 {
 
 public:
+  CORBA::WChar EchoWChar(CORBA::WChar arg);
+  CORBA::WChar* EchoWString(const CORBA::WChar* arg);
+
+  CORBA::Char EchoChar(CORBA::Char arg);
+  char* EchoString(const char* arg);
+
   ::TestUnion EchoTestUnion(const ::TestUnion& arg);
   ::TestUnionE EchoTestUnionE(const ::TestUnionE& arg);
   CORBA::Any* RetrieveUnknownUnion();
   CORBA::Any* EchoAny(const CORBA::Any& arg);
 
+  ::wstringSeq* RetrieveWstringSeq(const CORBA::WChar * val, CORBA::Long nrOrElems);
+  ::wstringSeq* EchoWstringSeq(const ::wstringSeq& arg);
+  ::seqOfWStringSeq* EchoSeqOfWStringSeq(const ::seqOfWStringSeq& arg);
+  ::boundedLongSeq* EchoBoundedSeq(const ::boundedLongSeq& arg);
+
 };
+
+
+CORBA::WChar 
+TestService_impl::EchoWChar(CORBA::WChar arg) 
+{
+  CORBA::WChar result = arg;
+  return arg;
+}
+
+CORBA::WChar* 
+TestService_impl::EchoWString(const CORBA::WChar* arg) 
+{
+    CORBA::WChar* result = CORBA::wstring_dup(arg);
+    return result;
+}
+
+CORBA::Char 
+TestService_impl::EchoChar(CORBA::Char arg) 
+{
+  CORBA::Char result = arg;
+  return result;
+}
+
+char* 
+TestService_impl::EchoString(const char* arg) 
+{
+    return CORBA::string_dup(arg);
+}
+
+
 
 ::TestUnion
 TestService_impl::EchoTestUnion (const ::TestUnion& arg)
@@ -47,6 +88,33 @@ CORBA::Any*
 TestService_impl::EchoAny (const CORBA::Any& arg) {
   return new CORBA::Any(arg);
 }
+
+
+::wstringSeq* 
+TestService_impl::RetrieveWstringSeq(const CORBA::WChar * val, CORBA::Long nrOfElems) {
+  CORBA::WChar** contentArr = new CORBA::WChar*[nrOfElems];
+  for (int i = 0; i < nrOfElems; i++) {
+      contentArr[i] = (CORBA::WChar*)val;
+  }
+  wstringSeq* result = new wstringSeq((CORBA::ULong)nrOfElems, (CORBA::ULong)nrOfElems, contentArr);
+  return result;
+}
+
+::wstringSeq*
+TestService_impl::EchoWstringSeq(const ::wstringSeq& arg) {
+  return new ::wstringSeq(arg);
+}
+
+::seqOfWStringSeq* 
+TestService_impl::EchoSeqOfWStringSeq(const ::seqOfWStringSeq& arg) {
+  return new ::seqOfWStringSeq(arg);
+}
+
+::boundedLongSeq*
+TestService_impl::EchoBoundedSeq(const ::boundedLongSeq& arg) {
+  return new ::boundedLongSeq(arg);
+}
+
 
 int
 main (int argc, char *argv[])

@@ -34,6 +34,7 @@ using NUnit.Framework;
 using Ch.Elca.Iiop;
 using Ch.Elca.Iiop.Services;
 using omg.org.CosNaming;
+using omg.org.CORBA;
 
 namespace Ch.Elca.Iiop.IntegrationTests {
 
@@ -68,6 +69,21 @@ namespace Ch.Elca.Iiop.IntegrationTests {
             m_testService = null;
             // unregister the channel            
             ChannelServices.UnregisterChannel(m_channel);
+        }
+
+
+        [Test]
+        public void TestChar() {
+            char arg = 'a';
+            char result = m_testService.EchoChar(arg);
+            Assertion.AssertEquals(arg, result);
+        }
+
+        [Test]
+        public void TestString() {
+            string arg = "test";
+            string result = m_testService.EchoString(arg);
+            Assertion.AssertEquals(arg, result);
         }
 
         [Test]
@@ -130,9 +146,29 @@ namespace Ch.Elca.Iiop.IntegrationTests {
 
         [Test]
         public void TestReceivingUnknownUnionsAsAny() {
-	        object result = m_testService.RetrieveUnknownUnion();
+            object result = m_testService.RetrieveUnknownUnion();
             Assertion.AssertNotNull("union not retrieved", result);
             Assertion.AssertEquals("type name", "TestUnionE2", result.GetType().FullName);
+        }
+
+        [Test]
+        public void TestBoundedSeq() {
+            int[] lengthOk = new int[] { 1, 2, 3 };
+            int[] result = m_testService.EchoBoundedSeq(lengthOk);
+            Assertion.AssertNotNull(result);
+            Assertion.AssertEquals(lengthOk.Length, result.Length);
+            for (int i = 0; i < result.Length; i++) {
+                Assertion.AssertEquals(lengthOk[i], result[i]);
+            }
+            
+            int[] tooLong = new int[] { 1, 2, 3, 4 };
+            try {
+                m_testService.EchoBoundedSeq(tooLong);
+                Assertion.Fail("expected BAD_PARAM exception, because sequence too long, but not thrown");
+            } catch (BAD_PARAM badParamE) {
+                Assertion.AssertEquals(badParamE.Minor, 3434);
+            }
+
         }
 
     }

@@ -11,7 +11,7 @@ mico_home_var:
     @IF NOT DEFINED MICO_HOME echo define MICO_HOME first
     @IF NOT DEFINED MICO_HOME exit 2
     
-server: service.h service.obj server.obj
+server: service.h service.obj server.obj service.cc
 	$(LD) $(LDFLAGS) service.obj server.obj $(LDLIBS) $(COS_LDLIBS) /OUT:server.exe
 
 service.h service.cc : service.idl $(IDLGEN)
