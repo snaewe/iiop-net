@@ -107,22 +107,20 @@ namespace Ch.Elca.Iiop {
         /// </summary>
         private void ProcessRequest(Stream networkStream, Stream requestStream) {
             requestStream.Seek(0, SeekOrigin.Begin); // go to the beginning of the stream
-            Debug.WriteLine("sending an IIOP message in the Client side Transport sink");
-            // for (int i = 0; i < requestStream.Length; i++) {
-            //    byte nextByte = (byte)requestStream.ReadByte();
-            //    if (i % 16 == 0) { Debug.WriteLine(""); }
-            //    Debug.Write(nextByte + " ");
-            //    networkStream.WriteByte(nextByte);
-            // }
-            // requestStream.Seek(0, SeekOrigin.Begin);
             byte[] data = new byte[requestStream.Length];
             requestStream.Read(data, 0, (int)requestStream.Length);
+#if TRACE
+            Debug.WriteLine("sending an IIOP message in the Client side Transport sink");
+	    /*
             for (int i = 0; i < data.Length; i++) {
                 if (i % 16 == 0) { 
                     Debug.WriteLine(""); 
                 }
                 Debug.Write(data[i] + " ");
             }
+	    */
+	    OutputHelper.DebugBuffer(data);
+#endif
             networkStream.Write(data, 0, (int)requestStream.Length);
             Debug.WriteLine("message sent");
         }
@@ -180,13 +178,17 @@ namespace Ch.Elca.Iiop {
             responseStream.Seek(0, SeekOrigin.Begin); // assure stream is read from beginning in formatter
             byte[] data = new byte[responseStream.Length];
             responseStream.Read(data, 0, (int)responseStream.Length);
-            for (int i = 0; i < data.Length; i++) {
+#if TRACE
+	    /*
+	    for (int i = 0; i < data.Length; i++) {
                 if (i % 16 == 0) { 
                     Debug.WriteLine(""); 
                 }
                 Debug.Write(data[i] + " ");
             }
-
+	    */
+	    OutputHelper.DebugBuffer(data);
+#endif
             responseStream.Seek(0, SeekOrigin.Begin); // assure stream is read from beginning in formatter
                                          
         }
@@ -301,6 +303,13 @@ namespace Ch.Elca.Iiop {
         /// <param name="networkStream"></param>
         private void HandleRequest(Stream msgStream, Stream networkStream) {
             msgStream.Seek(0, SeekOrigin.Begin); // assure stream is read from beginning in formatter
+
+#if TRACE
+            byte[] data = new byte[msgStream.Length];
+            msgStream.Read(data, 0, (int)msgStream.Length);
+	    OutputHelper.DebugBuffer(data);
+            msgStream.Seek(0, SeekOrigin.Begin); // assure stream is read from beginning in formatter
+#endif
 
             
             // the out params returned form later sinks
@@ -417,29 +426,11 @@ namespace Ch.Elca.Iiop {
         private void SendResponseMessage(Stream networkStream, Stream responseMsgStream) {
             responseMsgStream.Seek(0, SeekOrigin.Begin); // go to the beginning of the stream
             Debug.WriteLine("sending an IIOP message in the server side Transport sink");
-            // for (int i = 0; i < responseMsgStream.Length; i++) {
-            //    byte nextByte = (byte)responseMsgStream.ReadByte();
-            //    if (i % 16 == 0) { Debug.WriteLine(""); }
-            //    Debug.Write(nextByte + " ");
-            //    networkStream.WriteByte(nextByte);
-            //}
+
             byte[] data = new byte[responseMsgStream.Length];
             responseMsgStream.Read(data, 0, (int)responseMsgStream.Length);
-            StringBuilder sb = new StringBuilder();
-            for (int i = 0; i < data.Length; i++) {
-                if (i % 16 == 0) {
-                    Debug.WriteLine("  |   " +sb.ToString()); 
-                    sb = new StringBuilder();
-                }
-                String msg = String.Format("{0, 3} ", data[i]);
-                char ch = (char)data[i];
-                sb = sb.Append(((ch > 0x20) ? ch.ToString() : " "));
-                Debug.Write(msg);
-            }
-            for (int i = data.Length % 16; i < 16; i++) {
-                Debug.Write("    ");
-            }
-            Debug.WriteLine("  |   " +sb.ToString());
+
+	    OutputHelper.DebugBuffer(data);
             networkStream.Write(data, 0, data.Length);
             responseMsgStream.Close();
             Debug.WriteLine("message sent");

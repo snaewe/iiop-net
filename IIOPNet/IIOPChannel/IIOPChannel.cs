@@ -39,6 +39,10 @@ using System.Net.Sockets;
 using System.Threading;
 using Ch.Elca.Iiop.Util;
 
+#if TRACE
+using System.IO;
+#endif
+
 namespace Ch.Elca.Iiop {
 
     /// <summary>
@@ -65,6 +69,23 @@ namespace Ch.Elca.Iiop {
         private IiopServerChannel m_serverChannel;
 
         #endregion IFields
+	#region SConstructor
+
+	#if TRACE
+	static IiopChannel() {
+		Stream log = File.Create("IIOPNET_DebugOutput_"+
+				         DateTime.Now.ToString("yyyyMMdd_HHmmss")+
+					 ".txt");
+ 
+		TextWriterTraceListener logListener = new TextWriterTraceListener(log);
+		
+		Trace.Listeners.Add(logListener);
+		Trace.AutoFlush = true;
+		Debug.AutoFlush = true;
+	}
+	#endif
+
+	#endregion SConstructor
         #region IConstructors
         
         public IiopChannel() {
