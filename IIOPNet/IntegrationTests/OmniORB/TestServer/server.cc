@@ -23,6 +23,7 @@ public:
   CORBA::Any* RetrieveUnknownUnion();
   CORBA::Any* RetrieveWStringAsAny(const CORBA::WChar* arg);
   CORBA::Any* EchoAny(const CORBA::Any& arg);
+  CORBA::Any* RetrieveStructWithTypedefMember(CORBA::Long elemVal);
   ::wstringSeq* RetrieveWstringSeq(const CORBA::WChar * val, CORBA::Long nrOrElems);
   ::wstringSeq* EchoWstringSeq(const ::wstringSeq& arg);
   ::seqOfWStringSeq* EchoSeqOfWStringSeq(const ::seqOfWStringSeq& arg);
@@ -76,6 +77,17 @@ TestService_impl::RetrieveWStringAsAny(const CORBA::WChar* arg) {
 CORBA::Any*
 TestService_impl::EchoAny (const CORBA::Any& arg) {
   return new CORBA::Any(arg);
+}
+
+CORBA::Any* 
+TestService_impl::RetrieveStructWithTypedefMember(CORBA::Long elemVal) {
+  
+  StructWithTypedefMember result;
+  result.longtdField = elemVal;
+
+  CORBA::Any* resultAny = new CORBA::Any;
+  *resultAny <<= result;
+  return resultAny;    
 }
 
 ::wstringSeq* 

@@ -43,6 +43,13 @@ typedef sequence<wstringSeq> seqOfWStringSeq;
 
 typedef sequence<long, 3> boundedLongSeq;
 
+typedef long longTD;
+
+struct StructWithTypedefMember {
+    longTD longtdField;
+};
+
+
 interface TestService {
 
     struct InnerStruct {
@@ -54,6 +61,8 @@ interface TestService {
     any EchoAny(in any arg);
     any RetrieveUnknownUnion();
     any RetrieveWStringAsAny(in wstring arg);
+
+    any RetrieveStructWithTypedefMember(in long elemVal);
 
     wchar EchoWChar(in wchar arg);
     wstring EchoWString(in wstring arg);
