@@ -167,8 +167,6 @@ namespace Ch.Elca.Iiop.Idl {
         private static Type s_mByValComponentType = typeof(MarshalByValueComponent);
 
         private static Type s_boxedValAttrType = typeof(BoxedValueAttribute);
-        private static Type s_widecharAttrType = typeof(WideCharAttribute);
-        private static Type s_stringValueAttrType = typeof(StringValueAttribute);
         private static Type s_objectIdlTypeAttrType = typeof(ObjectIdlTypeAttribute);
         private static Type s_interfaceTypeAttrType = typeof(InterfaceTypeAttribute);
 
@@ -407,7 +405,7 @@ namespace Ch.Elca.Iiop.Idl {
         /// </summary>
         private bool UseWideOk(AttributeExtCollection attributes) {
             bool useWide = true;
-            WideCharAttribute wideAttr = (WideCharAttribute)attributes.GetAttributeForType(s_widecharAttrType);
+            WideCharAttribute wideAttr = (WideCharAttribute)attributes.GetAttributeForType(ReflectionHelper.WideCharAttributeType);
             if (wideAttr != null) {
                 useWide = wideAttr.IsAllowed;
             }
@@ -416,7 +414,7 @@ namespace Ch.Elca.Iiop.Idl {
 
         /// <summary>helper to determine if the string is mapped as a normal primitive value or as boxed value type</summary>
         private bool MapStringAsValueType(AttributeExtCollection attributes) {
-            return attributes.IsInCollection(s_stringValueAttrType);
+            return attributes.IsInCollection(ReflectionHelper.StringValueAttributeType);
         }
 
         private object CallActionForDNString(ref Type clsType, AttributeExtCollection attributes, MappingAction action) {

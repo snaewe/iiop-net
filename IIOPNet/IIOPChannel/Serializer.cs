@@ -242,9 +242,8 @@ namespace Ch.Elca.Iiop.Marshalling {
 
         protected bool UseWideOk(AttributeExtCollection attributes) {
             bool useWide = true;
-            WideCharAttribute wideAttr = (WideCharAttribute)attributes.GetAttributeForType(typeof(WideCharAttribute));
-            if (wideAttr != null) 
-            {
+            WideCharAttribute wideAttr = (WideCharAttribute)attributes.GetAttributeForType(ReflectionHelper.WideCharAttributeType);
+            if (wideAttr != null) {
                 useWide = wideAttr.IsAllowed;
             }
             return useWide;

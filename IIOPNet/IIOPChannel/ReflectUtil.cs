@@ -50,6 +50,8 @@ namespace Ch.Elca.Iiop.Util {
         private static Type s_idlSequenceAttributeType = typeof(IdlSequenceAttribute);
         private static Type s_idlStructAttrType = typeof(IdlStructAttribute);
         private static Type s_idlUnionAttrType = typeof(IdlUnionAttribute);
+        private static Type s_wideCharAttrType = typeof(WideCharAttribute);
+        private static Type s_stringValueAttrType = typeof(StringValueAttribute);
         private static Type s_fromIdlNameAttributeType = typeof(FromIdlNameAttribute);
                 
         private static Type s_voidType = typeof(void);
@@ -135,6 +137,19 @@ namespace Ch.Elca.Iiop.Util {
             }
         }
         
+        /// <summary>caches typeof(WideCharAttribute)</summary>
+        public static Type WideCharAttributeType {
+            get {
+                return s_wideCharAttrType;
+            }
+        }
+        
+        /// <summary>caches typeof(StringValueAttribute)</summary>
+        public static Type StringValueAttributeType {
+            get {
+                return s_stringValueAttrType;
+            }
+        }
         
         /// <summary>caches typeof(FromIdlNameAttribute)</summary>        
         public static Type FromIdlNameAttributeType {
