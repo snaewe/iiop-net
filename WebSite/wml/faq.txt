@@ -267,6 +267,28 @@ generate <code>proxy.dll</code> from <code>def.idl</code> in the current directo
 <p>The -r option forces the compiler to check into the given assembly whether some definitions (in this case common.idl) are already available, in which case no further code is generated for them.
 </FAQ>
 
+<FAQ question="How do I configure the channel timeout?">
+
+<p>This section is valid from release 1.7.0 RC 1 and CVS after 3 October 2004.
+
+<p>The channel timeout is configured during the channel registration. By default, the timeout is set to infinity (no timeout).
+
+<p>The properties <code>IiopClientChannel.CLIENT_RECEIVE_TIMEOUT_KEY</code> and <code>IiopClientChannel.CLIENT_SEND_TIMEOUT_KEY</code> control the reception resp. sending timeouts. The timeouts are in milliseconds.
+
+<p>The following code installs an IIOP Channel with receive and send timeouts.
+
+<pre>
+  IDictionary props = new Hashtable();
+  props[IiopClientChannel.CLIENT_RECEIVE_TIMEOUT_KEY] = 1000; // timeout 1000ms
+  props[IiopClientChannel.CLIENT_SEND_TIMEOUT_KEY] = 1000; // timeout 1000ms
+            
+  // register the channel
+  IiopClientChannel channel = new IiopClientChannel(props);
+  ChannelServices.RegisterChannel(channel);
+</pre>
+
+</FAQ>
+
 </FAQ-SECTION>
 <FAQ-SECTION name="Accessing CORBA objects from IIOP.NET">
 

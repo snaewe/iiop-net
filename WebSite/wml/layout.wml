@@ -5,6 +5,16 @@
 {#SUBJECT#:%body:##}
 </define-tag>
 
+# custom tags
+#
+
+<define-tag SOURCE endtag=required>
+<table border="1">
+<tr><td><pre>
+%body
+</pre></td></tr>
+</table>
+</define-tag>
 
 # the template
 #
