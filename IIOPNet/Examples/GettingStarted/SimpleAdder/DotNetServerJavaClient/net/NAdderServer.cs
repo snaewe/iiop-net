@@ -33,7 +33,7 @@ using System.Runtime.Remoting.Channels;
 using Ch.Elca.Iiop;
 
 
-namespace Tutorial.GettingStarted {
+namespace Ch.Elca.Iiop.Tutorial.GettingStarted {
 
     /// <summary>
     /// publishes the service.

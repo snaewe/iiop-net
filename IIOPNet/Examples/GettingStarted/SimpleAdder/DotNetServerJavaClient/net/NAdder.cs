@@ -31,7 +31,7 @@ using System;
 using System.Runtime.Remoting;
 using Ch.Elca.Iiop.Idl;
 
-namespace Tutorial.GettingStarted {
+namespace Ch.Elca.Iiop.Tutorial.GettingStarted {
 
     /// <summary>
     /// The adder implementation class
