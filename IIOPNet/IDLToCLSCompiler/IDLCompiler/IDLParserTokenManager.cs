@@ -796,6 +796,9 @@ private void jjCheckNAddStates(int start)
 static ulong[] jjbitVec0 = {
    (ulong)0x0L, (ulong)0x0L, (ulong)0xffffffffffffffffL, (ulong)0xffffffffffffffffL
 };
+static ulong[] jjbitVec1 = {
+   (ulong)0x0L, (ulong)0x0L, (ulong)0x0L, (ulong)0x8000000080000000L
+};
 private int jjMoveNfa_0(int startState, int curPos)
 {
    int[] nextStates;
@@ -1389,6 +1392,14 @@ private int jjMoveNfa_0(int startState, int curPos)
          {
             switch(jjstateSet[--i])
             {
+               case 0:
+               case 13:
+                  if ((jjbitVec1[i2] & l2) == (ulong)0L)
+                     break;
+                  if (kind > 92)
+                     kind = 92;
+                  jjCheckNAdd(13);
+                  break;
                case 5:
                   if ((jjbitVec0[i2] & l2) != (ulong)0L)
                      jjAddStates(91, 92);

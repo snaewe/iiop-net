@@ -731,6 +731,42 @@ namespace Ch.Elca.Iiop.IDLCompiler.Tests {
                 writer.Close();
             }            
         }
+
+
+        [Test]
+        public void TestIdentifiers() {
+            MemoryStream testSource = new MemoryStream();
+            StreamWriter writer = new StreamWriter(testSource, s_latin1);
+            
+            // idl:
+            writer.WriteLine("module WithSpecialß {");
+            writer.WriteLine("    enum Testß {");
+            writer.WriteLine("        ß, B, ÿ");
+            writer.WriteLine("    };");
+            writer.WriteLine("};");
+            
+            writer.Flush();
+            testSource.Seek(0, SeekOrigin.Begin);
+            Assembly result = CreateIdl(testSource);
+                       
+            // check if enum is correctly created
+            Type enumType = result.GetType("WithSpecialß.Testß", true);
+            CheckIdlEnumAttributePresent(enumType);
+            
+            // check enum val
+            FieldInfo[] fields = enumType.GetFields(BindingFlags.Public | 
+                                                    BindingFlags.Static | 
+                                                    BindingFlags.DeclaredOnly);
+            Assertion.AssertEquals("wrong number of fields in enum", 
+                                   3, fields.Length);
+            
+            CheckEnumField(fields[0], "ß");
+            CheckEnumField(fields[1], "B");
+            CheckEnumField(fields[2], "ÿ");
+            
+            writer.Close();            
+        }
+
         
         
         [Test]
