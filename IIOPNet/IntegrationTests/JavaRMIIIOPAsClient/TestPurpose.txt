@@ -1,0 +1,6 @@
+This integration test tests the basic interoperability of IIOP.NET with RMI/IIOP as a client.
+
+The remote .NET test object provides methods to test serialisation / deserialisation of different types.
+
+
+

@@ -1,0 +1,53 @@
+IDLSource=..\TestServer\IDL\Ch\Elca\Iiop\IntegrationTests\*.idl
+TestService=Ch\Elca\Iiop\IntegrationTests\ 
+JUNIT_JAR = $(JUNIT_HOME)\junit.jar
+
+Predef=..\TestServer\IDL\Predef.idl
+
+build: build-idl build-java
+
+build-idl:
+	if not exist IDL\nul mkdir IDL
+	copy ..\..\..\IDL\*.idl IDL
+	xcopy /s /y ..\TestServer\IDL IDL
+	cd IDL
+	idlj -td .. $(TestService)TestService.idl 
+	idlj -td .. $(TestService)Adder.idl 
+	idlj -td .. $(TestService)TestAbstrInterfaceImplByMarshalByVal.idl
+	idlj -td .. $(TestService)TestEchoInterface.idl
+	idlj -td .. $(TestService)TestEnum.idl
+	idlj -td .. $(TestService)TestInterfaceA.idl
+	idlj -td .. $(TestService)TestNonSerializableBaseClass.idl
+	idlj -td .. $(TestService)TestSerializableClassB1.idl
+	idlj -td .. $(TestService)TestSerializableClassB2.idl
+	idlj -td .. $(TestService)TestSerializableClassC.idl
+	idlj -td .. $(TestService)TestSerializableClassD.idl
+	idlj -td .. $(TestService)TestStructA.idl
+	idlj -td .. org\omg\BoxedArray\System\seq1_long.idl
+	idlj -td .. org\omg\BoxedArray\System\seq1_octet.idl
+	idlj -td .. org\omg\BoxedArray\System\seq1_wstring.idl
+	idlj -td .. org\omg\BoxedArray\System\seq2_long.idl
+	idlj -td .. org\omg\BoxedArray\System\seq2_octet.idl
+	idlj -td .. org\omg\BoxedArray\System\seq2_wstring.idl
+	idlj -td .. org\omg\BoxedArray\System\seq3_octet.idl
+	idlj -td .. Predef.idl
+	cd ..
+
+junit-jar:
+	if not defined JUNIT_HOME echo define JUNIT_HOME first (e.g. C:\JUNIT\Junit3.8.1)
+        if not defined JUNIT_HOME exit 2
+
+copy-valuetypeImpls:
+        copy valTypeImpls\*.java $(TestService)
+
+build-java: junit-jar copy-valuetypeImpls compile-java
+
+compile-java: $(TestService)*.java *.java
+	javac -classpath .;$(JUNIT_JAR) $?
+
+clean:
+	if exist IDL\nul rmdir /q /s IDL
+	if exist org\nul rmdir /q /s org
+        if exist Ch\nul rmdir /q /s Ch
+	if exist *.class del /q *.class
+
