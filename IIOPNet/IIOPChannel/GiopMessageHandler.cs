@@ -44,8 +44,11 @@ namespace Ch.Elca.Iiop.MessageHandling {
     }
 
     /// <summary>
-    /// This class handles IIOP-Messages
+    /// This class handles Giop-Messages
     /// </summary>
+    /// <remarks>
+    /// This class is a helper class for the formatter
+    /// </remarks>
     public class GiopMessageHandler {
 
         #region SFields
@@ -68,80 +71,48 @@ namespace Ch.Elca.Iiop.MessageHandling {
         #endregion SMethods
         #region IMethods
 
-        private IncomingHandlingStatus HandleFragment(CdrInputStream msgBody, GiopHeader header) {
-            GiopMessageBodySerialiser ser = GiopMessageBodySerialiser.GetSingleton();
-            uint moreBytesToFollow = 0;
-            uint reqId = ser.DeserialiseFragment(msgBody, header, out moreBytesToFollow);
-            // inform connection manager
-            GiopConnectionContext context = IiopConnectionManager.GetCurrentConnectionContext();
-            IiopConnection con = context.Connection;
-            con.FragmetReceived(reqId, moreBytesToFollow, header.GiopFlags);
-            return IncomingHandlingStatus.fragment;
-        }
-
-
-        /// <summary>reads an incoming IIOP-message from the Stream sourceStream on the client side</summary>
-        /// <param name="resultMsg">the .NET message creates from this IIOP-message</param>
-        /// <returns>status</returns>
-        public IncomingHandlingStatus ParseIncomingClientMessage(Stream sourceStream, 
-                                                                 IMethodCallMessage requestMessage,
-                                                                 out IMessage resultMsg) {
-            Debug.WriteLine("receive message at client side");            
+        /// <summary>reads an incoming Giop reply message from the Stream sourceStream</summary>
+        /// <remarks>Precondition: sourceStream contains a Giop reply Msg</remarks>
+        /// <returns>the .NET reply Msg created from the Giop Reply</returns>
+        public IMessage ParseIncomingReplyMessage(Stream sourceStream, 
+                                                  IMethodCallMessage requestMessage) {
+            Debug.WriteLine("receive reply message at client side");            
             CdrMessageInputStream msgInput = new CdrMessageInputStream(sourceStream);
-            IiopMsgTypes msgType = msgInput.Header.GiopType;
-            Debug.WriteLine("message-type: " + msgType);
             CdrInputStream msgBody = msgInput.GetMessageContentReadingStream();
             // deserialize message body
-            switch (msgType) {
-                case IiopMsgTypes.Reply:
-                    GiopMessageBodySerialiser ser = GiopMessageBodySerialiser.GetSingleton();
-                    resultMsg = ser.DeserialiseReply(msgInput, msgBody, msgInput.Header.Version, requestMessage);
-                    return IncomingHandlingStatus.normal;
-                case IiopMsgTypes.Fragment:
-                    resultMsg = null;
-                    return HandleFragment(msgBody, msgInput.Header);
-                default:
-                    throw new NotImplementedException("message handling not yet implemented for type: " + msgType);
-            }
+            GiopMessageBodySerialiser ser = GiopMessageBodySerialiser.GetSingleton();
+            return ser.DeserialiseReply(msgInput, msgBody, msgInput.Header.Version, requestMessage);
         }
 
-        /// <summary>reads an incoming IIOP-message from the Stream sourceStream on the server side</summary>
-        /// <returns>the .NET message created from this IIOP-message</returns>
-        public IncomingHandlingStatus ParseIncomingServerMessage(Stream sourceStream, out IMessage resultMsg) {
+        /// <summary>reads an incoming Giop request-message from the Stream sourceStream</summary>
+        /// <returns>the .NET request message created from this Giop-message</returns>
+        public IMessage ParseIncomingRequestMessage(Stream sourceStream) {
             CdrMessageInputStream msgInput = new CdrMessageInputStream(sourceStream);
-            IiopMsgTypes msgType = msgInput.Header.GiopType;
             CdrInputStream msgBody = msgInput.GetMessageContentReadingStream();
             // deserialize the message body (the GIOP-request id is included in this message)
-            switch (msgType) {
-                case IiopMsgTypes.Request:
-                    GiopMessageBodySerialiser ser = GiopMessageBodySerialiser.GetSingleton();
-                    resultMsg = ser.DeserialiseRequest(msgInput, msgBody, msgInput.Header.Version);
-                    return IncomingHandlingStatus.normal;
-                case IiopMsgTypes.Fragment:
-                    resultMsg = null;
-                    return HandleFragment(msgBody, msgInput.Header);
-                default:
-                    throw new NotImplementedException("message handling not yet implemented for type: " + msgType);
-            }
+            GiopMessageBodySerialiser ser = GiopMessageBodySerialiser.GetSingleton();
+            return ser.DeserialiseRequest(msgInput, msgBody, msgInput.Header.Version);
         }
 
-        /// <summary>serialises an outgoing .NET Message on client side</summary>
-        public void SerialiseOutgoingClientMessage(IMessage msg, Stream targetStream, 
-                                                   GiopRequestNumberGenerator reqNumberGen) {
+        /// <summary>serialises an outgoing .NET request Message on client side</summary>
+        public void SerialiseOutgoingRequestMessage(IMessage msg, Stream targetStream, 
+                                                    GiopRequestNumberGenerator reqNumberGen) {
             if (msg is IConstructionCallMessage) {
                 // not supported in CORBA, TBD: replace through do nothing instead of exception
                 throw new NotSupportedException("client activated objects are not supported with this channel");
             } else if (msg is IMethodCallMessage) {
                 // extract the GIOP-version out of the message-target
-                GiopVersion version = ExtractGIOPVersion(msg as IMethodCallMessage);
+                GiopVersion version = ExtractGiopVersion(msg as IMethodCallMessage);
                 // write a CORBA request message into the stream targetStream
-                GiopHeader header = new GiopHeader(version.Major, version.Minor, 0, IiopMsgTypes.Request);
+                GiopHeader header = new GiopHeader(version.Major, version.Minor,
+                                                   0, GiopMsgTypes.Request);
                 CdrMessageOutputStream msgOutput = new CdrMessageOutputStream(targetStream, header);
                 // serialize the message, this insert some data into msg, e.g. request-id
                 GiopMessageBodySerialiser ser = GiopMessageBodySerialiser.GetSingleton();
                 uint requestId = reqNumberGen.GenerateRequestId();
                 msg.Properties[SimpleGiopMsg.REQUEST_ID_KEY] = requestId; // set request-id
-                ser.SerialiseRequest(msg, msgOutput.GetMessageContentWritingStream(),
+                ser.SerialiseRequest(msg as IMethodCallMessage, 
+                                     msgOutput.GetMessageContentWritingStream(),
                                      version, requestId);
                 msgOutput.CloseStream();
             } else {
@@ -151,7 +122,7 @@ namespace Ch.Elca.Iiop.MessageHandling {
         }
 
         /// <summary>extracts the GIOP-version out of the target information</summary>
-        private GiopVersion ExtractGIOPVersion(IMethodCallMessage msg) {
+        private GiopVersion ExtractGiopVersion(IMethodCallMessage msg) {
             GiopVersion result;
             string objectURI = msg.Uri;
             if (IiopUrlUtil.IsUrl(msg.Uri)) {
@@ -161,12 +132,12 @@ namespace Ch.Elca.Iiop.MessageHandling {
             return result;
         }
 
-        /// <summary>serialises an outgoing .NET Message on server side</summary>
-        public void SerialiseOutgoingServerMessage(IMessage msg, GiopVersion version, uint forRequstId,
+        /// <summary>serialises an outgoing .NET reply Message on server side</summary>
+        public void SerialiseOutgoingReplyMessage(IMessage msg, GiopVersion version, uint forRequstId,
                                                    Stream targetStream) {
             if (msg is ReturnMessage) {
                 // write a CORBA response message into the stream targetStream
-                GiopHeader header = new GiopHeader(version.Major, version.Minor, 0, IiopMsgTypes.Reply);
+                GiopHeader header = new GiopHeader(version.Major, version.Minor, 0, GiopMsgTypes.Reply);
                 CdrMessageOutputStream msgOutput = new CdrMessageOutputStream(targetStream, header);
                 // serialize the message
                 GiopMessageBodySerialiser ser = GiopMessageBodySerialiser.GetSingleton();

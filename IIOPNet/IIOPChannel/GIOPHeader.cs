@@ -29,6 +29,7 @@
 
 using System;
 using System.Diagnostics;
+using System.IO;
 using Ch.Elca.Iiop.Cdr;
 
 namespace Ch.Elca.Iiop {
@@ -81,6 +82,8 @@ namespace Ch.Elca.Iiop {
         
         /// <summary>the length of the header in bytes</summary>
         internal const int HEADER_LENGTH = 12;
+    	
+    	internal const int FRAGMENT_MASK = 0x02;
         
         #endregion Constants
         #region IFields
@@ -88,13 +91,13 @@ namespace Ch.Elca.Iiop {
         private GiopVersion m_version;
         private byte m_flags;
         private uint m_msgLength = 0;
-        private IiopMsgTypes m_type;
+        private GiopMsgTypes m_type;
         internal byte[] m_giop_magic = { 71, 73, 79, 80 };
         
         #endregion IFields
         #region IConstructors
 
-        internal GiopHeader(byte GIOP_major, byte GIOP_minor, byte flags, IiopMsgTypes type) {
+        internal GiopHeader(byte GIOP_major, byte GIOP_minor, byte flags, GiopMsgTypes type) {
             m_version = new GiopVersion(GIOP_major, GIOP_minor);
             m_flags = flags;
             m_type = type;
@@ -125,25 +128,25 @@ namespace Ch.Elca.Iiop {
         #endregion IConstructors
         #region IProperties
 
-        public GiopVersion Version {
+        internal GiopVersion Version {
             get { 
                 return m_version; 
             }
         }
 
-        public byte GiopFlags {
+        internal byte GiopFlags {
             get    { 
                 return m_flags; 
             }
         }
 
-        public IiopMsgTypes GiopType {
+        internal GiopMsgTypes GiopType {
             get { 
                 return m_type; 
             }
         }
 
-        public uint ContentMsgLength {
+        internal uint ContentMsgLength {
             get { 
                 return m_msgLength; 
             }
@@ -157,7 +160,7 @@ namespace Ch.Elca.Iiop {
         /// </summary>
         /// <param name="stream">the stream to write to</param>
         /// <param name="msgLength">the length of the msg content</param>
-        public void WriteToStream(CdrOutputStream stream, uint msgLength) {
+        internal void WriteToStream(CdrOutputStream stream, uint msgLength) {
             Trace.WriteLine("\nGIOP-message header starting: ");
             // write magic
             for (int i = 0; i < m_giop_magic.Length; i++) {
@@ -177,27 +180,37 @@ namespace Ch.Elca.Iiop {
             Debug.Write("\nMessage-length: " + msgLength + "\n");
             stream.WriteULong(msgLength);
         }
+        
+        /// <summary>
+        /// writes this message header to a stream, using msgLength as 
+        /// message Length
+        /// </summary>
+        internal void WriteToStream(Stream stream, uint msgLength) {
+        	CdrOutputStream target = new CdrOutputStreamImpl(stream, GiopFlags,
+        	                                                 Version);
+        	WriteToStream(target, msgLength);
+        }
 
-        private IiopMsgTypes ConvertType(byte type) {
+        private GiopMsgTypes ConvertType(byte type) {
             switch (type) {
                 case 0: 
-                    return IiopMsgTypes.Request;
+                    return GiopMsgTypes.Request;
                 case 1: 
-                    return IiopMsgTypes.Reply;
+                    return GiopMsgTypes.Reply;
                 case 2: 
-                    return IiopMsgTypes.CancelRequest;
+                    return GiopMsgTypes.CancelRequest;
                 case 3: 
-                    return IiopMsgTypes.LocateRequest;
+                    return GiopMsgTypes.LocateRequest;
                 case 4: 
-                    return IiopMsgTypes.LocateReply;
+                    return GiopMsgTypes.LocateReply;
                 case 5: 
-                    return IiopMsgTypes.CloseConnection;
+                    return GiopMsgTypes.CloseConnection;
                 case 6: 
-                    return IiopMsgTypes.MessageError;
+                    return GiopMsgTypes.MessageError;
                 case 7: 
-                    return IiopMsgTypes.Fragment;
+                    return GiopMsgTypes.Fragment;
                 default:
-                    throw new Exception("unknown IIOP_msg_type: " + type);
+                    throw new Exception("unknown Giop_msg_type: " + type);
             }
         }
 

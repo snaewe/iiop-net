@@ -314,19 +314,24 @@ namespace Ch.Elca.Iiop.Cdr {
             m_inputStream = new CdrInputStreamImpl(stream);
             // read the header, this sets the big/little endian implementation and bytesToFollow
             m_header = new GiopHeader(m_inputStream);
-            m_inputStream.SetMessageStream(this);
         }
 
         #endregion IConstructors
         #region IProperties
         
         public GiopHeader Header {
-            get { return m_header; }
+            get { 
+                return m_header; 
+            }
         }
         
         public uint RequestId {
-            get { return m_reqId; }
-            set { m_reqId = value; }
+            get { 
+                return m_reqId; 
+            }
+            set { 
+                m_reqId = value; 
+            }
         }
 
         #endregion IProperties
@@ -432,7 +437,7 @@ namespace Ch.Elca.Iiop.Cdr {
         
         /// <summary>set streamPos to the next aligned position, after reaching it</summary>
         /// <param name="streamPos"></param>
-        internal void markNextAlignedPosition(StreamPosition streamPos) {
+        internal void MarkNextAlignedPosition(StreamPosition streamPos) {
             m_memNextAlign = true;
             m_storeNextAlignedPos = streamPos;
             m_storeNextAlignedPos.Position = GetPosition();
@@ -475,9 +480,6 @@ namespace Ch.Elca.Iiop.Cdr {
         
         #region IFields
         
-        /// <summary>the message input stream, which has created this stream, if it was created by a message input stream</summary>
-        private CdrMessageInputStream m_msgStream;
-
         private object m_version = null;
         private CdrEndianDepInputStreamOp m_endianOp = null;
 
@@ -487,8 +489,6 @@ namespace Ch.Elca.Iiop.Cdr {
         private ulong m_indexForBytesToF = 0;
 
         private ulong m_startPeekPosition = 0;
-
-        private bool m_moreFragmentsToFollow = false;
         
         #endregion IFields
         #region IConstructors
@@ -529,12 +529,6 @@ namespace Ch.Elca.Iiop.Cdr {
             // use a peeksupporting stream, because peek-support is needed for value-type deserialization
             base.SetStream(new PeekSupportingStream(stream));
         }
-
-        internal void SetMessageStream(CdrMessageInputStream msgStream) {
-            m_msgStream = msgStream;
-            m_moreFragmentsToFollow = MoreFragments(msgStream.Header.GiopFlags);
-
-        }
         
         /// <summary>
         /// sets GIOP-Version of this stream.
@@ -542,7 +536,7 @@ namespace Ch.Elca.Iiop.Cdr {
         /// <remarks>
         /// before GIOP-Version is not set, no version dependant operation are possible (e.g. reading wstring)
         /// </remarks>
-        private void SetGIOPVersion(GiopVersion version) {
+        private void SetGiopVersion(GiopVersion version) {
             if (m_version != null) { 
                 throw new InvalidOperationException("giop version already set before"); 
             }
@@ -575,7 +569,7 @@ namespace Ch.Elca.Iiop.Cdr {
         /// <param name="endianFlag"></param>
         /// <param name="version"></param>
         public void ConfigStream(byte endianFlag, GiopVersion version) {
-            SetGIOPVersion(version);
+            SetGiopVersion(version);
             SetEndian(endianFlag);
         }
 
@@ -619,34 +613,8 @@ namespace Ch.Elca.Iiop.Cdr {
             if (m_bytesToFollowSet) {
                 if (GetPosition() + bytesToRead > m_indexForBytesToF + m_bytesToFollow) {
                     // no more bytes readable in this message
-                    // check if more fragments will follow
-                    if (m_moreFragmentsToFollow) {
-                        StartPeeking(); // read the rest of the message to the peek-buffer
-                        ReadPadding(GetBytesToFollow());
-                        StopPeeking(); // after rest is read, next fragment will follow
-                        GiopConnectionContext context = IiopConnectionManager.GetCurrentConnectionContext();
-                        IiopConnection con = context.Connection;
-                        byte flags;
-                        uint moreBytes = con.WaitForFragment(m_msgStream.RequestId, out flags);
-                        m_moreFragmentsToFollow = MoreFragments(flags);
-                        m_bytesToFollow += moreBytes;
-                        CheckEndOfStream(bytesToRead);
-                    } else {
-                        throw new InvalidOperationException("eof reached, read not possible");
-                    }
+                     throw new InvalidOperationException("eof reached, read not possible");
                 }
-            }
-        }
-
-
-        
-        /// <summary>check if more fragments will follow</summary>
-        private bool MoreFragments(byte flags) {
-            if ((m_msgStream != null) && (!((m_msgStream.Header.Version.Major == 1) && (m_msgStream.Header.Version.Minor == 0))) 
-                                         && ((flags & 0x02) > 0)) {
-                return true;
-            } else {
-                return false;
             }
         }
         
@@ -686,11 +654,16 @@ namespace Ch.Elca.Iiop.Cdr {
 
         public bool ReadBool() {
             byte read = ReadOctet();
-            if (read == 0) { return false; }
-            else if (read == 1) { return true; }
-            else { throw new InvalidCdrDataException("invalid data for boolean: " + read); }
+            if (read == 0) { 
+                return false; 
+            }
+            else if (read == 1) { 
+                return true; 
+            }
+            else { 
+                throw new InvalidCdrDataException("invalid data for boolean: " + read); 
+            }
         }
-
         
         public char ReadChar() {
             // char is a multibyte format with not fixed length characters, but in IDL one char is one byte
@@ -776,13 +749,9 @@ namespace Ch.Elca.Iiop.Cdr {
 
         public void SkipRest() {
             if (!m_bytesToFollowSet) { 
-            	throw new InvalidOperationException("only possible to call skipRest, if nrOfBytes set"); 
+                throw new InvalidOperationException("only possible to call skipRest, if nrOfBytes set"); 
             }
             ReadPadding(GetBytesToFollow());
-            while (m_moreFragmentsToFollow) {
-                ReadOctet();
-                ReadPadding(GetBytesToFollow());
-            }
         }
 
         #endregion Implementation of CDRInputStream
@@ -940,7 +909,9 @@ namespace Ch.Elca.Iiop.Cdr {
         }
         
         public void WriteOpaque(byte[] data) {
-            if (data == null) { return; }
+            if (data == null) { 
+            	return; 
+            }
             BaseStream.Write(data, 0, data.Length);
             IncrementPosition((ulong)data.Length);
         }

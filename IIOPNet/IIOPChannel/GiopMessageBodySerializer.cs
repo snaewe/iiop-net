@@ -33,6 +33,7 @@ using System.Runtime.Remoting.Messaging;
 using System.Runtime.Remoting;
 using System.Diagnostics;
 using System.Reflection;
+using System.IO;
 using Ch.Elca.Iiop.Cdr;
 using Ch.Elca.Iiop.Marshalling;
 using Ch.Elca.Iiop.Services;
@@ -219,7 +220,8 @@ namespace Ch.Elca.Iiop.MessageHandling {
         #endregion Common
         #region Requests
 
-        private void WriteTarget(CdrOutputStream cdrStream, byte[] objectKey, GiopVersion version) {
+        private void WriteTarget(CdrOutputStream cdrStream, 
+                                 byte[] objectKey, GiopVersion version) {
             if (!((version.Major == 1) && (version.Minor <= 1))) {
                 // for GIOP >= 1.2
                 uint targetAdrType = 0;
@@ -306,13 +308,14 @@ namespace Ch.Elca.Iiop.MessageHandling {
         /// <summary>
         /// serialises the message body for a GIOP request
         /// </summary>
-        /// <param name="msg">the .NET remoting request Msg</param>
+        /// <param name="methodCall">the .NET remoting request Msg</param>
         /// <param name="targetStream"></param>
         /// <param name="version">the Giop version to use</param>
         /// <param name="reqId">the request-id to use</param>
-        public void SerialiseRequest(IMessage msg, CdrOutputStream targetStream, 
+        public void SerialiseRequest(IMethodCallMessage methodCall,
+                                     CdrOutputStream targetStream, 
                                      GiopVersion version, uint reqId) {
-            IMethodCallMessage methodCall = msg as IMethodCallMessage;
+
             string uri = methodCall.Uri;
             // method-call uri is normally a full url, but can also be only the object-uri part
             if (IiopUrlUtil.IsUrl(uri)) {
@@ -644,26 +647,8 @@ namespace Ch.Elca.Iiop.MessageHandling {
             }
         }
 
-
         #endregion Replys
-        #region Fragment
-
-        /// <summary>
-        /// Deserialises the GIOP message body for a fragment message
-        /// </summary>
-        /// <param name="sourceStream"></param>
-        /// <param name="header"></param>
-        /// <param name="moreBytesToFollow"></param>
-        /// <returns></returns>
-        public uint DeserialiseFragment(CdrInputStream sourceStream, GiopHeader header,
-                                        out uint moreBytesToFollow) {
-            uint reqId = sourceStream.ReadULong();
-            moreBytesToFollow = header.ContentMsgLength - 4; // 4 bytes for req-id
-            return reqId;
-        }
-
-        #endregion Fragment
-
+        
         #endregion IMethods
 
     }
