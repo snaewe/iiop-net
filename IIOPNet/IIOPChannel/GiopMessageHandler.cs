@@ -386,7 +386,7 @@ namespace Ch.Elca.Iiop.Tests {
             // target must be testuri encoded as wide-characters followed by nonStringifyTag ( 44, 115, 116, 114, 61, 102 );
             Assertion.AssertEquals(20 , cdrIn.ReadULong());
             AssertBytesFollowing(
-                new byte[] { 0, 116, 0, 101, 0, 115, 0, 116, 0, 117, 0, 114, 0, 105, 44, 115, 116, 114, 61, 102 }, 
+                new byte[] { 116, 0, 101, 0, 115, 0, 116, 0, 117, 0, 114, 0, 105, 0, 44, 115, 116, 114, 61, 102 }, 
                 cdrIn);
             // now the target method follows: Add (string is terminated by a zero)
             Assertion.AssertEquals(4, cdrIn.ReadULong());
@@ -479,7 +479,7 @@ namespace Ch.Elca.Iiop.Tests {
             // target: key type
             cdrOut.WriteULong(0);
             cdrOut.WriteULong(26); // key length
-            cdrOut.WriteOpaque(new byte[] { 0, 116, 0, 101, 0, 115, 0, 116, 0, 111, 0, 98, 0, 106, 0, 101, 0, 99, 0, 116, 44, 115, 116, 114, 61, 102 }); // testobject,str=f
+            cdrOut.WriteOpaque(new byte[] { 116, 0, 101, 0, 115, 0, 116, 0, 111, 0, 98, 0, 106, 0, 101, 0, 99, 0, 116, 0, 44, 115, 116, 114, 61, 102 }); // testobject,str=f
             // method name
             cdrOut.WriteString("Add");
             // no service contexts
