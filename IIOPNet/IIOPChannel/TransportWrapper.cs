@@ -97,7 +97,10 @@ namespace Ch.Elca.Iiop {
         /// <summary>creates a key identifying an endpoint; if two keys for two IORs are equal, 
         /// then the transport can be used to connect to both.</summary>
         string GetEndpointKey(Ior target);
-                
+        
+        /// <summary>returns true, if this transport factory can create a transport for the given IOR, otherwise false</summary>
+        bool CanCreateTranporForIor(Ior target);
+        
     }
     
     /// <summary>creates server transports</summary>

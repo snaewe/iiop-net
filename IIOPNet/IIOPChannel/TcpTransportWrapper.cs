@@ -192,6 +192,13 @@ namespace Ch.Elca.Iiop {
         }
         
         /// <summary>
+        /// <see cref="Ch.Elca.Iiop.IClientTransportFactory.CanCreateTransportForIor"/>op.IClientTransportFactory.CanCreateTransportForIor"/>
+        /// </summary>
+        public bool CanCreateTranporForIor(Ior target) {
+            return (target.HostName != null) && (target.Port > 0);
+        }
+        
+        /// <summary>
         /// returns the IPAddress if hostName is a valid ipAdress, otherwise returns null.
         /// </summary>
         private IPAddress ConvertToIpAddress(string hostName) {

@@ -111,13 +111,16 @@ namespace Ch.Elca.Iiop {
         #endregion IFields
         #region IConstructors
         
-        internal GiopClientConnectionManager(IClientTransportFactory transportFactory) {
+        internal GiopClientConnectionManager(IClientTransportFactory transportFactory) : this(transportFactory, 30000) {
+        }
+        
+        internal GiopClientConnectionManager(IClientTransportFactory transportFactory, int unusedKeepAliveTime) {
             m_transportFactory = transportFactory;
             
             TimerCallback timerDelegate = new TimerCallback(DestroyUnusedConnections);
-            // Create a timer which invokes the session destroyer every 5 seconds, first call in 10 seconds
-            m_destroyTimer = new Timer(timerDelegate, null, 10000, 5000);
-        }                
+            // Create a timer which invokes the session destroyer every unusedKeepAliveTime
+            m_destroyTimer = new Timer(timerDelegate, null, 2 * unusedKeepAliveTime, unusedKeepAliveTime);
+        }
         
         #endregion IConstructors
         
@@ -165,31 +168,39 @@ namespace Ch.Elca.Iiop {
             }
         }
         
+        /// <summary>
+        /// checks, if this connection manager is able to build up a connection to the given target ior
+        /// </summary>
+        internal bool CanConnectToIor(Ior target) {            
+            return m_transportFactory.CanCreateTranporForIor(target);
+        }
+        
         
         /// <summary>allocation a connection for the message.</summary>
         internal GiopClientConnectionDesc AllocateConnectionFor(IMessage msg, Ior target) {
             GiopClientConnection result = null;
-            lock(this) {
-                if (target != null) {
-                    string targetKey = m_transportFactory.GetEndpointKey(target);
+            
+            if (target != null) {
+                string targetKey = m_transportFactory.GetEndpointKey(target);
+                lock(this) {
                     result = GetFromAvailable(targetKey);
 
                     // if connection not reusable, create new one
                     if (result == null) {
                         IClientTransport transport =
-                            m_transportFactory.CreateTransport(target);
-                        // already open connection here, because GetConnectionFor 
-                        // should returns an open connection (if not closed meanwhile)
-                        transport.OpenConnection();
-                        result = new GiopClientConnection(targetKey, transport);
+                             m_transportFactory.CreateTransport(target);
+                         // already open connection here, because GetConnectionFor 
+                         // should returns an open connection (if not closed meanwhile)
+                         transport.OpenConnection();
+                         result = new GiopClientConnection(targetKey, transport);
                     }
-                } else {
-                    // should not occur?
-                    throw new omg.org.CORBA.INTERNAL(995,
-                                                     omg.org.CORBA.CompletionStatus.Completed_No);
-                }                
-                m_allocatedConnections[msg] = result;
-            }
+                    m_allocatedConnections[msg] = result;
+                }
+            } else {
+                // should not occur?
+                throw new omg.org.CORBA.INTERNAL(995,
+                                                 omg.org.CORBA.CompletionStatus.Completed_No);
+            }                                        
             
             return result.Desc;
 

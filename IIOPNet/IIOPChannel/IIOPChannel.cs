@@ -220,6 +220,7 @@ namespace Ch.Elca.Iiop {
         private int m_channelPriority = IiopChannel.DEFAULT_CHANNEL_PRIORITY;
 
         private IClientChannelSinkProvider m_providerChain;                
+        private GiopClientConnectionManager m_conManager;
 
         #endregion IFields
         #region SConstructor
@@ -316,11 +317,10 @@ namespace Ch.Elca.Iiop {
         /// <summary>initalize this channel</summary>
         private void InitChannel(IClientTransportFactory transportFactory) {
             
-            GiopClientConnectionManager conManager =
-                new GiopClientConnectionManager(transportFactory);
+            m_conManager = new GiopClientConnectionManager(transportFactory);
             
             IiopClientTransportSinkProvider transportProvider =
-                new IiopClientTransportSinkProvider(conManager);
+                new IiopClientTransportSinkProvider(m_conManager);
             if (m_providerChain != null) {
                 // append transport provider to the chain
                 IClientChannelSinkProvider prov = m_providerChain;
@@ -341,31 +341,47 @@ namespace Ch.Elca.Iiop {
         /// </summary>
         public IMessageSink CreateMessageSink(string url, object remoteChannelData, out string objectURI) {
             objectURI = null;
-            if (!IiopUrlUtil.IsUrl(url)) {
-                return null;
-            }
-            GiopVersion version = new GiopVersion(1, 0);
-            if (url != null) {
+            if ((url != null) && IiopUrlUtil.IsUrl(url) && 
+                (m_conManager.CanConnectToIor(IiopUrlUtil.CreateIorForUrl(url, "")))) {
+                GiopVersion version = new GiopVersion(1, 0);
                 IiopUrlUtil.ParseUrl(url, out objectURI, out version);
-            } else {
+            
+                IClientChannelSink sink = m_providerChain.CreateSink(this, url, remoteChannelData);
+                if (!(sink is IMessageSink)) { 
+                    throw new Exception("first sink in the client side channel must be a message-sink"); 
+                }
+                return (IMessageSink) sink;                
+            } else if ((url == null) && (remoteChannelData is IiopChannelData)) {
                 // check remoteChannelData
                 Console.WriteLine("url null, remote channel data: " + remoteChannelData);
-                // TODO
+//                IiopChannelData chanData = (IiopChannelData)remoteChannelData;
+//                IClientChannelSink sink = m_providerChain.CreateSink(this, url, chanData);
+//                if (!(sink is IMessageSink)) { 
+//                    throw new Exception("first sink in the client side channel must be a message-sink"); 
+//                }
+//                return (IMessageSink) sink;
+                return null; // TODO
+            } else {
+                return null;
             }
-            
-            IClientChannelSink sink = m_providerChain.CreateSink(this, url, remoteChannelData);
-            if (!(sink is IMessageSink)) { 
-                throw new Exception("first sink in the client side channel must be a message-sink"); 
-            }
-            return (IMessageSink) sink;
         }
     
         #endregion Implementation of IChannelSender
         #region Implementation of IChannel
         public string Parse(string url, out string objectURI) {
-            GiopVersion version;
-            objectURI = null;
-            return IiopUrlUtil.ParseUrl(url, out objectURI, out version).ToString();
+            string result;
+            if (IiopUrlUtil.IsUrl(url) && (m_conManager.CanConnectToIor(IiopUrlUtil.CreateIorForUrl(url, "")))) {
+                GiopVersion version;
+                objectURI = null;
+                Uri uri = IiopUrlUtil.ParseUrl(url, out objectURI, out version);
+                result = uri.ToString();
+            } else {
+                // is either no corba url or is not usable by transport factory, 
+                // because it doesn't support the transport protocol
+                objectURI = null;
+                result = null;
+            }
+            return result;            
         }
 
         #endregion Implementation of IChannel
