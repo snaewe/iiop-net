@@ -34,12 +34,6 @@ rebuild-base: clean-base build-base
 rebuild-base-debug: clean-base build-base-debug
 
 test:
-	cd IIOPChannel
-	$(MAKE) -C test -f Makefile.mono
-	cd ..
-	cd IDLToCLSCompiler
-	$(MAKE) -C test -f Makefile.mono
-	cd ..
-	cd IntegrationTests
-	$(MAKE) -C test -f Makefile.mono
-	cd ..   
+	$(MAKE) -C IIOPChannel -f Makefile.mono test
+	$(MAKE) -C IDLToCLSCompiler -f Makefile.mono test
+	$(MAKE) -C IntegrationTests -f Makefile.mono test
