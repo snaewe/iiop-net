@@ -191,13 +191,18 @@ namespace Ch.Elca.Iiop.Idl {
                 int arrayRank = typeName.Length - elemType.Length; // array rank = number of [ - characters
                 // parse the elem-type, which is in RMI-ID format
                 string elemNameSpace;
-                elemType = ParseRMIArrayElemType(elemType, out elemNameSpace);
+                string unqualElemType = ParseRMIArrayElemType(elemType, out elemNameSpace);
+                unqualElemType = IdlNaming.MapRmiNameToClsName(unqualElemType);
                 if (elemNameSpace.Length > 0) { 
+                    elemNameSpace = IdlNaming.MapRmiNameToClsName(elemNameSpace);
                     elemNameSpace = "." + elemNameSpace; 
                 } 
                 // determine name of boxed value type
-                typeName = "org.omg.boxedRMI" + elemNameSpace + ".seq" + arrayRank + "_" + elemType;
-                Debug.WriteLine("try to load boxed value type:" + typeName);
+                typeName = "org.omg.boxedRMI" + elemNameSpace + ".seq" + arrayRank + "_" + unqualElemType;
+                Debug.WriteLine("mapped rmi id to boxed value type name:" + typeName);
+            } else {
+                // do name mapping (e.g. resolve clashes with CLS keywords)
+                typeName = IdlNaming.MapRmiNameToClsName(typeName);
             }
             
             return typeName;

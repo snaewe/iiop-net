@@ -46,7 +46,7 @@ namespace Ch.Elca.Iiop.JavaCollectionMappers {
         private static Type s_doubleType = typeof(System.Double);
         private static Type s_charType = typeof(System.Char);
         
-        private static Type s_javaBoxInteger = typeof(java.lang.Integer);
+        private static Type s_javaBoxInteger = typeof(java.lang._Integer);
         private static Type s_javaBoxShort = typeof(java.lang._Short);
         private static Type s_javaBoxByte = typeof(java.lang._Byte);
         private static Type s_javaBoxDouble = typeof(java.lang._Double);
@@ -69,7 +69,7 @@ namespace Ch.Elca.Iiop.JavaCollectionMappers {
     		if (s_int16Type.IsInstanceOfType(clsPrimitive)) {
                     return new java.lang._ShortImpl((System.Int16)clsPrimitive);
     		} else if (s_int32Type.IsInstanceOfType(clsPrimitive)) {
-    		    return new java.lang.IntegerImpl((System.Int32)clsPrimitive);
+    		    return new java.lang._IntegerImpl((System.Int32)clsPrimitive);
     		} else if (s_byteType.IsInstanceOfType(clsPrimitive)) {
                     return new java.lang._ByteImpl((System.Byte)clsPrimitive);
        		} else if (s_singleType.IsInstanceOfType(clsPrimitive)) {
@@ -106,7 +106,7 @@ namespace Ch.Elca.Iiop.JavaCollectionMappers {
         /// <remarks>javaInstance must be one of java primitive boxes, else throws exception</remarks>        	
     	protected object UnboxBaseType(object javaInstance) {
     	    if (s_javaBoxInteger.IsInstanceOfType(javaInstance)) {
-    	    	return ((java.lang.IntegerImpl)javaInstance).intValue();
+    	    	return ((java.lang._IntegerImpl)javaInstance).intValue();
     	    } else if (s_javaBoxShort.IsInstanceOfType(javaInstance)) {
     	    	return ((java.lang._ShortImpl)javaInstance).shortValue();
     	    } else if (s_javaBoxByte.IsInstanceOfType(javaInstance)) {

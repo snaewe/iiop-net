@@ -205,6 +205,25 @@ namespace Ch.Elca.Iiop.Idl {
             return result;
         }
 
+
+        /// <summary>
+        /// maps an RMI fully/partially/not qualified type name or a namespace name into a Cls name
+        /// </summary>
+        /// <param name="rmiName"></param>
+        /// <returns>the cls name for rmi-Name</returns>
+        internal static string MapRmiNameToClsName(string rmiName) {
+            string[] parts = rmiName.Split('.');
+            string result = "";
+            foreach (string part in parts) {                
+                // a type mapped from IDL to CLS -> map type name to CLS too
+                result = result + "." + MapIdlNameToClsName(part);
+            }
+            if (result.StartsWith(".")) {
+                result = result.Substring(1);
+            }
+            return result;
+        }
+
         /// <summary>
         /// map a fully qualified name for a CLS type to an IDL-name
         /// </summary>
@@ -473,6 +492,8 @@ namespace Ch.Elca.Iiop.Idl {
             s_clsKeywordList.Add("instanceof");
             s_clsKeywordList.Add("package");
             s_clsKeywordList.Add("var");            
+            // sort the list for binary search
+            s_clsKeywordList.Sort(s_keyWordComparer);
         }
         /// <summary>initalize the IDL keyword-list</summary>        
         /// <remarks>see section 3.2.4, Corba 2.3.1</remarks>
@@ -524,6 +545,8 @@ namespace Ch.Elca.Iiop.Idl {
             s_idlKeywordList.Add("void");
             s_idlKeywordList.Add("wchar");
             s_idlKeywordList.Add("wstring");
+            // sort the list for binary search
+            s_idlKeywordList.Sort(s_keyWordComparer);
         }
 
         #endregion Keyword handling

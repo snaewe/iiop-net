@@ -266,12 +266,12 @@ namespace java.lang {
     
 
     [Serializable]
-    public class IntegerImpl : Integer {
+    public class _IntegerImpl : _Integer {
 
-        public IntegerImpl() : base() {
+        public _IntegerImpl() : base() {
         }
         
-        public IntegerImpl(System.Int32 val) : base() {
+        public _IntegerImpl(System.Int32 val) : base() {
             m_value = val;
         }
 
