@@ -330,10 +330,7 @@ namespace Ch.Elca.Iiop.Cdr {
         #region IFields
 
         /// <summary>the underlying stream</summary>
-        private Stream m_stream;
-        
-        /// <summary>the flags used for this stream</summary>
-        protected byte m_flags;
+        private Stream m_stream;                
 
         private ulong m_index = 0;
 
@@ -534,7 +531,6 @@ namespace Ch.Elca.Iiop.Cdr {
                 // endian flag was already set before
                 throw new INTERNAL(1202, CompletionStatus.Completed_MayBe);
             }
-            m_flags = endianFlag;
             if (ParseEndianFlag(endianFlag)) {
                 m_endianOp = new CdrStreamBigEndianReadOP(this, (GiopVersion)m_version);
             } else {
@@ -747,7 +743,6 @@ namespace Ch.Elca.Iiop.Cdr {
         }
         
         public CdrOutputStreamImpl(Stream stream, byte flags, GiopVersion giopVersion) : base(stream) {
-            m_flags = flags;
             m_giopVersion = giopVersion;
             if (ParseEndianFlag(flags)) {
                 m_endianOp = new CdrStreamBigEndianWriteOP(this, giopVersion);
