@@ -149,13 +149,24 @@ public class MetaDataGenerator implements IDLParserVisitor {
 
     /** helper class, to pass information */
     class BuildInfo {
+
+        #region Types
+        
+        #region IFields
+
+        private TypeBuilder m_containerType;
+        private Scope m_buildScope;
+        
+        #endregion IFields
+        #region IConstructors
+        
         public BuildInfo(Scope buildScope, TypeBuilder containerType) {
             m_buildScope = buildScope;
             m_containerType = containerType;
         }
 
-        private TypeBuilder m_containerType;
-        private Scope m_buildScope;
+        #endregion IConstructors
+        #region IMethods
 
         public TypeBuilder getContainterType() {
             return m_containerType;
@@ -163,19 +174,30 @@ public class MetaDataGenerator implements IDLParserVisitor {
         public Scope getBuildScope() {
             return m_buildScope;
         }
+
+        #endregion IMethods
     }
 
     /** helper class to collect data about a parameter of an operation */
     class ParameterSpec {
+        
+        #region IFields
+
+        private TypeContainer m_paramType;
+        private String m_paramName;
+        private int m_direction;
+
+        #endregion IFields
+        #region IConstructors
+        
         public ParameterSpec(String paramName, TypeContainer paramType, int direction) {
             m_paramName = paramName;
             m_paramType = paramType;
             m_direction = direction;
         }
 
-        private TypeContainer m_paramType;
-        private String m_paramName;
-        private int m_direction;
+        #endregion IConstructors
+        #region IMethods
 
         public String getPramName() {
             return m_paramName;
@@ -201,12 +223,20 @@ public class MetaDataGenerator implements IDLParserVisitor {
             return (m_direction == ASTparam_attribute.ParamDir_OUT);
         }
 
+        #endregion IMethods
+
     }
+
+    #endregion Types
+    #region IFields
 
     /** reference to one of the internal constructor of class ParameterInfo. Used for assigning custom attributes to the return parameter */
     private ConstructorInfo m_paramBuildConstr;
     /** is the generator initalized for parsing a file */
     private boolean m_initalized = false;
+
+    #endregion IFields
+    #region IConstructors
 
     public MetaDataGenerator(String targetAssemblyName) {
         m_targetAsmName = targetAssemblyName;
@@ -221,21 +251,23 @@ public class MetaDataGenerator implements IDLParserVisitor {
         m_paramBuildConstr = paramBuildType.GetConstructor(BindingFlags.NonPublic | BindingFlags.Instance, null, new Type[] { MethodBuilder.class.ToType(), System.Int32.class.ToType(), ParameterAttributes.class.ToType(), String.class.ToType() }, null);
     }
 
+    #endregion IConstructors
+    #region IMethods
+
     /** ends the build process, after this is called, the Generator is not able to process more files */
-    public void saveAssembly() {
+    public void SaveAssembly() {
         // save the assembly to disk
         m_asmBuilder.Save(m_targetAsmName + ".dll");
     }
 
     /** initalize the generator for next source, with using the same target assembly / target modules */
-    public void initalizeForSource(SymbolTable symbolTable) {
+    public void InitalizeForSource(SymbolTable symbolTable) {
         m_symbolTable = symbolTable;
         // helps to find already declared types
         m_typeManager = new TypeManager(m_modBuilderManager);
         // ready for code generation
         m_initalized = true;
     }
-
     
     /** checks if a type generation can be skipped, because type is already defined in a previous run over a parse tree 
      * this method is used to support runs over more than one parse tree */
@@ -297,8 +329,6 @@ public class MetaDataGenerator implements IDLParserVisitor {
         nestedScope.addSymbol(createdFor.getSymbolName());
         return nestedScope;
     }
-
-
 
     /**
      * @see parser.IDLParserVisitor#visit(SimpleNode, Object)
@@ -1994,5 +2024,7 @@ public class MetaDataGenerator implements IDLParserVisitor {
     private void checkParameterForBuildInfo(Object data, Node visitedNode) {
         if (!(data instanceof BuildInfo)) { throw new RuntimeException("precondition violation in visitor for node" + visitedNode.GetType() + ", " + data.GetType() + " but expected BuildInfo"); }
     }
+
+    #endregion IMethods
 
 }

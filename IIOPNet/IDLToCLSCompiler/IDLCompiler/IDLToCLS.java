@@ -69,12 +69,12 @@ public class IDLToCLS {
                 ASTspecification spec = parser.specification();
                 Trace.WriteLine(parser.getSymbolTable());
                 // now parsed representation can be visited with the visitors    
-                generator.initalizeForSource(parser.getSymbolTable());
+                generator.InitalizeForSource(parser.getSymbolTable());
                 spec.jjtAccept(generator, null);
                 Trace.WriteLine("");
             }
             // save the result to disk
-            generator.saveAssembly();
+            generator.SaveAssembly();
         } catch (Exception e) {
             System.err.println("exception encountered: " + e);
         }
