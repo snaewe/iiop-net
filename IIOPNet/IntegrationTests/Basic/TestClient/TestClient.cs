@@ -340,6 +340,58 @@ namespace Ch.Elca.Iiop.IntegrationTests {
             Assertion.AssertEquals(false, prop.CanWrite);
             Assertion.AssertEquals(true, prop.CanRead);
         }
+        
+        /// <summary>
+        /// Test passing instances, if formal parameter is System.Object
+        /// </summary>
+        [Test]
+        public void TestPassingForFormalParamObjectSimpleTypes() {
+            System.Double arg1 = 1.23;
+            System.Double result1 = (System.Double) m_testService.EchoAnything(arg1);
+            Assertion.AssertEquals(arg1, result1);
+
+            System.Char arg2 = 'a';
+            System.Char result2 = (System.Char) m_testService.EchoAnything(arg2);
+            Assertion.AssertEquals(arg2, result2);
+
+            System.Boolean arg3 = true;
+            System.Boolean result3 = (System.Boolean) m_testService.EchoAnything(arg3);
+            Assertion.AssertEquals(arg3, result3);
+
+            System.Int32 arg4 = 89;
+            System.Int32 result4 = (System.Int32) m_testService.EchoAnything(arg4);
+            Assertion.AssertEquals(arg4, result4);
+        }
+
+        public void TestPassingForFormalParamObjectComplexTypes() {
+            System.String arg1 = "test";
+            System.String result1 = (System.String) m_testService.EchoAnything(arg1);
+            Assertion.AssertEquals(arg1, result1);
+            
+            TestSerializableClassB1 arg2 = new TestSerializableClassB1Impl();
+            arg2.Msg = "msg";
+            TestSerializableClassB1 result2 = (TestSerializableClassB1) m_testService.EchoAnything(arg2);
+            Assertion.AssertEquals(arg2.Msg, result2.Msg);
+        }
+
+        /// <summary>
+        /// Checks if arrays can be passed for formal parameter object.
+        /// </summary>
+        /// <remarks>
+        /// Difficulty here is, that at the server, boxed type may not exist yet for array type and must be created on deserialising
+        /// any!
+        /// </remarks>
+        public void TestPassingForFormalParamObjectArrays() {
+            System.Byte[] arg3 = new System.Byte[1];
+            arg3[0] = 1;
+            System.Byte[] result3 = (System.Byte[]) m_testService.EchoAnything(arg3);
+            Assertion.AssertEquals(arg3[0], result3[0]);
+
+            System.Int32[] arg4 = new System.Int32[1];
+            arg4[0] = 1;
+            System.Int32[] result4 = (System.Int32[]) m_testService.EchoAnything(arg4);
+            Assertion.AssertEquals(arg4[0], result4[0]);
+        }
 
     }
 

@@ -248,6 +248,10 @@ namespace Ch.Elca.Iiop.IntegrationTests {
             return new TestAbstrInterfaceImplByMarshalByVal(initialMsg);
         }
 
+        public object EchoAnything(object arg) {
+            return arg;
+        }
+
         public override object InitializeLifetimeService() {
             // live forever
             return null;
