@@ -24,6 +24,7 @@
  */
 
 using System;
+using System.Collections;
 
 namespace parser {
 
@@ -68,6 +69,17 @@ public class ASTinterface_header : SimpleNodeWithIdent {
     /** make sure to set either abstract or local or none, but not abstract and local */
     public void setLocal() {
         m_isLocal = true;
+    }
+    
+    public IList getInheritedScopeNames() {
+        if (jjtGetNumChildren() > 0) {
+            // an inheritance spec available
+            ASTinterface_inheritance_spec inheritanceSpec = 
+                (ASTinterface_inheritance_spec) jjtGetChild(0);
+            return inheritanceSpec.getInheritedScopeNames();
+        } else {
+            return new ArrayList();
+        }
     }
     
     public override string GetIdentification() {

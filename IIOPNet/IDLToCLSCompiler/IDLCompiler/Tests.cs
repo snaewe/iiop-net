@@ -43,6 +43,7 @@ namespace Ch.Elca.Iiop.IDLCompiler.Tests {
     using parser;
     using Ch.Elca.Iiop.IdlCompiler.Action;
     using Ch.Elca.Iiop.IdlCompiler.Exceptions;
+    using Ch.Elca.Iiop.Util;
 
     /// <summary>
     /// Unit-tests for testing assembly generation
@@ -86,7 +87,8 @@ namespace Ch.Elca.Iiop.IDLCompiler.Tests {
                                                                 new ArrayList());
             generator.InitalizeForSource(parser.getSymbolTable());
             spec.jjtAccept(generator, null);
-            return generator.GetResultAssembly();
+            Assembly result = generator.GetResultAssembly();
+            return result;
         }                
         
         private void CheckRepId(Type testType, string expected) {
@@ -695,6 +697,41 @@ namespace Ch.Elca.Iiop.IDLCompiler.Tests {
                         
             writer.Close();
         }
+        
+        [Test]
+        public void TestInheritedIdentifierResolution() {
+            MemoryStream testSource = new MemoryStream();
+            StreamWriter writer = new StreamWriter(testSource, s_latin1);
+            
+            // idl:            
+            writer.WriteLine("module testmod {");
+            writer.WriteLine("    interface A {");
+            writer.WriteLine("        exception E { } ;");            
+            writer.WriteLine("        void f() raises(E);");            
+            writer.WriteLine("    };");
+            writer.WriteLine("    interface B : A {");
+            writer.WriteLine("        void g() raises(E);");
+            writer.WriteLine("    };");
+            writer.WriteLine("};");
+            writer.Flush();
+            testSource.Seek(0, SeekOrigin.Begin);
+            
+            try {
+                Assembly result = CreateIdl(testSource);
+                Type ifB = result.GetType("testmod.B", true);
+                CheckPublicInstanceMethodPresent(ifB, "g",
+                                                 typeof(void), Type.EmptyTypes);
+                MethodInfo testMethod = ifB.GetMethod("g", 
+                                                       BindingFlags.Public | BindingFlags.Instance,
+                                                       null, Type.EmptyTypes, null);
+                Assertion.AssertNotNull(testMethod);
+                // not possible to check directly for exceptoin attribute, because Exception type
+                // not resolvable because assembly not written to disk!
+            } finally {           
+                writer.Close();
+            }            
+        }
+        
         
         [Test]
         [ExpectedException(typeof(InvalidIdlException))]

@@ -54,6 +54,8 @@ public class Scope {
     private Hashtable m_symbols = new Hashtable();
 
     private Hashtable m_pragmas = new Hashtable();
+    
+    private ArrayList m_inheritedScopes = new ArrayList();
 
     private bool m_isTypeScope = false;
 
@@ -286,6 +288,17 @@ public class Scope {
         // and not e.g. a SymbolValue for constants?
         nestedScope.addSymbol(createdFor.getSymbolName());        
         return nestedScope;
+    }
+    
+    /// <summary>
+    /// adds an inherited scope (e.g. interface A : B leads to A inheriting scope B)
+    /// </summary>
+    public void AddInheritedScope(Scope scope) {
+        m_inheritedScopes.Add(scope);
+    }
+    
+    public IList GetInheritedScopes() {
+        return m_inheritedScopes;
     }
 
     public override String ToString() {

@@ -296,10 +296,21 @@ void interface_dcl() :
   {
     // add the interface symbol, after the header is completed
     // get the header node
-    SimpleNodeWithIdent header = (SimpleNodeWithIdent) jjtree.peekNode();
+    ASTinterface_header header = (ASTinterface_header) jjtree.peekNode();
     Scope currentScope = m_symbolTable.getCurrentScope();
     currentScope.addSymbol(header.getIdent());
-    m_symbolTable.openScope(header.getIdent(), true); // open a scope for type declaration inside the interface
+    Scope ifScope = m_symbolTable.openScope(header.getIdent(), true); // open a scope for type declaration inside the interface
+    IList inheritedScopes = header.getInheritedScopeNames(); // list of ASTscoped_name nodes
+    for (int i = 0; i <inheritedScopes.Count; i++) {
+        ASTscoped_name inheritedScope = (ASTscoped_name)inheritedScopes[i];
+        Scope inheritedResolved = 
+            m_symbolTable.ResolveScopedNameToScope((inheritedScope.hasFileScope() ? m_symbolTable.getTopScope() : currentScope),
+                                                   inheritedScope.getNameParts());
+        if (inheritedResolved != null) {
+            ifScope.AddInheritedScope(inheritedResolved);    
+        }
+    }    
+    
   }
   
   "{" interface_body() "}"
