@@ -505,7 +505,10 @@ namespace Ch.Elca.Iiop.MessageHandling {
                 } else {
                     // handle standard corba-ops like _is_a
                     calledMethodInfo = DecodeStandardOperation(methodName);
-                	MethodInfo methodToCall = StandardCorbaOps.GetMethodToCallForStandardMethod(calledMethodInfo.Name);
+                    MethodInfo methodToCall = StandardCorbaOps.GetMethodToCallForStandardMethod(calledMethodInfo.Name);
+                    if (methodToCall == null) {
+                	    throw new INTERNAL(2802, CompletionStatus.Completed_MayBe);    
+                    }
                     methodName = methodToCall.Name;
                     objectUri = StandardCorbaOps.WELLKNOWN_URI; // change object-uri
                     standardOp = true;
