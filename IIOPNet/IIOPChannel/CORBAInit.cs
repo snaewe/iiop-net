@@ -34,11 +34,12 @@ using System.Runtime.Remoting;
 using System.Runtime.Remoting.Channels;
 using Ch.Elca.Iiop;
 using Ch.Elca.Iiop.Util;
+using omg.org.CosNaming;
 
 namespace Ch.Elca.Iiop.Services {
 
     /// <summary>
-    /// provides access to the init-services
+    /// provides helper methods to access nameservice and other inital services
     /// </summary>
     public class CorbaInit {
 
@@ -69,14 +70,62 @@ namespace Ch.Elca.Iiop.Services {
         
         #endregion SMethods
         #region IMethods
+        	
+        public NamingContext GetNameService(string host, int port) {
+			string nsKey = String.Format("NameService:{0}:{1}", host, port);
+	
+			lock(m_initalServices.SyncRoot) {
+				NamingContext result = null;
+				if (!m_initalServices.ContainsKey(nsKey)) {
+				
+				    string objectURI = IiopUrlUtil.GetObjUriForObjectInfo(InitialCOSNamingContextImpl.s_initalnamingObjKey,
+                                                                  new GiopVersion(1, 0));
+                    string url = IiopUrlUtil.GetUrl(host, port, objectURI);
+                    result = (NamingContext)RemotingServices.Connect(typeof(NamingContext), url);
+                    m_initalServices.Add(nsKey, result);
+                } else {
+                	result = (NamingContext)m_initalServices[nsKey];
+                }
+                return result;
+            }
+        }
         
-        /// <summary>get a reference to the CORBA naming service running at the specified host at the specified port</summary>
+        #endregion IMethods
+        
+    }
+
+    /// <summary>
+    /// provides access to the init-services. 
+    ///	The concept of the INIT service is specific to RMI/IIOP.
+    /// </summary>
+    public class RmiIiopInit {
+
+        #region IFields
+
+        /// <summary>known references to INIT-services</summary>
+        /// <remarks>caching references to INIT-services, they remain the same</remarks>
+        private Hashtable m_initalServices = new Hashtable();
+        
+		/// <summary>the INIT service object</summary>
+		private CORBAInitService m_initService;
+
+        #endregion IFields
+        #region IConstructors
+        
+        public RmiIiopInit(string host, int port) {
+            m_initService = GetInitService(host, port);
+        }
+
+        #endregion IConstructors
+        #region IMethods
+        
+        /// <summary>get a reference to the CORBA naming service from the init service</summary>
         /// <param name="host"></param>
         /// <param name="port"></param>
         /// <returns>a reference to the naming service</returns>
-        public omg.org.CosNaming.NamingContext GetNameService(string host, int port) {
-            CORBAInitService initService = GetInitService(host, port);
-            return (omg.org.CosNaming.NamingContext)initService._get(CORBAInitServiceImpl.NAMESERVICE_NAME);
+        /// <remarks>This method is only useful, for communication with the RMI/IIOP SUN JDK ORB</remarks>
+        public omg.org.CosNaming.NamingContext GetNameService() {
+            return (omg.org.CosNaming.NamingContext)m_initService._get(CORBAInitServiceImpl.NAMESERVICE_NAME);
             
         }
         
