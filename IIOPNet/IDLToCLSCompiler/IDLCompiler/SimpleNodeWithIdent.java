@@ -31,6 +31,12 @@ package parser;
 
 /**
  * 
+ * This node is used as a base class for nodes, which are created out of a grammar rule,
+ * containing an ident;
+ * e.g. for node ASTenum_type for the enum type rule.
+ * Remark: in the grammar file IDL.jjt, setIdent is called to set the ident for the node.
+ * 
+ * 
  * @version 
  * @author dul
  * 
