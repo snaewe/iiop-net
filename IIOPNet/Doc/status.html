@@ -130,11 +130,19 @@ Interoperation with the following ORBs has been reported:
 	<ul>
 	<table border="0" cellspacing="6" summary="">
 	<!--tr><th>Software</th><th>Version</th><th>Report</th></tr-->
-	<tr><td>SUN JDK</td><td>1.4</td><td>OK</td></tr>
-	<tr><td>MICO</td><td>2.3.10</td><td>OK</td></tr>
-	<tr><td>TAO</td><td></td><td>in progress</td></tr>
-	<tr><td>OmniORB</td><td>4.0.2</td><td>wide-char not supported</td></tr>
-	<tr><td>OmniORB</td><td>4.0.3</td><td>wide-char not supported</td></tr>
+	<tr><td width="10px" bgcolor=""></td><td>all</td><td align="left"></td><td>
+	any partially supported (bug
+	<a href="http://sourceforge.net/tracker/index.php?func=detail&aid=857050&group_id=80227&atid=559114">857050</a>
+)<br>
+	wide-char not supported (request
+	<a href="http://sourceforge.net/tracker/index.php?func=detail&aid=778878&group_id=80227&atid=559117">778878</a>
+)
+	</td></tr>
+	<tr><td width="10px" bgcolor="#99FF99"></td><td>SUN JDK</td><td align="left">1.4</td><td>OK</td></tr>
+	<tr><td width="10px" bgcolor="#99FF99"></td><td>MICO</td><td align="left">2.3.10</td><td>OK</td></tr>
+	<tr><td width="10px" bgcolor="#99FF99"></td><td>TAO</td><td align="left">1.4</td><td>ok</td></tr>
+	<tr><td width="10px" bgcolor="#99FF99"></td><td>OmniORB</td><td align="left">4.0.2</td><td>ok</td></tr>
+	<tr><td width="10px" bgcolor="#99FF99"></td><td>OmniORB</td><td align="left">4.0.3</td><td>ok</td></tr>
 	</table>
 	</ul>
 <p>
@@ -142,14 +150,31 @@ Interoperation with J2EE applications is reported for the following application 
 	<ul>
 	<table border="0" cellspacing="6" summary="">
 	<!--tr><th>Software</th><th>Version</th><th>Report</th></tr-->
-	<tr><td>IBM Websphere</td><td>4.0</td><td>ok</td></tr>
-	<tr><td>IBM Websphere</td><td>5.0</td><td>ok</td></tr>
-	<tr><td>JBoss</td><td>3.0.6</td><td>in progress</td></tr>
-	<tr><td>JBoss</td><td>3.2.1</td><td>ok</td></tr>
-	<tr><td>JBoss</td><td>3.2.2</td><td>no (JBoss bug #<a href="http://sourceforge.net/tracker/index.php?func=detail&aid=829734&group_id=22866&atid=376685">829734</a>)</td></tr>
-	<tr><td>JBoss</td><td>3.2.3</td><td>ok</td></tr>
-	<tr><td>BEA Weblogic</td><td>6.1</td><td>array mapping problems</td></tr>
-	<tr><td>BEA Weblogic</td><td>8.1</td><td>ok</td></tr>
+	<tr><td width="10px" bgcolor="#99FF99"></td><td>IBM Websphere</td><td align="left">4.0</td><td>ok</td></tr>
+	<tr><td width="10px" bgcolor="#99FF99"></td><td>IBM Websphere</td><td align="left">5.0</td><td>ok</td></tr>
+	<tr><td width="10px" bgcolor="#FFFF99"></td><td>JBoss</td><td align="left">3.0.6</td><td>in progress</td></tr>
+	<tr><td width="10px" bgcolor="#99FF99"></td><td>JBoss</td><td align="left">3.2.1</td><td>ok</td></tr>
+	<tr><td width="10px" bgcolor="#FF3333"></td><td>JBoss</td><td align="left">3.2.2</td><td>no (JBoss bug #<a href="http://sourceforge.net/tracker/index.php?func=detail&aid=829734&group_id=22866&atid=376685">829734</a>)</td></tr>
+	<tr><td width="10px" bgcolor="#99FF99"></td><td>JBoss</td><td align="left">3.2.3</td><td>ok</td></tr>
+	<tr><td width="10px" bgcolor="#FFFF99"></td><td>BEA Weblogic</td><td align="left">6.1</td><td>array mapping problems</td></tr>
+	<tr><td width="10px" bgcolor="#FF9966"></td><td>BEA Weblogic</td><td align="left">7</td><td>in progress</td></tr>
+	<tr><td width="10px" bgcolor="#99FF99"></td><td>BEA Weblogic</td><td align="left">8.1</td><td>ok</td></tr>
+	</table>
+	</ul>
+<p>
+IIOP.NET on Mono:
+	<ul>
+	<table border="0" cellspacing="6" summary="">
+	<!--tr><th>Software</th><th>Version</th><th>Report</th></tr-->
+	<tr><td width="10px" bgcolor="#FF9966"></td><td>Mono 0.31</td><td align="left">IntegrationTests/Basic</td><td>
+		doesn't compile (reason unknown)
+	</td></tr>
+	<tr><td width="10px" bgcolor="#FF9966"></td><td>Mono 0.31</td><td align="left">IntegrationTests/Direct</td><td>
+		Unions not working due to Mono bugs
+	<a href="http://bugzilla.ximian.com/show_bug.cgi?id=56005">56005</a>
+ and
+	<a href="http://bugzilla.ximian.com/show_bug.cgi?id=56013">56013</a>
+	</td></tr>
 	</table>
 	</ul>
 <p>Please help us keeping this table updated!
