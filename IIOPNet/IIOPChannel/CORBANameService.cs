@@ -130,30 +130,55 @@ namespace omg.org.CosNaming {
 
         /// <summary>resolve a bound object</summary>
         [FromIdlName("resolve")]
+        [ThrowsIdlException(typeof(omg.org.CosNaming.NamingContext_package.NotFound))]
+        [ThrowsIdlException(typeof(omg.org.CosNaming.NamingContext_package.CannotProceed))]
+        [ThrowsIdlException(typeof(omg.org.CosNaming.NamingContext_package.InvalidName))]
         MarshalByRefObject resolve([IdlSequenceAttribute] NameComponent[] nameComponents);
         /// <summary>bind an object for the name</summary>
         [FromIdlName("bind")]
+        [ThrowsIdlException(typeof(omg.org.CosNaming.NamingContext_package.NotFound))]
+        [ThrowsIdlException(typeof(omg.org.CosNaming.NamingContext_package.CannotProceed))]
+        [ThrowsIdlException(typeof(omg.org.CosNaming.NamingContext_package.InvalidName))]
+        [ThrowsIdlException(typeof(omg.org.CosNaming.NamingContext_package.AlreadyBound))]
         void bind([IdlSequenceAttribute] NameComponent[] nameComponents, MarshalByRefObject obj);
 
         [FromIdlName("rebind")]
+        [ThrowsIdlException(typeof(omg.org.CosNaming.NamingContext_package.NotFound))]
+        [ThrowsIdlException(typeof(omg.org.CosNaming.NamingContext_package.CannotProceed))]
+        [ThrowsIdlException(typeof(omg.org.CosNaming.NamingContext_package.InvalidName))]        
         void rebind([IdlSequenceAttribute] NameComponent[] nameComponents, MarshalByRefObject obj);
     
         [FromIdlName("bind_context")]
+        [ThrowsIdlException(typeof(omg.org.CosNaming.NamingContext_package.NotFound))]
+        [ThrowsIdlException(typeof(omg.org.CosNaming.NamingContext_package.CannotProceed))]
+        [ThrowsIdlException(typeof(omg.org.CosNaming.NamingContext_package.InvalidName))]
+        [ThrowsIdlException(typeof(omg.org.CosNaming.NamingContext_package.AlreadyBound))]        
         void  bind_context([IdlSequenceAttribute] NameComponent[] nameComponents, NamingContext toBind);
     
         [FromIdlName("rebind_context")]
+        [ThrowsIdlException(typeof(omg.org.CosNaming.NamingContext_package.NotFound))]
+        [ThrowsIdlException(typeof(omg.org.CosNaming.NamingContext_package.CannotProceed))]
+        [ThrowsIdlException(typeof(omg.org.CosNaming.NamingContext_package.InvalidName))]        
         void  rebind_context([IdlSequenceAttribute] NameComponent[] nameComponents, NamingContext toRebind);
     
         [FromIdlName("unbind")]
+        [ThrowsIdlException(typeof(omg.org.CosNaming.NamingContext_package.NotFound))]
+        [ThrowsIdlException(typeof(omg.org.CosNaming.NamingContext_package.CannotProceed))]
+        [ThrowsIdlException(typeof(omg.org.CosNaming.NamingContext_package.InvalidName))]        
         void  unbind([IdlSequenceAttribute] NameComponent[] nameComponents);
     
         [FromIdlName("new_context")]
         NamingContext new_context();
     
         [FromIdlName("bind_new_context")]
+        [ThrowsIdlException(typeof(omg.org.CosNaming.NamingContext_package.NotFound))]
+        [ThrowsIdlException(typeof(omg.org.CosNaming.NamingContext_package.CannotProceed))]
+        [ThrowsIdlException(typeof(omg.org.CosNaming.NamingContext_package.InvalidName))]
+        [ThrowsIdlException(typeof(omg.org.CosNaming.NamingContext_package.AlreadyBound))]        
         NamingContext bind_new_context([IdlSequenceAttribute] NameComponent[] nameComponents);
         
         [FromIdlName("destroy")]
+        [ThrowsIdlException(typeof(omg.org.CosNaming.NamingContext_package.NotEmpty))]        
         void destroy();
         
         [FromIdlName("list")]
@@ -172,15 +197,20 @@ namespace omg.org.CosNaming {
     public interface NamingContextExt : NamingContext {
 
         [FromIdlName("resolve_str")]
+        [ThrowsIdlException(typeof(omg.org.CosNaming.NamingContext_package.NotFound))]
+        [ThrowsIdlException(typeof(omg.org.CosNaming.NamingContext_package.CannotProceed))]
+        [ThrowsIdlException(typeof(omg.org.CosNaming.NamingContext_package.InvalidName))]
         MarshalByRefObject resolve_str([StringValue][WideChar(false)] string name);
 
         [return: StringValue]
         [return: WideChar(false)]
         [FromIdlName("to_string")]
+        [ThrowsIdlException(typeof(omg.org.CosNaming.NamingContext_package.InvalidName))]        
         string  to_string([IdlSequence]NameComponent[] name);
         
         [return: IdlSequence]
         [FromIdlName("to_name")]
+        [ThrowsIdlException(typeof(omg.org.CosNaming.NamingContext_package.InvalidName))]        
         NameComponent[] to_name([StringValue][WideChar(false)] string name);
 
     }

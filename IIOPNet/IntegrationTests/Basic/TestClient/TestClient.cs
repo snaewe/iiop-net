@@ -49,6 +49,14 @@ namespace Ch.Elca.Iiop.IntegrationTests {
 
 
         #endregion IFields
+        #region IMethods
+
+        private NamingContext GetNameService() {
+            // access COS nameing service
+            CorbaInit init = CorbaInit.GetInit();
+            NamingContext nameService = init.GetNameService("localhost", 8087);            
+            return nameService;
+        }
 
         [SetUp]
         public void SetupEnvironment() {
@@ -56,14 +64,12 @@ namespace Ch.Elca.Iiop.IntegrationTests {
             m_channel = new IiopClientChannel();
             ChannelServices.RegisterChannel(m_channel);
 
-            // access COS nameing service
-            CorbaInit init = CorbaInit.GetInit();
-            NamingContext nameService = init.GetNameService("localhost", 8087);
+            NamingContext nameService = GetNameService();
             NameComponent[] name = new NameComponent[] { new NameComponent("test", "") };
             // get the reference to the test-service
             m_testService = (TestService)nameService.resolve(name);
             m_testExService = (TestExceptionService)nameService.resolve(new NameComponent[] {
-                                                                           new NameComponent("testExService") });
+                                                                           new NameComponent("testExService") });            
         }
 
         [TearDown]
@@ -633,17 +639,14 @@ namespace Ch.Elca.Iiop.IntegrationTests {
             Assertion.AssertEquals(true, proxy2._is_a("IDL:Ch/Elca/Iiop/IntegrationTests/TestSimpleInterface2:1.0"));
         }
 
-/*        [Test]
+        [ExpectedException(typeof(omg.org.CosNaming.NamingContext_package.NotFound))]
+        [Test]
         public void TestNonExistent() {
-            // access COS nameing service
-            CorbaInit init = CorbaInit.GetInit();
-
-            NamingContext nameService = init.GetNameService("localhost", 8087);
+            NamingContext nameService = GetNameService();
             NameComponent[] name = new NameComponent[] { new NameComponent("testXYZ", "") };
             // get the reference to non-existent service
             m_testService = (TestService)nameService.resolve(name);            
         }
-*/
 
         [Test]
         public void TestRaisesClauseUserException() {
@@ -681,6 +684,8 @@ namespace Ch.Elca.Iiop.IntegrationTests {
                 Assertion.Fail("wrong exception type: " + ex.GetType());
             }
         }
+
+        #endregion IMethods
 
 
     }
