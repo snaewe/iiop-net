@@ -4,7 +4,7 @@
  * Examples
  *
  * WHEN      RESPONSIBLE
- * 24.06.03  Dominic Ullmann (DUL), dominic.ullmann -at- elca.ch
+ * 04.07.03  Dominic Ullmann (DUL), dominic.ullmann -at- elca.ch
  *
  * Copyright 2003 ELCA Informatique SA
  * Av. de la Harpe 22-24, 1000 Lausanne 13, Switzerland
@@ -59,9 +59,9 @@ namespace Ch.Elca.Iiop.Demo.ValueObjectDemo {
                 ValObjectDemoHome valDemoHome = (ValObjectDemoHome)nameService.resolve(name);
                 // create valObjectDemo
                 ValObjectDemo valDemo = valDemoHome.create();
-                // call retrieveValObject
-                Console.WriteLine("calling retrieveValObject");
-                ValObject resultVal = valDemo.retrieveValObject();
+                // call getValObject
+                Console.WriteLine("calling getValObject");
+                ValObject resultVal = valDemo.getValObject();
                 Console.WriteLine("test-string: " + resultVal.testString);
                 Console.WriteLine("test-int: " + resultVal.testValue);
 
