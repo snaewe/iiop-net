@@ -154,6 +154,24 @@ public class TestServiceImpl extends PortableRemoteObject implements TestService
         return arg;
     }
 
+    public TestSerializableMixedValAndBase TestMixedSerType(boolean arg1, short arg2, int arg3, String arg4) throws RemoteException {
+        TestSerializableMixedValAndBase result = new TestSerializableMixedValAndBase();
+        result.basicVal1 = arg1;
+        result.basicVal2 = arg2;
+        result.basicVal3 = arg3;
+        result.val1 = new TestSerializableClassB1();
+        result.val1.Msg = arg4;
+        result.val2 = new TestSerializableClassB1();
+        result.val2.Msg = arg4;
+        result.val3 = new TestSerializableClassB1();
+        result.val3.Msg = arg4;
+        return result;
+    }
+
+    public TestSerializableClassD TestMixedSerTypeFormalIsBase(boolean arg1, short arg2, int arg3, String arg4) throws RemoteException {
+        return TestMixedSerType(arg1, arg2, arg3, arg4);
+    }
+
     public Object EchoAnything(Object arg) throws RemoteException {
         return arg;
     }

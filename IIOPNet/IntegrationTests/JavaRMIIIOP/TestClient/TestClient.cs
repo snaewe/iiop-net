@@ -337,6 +337,26 @@ namespace Ch.Elca.Iiop.IntegrationTests {
             Assertion.AssertEquals(result.val1, result.val2);
             Assertion.AssertEquals(result.val1.Msg, result.val2.Msg);
         }
+
+
+        [Test]
+        public void TestValueTypeWithMixedContent() {
+           System.Boolean arg1 = true;
+           System.Int16 arg2 = 2;
+           System.Int32 arg3 = 3;
+           System.String arg4 = "test";
+           TestSerializableMixedValAndBase result = m_testService.TestMixedSerType(arg1, arg2, arg3, arg4);
+           Assertion.AssertEquals(arg1, result.basicVal1);
+           Assertion.AssertEquals(arg2, result.basicVal2);
+           Assertion.AssertEquals(arg3, result.basicVal3);
+           Assertion.AssertEquals(arg4, result.val1.Msg);
+           Assertion.AssertEquals(arg4, result.val2.Msg);
+           Assertion.AssertEquals(arg4, result.val3.Msg);
+
+           TestSerializableClassD result2 = m_testService.TestMixedSerTypeFormalIsBase(arg1, arg2, arg3, arg4);
+           Assertion.AssertEquals(arg4, result.val1.Msg);
+           Assertion.AssertEquals(arg4, result.val2.Msg);
+        }
        
         /// <summary>
         /// Test receiving instances, if formal parameter is System.Object

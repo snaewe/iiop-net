@@ -53,5 +53,11 @@ namespace Ch.Elca.Iiop.IntegrationTests {
     
     }
 
+    [Serializable]
+    public class TestSerializableMixedValAndBaseImpl : TestSerializableMixedValAndBase {
+    
+
+    }
+
 
 }
