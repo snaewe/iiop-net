@@ -139,6 +139,8 @@ namespace Ch.Elca.Iiop.Cdr {
         
         private IDictionary m_indirections = new Hashtable();
         
+        private ulong m_lastEncapsulationBoundry = 0;
+        
         #endregion IFields
         #region IConstructors
         
@@ -156,6 +158,17 @@ namespace Ch.Elca.Iiop.Cdr {
         
         #endregion IProperties
         #region IMethods
+        
+        /// <summary>is the specified position before the last encapsulation boundry</summary>
+        internal bool IsEncapBoundryCrossed(ulong position) {
+            return position < m_lastEncapsulationBoundry;
+        }
+        
+        /// <summary>sets the last encapsulation boundry position</summary>
+        internal void SetLastEncapBoundry(ulong position) {
+            m_lastEncapsulationBoundry = position;
+        }
+        
         #endregion IMethods
         
     }
@@ -197,15 +210,15 @@ namespace Ch.Elca.Iiop.Cdr {
         }
         
         /// <summary>resolves indirection, if not possible throws marshal excpetion</summary>
-        internal object GetObjectForIndir(IndirectionInfo indirDesc) {            
-            if (!IsIndirectionResolvable(indirDesc)) {    
+        internal object GetObjectForIndir(IndirectionInfo indirDesc, bool allowEncapBoundryCross) {            
+            if (!IsIndirectionResolvable(indirDesc, allowEncapBoundryCross)) {    
                 // indirection not resolvable!
                 throw CreateIndirectionNotResolvableException();
             }
             return Store[indirDesc];
         }
    
-        internal bool IsIndirectionResolvable(IndirectionInfo indirInfo) {
+        internal bool IsIndirectionResolvable(IndirectionInfo indirInfo, bool allowEncapBoundryCross) {
             if (!Store.Contains(indirInfo)) { 
                 Debug.WriteLine("indirection not found, streamPos: " + indirInfo.StreamPos +
                                 ", type: " + indirInfo.IndirType + 
@@ -219,12 +232,15 @@ namespace Ch.Elca.Iiop.Cdr {
                 }
                 return false;
             } else {
+                if ((!allowEncapBoundryCross) && (IsEncapBoundryCrossed(indirInfo.StreamPos))) {
+                    throw CreateIndirectionBoundryCrossException();
+                } 
                 return true;
             }                
         }
         
-        internal void CheckIndirectionResolvable(IndirectionInfo indirInfo) {
-            if (!IsIndirectionResolvable(indirInfo)) {                                                     
+        internal void CheckIndirectionResolvable(IndirectionInfo indirInfo, bool allowEncapBoundryCross) {
+            if (!IsIndirectionResolvable(indirInfo, allowEncapBoundryCross)) {
                 throw CreateIndirectionNotResolvableException();
             }
         }
@@ -232,6 +248,10 @@ namespace Ch.Elca.Iiop.Cdr {
         private Exception CreateIndirectionNotResolvableException() {
             return new MARSHAL(951, CompletionStatus.Completed_MayBe);
         }        
+        
+        private Exception CreateIndirectionBoundryCrossException() {
+            return new MARSHAL(961, CompletionStatus.Completed_MayBe);
+        }
         
         #endregion IMethods
     
@@ -255,10 +275,8 @@ namespace Ch.Elca.Iiop.Cdr {
             stream.MarkNextAlignedPosition(this);
         }
         
-        public StreamPosition(CdrInputStream stream, bool resolveGlobal) {
-            if (resolveGlobal) {
-                m_globalOffset = stream.GetGlobalOffset();
-            }
+        public StreamPosition(CdrInputStream stream) {
+            m_globalOffset = stream.GetGlobalOffset();
             stream.MarkNextAlignedPosition(this);
         }
  
@@ -1100,39 +1118,36 @@ namespace Ch.Elca.Iiop.Cdr {
         }
         
         /// <summary>resolves indirection, if not possible throws marshal excpetion</summary>
-        public object GetObjectForIndir(long indirectionOffset, bool resolveGlobal,
+        public object GetObjectForIndir(long indirectionOffset, bool allowEncapBoundryCross,
                                         IndirectionType indirType,
                                         IndirectionUsage indirUsage) {
-            IndirectionInfo info = new IndirectionInfo(CalculateIndirectionPos(indirectionOffset, resolveGlobal),
+            IndirectionInfo info = new IndirectionInfo(CalculateIndirectionPos(indirectionOffset),
                                                        indirType, indirUsage);
-            return m_indirections.GetObjectForIndir(info);
+            return m_indirections.GetObjectForIndir(info, allowEncapBoundryCross);
         }
 
-        public bool IsIndirectionResolvable(long indirectionOffset, bool resolveGlobal,
+        public bool IsIndirectionResolvable(long indirectionOffset, bool allowEncapBoundryCross,
                                             IndirectionType indirType,
                                             IndirectionUsage indirUsage) {
             
             // indirection-offset is negative --> therefore add to stream-position; -4, because indirectionoffset itself doesn't count --> stream-pos too high
-            IndirectionInfo info = new IndirectionInfo(CalculateIndirectionPos(indirectionOffset, resolveGlobal),
+            IndirectionInfo info = new IndirectionInfo(CalculateIndirectionPos(indirectionOffset),
                                                        indirType, indirUsage);
-            return m_indirections.IsIndirectionResolvable(info);
+            return m_indirections.IsIndirectionResolvable(info, allowEncapBoundryCross);
         }
                 
-        public void CheckIndirectionResolvable(long indirectionOffset, bool resolveGlobal,
+        public void CheckIndirectionResolvable(long indirectionOffset, bool allowEncapBoundryCross,
                                                IndirectionType indirType,
                                                IndirectionUsage indirUsage) {            
-             IndirectionInfo info = new IndirectionInfo(CalculateIndirectionPos(indirectionOffset, 
-                                                                                resolveGlobal),
+             IndirectionInfo info = new IndirectionInfo(CalculateIndirectionPos(indirectionOffset),
                                                         indirType, indirUsage);
-             m_indirections.CheckIndirectionResolvable(info);
+             m_indirections.CheckIndirectionResolvable(info, allowEncapBoundryCross);
         }
         
-        private ulong CalculateIndirectionPos(long indirectionOffset, bool resolveGlobal) {
+        private ulong CalculateIndirectionPos(long indirectionOffset) {
             // indirection-offset is negative --> therefore add to stream-position; -4, because indirectionoffset itself doesn't count --> stream-pos too high
             long streamPosition = (long)GetPosition();
-            if (resolveGlobal) {
-                streamPosition += (long)GetGlobalOffset();
-            }
+            streamPosition += (long)GetGlobalOffset();
             return (ulong)(streamPosition + indirectionOffset - 4);
         }        
         
@@ -1394,8 +1409,8 @@ namespace Ch.Elca.Iiop.Cdr {
         internal CdrEncapsulationInputStream(CdrInputStream stream, 
                                              IndirectionStoreIndirKey indirStore) : base(indirStore) {
             Stream baseStream = new MemoryStream();
-            StreamPosition streamPos = new StreamPosition(stream, 
-                                                          true); // store aligned position of encapsulation relative to stream beginning
+            // store aligned position of encapsulation relative to stream beginning
+            StreamPosition streamPos = new StreamPosition(stream);             
             // read the encapsulation from the input stream
             ulong encapsLength = stream.ReadULong();
             byte[] data = stream.ReadOpaque((int)encapsLength);

@@ -1574,7 +1574,7 @@ namespace Ch.Elca.Iiop.Marshalling {
 
         public override object Deserialise(System.Type formal, AttributeExtCollection attributes, CdrInputStream sourceStream) {
             // indirPos will contain the next aligned position in the base stream, after next read-op is performed
-            StreamPosition indirPos = new StreamPosition(sourceStream, true);
+            StreamPosition indirPos = new StreamPosition(sourceStream);
             
             uint kindVal = (uint)sourceStream.ReadULong();
             if (kindVal != CdrStreamHelper.INDIRECTION_TAG) {

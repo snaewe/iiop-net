@@ -469,8 +469,9 @@ namespace Ch.Elca.Iiop.Cdr {
         /// <summary>reads in a whole value-type instance</summary>
         public object ReadValue(Type formal) {
             // a reference to the whole value is also possible for an indirection, prepare the position to add to indir table
-            StreamPosition indirPos = new StreamPosition(m_baseStream, 
-                                                         false); // indirPos will contain the next aligned position in the base stream, after next read-op is performed
+            // indirPos will contain the next aligned position in the base stream, after next read-op is performed
+            StreamPosition indirPos = new StreamPosition(m_baseStream); 
+
             
             long indirOffset = 0;
             if (CheckForIndirection(out indirOffset)) { // check if an indirection will follow instead of a value
@@ -681,8 +682,9 @@ namespace Ch.Elca.Iiop.Cdr {
                                                           IndirectionType.IndirRepId,
                                                           IndirectionUsage.ValueType);
                     } else {
-                        StreamPosition indirPos = new StreamPosition(m_baseStream, 
-                                                                     false); // indirPos will contain the next aligned position in the base stream after next read-Op
+                        // indirPos will contain the next aligned position in the base stream after next read-Op
+                        StreamPosition indirPos = new StreamPosition(m_baseStream); 
+
                         repId = ReadString();
                         // add repository id to indirection table
                         StoreIndirection(new IndirectionInfo(indirPos.Position,
@@ -730,8 +732,9 @@ namespace Ch.Elca.Iiop.Cdr {
                                                IndirectionType.CodeBaseUrl,
                                                IndirectionUsage.ValueType);
                 } else {
-                    StreamPosition indirPos = new StreamPosition(m_baseStream,
-                                                                 false); // indirPos will contain the next aligned position in the base stream, after next read-op is performed
+                    // indirPos will contain the next aligned position in the base stream, after next read-op is performed
+                    StreamPosition indirPos = new StreamPosition(m_baseStream);
+
                     string codeBaseURL = ReadString();    
                     // add codebase url to indirection table
                     StoreIndirection(new IndirectionInfo(indirPos.Position, 
