@@ -82,7 +82,8 @@ namespace Ch.Elca.Iiop {
             }
         }
         
-        /// <summary>the transport factory to use for this channel</summary>
+        /// <summary>the connection manager to use for this channel; 
+        /// manages all connections opened by this channel.</summary>
         internal GiopClientConnectionManager ConnectionManager {
             get {
                 return m_conManager;
@@ -97,21 +98,6 @@ namespace Ch.Elca.Iiop {
 
         #endregion IProperties
         #region IMethods
-
-/*        /// <summary>
-        /// gets a socket to the target to send the message
-        /// </summary>
-        /// <param name="msg">The message to send</param>
-        private TcpClient GetSocket(IMessage msg) {
-            IiopClientConnectionManager conManager = IiopClientConnectionManager.GetManager();
-            IiopClientConnection con = conManager.GetConnectionFor(msg);
-            if (!con.CheckConnected()) {
-                con.ConnectTo(m_target.Host, m_target.Port);
-                return con.ClientSocket;
-            } else {
-                return con.ClientSocket;
-            }
-        } */
                 
         private GiopClientConnection GetClientConnection(IMessage msg) {
             GiopClientConnection con = m_conManager.GetConnectionFor(msg);            
@@ -120,7 +106,8 @@ namespace Ch.Elca.Iiop {
                 throw new omg.org.CORBA.INTERNAL(998, omg.org.CORBA.CompletionStatus.Completed_No);
             }
             if (!con.CheckConnected()) {
-                // a new connection must not be open, because this would require a remarshal of the message (service-contexts)
+                // a new connection must not be opened, because this would require a remarshal 
+                // of the message (service-contexts) -> Therefore connection must already be open
                 throw new omg.org.CORBA.COMM_FAILURE(999, omg.org.CORBA.CompletionStatus.Completed_No);
             }
             return con;
@@ -295,8 +282,12 @@ namespace Ch.Elca.Iiop {
         #endregion IFiels
         #region IConstructors
         
+        /// <param name="conManager">the connection manager for this channel, must be != null</param>
         internal IiopClientTransportSinkProvider(GiopClientConnectionManager conManager) {
-            Debug.Assert(conManager != null);
+            if (conManager == null) {
+                // should not occur
+                throw new omg.org.CORBA.INTERNAL(997, omg.org.CORBA.CompletionStatus.Completed_No);
+            }            
             m_conManager = conManager;
         }
         
