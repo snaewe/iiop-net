@@ -251,6 +251,9 @@ namespace Ch.Elca.Iiop.IntegrationTests {
         
         Adder CreateNewWithSystemID();
         Adder CreateNewWithUserID(string userId);
+
+        /// <summary>returns the IOR for the instance of MBR implementing this interface</summary>
+        string GetIorStringForThisObject();
         
     }
 

@@ -29,6 +29,7 @@
 using System;
 using System.Runtime.Remoting;
 using Ch.Elca.Iiop.Idl;
+using omg.org.CORBA;
 
 namespace Ch.Elca.Iiop.IntegrationTests {
 
@@ -314,6 +315,11 @@ namespace Ch.Elca.Iiop.IntegrationTests {
             Adder result = new Adder();
             RemotingServices.Marshal(result, userId);
             return result;
+        }
+
+        public string GetIorStringForThisObject() {
+            OrbServices orbServices = OrbServices.GetSingleton();
+            return orbServices.object_to_string(this);
         }
 
         

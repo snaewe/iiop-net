@@ -33,6 +33,7 @@ using System.Runtime.Remoting.Channels;
 using System.Text;
 using NUnit.Framework;
 using Ch.Elca.Iiop;
+using Ch.Elca.Iiop.Idl;
 using Ch.Elca.Iiop.Services;
 using omg.org.CosNaming;
 using omg.org.CORBA;
@@ -890,6 +891,39 @@ namespace Ch.Elca.Iiop.IntegrationTests {
             int arg1 = 1;
             int arg2 = 2;
             Assertion.AssertEquals("wrong adder result", arg1 + arg2, adder.Add(arg1, arg2));
+        }
+
+        [Test]
+        public void TestObjectToString() {
+            OrbServices orbServices = OrbServices.GetSingleton();
+            string id = "myAdderId2";
+            Adder adder = m_testService.CreateNewWithUserID(id);
+            string iorString = orbServices.object_to_string(adder);
+            Ior adderIor = new Ior(iorString);
+            Assertion.AssertEquals(8087, adderIor.Port);            
+            Assertion.AssertEquals(1, adderIor.Version.Major);
+            Assertion.AssertEquals(2, adderIor.Version.Minor);
+            
+            byte[] oid = { 0x6d, 0x79, 0x41, 0x64, 0x64, 0x65, 0x72, 0x49, 0x64, 0x32 };
+            CheckIorKey(oid, adderIor.ObjectKey);                        
+
+            string testServiceIorString = m_testService.GetIorStringForThisObject();
+            Ior testServiceIor = new Ior(testServiceIorString);
+            Assertion.AssertEquals(8087, testServiceIor.Port);
+            Assertion.AssertEquals(1, testServiceIor.Version.Major);
+            Assertion.AssertEquals(2, testServiceIor.Version.Minor);            
+            
+            byte[] oidTestService = { 0x74, 0x65, 0x73, 0x74 };
+            CheckIorKey(oidTestService, testServiceIor.ObjectKey);                        
+
+
+        }
+
+        private void CheckIorKey(byte[] expected, byte[] actual) {
+            Assertion.AssertEquals("wrong id length", expected.Length, actual.Length);
+            for (int i = 0; i <expected.Length; i++) {
+                Assertion.AssertEquals("wrong element nr " + i, expected[i], actual[i]);
+            }
         }
         
         [Test]
