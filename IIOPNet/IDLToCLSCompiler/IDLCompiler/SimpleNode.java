@@ -2,8 +2,6 @@
 
 package parser;
 
-import symboltable.SymbolTable;
-
 public class SimpleNode implements Node {
   protected Node parent;
   protected Node[] children;
@@ -78,13 +76,12 @@ public class SimpleNode implements Node {
     System.out.println(toString(prefix));
     if (children != null) {
       for (int i = 0; i < children.length; ++i) {
-    SimpleNode n = (SimpleNode)children[i];
-    if (n != null) {
-      n.dump(prefix + " ");
-    }
+	SimpleNode n = (SimpleNode)children[i];
+	if (n != null) {
+	  n.dump(prefix + " ");
+	}
       }
     }
   }
-  
 }
 
