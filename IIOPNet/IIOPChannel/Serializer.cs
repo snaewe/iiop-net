@@ -756,7 +756,11 @@ namespace Ch.Elca.Iiop.Marshalling {
             if (!(typeCode is NullTC)) {
                 Type dotNetType = Repository.GetTypeForTypeCode(typeCode);
                 Marshaller marshaller = Marshaller.GetSingleton();
-                return marshaller.Unmarshal(dotNetType, new AttributeExtCollection(new Attribute[0]), sourceStream);
+                object result = marshaller.Unmarshal(dotNetType, new AttributeExtCollection(new Attribute[0]), sourceStream);
+                if (result is BoxedValueBase) {
+                    result = ((BoxedValueBase)result).Unbox(); // unboxing the boxed-value, because BoxedValueTypes are internal types, which should not be used by users
+                }
+                return result;
             } else {
                 return null;
             }

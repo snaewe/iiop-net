@@ -200,7 +200,8 @@ namespace Ch.Elca.Iiop.Idl {
             DefineGetValue(boxBuilder, valField);
             // define getBoxed type methods:
             DefineGetBoxedType(boxBuilder, valField);
-            DefineGetFirstNonBoxedType(boxBuilder, arrayType);
+            DefineGetBoxedTypeAttributes(boxBuilder, valField);
+            DefineGetFirstNonBoxedType(boxBuilder, arrayType);            
             // define the constructors
             DefineEmptyDefaultConstr(boxBuilder);
             // define the constructor which sets the valField directly
@@ -225,6 +226,7 @@ namespace Ch.Elca.Iiop.Idl {
             DefineGetValue(boxBuilder, valField);
             // define getBoxed type methods:
             DefineGetBoxedType(boxBuilder, valField);
+            DefineGetBoxedTypeAttributes(boxBuilder, valField);
             Type fullUnboxed = boxedType;
             if ((fullUnboxed.IsArray) && (fullUnboxed.GetElementType().IsSubclassOf(typeof(BoxedValueBase)))) {
                 // call GetFirstNonBoxed static method on element type 
@@ -346,6 +348,35 @@ namespace Ch.Elca.Iiop.Idl {
             MethodInfo getTypeFromH = typeof(Type).GetMethod("GetTypeFromHandle", BindingFlags.Public | BindingFlags.Static);
             bodyGen.Emit(OpCodes.Call, getTypeFromH); // call the static method --> therefore no need to push this to the stack
             bodyGen.Emit(OpCodes.Ret); // return the type                
+        }
+
+        /// <summary>
+        /// creates a static method, which returns an object[] of attributes of the boxed type
+        /// </summary>
+        /// <param name="boxBuilder">the boxed type builder</param>
+        /// <param name="valField">the field containing the boxed instance</param>
+        private void DefineGetBoxedTypeAttributes(TypeBuilder boxBuilder, FieldBuilder valField) {
+            MethodBuilder getMethodBuilder = boxBuilder.DefineMethod(BoxedValueBase.GET_BOXED_TYPE_ATTRIBUTES_METHOD_NAME,
+                                                                     MethodAttributes.Static | MethodAttributes.Public |
+                                                                        MethodAttributes.HideBySig,
+                                                                     typeof(object[]), new Type[0]);
+            ILGenerator bodyGen = getMethodBuilder.GetILGenerator();
+            bodyGen.Emit(OpCodes.Ldtoken, boxBuilder); // load token for the boxed type
+            // now use Type.GetTypeFromHandle to get a Type-object
+            MethodInfo getTypeFromH = typeof(Type).GetMethod("GetTypeFromHandle", BindingFlags.Public | BindingFlags.Static);
+            bodyGen.Emit(OpCodes.Call, getTypeFromH); // call the static method --> therefore no need to push this to the stack
+            // now use GetField to get the field type, this is on stack: the Type-object
+            MethodInfo getFieldMethod = typeof(Type).GetMethod("GetField", BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Instance, null,
+                                                               new Type[] { typeof(string), typeof(BindingFlags) }, null);
+            bodyGen.Emit(OpCodes.Ldstr, valField.Name);
+            bodyGen.Emit(OpCodes.Ldc_I4, (Int32)(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance));
+            bodyGen.EmitCall(OpCodes.Callvirt, getFieldMethod, null);
+            // now call GetCustomAttributes on field, args: methodInfo, true
+            bodyGen.Emit(OpCodes.Ldc_I4_1);
+            MethodInfo getCustomAttrsMethod = typeof(FieldInfo).GetMethod("GetCustomAttributes", BindingFlags.Public | BindingFlags.Instance, null, 
+                                                                          new Type[] { typeof(bool) }, null);
+            bodyGen.EmitCall(OpCodes.Callvirt, getCustomAttrsMethod, null);
+            bodyGen.Emit(OpCodes.Ret); // return the array of attributes
         }
 
 

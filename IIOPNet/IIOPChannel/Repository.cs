@@ -482,12 +482,19 @@ namespace Ch.Elca.Iiop.Idl {
                 throw new INTERNAL(1929, CompletionStatus.Completed_MayBe);
             }
             Type boxedType;
+            object[] attributesOnBoxed = new object[0];
             try {
                 boxedType = (Type)clsType.InvokeMember(BoxedValueBase.GET_BOXED_TYPE_METHOD_NAME,
                                                        BindingFlags.InvokeMethod | BindingFlags.Public |
                                                        BindingFlags.NonPublic | BindingFlags.Static | 
                                                        BindingFlags.DeclaredOnly, 
                                                        null, null, new object[0]);
+
+                attributesOnBoxed = (object[])clsType.InvokeMember(BoxedValueBase.GET_BOXED_TYPE_ATTRIBUTES_METHOD_NAME,
+                                                            BindingFlags.InvokeMethod | BindingFlags.Public |
+                                                            BindingFlags.NonPublic | BindingFlags.Static | 
+                                                            BindingFlags.DeclaredOnly, 
+                                                            null, null, new object[0]);
             } 
             catch (Exception) {
                 // invalid type: clsType
@@ -495,7 +502,9 @@ namespace Ch.Elca.Iiop.Idl {
                 // BoxedValueBase.GET_BOXED_TYPE_METHOD_NAME
                 throw new INTERNAL(1930, CompletionStatus.Completed_MayBe);
             }
-            omg.org.CORBA.TypeCode boxed = Repository.CreateTypeCodeForType(boxedType, attributes);
+            
+            omg.org.CORBA.TypeCode boxed = Repository.CreateTypeCodeForType(boxedType, 
+                                                                            AttributeExtCollection.ConvertToAttributeCollection(attributesOnBoxed));
             
             return new ValueBoxTC(Repository.GetRepositoryID(clsType), clsType.FullName, boxed);
         }

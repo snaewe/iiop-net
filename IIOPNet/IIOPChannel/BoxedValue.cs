@@ -41,6 +41,9 @@ namespace Ch.Elca.Iiop.Idl {
         
         /// <summary>the name of the static method, returning the Type of the boxed type</summary>
         internal const string GET_BOXED_TYPE_METHOD_NAME = "GetBoxedType";
+
+        /// <summary>the name of the static method, returning the attributes  for the Type of the boxed type</summary>
+        internal const string GET_BOXED_TYPE_ATTRIBUTES_METHOD_NAME = "GetBoxedTypeAttributes";
         
         /// <summary>the name of the static method, which returns the first non-boxed type, when following the boxing chain (array of boxed is here not considered as non-boxed type)</summary>
         public const string GET_FIRST_NONBOXED_TYPE_METHODNAME = "GetFirstNonBoxedType";
@@ -133,6 +136,11 @@ namespace omg.org.CORBA {
         internal static Type GetFirstNonBoxedType() {
             return GetBoxedType();
         }
+
+        public static object[] GetBoxedTypeAttributes() {
+            return new object[] { new StringValueAttribute() };
+        }
+
         #endregion SMethods
         #region IMethods
         
@@ -170,6 +178,10 @@ namespace omg.org.CORBA {
         
         public static Type GetBoxedType() {
             return typeof(string);
+        }
+
+        public static object[] GetBoxedTypeAttributes() {
+            return new object[] { new StringValueAttribute(), new WideCharAttribute(false) };
         }
         
         internal static Type GetFirstNonBoxedType() {
