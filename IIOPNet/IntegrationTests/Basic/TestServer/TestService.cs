@@ -44,6 +44,18 @@ namespace Ch.Elca.Iiop.IntegrationTests {
             return (System.Byte)(arg + 1);
         }
 
+        public System.Int16 TestIncInt16(System.Int16 arg) {
+            return (System.Int16)(arg + 1);
+        }
+
+        public System.Int32 TestIncInt32(System.Int32 arg) {
+            return arg + 1;
+        }
+
+        public System.Int64 TestIncInt64(System.Int64 arg) {
+            return arg + 1;
+        }
+
         public override object InitializeLifetimeService() {
             // live forever
             return null;

@@ -72,21 +72,51 @@ namespace Ch.Elca.Iiop.IntegrationTests {
         public void TestDouble() {
             System.Double arg = 1.23;
             System.Double result = m_testService.TestIncDouble(arg);
-            Assertion.AssertEquals(arg + 1, result);
+            Assertion.AssertEquals((System.Double)(arg + 1), result);
         }
 
         [Test]
         public void TestFloat() {
             System.Single arg = 1.23f;
             System.Single result = m_testService.TestIncFloat(arg);
-            Assertion.AssertEquals(arg + 1, result);
+            Assertion.AssertEquals((System.Single)(arg + 1), result);
         }
         
         [Test]
         public void TestByte() {
             System.Byte arg = 1;
             System.Byte result = m_testService.TestIncByte(arg);
-            Assertion.AssertEquals(arg + 1, result);
+            Assertion.AssertEquals((System.Byte)(arg + 1), result);
+        }
+
+        [Test]
+        public void TestInt16() {
+            System.Int16 arg = 1;
+            System.Int16 result = m_testService.TestIncInt16(arg);
+            Assertion.AssertEquals((System.Int16)(arg + 1), result);
+            arg = -11;
+            result = m_testService.TestIncInt16(arg);
+            Assertion.AssertEquals((System.Int16)(arg + 1), result);
+        }
+
+        [Test]
+        public void TestInt32() {
+            System.Int32 arg = 1;
+            System.Int32 result = m_testService.TestIncInt32(arg);
+            Assertion.AssertEquals((System.Int32)(arg + 1), result);
+            arg = -11;
+            result = m_testService.TestIncInt32(arg);
+            Assertion.AssertEquals((System.Int32)(arg + 1), result);
+        }
+
+        [Test]
+        public void TestInt64() {
+            System.Int64 arg = 1;
+            System.Int64 result = m_testService.TestIncInt64(arg);
+            Assertion.AssertEquals((System.Int64)(arg + 1), result);
+            arg = -11;
+            result = m_testService.TestIncInt64(arg);
+            Assertion.AssertEquals((System.Int64)(arg + 1), result);
         }
 
     }
