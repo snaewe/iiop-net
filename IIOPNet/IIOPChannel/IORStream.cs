@@ -323,3 +323,133 @@ namespace Ch.Elca.Iiop.CorbaObjRef {
     }
 
 }
+
+#if UnitTest
+
+namespace Ch.Elca.Iiop.Tests {
+	
+    using NUnit.Framework;    
+    using System;
+	using System.IO;
+	using Ch.Elca.Iiop.CorbaObjRef;
+	using omg.org.CORBA;
+	
+    /// <summary>
+    /// Unit test for testing IorStream
+    /// </summary>
+    public class IorTest : TestCase {
+        
+        public IorTest() {
+        }
+
+        public void TestIorDeStringification() {
+            MemoryStream memStream = new MemoryStream();
+            
+            // IOR:
+            memStream.WriteByte(0x49);
+            memStream.WriteByte(0x4F);
+            memStream.WriteByte(0x52);
+            memStream.WriteByte(0x3A);
+            
+            // content:
+            memStream.WriteByte(0x35);
+            memStream.WriteByte(0x33);
+            
+            memStream.WriteByte(0x36);
+            memStream.WriteByte(0x31);
+            
+            memStream.WriteByte(0x37);
+            memStream.WriteByte(0x39);
+            
+            memStream.WriteByte(0x34);
+            memStream.WriteByte(0x38);
+            
+            memStream.WriteByte(0x36);
+            memStream.WriteByte(0x35);
+
+            memStream.WriteByte(0x36);
+            memStream.WriteByte(0x43);		
+
+            memStream.WriteByte(0x36);
+            memStream.WriteByte(0x43);
+
+            memStream.WriteByte(0x36);
+            memStream.WriteByte(0x46);
+            
+            memStream.Seek(0, SeekOrigin.Begin);
+            
+            IorStream iorStream = new IorStream(memStream);
+            Assertion.AssertEquals(83, iorStream.ReadByte());
+            Assertion.AssertEquals(97, iorStream.ReadByte());
+            Assertion.AssertEquals(121, iorStream.ReadByte());
+            Assertion.AssertEquals(72, iorStream.ReadByte());
+            Assertion.AssertEquals(101, iorStream.ReadByte());
+            Assertion.AssertEquals(108, iorStream.ReadByte());
+            Assertion.AssertEquals(108, iorStream.ReadByte());
+            Assertion.AssertEquals(111, iorStream.ReadByte());
+        }
+
+        public void TestIorStringification() {
+            MemoryStream memStream = new MemoryStream();
+
+            IorStream iorStream = new IorStream(memStream);
+            iorStream.WriteByte(83);
+            iorStream.WriteByte(97);
+            iorStream.WriteByte(121);
+            iorStream.WriteByte(72);
+            iorStream.WriteByte(101);
+            iorStream.WriteByte(108);
+            iorStream.WriteByte(108);
+            iorStream.WriteByte(111);
+            
+            memStream.Seek(0, SeekOrigin.Begin);
+            
+            // IOR magic
+            Assertion.AssertEquals(0x49, memStream.ReadByte());
+            Assertion.AssertEquals(0x4F, memStream.ReadByte());
+            Assertion.AssertEquals(0x52, memStream.ReadByte());
+            Assertion.AssertEquals(0x3A, memStream.ReadByte());
+
+            // content
+            Assertion.AssertEquals(0x35, memStream.ReadByte());
+            Assertion.AssertEquals(0x33, memStream.ReadByte());
+            
+            Assertion.AssertEquals(0x36, memStream.ReadByte());
+            Assertion.AssertEquals(0x31, memStream.ReadByte());
+
+            Assertion.AssertEquals(0x37, memStream.ReadByte());
+            Assertion.AssertEquals(0x39, memStream.ReadByte());
+
+            Assertion.AssertEquals(0x34, memStream.ReadByte());
+            Assertion.AssertEquals(0x38, memStream.ReadByte());
+
+            Assertion.AssertEquals(0x36, memStream.ReadByte());
+            Assertion.AssertEquals(0x35, memStream.ReadByte());
+
+            Assertion.AssertEquals(0x36, memStream.ReadByte());
+            Assertion.AssertEquals(0x43, memStream.ReadByte());
+
+            Assertion.AssertEquals(0x36, memStream.ReadByte());
+            Assertion.AssertEquals(0x43, memStream.ReadByte());
+
+            Assertion.AssertEquals(0x36, memStream.ReadByte());
+            Assertion.AssertEquals(0x46, memStream.ReadByte());
+
+            Assertion.AssertEquals(-1, memStream.ReadByte());
+		}
+
+        [ExpectedException(typeof(INV_OBJREF))]
+        public void TestInvalidDataInIorStream() {
+            MemoryStream stream = new MemoryStream();
+            stream.WriteByte(0x01);
+            stream.WriteByte(0x02);
+            stream.Seek(0, SeekOrigin.Begin);
+			IorStream iorStream = new IorStream(stream);
+            byte data = (byte)iorStream.ReadByte();
+        }
+
+    }
+
+}
+
+#endif
