@@ -136,7 +136,7 @@ namespace parser {
 #if UnitTest
 
 
-namespace Ch.Elca.Iiop.IDLCompiler.Tests {
+namespace Ch.Elca.Iiop.IdlCompiler.Tests {
 	
     using System;
     using NUnit.Framework;
