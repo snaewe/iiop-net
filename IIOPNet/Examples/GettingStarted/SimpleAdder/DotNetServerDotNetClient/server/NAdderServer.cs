@@ -30,6 +30,7 @@
 using System;
 using System.Runtime.Remoting;
 using System.Runtime.Remoting.Channels;
+using System.Threading;
 using Ch.Elca.Iiop;
 
 
@@ -71,7 +72,7 @@ namespace Ch.Elca.Iiop.Tutorial.GettingStarted {
 			RemotingServices.Marshal(adder, objectURI);
 			
 			Console.WriteLine("server running");
-			Console.ReadLine();
+			Thread.Sleep(Timeout.Infinite);
 		}
     }
 
