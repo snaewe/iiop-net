@@ -1,7 +1,14 @@
 projects = IIOPChannel CLSToIDLGenerator
 
 
-build:
+build: build-base build-examples
+
+build-examples:
+	cd Examples
+	$(MAKE) build
+	cd ..
+
+build-base:
 	cd IIOPChannel
 	$(MAKE) build
 	cd ..
@@ -11,11 +18,9 @@ build:
 	cd IDLToCLSCompiler
 	$(MAKE) build
 	cd ..
-	cd Examples
-	$(MAKE) build
-	cd ..
 
-build-tests: build
+
+build-tests: build-base
 	cd IIOPChannel
 	$(MAKE) build-unit-tests
 	cd ..
@@ -31,9 +36,9 @@ clean:
 	$(MAKE) clean
 	cd ..
 	cd IDLToCLSCompiler
-	$(MAKE) build
+	$(MAKE) clean
 	cd ..
 	cd Examples
-	$(MAKE) build
+	$(MAKE) clean
 	cd ..
 
