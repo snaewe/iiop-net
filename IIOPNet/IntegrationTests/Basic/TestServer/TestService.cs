@@ -117,6 +117,23 @@ namespace Ch.Elca.Iiop.IntegrationTests {
 
     public class TestService : MarshalByRefObject {
 
+        private System.Double m_propValue = 0;
+        
+        public System.Double TestProperty {
+            get {
+                return m_propValue;
+            }
+            set {
+                m_propValue = value;
+            }
+        }
+        
+        public System.Double TestReadOnlyPropertyReturningZero {
+            get {
+                return 0;
+            }
+        }
+        
         public System.Double TestIncDouble(System.Double arg) {
             return arg + 1;
         }

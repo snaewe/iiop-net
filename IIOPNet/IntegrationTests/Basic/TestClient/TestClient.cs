@@ -27,6 +27,7 @@
 
 
 using System;
+using System.Reflection;
 using System.Runtime.Remoting;
 using System.Runtime.Remoting.Channels;
 using NUnit.Framework;
@@ -198,6 +199,7 @@ namespace Ch.Elca.Iiop.IntegrationTests {
             Assertion.AssertEquals("hik", result[0]);
         }
 
+        [Test]
         public void TestRemoteObjects() {
             Adder adder = m_testService.RetrieveAdder();
             System.Int32 arg1 = 1;
@@ -206,6 +208,7 @@ namespace Ch.Elca.Iiop.IntegrationTests {
             Assertion.AssertEquals((System.Int32) arg1 + arg2, result);            
         }
 
+        [Test]
         public void TestSendRefOfAProxy() {
             Adder adder = m_testService.RetrieveAdder();
             System.Int32 arg1 = 1;
@@ -214,6 +217,7 @@ namespace Ch.Elca.Iiop.IntegrationTests {
             Assertion.AssertEquals((System.Int32) arg1 + arg2, result);
         }
 
+        [Test]
         public void TestStruct() {
             TestStructA arg = new TestStructAImpl();
             arg.X = 11;
@@ -227,6 +231,7 @@ namespace Ch.Elca.Iiop.IntegrationTests {
         /// Checks, if the repository id of the value-type itself is used and not the rep-id 
         /// for the implementation class
         /// </summary>
+        [Test]
         public void TestTypeOfValueTypePassed() {
             TestSerializableClassB2Impl arg = new TestSerializableClassB2Impl();
             arg.Msg = "msg";            
@@ -237,6 +242,7 @@ namespace Ch.Elca.Iiop.IntegrationTests {
         /// <summary>
         /// Checks, if the fields of a super-type are serilised too
         /// </summary>
+        [Test]
         public void TestValueTypeInheritance() {
             TestSerializableClassB2 arg = new TestSerializableClassB2Impl();
             arg.Msg = "msg";
@@ -250,12 +256,14 @@ namespace Ch.Elca.Iiop.IntegrationTests {
         /// Checks, if a formal parameter type, which is not Serilizable works correctly,
         /// if an instance of a Serializable subclass is passed.
         /// </summary>
+        [Test]
         public void TestNonSerilizableFormalParam() {
             TestNonSerializableBaseClass arg = new TestSerializableClassCImpl();
             TestNonSerializableBaseClass result = m_testService.TestAbstractValueTypeEcho(arg);
             Assertion.AssertEquals(typeof(TestSerializableClassCImpl), result.GetType());
         }
 
+        [Test]
         public void TestBaseTypeNonSerializableParam() {
             TestSerializableClassCImpl arg = new TestSerializableClassCImpl();
             arg.Msg = "test";
@@ -268,6 +276,7 @@ namespace Ch.Elca.Iiop.IntegrationTests {
         /// <summary>
         /// Checks, if fields with reference semantics retain their semantic during serialisation / deserialisation
         /// </summary>
+        [Test]
         public void TestReferenceSematicForValueTypeField() {
             TestSerializableClassD arg = new TestSerializableClassDImpl();
             arg.val1 = new TestSerializableClassB1Impl();
@@ -283,6 +292,7 @@ namespace Ch.Elca.Iiop.IntegrationTests {
         /// <summary>
         /// Checks if a ByRef actual value for a formal parameter interface is passed correctly
         /// </summary>
+        [Test]
         public void TestInterfacePassingByRef() {
             TestEchoInterface result = m_testService.RetrieveEchoInterfaceImplementor();
             // result is a proxy
@@ -295,6 +305,7 @@ namespace Ch.Elca.Iiop.IntegrationTests {
         /// <summary>
         /// Checks if a ByVal actual value for a formal parameter interface is passed correctly
         /// </summary>        
+        [Test]
         public void TestInterfacePassingByVal() {
             System.String initialMsg = "initial";
             TestInterfaceA result = m_testService.RetrieveTestInterfaceAImplementor(initialMsg);
@@ -304,6 +315,7 @@ namespace Ch.Elca.Iiop.IntegrationTests {
             Assertion.AssertEquals(initialMsg, passedBack);
         }
 
+        [Test]
         public void TestInheritanceFromInterfaceForValueType() {
             System.String initialMsg = "initial";
             TestAbstrInterfaceImplByMarshalByVal impl = m_testService.RetriveTestInterfaceAImplemtorTheImpl(initialMsg);            
@@ -311,7 +323,23 @@ namespace Ch.Elca.Iiop.IntegrationTests {
             Assertion.AssertEquals(initialMsg, impl.Msg);
         }
 
+        [Test]
+        public void TestWritableProperty() {
+            System.Double arg = 1.2;
+            m_testService.TestProperty = arg;
+            System.Double result = m_testService.TestProperty;
+            Assertion.AssertEquals(arg, result);
+        }
 
+        [Test]
+        public void TestReadOnlyProperty() {
+            System.Double result = m_testService.TestReadOnlyPropertyReturningZero;
+            Assertion.AssertEquals((System.Double) 0, result);
+            PropertyInfo prop = typeof(TestService).GetProperty("TestReadOnlyPropertyReturningZero");
+            Assertion.AssertNotNull(prop);
+            Assertion.AssertEquals(false, prop.CanWrite);
+            Assertion.AssertEquals(true, prop.CanRead);
+        }
 
     }
 
