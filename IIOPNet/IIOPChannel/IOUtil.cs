@@ -39,13 +39,16 @@ namespace Ch.Elca.Iiop.Util {
     /// </summary>
     internal sealed class IoUtil {
         
-        private const int BUFFER_LENGTH = 1024;
+        /// <summary>
+        /// specifies, how much should be read in one step
+        /// </summary>
+        private const int READ_CHUNK_SIZE = 1024;
         
         #if UnitTest 
         
         internal static int BufferLength {
             get {
-                return BUFFER_LENGTH;
+                return READ_CHUNK_SIZE;
             }
         }
         
@@ -59,7 +62,7 @@ namespace Ch.Elca.Iiop.Util {
                                        int nrOfBytesToCopy) {                                            
             // for efficiency, almost a copy of code from ReadExaclty
             
-            byte[] readBuffer = new byte[BUFFER_LENGTH];
+            byte[] readBuffer = new byte[READ_CHUNK_SIZE];
             
             int bytesRead = 0;            
             while (bytesRead < nrOfBytesToCopy) {
@@ -90,26 +93,22 @@ namespace Ch.Elca.Iiop.Util {
                 throw new ArgumentException("target array to small");
             }            
             
-            byte[] readBuffer = new byte[BUFFER_LENGTH];
-            
             int bytesRead = 0;
             while (bytesRead < nrOfBytesToRead) {
                 // need more data
-                int toRead = Math.Min(readBuffer.Length, 
+                int toRead = Math.Min(READ_CHUNK_SIZE, 
                                       nrOfBytesToRead - bytesRead);
-                
+
                 // read either the whole buffer length or 
-                // the remaining nr of bytes: nrOfBytesToRead - bytesRead                
-                int readCurrent = source.Read(readBuffer, 0, toRead);
+                // the remaining nr of bytes: nrOfBytesToRead - bytesRead
+                int readCurrent = source.Read(target, targetOffset + bytesRead, 
+                                              toRead);
                 if (readCurrent <= 0) {
                     throw new IOException("underlying stream not enough data");
                 }
-                // copy to destination Array
-                Array.Copy(readBuffer, 0, target, 
-                           targetOffset + bytesRead, readCurrent);
                 bytesRead += readCurrent;
             }                                                    
-                                        
+                                                                                        
         }
         
         

@@ -651,9 +651,7 @@ namespace Ch.Elca.Iiop.Cdr {
             // write header
             m_header.WriteToStream(m_stream, (uint)m_buffer.Length);
             // write content
-            for (int i = 0; i < m_buffer.Length; i++) {
-                m_stream.WriteOctet((byte)m_buffer.ReadByte());
-            }
+            m_stream.WriteBytes(m_buffer.GetBuffer(), 0, (int)m_buffer.Length);
             m_buffer.Close();
             m_contentStream = null;
         }
@@ -1645,7 +1643,7 @@ namespace Ch.Elca.Iiop.Cdr {
         }
         
         public void WriteOpaque(byte[] data) {
-		WriteBytes(data, 0, data.Length);
+            WriteBytes(data, 0, data.Length);
         }
 
         public void WriteBytes(byte[] data, int offset, int count) {
