@@ -19,4 +19,5 @@ Running the test
 - The test can be run using the NUnit GUI or the NUnit Console runner
   Running the test with console launcher:
   - change to directory TestClient\bin
-  - launch %NUNITV2_HOME%\bin\nunit-console.exe /assembly:ClientTest.dll
+  - launch LaunchTest.bat
+
