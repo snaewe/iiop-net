@@ -86,7 +86,9 @@ public class CompilerMappingPlugin {
      public void AddMappingsFromFile(FileInfo configFile) {
          // load the xml-file
          XmlDocument doc = new XmlDocument();
-         doc.Load(new FileStream(configFile.get_FullName(), FileMode.Open));
+         FileStream file = new FileStream(configFile.get_FullName(), FileMode.Open);
+         doc.Load(file);
+         file.Close();
          // process the file
          XmlNodeList elemList = doc.GetElementsByTagName("mapping");
          for (int i = 0; i < elemList.get_Count(); i++) {
