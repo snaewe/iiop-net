@@ -785,7 +785,7 @@ namespace Ch.Elca.Iiop.Marshalling {
                 m_objRefSer.Serialise(formal, actual, attributes, targetStream);
             } else if ((actual == null) || (ClsToIdlMapper.IsDefaultMarshalByVal(actual.GetType()))) {
                 targetStream.WriteBool(false); // a value-type is serialised
-                m_objRefSer.Serialise(formal, actual, attributes, targetStream);
+                m_valueSer.Serialise(formal, actual, attributes, targetStream);
             } else {
                 // actual value ( actual ) with type: 
                 // actual.GetType() is not serializable for the formal type
@@ -801,7 +801,7 @@ namespace Ch.Elca.Iiop.Marshalling {
                 object result = m_objRefSer.Deserialise(formal, attributes, sourceStream);    
                 return result;
             } else {
-                object result = m_objRefSer.Deserialise(formal, attributes, sourceStream);
+                object result = m_valueSer.Deserialise(formal, attributes, sourceStream);
                 return result;
             }
         }
