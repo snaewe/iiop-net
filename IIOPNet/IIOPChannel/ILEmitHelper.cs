@@ -111,6 +111,23 @@ namespace Ch.Elca.Iiop.Idl {
             m_paramType = new TypeContainer(clsType);
             m_direction = ParameterDirection.s_in;
         }
+        
+        /// <summary>creates a ParameterSpec for a ParameterInfo</summary>
+        public ParameterSpec(ParameterInfo forParamInfo) {
+            if (forParamInfo.IsOut) {
+                m_direction = ParameterDirection.s_out;
+            } else if (forParamInfo.ParameterType.IsByRef) {
+                m_direction = ParameterDirection.s_inout;
+            } else {
+                m_direction = ParameterDirection.s_in;
+            }            
+            m_paramName = forParamInfo.Name;
+            
+            // custom attributes
+            System.Object[] attrs = forParamInfo.GetCustomAttributes(false);
+            m_paramType = new TypeContainer(forParamInfo.ParameterType,
+                                            attrs);
+        }
 
         #endregion IConstructors
         #region IMethods
@@ -169,7 +186,8 @@ namespace Ch.Elca.Iiop.Idl {
 
         private static IlEmitHelper s_singleton = new IlEmitHelper();
 
-        /** reference to one of the internal constructor of class ParameterInfo. Used for assigning custom attributes to the return parameter */
+        ///<summary>reference to one of the internal constructor of class ParameterInfo. 
+        /// Used for assigning custom attributes to the return parameter</summary>
         private static ConstructorInfo s_paramBuildConstr;
     
         #endregion SFields
@@ -347,7 +365,7 @@ namespace Ch.Elca.Iiop.Idl {
         /// <param name="methodBuild"></param>
         /// <param name="spec"></param>
         /// <param name="paramNr"></param>
-        public void DefineParamter(MethodBuilder methodBuild, ParameterSpec spec, int paramNr) {
+        private void DefineParamter(MethodBuilder methodBuild, ParameterSpec spec, int paramNr) {
             ParameterAttributes paramAttr = ParameterAttributes.None;
             if (spec.IsOut()) { 
                 paramAttr = paramAttr | ParameterAttributes.Out; 
@@ -366,7 +384,7 @@ namespace Ch.Elca.Iiop.Idl {
         /// TBD: search nicer solution for this 
         /// </summary>
         /// <remarks>should be on MethodBuilder, but not possible to change MethodBuilder-class</remarks>
-        public ParameterBuilder CreateParamBuilderForRetParam(MethodBuilder forMethod) {
+        private ParameterBuilder CreateParamBuilderForRetParam(MethodBuilder forMethod) {
             return (ParameterBuilder) s_paramBuildConstr.Invoke(new Object[] { forMethod, (System.Int32) 0, ParameterAttributes.Retval, "" } );
         }
 

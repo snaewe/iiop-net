@@ -63,6 +63,27 @@ namespace Ch.Elca.Iiop.Idl {
 
         public TypeContainer(Type clsType) : this(clsType, new CustomAttributeBuilder[0]){
         }
+        
+        /// <summary>takes the type and the attributes as array of Attributes.
+        /// </summary>
+        /// <remarks>Use only the separated form with this constructor.</remarks>
+        public TypeContainer(Type separatedClsType, object[] attrs) {
+            m_clsType = separatedClsType;
+            m_separatedClsType = separatedClsType;
+            if (attrs == null) {
+                throw new ArgumentException("TypeContainer; attrs must be != null"); 
+            }
+            CustomAttributeBuilder[] custAttrs = 
+                new CustomAttributeBuilder[attrs.Length];
+            for (int i = 0; i < attrs.Length; i++) {
+                if (attrs[i] is IIdlAttribute) {
+                    custAttrs[i] = ((IIdlAttribute) attrs[i]).CreateAttributeBuilder();
+                }                    
+            }
+            m_separatedAttrs = custAttrs;
+            m_compactTypeAttrs = custAttrs;
+
+        }
 
         #endregion IConstructors
         #region IMethods

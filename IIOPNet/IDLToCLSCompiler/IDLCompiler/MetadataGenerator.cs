@@ -55,7 +55,7 @@ public class MetaDataGenerator : IDLParserVisitor {
     
     #region Types
 
-    /** helper class, to pass information */
+    /// <summary>helper class, to pass information</summary>
     private class BuildInfo {
         
         #region IFields
@@ -204,6 +204,10 @@ public class MetaDataGenerator : IDLParserVisitor {
     #endregion IProperties
     #region IMethods
     
+    private string GetDllName() {
+        return m_targetAsmName + ".dll";
+    }
+    
     /// <summary>
     /// creates the persistent assembly and the module, which will hold the
     /// resulting CLS
@@ -216,8 +220,7 @@ public class MetaDataGenerator : IDLParserVisitor {
                                   targetDir);
         // define one module containing the resulting CLS
         string modName = "_" + m_targetAsmName + ".netmodule";
-	string dllName = m_targetAsmName + ".dll";
-        m_modBuilder = m_asmBuilder.DefineDynamicModule(modName, dllName);
+        m_modBuilder = m_asmBuilder.DefineDynamicModule(modName, GetDllName());
     }
     
     /// <summary>initalizes the assemblies, which contains type to use
@@ -229,10 +232,12 @@ public class MetaDataGenerator : IDLParserVisitor {
         m_typesInRefAsms = new TypesInAssemblyManager(refAssemblies);
     }    
 
-    /** ends the build process, after this is called, the Generator is not able to process more files */
+    ///<summary>
+    /// ends the build process, after this is called, the Generator is not able to process more files
+    ///</summary>
     public void SaveAssembly() {
         // save the assembly to disk
-        m_asmBuilder.Save(m_targetAsmName + ".dll");
+        m_asmBuilder.Save(GetDllName());
         
         if (m_valTypeImplSkelProvider != null) {
             CreateValueTypeImplSkeletons();
@@ -250,7 +255,9 @@ public class MetaDataGenerator : IDLParserVisitor {
     
     #endif
 
-    /** prints a list of value types for which an implementation must be provided. */
+    /// <summary>
+    /// prints a list of value types for which an implementation must be provided.
+    /// </summary>
     private void PrintNeededValueImplList() {
         if (m_valueTypesDefined.Count > 0) {
             Console.WriteLine("\nDon't forget to provide an implementation for the following value types: \n");
@@ -304,7 +311,9 @@ public class MetaDataGenerator : IDLParserVisitor {
         }        
     }
 
-    /** initalize the generator for next source, with using the same target assembly / target modules */
+    /// <summary>
+    /// initalize the generator for next source, with using the same target assembly / target modules
+    /// </summary>
     public void InitalizeForSource(SymbolTable symbolTable) {
         m_symbolTable = symbolTable;
         m_symbolTable.CheckAllFwdDeclsComplete(); // assure symbol table is valid: all fwd decls are defined by a full definition
@@ -358,7 +367,7 @@ public class MetaDataGenerator : IDLParserVisitor {
         typebuild.SetCustomAttribute(serAttr);
     }
             
-    /** check if data is an instance of buildinfo, if not throws an exception */
+    ///<summary>check if data is an instance of buildinfo, if not throws an exception</summary>
     private void CheckParameterForBuildInfo(Object data, Node visitedNode) {
         if (!(data is BuildInfo)) { 
             throw new InternalCompilerException("precondition violation in visitor for node" + visitedNode.GetType() +
@@ -366,9 +375,9 @@ public class MetaDataGenerator : IDLParserVisitor {
         }
     }
 
-    /**
-     * @see parser.IDLParserVisitor#visit(SimpleNode, Object)
-     */
+    /// <summary>
+    /// <see cref="parser.IDLParserVisitor.visit(SimpleNode, Object)"/>
+    /// </summary>
     public Object visit(SimpleNode node, Object data) {
         return null; // not needed
     }
@@ -715,12 +724,14 @@ public class MetaDataGenerator : IDLParserVisitor {
         return (System.Type[])result.ToArray(typeof(System.Type));
     }
 
-    /** add abstract methods for all implemented interfaces to the abstract class,
-     *  add properties for all implemented interfaces to the abstrct class */
-    private void AddInheritedMembersAbstractDeclToClassForIf(TypeBuilder classBuilder, System.Type[] interfaces) {
+    ///<summary>add abstract methods for all implemented interfaces to the abstract class,
+    ///add properties for all implemented interfaces to the abstrct class</summary>
+    private void AddInheritedMembersAbstractDeclToClassForIf(TypeBuilder classBuilder, 
+                                                             System.Type[] interfaces) {
         if (!(classBuilder.IsClass)) { 
             return; 
         } // only needed for classes
+        
         // make sure to include interfaces inherited by the direct implemented interfaces are also considered here
         interfaces = FlattenInterfaceHierarchy(interfaces);
         for (int i = 0; i < interfaces.Length; i++) {
@@ -733,89 +744,44 @@ public class MetaDataGenerator : IDLParserVisitor {
                 }
                 // normal parameters
                 ParameterInfo[] parameters = methods[j].GetParameters();
-                System.Type[] paramTypes = new System.Type[parameters.Length];
+                ParameterSpec[] paramSpecs = new ParameterSpec[parameters.Length];
                 for (int k = 0; k < parameters.Length; k++) {
-                    paramTypes[k] = parameters[k].ParameterType;
+                    paramSpecs[k] = new ParameterSpec(parameters[k]);
                 }
-                MethodBuilder method = classBuilder.DefineMethod(methods[j].Name, 
-                                                                 MethodAttributes.Abstract | MethodAttributes.Public | MethodAttributes.Virtual | MethodAttributes.HideBySig, 
-                                                                 methods[j].ReturnType, paramTypes);
-                for (int k = 0; k < parameters.Length; k++) {
-                    SetParamAttrs(method, parameters[k]);
-                }
-                // return parameter
-                Object[] retAttrs = methods[j].ReturnTypeCustomAttributes.GetCustomAttributes(false);
-                // add custom attributes for the return type
-                ParameterBuilder paramBuild = m_ilEmitHelper.CreateParamBuilderForRetParam(method);
-                for (int k = 0; k < retAttrs.Length; k++) {
-                    if (retAttrs[k] is IIdlAttribute) {
-                        CustomAttributeBuilder attrBuilder = ((IIdlAttribute) retAttrs[k]).CreateAttributeBuilder();
-                        paramBuild.SetCustomAttribute(attrBuilder);    
-                    }
-                }
+                m_ilEmitHelper.AddMethod(classBuilder, methods[j].Name, paramSpecs,
+                                         new TypeContainer(methods[j].ReturnType, 
+                                                           methods[j].ReturnTypeCustomAttributes.GetCustomAttributes(false)),
+                                         MethodAttributes.Abstract | MethodAttributes.Public |
+                                         MethodAttributes.Virtual | MethodAttributes.HideBySig);
+                
             }
             // properties
             PropertyInfo[] properties = ifType.GetProperties(BindingFlags.Instance | BindingFlags.Public);
             for (int j = 0; j < properties.Length; j++) {
-                PropertyBuilder propBuild = classBuilder.DefineProperty(properties[j].Name, PropertyAttributes.None,
-                                                                        properties[j].PropertyType, System.Type.EmptyTypes);
-
-
-                // set the methods for the property
-                MethodBuilder getAccessor = classBuilder.DefineMethod("__get_" + properties[j].Name, 
-                                                                      MethodAttributes.Virtual | MethodAttributes.Abstract | MethodAttributes.Public | MethodAttributes.HideBySig | MethodAttributes.SpecialName, 
-                                                                      properties[j].PropertyType, System.Type.EmptyTypes);
-                propBuild.SetGetMethod(getAccessor);
+                TypeContainer propType = new TypeContainer(properties[j].PropertyType,
+                                                           properties[j].GetCustomAttributes(true));
+                MethodBuilder getAccessor = 
+                    m_ilEmitHelper.AddPropertyGetter(classBuilder, properties[j].Name,
+                                                     propType, MethodAttributes.Virtual | MethodAttributes.Abstract |
+                                                               MethodAttributes.Public | MethodAttributes.HideBySig | 
+                                                               MethodAttributes.SpecialName);
                 MethodBuilder setAccessor = null;
                 if (properties[j].CanWrite) {
-                    setAccessor = classBuilder.DefineMethod("__set_" + properties[j].Name, 
-                                                            MethodAttributes.Virtual | MethodAttributes.Abstract | MethodAttributes.Public | MethodAttributes.HideBySig | MethodAttributes.SpecialName, 
-                                                            null, new System.Type[] { properties[j].PropertyType });
-                    propBuild.SetSetMethod(setAccessor);
+                    setAccessor = 
+                        m_ilEmitHelper.AddPropertySetter(classBuilder, properties[j].Name,
+                                                         propType, MethodAttributes.Virtual | MethodAttributes.Abstract |
+                                                                   MethodAttributes.Public | MethodAttributes.HideBySig |
+                                                                   MethodAttributes.SpecialName);
                 }
-            
-                ParameterBuilder retParamGet = m_ilEmitHelper.CreateParamBuilderForRetParam(getAccessor);
-                ParameterBuilder valParam = null;
-                if (setAccessor != null) { 
-                    valParam = setAccessor.DefineParameter(1, ParameterAttributes.None, "value"); 
-                }
-                // add custom attributes
-                Object[] attrs = properties[j].GetCustomAttributes(true);
-                for (int k = 0; k < attrs.Length; k++) {
-                    if (attrs[k] is IIdlAttribute) {
-                        CustomAttributeBuilder attrBuilder = ((IIdlAttribute) attrs[k]).CreateAttributeBuilder();
-                        propBuild.SetCustomAttribute(attrBuilder);
                 
-                        retParamGet.SetCustomAttribute(attrBuilder);
-                        if (setAccessor != null) {
-                            valParam.SetCustomAttribute(attrBuilder);
-                        }
-                    }
-                } 
-
+                m_ilEmitHelper.AddProperty(classBuilder, properties[j].Name,
+                                           propType,
+                                           getAccessor, setAccessor);                                                                                           
             }
 
         }
     }
     
-    /** Defines the parameter-attributes for a method parameter (inclusive custom attributes) */
-    private void SetParamAttrs(MethodBuilder methodBuild, ParameterInfo info) {
-        ParameterAttributes paramAttr = ParameterAttributes.None;
-        if (info.IsOut) { 
-            paramAttr = paramAttr | ParameterAttributes.Out; 
-        }
-        ParameterBuilder paramBuild = methodBuild.DefineParameter(info.Position + 1, 
-                                                                  paramAttr, info.Name);
-        // custom attributes
-        System.Object[] attrs = info.GetCustomAttributes(false);
-        for (int i = 0; i < attrs.Length; i++) {
-            if (attrs[i] is IIdlAttribute) {
-                CustomAttributeBuilder attrBuilder = ((IIdlAttribute) attrs[i]).CreateAttributeBuilder();
-                paramBuild.SetCustomAttribute(attrBuilder);    
-            }
-        }
-    }
-
     /**
      * @see parser.IDLParserVisitor#visit(ASTvalue_decl, Object)
      * @param data an instance of the type buildinfo specifing the scope, this value is declared in
@@ -1167,7 +1133,7 @@ public class MetaDataGenerator : IDLParserVisitor {
         for (int i = 0; i < result.Length; i++) {
             if ((i > 0) && (result[i].IsClass)) {
                 throw new InvalidIdlException("invalid supertype: " + result[i].FullName + " for type: " + 
-                                              ((BuildInfo)data).GetContainterType().FullName +
+                                              node.GetEmbedderDesc() +
                                               " for value types, only one concrete value type parent is possible at the first position in the inheritance spec");
             }
             AttributeExtCollection attrs = AttributeExtCollection.ConvertToAttributeCollection(result[i].GetCustomAttributes(typeof(InterfaceTypeAttribute), true));
@@ -1175,7 +1141,7 @@ public class MetaDataGenerator : IDLParserVisitor {
                 InterfaceTypeAttribute ifAttr = (InterfaceTypeAttribute)attrs.GetAttributeForType(typeof(InterfaceTypeAttribute));
                 if (!(ifAttr.IdlType.Equals(IdlTypeInterface.AbstractValueType))) {
                     throw new InvalidIdlException("invalid supertype: " + result[i].FullName + " for type: " + 
-                                               ((BuildInfo)data).GetContainterType().FullName +
+                                               node.GetEmbedderDesc() +
                                                " only abstract value types are allowed in value inheritance clause and no interfaces");
                 }
             }
