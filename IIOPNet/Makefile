@@ -11,6 +11,9 @@ build:
 	cd IDLToCLSCompiler
 	$(MAKE) build
 	cd ..
+	cd Examples
+	$(MAKE) build
+	cd ..
 
 clean:
 	cd IIOPChannel
@@ -20,6 +23,9 @@ clean:
 	$(MAKE) clean
 	cd ..
 	cd IDLToCLSCompiler
+	$(MAKE) build
+	cd ..
+	cd Examples
 	$(MAKE) build
 	cd ..
 
