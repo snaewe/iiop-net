@@ -24,12 +24,18 @@ build-tests: build-base
 	cd IIOPChannel
 	$(MAKE) build-unit-tests
 	cd ..
+	cd IDLToCLSCompiler
+	$(MAKE) build-unit-tests
+	cd ..
         cd IntegrationTests
         $(MAKE) build
         cd ..
 
 test:
 	cd IIOPChannel
+	$(MAKE) test
+	cd ..
+	cd IDLToCLSCompiler
 	$(MAKE) test
 	cd ..
 	cd IntegrationTests
