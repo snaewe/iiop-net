@@ -310,6 +310,17 @@ namespace Ch.Elca.Iiop.IntegrationTests {
             
         }
 
+        [return: IdlArray(0, 5)]
+        public System.Int32[] EchoIdlLongArrayFixedSize5([IdlArray(0, 5)] System.Int32[] arg) {
+            return arg;
+        }
+
+        [return: IdlArray(0, 5)]
+        [return: IdlArrayDimension(0, 1, 3)]
+        public System.Int32[,] EchoIdlLongArray5times3([IdlArray(0, 5)][IdlArrayDimension(0, 1, 3)] System.Int32[,] arg) {
+            return arg;
+        }
+
         public Adder RetrieveAdder() {
             return new Adder();
         }

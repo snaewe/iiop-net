@@ -423,6 +423,30 @@ namespace Ch.Elca.Iiop.IntegrationTests {
         }
 
         [Test]
+        public void TestIdlIntOneDimArray() {
+            int[] testArray = new int[] { 1, 2, 3, 4, 5 };
+            int[] result = m_testService.EchoIdlLongArrayFixedSize5(testArray);
+            Assertion.AssertEquals(testArray.Length, result.Length);           
+            for (int i = 0; i < testArray.Length; i++) {
+                Assertion.AssertEquals(testArray[i], result[i]);
+            }
+        }
+
+        [Test]
+        public void TestIdlIntTwoDimArray() {
+            int[,] testArray = new int[,] { {1, 2, 3}, {4, 5, 6}, {7, 8, 9}, {10, 11, 12}, {13, 14, 15} };
+            int[,] result = m_testService.EchoIdlLongArray5times3(testArray);
+            Assertion.AssertEquals(testArray.Rank, result.Rank);
+            Assertion.AssertEquals(testArray.GetLength(0), result.GetLength(0));
+            Assertion.AssertEquals(testArray.GetLength(1), result.GetLength(1));
+            for (int i = 0; i < testArray.GetLength(0); i++) {
+                for (int j = 0; j < testArray.GetLength(1); j++) {
+                    Assertion.AssertEquals(testArray[i,j], result[i,j]);    
+                }                
+            }
+        }
+
+        [Test]
         public void TestRemoteObjects() {
             Adder adder = m_testService.RetrieveAdder();
             System.Int32 arg1 = 1;
