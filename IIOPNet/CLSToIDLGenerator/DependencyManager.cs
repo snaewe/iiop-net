@@ -412,14 +412,14 @@ namespace Ch.Elca.Iiop.Idl {
 
                 // return type
                 Type returnType = info.ReturnType;
-                if (!m_manager.IsDefaultMapped(returnType)) { 
+                if (!m_manager.IsDefaultMapped(returnType) && !returnType.Equals(forType)) {                 	
                     AddToDepList(dependencies, new MapTypeInfo(returnType, AttributeExtCollection.ConvertToAttributeCollection(info.ReturnTypeCustomAttributes.GetCustomAttributes(true)))); 
                 }
                 
                 ParameterInfo[] methodParams = info.GetParameters();
                 foreach (ParameterInfo paramInfo in methodParams) {
-                    if (!m_manager.IsDefaultMapped(paramInfo.ParameterType)) {
-                        // only add to dependencies, if not default mapped
+                    if (!m_manager.IsDefaultMapped(paramInfo.ParameterType) && !paramInfo.ParameterType.Equals(forType)) {
+                        // only add to dependencies, if not default mapped and not the same as type which is checked
                         AddToDepList(dependencies, new MapTypeInfo(paramInfo.ParameterType, AttributeExtCollection.ConvertToAttributeCollection(paramInfo.GetCustomAttributes(true))));
                     }
                 }
@@ -429,7 +429,7 @@ namespace Ch.Elca.Iiop.Idl {
         private void AddTypesFromProperties(Type forType, ArrayList dependencies, BindingFlags flags) {
             PropertyInfo[] properties = forType.GetProperties(flags);
             foreach (PropertyInfo info in properties) {
-                if (!m_manager.IsDefaultMapped(info.PropertyType))     {
+                if (!m_manager.IsDefaultMapped(info.PropertyType) && !info.PropertyType.Equals(forType))     {
                     // only add to dependencies, if not default mapped
                     AddToDepList(dependencies, new MapTypeInfo(info.PropertyType, AttributeExtCollection.ConvertToAttributeCollection(info.GetCustomAttributes(true))));
                 }
@@ -439,7 +439,7 @@ namespace Ch.Elca.Iiop.Idl {
         private void AddTypesFromFields(Type forType, ArrayList dependencies, BindingFlags flags) {
             FieldInfo[] fields = forType.GetFields(flags);
             foreach (FieldInfo info in fields) {
-                if (!m_manager.IsDefaultMapped(info.FieldType)) {
+                if (!m_manager.IsDefaultMapped(info.FieldType) && !info.FieldType.Equals(forType)) {
                     // only add to dependencies, if not default mapped
                     AddToDepList(dependencies, new MapTypeInfo(info.FieldType, AttributeExtCollection.ConvertToAttributeCollection(info.GetCustomAttributes(true))));
                 }
