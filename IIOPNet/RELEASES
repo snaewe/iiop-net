@@ -1,3 +1,18 @@
+version 1.7.0 rc1 (03 October 2004)
+-----------------------------------
+
+bugs fixed:
+- IDLToCLSCompiler: Constants type redefinition error (bug #1025398)
+- IIOPChannel: Problem with port numbers bigger than 32767
+- IDLToCLSCompiler: fixed error in command line for idl-files like ..\test.idl
+- IDLPreprocessor: corrected problem with #include directive (wrong directory used as reference)
+- IIOPChannel: corrected missing _ in case where an rmi id clashes with an idl keyword, e.g. java.lang.Exception
+
+changes:
+- some performance optimizations
+- support for setting send/receive timeout in IIOPClientChannel
+
+
 version 1.7.0 rc0 (30 August 2004)
 ----------------------------------
 
