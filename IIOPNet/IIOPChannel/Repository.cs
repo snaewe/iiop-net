@@ -329,6 +329,7 @@ namespace Ch.Elca.Iiop.Idl {
         /// <param name="clsTypeName">the fully qualified CLS type name</param>
         /// <returns></returns>
         public static Type LoadType(string clsTypeName) {
+            Debug.WriteLine("try to load type: " + clsTypeName);
             Type foundType = s_typeCache.GetType(clsTypeName);
             if (foundType != null) { 
                 return foundType; 
