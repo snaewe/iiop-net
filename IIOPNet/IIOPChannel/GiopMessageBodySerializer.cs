@@ -585,6 +585,10 @@ namespace Ch.Elca.Iiop.MessageHandling {
                         throw DeserialiseUserException(cdrStream, version); // the error .NET message for this exception is created in the formatter
                     case 2 : 
                         throw DeserialiseSystemError(cdrStream, version); // the error .NET message for this exception is created in the formatter
+                    case 3 :
+                    	// LOCATION_FORWARD:
+                    	// --> reissue request transparentely to another object
+                    	response = ReissueLocationFwd(cdrStream, methodCall); break;
                     default : 
                         // deseralization of reply error, unknown reply status: responseStatus
                         // the error .NET message for this exception is created in the formatter
@@ -646,6 +650,47 @@ namespace Ch.Elca.Iiop.MessageHandling {
             } else {
                 throw result;
             }
+        }
+        
+        /// <summary>
+        /// reissue the request on location fwd status
+        /// </summary>
+        private IMessage ReissueLocationFwd(CdrInputStream cdrStream, IMethodCallMessage request) {
+            // read the Location fwd IOR
+            Marshaller marshaller = Marshaller.GetSingleton();
+            MarshalByRefObject newProxy = marshaller.Unmarshal(request.MethodBase.DeclaringType, new AttributeExtCollection(), cdrStream)
+                                              as MarshalByRefObject;
+            if (newProxy == null) {
+            	throw new OBJECT_NOT_EXIST(2402, CompletionStatus.Completed_No);
+            }
+			object[] reqArgs = new object[request.Args.Length];			 
+			request.Args.CopyTo(reqArgs, 0);
+			object retVal = request.MethodBase.Invoke(newProxy, reqArgs);
+			return CreateReturnMsgForValues(retVal, reqArgs, request);
+        }
+        	
+		/// <summary>
+		/// creates a return message for a return value and possible out/ref args among the sent arguments
+		/// </summary>
+        private ReturnMessage CreateReturnMsgForValues(object retVal, object[] reqArgs,
+                                                       IMethodCallMessage request) {
+            // find out args
+            MethodInfo targetMethod = (MethodInfo)request.MethodBase;
+            ParameterInfo[] parameters = targetMethod.GetParameters();
+            ArrayList outArgsList = new ArrayList();
+            for (int i = 0; i < parameters.Length; i++) {
+                if (ParameterMarshaller.IsOutParam(parameters[i]) || 
+                    ParameterMarshaller.IsRefParam(parameters[i])) {
+                    outArgsList.Add(reqArgs[i]); // i-th argument is an out/ref param
+                }
+            }
+            
+            object[] outArgs = outArgsList.ToArray();
+            if (outArgs == null) { 
+                outArgs = new object[0]; 
+            }
+            // create the return message
+            return new ReturnMessage(retVal, outArgs, outArgs.Length, null, request); 
         }
 
         #endregion Replys
