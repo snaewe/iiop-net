@@ -870,12 +870,12 @@ namespace Ch.Elca.Iiop.Tests {
     using Ch.Elca.Iiop.MessageHandling;
     using Ch.Elca.Iiop.Cdr;
     using omg.org.CORBA;
-
+    
 
     /// <summary>
     /// Unit-tests for testing request/reply serialisation/deserialisation
     /// </summary>
-    public class ServiceContextSerTest : TestCase {
+    public class MessageBodySerialiserTest : TestCase {
         
         public void TestSameServiceIdMultiple() {
             // checks if service contexts with the same id, doesn't throw an exception
@@ -901,8 +901,8 @@ namespace Ch.Elca.Iiop.Tests {
             ServiceContextCollection result = (ServiceContextCollection) method.Invoke(ser, new object[] { cdrIn });
             // check if context is present
             Assertion.Assert("expected context not in collection", result.ContainsContextForService(1234567) == true);
-        }
-        
+        }        
+                
     }
     
 }
