@@ -99,5 +99,13 @@ public interface TestService extends java.rmi.Remote {
     public TestSimpleInterface1 GetSimpleService1() throws RemoteException;
     public TestSimpleInterface2 GetSimpleService2() throws RemoteException;
 
+    /** sequence is an idl keyword, check _ removal during transmission */
+    public int[] getSequence() throws RemoteException;
+    
+    /** sequence is an idl keyword, check _ removal during transmission */
+    public void setSequence(int[] arg) throws RemoteException;
+    
+    /** octet is an idl keyword, check _ removal during transmission */
+    public byte octet(byte arg) throws RemoteException;    
 
 }

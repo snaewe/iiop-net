@@ -34,6 +34,7 @@ import javax.rmi.PortableRemoteObject;
 public class TestServiceImpl extends PortableRemoteObject implements TestService {
 
     private int m_val = 0;
+    private int[] m_intSequence = new int[0];
 
     public TestServiceImpl() throws java.rmi.RemoteException {
         super(); // invoke rmi linking and remote object initialization
@@ -219,6 +220,21 @@ public class TestServiceImpl extends PortableRemoteObject implements TestService
     
     public TestSimpleInterface2 GetSimpleService2() throws RemoteException {
         return new TestSimpleIfImpl();        
+    }
+    
+    /** sequence is an idl keyword, check _ removal during transmission */
+    public int[] getSequence() throws RemoteException {
+        return m_intSequence;
+    }
+    
+    /** sequence is an idl keyword, check _ removal during transmission */
+    public void setSequence(int[] arg) throws RemoteException {
+        m_intSequence = arg;
+    }
+    
+    /** inout is an idl keyword, check _ removal during transmission */
+    public byte octet(byte arg) throws RemoteException {
+        return arg;
     }
         
 }

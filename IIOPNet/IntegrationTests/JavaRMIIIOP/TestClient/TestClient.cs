@@ -468,7 +468,26 @@ namespace Ch.Elca.Iiop.IntegrationTests {
             Assertion.AssertNotNull("testSimpleService2 ref not received", proxy2);
             Assertion.AssertEquals(true, proxy2._is_a("RMI:Ch.Elca.Iiop.IntegrationTests.TestSimpleInterface2:0000000000000000"));
         }
-
+        
+        [Test]
+        public void TestIdlKeyWordPropertyNames() {           
+            int[] argSeq = new int[] { 1, 2, 3 };
+            m_testService._sequence = argSeq;
+            int[] resultSeq = m_testService._sequence;
+            Assertion.AssertNotNull("property int seq null", resultSeq);
+            Assertion.AssertEquals(argSeq.Length, resultSeq.Length);
+            for (int i = 0; i < argSeq.Length; i++) {
+                Assertion.AssertEquals("wrong seq entry", argSeq[i], resultSeq[i]);
+            }            
+        }
+        
+        [Ignore("doesn't work with sun jdk 1.4; it expects _!")]
+        [Test]
+        public void TestIdlKeyWordMethodNames() {
+            byte arg = 39;
+            byte result = m_testService._octet(arg);
+            Assertion.AssertEquals("wrong result octet-call", arg, result);
+        }
         
     }
 
