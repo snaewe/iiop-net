@@ -1092,11 +1092,14 @@ public class MetaDataGenerator implements IDLParserVisitor {
     /**
      * @see parser.IDLParserVisitor#visit(ASTconst_dcl, Object)
      * @param data expects a BuildInfo instance
-     * if ((BuildInfo)data).getContainerType() is null, than an independant const-decl is created, else
-     * the const delcaration is added to the Type in creation
+     * The following two cases are possible here:
+     * constant directly declared in module: ((BuildInfo)data).GetContainerType() is null 
+     * constant declared in an interface or value type: ((BuildInfo)data).GetContainerType() is not null
+     * 
+     * remark: fields in interfaces are not CLS-compliant!
      */
     public Object visit(ASTconst_dcl node, Object data) {
-        return null;
+        throw new RuntimeException("constants are not yet supported");
     }
 
     /**
@@ -1362,7 +1365,7 @@ public class MetaDataGenerator implements IDLParserVisitor {
      * @see parser.IDLParserVisitor#visit(ASTfloating_pt_type_longdouble, Object)
      */
     public Object visit(ASTfloating_pt_type_longdouble node, Object data) {
-        throw new System.NotSupportedException("long double not supported by this compiler");
+        throw new RuntimeException("long double not supported by this compiler");
     }
 
     /**
@@ -1609,42 +1612,42 @@ public class MetaDataGenerator implements IDLParserVisitor {
      */
     public Object visit(ASTunion_type node, Object data) 
     {
-        throw new System.NotSupportedException("union type is not supported by this compiler");
+        throw new RuntimeException("union type is not supported by this compiler");
     }
 
     /**
      * @see parser.IDLParserVisitor#visit(ASTswitch_type_spec, Object)
      */
     public Object visit(ASTswitch_type_spec node, Object data) {
-        throw new System.NotSupportedException("union type is not supported by this compiler");
+        throw new RuntimeException("union type is not supported by this compiler");
     }
 
     /**
      * @see parser.IDLParserVisitor#visit(ASTswitch_body, Object)
      */
     public Object visit(ASTswitch_body node, Object data) {
-        throw new System.NotSupportedException("union type is not supported by this compiler");
+        throw new RuntimeException("union type is not supported by this compiler");
     }
 
     /**
      * @see parser.IDLParserVisitor#visit(ASTcasex, Object)
      */
     public Object visit(ASTcasex node, Object data) {
-        throw new System.NotSupportedException("union type is not supported by this compiler");
+        throw new RuntimeException("union type is not supported by this compiler");
     }
 
     /**
      * @see parser.IDLParserVisitor#visit(ASTcase_label, Object)
      */
     public Object visit(ASTcase_label node, Object data) {
-        throw new System.NotSupportedException("union type is not supported by this compiler");
+        throw new RuntimeException("union type is not supported by this compiler");
     }
 
     /**
      * @see parser.IDLParserVisitor#visit(ASTelement_spec, Object)
      */
     public Object visit(ASTelement_spec node, Object data) {
-        throw new System.NotSupportedException("union type is not supported by this compiler");
+        throw new RuntimeException("union type is not supported by this compiler");
     }
     #endregion
 
@@ -1770,14 +1773,14 @@ public class MetaDataGenerator implements IDLParserVisitor {
      * @see parser.IDLParserVisitor#visit(ASTarray_declarator, Object)
      */
     public Object visit(ASTarray_declarator node, Object data) {
-        throw new System.NotSupportedException("array type is not supported by this compiler");
+        throw new RuntimeException("array type is not supported by this compiler");
     }
 
     /**
      * @see parser.IDLParserVisitor#visit(ASTfixed_array_size, Object)
      */
     public Object visit(ASTfixed_array_size node, Object data) {
-        throw new System.NotSupportedException("union type is not supported by this compiler");
+        throw new RuntimeException("union type is not supported by this compiler");
     }
     #endregion
 
