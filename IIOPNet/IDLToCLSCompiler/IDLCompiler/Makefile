@@ -19,5 +19,5 @@ $(Dest)IDLToCLSCompiler.exe: $(Dest)IIOPChannel.dll $(Dest)IDLPreprocessor.dll *
 
 
 clean:
-	del /s /q $(Dest)*
-	rmdir $(Dest)
+	if exist $(Dest)* del /s /q $(Dest)*
+	if exist $(Dest) rmdir $(Dest)
