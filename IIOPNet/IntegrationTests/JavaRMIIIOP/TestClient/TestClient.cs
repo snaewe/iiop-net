@@ -49,15 +49,21 @@ namespace Ch.Elca.Iiop.IntegrationTests {
 
         #endregion IFields
 
+        private NamingContext GetNameService() {
+            // access COS nameing service
+            CorbaInit init = CorbaInit.GetInit();
+            NamingContext nameService = init.GetNameService("localhost", 1050);
+            return nameService;            
+        }
+
+
         [SetUp]
         public void SetupEnvironment() {
             // register the channel
             m_channel = new IiopClientChannel();
             ChannelServices.RegisterChannel(m_channel);
 
-            // access COS nameing service
-            CorbaInit init = CorbaInit.GetInit();
-            NamingContext nameService = init.GetNameService("localhost", 1050);
+            NamingContext nameService = GetNameService();
             NameComponent[] name = new NameComponent[] { new NameComponent("test", "") };
             // get the reference to the test-service
             m_testService = (TestService)nameService.resolve(name);
@@ -520,6 +526,27 @@ namespace Ch.Elca.Iiop.IntegrationTests {
             byte result = m_testService._octet(arg);
             Assertion.AssertEquals("wrong result octet-call", arg, result);
         }
+
+        [Test]
+        public void TestNameserviceList() {
+            NamingContext nameService = GetNameService();
+
+            Binding[] bindings;
+            BindingIterator bindingIterator;
+            nameService.list(10, out bindings, out bindingIterator);
+            Assertion.Assert("nr of bindings too small", (bindings.Length > 0));
+
+            bool found  = false;
+            foreach (Binding binding in bindings) {
+                NameComponent[] name = binding.binding_name;                
+                if ((name.Length > 0) && (name[0].id.Equals("test"))) {
+                    found = true;
+                    break;
+                }
+            }
+            Assertion.Assert("service not found", found);
+        }
+
         
     }
 
