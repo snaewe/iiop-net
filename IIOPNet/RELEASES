@@ -1,18 +1,16 @@
-Version 1.0
------------
+Latest Changes
+--------------
+- IDL to CLS compiler
+- GettingStarted examples showing how to use the tools
 
-- first version of the IIOP.NET Channel
 
-Version 1.1
------------
-
+Version 1.1 (28 May 2003)
+-------------------------
 - improved version of the IIOP.NET Channel
-- non-trivial example
+- GenericCollections example
 - CLS to IDL generator
 
 
-Version 1.2
------------
-
-- IDL to CLS compiler
-- examples showing how to use the tools
+Version 1.0 (05 May 2003)
+-------------------------
+- first version of the IIOP.NET Channel
