@@ -1,3 +1,25 @@
+version 1.6.0 rc0 (22 January 2003)
+-----------------------------------
+
+new features:
+- IDLToCLSCompiler is now able to generate a skeleton for value type implementation classes. 
+  Use the option -vtSkel to turn on generation of the .cs files containing the skeletons.
+- IIOPChannel: added runtime check for bounded sequences
+
+changes:
+- IDLToCLSCompiler generates now only one dll without an additional .netmodule file. This resolves the problem with
+  C# VS.NET intellisense.
+- Performance improvment.
+- improved some error messages from the IDLToCLSCompiler.
+
+bugs fixed:
+
+- IIOPChannel: Strings deserialized from "any" are assumed to be boxed (bug #858354)
+- IIOPChannel: (W)StringTC deserialization incorrect (bug #860267)
+- IDLToCLSCompiler: problem with recursive structs (sequence) (bug #866708)
+
+
+
 Version 1.5.1 (02 Decembre 2003)
 -------------------------------
 
