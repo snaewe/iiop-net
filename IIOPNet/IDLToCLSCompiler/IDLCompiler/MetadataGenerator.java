@@ -1155,7 +1155,9 @@ public class MetaDataGenerator implements IDLParserVisitor {
      * remark: fields in interfaces are not CLS-compliant!
      */
     public Object visit(ASTconst_dcl node, Object data) {
-        throw new RuntimeException("constants are not yet supported");
+        // throw new RuntimeException("constants are not yet supported");
+        System.out.println("warning: constants are not yet supported; " + node.getIdent());
+        return null;
     }
 
     /**
