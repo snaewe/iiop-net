@@ -35,6 +35,7 @@ using System.Net;
 using System.Threading;
 using System.Diagnostics;
 using Ch.Elca.Iiop.CorbaObjRef;
+using omg.org.CORBA;
 
 namespace Ch.Elca.Iiop {
 
@@ -83,25 +84,47 @@ namespace Ch.Elca.Iiop {
         #region IFields
                
         private string m_targetHost;
+        private IPAddress m_targetHostIp;
         private int m_port;
         
         #endregion IFields
         #region IConstructors
         
+        /// <summary>
+        /// create a transport wrapper to host with name host and port port.
+        /// </summary>
+        /// <param name="host">a symbolic name, which is resolved using dns</param>
+        /// <param name="port">the port to connect to</param>
         public TcpClientTransport(string host, int port) {
             m_targetHost = host;
             m_port = port;
+            
+        }
+
+        /// <summary>
+        /// create a transport wrapper to host with ip-address hostAddr and port port.
+        /// </summary>        
+        public TcpClientTransport(IPAddress hostIp, int port) {
+            m_targetHostIp = hostIp;
+            m_port = port;
         }
         
-        #endregion Ionstructors
-        #region IMethods
+        #endregion IConstructors
+        #region IMethods                        
         
         /// <summary><see cref="Ch.Elca.Iiop.IClientTranport.OpenConnection/></summary>
         public void OpenConnection() {
             if (IsConnectionOpen()) { 
                 return; // already open
             }
-            m_socket = new TcpClient(m_targetHost, m_port);
+            m_socket = new TcpClient();
+            if (m_targetHostIp != null) {
+                m_socket.Connect(m_targetHostIp, m_port);
+            } else if (m_targetHost != null) {                
+                m_socket.Connect(m_targetHost, m_port);
+            } else {
+                throw new INTERNAL(547, CompletionStatus.Completed_No);
+            }
             m_socket.NoDelay = true; // send immediately; (TODO: what is better here?)
             m_stream = m_socket.GetStream();
         }
@@ -118,7 +141,7 @@ namespace Ch.Elca.Iiop {
                 }                                
                 return true; 
             }
-        }
+        }                
         
         #endregion IMethods
         
@@ -156,10 +179,30 @@ namespace Ch.Elca.Iiop {
     /// </summary>
     internal class TcpTransportFactory : ITransportFactory {
         
+        #region IMethods
+        
         /// <summary><see cref="Ch.Elca.Iiop.IClientTransportFactory.CreateTransport(Ior)"/></summary>
         public IClientTransport CreateTransport(Ior target) {
-            return new TcpClientTransport(target.HostName, target.Port);
+            IPAddress asIpAddress = ConvertToIpAddress(target.HostName);
+            if (asIpAddress == null) {
+                return new TcpClientTransport(target.HostName, target.Port);
+            } else {
+                return new TcpClientTransport(asIpAddress, target.Port);
+            }
         }
+        
+        /// <summary>
+        /// returns the IPAddress if hostName is a valid ipAdress, otherwise returns null.
+        /// </summary>
+        private IPAddress ConvertToIpAddress(string hostName) {
+            // is there a good way to tell if hostName represents an IpAddress or not?
+            try {
+                return IPAddress.Parse(hostName);
+            } catch (Exception) {
+                // not parsable
+                return null;
+            }            
+        }        
         
         /// <summary><see cref="Ch.Elca.Iiop.IClientTransportFactory.GetEndpointKey(Ior)"/></summary>
         public string GetEndpointKey(Ior target) {
@@ -172,6 +215,8 @@ namespace Ch.Elca.Iiop {
             result.Setup(clientAcceptCallBack);
             return result;
         }
+        
+        #endregion IMethods
                 
     }
     
