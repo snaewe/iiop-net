@@ -75,7 +75,8 @@ namespace Ch.Elca.Iiop.Security.Ssl {
         private short    m_target_requires;
         
         /// <summary>the listening port</summary>
-        public short Port;
+        /// <remarks>was mapped form an UShort, is negative for high ports
+        public short Port; // Port is mapped from an unsigned short -> cast back to ushort, before return
         
         #endregion IFields        
         #region IConstructors
@@ -121,6 +122,13 @@ namespace Ch.Elca.Iiop.Security.Ssl {
         }
         
         #endregion IProperties
+        #region IMethods
+
+        public int GetPort() {
+            return (ushort)Port;
+        }
+
+        #endregion IMethods
         
     }
 

@@ -210,7 +210,7 @@ namespace Ch.Elca.Iiop.Security.Ssl {
         public IClientTransport CreateTransport(Ior target) {
             ITaggedComponent sslComponent = GetSSLComponent(target);
             IPAddress asIpAddress = ConvertToIpAddress(target.HostName);
-            int port = ((SSLComponentData)sslComponent.ComponentData).Port;            
+            int port = ((SSLComponentData)sslComponent.ComponentData).GetPort();            
             SecurityOptions options = CreateClientSecurityOptions((SSLComponentData)sslComponent.ComponentData);
             if (asIpAddress == null) {            
                 return new SslClientTransport(target.HostName, port, options);

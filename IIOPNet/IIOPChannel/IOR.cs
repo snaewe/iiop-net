@@ -173,9 +173,9 @@ namespace Ch.Elca.Iiop.CorbaObjRef {
         }
 
         /// <summary>the port of the default InternetIIOPProfile</summary>
-        public short Port {
+        public int Port {
             get { 
-                return m_port; 
+                return ((ushort)m_port); // m_port is mapped from an unsigned short -> cast back to ushort, before return
             }
         }
 
@@ -213,7 +213,7 @@ namespace Ch.Elca.Iiop.CorbaObjRef {
         private void AssignDefaultFromProfile(IorProfile profile) {
             m_version = profile.Version;
             m_hostName = profile.HostName;
-            m_port = profile.Port;
+            m_port = (short)profile.Port;
             m_objectKey = profile.ObjectKey;
         }
 
@@ -337,9 +337,9 @@ namespace Ch.Elca.Iiop.CorbaObjRef {
             }
         }
 
-        public short Port {
+        public int Port {
             get { 
-                return m_port; 
+                return (ushort)m_port; // m_port is mapped from an unsigned short -> cast back to ushort, before return
             }
         }
 
