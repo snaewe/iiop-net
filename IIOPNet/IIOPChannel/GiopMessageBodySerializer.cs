@@ -76,6 +76,8 @@ namespace Ch.Elca.Iiop.MessageHandling {
         public const string METHODNAME_KEY = "__MethodName";
         /// <summary>the key used to access the argument-property in messages</summary>
         public const string ARGS_KEY = "__Args";
+    	/// <summary>the key used to access the method-signature property in messages</summary>
+    	public const string METHOD_SIG_KEY = "__MethodSignature";
 
         #endregion Constants
         #region IFields
@@ -287,7 +289,7 @@ namespace Ch.Elca.Iiop.MessageHandling {
         /// <param name="serverType">the type of the object called</param>
         /// <param name="calledMethodInfo">the MethodInfo of the method, which is called</param>
         /// <returns>returns the mapped methodName of the operation to call of this object specific method</returns>
-        private MethodInfo DecodeObjectOperation(string objectUri, string methodName, Type serverType) {            
+        private MethodInfo DecodeObjectOperation(string methodName, Type serverType) {
             // method name mapping
             string resultMethodName;
             if (s_iIdlEntityType.IsAssignableFrom(serverType)) {
@@ -346,6 +348,16 @@ namespace Ch.Elca.Iiop.MessageHandling {
             result[0] = objectUri; // this argument is passed to all standard operations
             Array.Copy((Array)args, 0, result, 1, args.Length);
             return result;
+        }
+        
+        /// <summary>generate the signature info for the method</summary>
+        private Type[] GenerateSigForMethod(MethodInfo method) {
+        	ParameterInfo[] parameters = method.GetParameters();
+        	Type[] result = new Type[parameters.Length];
+        	for (int i = 0; i < parameters.Length; i++) {        		        	  
+                result[i] = parameters[i].ParameterType;
+        	}
+        	return result;
         }
 
         /// <summary>
@@ -473,8 +485,11 @@ namespace Ch.Elca.Iiop.MessageHandling {
                 bool standardOp = false;
                 if (!StandardCorbaOps.CheckIfStandardOp(methodName)) {
                     // handle object specific-ops
-                    calledMethodInfo = DecodeObjectOperation(objectUri, methodName, serverType);
+                    calledMethodInfo = DecodeObjectOperation(methodName, serverType);
                     methodName = calledMethodInfo.Name;
+                    // to handle overloads correctly, add signature info:
+                    Type[] sig = GenerateSigForMethod(calledMethodInfo);
+            	    msg.Properties.Add(SimpleGiopMsg.METHOD_SIG_KEY, sig);
                 } else {
                     // handle standard corba-ops like _is_a
                     calledMethodInfo = DecodeStandardOperation(objectUri, methodName);

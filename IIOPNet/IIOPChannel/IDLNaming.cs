@@ -124,9 +124,20 @@ namespace Ch.Elca.Iiop.Idl {
         /// <summary>
         /// find the CLS method for the idl name of an overloaded CLS method, defined in type serverType
         /// </summary>
-        internal static MethodInfo FindClsMethodForOverloadedMethodIdlName(string idlName, Type serverType) {
-            // TODO: implement this
-            throw new omg.org.CORBA.BAD_OPERATION(247, omg.org.CORBA.CompletionStatus.Completed_No);
+        internal static MethodInfo FindClsMethodForOverloadedMethodIdlName(string idlName,
+                                                                           Type serverType) {            
+            string methodName = idlName.Substring(0, idlName.IndexOf("__"));
+            MethodInfo[] methods = serverType.GetMethods(BindingFlags.Public | BindingFlags.Instance);
+            foreach (MethodInfo method in methods) {
+            	if (method.Name.Equals(methodName)) {
+            		// method name is equal -> check if mangled method Name is the same
+            		string mappedName = MapClsMethodNameToIdlName(method, true);
+            		if (mappedName.Equals(idlName)) {
+            			return method;
+            		}
+            	}
+            }
+            return null;
         }
         
         /// <summary>
