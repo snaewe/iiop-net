@@ -90,10 +90,10 @@ public class IDLToCLS {
     
     private static void HowTo() {
         Console.WriteLine("Compiler usage:");
-        Console.WriteLine("  IDLToCLSCompiler [options] <target assembly name> idl-files");
+        Console.WriteLine("  IDLToCLSCompiler [options] target_assembly_name idl-files");
         Console.WriteLine();
         Console.WriteLine("creates a CLS assembly for the OMG IDL definition files.");
-        Console.WriteLine("target assembly name is the name of the target assembly without .dll");
+        Console.WriteLine("target_assembly_name is the name of the target assembly without .dll");
         Console.WriteLine("idl-files: one or more idl files containg OMG IDL definitions");
         Console.WriteLine();
         Console.WriteLine("options are:");
