@@ -101,7 +101,7 @@ namespace Ch.Elca.Iiop.Idl {
 
         object MapToStringValue(Type clsType);
 
-        /// <summary>map to the special type TypeDesc, which is defined for mapping System.Type</summary>
+        /// <summary>map to CORBA type-desc (typecode) for System.Type</summary>
         object MapToTypeDesc(Type clsType);
 
         /// <summary>map to the special type CORBA::TypeCode, which is defined for mapping CORBA::TypeCodeImpl</summary>
