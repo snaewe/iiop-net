@@ -269,6 +269,7 @@ namespace Ch.Elca.Iiop.Marshalling {
 
             // prepare the result
             outArgs = demarshalledOutArgs.ToArray();
+            // need to return empty array, if no out-arg is present, because otherwise async calls fail
             if ((!outArgFound) || (outArgs == null)) { 
                 outArgs = new object[0]; 
             }
