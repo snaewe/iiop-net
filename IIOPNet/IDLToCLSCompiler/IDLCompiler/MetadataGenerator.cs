@@ -1278,8 +1278,19 @@ public class MetaDataGenerator : IDLParserVisitor {
      * @see parser.IDLParserVisitor#visit(ASTpositive_int_const, Object)
      */
     public Object visit(ASTpositive_int_const node, Object data) {
-        // used for array, bounded seq, ...; not used yet
-        return null;
+        // used for array, bounded seq, ...;
+        // evaluate the const-exp:
+        Literal result = (Literal)node.jjtGetChild(0).jjtAccept(this, data);
+        if (!(result is IntegerLiteral)) {
+            throw new InvalidIdlException("invalid positive int const found: " + result.GetValue());
+        }
+        long intConst = (long)result.GetValue();
+        if (intConst < 0) {
+            throw new InvalidIdlException("negative int found where positive int constant was required: " + 
+                result.GetValue());
+        }
+
+        return intConst;
     }
     #endregion
 
@@ -1995,10 +2006,6 @@ public class MetaDataGenerator : IDLParserVisitor {
     public Object visit(ASTsequence_type node, Object data) {
         CheckParameterForBuildInfo(data, node);        
         BuildInfo containerInfo = (BuildInfo) data;
-        if (node.jjtGetNumChildren() > 1) { 
-            // throw new NotSupportedException("sequence with a bound not supported by this compiler"); 
-            Console.WriteLine("WARNING: sequence with a bound not supported by this compiler; map to unbounded");
-        }
         SimpleNode elemTypeNode = (SimpleNode)node.jjtGetChild(0);
         if (containerInfo.GetContainterType() != null) {
             // inform the type-manager of structs/unions in creation, because
@@ -2029,7 +2036,15 @@ public class MetaDataGenerator : IDLParserVisitor {
             arrayType = declAssembly.GetType(elemType.GetCompactClsType().FullName + "[]"); // not nice, better solution ?
         }
         
-        Debug.WriteLine("created array type: " + arrayType);        
+        Debug.WriteLine("created array type: " + arrayType);
+        
+        // determin if sequence is bounded or unbounded
+        long bound = 0;
+        if (node.jjtGetNumChildren() > 1) { 
+            // bounded sequnece
+            bound = (long) node.jjtGetChild(1).jjtAccept(this, data);
+        }
+
         // determine the needed attributes: IdlSequence is required by the sequence itself; 
         // combine with the attribute from the element type
         // possible are: IdlSequence (for sequence of sequence), ObjectIdlType,
@@ -2038,7 +2053,11 @@ public class MetaDataGenerator : IDLParserVisitor {
         // is in the compact form        
         CustomAttributeBuilder[] customAttrs = 
             new CustomAttributeBuilder[1 + elemType.GetCompactTypeAttrs().Length];
-        customAttrs[0] = new IdlSequenceAttribute().CreateAttributeBuilder();
+        if (bound == 0) {
+            customAttrs[0] = new IdlSequenceAttribute().CreateAttributeBuilder();
+        } else {
+            customAttrs[0] = new IdlSequenceAttribute(bound).CreateAttributeBuilder();
+        }
         if (elemType.GetCompactTypeAttrs().Length > 0) {
             Array.Copy((Array)(elemType.GetCompactTypeAttrs()), 0,
                        (Array)customAttrs, 1, 

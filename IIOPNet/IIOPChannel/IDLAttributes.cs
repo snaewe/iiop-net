@@ -319,14 +319,61 @@ namespace Ch.Elca.Iiop.Idl {
                     AllowMultiple = false)]
     public sealed class IdlSequenceAttribute : Attribute, IIdlAttribute {
         
+        #region IFields
+
+        /// <summary>
+        /// for bounded sequences > 0 (max number of elements), for unbounded = 0
+        /// </summary>
+        private long m_bound = 0;
+
+        #endregion IFields
+        #region IConsturctors
+
+        /// <summary>
+        /// Constructor for unbounded sequences
+        /// </summary>
+        public IdlSequenceAttribute() {
+            m_bound = 0;
+        }
+
+        /// <summary>
+        /// constructor for bounded sequences
+        /// </summary>
+        /// <param name="bound">max nr of elements</param>
+        public IdlSequenceAttribute(long bound) {
+            m_bound = bound;
+        }
+
+        #endregion IConstructors
+        #region IProperties
+
+        public long Bound {
+            get {
+                return m_bound;
+            }
+        }
+
+        #endregion IProperties
         #region IMethods
 
         /// <summary>creates an attribute builder for this custom attribute</summary>
         public CustomAttributeBuilder CreateAttributeBuilder() {
             Type attrType = this.GetType();
+            if (!IsBounded()) {
             ConstructorInfo attrConstr = attrType.GetConstructor(Type.EmptyTypes);
-            CustomAttributeBuilder result = new CustomAttributeBuilder(attrConstr, new Object[0]);
-            return result;
+                return new CustomAttributeBuilder(attrConstr, new Object[0]);
+            } else {
+                ConstructorInfo attrConstr = attrType.GetConstructor(new Type[] { typeof(long) });
+                return new CustomAttributeBuilder(attrConstr, new Object[] { m_bound } );
+            }
+        }
+
+        /// <summary>
+        /// is the sequence bounded or not
+        /// </summary>
+        /// <returns>bounded or not</returns>
+        public bool IsBounded() {
+            return (m_bound > 0);
         }
 
         #endregion IMethods

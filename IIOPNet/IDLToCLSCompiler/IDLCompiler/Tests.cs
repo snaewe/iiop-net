@@ -563,6 +563,60 @@ namespace Ch.Elca.Iiop.IDLCompiler.Tests {
             
             writer.Close();
         }
+
+        [Test]
+        public void TestBoundedSeq() {
+            MemoryStream testSource = new MemoryStream();
+            StreamWriter writer = new StreamWriter(testSource, s_latin1);
+            
+            // idl:
+            writer.WriteLine("module testmod {");
+            writer.WriteLine("    typedef sequence<long, 3> boundedLongSeq;");
+            writer.WriteLine("    typedef sequence<long> unboundedLongSeq;");
+            writer.WriteLine("    struct TestStructWithSeq {");
+            writer.WriteLine("        boundedLongSeq boundedSeqElem;");
+            writer.WriteLine("        unboundedLongSeq unboundedSeqElem;");
+            writer.WriteLine("    };");
+            writer.WriteLine("};");
+            writer.Flush();
+            testSource.Seek(0, SeekOrigin.Begin);
+            Assembly result = CreateIdl(testSource);
+                       
+            // check if classes for constants were created correctly
+            Type structType = result.GetType("testmod.TestStructWithSeq", true);
+
+            CheckFieldPresent(structType, "boundedSeqElem", typeof(int[]), 
+                              BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly);
+            CheckFieldPresent(structType, "unboundedSeqElem", typeof(int[]), 
+                              BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly);
+            CheckNumberOfFields(structType, BindingFlags.Public | BindingFlags.NonPublic |
+                                            BindingFlags.Instance | BindingFlags.Static | BindingFlags.DeclaredOnly,
+                                2);
+
+            FieldInfo boundedElemField = structType.GetField("boundedSeqElem",
+                                                              BindingFlags.Public | BindingFlags.Instance |
+                                                              BindingFlags.DeclaredOnly);
+
+            object[] bseqAttrs = 
+                boundedElemField.GetCustomAttributes(typeof(IdlSequenceAttribute), true);
+            Assertion.AssertNotNull(bseqAttrs);
+            Assertion.AssertEquals(1, bseqAttrs.Length);
+            Assertion.AssertEquals(true, ((IdlSequenceAttribute)bseqAttrs[0]).IsBounded());
+            Assertion.AssertEquals(3, ((IdlSequenceAttribute)bseqAttrs[0]).Bound);
+
+            FieldInfo unboundedElemField = structType.GetField("unboundedSeqElem",
+                                                               BindingFlags.Public | BindingFlags.Instance |
+                                                               BindingFlags.DeclaredOnly);
+
+            object[] ubseqAttrs = 
+                unboundedElemField.GetCustomAttributes(typeof(IdlSequenceAttribute), true);
+            Assertion.AssertNotNull(ubseqAttrs);
+            Assertion.AssertEquals(1, ubseqAttrs.Length);
+            Assertion.AssertEquals(false, ((IdlSequenceAttribute)ubseqAttrs[0]).IsBounded());
+            Assertion.AssertEquals(0, ((IdlSequenceAttribute)ubseqAttrs[0]).Bound);
+                        
+            writer.Close();
+        }
         
         [Test]
         [ExpectedException(typeof(InvalidIdlException))]

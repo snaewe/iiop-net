@@ -832,17 +832,29 @@ namespace Ch.Elca.Iiop.Marshalling {
     public class IdlSequenceSerializer : Serialiser {
 
         #region IMethods
+
+        /// <summary>
+        /// checks, if parameter to serialise does not contain more elements than allowed
+        /// </summary>
+        private void CheckBound(uint sequenceLength, IdlSequenceAttribute seqAttr) {
+            if (seqAttr.IsBounded() && (sequenceLength > seqAttr.Bound)) {
+                throw new BAD_PARAM(3434, CompletionStatus.Completed_MayBe);
+            }
+        }
         
         public override void Serialise(Type formal, object actual, AttributeExtCollection attributes,
                                        CdrOutputStream targetStream) {
-            if (attributes.IsInCollection(typeof(IdlSequenceAttribute))) {
+            if (attributes.IsInCollection(typeof(IdlSequenceAttribute))) {                
                 // mapped from an IDL-sequence or CLS to IDL mapping
-                attributes.RemoveAttributeOfType(typeof(IdlSequenceAttribute)); // this attribute is handled --> remove it
+                IdlSequenceAttribute seqAttr = (IdlSequenceAttribute)
+                    attributes.RemoveAttributeOfType(typeof(IdlSequenceAttribute)); // this attribute is handled --> remove it
+
                 Array array = (Array) actual;
                 if (array == null) {
                     // not allowed for a sequence:
-                    throw new MARSHAL(3433, CompletionStatus.Completed_MayBe);
+                    throw new BAD_PARAM(3433, CompletionStatus.Completed_MayBe);
                 }
+                CheckBound((uint)array.Length, seqAttr);
                 targetStream.WriteULong((uint)array.Length);
                 // get marshaller for elemtype
                 Type elemType = formal.GetElementType();
@@ -863,9 +875,12 @@ namespace Ch.Elca.Iiop.Marshalling {
                                            CdrInputStream sourceStream) {
             if (attributes.IsInCollection(typeof(IdlSequenceAttribute))) {
                 // mapped from an IDL-sequence
-                attributes.RemoveAttributeOfType(typeof(IdlSequenceAttribute));
+                IdlSequenceAttribute seqAttr = 
+                    (IdlSequenceAttribute)attributes.RemoveAttributeOfType(typeof(IdlSequenceAttribute));
                 uint nrOfElements = sourceStream.ReadULong();
-                Array result = Array.CreateInstance(formal.GetElementType(), (int)nrOfElements);
+                CheckBound(nrOfElements, seqAttr);
+                
+                Array result = Array.CreateInstance(formal.GetElementType(), (int)nrOfElements);                
                 // get marshaller for array element type
                 Type elemType = formal.GetElementType();
                 MarshallerForType marshaller = new MarshallerForType(elemType, attributes);

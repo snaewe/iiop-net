@@ -132,19 +132,13 @@ namespace Ch.Elca.Iiop.Util {
         /// <summary>
         /// removes the first attribute of the given type
         /// </summary>
-        public void RemoveAttributeOfType(Type attrType) {
-            IEnumerator enumerator = GetEnumerator();
-            Attribute foundAttr = null;
-            while (enumerator.MoveNext()) {
-                Attribute attr = (Attribute)enumerator.Current;
-                if (attr.GetType() == attrType) { 
-                    foundAttr = attr;
-                    break;
-                }
-            }
+        /// <returns>The removed attribute, or null if not found</returns>
+        public Attribute RemoveAttributeOfType(Type attrType) {
+            Attribute foundAttr = GetAttributeForType(attrType);
             if (foundAttr != null) {
                 m_attributes.Remove(foundAttr);
             }
+            return foundAttr;
         }
 
         /// <summary>

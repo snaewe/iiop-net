@@ -34,6 +34,7 @@ using NUnit.Framework;
 using Ch.Elca.Iiop;
 using Ch.Elca.Iiop.Services;
 using omg.org.CosNaming;
+using omg.org.CORBA;
 
 namespace Ch.Elca.Iiop.IntegrationTests {
 
@@ -201,6 +202,26 @@ namespace Ch.Elca.Iiop.IntegrationTests {
                 }
             }
             
+        }
+
+        [Test]
+        public void TestBoundedSeq() {
+            int[] lengthOk = new int[] { 1, 2, 3 };
+            int[] result = m_testService.EchoBoundedSeq(lengthOk);
+            Assertion.AssertNotNull(result);
+            Assertion.AssertEquals(lengthOk.Length, result.Length);
+            for (int i = 0; i < result.Length; i++) {
+                Assertion.AssertEquals(lengthOk[i], result[i]);
+            }
+            
+            int[] tooLong = new int[] { 1, 2, 3, 4 };
+            try {
+                m_testService.EchoBoundedSeq(tooLong);
+                Assertion.Fail("expected BAD_PARAM exception, because sequence too long, but not thrown");
+            } catch (BAD_PARAM badParamE) {
+                Assertion.AssertEquals(badParamE.Minor, 3434);
+            }
+
         }
 
         [Test]
