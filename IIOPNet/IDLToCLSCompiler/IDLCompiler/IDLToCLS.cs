@@ -63,7 +63,8 @@ public class IDLToCLS {
     private bool m_vtSkelOverwrite = false;
     private bool m_vtSkelEnable = false;
 	
-	private StrongNameKeyPair m_keyPair;
+	private string m_keyFile;
+	private bool m_delaySign = false;
     
     #endregion IFields
     #region IConstructors
@@ -110,6 +111,7 @@ public class IDLToCLS {
         Console.WriteLine("-vtSkelTd       The targetDirectory for generated valuetype impl skeletons");
         Console.WriteLine("-vtSkelO        Overwrite already present valuetype skeleton implementations");
     	Console.WriteLine("-snk            sign key file (used for generating strong named assemblies)");
+    	Console.WriteLine("-delaySign      delay signing of assembly (snk file contains only a pk)");
     }
     
     public static void Error(String message) {
@@ -178,9 +180,10 @@ public class IDLToCLS {
                 m_vtSkelOverwrite = true;
             } else if (args[i].Equals("-snk")) {
             	i++;
-            	m_keyPair = new StrongNameKeyPair(File.Open(args[i++], 
-            	                                            FileMode.Open, 
-            	                                            FileAccess.Read));
+            	m_keyFile = args[i++];
+            } else if (args[i].Equals("-delaySign")) {
+                i++;
+                m_delaySign = true;
             } else {
                 Error(String.Format("Error: invalid option {0}", args[i]));
             }
@@ -231,9 +234,23 @@ public class IDLToCLS {
     private AssemblyName GetAssemblyName() {
         AssemblyName result = new AssemblyName();
         result.Name = m_asmPrefix;
-        if (m_keyPair != null) {
-            result.KeyPair = m_keyPair;
-        }
+    	if (m_keyFile != null) {
+    		if (!m_delaySign) {
+    			// load keypair
+    			StrongNameKeyPair snP = new StrongNameKeyPair(File.Open(m_keyFile, 
+                                                                        FileMode.Open, 
+                                                                        FileAccess.Read));
+                result.KeyPair = snP;
+    		} else {
+    			// deleay signing, load only pk
+                FileStream publicKeyStream = File.Open(m_keyFile, FileMode.Open);
+                byte[] publicKey = new byte[publicKeyStream.Length];
+                publicKeyStream.Read(publicKey, 0, (int)publicKeyStream.Length);
+                // Provide the assembly with a public key.
+                result.SetPublicKey(publicKey);
+    			publicKeyStream.Close();
+    		}
+    	}
         return result;
     }
     
