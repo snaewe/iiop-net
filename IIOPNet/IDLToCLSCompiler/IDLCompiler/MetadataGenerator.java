@@ -686,12 +686,29 @@ public class MetaDataGenerator implements IDLParserVisitor {
         return valueToBuild;
     }
 
+
+    private System.Type[] FlattenInterfaceHierarchy(System.Type[] interfaces) {
+        System.Collections.ArrayList result = new System.Collections.ArrayList(interfaces);
+        for (int i = 0; i < interfaces.length; i++) {
+            // all inherited interfaces, also inherited by inherited:
+            System.Type[] inherited = interfaces[i].GetInterfaces();
+            for (int j = 0; j < inherited.length; j++) {
+                if (!result.Contains(inherited[j])) {
+                    result.Add(inherited[j]);
+                }
+            }
+        }
+        return (System.Type[])result.ToArray(System.Type.class.ToType());
+    }
+
     /** add abstract methods for all implemented interfaces to the abstract class,
      *  add properties for all implemented interfaces to the abstrct class */
     private void AddInheritedMembersAbstractDeclToClassForIf(TypeBuilder classBuilder, System.Type[] interfaces) {
         if (!(classBuilder.get_IsClass())) { 
             return; 
         } // only needed for classes
+        // make sure to include interfaces inherited by the direct implemented interfaces are also considered here
+        interfaces = FlattenInterfaceHierarchy(interfaces);
         for (int i = 0; i < interfaces.length; i++) {
             Type ifType = interfaces[i];    
             // methods
