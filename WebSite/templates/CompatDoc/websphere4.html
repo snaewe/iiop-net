@@ -15,7 +15,7 @@ The Websphere nameservice can be accessed from a .NET client with the following 
 </pre> <p/>
 
 Because the type of the NamingContext returned is Websphere-specific,
-the following file must be added to every IIOP.NET Websphere client:
+the following file must be added to every IIOP.NET Websphere client, when using an IIOP.NET version prior to 1.3.1:
 
 <pre>
     //IbmNaming.cs
@@ -35,6 +35,10 @@ the following file must be added to every IIOP.NET Websphere client:
 </pre>
 
 <p/>
+
+Hint: This interface has been added to the channel in version 1.3.1.
+<BR> <BR>
+
 Hint: The nameservice is listening normally on port 900.
 
 <p/>
