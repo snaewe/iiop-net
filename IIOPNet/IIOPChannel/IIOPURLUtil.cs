@@ -69,8 +69,12 @@ namespace Ch.Elca.Iiop.Util {
         
         /// <summary>checks if data is an URL for the IIOP-channel </summary>
         public static bool IsUrl(string data) {
-            return (data.StartsWith("iiop") || data.StartsWith("IOR") ||
+            return (data.StartsWith("iiop") || IsIorString(data) ||
                     data.StartsWith("corbaloc"));
+        }
+
+        public static bool IsIorString(string url) {
+            return url.StartsWith("IOR");
         }
         
         /// <summary>creates an IOR for the object described by the Url url</summary>

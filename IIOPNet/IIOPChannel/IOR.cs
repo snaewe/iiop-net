@@ -248,7 +248,7 @@ namespace Ch.Elca.Iiop.CorbaObjRef {
 
             // write content to the IORStream
             content.Close();
-            string result = "IOR:" + StringConversions.Stringify(content.GetBuffer());
+            string result = "IOR:" + StringConversions.Stringify(content.ToArray());
 
             return result;
         }
