@@ -170,11 +170,17 @@ namespace Ch.Elca.Iiop.Cdr {
             if (encoding == null) {
                 throw new INTERNAL(987, CompletionStatus.Completed_MayBe);
             }
-            byte[] data = new byte[] { m_stream.ReadOctet() };
-            while (encoding.GetCharCount(data) < 1) {
-                data = AppendChar(data);
-            }
-            char[] result = encoding.GetChars(data);            
+            byte[] data;
+            if ((m_version.Major == 1) && (m_version.Minor <= 1)) { // GIOP 1.1 / 1.0
+                data = new byte[] { m_stream.ReadOctet() };
+                while (encoding.GetCharCount(data) < 1) {
+                    data = AppendChar(data);
+                }
+            } else { // GIOP 1.2 or above
+                byte count = m_stream.ReadOctet();
+                data = m_stream.ReadOpaque(count);
+            }            
+            char[] result = encoding.GetChars(data);
             return result[0];
         }
 
@@ -313,8 +319,11 @@ namespace Ch.Elca.Iiop.Cdr {
                                                                  CodeSetConversionRegistryBigEndian.GetRegistry());
             if (encoding == null) {
                 throw new INTERNAL(987, CompletionStatus.Completed_MayBe);
-            }
+            }            
             byte[] toSend = encoding.GetBytes(new char[] { data } );
+            if (!((m_version.Major == 1) && (m_version.Minor <= 1))) { // GIOP 1.2
+                m_stream.WriteOctet((byte)toSend.Length);
+            }
             m_stream.WriteOpaque(toSend);
         }
 
@@ -473,9 +482,19 @@ namespace Ch.Elca.Iiop.Cdr {
         public char ReadWChar() {
             Encoding encoding = CdrStreamHelper.GetWCharEncoding(m_stream.WCharSet, 
                                     CodeSetConversionRegistryLittleEndian.GetRegistry());
-            byte[] data = new byte[] { m_stream.ReadOctet() };
-            while (encoding.GetCharCount(data) < 1) {
-                data = AppendChar(data);
+            if (encoding == null) {
+                throw new INTERNAL(987, CompletionStatus.Completed_MayBe);
+            }
+
+            byte[] data;
+            if ((m_version.Major == 1) && (m_version.Minor <= 1)) { // GIOP 1.1 / 1.0
+                data = new byte[] { m_stream.ReadOctet() };
+                while (encoding.GetCharCount(data) < 1) {
+                    data = AppendChar(data);
+                }
+            } else { // GIOP 1.2 or above
+                byte count = m_stream.ReadOctet();
+                data = m_stream.ReadOpaque(count);
             }
             char[] result = encoding.GetChars(data);            
             return result[0];
@@ -612,6 +631,9 @@ namespace Ch.Elca.Iiop.Cdr {
             Encoding encoding = CdrStreamHelper.GetWCharEncoding(m_stream.WCharSet,
                                                                  CodeSetConversionRegistryLittleEndian.GetRegistry());
             byte[] toSend = encoding.GetBytes(new char[] { data } );
+            if (!((m_version.Major == 1) && (m_version.Minor <= 1))) { // GIOP 1.2
+                m_stream.WriteOctet((byte)toSend.Length);
+            }
             m_stream.WriteOpaque(toSend);
         }
 
