@@ -52,10 +52,10 @@ namespace Ch.Elca.Iiop {
         
         private static MarshalByRefObject s_standardOpsH;
         private static ArrayList s_standardOpList = new ArrayList();
-    	private static Hashtable s_opToCallTable = new Hashtable();
+        private static Hashtable s_opToCallTable = new Hashtable();
         private static object s_lock = new object();
-    	
-    	internal static Type s_type = typeof(StandardCorbaOps);
+        
+        internal static Type s_type = typeof(StandardCorbaOps);
 
         #endregion SFields
         #region SConstructor
@@ -63,15 +63,15 @@ namespace Ch.Elca.Iiop {
         static StandardCorbaOps() {
             string isAMethodName = "_is_a";
             s_standardOpList.Add(isAMethodName);
-        	s_opToCallTable.Add(isAMethodName, 
-        	                    s_type.GetMethod(MapMethodName(isAMethodName), 
-        	                                     BindingFlags.Public | BindingFlags.Instance));
-        	
-        	string nonExistMethodName = "_non_existent";
+            s_opToCallTable.Add(isAMethodName, 
+                                s_type.GetMethod(MapMethodName(isAMethodName), 
+                                                 BindingFlags.Public | BindingFlags.Instance));
+            
+            string nonExistMethodName = "_non_existent";
             s_standardOpList.Add(nonExistMethodName);
-        	s_opToCallTable.Add(nonExistMethodName, 
-        	                    s_type.GetMethod(MapMethodName(nonExistMethodName), 
-        	                                     BindingFlags.Public | BindingFlags.Instance));
+            s_opToCallTable.Add(nonExistMethodName, 
+                                s_type.GetMethod(MapMethodName(nonExistMethodName), 
+                                                 BindingFlags.Public | BindingFlags.Instance));
 
             
             // TODO: other standard ops
@@ -135,10 +135,10 @@ namespace Ch.Elca.Iiop {
         /// <returns></returns>
         public bool is_a(string objectUri, string repositoryId) {
             Type serverType = RemotingServices.GetServerTypeForUri(objectUri);
-        	if (serverType == null) {
-        		throw new OBJECT_NOT_EXIST(0, CompletionStatus.Completed_No); 
-        	}        	
-        	
+            if (serverType == null) {
+                throw new OBJECT_NOT_EXIST(0, CompletionStatus.Completed_No); 
+            }           
+            
             Debug.WriteLine("test if : " + serverType + " _is_a " + repositoryId);
             Type toCheck = Repository.GetTypeForId(repositoryId);
             if (toCheck == null) { return false; }
@@ -150,6 +150,7 @@ namespace Ch.Elca.Iiop {
         }
 
         /// <summary>this method has no implementation, is does only specify the interface of the _is_a method</summary>
+        [CLSCompliant(false)]
         public bool _is_a([WideCharAttribute(false)][StringValueAttribute]string repositoryId) {
             throw new NotSupportedException("this method should not be called");
         }
@@ -162,10 +163,11 @@ namespace Ch.Elca.Iiop {
         /// <returns></returns>
         public bool non_existent(string objectUri) {
             Type serverType = RemotingServices.GetServerTypeForUri(objectUri);
-        	return (serverType == null);
+            return (serverType == null);
         }
 
         /// <summary>this method has no implementation, is does only specify the interface of the _non_existent method</summary>
+        [CLSCompliant(false)]
         public bool _non_existent() {
             throw new NotSupportedException("this method should not be called");
         }
@@ -180,13 +182,14 @@ namespace omg.org.CORBA {
 
 
     /// <summary>mapping of the CORBA Object interface</summary>
+    [CLSCompliant(false)]
     [InterfaceType(IdlTypeInterface.ConcreteInterface)]
     public interface IObject : IIdlEntity {
-        
+                
         [FromIdlName("_is_a")]
         bool _is_a([WideCharAttribute(false)][StringValueAttribute]string
                    repositoryId);
-        
+                
         [FromIdlName("_non_existent")]
         bool _non_existent();
         
