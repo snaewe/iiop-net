@@ -311,8 +311,22 @@ namespace Ch.Elca.Iiop.MessageHandling {
                         resultMethodName = prop.GetSetMethod().Name;
                     }
                 }
-            } else {
+            } else {                
                 resultMethodName = IdlNaming.ReverseClsToIdlNameMapping(methodName);
+                if (resultMethodName.StartsWith("get_") || resultMethodName.StartsWith("set_")) {
+                    // special handling for properties, because properties with a name, which is transformed on mapping,
+                    // need to be specially identified, because porperty name is included in method name.
+                    string propName = IdlNaming.ReverseClsToIdlNameMapping(resultMethodName.Substring(4));
+                    PropertyInfo prop = serverType.GetProperty(propName, BindingFlags.Public | BindingFlags.Instance);
+                    if (prop != null) {
+                        if (resultMethodName.StartsWith("get_")) {
+                            resultMethodName = prop.GetGetMethod().Name;
+                        } else {
+                            resultMethodName = prop.GetSetMethod().Name;
+                        }
+                    }
+                }
+
             }
             
             MethodInfo calledMethodInfo = serverType.GetMethod(resultMethodName);

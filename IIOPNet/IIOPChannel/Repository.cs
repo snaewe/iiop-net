@@ -124,7 +124,14 @@ namespace Ch.Elca.Iiop.Idl {
             string typeName = GetTypeNameForId(repId);
             if (typeName != null) {
                 // now try to load the type:
-                return LoadType(typeName);
+                Type result = LoadType(typeName);
+                if ((result == null) && (repId.StartsWith("IDL"))) {
+                    // check, if type can be found, if it's assumed, that repId represents a type, which was
+                    // mapped from IDL to CLS and a name mapping special case prevented the type from being found.
+                    string alternativeTypeName = GetTypeNameForIDLId(repId, true);
+                    result = LoadType(alternativeTypeName);
+                }
+                return result;
             } else {
                 return null;
             }
@@ -137,7 +144,7 @@ namespace Ch.Elca.Iiop.Idl {
             if (repId.StartsWith("RMI")) {
                 return GetTypeNameForRMIId(repId);
             } else if (repId.StartsWith("IDL")) {
-                return GetTypeNameForIDLId(repId);
+                return GetTypeNameForIDLId(repId, false);
             } else {
                 return null; // unknown
             }
@@ -147,15 +154,18 @@ namespace Ch.Elca.Iiop.Idl {
         /// gets the CLS type name represented by the IDL-id
         /// </summary>
         /// <param name="idlID"></param>
-        /// <returns></returns>
-        private static string GetTypeNameForIDLId(string idlID) {
+        /// <param name="assumeMappedFromIdl">should assume, that type represented by idlid is mapped from IDL to CLS</param>
+        /// <returns>
+        /// The typename for the idlID
+        /// </returns>
+        private static string GetTypeNameForIDLId(string idlID, bool assumeMappedFromIdl) {
             idlID = idlID.Substring(4);
             if (idlID.IndexOf(":") < 0) { 
                 // invalid repository id: idlID
                 throw new INV_IDENT(10001, CompletionStatus.Completed_MayBe);
             }
             string typeName = idlID.Substring(0, idlID.IndexOf(":"));
-            typeName = IdlNaming.MapIdlRepIdTypePartToClsName(typeName);
+            typeName = IdlNaming.MapIdlRepIdTypePartToClsName(typeName, assumeMappedFromIdl);
             return typeName;
         }
         /// <summary>

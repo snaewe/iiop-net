@@ -81,8 +81,14 @@ namespace Ch.Elca.Iiop.Idl {
         /// <param name="clsName">a simple unqualified cls name (e.g. a type-name or a method name)</param>
         /// <returns></returns>
         public static string MapClsNameToIdlName(string clsName) {
-            // TODO: handle exceptions
-            return clsName;
+            string result = clsName;
+            if (NameClashesWithIdlKeyWord(clsName)) {
+                result = "_" + result;
+            } else if (clsName.StartsWith("_")) {
+                result = "N" + result;
+            }
+            // TODO: handle exception from chapter 2.2.4
+            return result;
         }
 
         /// <summary>
@@ -91,8 +97,11 @@ namespace Ch.Elca.Iiop.Idl {
         /// <param name="clsName">a simple unqualified cls name (e.g. a type-name or a method name)</param>
         /// <returns></returns>
         public static string MapIdlNameToClsName(string idlName) {
-            // TODO: handle exceptions
-            return idlName;
+            string result = idlName;
+            if (NameClashesWithClsKeyWord(idlName)) {
+                result = "_" + result;
+            }
+            return result;
         }
 
         
@@ -171,12 +180,28 @@ namespace Ch.Elca.Iiop.Idl {
         /// <summary>
         /// maps the type part of an IDL repository id to a Cls type-name
         /// </summary>
+        /// <remarks>
+        /// uses the inverse Cls to Idl mapping to reproduce the CLS type name if assumeMappedFromIdl is false;
+        /// otherwise use MapIdlNameToCls name for mapping names. 
+        /// </remarks>
         /// <param name="idlName"></param>
+        /// <param name="assumeMappedFromIdl">should assume that cls type represented by idlName is mapped from IDL to CLS</param>
         /// <returns></returns>
-        public static string MapIdlRepIdTypePartToClsName(string idlName) {
-            // replace / with .
-            string result = idlName.Replace("/", ".");
-            // TODO: exceptions
+        internal static string MapIdlRepIdTypePartToClsName(string idlName, bool assumeMappedFromIdl) {
+            string[] parts = idlName.Split('/');
+            string result = "";
+            foreach (string part in parts) {                
+                if (!assumeMappedFromIdl) {
+                    // standard case: type from rep-id represents a CLS type, which was mapped from CLS to IDL.
+                    result = result + "." + ReverseClsToIdlNameMapping(part);
+                } else {
+                    // a type mapped from IDL to CLS -> map type name to CLS too
+                    result = result + "." + MapIdlNameToClsName(part);
+                }
+            }
+            if (result.StartsWith(".")) {
+                result = result.Substring(1);
+            }
             return result;
         }
 
@@ -186,8 +211,7 @@ namespace Ch.Elca.Iiop.Idl {
         /// <param name="forType"></param>
         /// <returns></returns>
         public static string MapFullTypeNameToIdlRepIdTypePart(Type forType) {
-            // TODO: exceptions in naming
-            string nameSpaceInIdl = MapNamespaceToIdl(forType);
+            string nameSpaceInIdl = MapNamespaceToIdl(forType, "/");
             if (!nameSpaceInIdl.Equals("")) {
                 nameSpaceInIdl += "/";
             }
@@ -201,30 +225,12 @@ namespace Ch.Elca.Iiop.Idl {
         /// <returns></returns>
         // generator needs scoped form
         public static string MapFullTypeNameToIdlScoped(Type forType) {
-            string result = forType.Namespace;
-            if (result == null) { 
-                result = ""; 
-            }
-            result = result.Replace(".", "::");
+            string result = MapNamespaceToIdl(forType, "::");
             if (result.Length > 0) { 
                 result += "::"; 
             }
             result = "::" + result;
             result += MapShortTypeNameToIdl(forType);
-            return result;
-        }
-
-        /// <summary>
-        /// map an IDL scoped name to a corresponding CLS name
-        /// </summary>
-        /// <param name="IDLScoped"></param>
-        /// <returns></returns>
-        /// <remarks>not used</remarks>
-        public static string MapIdlScopedToFullTypeName(string IdlScoped) {
-            string result = IdlScoped;    
-            result = result.Replace("::", ".");
-            if (result.StartsWith(".")) { result = result.Substring(1); }
-            // TODO: handle exception in direct mapping rule ...
             return result;
         }
 
@@ -245,12 +251,20 @@ namespace Ch.Elca.Iiop.Idl {
         /// <summary>
         /// maps a namespace name to an IDL name
         /// </summary>
-        private static string MapNamespaceToIdl(Type forType) {
-            string result = forType.Namespace;
-            if (result == null) { 
-                result = "";
+        /// <param name="separator">separator between module parts, e.g. / or ::</param>
+        private static string MapNamespaceToIdl(Type forType, string separator) {
+            string namespaceName = forType.Namespace;
+            string result = "";
+            if (namespaceName == null) { 
+                return result;
             }
-            result = result.Replace(".", "/");
+            string[] parts = namespaceName.Split('.');
+            foreach (string part in parts) {
+                result = result + separator + MapClsNameToIdlName(part);
+            }
+            if (result.StartsWith(separator)) {
+                result = result.Substring(separator.Length);
+            }
             return result;
         }
 
@@ -259,13 +273,15 @@ namespace Ch.Elca.Iiop.Idl {
         /// </summary>
         // used for generator
         public static string[] MapNamespaceToIdlModules(Type forType) {
-            // TODO: exceptions
             string clsNamespace = forType.Namespace;
             string[] modules;
             if ((clsNamespace != null) && (!clsNamespace.Trim().Equals(""))) {
                 modules = clsNamespace.Split(new char[] { Char.Parse(".") } );
             } else {
                 modules = new string[0];
+            }
+            for (int i = 0; i < modules.Length; i++) {
+                modules[i] = MapClsNameToIdlName(modules[i]);
             }
             return modules;
         }
