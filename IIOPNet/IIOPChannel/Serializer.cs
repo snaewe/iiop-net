@@ -599,7 +599,7 @@ namespace Ch.Elca.Iiop.Marshalling {
     
         public override object Deserialise(System.Type formal, AttributeExtCollection attributes,
                                            CdrInputStream sourceStream) {
-            FieldInfo[] fields = formal.GetFields(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.DeclaredOnly | BindingFlags.Instance);
+            FieldInfo[] fields = ReflectionHelper.GetAllDeclaredInstanceFields(formal);
             Marshaller marshaller = Marshaller.GetSingleton();
                         
             object instance = Activator.CreateInstance(formal);
@@ -612,7 +612,7 @@ namespace Ch.Elca.Iiop.Marshalling {
 
         public override void Serialise(System.Type formal, object actual, AttributeExtCollection attributes,
                                        CdrOutputStream targetStream) {
-            FieldInfo[] fields = formal.GetFields(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.DeclaredOnly | BindingFlags.Instance);
+            FieldInfo[] fields = ReflectionHelper.GetAllDeclaredInstanceFields(formal);
             Marshaller marshaller = Marshaller.GetSingleton();
             foreach (FieldInfo info in fields) {
                 marshaller.Marshal(info.FieldType, AttributeExtCollection.ConvertToAttributeCollection(info.GetCustomAttributes(true)), info.GetValue(actual), targetStream);
@@ -1065,7 +1065,7 @@ namespace Ch.Elca.Iiop.Marshalling {
             } else {
                 Exception exception = (Exception)Activator.CreateInstance(exceptionType);
                 // deserialise fields
-                FieldInfo[] fields = exceptionType.GetFields(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.DeclaredOnly);
+                FieldInfo[] fields = ReflectionHelper.GetAllDeclaredInstanceFields(exceptionType);
                 Marshaller marshaller = Marshaller.GetSingleton();
                 foreach (FieldInfo field in fields) {
                     object fieldVal = marshaller.Unmarshal(field.FieldType, 
@@ -1088,8 +1088,7 @@ namespace Ch.Elca.Iiop.Marshalling {
                 targetStream.WriteULong((uint)sysEx.Minor);
                 targetStream.WriteULong((uint)sysEx.Status);
             } else {
-                FieldInfo[] fields = formal.GetFields(BindingFlags.Public | BindingFlags.NonPublic | 
-                                                      BindingFlags.Instance | BindingFlags.DeclaredOnly);
+                FieldInfo[] fields = ReflectionHelper.GetAllDeclaredInstanceFields(formal);
                 Marshaller marshaller = Marshaller.GetSingleton();
                 foreach (FieldInfo field in fields) {
                     object fieldVal = field.GetValue(actual);

@@ -29,13 +29,55 @@
 
 using System;
 using System.Reflection;
+using Ch.Elca.Iiop.Idl;
 
 namespace Ch.Elca.Iiop.Util {
     
     /// <summary>
     /// Adds some missing reflection functionalty.
     /// </summary>
-    public class ReflectionHelper {
+    public sealed class ReflectionHelper {
+    	
+    	#region SFields
+    	
+    	private static Type s_iIdlEntityType = typeof(IIdlEntity);
+    	
+    	#endregion SFields
+    	#region SProperties
+    	
+    	public static Type IIdlEntityType {
+    		get {
+    			return s_iIdlEntityType;
+    		}
+    	}
+    	
+    	#endregion SProperties    	
+    	#region SMethods
+    	
+    	/// <summary>
+    	/// gets all the public instance methods for Type type.
+    	/// </summary>
+    	/// <param name="type">The type to get the methods for</param>
+    	/// <param name="declaredOnly">return only methods directly declared in type</param>
+    	/// <returns></returns>
+    	public static MethodInfo[] GetPublicInstanceMethods(Type type, bool declaredOnly) {
+    		BindingFlags flags = BindingFlags.Instance | BindingFlags.Public;
+    		if (declaredOnly) {
+    		    flags |= BindingFlags.DeclaredOnly;	
+    		}
+    		return type.GetMethods(flags);
+    	}
+    	
+    	/// <summary>
+    	/// get all the instance fields directly declared in Type type.
+    	/// </summary>
+    	/// <param name="type">The type to get the fields for</param>
+    	/// <returns></returns>
+    	public static FieldInfo[] GetAllDeclaredInstanceFields(Type type) {
+    		BindingFlags flags = BindingFlags.Instance | BindingFlags.Public |
+    		                     BindingFlags.NonPublic | BindingFlags.DeclaredOnly;
+    		return type.GetFields(flags);
+    	}    	
 
         /// <summary>
         /// collects the custom attributes on the current parameter and from
@@ -149,6 +191,8 @@ namespace Ch.Elca.Iiop.Util {
                                                           Type.EmptyTypes, null);
             return (foundProperty != null);
         }
+        
+        #endregion SMethods
 
     }
 

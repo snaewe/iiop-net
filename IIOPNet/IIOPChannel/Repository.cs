@@ -543,8 +543,7 @@ namespace Ch.Elca.Iiop.Idl {
             RegisterCreatedTypeCodeForType(clsType, new AttributeExtCollection(),
                                            result);
             
-            FieldInfo[] members = clsType.GetFields(BindingFlags.Instance | BindingFlags.DeclaredOnly |
-                                                    BindingFlags.Public | BindingFlags.NonPublic);
+            FieldInfo[] members = ReflectionHelper.GetAllDeclaredInstanceFields(clsType);
             StructMember[] structMembers = new StructMember[members.Length];
             for (int i = 0; i < members.Length; i++) {                
                 omg.org.CORBA.TypeCode memberType = 
@@ -674,8 +673,7 @@ namespace Ch.Elca.Iiop.Idl {
                                            result);                        
             
             // create the TypeCodes for the members
-            FieldInfo[] members = clsType.GetFields(BindingFlags.Instance | BindingFlags.DeclaredOnly |
-                                                    BindingFlags.Public | BindingFlags.NonPublic);
+            FieldInfo[] members = ReflectionHelper.GetAllDeclaredInstanceFields(clsType);
             ValueTypeMember[] valueMembers = new ValueTypeMember[members.Length];
             for (int i = 0; i < members.Length; i++) {
                 omg.org.CORBA.TypeCode memberType = CreateOrGetTypeCodeForType(members[i].FieldType, 
@@ -778,8 +776,7 @@ namespace Ch.Elca.Iiop.Idl {
             RegisterCreatedTypeCodeForType(clsType, new AttributeExtCollection(),
                                            result);
             
-            FieldInfo[] members = clsType.GetFields(BindingFlags.Instance | BindingFlags.DeclaredOnly |
-                                                    BindingFlags.Public | BindingFlags.NonPublic);
+            FieldInfo[] members = ReflectionHelper.GetAllDeclaredInstanceFields(clsType);
             StructMember[] exMembers = new StructMember[members.Length];
             for (int i = 0; i < members.Length; i++) {                
                 omg.org.CORBA.TypeCode memberType = CreateOrGetTypeCodeForType(members[i].FieldType,

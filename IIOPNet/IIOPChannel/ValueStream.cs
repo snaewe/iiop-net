@@ -599,7 +599,7 @@ namespace Ch.Elca.Iiop.Cdr {
         /// <summary>reads and sets the field declared in the type ofType.</summary>
         private void ReadFieldsForType(object instance, Type ofType, bool chunkedRep) {
             // reads all fields declared in the Type: no inherited fields
-            FieldInfo[] fields = ofType.GetFields(BindingFlags.DeclaredOnly | BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
+            FieldInfo[] fields = ReflectionHelper.GetAllDeclaredInstanceFields(ofType);
             foreach (FieldInfo fieldInfo in fields) {
                 if (!fieldInfo.IsNotSerialized) { // do not serialize transient fields
                     ReadAndSetField(fieldInfo, instance);
@@ -1000,7 +1000,7 @@ namespace Ch.Elca.Iiop.Cdr {
         /// <summary>writes the fields delcared in the type ofType of the instance instance</summary>
         /// <param name="chunkedRep">use chunked representation</param>
         private void WriteFieldsForType(object instance, Type ofType) {
-            FieldInfo[] fields = ofType.GetFields(BindingFlags.DeclaredOnly | BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
+            FieldInfo[] fields = ReflectionHelper.GetAllDeclaredInstanceFields(ofType);
             foreach (FieldInfo fieldInfo in fields) {
                 if (!fieldInfo.IsNotSerialized) { // do not serialize transient fields
                     WriteField(fieldInfo, instance);
