@@ -486,7 +486,8 @@ namespace Ch.Elca.Iiop.Cdr {
             }
             // get active chunk
             ChunkInfo info = (ChunkInfo)m_chunkStack.Peek();
-            if (info.GetNrOfBytesReadPassBorder() == 4) {
+            uint passedBy = info.GetNrOfBytesReadPassBorder();
+            if ((passedBy >= 4) && (passedBy < 8)) { // read a long, with alignement max 7 over border, at least 4
                 // possibleStart must be a chunk-start, because read accross border with last
                 // read-long.
                 if (possibleStart < 0) {
@@ -578,17 +579,9 @@ namespace Ch.Elca.Iiop.Cdr {
             }
             
             int valueTag = ReadLong();
-            if (valueTag == 0) { return null; } // a null-value
-
-            bool chunked = false;
-            int chunkLevel = 0;
-            if ((valueTag & 0x00000008) > 0) { // chunking is used, a new chunk begins here
-                chunked = true;
-                ChunkInfo info = new ChunkInfo(0, m_baseStream);
-                info.IsContinuationExpected = true;
-                m_chunkStack.Push(info);
-                chunkLevel = m_chunkStack.Count;
-            }
+            if (valueTag == 0) { 
+                return null; 
+            } // a null-value
 
             // handle codebase-url
             HandleCodeBaseURL(valueTag);
@@ -608,7 +601,31 @@ namespace Ch.Elca.Iiop.Cdr {
             // add the instance, which is created at the moment to the indirection table
             m_indirectionTable.Add(new IndirectionInfo(indirPos.Position, 
                                                        IndirectionType.IndirValue),
-                                   instance);            
+                                   instance);
+
+            bool chunked = false;
+            int chunkLevel = 0;
+            if ((valueTag & 0x00000008) > 0) { // chunking is used, a new chunk begins here
+                chunked = true;
+                
+                m_baseStream.StartPeeking(); // switch to peek mode
+                int tag = m_baseStream.ReadLong();
+                m_baseStream.StopPeeking(); // end peek mode
+                ChunkInfo info;
+                if ((tag > 0) && (tag < ValueBaseStream.MIN_VALUE_TAG)) {
+                    // a chunk starts here
+                    m_baseStream.ReadLong(); // read start chunk
+                    info = new ChunkInfo(tag, m_baseStream);
+                    info.IsContinuationExpected = false;
+                } else {
+                    // deactivate chunk, inner value must follow
+                    info = new ChunkInfo(0, m_baseStream);
+                    info.IsContinuationExpected = true;
+                }               
+                // store chunk-info
+                m_chunkStack.Push(info);
+                chunkLevel = m_chunkStack.Count;
+            }
             
             // set the fields: from the most basic type to the most derived type ...
             Stack typeHierarchy = CreateTypeHirarchyStack(actualType);
@@ -688,7 +705,7 @@ namespace Ch.Elca.Iiop.Cdr {
             CheckChunkInfoAtEnd(top); // check if chunk is completely read here
             top.IsFinished = true; // chunk is finished
             // read-endTag for this chunk and possibly for outer chunks
-            int endTag = ReadLong();
+            int endTag = ReadLong(); // not part of chunk -> do not check if over border; IsFinished = true deactivated chunk border checking
 
             if (endTag >= 0) { 
                 // end-tag for a chunk must be < 0
@@ -859,7 +876,7 @@ namespace Ch.Elca.Iiop.Cdr {
             return true;
         }
 
-        /// <summary>checks, if an inner value type follows</summary>
+/*        /// <summary>checks, if an inner value type follows</summary>
         private bool CheckForInnerValueType(FieldInfo fieldInfo) {
             if ((!ClsToIdlMapper.IsDefaultMarshalByVal(fieldInfo.FieldType))
                 || (ClsToIdlMapper.IsMarshalByRef(fieldInfo.FieldType))) {
@@ -875,7 +892,7 @@ namespace Ch.Elca.Iiop.Cdr {
             } else {
                 return false;
             }
-        }
+        } */
 
         /// <summary>reads codebase-URL</summary>
         private void HandleCodeBaseURL(long valueTag) {
