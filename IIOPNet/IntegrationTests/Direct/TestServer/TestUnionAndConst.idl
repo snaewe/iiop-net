@@ -1,0 +1,33 @@
+module Ch {
+module Elca {
+module Iiop {
+module IntegrationTests {
+
+
+    enum TestEnumForU {
+        A, B, C
+    };
+
+
+    union TestUnion switch(long) {
+        case 0: short val0;
+        case 1:
+        case 2: long val1;
+        default: boolean val2;
+    };
+
+
+    union TestUnionE switch(TestEnumForU) {
+        case A: short valE0;
+        case B: 
+        case C: TestEnumForU valE1;
+    };
+
+    
+    const long MyConstant = 11;
+
+
+};
+};
+};
+};

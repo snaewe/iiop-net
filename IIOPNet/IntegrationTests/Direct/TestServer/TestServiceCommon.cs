@@ -219,6 +219,15 @@ namespace Ch.Elca.Iiop.IntegrationTests {
         [return: StringValue]
         [return: WideChar(false)]
         String CheckParamAttrs([StringValue][WideChar(false)]String arg);
+
+        TestUnion EchoUnion(TestUnion arg);
+
+        /// <summary>
+        /// echos a union, which has an enumeration discriminator
+        /// </summary>
+        TestUnionE EchoUnionE(TestUnionE arg);
+
+        object RetrieveUnknownUnionAsAny();
         
         /// <summary>
         /// used to check, if a reference passed is equal to this object itself.

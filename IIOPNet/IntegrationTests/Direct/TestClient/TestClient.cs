@@ -575,12 +575,113 @@ namespace Ch.Elca.Iiop.IntegrationTests {
             Assertion.AssertEquals(arg, result);
         }
 
-		[Test]
-		public void TestCheckParamAttrs() {
-			System.String arg = "testArg";
-			System.String result = m_testService.CheckParamAttrs(arg);
-			Assertion.AssertEquals(arg, result);
-		}
+        [Test]
+        public void TestCheckParamAttrs() {
+            System.String arg = "testArg";
+            System.String result = m_testService.CheckParamAttrs(arg);
+            Assertion.AssertEquals(arg, result);
+        }
+
+        [Test]
+        public void TestSimpleUnionNoExceptions() {
+            TestUnion arg = new TestUnion();
+            short case0Val = 11;
+            arg.Setval0(case0Val);
+            TestUnion result = m_testService.EchoUnion(arg);
+            Assertion.AssertEquals(case0Val, result.Getval0());
+            Assertion.AssertEquals(0, result.Discriminator);
+
+	    TestUnion arg2 = new TestUnion();
+            int case1Val = 12;
+            arg2.Setval1(case1Val, 2);
+            TestUnion result2 = m_testService.EchoUnion(arg2);
+            Assertion.AssertEquals(case1Val, result2.Getval1());
+            Assertion.AssertEquals(2, result2.Discriminator);
+
+	    TestUnion arg3 = new TestUnion();
+            bool case2Val = true;
+            arg3.Setval2(case2Val, 7);
+            TestUnion result3 = m_testService.EchoUnion(arg3);
+            Assertion.AssertEquals(case2Val, result3.Getval2());
+            Assertion.AssertEquals(7, result3.Discriminator);            
+
+        }
+
+        [Test]
+        public void TestEnumBasedUnionNoExceptions() {
+            TestUnionE arg = new TestUnionE();
+            short case0Val = 11;
+            arg.SetvalE0(case0Val);
+            TestUnionE result = m_testService.EchoUnionE(arg);
+            Assertion.AssertEquals(case0Val, result.GetvalE0());
+            Assertion.AssertEquals(TestEnumForU.A, result.Discriminator);
+
+	    TestUnionE arg2 = new TestUnionE();
+            TestEnumForU case1Val = TestEnumForU.A;
+            arg2.SetvalE1(case1Val, TestEnumForU.B);
+            TestUnionE result2 = m_testService.EchoUnionE(arg2);
+            Assertion.AssertEquals(case1Val, result2.GetvalE1());
+            Assertion.AssertEquals(TestEnumForU.B, result2.Discriminator);
+        }
+
+        [Test]
+        public void TestUnionExceptions() {
+            try {
+                TestUnion arg = new TestUnion();
+                arg.Getval0();
+                Assertion.Fail("exception not thrown for getting value from non-initalized union");
+            } catch (omg.org.CORBA.BAD_OPERATION) {
+            }
+            try {
+                TestUnion arg = new TestUnion();
+                arg.Setval0(11);
+                arg.Getval1();
+                Assertion.Fail("exception not thrown for getting value from non-initalized union");
+            } catch (omg.org.CORBA.BAD_OPERATION) {
+            }
+            try {
+                TestUnion arg1 = new TestUnion();
+                arg1.Setval1(11, 7);
+                Assertion.Fail("exception not thrown on wrong discriminator value.");
+            } catch (omg.org.CORBA.BAD_PARAM) {
+            }
+            try {
+                TestUnion arg2 = new TestUnion();
+                arg2.Setval2(false, 0);
+                Assertion.Fail("exception not thrown on wrong discriminator value.");
+            } catch (omg.org.CORBA.BAD_PARAM) {
+            }
+        }
+
+        [Test]
+        public void TestConstant() {
+            Int32 constVal = MyConstant.ConstVal;
+            Assertion.AssertEquals("wrong constant value", 11, constVal);
+        }
+
+        [Test]
+        public void TestPassingUnionsAsAny() {
+            TestUnion arg = new TestUnion();
+            short case0Val = 11;
+            arg.Setval0(case0Val);
+            TestUnion result = (TestUnion)m_testService.EchoAnything(arg);
+            Assertion.AssertEquals(case0Val, result.Getval0());
+            Assertion.AssertEquals(0, result.Discriminator);
+
+	    TestUnionE arg2 = new TestUnionE();
+            TestEnumForU case1Val = TestEnumForU.A;
+            arg2.SetvalE1(case1Val, TestEnumForU.B);
+            TestUnionE result2 = (TestUnionE)m_testService.EchoAnything(arg2);
+            Assertion.AssertEquals(case1Val, result2.GetvalE1());
+            Assertion.AssertEquals(TestEnumForU.B, result2.Discriminator);
+        }
+
+        [Test]
+        public void TestReceivingUnknownUnionsAsAny() {
+	    object result = m_testService.RetrieveUnknownUnionAsAny();
+            Assertion.AssertNotNull("union not retrieved", result);
+            Assertion.AssertEquals("type name", "Ch.Elca.Iiop.IntegrationTests.TestUnionE2", result.GetType().FullName);
+        }
 
     }
 

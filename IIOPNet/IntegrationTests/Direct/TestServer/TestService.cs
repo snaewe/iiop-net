@@ -252,6 +252,22 @@ namespace Ch.Elca.Iiop.IntegrationTests {
         public System.String CheckParamAttrs(System.String arg) {
         	return arg;
         }
+
+        public TestUnion EchoUnion(TestUnion arg) {
+            return arg;
+        } 
+
+        public TestUnionE EchoUnionE(TestUnionE arg) {
+            return arg;
+        }
+
+        public object RetrieveUnknownUnionAsAny() {
+            TestUnionE2 arg = new TestUnionE2();
+            short case0Val = 11;
+            arg.SetvalE0(case0Val);
+            return arg;
+        }
+
         
         /// <summary>
         /// used to check, if a reference passed is equal to this object itself.
