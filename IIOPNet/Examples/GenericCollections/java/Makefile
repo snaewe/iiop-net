@@ -23,12 +23,14 @@ build-java: $(StorageSystem)*.java *.java
 	javac -classpath . $?
 
 clean:
+	del /q Ch\Elca\Iiop\*.java
+	del /q Ch\Elca\Iiop\*.class
 	move $(EntryImpl) tmp.java
+	del /q Ch\Elca\Iiop\Demo\StorageSystem\*.java
+	del /q Ch\Elca\Iiop\Demo\StorageSystem\*.class
 	if exist IDL\nul rmdir /q /s IDL
-	if exist  Ch\nul rmdir /q /s Ch
 	if exist org\nul rmdir /q /s org
-	if exist *.class del /s *.class
-	mkdir $(StorageSystem)
+	if exist *.class del /q *.class
 	move tmp.java $(EntryImpl)
 
 
