@@ -64,6 +64,9 @@ namespace omg.org.CosNaming {
             m_kind = kind;
         }
 
+        public NameComponent(string id): this(id, "") {
+        }
+
         #endregion IConstructors
         #region IProperties
 
