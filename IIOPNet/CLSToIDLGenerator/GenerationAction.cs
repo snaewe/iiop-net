@@ -243,7 +243,9 @@ namespace Ch.Elca.Iiop.Idl {
             while (enumerator.MoveNext()) {
                 MapTypeInfo info = (MapTypeInfo) enumerator.Current;
                 string idlFileName = m_depManager.GetIdlFileForMappedType(info.m_type);
-                if (idlFileName == null) { throw new Exception("internal error in dep-manager, mapped type missing after mapped before: " + info.m_type); }
+                if (idlFileName == null) { 
+                    throw new Exception("internal error in dep-manager, mapped type missing after mapped before: " + info.m_type); 
+                }
                 m_currentOutputStream.WriteLine("#include \"" + idlFileName + "\"");
             }
         }
@@ -275,7 +277,9 @@ namespace Ch.Elca.Iiop.Idl {
         /// <param name="shouldThrowException">if true, generate a raise clause for method: GenericUserException</param>
         private void MapMethod(MethodInfo methodToMap, Type declaringType, bool shouldThrowException) {
             Type returnType = methodToMap.ReturnType;
-            string returnTypeMapped = (string)m_mapper.MapClsType(returnType, Util.AttributeExtCollection.ConvertToAttributeCollection(methodToMap.ReturnTypeCustomAttributes.GetCustomAttributes(true)), m_refMapper);
+            string returnTypeMapped = (string)m_mapper.MapClsType(returnType, 
+                                                                  Util.AttributeExtCollection.ConvertToAttributeCollection(methodToMap.ReturnTypeCustomAttributes.GetCustomAttributes(true)),
+                                                                  m_refMapper);
             m_currentOutputStream.Write(returnTypeMapped + " ");
             
             string mappedMethodName = IdlNaming.MapClsMethodNameToIdlName(methodToMap.Name, declaringType);
@@ -288,7 +292,9 @@ namespace Ch.Elca.Iiop.Idl {
                 WriteParamDirection(info);    
                 // type of param
                 Type paramType = info.ParameterType;
-                string paramTypeMapped = (string)m_mapper.MapClsType(paramType, Util.AttributeExtCollection.ConvertToAttributeCollection(info.GetCustomAttributes(true)), m_refMapper);
+                string paramTypeMapped = (string)m_mapper.MapClsType(paramType, 
+                                                                     Util.AttributeExtCollection.ConvertToAttributeCollection(info.GetCustomAttributes(true)), 
+                                                                     m_refMapper);
                 m_currentOutputStream.Write(paramTypeMapped + " ");
                 // name of param
                 m_currentOutputStream.Write(info.Name); // TBD: check if no IDL-keyword ...
@@ -387,7 +393,8 @@ namespace Ch.Elca.Iiop.Idl {
 
         private void MapField(FieldInfo fieldToMap, Type declaringType) {
             Type fieldType = fieldToMap.FieldType;
-            string fieldTypeMapped = (string)m_mapper.MapClsType(fieldType, Util.AttributeExtCollection.ConvertToAttributeCollection(fieldToMap.GetCustomAttributes(true)), 
+            string fieldTypeMapped = (string)m_mapper.MapClsType(fieldType, 
+                                                                 Util.AttributeExtCollection.ConvertToAttributeCollection(fieldToMap.GetCustomAttributes(true)), 
                                                                  m_refMapper);
             if (fieldToMap.IsPrivate) { 
                 m_currentOutputStream.Write("private ");
@@ -404,7 +411,8 @@ namespace Ch.Elca.Iiop.Idl {
             Type propertyType = propertyToMap.PropertyType;
             if ((propertyToMap.CanWrite) && (!propertyToMap.CanRead)) { return; } // not mappable
             m_currentOutputStream.Write("attribute ");
-            string propTypeMapped = (string)m_mapper.MapClsType(propertyType, Util.AttributeExtCollection.ConvertToAttributeCollection(propertyToMap.GetCustomAttributes(true)),
+            string propTypeMapped = (string)m_mapper.MapClsType(propertyType, 
+                                                                Util.AttributeExtCollection.ConvertToAttributeCollection(propertyToMap.GetCustomAttributes(true)),
                                                                 m_refMapper);
             m_currentOutputStream.Write(propTypeMapped + " ");
             m_currentOutputStream.Write(propertyToMap.Name);
@@ -415,8 +423,9 @@ namespace Ch.Elca.Iiop.Idl {
         /// <returns>true, if basetype is mapped, else false</returns>
         private bool MapBaseType(Type forType) {
             Type baseType = forType.BaseType;
-            if ((baseType == null) || (baseType.Equals(typeof(object))) || (baseType.Equals(typeof(System.ComponentModel.MarshalByValueComponent))) ||
-               (baseType.Equals(typeof(MarshalByRefObject))) || (baseType.Equals(typeof(ValueType)))) {
+            if ((baseType == null) || (baseType.Equals(typeof(object))) || 
+                (baseType.Equals(typeof(System.ComponentModel.MarshalByValueComponent))) ||
+                (baseType.Equals(typeof(MarshalByRefObject))) || (baseType.Equals(typeof(ValueType)))) {
                 return false;
             }
             m_currentOutputStream.Write(": ");
@@ -647,7 +656,8 @@ namespace Ch.Elca.Iiop.Idl {
                 return null; 
             }
             // do the mapping
-            string unqualName; string[] modules;
+            string unqualName;
+            string[] modules;
             BeginType(clsType, out modules, out unqualName);
             
             // write type dependant information
