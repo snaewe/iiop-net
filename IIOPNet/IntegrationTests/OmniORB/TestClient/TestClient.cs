@@ -135,6 +135,29 @@ namespace Ch.Elca.Iiop.IntegrationTests {
             Assertion.AssertEquals("type name", "TestUnionE2", result.GetType().FullName);
         }
 
+        [Test]
+        public void TestWStringSeq() {
+            string elem = "seqElem";
+            int nrOfElems = 5;
+
+            string[] retrieved = m_testService.RetrieveWstringSeq(elem, nrOfElems);
+            Assertion.AssertNotNull("wstring seq not retrieved", retrieved);            
+            Assertion.AssertEquals(nrOfElems, retrieved.Length);
+            for (int i = 0; i < retrieved.Length; i++) {
+                Assertion.AssertEquals("array element i:" + i + " not ok; " + retrieved[i],
+                                       elem, retrieved[i]);            
+            }
+
+            string[] arg = new string[] { "Nr1", "Nr2", "Nr3" };
+            string[] result = m_testService.EchoWstringSeq(arg);
+            Assertion.AssertNotNull("wstring seq not retrieved", result);
+            Assertion.AssertEquals(arg.Length, result.Length);
+            for (int i = 0; i < arg.Length; i++) {
+                Assertion.AssertEquals("array element i:" + i + " not ok; " + result[i], arg[i], result[i]);
+            }
+        }
+
+
     }
 
 }

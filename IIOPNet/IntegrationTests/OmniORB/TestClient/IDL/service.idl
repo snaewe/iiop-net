@@ -17,11 +17,16 @@ union TestUnionE switch(TestEnumForU) {
     case C: TestEnumForU valE1;
 };
 
+typedef sequence<wstring> wstringSeq;
+
 interface TestService {
     TestUnion EchoTestUnion(in TestUnion arg);
     TestUnionE EchoTestUnionE(in TestUnionE arg);   
     any EchoAny(in any arg);
     any RetrieveUnknownUnion();
+    // test for forum bug report: idl wstring sequences
+    wstringSeq RetrieveWstringSeq(in wstring val, in long nrOfElems);
+    wstringSeq EchoWstringSeq(in wstringSeq arg);
 }; 
 
 

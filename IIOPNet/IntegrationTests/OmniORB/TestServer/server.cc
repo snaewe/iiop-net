@@ -3,7 +3,7 @@
  */
 
 #include "service.hh"
-#include <IoStream>
+#include <iostream>
 
 using namespace std;
 
@@ -20,7 +20,8 @@ public:
   ::TestUnionE EchoTestUnionE(const ::TestUnionE& arg);
   CORBA::Any* RetrieveUnknownUnion();
   CORBA::Any* EchoAny(const CORBA::Any& arg);
-
+  ::wstringSeq* RetrieveWstringSeq(const CORBA::WChar * val, CORBA::Long nrOrElems);
+  ::wstringSeq* EchoWstringSeq(const ::wstringSeq& arg);
 };
 
 ::TestUnion
@@ -48,6 +49,23 @@ CORBA::Any*
 TestService_impl::EchoAny (const CORBA::Any& arg) {
   return new CORBA::Any(arg);
 }
+
+::wstringSeq* 
+TestService_impl::RetrieveWstringSeq(const CORBA::WChar * val, CORBA::Long nrOfElems) {
+  CORBA::WChar** contentArr = new CORBA::WChar*[nrOfElems];
+  for (int i = 0; i < nrOfElems; i++) {
+      contentArr[i] = (CORBA::WChar*)val;
+  }
+  wstringSeq* result = new wstringSeq((CORBA::ULong)nrOfElems, (CORBA::ULong)nrOfElems, contentArr);
+  return result;
+}
+
+::wstringSeq*
+TestService_impl::EchoWstringSeq(const ::wstringSeq& arg) {
+  return new ::wstringSeq(arg);
+}
+
+
 
 int
 main (int argc, char *argv[])
@@ -102,6 +120,7 @@ main (int argc, char *argv[])
   if (CORBA::is_nil (nc)) {
     cerr << "oops, I cannot access the Naming Service!" << endl;
     exit (1);
+    return 1;
   }
 
 
