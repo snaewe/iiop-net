@@ -21,6 +21,7 @@
 
 <ol START="8">
     <li><a href="#fileConfig">Can the IIOP.NET channel be configured with a config-file?</a></li>
+    <li><a href="#NUnit2Config">How do I configure NUnit V2.0 to use the .NET Framework 1.1?</a></li>
 </ol>
 
 
@@ -104,6 +105,16 @@ The config file is processed with: <BR>
 
 
 
+<a name="#NUnit2Config"></a>
+<H3>How do I configure NUnit V2.0 to use the .NET Framework 1.1?</H3>
+
+Add the following configuration lines in the files <code>%NUnit2%\bin\nunit-console.exe.config</code> and <code>%NUnit2%\bin\nunit-gui.exe.config</code>:
+
+<pre>
+  &lt;startup&gt; 
+    &lt;supportedRuntime version="v1.1.4322" /&gt; 
+  &lt;/startup&gt; 
+</pre>
 
 
 
