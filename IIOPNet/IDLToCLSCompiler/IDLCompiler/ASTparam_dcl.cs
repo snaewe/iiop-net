@@ -20,7 +20,7 @@ public class ASTparam_dcl : SimpleNode {
   public override string GetIdentification() {      
       return "parameter " + 
              ((ASTsimple_declarator)jjtGetChild(2)).getIdent() +
-             " in " + ((SimpleNode)jjtGetParent()).GetIdentification();
+             " in " + ((SimpleNode)jjtGetParent()).GetEmbedderDesc();
   }
   
 }

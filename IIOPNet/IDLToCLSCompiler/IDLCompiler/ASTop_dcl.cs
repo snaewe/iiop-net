@@ -70,7 +70,7 @@ public class ASTop_dcl : SimpleNodeWithIdent {
     
     public override string GetIdentification() {
         return "method " + getIdent() + " defined in " + 
-                   ((SimpleNode)jjtGetParent()).GetIdentification();
+                   ((SimpleNode)jjtGetParent()).GetEmbedderDesc();
     }
     
     #endregion IMethods

@@ -39,6 +39,17 @@ public class ASTunion_type : SimpleNodeWithIdent {
   public override Object jjtAccept(IDLParserVisitor visitor, Object data) {
     return visitor.visit(this, data);
   }
+  
+  public override string GetIdentification() {
+    return "union " + getIdent() + "(in " + 
+            ((SimpleNode)jjtGetParent()).GetEmbedderDesc() + ")";
+  }
+  
+  public override string GetEmbedderDesc() {
+    return "union " + getIdent() + "(in " + 
+            ((SimpleNode)jjtGetParent()).GetEmbedderDesc() + ")";
+  }
+
 }
 
 

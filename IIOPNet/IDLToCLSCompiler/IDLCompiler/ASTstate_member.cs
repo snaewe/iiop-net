@@ -58,6 +58,15 @@ public class ASTstate_member : SimpleNode {
         m_isPrivate = isPrivate;
     }
     
+    public override string GetIdentification() {
+        string stateMemberNameList =
+            ((SimpleNode)jjtGetChild(1)).GetIdentification();
+        
+        return "state member(s) " + stateMemberNameList +         
+            " defined in " +
+            ((SimpleNode)jjtGetParent()).GetEmbedderDesc();
+    }
+        
     #endregion IMethods
 
 }

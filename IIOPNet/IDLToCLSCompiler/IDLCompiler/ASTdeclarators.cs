@@ -16,6 +16,15 @@ public class ASTdeclarators : SimpleNode {
   public override Object jjtAccept(IDLParserVisitor visitor, Object data) {
     return visitor.visit(this, data);
   }
+  
+  public override string GetIdentification() {
+    string decls = ((SimpleNode)jjtGetChild(0)).GetIdentification();
+    for (int i = 1; i < jjtGetNumChildren(); i++) {
+      decls = decls + ", " + ((SimpleNode)jjtGetChild(i)).GetIdentification();
+    }
+    return decls;
+  }
+  
 }
 
 

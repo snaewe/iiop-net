@@ -17,8 +17,8 @@ public class ASTparameter_dcls : SimpleNode {
     return visitor.visit(this, data);
   }
   
-  public override string GetIdentification() {
-      return ((SimpleNode)jjtGetParent()).GetIdentification();
+  public override string GetEmbedderDesc() {
+      return ((SimpleNode)jjtGetParent()).GetEmbedderDesc();
   }
 
   

@@ -16,6 +16,15 @@ public class ASTswitch_body : SimpleNode {
   public override Object jjtAccept(IDLParserVisitor visitor, Object data) {
     return visitor.visit(this, data);
   }
+  
+  public override string GetIdentification() {
+      return "switch body in " + ((SimpleNode)jjtGetParent()).GetEmbedderDesc();
+  }
+  
+  public override string GetEmbedderDesc() {
+      return ((SimpleNode)jjtGetParent()).GetEmbedderDesc();
+  }
+  
 }
 
 

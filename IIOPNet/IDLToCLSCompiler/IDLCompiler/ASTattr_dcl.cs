@@ -58,6 +58,19 @@ public class ASTattr_dcl : SimpleNode {
         m_readOnly = readOnly;
     }
     
+    public override string GetIdentification() {
+        string attributeNameList =
+            ((SimpleNode)jjtGetChild(1)).GetIdentification();
+        
+        for (int i = 2; i < jjtGetNumChildren(); i++) {
+            attributeNameList += ", " + 
+                ((SimpleNode)jjtGetChild(i)).GetIdentification();
+        }
+        return "attribute(s) " + attributeNameList +         
+            " defined in " +
+            ((SimpleNode)jjtGetParent()).GetEmbedderDesc();
+    }
+    
     #endregion IMethods
     
 }
