@@ -93,6 +93,10 @@ namespace Ch.Elca.Iiop {
         #endregion IFields
         #region IConstructors
 
+        // needed for Deserialization
+        public GenericUserException() : base() {
+        }
+
         /// <param name="reason">the .NET exception encountered</param>
         public GenericUserException(Exception reason) : base(reason.Message) {
             m_exceptionString = reason.Message;
