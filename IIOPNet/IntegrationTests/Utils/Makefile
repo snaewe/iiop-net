@@ -6,7 +6,7 @@ Utils = launch.exe kill.exe delay.exe
 build: $(Utils)
 
 .cs.exe:
-	csc $<
+	csc $(CSFLAGS) $<
 
 clean:
 	if exist kill.exe del kill.exe
