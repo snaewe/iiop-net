@@ -107,11 +107,6 @@ namespace Ch.Elca.Iiop.IdlPreprocessor {
         private static Encoding s_latin1 = Encoding.GetEncoding("ISO-8859-1");
         
         /// <summary>
-        /// the path to the default IDL files
-        /// </summary>
-        // private static DirectoryInfo s_idlPath; 
-	
-        /// <summary>
         /// the path to the IDL files: a List of DirectoryInfo entries
         /// </summary>
 	private static IList s_idlPath;
@@ -164,6 +159,7 @@ namespace Ch.Elca.Iiop.IdlPreprocessor {
         }
 
         /// <summary>internal constructor to resolve included files</summary>
+        /// <param name="toProcess">the file to process with the preprocessor</param>
         /// <param name="symbols">already defined symbols in previously 
         /// preprocessed files.</param>
         private IDLPreprocessor(FileInfo toProcess, Hashtable symbols) {
@@ -266,7 +262,7 @@ namespace Ch.Elca.Iiop.IdlPreprocessor {
 	}
 
         /// <summary>processes an include directive</summary>
-        /// <exception cref="IllegalPreprocDirective">
+        /// <exception cref="Ch.Elca.Iiop.IdlPreprocessor.IllegalPreprocDirectiveException">
         /// illegal include directive encountered
         /// </exception>
         private void ProcessInclude(String currentLine) {
@@ -313,7 +309,7 @@ namespace Ch.Elca.Iiop.IdlPreprocessor {
         }    
     
         /// <summary>processes a define directive</summary>
-        /// <exception cref="IllegalPreprocDirective">
+        /// <exception cref="Ch.Elca.Iiop.IdlPreprocessor.IllegalPreprocDirectiveException">
         /// illeagal define statemant encountered</exception>
         private void ProcessDefine(String currentLine) {
 
