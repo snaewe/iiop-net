@@ -74,7 +74,7 @@ namespace Ch.Elca.Iiop {
                 return m_wcharSetChosen;
             }
             set {
-                m_charSetChosen = value;
+                m_wcharSetChosen = value;
             }
         }
         

@@ -640,6 +640,9 @@ namespace Ch.Elca.Iiop.Cdr {
         public char ReadChar() {
             // char is a multibyte format with not fixed length characters, but in IDL one char is one byte
             Encoding encoding = CdrStreamHelper.GetCharEncoding(CharSet, CodeSetConversionRegistry.GetRegistry());
+            if (encoding == null) {
+                throw new INTERNAL(987, CompletionStatus.Completed_MayBe);
+            } 
             byte[] data = new byte[] { ReadOctet() };
             char[] result = encoding.GetChars(data);
             return result[0];
@@ -685,6 +688,9 @@ namespace Ch.Elca.Iiop.Cdr {
             byte[] charData = ReadOpaque((int)length-1); // read string data
             ReadOctet(); // read terminating 0
             Encoding encoding = CdrStreamHelper.GetCharEncoding(CharSet, CodeSetConversionRegistry.GetRegistry());
+            if (encoding == null) {
+                throw new INTERNAL(987, CompletionStatus.Completed_MayBe);
+            }
             char[] data = encoding.GetChars(charData);
             string result = new string(data);
             return result;
@@ -824,6 +830,9 @@ namespace Ch.Elca.Iiop.Cdr {
 
         public void WriteChar(char data) {
             Encoding encoding = CdrStreamHelper.GetCharEncoding(CharSet, CodeSetConversionRegistry.GetRegistry());
+            if (encoding == null) {
+                throw new INTERNAL(987, CompletionStatus.Completed_MayBe);
+            } 
             byte[] toSend = encoding.GetBytes(new char[] { data });
             if (toSend.Length > 1) { 
                 // character can't be sent: only one byte representation allowed
@@ -867,6 +876,9 @@ namespace Ch.Elca.Iiop.Cdr {
         
         public void WriteString(string data) {
             Encoding encoding = CdrStreamHelper.GetCharEncoding(CharSet, CodeSetConversionRegistry.GetRegistry());
+            if (encoding == null) {
+                throw new INTERNAL(987, CompletionStatus.Completed_MayBe);
+            }
             byte[] toSend = encoding.GetBytes(data.ToCharArray()); // encode the string
             WriteULong((uint)(toSend.Length + 1));
             WriteOpaque(toSend);

@@ -168,8 +168,8 @@ namespace Ch.Elca.Iiop.Services {
         }
 
         public override void Deserialize(CdrEncapsulationInputStream encap) {
-            uint charSet = encap.ReadULong();
-            uint wcharSet = encap.ReadULong();
+            m_charSet = encap.ReadULong();
+            m_wcharSet = encap.ReadULong();
         }
 
         #endregion IMethods
