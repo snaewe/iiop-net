@@ -1,4 +1,4 @@
-/* IIOPMessageHandler.cs
+/* GiopMessageHandler.cs
  * 
  * Project: IIOP.NET
  * IIOPChannel
@@ -50,7 +50,7 @@ namespace Ch.Elca.Iiop.MessageHandling {
     /// <remarks>
     /// This class is a helper class for the formatter
     /// </remarks>
-    public class GiopMessageHandler {
+    internal class GiopMessageHandler {
 
         #region SFields
 
@@ -65,7 +65,7 @@ namespace Ch.Elca.Iiop.MessageHandling {
         #endregion IConstructors
         #region SMethods
 
-        public static GiopMessageHandler GetSingleton() {
+        internal static GiopMessageHandler GetSingleton() {
             return s_handler;
         }
 
@@ -80,7 +80,7 @@ namespace Ch.Elca.Iiop.MessageHandling {
         /// <summary>reads an incoming Giop reply message from the Stream sourceStream</summary>
         /// <remarks>Precondition: sourceStream contains a Giop reply Msg</remarks>
         /// <returns>the .NET reply Msg created from the Giop Reply</returns>
-        public IMessage ParseIncomingReplyMessage(Stream sourceStream, 
+        internal IMessage ParseIncomingReplyMessage(Stream sourceStream, 
                                                   IMethodCallMessage requestMessage,
                                                   GiopConnectionDesc conDesc) {
             Debug.WriteLine("receive reply message at client side");            
@@ -113,7 +113,7 @@ namespace Ch.Elca.Iiop.MessageHandling {
 
         /// <summary>reads an incoming Giop request-message from the Stream sourceStream</summary>
         /// <returns>the .NET request message created from this Giop-message</returns>
-        public IMessage ParseIncomingRequestMessage(Stream sourceStream, 
+        internal IMessage ParseIncomingRequestMessage(Stream sourceStream, 
                                                     GiopConnectionDesc conDesc) {
             CdrMessageInputStream msgInput = new CdrMessageInputStream(sourceStream);
             CdrInputStream msgBody = msgInput.GetMessageContentReadingStream();
@@ -124,7 +124,7 @@ namespace Ch.Elca.Iiop.MessageHandling {
         }
 
         /// <summary>serialises an outgoing .NET request Message on client side</summary>
-        public void SerialiseOutgoingRequestMessage(IMessage msg, Ior target, GiopConnectionDesc conDesc,
+        internal void SerialiseOutgoingRequestMessage(IMessage msg, Ior target, GiopConnectionDesc conDesc,
                                                     Stream targetStream, uint requestId) {
             if (msg is IConstructionCallMessage) {
                 // not supported in CORBA, TBD: replace through do nothing instead of exception
@@ -149,7 +149,7 @@ namespace Ch.Elca.Iiop.MessageHandling {
         }
 
         /// <summary>serialises an outgoing .NET reply Message on server side</summary>
-        public void SerialiseOutgoingReplyMessage(IMessage msg, GiopVersion version, uint forRequstId,
+        internal void SerialiseOutgoingReplyMessage(IMessage msg, GiopVersion version, uint forRequstId,
                                                    Stream targetStream, GiopConnectionDesc conDesc) {
             if (msg is ReturnMessage) {
                 // write a CORBA response message into the stream targetStream
@@ -171,7 +171,7 @@ namespace Ch.Elca.Iiop.MessageHandling {
         /// </summary>
         /// <param name="sourceStream"></param>
         /// <returns></returns>
-        public Stream HandleIncomingLocateRequestMessage(Stream sourceStream) {
+        internal Stream HandleIncomingLocateRequestMessage(Stream sourceStream) {
             Debug.WriteLine("receive locate request message");
             CdrMessageInputStream msgInput = new CdrMessageInputStream(sourceStream);
             CdrInputStream msgBody = msgInput.GetMessageContentReadingStream();
@@ -201,7 +201,7 @@ namespace Ch.Elca.Iiop.MessageHandling {
 #if UnitTest
 
 namespace Ch.Elca.Iiop.Tests {
-	
+    
     using System.Reflection;
     using System.Collections;
     using System.IO;
@@ -215,13 +215,13 @@ namespace Ch.Elca.Iiop.Tests {
     using omg.org.CORBA;
 
 
-	public class TestService : MarshalByRefObject {
-	
-	    public int Add(Int32 arg1, Int32 arg2) {
-	        return arg1 + arg2;
-	    }
-	
-	}
+    public class TestService : MarshalByRefObject {
+    
+        public int Add(Int32 arg1, Int32 arg2) {
+            return arg1 + arg2;
+        }
+    
+    }
 
     public class TestMessage : IMethodCallMessage {
     
@@ -678,7 +678,7 @@ namespace Ch.Elca.Iiop.Tests {
             string repositoryID = Repository.GetRepositoryID(target.GetType());
             // this server support GIOP 1.2 --> create an GIOP 1.2 profile
             InternetIiopProfile profile = new InternetIiopProfile(new GiopVersion(1, 2), host,
-                                                                  (ushort)port, objectKey);                           
+                                                                  port, objectKey);                           
             Ior locFwdTarget = new Ior(repositoryID, new IorProfile[] { profile });
             CdrOutputStreamImpl iorStream = new CdrOutputStreamImpl(new MemoryStream(), 
                                                                     0, new GiopVersion(1, 2));
