@@ -524,6 +524,35 @@ namespace Ch.Elca.Iiop.IntegrationTests {
         }
 
         [Test]
+        public void TestRefArgs() {
+            System.Int32 argInit = 1;
+            System.Int32 arg = argInit;
+            System.Int32 result = m_testService.TestRef(ref arg);
+            Assertion.AssertEquals(arg, result);
+            Assertion.AssertEquals(argInit + 1, arg);
+        }
+
+        delegate System.Int32 TestOutArgsDelegate(System.Int32 arg, out System.Int32 argOut);
+
+        [Test]
+        public void TestOutArgs() {
+            System.Int32 argOut;
+            System.Int32 arg = 1;
+            System.Int32 result = m_testService.TestOut(arg, out argOut);
+            Assertion.AssertEquals(arg, argOut);
+            Assertion.AssertEquals(arg, result);
+
+            System.Int32 argOut2;
+            TestOutArgsDelegate oad = new TestOutArgsDelegate(m_testService.TestOut);
+            // async call
+            IAsyncResult ar = oad.BeginInvoke(arg, out argOut2, null, null);
+            // wait for response
+            System.Int32 result2 = oad.EndInvoke(out argOut2, ar);
+            Assertion.AssertEquals(arg, argOut2);
+            Assertion.AssertEquals(arg, result2);
+        }
+
+        [Test]
         public void TestOverloadedMethods() {
             System.Int32 arg1int = 1;
             System.Int32 arg2int = 2;
