@@ -190,7 +190,8 @@ public class MetaDataGenerator implements IDLParserVisitor {
         #endregion IFields
         #region IConstructors
         
-        public ParameterSpec(String paramName, TypeContainer paramType, int direction) {
+        public ParameterSpec(String paramName, TypeContainer paramType, 
+                             int direction) {
             m_paramName = paramName;
             m_paramType = paramType;
             m_direction = direction;
@@ -248,7 +249,9 @@ public class MetaDataGenerator implements IDLParserVisitor {
         // manager for persistent modules
         m_modBuilderManager = new ModuleBuilderManager(m_asmBuilder, targetAssemblyName);
         Type paramBuildType = ParameterBuilder.class.ToType();
-        m_paramBuildConstr = paramBuildType.GetConstructor(BindingFlags.NonPublic | BindingFlags.Instance, null, new Type[] { MethodBuilder.class.ToType(), System.Int32.class.ToType(), ParameterAttributes.class.ToType(), String.class.ToType() }, null);
+        m_paramBuildConstr = paramBuildType.GetConstructor(BindingFlags.NonPublic | BindingFlags.Instance, null,
+                                                           new Type[] { MethodBuilder.class.ToType(), System.Int32.class.ToType(), ParameterAttributes.class.ToType(), String.class.ToType() }, 
+                                                           null);
     }
 
     #endregion IConstructors
@@ -309,7 +312,9 @@ public class MetaDataGenerator implements IDLParserVisitor {
                 Symbol newSymbol = nested.getSymbol(current.getSymbolName());
                 Type defined = m_typeManager.getTypeFromBuildModule(newSymbol);
                 // the Type resolution will work with the normal symbol --> therefore add type for this
-                if (defined == null) { throw new RuntimeException("internal exception, while adding nested type for a type from a previous run: " + current.getSymbolName()); }
+                if (defined == null) { 
+                    throw new RuntimeException("internal exception, while adding nested type for a type from a previous run: " + current.getSymbolName()); 
+                }
                 m_typeManager.registerTypeDefinition(defined, current);            
             }
         }
@@ -400,11 +405,13 @@ public class MetaDataGenerator implements IDLParserVisitor {
     /** handles the declaration for the interface definition / fwd declaration
      * @return the TypeBuilder for this interface
      */
-    private TypeBuilder createOrGetInterfaceDcl(String fullyQualName, System.Type[] interfaces, boolean isAbstract, Symbol forSymbol, String repId, ModuleBuilder modBuilder) {
+    private TypeBuilder createOrGetInterfaceDcl(String fullyQualName, System.Type[] interfaces, boolean isAbstract,
+                                                Symbol forSymbol, String repId, ModuleBuilder modBuilder) {
         TypeBuilder interfaceToBuild;
         if (!m_typeManager.IsFwdDeclared(forSymbol)) {
             Trace.WriteLine("generating code for interface: " + fullyQualName);
-            interfaceToBuild = modBuilder.DefineType(fullyQualName, TypeAttributes.Interface | TypeAttributes.Public | TypeAttributes.Abstract, null, interfaces);
+            interfaceToBuild = modBuilder.DefineType(fullyQualName, TypeAttributes.Interface | TypeAttributes.Public | TypeAttributes.Abstract,
+                                                     null, interfaces);
             // add InterfaceTypeAttribute
             IdlTypeInterface ifType = IdlTypeInterface.ConcreteInterface;
             if (isAbstract) { ifType = IdlTypeInterface.AbstractInterface; }
@@ -454,7 +461,9 @@ public class MetaDataGenerator implements IDLParserVisitor {
         String fullyQualName = enclosingScope.getFullyQualifiedNameForSymbol(forSymbol.getSymbolName());
 
         ModuleBuilder curModBuilder = m_modBuilderManager.GetOrCreateModuleBuilderFor(enclosingScope);
-        TypeBuilder interfaceToBuild = createOrGetInterfaceDcl(fullyQualName, interfaces, header.isAbstract(), forSymbol, enclosingScope.getRepositoryIdFor(header.getIdent()), curModBuilder);
+        TypeBuilder interfaceToBuild = createOrGetInterfaceDcl(fullyQualName, interfaces, header.isAbstract(), 
+                                                               forSymbol, enclosingScope.getRepositoryIdFor(header.getIdent()),
+                                                               curModBuilder);
 
         // generate body
         ASTinterface_body body = (ASTinterface_body)node.jjtGetChild(1);
@@ -487,7 +496,9 @@ public class MetaDataGenerator implements IDLParserVisitor {
             ModuleBuilder curModBuilder = m_modBuilderManager.GetOrCreateModuleBuilderFor(enclosingScope);
             // it's no problem to add later on interfaces this type should implement with AddInterfaceImplementation,
             // here: specify no interface inheritance, because not known at this point
-            createOrGetInterfaceDcl(fullyQualName, Type.EmptyTypes, node.isAbstract(), forSymbol, enclosingScope.getRepositoryIdFor(node.getIdent()), curModBuilder);
+            createOrGetInterfaceDcl(fullyQualName, Type.EmptyTypes, node.isAbstract(), 
+                                    forSymbol, enclosingScope.getRepositoryIdFor(node.getIdent()), 
+                                    curModBuilder);
         }
         return null;
     }
@@ -584,7 +595,9 @@ public class MetaDataGenerator implements IDLParserVisitor {
         for (int i = 0; i < parts.size() - 1; i++) {
             // resolve scopes
             currentScope = currentScope.getChildScope((String)parts.get(i));
-            if (currentScope == null) { throw new RuntimeException("scope resolving error, subscope " + parts.get(i) + " not found in scope "); }
+            if (currentScope == null) { 
+                throw new RuntimeException("scope resolving error, subscope " + parts.get(i) + " not found in scope "); 
+            }
         }
         // resolve symbol
         Symbol sym = currentScope.getSymbol((String)parts.getLast());
@@ -594,7 +607,9 @@ public class MetaDataGenerator implements IDLParserVisitor {
             sym = searchSymbolInEnclosingScopes(currentScope, (String)parts.getLast());    
         }
 
-        if (sym == null) { throw new RuntimeException("scoped name not resolvable: " + node.getScopedName()); }
+        if (sym == null) { 
+            throw new RuntimeException("scoped name not resolvable: " + node.getScopedName()); 
+        }
         return sym;
     }
 
@@ -621,7 +636,9 @@ public class MetaDataGenerator implements IDLParserVisitor {
     /** handles the declaration for the value definition / fwd declaration
      * @return the TypeBuilder for this interface
      */
-    private TypeBuilder createOrGetValueDcl(String fullyQualName, System.Type[] interfaces, System.Type parent, boolean isAbstract, Symbol forSymbol, String repId, ModuleBuilder modBuilder) {
+    private TypeBuilder createOrGetValueDcl(String fullyQualName, System.Type[] interfaces, 
+                                            System.Type parent, boolean isAbstract, Symbol forSymbol, 
+                                            String repId, ModuleBuilder modBuilder) {
         TypeBuilder valueToBuild;
         if (!m_typeManager.IsFwdDeclared(forSymbol)) {
             Trace.WriteLine("generating code for value type: " + fullyQualName);
@@ -672,7 +689,9 @@ public class MetaDataGenerator implements IDLParserVisitor {
                 for (int k = 0; k < params.length; k++) {
                     paramTypes[k] = params[k].get_ParameterType();
                 }
-                MethodBuilder method = classBuilder.DefineMethod(methods[j].get_Name(), MethodAttributes.Abstract | MethodAttributes.Public | MethodAttributes.Virtual | MethodAttributes.HideBySig, methods[j].get_ReturnType(), paramTypes);
+                MethodBuilder method = classBuilder.DefineMethod(methods[j].get_Name(), 
+                                                                 MethodAttributes.Abstract | MethodAttributes.Public | MethodAttributes.Virtual | MethodAttributes.HideBySig, 
+                                                                 methods[j].get_ReturnType(), paramTypes);
                 for (int k = 0; k < params.length; k++) {
                     copyParamAttrs(method, params[k]);
                 }
@@ -693,7 +712,8 @@ public class MetaDataGenerator implements IDLParserVisitor {
     private void copyParamAttrs(MethodBuilder methodBuild, ParameterInfo info) {
         ParameterAttributes paramAttr = ParameterAttributes.None;
         if (info.get_IsOut()) { paramAttr = paramAttr | ParameterAttributes.Out; }
-        ParameterBuilder paramBuild = methodBuild.DefineParameter(info.get_Position() + 1, paramAttr, info.get_Name());
+        ParameterBuilder paramBuild = methodBuild.DefineParameter(info.get_Position() + 1, 
+                                                                  paramAttr, info.get_Name());
         // custom attributes
         System.Object[] attrs = info.GetCustomAttributes(false);
         for (int i = 0; i < attrs.length; i++) {
@@ -749,7 +769,10 @@ public class MetaDataGenerator implements IDLParserVisitor {
 
         String fullyQualName = enclosingScope.getFullyQualifiedNameForSymbol(forSymbol.getSymbolName());
         ModuleBuilder curModBuilder = m_modBuilderManager.GetOrCreateModuleBuilderFor(enclosingScope);
-        TypeBuilder valueToBuild = createOrGetValueDcl(fullyQualName, inheritFrom, baseClass, false, forSymbol, enclosingScope.getRepositoryIdFor(header.getIdent()), curModBuilder);
+        TypeBuilder valueToBuild = createOrGetValueDcl(fullyQualName, inheritFrom, baseClass, 
+                                                       false, forSymbol, 
+                                                       enclosingScope.getRepositoryIdFor(header.getIdent()), 
+                                                       curModBuilder);
         
         // add implementation class attribute
         valueToBuild.SetCustomAttribute(new ImplClassAttribute(fullyQualName + "Impl").CreateAttributeBuilder());
@@ -783,7 +806,9 @@ public class MetaDataGenerator implements IDLParserVisitor {
         if (checkSkip(forSymbol)) { registerSkipped(forSymbol, false); return null; }
 
         Type[] interfaces = parseValueInheritSpec(node, (BuildInfo) data);
-        if ((interfaces.length > 0) && (interfaces[0].get_IsClass())) { throw new RuntimeException("invalid abstract value type, can only inherit from abstract value types, but not from: " + interfaces[0]); }
+        if ((interfaces.length > 0) && (interfaces[0].get_IsClass())) { 
+            throw new RuntimeException("invalid abstract value type, can only inherit from abstract value types, but not from: " + interfaces[0]); 
+        }
         int bodyNodeIndex = 0;
         for (int i = 0; i < node.jjtGetNumChildren(); i++) {
             if (!((node.jjtGetChild(i) instanceof ASTvalue_base_inheritance_spec) || (node.jjtGetChild(i) instanceof ASTvalue_support_inheritance_spec))) {
@@ -794,7 +819,10 @@ public class MetaDataGenerator implements IDLParserVisitor {
 
         String fullyQualName = enclosingScope.getFullyQualifiedNameForSymbol(forSymbol.getSymbolName());
         ModuleBuilder curModBuilder = m_modBuilderManager.GetOrCreateModuleBuilderFor(enclosingScope);
-        TypeBuilder valueToBuild = createOrGetValueDcl(fullyQualName, interfaces, null, true, forSymbol, enclosingScope.getRepositoryIdFor(node.getIdent()), curModBuilder);
+        TypeBuilder valueToBuild = createOrGetValueDcl(fullyQualName, interfaces, null,
+                                                       true, forSymbol, 
+                                                       enclosingScope.getRepositoryIdFor(node.getIdent()),
+                                                       curModBuilder);
 
         // generate elements
         BuildInfo buildInfo = new BuildInfo(enclosingScope, valueToBuild);
@@ -830,7 +858,8 @@ public class MetaDataGenerator implements IDLParserVisitor {
         TypeContainer boxedType = (TypeContainer)node.jjtGetChild(0).jjtAccept(this, data);
         Trace.WriteLine("generating code for boxed value type: " + fullyQualName);
         BoxedValueTypeGenerator boxedValueGen = new BoxedValueTypeGenerator();
-        TypeBuilder resultType = boxedValueGen.CreateBoxedType(boxedType.getCLSType(), curModBuilder, fullyQualName, boxedType.getAttrs());
+        TypeBuilder resultType = boxedValueGen.CreateBoxedType(boxedType.getCLSType(), curModBuilder,
+                                                               fullyQualName, boxedType.getAttrs());
         addRepIdAttribute(resultType, enclosingScope.getRepositoryIdFor(node.getIdent()));
         resultType.AddInterfaceImplementation(IIdlEntity.class.ToType());
         Type result = resultType.CreateType();
@@ -856,7 +885,9 @@ public class MetaDataGenerator implements IDLParserVisitor {
             ModuleBuilder curModBuilder = m_modBuilderManager.GetOrCreateModuleBuilderFor(enclosingScope);
             // it's no problem to add later on interfaces this type should implement and the base class this type should inherit from with AddInterfaceImplementation / set parent
             // here: specify no inheritance, because not known at this point
-            createOrGetValueDcl(fullyQualName, Type.EmptyTypes, null, node.isAbstract(), forSymbol, enclosingScope.getRepositoryIdFor(node.getIdent()), curModBuilder);        
+            createOrGetValueDcl(fullyQualName, Type.EmptyTypes, null, node.isAbstract(),
+                                forSymbol, enclosingScope.getRepositoryIdFor(node.getIdent()),
+                                curModBuilder);        
         }
         return null;
     }
@@ -1153,7 +1184,8 @@ public class MetaDataGenerator implements IDLParserVisitor {
                 String ident = ((SimpleNodeWithIdent) decl.jjtGetChild(0)).getIdent();
                 Symbol typedefSymbol = currentScope.getSymbol(ident);
                 // inform the type-manager of this typedef
-                Debug.WriteLine("typedef defined here, type: " + typeUsedInDefine.getCLSType() + ", symbol: " + typedefSymbol);
+                Debug.WriteLine("typedef defined here, type: " + typeUsedInDefine.getCLSType() +
+                                ", symbol: " + typedefSymbol);
                 m_typeManager.registerTypeDef(typeUsedInDefine, typedefSymbol);
             }
         }    
@@ -1476,19 +1508,23 @@ public class MetaDataGenerator implements IDLParserVisitor {
             // independent dcl
             ModuleBuilder curModBuilder = m_modBuilderManager.GetOrCreateModuleBuilderFor(buildInfo.GetBuildScope());
             String fullyQualName = buildInfo.GetBuildScope().getFullyQualifiedNameForSymbol(forSymbol.getSymbolName());
-            structToCreate = curModBuilder.DefineType(fullyQualName, typeAttrs, System.ValueType.class.ToType(), new System.Type[] { IIdlEntity.class.ToType() });
+            structToCreate = curModBuilder.DefineType(fullyQualName, typeAttrs, System.ValueType.class.ToType(),
+                                                      new System.Type[] { IIdlEntity.class.ToType() });
             thisTypeInfo = new BuildInfo(buildInfo.GetBuildScope(), structToCreate);
         } else {
             // nested dcl
             if (buildInfo.GetContainterType().get_IsClass()) {
                 String fullyQualName = buildInfo.GetBuildScope().getFullyQualifiedNameForSymbol(forSymbol.getSymbolName());
-                structToCreate = buildInfo.GetContainterType().DefineNestedType(fullyQualName, typeAttrs, System.ValueType.class.ToType(), new System.Type[] { IIdlEntity.class.ToType() });
+                structToCreate = buildInfo.GetContainterType().DefineNestedType(fullyQualName, typeAttrs,
+                                                                                System.ValueType.class.ToType(),
+                                                                                new System.Type[] { IIdlEntity.class.ToType() });
             } else {
                 // only a class can contain nested types --> therefore use another solution than a nested type for container types which are not classes
                 Scope nestedScope = getScopeForNested(buildInfo.GetBuildScope(), forSymbol);
                 String fullyQualName = nestedScope.getFullyQualifiedNameForSymbol(forSymbol.getSymbolName());
                 ModuleBuilder curModBuilder = m_modBuilderManager.GetOrCreateModuleBuilderFor(nestedScope);
-                structToCreate = curModBuilder.DefineType(fullyQualName, typeAttrs, System.ValueType.class.ToType(), new System.Type[] { IIdlEntity.class.ToType() });
+                structToCreate = curModBuilder.DefineType(fullyQualName, typeAttrs, System.ValueType.class.ToType(),
+                                                          new System.Type[] { IIdlEntity.class.ToType() });
             }
             thisTypeInfo = new BuildInfo(buildInfo.GetBuildScope(), structToCreate);
         }
@@ -1597,7 +1633,8 @@ public class MetaDataGenerator implements IDLParserVisitor {
         if (checkSkip(forSymbol)) { registerSkipped(forSymbol, false); return null; }
 
         TypeBuilder enumToCreate = null;
-        TypeAttributes typeAttrs = TypeAttributes.Class | TypeAttributes.Public | TypeAttributes.Sealed | TypeAttributes.Serializable;
+        TypeAttributes typeAttrs = TypeAttributes.Class | TypeAttributes.Public | TypeAttributes.Sealed |
+                                   TypeAttributes.Serializable;
         if (buildInfo.GetContainterType() == null) {
             // independent dcl
             String fullyQualName = buildInfo.GetBuildScope().getFullyQualifiedNameForSymbol(forSymbol.getSymbolName());
@@ -1607,7 +1644,8 @@ public class MetaDataGenerator implements IDLParserVisitor {
             // nested dcl
             if (buildInfo.GetContainterType().get_IsClass()) {
                 String fullyQualName = buildInfo.GetBuildScope().getFullyQualifiedNameForSymbol(forSymbol.getSymbolName());
-                enumToCreate = buildInfo.GetContainterType().DefineNestedType(fullyQualName, typeAttrs, System.Enum.class.ToType());
+                enumToCreate = buildInfo.GetContainterType().DefineNestedType(fullyQualName, typeAttrs,
+                                                                              System.Enum.class.ToType());
             } else {
                 // only a class can contain nested types --> therefore use another solution than a nested type for container types which are not classes
                 Scope nestedScope = getScopeForNested(buildInfo.GetBuildScope(), forSymbol);
@@ -1617,12 +1655,14 @@ public class MetaDataGenerator implements IDLParserVisitor {
             }
         }
         // add value__ field, see DefineEnum method of ModuleBuilder
-        enumToCreate.DefineField("value__", System.Int32.class.ToType(), FieldAttributes.Public | FieldAttributes.SpecialName | FieldAttributes.RTSpecialName);
+        enumToCreate.DefineField("value__", System.Int32.class.ToType(), 
+                                 FieldAttributes.Public | FieldAttributes.SpecialName | FieldAttributes.RTSpecialName);
         
         // add enum entries
         for (int i = 0; i < node.jjtGetNumChildren(); i++) {
             String enumeratorId = ((SimpleNodeWithIdent)node.jjtGetChild(i)).getIdent();
-            enumToCreate.DefineField(enumeratorId, enumToCreate, FieldAttributes.Public | FieldAttributes.Static | FieldAttributes.Literal);
+            enumToCreate.DefineField(enumeratorId, enumToCreate, 
+                                     FieldAttributes.Public | FieldAttributes.Static | FieldAttributes.Literal);
         }
 
         // add IDLEnum attribute
@@ -1649,7 +1689,9 @@ public class MetaDataGenerator implements IDLParserVisitor {
      */
     public Object visit(ASTsequence_type node, Object data) {
         checkParameterForBuildInfo(data, node);
-        if (node.jjtGetNumChildren() > 1) { throw new RuntimeException("sequence with a bound not supported by this compiler"); }
+        if (node.jjtGetNumChildren() > 1) { 
+            throw new RuntimeException("sequence with a bound not supported by this compiler"); 
+        }
         Node elemTypeNode = node.jjtGetChild(0);
         Debug.WriteLine("determine element type of IDLSequence");
         TypeContainer elemType = (TypeContainer)elemTypeNode.jjtAccept(this, data);
@@ -1732,19 +1774,26 @@ public class MetaDataGenerator implements IDLParserVisitor {
         PropertyBuilder propBuild;
         for (int i = 1; i < node.jjtGetNumChildren(); i++) {
             ASTsimple_declarator simpleDecl = (ASTsimple_declarator) node.jjtGetChild(i);
-            propBuild = builder.DefineProperty(simpleDecl.getIdent(), PropertyAttributes.None, propType.getCLSType(), System.Type.EmptyTypes);
+            propBuild = builder.DefineProperty(simpleDecl.getIdent(), PropertyAttributes.None, 
+                                               propType.getCLSType(), System.Type.EmptyTypes);
             // set the methods for the property
-            MethodBuilder getAccessor = builder.DefineMethod("get_" + simpleDecl.getIdent(), MethodAttributes.Virtual | MethodAttributes.Abstract | MethodAttributes.Public | MethodAttributes.HideBySig | MethodAttributes.SpecialName, propType.getCLSType(), System.Type.EmptyTypes);
+            MethodBuilder getAccessor = builder.DefineMethod("get_" + simpleDecl.getIdent(), 
+                                                             MethodAttributes.Virtual | MethodAttributes.Abstract | MethodAttributes.Public | MethodAttributes.HideBySig | MethodAttributes.SpecialName, 
+                                                             propType.getCLSType(), System.Type.EmptyTypes);
             propBuild.SetGetMethod(getAccessor);
             MethodBuilder setAccessor = null;
             if (!(node.isReadOnly())) {
-                setAccessor = builder.DefineMethod("set_" + simpleDecl.getIdent(), MethodAttributes.Virtual | MethodAttributes.Abstract | MethodAttributes.Public | MethodAttributes.HideBySig | MethodAttributes.SpecialName, null, new System.Type[] { propType.getCLSType() });
+                setAccessor = builder.DefineMethod("set_" + simpleDecl.getIdent(), 
+                                                   MethodAttributes.Virtual | MethodAttributes.Abstract | MethodAttributes.Public | MethodAttributes.HideBySig | MethodAttributes.SpecialName, 
+                                                   null, new System.Type[] { propType.getCLSType() });
                 propBuild.SetSetMethod(setAccessor);
             }
             
             ParameterBuilder retParamGet = createParamBuilderForRetParam(getAccessor);
             ParameterBuilder valParam = null;
-            if (setAccessor != null) { valParam = setAccessor.DefineParameter(1, ParameterAttributes.None, "value"); }
+            if (setAccessor != null) { 
+                valParam = setAccessor.DefineParameter(1, ParameterAttributes.None, "value"); 
+            }
             // add custom attributes
             for (int j = 0; j < propType.getAttrs().length; j++) {
                 propBuild.SetCustomAttribute(propType.getAttrs()[j]);    
@@ -1780,19 +1829,25 @@ public class MetaDataGenerator implements IDLParserVisitor {
             // independent dcl
             String fullyQualName = buildInfo.GetBuildScope().getFullyQualifiedNameForSymbol(forSymbol.getSymbolName());
             ModuleBuilder curModBuilder = m_modBuilderManager.GetOrCreateModuleBuilderFor(buildInfo.GetBuildScope());
-            exceptToCreate = curModBuilder.DefineType(fullyQualName, TypeAttributes.Class | TypeAttributes.Public, AbstractUserException.class.ToType());
+            exceptToCreate = curModBuilder.DefineType(fullyQualName, 
+                                                      TypeAttributes.Class | TypeAttributes.Public, 
+                                                      AbstractUserException.class.ToType());
             thisTypeInfo = new BuildInfo(buildInfo.GetBuildScope(), exceptToCreate);
         } else {
             // nested dcl
             if (buildInfo.GetContainterType().get_IsClass()) {
                 String fullyQualName = buildInfo.GetBuildScope().getFullyQualifiedNameForSymbol(forSymbol.getSymbolName());                
-                exceptToCreate = buildInfo.GetContainterType().DefineNestedType(fullyQualName, TypeAttributes.Class | TypeAttributes.NestedPublic, AbstractUserException.class.ToType());
+                exceptToCreate = buildInfo.GetContainterType().DefineNestedType(fullyQualName, 
+                                                                                TypeAttributes.Class | TypeAttributes.NestedPublic, 
+                                                                                AbstractUserException.class.ToType());
             } else {
                 // only a class can contain nested types --> therefore use another solution than a nested type for container types which are not classes
                 Scope nestedScope = getScopeForNested(buildInfo.GetBuildScope(), forSymbol);
                 String fullyQualName = nestedScope.getFullyQualifiedNameForSymbol(forSymbol.getSymbolName());
                 ModuleBuilder curModBuilder = m_modBuilderManager.GetOrCreateModuleBuilderFor(nestedScope);
-                exceptToCreate = curModBuilder.DefineType(fullyQualName, TypeAttributes.Class | TypeAttributes.Public, AbstractUserException.class.ToType());                
+                exceptToCreate = curModBuilder.DefineType(fullyQualName, 
+                                                          TypeAttributes.Class | TypeAttributes.Public,
+                                                          AbstractUserException.class.ToType());                
             }
             thisTypeInfo = new BuildInfo(buildInfo.GetBuildScope(), exceptToCreate);
         }
@@ -1852,7 +1907,9 @@ public class MetaDataGenerator implements IDLParserVisitor {
         String methodName = node.getIdent();
         // ready to create method
         TypeBuilder typeAtBuild = buildInfo.GetContainterType();
-        MethodBuilder methodBuild = typeAtBuild.DefineMethod(methodName,  MethodAttributes.Virtual | MethodAttributes.Abstract | MethodAttributes.Public | MethodAttributes.HideBySig, returnType.getCLSType(), paramTypes);
+        MethodBuilder methodBuild = typeAtBuild.DefineMethod(methodName,  
+                                                             MethodAttributes.Virtual | MethodAttributes.Abstract | MethodAttributes.Public | MethodAttributes.HideBySig,
+                                                             returnType.getCLSType(), paramTypes);
         // define the paramter-names / attributes
         for (int i = 0; i < params.length; i++) {
             defineParamter(methodBuild, params[i], i+1);
@@ -2024,14 +2081,17 @@ public class MetaDataGenerator implements IDLParserVisitor {
             CustomAttributeBuilder[] attrs = new CustomAttributeBuilder[] { new BoxedValueAttribute(boxedValueRepId).CreateAttributeBuilder() };
             return new TypeContainer(fullUnboxed, attrs);
         } catch (Exception e) {
-            throw new RuntimeException("invalid type found: " + boxedValueType + ", static method missing or not callable: " + BoxedValueBase.GET_FIRST_NONBOXED_TYPE_METHODNAME);
+            throw new RuntimeException("invalid type found: " + boxedValueType + 
+                                       ", static method missing or not callable: " + BoxedValueBase.GET_FIRST_NONBOXED_TYPE_METHODNAME);
         }
     }
 
 
     /** check if data is an instance of buildinfo, if not throws an exception */
     private void checkParameterForBuildInfo(Object data, Node visitedNode) {
-        if (!(data instanceof BuildInfo)) { throw new RuntimeException("precondition violation in visitor for node" + visitedNode.GetType() + ", " + data.GetType() + " but expected BuildInfo"); }
+        if (!(data instanceof BuildInfo)) { 
+            throw new RuntimeException("precondition violation in visitor for node" + visitedNode.GetType() + ", " + data.GetType() + " but expected BuildInfo"); 
+        }
     }
 
     #endregion IMethods

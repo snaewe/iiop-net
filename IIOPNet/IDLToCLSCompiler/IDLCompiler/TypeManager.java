@@ -63,10 +63,13 @@ public class TypeManager {
     /** register a not fully created type */
     public void RegisterTypeFwdDecl(TypeBuilder type, Symbol forSymbol) {
         if (forSymbol == null) { 
-            throw new RuntimeException("register error for type: " + type.get_FullName() + ", symbol may not be null"); 
+            throw new RuntimeException("register error for type: " + 
+                                       type.get_FullName() + ", symbol may not be null"); 
         }
         if (IsTypeDeclarded(forSymbol)) {
-            throw new RuntimeException("a type with the name " + GetKnownType(forSymbol).getCLSType().get_FullName() + " is already declared for symbol: " + forSymbol);
+            throw new RuntimeException("a type with the name " + 
+                                       GetKnownType(forSymbol).getCLSType().get_FullName() +
+                                       " is already declared for symbol: " + forSymbol);
         }
         TypeContainer container = new TypeContainer(type, new CustomAttributeBuilder[0]);
         m_typesInCreation.put(forSymbol, container);
@@ -129,7 +132,10 @@ public class TypeManager {
      * @param fwdDecl tells, if this action is triggered by a fwd declaration or a full declaration */
     public void registerTypeFromBuildModule(Symbol forSymbol, boolean fwdDecl) {
         Type toReg = getTypeFromBuildModule(forSymbol);
-        if (toReg == null) { throw new RuntimeException("internal error, illegal argument for registerTypeFromBuildModule: " + forSymbol); }
+        if (toReg == null) { 
+            throw new RuntimeException("internal error, illegal argument for registerTypeFromBuildModule: " +
+                                       forSymbol); 
+        }
         if (!fwdDecl) {
             m_typesInCreation.remove(forSymbol); // if fwd decl --> remove
             registerTypeDefinition(toReg, forSymbol);
@@ -145,7 +151,8 @@ public class TypeManager {
         if (m_typesInCreation.size() > 0) {
             java.util.Enumeration enum = m_typesInCreation.elements();
             while (enum.hasMoreElements()) {
-                System.out.println("only forward declared: " + ((TypeContainer)enum.nextElement()).getCLSType());
+                System.out.println("only forward declared: " + 
+                                   ((TypeContainer)enum.nextElement()).getCLSType());
             }
             return false;
         } else {
@@ -166,8 +173,12 @@ public class TypeManager {
     /** add a fully defined type to the known types
      */
     private void addTypeDefinition(TypeContainer fullDecl, Symbol forSymbol) {
-        if (m_typesInCreation.containsKey(forSymbol)) { throw new RuntimeException("type can't be registered, a fwd declaration exists"); }
-        if (m_typeTable.containsKey(forSymbol)) { throw new RuntimeException("type already defined"); }
+        if (m_typesInCreation.containsKey(forSymbol)) { 
+            throw new RuntimeException("type can't be registered, a fwd declaration exists"); 
+        }
+        if (m_typeTable.containsKey(forSymbol)) { 
+            throw new RuntimeException("type already defined"); 
+        }
         m_typeTable.put(forSymbol, fullDecl);
     }
     
