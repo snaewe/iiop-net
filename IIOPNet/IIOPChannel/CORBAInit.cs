@@ -70,22 +70,22 @@ namespace Ch.Elca.Iiop.Services {
         
         #endregion SMethods
         #region IMethods
-        	
+
         public NamingContext GetNameService(string host, int port, GiopVersion version) {
-			string nsKey = String.Format("NameService:{0}:{1}:{2}.{3}", host, port, 
+            string nsKey = String.Format("NameService:{0}:{1}:{2}.{3}", host, port, 
                                          version.Major, version.Minor);
-	
-			lock(m_initalServices.SyncRoot) {
-				NamingContext result = null;
-				if (!m_initalServices.ContainsKey(nsKey)) {
-				
-				    string objectURI = IiopUrlUtil.GetObjUriForObjectInfo(InitialCOSNamingContextImpl.s_initalnamingObjKey,
+
+            lock(m_initalServices.SyncRoot) {
+                NamingContext result = null;
+                if (!m_initalServices.ContainsKey(nsKey)) {
+                
+                    string objectURI = IiopUrlUtil.GetObjUriForObjectInfo(InitialCOSNamingContextImpl.s_initalnamingObjKey,
                                                                   version);
                     string url = IiopUrlUtil.GetUrl(host, port, objectURI);
                     result = (NamingContext)RemotingServices.Connect(typeof(NamingContext), url);
                     m_initalServices.Add(nsKey, result);
                 } else {
-                	result = (NamingContext)m_initalServices[nsKey];
+                    result = (NamingContext)m_initalServices[nsKey];
                 }
                 return result;
             }
@@ -101,7 +101,7 @@ namespace Ch.Elca.Iiop.Services {
 
     /// <summary>
     /// provides access to the init-services. 
-    ///	The concept of the INIT service is specific to RMI/IIOP.
+    /// The concept of the INIT service is specific to RMI/IIOP.
     /// </summary>
     public class RmiIiopInit {
 
@@ -111,8 +111,8 @@ namespace Ch.Elca.Iiop.Services {
         /// <remarks>caching references to INIT-services, they remain the same</remarks>
         private Hashtable m_initalServices = new Hashtable();
         
-		/// <summary>the INIT service object</summary>
-		private CORBAInitService m_initService;
+        /// <summary>the INIT service object</summary>
+        private CORBAInitService m_initService;
 
         #endregion IFields
         #region IConstructors
@@ -156,6 +156,9 @@ namespace Ch.Elca.Iiop.Services {
                 return initService;
             }
         }
+        
+        #endregion IMethods
+        #region SMethods
 
         /// <summary>
         /// get the obj-uri for the CORBA init service
@@ -165,8 +168,25 @@ namespace Ch.Elca.Iiop.Services {
             return IiopUrlUtil.GetObjUriForObjectInfo(CORBAInitServiceImpl.s_corbaObjKey,
                                                       new GiopVersion(1, 0));
         }
-
-        #endregion IMethods
+        
+        /// <summary>
+        /// creates a name, which should be passed to resolve method on naming context,
+        /// for the given jndi name
+        /// </summary>
+        public static NameComponent[] CreateNameForJNDI(string jndiName) {
+            if (jndiName == null) {
+                throw new ArgumentException("jndi name must be != null");
+            }
+            string[] nameParts = jndiName.Split('.');
+            NameComponent[] result = new NameComponent[nameParts.Length];
+            for (int i = 0; i < nameParts.Length; i++) {
+                result[i] = new NameComponent(nameParts[i]);
+            }
+            return result;
+        }
+        
+        #endregion SMethods
+        
 
     }
 }
