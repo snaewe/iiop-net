@@ -234,11 +234,15 @@ public class MetaDataGenerator : IDLParserVisitor {
     /// get the types for the scoped names specified in an inheritance relationship
     /// </summary>
     /// <param name="data">the buildinfo of the container of the type having this inheritance relationship</param>    
-    private Type[] ParseInheritanceRelation(SimpleNode node, BuildInfo data) {
-        Type[] result = new Type[node.jjtGetNumChildren()];
+    private Type[] ParseInheritanceRelation(SimpleNode node, BuildInfo data) {        
+        ArrayList result = new ArrayList();
         for (int i = 0; i < node.jjtGetNumChildren(); i++) {
             // get symbol
             Symbol sym = (Symbol)(node.jjtGetChild(i).jjtAccept(this, data)); // accept interface_name
+            if (sym.getDeclaredIn().getFullyQualifiedNameForSymbol(sym.getSymbolName()).Equals("java.io.Serializable")) {
+                Console.WriteLine("ignoring inheritance from java.io.Serializable, because not allowed");                
+                continue;
+            }
             // get Type
             TypeContainer resultType = m_typeManager.GetKnownType(sym);
             if (resultType == null) {
@@ -250,9 +254,10 @@ public class MetaDataGenerator : IDLParserVisitor {
                 throw new InvalidIdlException("type " + sym.getSymbolName() + 
                                               " only fwd declared, but for inheritance full definition is needed");
             }
-            result[i] = resultType.GetCompactClsType();
+            result.Add(resultType.GetCompactClsType());
         }
-        return result;        
+        
+        return (System.Type[])result.ToArray(typeof(Type));
     }
     
     private void AddRepIdAttribute(TypeBuilder typebuild, String repId) {
