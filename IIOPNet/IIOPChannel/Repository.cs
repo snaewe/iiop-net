@@ -107,7 +107,7 @@ namespace Ch.Elca.Iiop.Idl {
         private static TypeCache s_typeCache = new TypeCache();
 
         // for efficiency reason: the evaluation of the following expressions is cached
-        private static Type s_repIDAttrType = typeof(RepositoryIDAttribute);
+        private static Type s_repIdAttrType = typeof(RepositoryIDAttribute);
         private static Type s_supInterfaceAttrType = typeof(SupportedInterfaceAttribute);
 
 
@@ -138,7 +138,8 @@ namespace Ch.Elca.Iiop.Idl {
         private static Type GetTypeForIDLId(string idlID) {
             idlID = idlID.Substring(4);
             if (idlID.IndexOf(":") < 0) { 
-                throw new Exception("invalid repository id: " + idlID); 
+                // invalid repository id: idlID
+                throw new INV_IDENT(10001, CompletionStatus.Completed_MayBe);
             }
             string typeName = idlID.Substring(0, idlID.IndexOf(":"));
             typeName = IdlNaming.MapIdltoClsName(typeName);
@@ -162,7 +163,8 @@ namespace Ch.Elca.Iiop.Idl {
             if (typeName.StartsWith("[")) {
                 string elemType = typeName.TrimStart(Char.Parse("["));
                 if ((elemType == null) || (elemType.Length == 0)) { 
-                    throw new Exception("invalid rmi-repository-id: " + typeName); 
+                    // invalid rmi-repository-id: typeName
+                    throw new INV_IDENT(10002, CompletionStatus.Completed_MayBe);
                 }
                 int arrayRank = typeName.Length - elemType.Length; // array rank = number of [ - characters
                 // parse the elem-type, which is in RMI-ID format
@@ -205,7 +207,8 @@ namespace Ch.Elca.Iiop.Idl {
                     return "short";
                 case 'L':
                     if (rmiElemType.Length <= 1) { 
-                        throw new Exception("invalid element type in RMI array repository id"); 
+                        // invalid element type in RMI array repository id"
+                        throw new INV_IDENT(10004, CompletionStatus.Completed_MayBe);
                     }
                     string elemTypeName = rmiElemType.Substring(1);
                     elemTypeName = elemTypeName.TrimEnd(Char.Parse(";"));
@@ -220,7 +223,8 @@ namespace Ch.Elca.Iiop.Idl {
                     }
                     return unqualName;
                 default:
-                    throw new Exception("invalid element type identifier in RMI array repository id: " + firstChar);
+                    // invalid element type identifier in RMI array repository id: firstChar
+                    throw new INV_IDENT(10003, CompletionStatus.Completed_MayBe);
             }
         }
 
@@ -232,7 +236,7 @@ namespace Ch.Elca.Iiop.Idl {
         /// <param name="type"></param>
         /// <returns></returns>
         public static string GetRepositoryID(Type type) {
-            object[] attr = type.GetCustomAttributes(s_repIDAttrType, true);    
+            object[] attr = type.GetCustomAttributes(s_repIdAttrType, true);    
             if (attr != null && attr.Length > 0) {
                 RepositoryIDAttribute repIDAttr = (RepositoryIDAttribute) attr[0];
                 return repIDAttr.Id;
@@ -347,9 +351,11 @@ namespace Ch.Elca.Iiop.Idl {
             return foundType;
         }
         
-        /// <summary>loads the boxed value type for the BoxedValueAttribute</summary>
+        /// <summary>
+        /// loads the boxed value type for the BoxedValueAttribute
+        /// </summary>
         public static Type GetBoxedValueType(BoxedValueAttribute attr) {
-            string repId = attr.RepositoryID; 
+            string repId = attr.RepositoryId; 
             Debug.WriteLine("getting boxed value type: " + repId);
             Type resultType = GetTypeForId(repId);
             return resultType;
@@ -423,7 +429,7 @@ namespace Ch.Elca.Iiop.Idl {
                                 structMembers);
         }
         public object MapToIdlAbstractInterface(Type clsType) {
-            return new AbstractIFTC(Repository.GetRepositoryID(clsType), clsType.FullName);
+            return new AbstractIfTC(Repository.GetRepositoryID(clsType), clsType.FullName);
         }
         public object MapToIdlConcreteInterface(Type clsType) {
             return new ObjRefTC(Repository.GetRepositoryID(clsType), clsType.FullName);

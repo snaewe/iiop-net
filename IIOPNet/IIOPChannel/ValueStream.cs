@@ -37,13 +37,14 @@ using Ch.Elca.Iiop.Marshalling;
 using Ch.Elca.Iiop.Idl;
 using Ch.Elca.Iiop.Util;
 using Corba;
+using omg.org.CORBA;
 
 namespace Ch.Elca.Iiop.Cdr {
     
     internal enum IndirectionType { 
         IndirRepId, 
         IndirValue,
-        CodeBaseURL
+        CodeBaseUrl
     };
 
     /// <summary>
@@ -601,7 +602,9 @@ namespace Ch.Elca.Iiop.Cdr {
                 chunk.SetContinuationLength(chunkLength);
                 chunk.IsContinuationExpected = false;
             } else {
-                if (chunk.IsDataAvailable()) { throw new InvalidCdrDataException("chunk can't end here, data is present in chunk"); }
+                if (chunk.IsDataAvailable()) { 
+                	throw new InvalidCdrDataException("chunk can't end here, data is present in chunk"); 
+                }
                 chunk.IsContinuationExpected = true;
             }
         }
@@ -631,7 +634,9 @@ namespace Ch.Elca.Iiop.Cdr {
             // read-endTag for this chunk and possibly for outer chunks
             int endTag = ReadLong();
 
-            if (endTag >= 0) { throw new InvalidCdrDataException("end-tag for a chunk must be < 0"); }
+            if (endTag >= 0) { 
+            	throw new InvalidCdrDataException("end-tag for a chunk must be < 0"); 
+            }
             int levelsToEnd = m_chunkStack.Count + 2 + endTag; // already removed topmost element --> add 2 here
             if (levelsToEnd <= 0) { throw new InvalidCdrDataException("invalid end-chunk tag"); }
             // set for the chunks, that are not removed here the IsFinished property to true!
@@ -663,12 +668,15 @@ namespace Ch.Elca.Iiop.Cdr {
         private object CreateInstance(Type actualType) {
             object[] implAttr = actualType.GetCustomAttributes(typeof(ImplClassAttribute), false);
             if ((implAttr != null) && (implAttr.Length > 0)) {
-                if (implAttr.Length > 1) { throw new Exception("invalid type: " + actualType + ", only on ImplClassAttribute allowed"); }
+                if (implAttr.Length > 1) { 
+                	throw new Exception("invalid type: " + actualType + ", only on ImplClassAttribute allowed"); 
+                }
                 ImplClassAttribute implCl = (ImplClassAttribute) implAttr[0];
                 // get the type
                 actualType = Repository.LoadType(implCl.ImplClass);
                 if (actualType == null) { 
-                    throw new Exception("implementation class : " + implCl.ImplClass + " of value-type: " + actualType + " couldn't be found"); 
+                    Trace.WriteLine("implementation class : " + implCl.ImplClass + " of value-type: " + actualType + " couldn't be found"); 
+                	throw new NO_IMPLEMENT(1, CompletionStatus.Completed_MayBe);
                 }
             }
             // type must not be abstract for beeing instantiable
@@ -803,7 +811,8 @@ namespace Ch.Elca.Iiop.Cdr {
             if ((valueTag & 0x00000001) > 0) {
                 long indirectionOffset;
                 if (CheckForIndirection(out indirectionOffset)) {
-                    CheckIndirectionResolvable(indirectionOffset, IndirectionType.CodeBaseURL);
+                    CheckIndirectionResolvable(indirectionOffset, 
+                                               IndirectionType.CodeBaseUrl);
                 } else {
                     StreamPosition indirPos = new StreamPosition(m_baseStream); // indirPos will contain the next aligned position in the base stream, after next read-op is performed
                     string codeBaseURL = ReadString();    

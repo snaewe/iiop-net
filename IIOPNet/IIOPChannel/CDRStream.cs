@@ -34,6 +34,7 @@ using Ch.Elca.Iiop;
 using Ch.Elca.Iiop.Util;
 using Ch.Elca.Iiop.Services;
 using Ch.Elca.Iiop.CodeSet;
+using omg.org.CORBA;
 
 namespace Ch.Elca.Iiop.Cdr {
     
@@ -41,9 +42,9 @@ namespace Ch.Elca.Iiop.Cdr {
     /// alignements possible in CDRStreams
     /// </summary>
     public enum Aligns {
-        Align_2 = 2,
-        Align_4 = 4,
-        Align_8 = 8
+        Align2 = 2,
+        Align4 = 4,
+        Align8 = 8
     }
 
 
@@ -774,7 +775,9 @@ namespace Ch.Elca.Iiop.Cdr {
         }
 
         public void SkipRest() {
-            if (!m_bytesToFollowSet) { throw new InvalidOperationException("only possible to call skipRest, if nrOfBytes set"); }
+            if (!m_bytesToFollowSet) { 
+            	throw new InvalidOperationException("only possible to call skipRest, if nrOfBytes set"); 
+            }
             ReadPadding(GetBytesToFollow());
             while (m_moreFragmentsToFollow) {
                 ReadOctet();
@@ -889,7 +892,8 @@ namespace Ch.Elca.Iiop.Cdr {
             Encoding encoding = CdrStreamHelper.GetCharEncoding(CharSet, CodeSetConversionRegistry.GetRegistry());
             byte[] toSend = encoding.GetBytes(new char[] { data });
             if (toSend.Length > 1) { 
-                throw new Exception("character can't be sent: only one byte representation allowed"); 
+                // character can't be sent: only one byte representation allowed
+                throw new DATA_CONVERSION(10001, CompletionStatus.Completed_MayBe);
             } // is this correct ?
             WriteOpaque(toSend);
         }
@@ -1067,7 +1071,7 @@ namespace Ch.Elca.Iiop.Cdr {
         }
 
         public ushort ReadUShort() {
-            m_stream.ForceReadAlign(Aligns.Align_2);
+            m_stream.ForceReadAlign(Aligns.Align2);
             return (ushort) ((m_stream.ReadOctet() << 8) | m_stream.ReadOctet());
         }
 
@@ -1090,7 +1094,7 @@ namespace Ch.Elca.Iiop.Cdr {
         }
 
         public uint ReadULong() {
-            m_stream.ForceReadAlign(Aligns.Align_4);
+            m_stream.ForceReadAlign(Aligns.Align4);
             return (
                 (((uint)m_stream.ReadOctet()) << 24) | (((uint)m_stream.ReadOctet()) << 16) | 
                 (((uint)m_stream.ReadOctet()) << 8) | ((uint)m_stream.ReadOctet())
@@ -1115,7 +1119,7 @@ namespace Ch.Elca.Iiop.Cdr {
         }
 
         public ulong ReadULongLong() {
-            m_stream.ForceReadAlign(Aligns.Align_8);
+            m_stream.ForceReadAlign(Aligns.Align8);
             return (ulong)(
                 (((ulong)m_stream.ReadOctet()) << 56) | (((ulong)m_stream.ReadOctet()) << 48)  | 
                 (((ulong)m_stream.ReadOctet()) << 40) | (((ulong)m_stream.ReadOctet()) << 32) |                 
@@ -1126,7 +1130,7 @@ namespace Ch.Elca.Iiop.Cdr {
         }
 
         public float ReadFloat() {
-            m_stream.ForceReadAlign(Aligns.Align_4);
+            m_stream.ForceReadAlign(Aligns.Align4);
             byte[] data = m_stream.ReadOpaque(4);
             Array.Reverse((Array)data); // BitConverter wants little endian
             float result = BitConverter.ToSingle(data, 0);
@@ -1134,7 +1138,7 @@ namespace Ch.Elca.Iiop.Cdr {
         }
 
         public double ReadDouble() {
-            m_stream.ForceReadAlign(Aligns.Align_8);
+            m_stream.ForceReadAlign(Aligns.Align8);
             byte[] data = m_stream.ReadOpaque(8);
             // BitConverter takes an 8 byte array, containing the litte endian representation of the double
             Array.Reverse((Array)data);
@@ -1211,7 +1215,7 @@ namespace Ch.Elca.Iiop.Cdr {
         #region write methods dependant on byte ordering
         
         public void WriteShort(short data) {
-            m_stream.ForceWriteAlign(Aligns.Align_2);
+            m_stream.ForceWriteAlign(Aligns.Align2);
             if (data < 0) {
                 // calculate two complement
                 ushort positiveNumber = (ushort)(data * -1);
@@ -1223,13 +1227,13 @@ namespace Ch.Elca.Iiop.Cdr {
         }
 
         public void WriteUShort(ushort data) {
-            m_stream.ForceWriteAlign(Aligns.Align_2);
+            m_stream.ForceWriteAlign(Aligns.Align2);
             m_stream.WriteOctet((byte) ((data & 0xFF00) >> 8));
             m_stream.WriteOctet((byte) ( data & 0x00FF));
         }
 
         public void WriteLong(int data) {
-            m_stream.ForceWriteAlign(Aligns.Align_4);
+            m_stream.ForceWriteAlign(Aligns.Align4);
             if (data < 0) {
                 // calculate two complement
                 uint positiveNumber = (uint)(data * -1);
@@ -1241,7 +1245,7 @@ namespace Ch.Elca.Iiop.Cdr {
         }
 
         public void WriteULong(uint data) {
-            m_stream.ForceWriteAlign(Aligns.Align_4);
+            m_stream.ForceWriteAlign(Aligns.Align4);
             m_stream.WriteOctet((byte) ((data & 0xFF000000) >> 24));
             m_stream.WriteOctet((byte) ((data & 0x00FF0000) >> 16));            
             m_stream.WriteOctet((byte) ((data & 0x0000FF00) >> 8));
@@ -1249,7 +1253,7 @@ namespace Ch.Elca.Iiop.Cdr {
         }
 
         public void WriteLongLong(long data) {
-            m_stream.ForceWriteAlign(Aligns.Align_8);
+            m_stream.ForceWriteAlign(Aligns.Align8);
             if (data < 0) {
                 // calculate two complement
                 ulong positiveNumber = (ulong)(data * -1);
@@ -1261,7 +1265,7 @@ namespace Ch.Elca.Iiop.Cdr {
         }
 
         public void WriteULongLong(ulong data) {
-            m_stream.ForceWriteAlign(Aligns.Align_8);
+            m_stream.ForceWriteAlign(Aligns.Align8);
             m_stream.WriteOctet((byte) ((data & 0xFF00000000000000) >> 56));
             m_stream.WriteOctet((byte) ((data & 0x00FF000000000000) >> 48));
             m_stream.WriteOctet((byte) ((data & 0x0000FF0000000000) >> 40));
@@ -1273,14 +1277,14 @@ namespace Ch.Elca.Iiop.Cdr {
         }
 
         public void WriteFloat(float data) {
-            m_stream.ForceWriteAlign(Aligns.Align_4);
+            m_stream.ForceWriteAlign(Aligns.Align4);
             byte[] byteRep = BitConverter.GetBytes(data);
             Array.Reverse((Array)byteRep);
             m_stream.WriteOpaque(byteRep);
         }
 
         public void WriteDouble(double data) {
-            m_stream.ForceWriteAlign(Aligns.Align_8);
+            m_stream.ForceWriteAlign(Aligns.Align8);
             byte[] byteRep = BitConverter.GetBytes(data); // create the little endian representation of the double
             Array.Reverse((Array)byteRep);
             m_stream.WriteOpaque(byteRep);
