@@ -540,6 +540,24 @@ namespace Ch.Elca.Iiop.IntegrationTests {
             Assertion.AssertEquals((System.Double)(arg1double + arg2double), result3);
         }
 
+        [Test]
+        public void TestNameClashes() {
+            System.Int32 arg = 89;
+            System.Int32 result = m_testService._custom(arg);
+            Assertion.AssertEquals(arg, result);
+           
+            m_testService._context = arg;
+            Assertion.AssertEquals(arg, m_testService._context);
+        }
+
+        [Test]
+        public void TestNamesStartingWithUnderScore() {
+            System.Int32 arg = 99;
+            System.Int32 result = m_testService.N_echoInt(arg);
+            Assertion.AssertEquals(arg, result);
+        }
+
+
     }
 
 }

@@ -118,6 +118,8 @@ namespace Ch.Elca.Iiop.IntegrationTests {
     public class TestService : MarshalByRefObject {
 
         private System.Double m_propValue = 0;
+
+        private System.Int32 m_context = 0;
         
         public System.Double TestProperty {
             get {
@@ -293,6 +295,36 @@ namespace Ch.Elca.Iiop.IntegrationTests {
 
         public int AddOverloaded(int arg1, int arg2, int arg3) {
             return arg1 + arg2 + arg3;
+        }
+        
+        /// <summary>
+        /// a property with a name, which clashes with an IDL keyword
+        /// </summary>
+        public System.Int32 context {
+            get {
+                return m_context;
+            }
+            set {
+                m_context = value;
+            }
+        }
+
+        /// <summary>
+        /// a method with a name, which clashes with an IDL keyword
+        /// </summary>
+        /// <param name="arg"></param>
+        /// <returns></returns>
+        public System.Int32 custom(System.Int32 arg) {
+            return arg;
+        }
+
+        /// <summary>
+        /// used to check special case mapping for ids, starting with _
+        /// </summary>
+        /// <param name="arg"></param>
+        /// <returns></returns>
+        public System.Int32 _echoInt(System.Int32 arg) {
+            return arg;
         }
         
         /// <summary>

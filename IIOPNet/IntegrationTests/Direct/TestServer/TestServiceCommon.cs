@@ -188,6 +188,28 @@ namespace Ch.Elca.Iiop.IntegrationTests {
         double AddOverloaded(double arg1, double arg2);
 
         int AddOverloaded(int arg1, int arg2, int arg3);
+
+        /// <summary>
+        /// a property with a name, which clashes with an IDL keyword
+        /// </summary>
+        System.Int32 context {
+            get;
+            set;                
+        }
+
+        /// <summary>
+        /// a method with a name, which clashes with an IDL keyword
+        /// </summary>
+        /// <param name="arg"></param>
+        /// <returns></returns>
+        System.Int32 custom(System.Int32 arg);
+
+        /// <summary>
+        /// used to check special case mapping for ids, starting with _
+        /// </summary>
+        /// <param name="arg"></param>
+        /// <returns></returns>
+        System.Int32 _echoInt(System.Int32 arg);
         
         /// <summary>
         /// used to check, if a reference passed is equal to this object itself.
