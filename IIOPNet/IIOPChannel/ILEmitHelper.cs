@@ -53,26 +53,26 @@ namespace Ch.Elca.Iiop.Idl {
 
             #endregion Constants
             #region SFields
-        	
+            
             public static readonly ParameterDirection s_inout = new ParameterDirection(ParamDir_INOUT);
             public static readonly ParameterDirection s_in = new ParameterDirection(ParamDir_IN);
             public static readonly ParameterDirection s_out = new ParameterDirection(ParamDir_OUT);
-        	
+            
             #endregion SFields
             #region IFields
-        	
+            
             private int m_direction;
-        	
+            
             #endregion IFields
             #region IConstructors
-        		
+                
             private ParameterDirection(int direction) {
                 m_direction = direction;
             }
-        	
+            
             #endregion IConstructors
             #region IMethods
-			
+            
             public bool IsInOut() {
                 return (m_direction == ParamDir_INOUT);
             }
@@ -84,9 +84,9 @@ namespace Ch.Elca.Iiop.Idl {
             public bool IsOut() {
                 return (m_direction == ParamDir_OUT);
             }
-			
+            
             #endregion IMethods
-        	
+            
         }
         
         #endregion Types
@@ -154,8 +154,9 @@ namespace Ch.Elca.Iiop.Idl {
                 return m_paramType.GetSeparatedClsType();
             } else { // out or inout parameter
                 // need a type which represents a reference to the parametertype
-                Assembly declAssembly = m_paramType.GetSeparatedClsType().Assembly;
-                return declAssembly.GetType(m_paramType.GetSeparatedClsType().FullName + "&"); // not nice, better solution ?
+                Module declModule = m_paramType.GetSeparatedClsType().Module;
+                // use module and not assembly here, because not fully completed types are possible here too
+                return declModule.GetType(m_paramType.GetSeparatedClsType().FullName + "&"); // not nice, better solution ?
             }
         }
 

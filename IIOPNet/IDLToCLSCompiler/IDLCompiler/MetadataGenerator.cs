@@ -2128,14 +2128,9 @@ public class MetaDataGenerator : IDLParserVisitor {
         Debug.WriteLine("seq type determined: " + elemType.GetCompactClsType());
         // create CLS array type with the help of GetType(), otherwise not possible
         Type arrayType;
-        if (elemType.GetCompactClsType() is TypeBuilder) {
-            Module declModule = ((TypeBuilder)elemType.GetCompactClsType()).Module;
-            arrayType = declModule.GetType(elemType.GetCompactClsType().FullName + "[]"); // not nice, better solution ?
-        } else {
-            Assembly declAssembly = elemType.GetCompactClsType().Assembly;
-            arrayType = declAssembly.GetType(elemType.GetCompactClsType().FullName + "[]"); // not nice, better solution ?
-        }
-        
+        // because not fully defined types are possible, use module and not assembly to get type from
+        Module declModule = elemType.GetCompactClsType().Module;
+        arrayType = declModule.GetType(elemType.GetCompactClsType().FullName + "[]"); // not nice, better solution ?        
         Debug.WriteLine("created array type: " + arrayType);
         
         // determin if sequence is bounded or unbounded

@@ -1112,14 +1112,9 @@ namespace omg.org.CORBA {
         internal override Type GetClsForTypeCode() {
             Type elemType = ((TypeCodeImpl)m_seqType).GetClsForTypeCode();
             Type arrayType;
-            // handle types in creation correctly
-            if (elemType is TypeBuilder) {
-                Module declModule = ((TypeBuilder)elemType).Module;
-                arrayType = declModule.GetType(elemType.FullName + "[]"); // not nice, better solution ?
-            } else {
-                Assembly declAssembly = elemType.Assembly;
-                arrayType = declAssembly.GetType(elemType.FullName + "[]"); // not nice, better solution ?
-            }                                    
+            // handle types in creation correctly (use module and not assembly to get type)
+            Module declModule = elemType.Module;
+            arrayType = declModule.GetType(elemType.FullName + "[]"); // not nice, better solution ?                                    
             return arrayType;
         }
         
