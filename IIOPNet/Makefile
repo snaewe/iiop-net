@@ -19,6 +19,10 @@ build-base:
 	$(MAKE) build
 	cd ..
 
+build-base-debug:
+	set CSFLAGS=/debug+ /d:DEBUG /d:TRACE
+	$(MAKE) build-base
+
 
 build-tests: build-base
 	cd IIOPChannel
