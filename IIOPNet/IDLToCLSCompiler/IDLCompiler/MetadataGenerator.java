@@ -132,20 +132,11 @@ import Ch.Elca.Iiop.AbstractUserException;
  */
 public class MetaDataGenerator implements IDLParserVisitor {
 
-    private SymbolTable m_symbolTable;
-
-    private AssemblyBuilder m_asmBuilder;
-
-    private ModuleBuilderManager m_modBuilderManager;
-
-    private TypeManager m_typeManager;
-
-    private String m_targetAsmName;
+    
+    #region Types
 
     /** helper class, to pass information */
     class BuildInfo {
-
-        #region Types
         
         #region IFields
 
@@ -225,6 +216,16 @@ public class MetaDataGenerator implements IDLParserVisitor {
 
     #endregion Types
     #region IFields
+
+    private SymbolTable m_symbolTable;
+
+    private AssemblyBuilder m_asmBuilder;
+
+    private ModuleBuilderManager m_modBuilderManager;
+
+    private TypeManager m_typeManager;
+
+    private String m_targetAsmName;
 
     /** reference to one of the internal constructor of class ParameterInfo. Used for assigning custom attributes to the return parameter */
     private ConstructorInfo m_paramBuildConstr;
