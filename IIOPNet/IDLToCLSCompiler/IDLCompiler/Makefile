@@ -16,7 +16,7 @@ $(Dest)IDLPreprocessor.dll: $(IDLPreprocessor)
 	copy $(IDLPreprocessor) $@
 
 $(Dest)IDLToCLSCompiler.exe: $(Dest)IIOPChannel.dll $(Dest)IDLPreprocessor.dll *.cs
-	csc $(CSFLAGS) /res:MappingPluginSchema.xsd /r:$(Dest)IIOPChannel.dll /r:$(Dest)IDLPreprocessor.dll /t:exe /out:$@ *.cs
+	csc /nowarn:0162,0164,0168,0169,0219 $(CSFLAGS) /res:MappingPluginSchema.xsd /r:$(Dest)IIOPChannel.dll /r:$(Dest)IDLPreprocessor.dll /t:exe /out:$@ *.cs
 
 
 nunit-var:
