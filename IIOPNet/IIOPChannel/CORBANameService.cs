@@ -270,8 +270,36 @@ namespace omg.org.CosNaming {
 
         #endregion IMethods
         
+    }
+
+
+    /// <summary>
+    /// This is an implementation of the COSNamingContext, living forever
+    /// </summary>
+    /// <remarks>
+    /// here, it's required to use the Repository-id: "IDL:omg.org/CosNaming/NamingContext:1.0"
+    /// </remarks>
+    [RepositoryIDAttribute("IDL:omg.org/CosNaming/NamingContext:1.0")]
+    public class InitialCOSNamingContextImpl : COSNamingContextImpl {
+
+        #region SFields
+        
+        internal static byte[] s_initalnamingObjKey = 
+            new byte[] { 0x4E, 0x61, 0x6D, 0x65, 0x53, 0x65, 0x72, 0x76, 0x69, 0x63, 0x65 };
+
+        #endregion SFields
+        #region IMethods
+        
+        public override Object InitializeLifetimeService() {
+            // this should live forever
+            return null;
+        }
+
+        #endregion IMethods
 
     }
+
+
 }
 
 namespace omg.org.CosNaming.NamingContext_package {

@@ -70,9 +70,15 @@ namespace Ch.Elca.Iiop.Services {
         private static object s_lockObject = new Object();
 
         #endregion SFields
+        #region IFields
+
+        private InitialCOSNamingContextImpl m_initalContext;
+
+        #endregion IFields
         #region IConstructors
 
         private CORBAInitServiceImpl() {
+            PublishNameService();
         }
 
         #endregion IConstructors
@@ -80,7 +86,9 @@ namespace Ch.Elca.Iiop.Services {
         
         public static void Publish() {
             lock(s_lockObject) {
-                if (s_corbaInitService == null) {    
+                if (s_corbaInitService == null) {
+
+                    // create the init service, which provides access to other service (for JDK orbs)
                     s_corbaInitService = new CORBAInitServiceImpl();
                     RemotingServices.Marshal(s_corbaInitService, 
                                              IiopUrlUtil.GetObjUriForObjectInfo(s_corbaObjKey,
@@ -91,11 +99,18 @@ namespace Ch.Elca.Iiop.Services {
 
         #endregion SMethods
         #region IMethods
+        
+        private void PublishNameService() {
+            // create root naming context and publish it
+            m_initalContext = new InitialCOSNamingContextImpl();
+            RemotingServices.Marshal(m_initalContext,
+                                     IiopUrlUtil.GetObjUriForObjectInfo(InitialCOSNamingContextImpl.s_initalnamingObjKey,
+                                                                        new GiopVersion(1, 0)));    
+        }
 
         public NamingContext _get([WideCharAttribute(false)][StringValueAttribute] string serviceName) {
             if (serviceName.Equals(NAMESERVICE_NAME)) {
-                COSNamingContextImpl nameingContext = new COSNamingContextImpl();
-                return nameingContext;
+                return m_initalContext;
             }
             // unknown serivce: serviceName
             throw new OBJECT_NOT_EXIST(9700, CompletionStatus.Completed_MayBe);
