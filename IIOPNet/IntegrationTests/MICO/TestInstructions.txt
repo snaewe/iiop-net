@@ -15,7 +15,7 @@ Running the test
 
 - start the server:
   - change to directory TestServer
-  - use nmake -f Makefile.Win32 to start the server
+  - use nmake -f Makefile.Win32 start-server to start the server
 
 - launch the test using the NUnit GUI or the NUnit Console runner
   Running the test with console launcher:
