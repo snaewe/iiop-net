@@ -273,7 +273,7 @@ namespace java.util {
     
         public HashMapImpl() {
             m_loadFactor = 0.75f;
-            m_capacity = 0;
+            m_capacity = 16; // for websphere 5, capacity 0 is not allowed!
         	m_buckets = new System.Collections.DictionaryEntry[0];        	
         }
 
