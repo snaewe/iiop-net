@@ -9,6 +9,9 @@ build: nunit-var junit-var
         cd Direct
 	$(MAKE) build
         cd ..
+        cd Multithread
+        $(MAKE) build
+        cd ..
         cd JavaRMIIIOP
 	$(MAKE) build
 	cd ..
@@ -55,6 +58,9 @@ test: nunit-var junit-var
         cd Direct
 	$(MAKE) test
         cd ..
+        cd Multithread
+        $(MAKE) test
+        cd ..
 	cd JavaRMIIIOP
 	$(MAKE) test
 	cd ..
@@ -94,6 +100,9 @@ clean:
 	cd ..
         cd Direct
 	$(MAKE) clean
+        cd ..
+        cd Multithread
+        $(MAKE) clean
         cd ..
 	cd JavaRMIIIOP
 	$(MAKE) clean
