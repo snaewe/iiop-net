@@ -235,18 +235,17 @@ namespace Ch.Elca.Iiop.CorbaObjRef {
         /// <param name="cdrStream"></param>
         /// <returns></returns>
         private IorProfile ParseProfile(CdrInputStream cdrStream) {
-            uint profileType = cdrStream.ReadULong(); 
-            CdrEncapsulationInputStream encapStream = cdrStream.ReadEncapsulation();
+            uint profileType = cdrStream.ReadULong();             
             switch (profileType) {
                 case 0: 
-                    IorProfile result = new InternetIiopProfile(encapStream);
+                    IorProfile result = new InternetIiopProfile(cdrStream);
                     AssignDefaultFromProfile(result);
                     return result;
-                case 1:
-                    return new MultipleComponentsProfile(encapStream);
+                case 1:                    
+                    return new MultipleComponentsProfile(cdrStream);
                 default: 
-                    // unparsable profile: profileType
-                    throw new INV_OBJREF(9403, CompletionStatus.Completed_MayBe);
+                    // unsupported profile type
+                    return new UnsupportedIorProfile(cdrStream, profileType);
             }
         }
 
@@ -301,11 +300,11 @@ namespace Ch.Elca.Iiop.CorbaObjRef {
         #region IConstructors
 
         /// <summary>
-        /// creates an IOR from the data in an encapsulation
+        /// creates an IOR from the data in a stream
         /// </summary>
-        /// <param name="encapsulation"></param>
-        protected IorProfile(CdrEncapsulationInputStream encapsulation) {
-            ReadFromEncapsulation(encapsulation);
+        /// <param name="stream">the stream containing the profile data</param>
+        protected IorProfile(CdrInputStream stream) {
+            ReadDataFromStream(stream);
         }
 
         /// <summary>
@@ -355,7 +354,7 @@ namespace Ch.Elca.Iiop.CorbaObjRef {
         /// <summary>
         /// the id of the profile
         /// </summary>
-        public abstract ulong ProfileId {
+        public abstract uint ProfileId {
             get;
         }
 
@@ -371,8 +370,8 @@ namespace Ch.Elca.Iiop.CorbaObjRef {
         /// <summary>writes this profile into an encapsulation</summary>
         public abstract void WriteToStream(CdrOutputStream cdrStream);
 
-        /// <summary>reads this profile from an encapsulation</summary>
-        protected abstract void ReadFromEncapsulation(CdrEncapsulationInputStream cdrStream);
+        /// <summary>reads this profile data from a stream</summary>
+        protected abstract void ReadDataFromStream(CdrInputStream cdrStream);
 
         #endregion IMethods
     
@@ -395,11 +394,10 @@ namespace Ch.Elca.Iiop.CorbaObjRef {
         }
 
         /// <summary>
-        /// reads an InternetIIOPProfile from an encapsulation (created with the method readEncapsulation in
-        /// CDRStream) // not very nice, to change
+        /// reads an InternetIIOPProfile from a cdr stream
         /// </summary>
         /// <param name="encapsulation"></param>
-        public InternetIiopProfile(CdrEncapsulationInputStream encapsulation) : base(encapsulation) {
+        public InternetIiopProfile(CdrInputStream dataStream) : base(dataStream) {
             
         }
 
@@ -407,7 +405,7 @@ namespace Ch.Elca.Iiop.CorbaObjRef {
         #region IProperties
 
         /// <summary>returns the profile-id for this profile</summary>
-        public override ulong ProfileId {
+        public override uint ProfileId {
             get { 
                 return 0; 
             }
@@ -416,7 +414,9 @@ namespace Ch.Elca.Iiop.CorbaObjRef {
         #endregion IProperties
         #region IMethods
 
-        protected override void ReadFromEncapsulation(CdrEncapsulationInputStream encapsulation) {
+        protected override void ReadDataFromStream(CdrInputStream inputStream) {
+            // internet-iiop profile is encapsulated
+            CdrEncapsulationInputStream encapsulation = inputStream.ReadEncapsulation();
             Debug.WriteLine("parse Internet IIOP Profile");
             byte giopMajor = encapsulation.ReadOctet();
             byte giopMinor = encapsulation.ReadOctet();
@@ -503,18 +503,17 @@ namespace Ch.Elca.Iiop.CorbaObjRef {
         }
 
         /// <summary>
-        /// reads a multiple component profile from an encapsulation (created with the method readEncapsulation in
-        /// CDRStream) // not very nice, to change
+        /// reads a multiple component profile data from a stream
         /// </summary>
         /// <param name="encapsulation"></param>
-        public MultipleComponentsProfile(CdrEncapsulationInputStream encapsulation) : base(encapsulation) {            
+        public MultipleComponentsProfile(CdrInputStream inputStream) : base(inputStream) {            
         }
 
         #endregion IConstructors
         #region IProperties
 
         /// <summary>returns the profile-id for this profile</summary>
-        public override ulong ProfileId {
+        public override uint ProfileId {
             get { 
                 return 1; 
             }
@@ -523,7 +522,10 @@ namespace Ch.Elca.Iiop.CorbaObjRef {
         #endregion IProperties
         #region IMethods
 
-        protected override void ReadFromEncapsulation(CdrEncapsulationInputStream encapsulation) {
+        protected override void ReadDataFromStream(CdrInputStream inputStream) {
+            // internet-iiop profile is encapsulated
+            CdrEncapsulationInputStream encapsulation = inputStream.ReadEncapsulation();
+
             Debug.WriteLine("parse Multiple component Profile");
             uint nrOfComponents = encapsulation.ReadULong();
             Debug.WriteLine("nr of components following: " + nrOfComponents);
@@ -556,6 +558,66 @@ namespace Ch.Elca.Iiop.CorbaObjRef {
             }
             // write the whole encapsulation to the stream
             cdrStream.WriteEncapsulation(encapStream);
+        }
+
+        #endregion IMethods
+    
+    }
+    
+    /// <summary>
+    /// used to store information about an unsupported profile
+    /// </summary>
+    public class UnsupportedIorProfile : IorProfile {
+        
+        #region IFields
+        
+        private uint m_profileId;       
+        private byte[] m_data;
+               
+        #endregion IFields
+        #region IConstructors
+    
+        /// <summary>
+        /// reads an unsupported profile from an encapsulation (created with the method readEncapsulation in
+        /// CDRStream) 
+        /// </summary>
+        /// <param name="encapsulation"></param>
+        public UnsupportedIorProfile(CdrInputStream inputStream, uint profileId) : base(inputStream) {                
+            m_profileId = profileId;
+        }
+        
+        #endregion IConstructors        
+        #region IProperties
+
+        /// <summary>returns the profile-id for this profile</summary>
+        public override uint ProfileId {
+            get { 
+                return m_profileId; 
+            }
+        }
+
+        #endregion IProperties
+        #region IMethods
+
+        protected override void ReadDataFromStream(CdrInputStream inputStream) {
+            Debug.WriteLine("parse unsupported ior profile");
+            uint length = inputStream.ReadULong();
+            m_data = inputStream.ReadOpaque((int)length);
+                        
+            Debug.WriteLine("parsing unsupported profile completed");
+        }
+
+        /// <summary>
+        /// writes this profile to the cdrStream
+        /// </summary>
+        /// <param name="cdrStream"></param>
+        /// <remarks>
+        public override void WriteToStream(CdrOutputStream cdrStream) {
+            // write the profile id of this profile
+            cdrStream.WriteULong((uint)ProfileId);
+            uint length = (uint)m_data.Length;
+            cdrStream.WriteULong(length);
+            cdrStream.WriteOpaque(m_data);
         }
 
         #endregion IMethods
@@ -844,6 +906,31 @@ namespace Ch.Elca.Iiop.Tests {
             Assertion.AssertEquals(2, ior.Version.Minor);
             byte[] oid = { 0x53, 0x61, 0x79, 0x48, 0x65, 0x6C, 0x6C, 0x6F };
             Assertion.Equals(oid, ior.ObjectKey);
+        }
+        
+        public void TestNonUsableProfileIncluded() {
+            string iorString = "IOR:000000000000001b49444c3a636d6956322f5573657241636365737356323a312e3000020000000210ca1000000000650000000800000008646576312d73660033de6f8e0000004d000000020000000855736572504f41000000001043415355736572416363657373563200c3fbedfb0000000e007c4c51000000fd57aacdaf801a0000000e007c4c51000000fd57aacdaf80120000009400000000000000980001023100000008646576312d736600200b00020000004d000000020000000855736572504f41000000001043415355736572416363657373563200c3fbedfb0000000e007c4c51000000fd57aacdaf801a0000000e007c4c51000000fd57aacdaf8012000000140000000200000002000000140000000400000001000000230000000400000001000000000000000800000000cb0e0001";            
+            Ior ior = new Ior(iorString);
+            Assertion.AssertEquals("wrong RepositoryId", "IDL:cmiV2/UserAccessV2:1.0", ior.TypID);
+            Assertion.AssertEquals("wrong hostname", "dev1-sf", ior.HostName);
+            Assertion.AssertEquals("wrong port", 8203, ior.Port);
+            Assertion.AssertEquals("wrong major", 1, ior.Version.Major);
+            Assertion.AssertEquals("wrong minor", 2, ior.Version.Minor);
+            Assertion.AssertEquals("wrong number of profiles", 2, ior.Profiles.Length);
+        }
+        
+        public void TestParseAndRecreate() {
+            string iorString = "IOR:0000000000000024524d493a48656c6c6f496e746572666163653a3030303030303030303030303030303000000000010000000000000050000102000000000c31302e34302e32302e3531001f9500000000000853617948656C6C6F0000000100000001000000200000000000010001000000020501000100010020000101090000000100010100";
+            Ior ior = new Ior(iorString);
+            string recreated = ior.ToString();
+            Assertion.AssertEquals("ior not recreated", iorString.ToLower(), 
+                                   recreated.ToLower());
+            
+            string iorString2 = "IOR:000000000000001b49444c3a636d6956322f5573657241636365737356323a312e3000000000000210ca1000000000650000000800000008646576312d73660033de6f8e0000004d000000020000000855736572504f41000000001043415355736572416363657373563200c3fbedfb0000000e007c4c51000000fd57aacdaf801a0000000e007c4c51000000fd57aacdaf80120000000000000000000000980001020000000008646576312d736600200b00000000004d000000020000000855736572504f41000000001043415355736572416363657373563200c3fbedfb0000000e007c4c51000000fd57aacdaf801a0000000e007c4c51000000fd57aacdaf8012000000000000000200000002000000140000000400000001000000230000000400000001000000000000000800000000cb0e0001";            
+            Ior ior2 = new Ior(iorString2);
+            string recreated2 = ior2.ToString();
+            Assertion.AssertEquals("ior2 not recreated", iorString2.ToLower(), 
+                                   recreated2.ToLower());                        
         }
         
     }
