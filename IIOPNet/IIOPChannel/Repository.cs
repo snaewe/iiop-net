@@ -453,7 +453,8 @@ namespace Ch.Elca.Iiop.Idl {
                                                             members[i].GetCustomAttributes(true)));
                 structMembers[i] = new StructMember(members[i].Name, memberType);
             }
-            return new StructTC(Repository.GetRepositoryID(clsType), clsType.FullName, 
+            return new StructTC(Repository.GetRepositoryID(clsType), 
+                                IdlNaming.ReverseIdlToClsNameMapping(clsType.Name),
                                 structMembers);
         }
         public object MapToIdlUnion(Type clsType) {
@@ -524,17 +525,21 @@ namespace Ch.Elca.Iiop.Idl {
                                                                  elemType);
                 cases[i] = switchCase;
             }                                                                                                
-            return new UnionTC(Repository.GetRepositoryID(clsType), clsType.FullName,
+            return new UnionTC(Repository.GetRepositoryID(clsType), 
+                               IdlNaming.ReverseIdlToClsNameMapping(clsType.Name),
                                discrTypeCode, defaultCaseNumber, cases);
         }
         public object MapToIdlAbstractInterface(Type clsType) {
-            return new AbstractIfTC(Repository.GetRepositoryID(clsType), clsType.FullName);
+            return new AbstractIfTC(Repository.GetRepositoryID(clsType), 
+                                    IdlNaming.ReverseIdlToClsNameMapping(clsType.Name));
         }
         public object MapToIdlLocalInterface(Type clsType) {
-            return new LocalIfTC(Repository.GetRepositoryID(clsType), clsType.FullName);
+            return new LocalIfTC(Repository.GetRepositoryID(clsType), 
+                                 IdlNaming.ReverseIdlToClsNameMapping(clsType.Name));
         }
         public object MapToIdlConcreteInterface(Type clsType) {
-            return new ObjRefTC(Repository.GetRepositoryID(clsType), clsType.FullName);
+            return new ObjRefTC(Repository.GetRepositoryID(clsType),
+                                IdlNaming.ReverseIdlToClsNameMapping(clsType.Name));
         }
         public object MapToIdlConcreateValueType(Type clsType) {
             omg.org.CORBA.TypeCode baseTypeCode;
@@ -561,7 +566,8 @@ namespace Ch.Elca.Iiop.Idl {
                 }
                 valueMembers[i] = new ValueTypeMember(members[i].Name, memberType, visibility);
             }
-            return new ValueTypeTC(Repository.GetRepositoryID(clsType), clsType.FullName,
+            return new ValueTypeTC(Repository.GetRepositoryID(clsType), 
+                                   IdlNaming.ReverseIdlToClsNameMapping(clsType.Name),
                                    valueMembers, baseTypeCode, CONCRETE_VALUE_MOD);
         }
         public object MapToIdlAbstractValueType(Type clsType) {
@@ -573,7 +579,9 @@ namespace Ch.Elca.Iiop.Idl {
                 baseTypeCode = Repository.CreateTypeCodeForType(clsType.BaseType, 
                                    new AttributeExtCollection(new Attribute[0]));
             }
-            return new ValueTypeTC(Repository.GetRepositoryID(clsType), clsType.FullName, new ValueTypeMember[0],
+            return new ValueTypeTC(Repository.GetRepositoryID(clsType),
+                                   IdlNaming.ReverseIdlToClsNameMapping(clsType.Name), 
+                                   new ValueTypeMember[0],
                                    baseTypeCode, ABSTRACT_VALUE_MOD);
         }
         
@@ -608,7 +616,9 @@ namespace Ch.Elca.Iiop.Idl {
             omg.org.CORBA.TypeCode boxed = Repository.CreateTypeCodeForType(boxedType, 
                                                                             AttributeExtCollection.ConvertToAttributeCollection(attributesOnBoxed));
             
-            return new ValueBoxTC(Repository.GetRepositoryID(clsType), clsType.FullName, boxed);
+            return new ValueBoxTC(Repository.GetRepositoryID(clsType), 
+                                  IdlNaming.ReverseIdlToClsNameMapping(clsType.Name),
+                                  boxed);
         }
         public object MapToIdlSequence(Type clsType, int bound) {
             omg.org.CORBA.TypeCode elementTC = Repository.CreateTypeCodeForType(clsType.GetElementType(),
@@ -642,11 +652,15 @@ namespace Ch.Elca.Iiop.Idl {
                                                             members[i].GetCustomAttributes(true)));
                 exMembers[i] = new StructMember(members[i].Name, memberType);
             }
-            return new ExceptTC(Repository.GetRepositoryID(clsType), clsType.FullName, exMembers);
+            return new ExceptTC(Repository.GetRepositoryID(clsType), 
+                                IdlNaming.ReverseIdlToClsNameMapping(clsType.Name),
+                                exMembers);
         }
         public object MapToIdlEnum(Type clsType) {
             string[] names = Enum.GetNames(clsType);
-            return new EnumTC(Repository.GetRepositoryID(clsType), clsType.FullName, names);
+            return new EnumTC(Repository.GetRepositoryID(clsType), 
+                              IdlNaming.ReverseIdlToClsNameMapping(clsType.Name),
+                              names);
         }
         public object MapToIdlBoolean(Type clsType) {
             return new BooleanTC();
@@ -704,7 +718,8 @@ namespace Ch.Elca.Iiop.Idl {
                                                         new WideCharAttribute(false), new StringValueAttribute() } ));
             short visibility = VISIBILITY_PUBLIC;
             valueMembers[0] = new ValueTypeMember("repositoryID", memberType, visibility);
-            return new ValueTypeTC(Repository.GetRepositoryID(clsType), clsType.FullName,
+            return new ValueTypeTC(Repository.GetRepositoryID(clsType), 
+                                   IdlNaming.ReverseIdlToClsNameMapping(clsType.Name),
                                    valueMembers, baseTypeCode, CONCRETE_VALUE_MOD);
         }
 
