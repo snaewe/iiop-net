@@ -427,6 +427,8 @@ namespace Ch.Elca.Iiop.IDLCompiler.Tests {
             CheckOnlySpecificCustomAttrInCollection(paramAttrs, typeof(IdlSequenceAttribute));
             object[] returnAttrs = seqMethod.ReturnTypeCustomAttributes.GetCustomAttributes(false);
             CheckOnlySpecificCustomAttrInCollection(returnAttrs, typeof(IdlSequenceAttribute));            
+            
+            writer.Close();
         }
 
         public void TestConstants() {
@@ -467,6 +469,8 @@ namespace Ch.Elca.Iiop.IDLCompiler.Tests {
             CheckNumberOfFields(const3Type, BindingFlags.Public | BindingFlags.NonPublic |
                                             BindingFlags.Instance | BindingFlags.Static | BindingFlags.DeclaredOnly,
                                 1);            
+            
+            writer.Close();
         }
 
         [Test]
@@ -492,6 +496,8 @@ namespace Ch.Elca.Iiop.IDLCompiler.Tests {
             CheckNumberOfFields(recStructType, BindingFlags.Public | BindingFlags.NonPublic |
                                             BindingFlags.Instance | BindingFlags.Static | BindingFlags.DeclaredOnly,
                                 1);            
+            
+            writer.Close();
         }
         
         [Test]
@@ -511,7 +517,12 @@ namespace Ch.Elca.Iiop.IDLCompiler.Tests {
             writer.WriteLine("};");
             writer.Flush();
             testSource.Seek(0, SeekOrigin.Begin);
-            Assembly result = CreateIdl(testSource);
+            
+            try {
+                Assembly result = CreateIdl(testSource);
+            } finally {           
+                writer.Close();
+            }
         }
         
         [Test]
@@ -531,7 +542,12 @@ namespace Ch.Elca.Iiop.IDLCompiler.Tests {
             writer.WriteLine("};");
             writer.Flush();
             testSource.Seek(0, SeekOrigin.Begin);
-            Assembly result = CreateIdl(testSource);
+            
+            try {            
+                Assembly result = CreateIdl(testSource);
+            } finally {
+                writer.Close();
+            }
         }
 
 
