@@ -1,4 +1,31 @@
-version 1.6.0 final (21 March 2003)
+version 1.6.1 final (04 May 2004)
+---------------------------------
+
+This release is a bug-fix and compatibility improvement release.
+
+bugs fixed:
+- IIOPChannel: methods on .NET servers with only out arguments (bug #945958)
+- IIOPChannel: wrong loc. forward deserialisation (Giop1.2) (bug #945954) 
+- IIOPChannel: bug reading target address in a request (bug #928555)
+- IIOPChannel: Any cannot be deserialized if it contains a typedef value (bug #857050)
+- IDLToCLSCompiler: ignoring unknown #pragma directives now instead of exception (needed for Borland Enterprise Server interop)
+
+new features:
+- better support for typecodes and any:
+  * recursive typecodes are now supported
+  * alias typecodes are now supported
+  * Added Any class to allow some customizatation of any insertion / extraction.
+- support for non_existent tests on server side
+- Added OrbServices helper class which allows:
+  * is_a, non_existent test for IIOP.NET clients
+  * getting IOR for proxy (object_to_string)
+  * getting proxy for IOR / corbaloc (string_to_object)
+
+examples:
+- added TAO event service interop example
+
+
+version 1.6.0 final (21 March 2004)
 -----------------------------------
 
 bugs fixed:
@@ -24,7 +51,7 @@ new tests:
 - multi-threading test
 
 
-version 1.6.0 rc0 (22 January 2003)
+version 1.6.0 rc0 (22 January 2004)
 -----------------------------------
 
 new features:
