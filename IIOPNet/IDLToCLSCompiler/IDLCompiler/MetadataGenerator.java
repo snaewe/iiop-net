@@ -241,7 +241,9 @@ public class MetaDataGenerator implements IDLParserVisitor {
      * this method is used to support runs over more than one parse tree */
     private boolean checkSkip(Symbol forSymbol) {
         // do skip, if type is not known (or only fwd declared) in current run over a parse tree, but is known from a previous run
-        if (m_typeManager.isTypeFullyDeclarded(forSymbol)) { return false; } // already known in this run, do checks if this is a redefinition error
+        if (m_typeManager.IsTypeFullyDeclarded(forSymbol)) { 
+            return false; 
+        } // already known in this run, do checks if this is a redefinition error
 
         if (m_typeManager.checkInBuildModulesForType(forSymbol)) { // safe to skip, because type is already fully declared in a previous run
             return true;
@@ -368,7 +370,7 @@ public class MetaDataGenerator implements IDLParserVisitor {
      */
     private TypeBuilder createOrGetInterfaceDcl(String fullyQualName, System.Type[] interfaces, boolean isAbstract, Symbol forSymbol, String repId, ModuleBuilder modBuilder) {
         TypeBuilder interfaceToBuild;
-        if (!m_typeManager.isFwdDeclared(forSymbol)) {
+        if (!m_typeManager.IsFwdDeclared(forSymbol)) {
             Trace.WriteLine("generating code for interface: " + fullyQualName);
             interfaceToBuild = modBuilder.DefineType(fullyQualName, TypeAttributes.Interface | TypeAttributes.Public | TypeAttributes.Abstract, null, interfaces);
             // add InterfaceTypeAttribute
@@ -381,7 +383,7 @@ public class MetaDataGenerator implements IDLParserVisitor {
             addRepIdAttribute(interfaceToBuild, repId);
             interfaceToBuild.AddInterfaceImplementation(IIdlEntity.class.ToType());
             // register type with type manager as not fully declared
-            m_typeManager.registerTypeFwdDecl(interfaceToBuild, forSymbol);    
+            m_typeManager.RegisterTypeFwdDecl(interfaceToBuild, forSymbol);    
         } else {
             // get incomplete type
             Trace.WriteLine("complete interface: " + fullyQualName);
@@ -443,7 +445,7 @@ public class MetaDataGenerator implements IDLParserVisitor {
         if (checkSkip(forSymbol)) { registerSkipped(forSymbol, true); return null; }
         
         String fullyQualName = enclosingScope.getFullyQualifiedNameForSymbol(forSymbol.getSymbolName());
-        if (!(m_typeManager.isTypeDeclarded(forSymbol))) { // ignore fwd-decl if type is already declared, if not generate type for fwd decl
+        if (!(m_typeManager.IsTypeDeclarded(forSymbol))) { // ignore fwd-decl if type is already declared, if not generate type for fwd decl
             ModuleBuilder curModBuilder = m_modBuilderManager.getOrCreateModuleBuilderFor(enclosingScope);
             // it's no problem to add later on interfaces this type should implement with AddInterfaceImplementation,
             // here: specify no interface inheritance, because not known at this point
@@ -501,7 +503,7 @@ public class MetaDataGenerator implements IDLParserVisitor {
             if (resultType == null) {
                 // this is an error: type must be created before it is inherited from
                 throw new RuntimeException("type not seen before in inheritance spec");
-            } else if (m_typeManager.isFwdDeclared(sym)) {
+            } else if (m_typeManager.IsFwdDeclared(sym)) {
                 // this is an error: can't inherit from a fwd declared type
                 throw new RuntimeException("type only fwd declared, but for inheritance full definition is needed");
             }
@@ -583,7 +585,7 @@ public class MetaDataGenerator implements IDLParserVisitor {
      */
     private TypeBuilder createOrGetValueDcl(String fullyQualName, System.Type[] interfaces, System.Type parent, boolean isAbstract, Symbol forSymbol, String repId, ModuleBuilder modBuilder) {
         TypeBuilder valueToBuild;
-        if (!m_typeManager.isFwdDeclared(forSymbol)) {
+        if (!m_typeManager.IsFwdDeclared(forSymbol)) {
             Trace.WriteLine("generating code for value type: " + fullyQualName);
             TypeAttributes attrs = TypeAttributes.Public | TypeAttributes.Abstract;
             if (isAbstract) {
@@ -603,7 +605,7 @@ public class MetaDataGenerator implements IDLParserVisitor {
             }
             valueToBuild.AddInterfaceImplementation(IIdlEntity.class.ToType()); // implement IDLEntity
             // register type with type manager as not fully declared
-            m_typeManager.registerTypeFwdDecl(valueToBuild, forSymbol);    
+            m_typeManager.RegisterTypeFwdDecl(valueToBuild, forSymbol);    
         } else {
             // get incomplete type
             Trace.WriteLine("complete valuetype: " + fullyQualName);
@@ -809,7 +811,7 @@ public class MetaDataGenerator implements IDLParserVisitor {
         
         // create only the type-builder, but don't call createType()
         String fullyQualName = enclosingScope.getFullyQualifiedNameForSymbol(node.getIdent());
-        if (!(m_typeManager.isTypeDeclarded(forSymbol))) { // if the full type declaration already exists, ignore fwd decl
+        if (!(m_typeManager.IsTypeDeclarded(forSymbol))) { // if the full type declaration already exists, ignore fwd decl
             ModuleBuilder curModBuilder = m_modBuilderManager.getOrCreateModuleBuilderFor(enclosingScope);
             // it's no problem to add later on interfaces this type should implement and the base class this type should inherit from with AddInterfaceImplementation / set parent
             // here: specify no inheritance, because not known at this point

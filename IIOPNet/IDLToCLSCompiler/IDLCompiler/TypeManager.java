@@ -53,9 +53,11 @@ public class TypeManager {
     }
 
     /** register a not fully created type */
-    public void registerTypeFwdDecl(TypeBuilder type, Symbol forSymbol) {
-        if (forSymbol == null) { throw new RuntimeException("register error for type: " + type.get_FullName() + ", symbol may not be null"); }
-        if (isTypeDeclarded(forSymbol)) {
+    public void RegisterTypeFwdDecl(TypeBuilder type, Symbol forSymbol) {
+        if (forSymbol == null) { 
+            throw new RuntimeException("register error for type: " + type.get_FullName() + ", symbol may not be null"); 
+        }
+        if (IsTypeDeclarded(forSymbol)) {
             throw new RuntimeException("a type with the name " + getKnownType(forSymbol).getCLSType().get_FullName() + " is already declared for symbol: " + forSymbol);
         }
         TypeContainer container = new TypeContainer(type, new CustomAttributeBuilder[0]);
@@ -63,7 +65,7 @@ public class TypeManager {
     }
 
     /** is at least a forward declaration for the type represented by the symbol present */
-    public boolean isTypeDeclarded(Symbol forSymbol) {
+    public boolean IsTypeDeclarded(Symbol forSymbol) {
         TypeContainer type = getKnownType(forSymbol);
         if (type == null) { 
             return false; 
@@ -73,15 +75,15 @@ public class TypeManager {
     }
     
     /** is a full definitaion present for the type represented by the symbol forSymbol */
-    public boolean isTypeFullyDeclarded(Symbol forSymbol) {
-        if ((!isFwdDeclared(forSymbol)) && (isTypeDeclarded(forSymbol))) { 
+    public boolean IsTypeFullyDeclarded(Symbol forSymbol) {
+        if ((!IsFwdDeclared(forSymbol)) && (IsTypeDeclarded(forSymbol))) { 
             return true; 
         } else {
             return false;    
         }
     }
 
-    public boolean isFwdDeclared(Symbol forSymbol) {
+    public boolean IsFwdDeclared(Symbol forSymbol) {
         TypeContainer result = (TypeContainer)m_typesInCreation.get(forSymbol);
         if (result == null) {
             return false;
