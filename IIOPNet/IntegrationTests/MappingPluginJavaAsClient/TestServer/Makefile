@@ -20,7 +20,6 @@ $(bin)IIOPChannel.dll: $(bin) $(IIOPCHANNEL)
 
 $(bin)javaCollections.dll: $(bin) $(MAPPINGPLUGINDIR)\bin\javaCollections.dll
         copy /y $(MAPPINGPLUGINDIR)bin\javaCollections.* $(bin)
-        copy /y $(MAPPINGPLUGINDIR)bin\_javaCollections*.netmodule $(bin)
 
 $(bin)$(CUSTOMJAVATYPEMAPPING).dll: $(bin) $(MAPPINGPLUGINDIR)\bin\$(CUSTOMJAVATYPEMAPPING).dll
         copy /y $(MAPPINGPLUGINDIR)bin\$(CUSTOMJAVATYPEMAPPING).* $(bin)

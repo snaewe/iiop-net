@@ -4,7 +4,6 @@ IIOPCHANNELPDB = ..\..\..\IIOPChannel\bin\IIOPChannel.pdb
 TestService = ..\TestServer\bin\TestServiceCommon.dll 
 TestServicePDB = ..\TestServer\bin\TestServiceCommon.pdb  
 TestUnion = ..\TestServer\bin\TestUnion.dll
-TestUnionMod = ..\TestServer\bin\_TestUnion.netmodule
 bin         = bin\ 
 
 build: $(bin)ClientTest.dll
@@ -12,7 +11,6 @@ build: $(bin)ClientTest.dll
 
 $(bin)TestUnion.dll : $(TestUnion)
         copy /y $(TestUnion) $(bin)
-        copy /y $(TestUnionMod) $(bin)
 	
 
 $(bin)IIOPChannel.dll: $(IIOPCHANNEL)

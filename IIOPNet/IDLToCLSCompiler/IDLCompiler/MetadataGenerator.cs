@@ -216,7 +216,8 @@ public class MetaDataGenerator : IDLParserVisitor {
                                   targetDir);
         // define one module containing the resulting CLS
         string modName = "_" + m_targetAsmName + ".netmodule";
-        m_modBuilder = m_asmBuilder.DefineDynamicModule(modName, modName);
+	string dllName = m_targetAsmName + ".dll";
+        m_modBuilder = m_asmBuilder.DefineDynamicModule(modName, dllName);
     }
     
     /// <summary>initalizes the assemblies, which contains type to use
