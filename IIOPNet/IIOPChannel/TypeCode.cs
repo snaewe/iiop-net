@@ -29,6 +29,7 @@
 
 
 using System;
+using System.Reflection.Emit;
 using Ch.Elca.Iiop.Idl;
 using Ch.Elca.Iiop.Marshalling;
 using Ch.Elca.Iiop.Cdr;
@@ -201,6 +202,14 @@ namespace omg.org.CORBA {
 
         internal abstract Type GetClsForTypeCode();
 
+        /// <summary>
+        /// for some type-codes, the type represented by the type-code must be created, if not present
+        /// </summary>
+        /// <returns>If overriden, the type created. Default is: Exception</returns>
+        internal virtual Type CreateType(ModuleBuilder modBuilder) {
+            throw new INTERNAL(129, CompletionStatus.Completed_MayBe);
+        }
+
         #region Implementation of TypeCode
         public bool equal(omg.org.CORBA.TypeCode tc) {
             if (tc.kind() != kind()) {
@@ -305,7 +314,13 @@ namespace omg.org.CORBA {
         }
 
         internal override Type GetClsForTypeCode() {
-            return Repository.GetTypeForId(m_id);
+            Type result = Repository.GetTypeForId(m_id);
+            if (result == null) {
+                // create the type represented by this typeCode
+                string typeName = Repository.GetTypeNameForId(m_id);
+                result = TypeFromTypeCodeRuntimeGenerator.GetSingleton().CreateOrGetType(typeName, this);
+            }
+            return result;
         }
 
         #endregion IMethods
@@ -725,7 +740,13 @@ namespace omg.org.CORBA {
         }
 
         internal override Type GetClsForTypeCode() {
-            return Repository.GetTypeForId(m_id);
+            Type result = Repository.GetTypeForId(m_id);
+            if (result == null) {
+                // create the type represented by this typeCode
+                string typeName = Repository.GetTypeNameForId(m_id);
+                result = TypeFromTypeCodeRuntimeGenerator.GetSingleton().CreateOrGetType(typeName, this);
+            }
+            return result;
         }
 
         #endregion IMethods
@@ -789,7 +810,13 @@ namespace omg.org.CORBA {
         }
 
         internal override Type GetClsForTypeCode() {
-            return Repository.GetTypeForId(m_id);
+            Type result = Repository.GetTypeForId(m_id);
+            if (result == null) {
+                // create the type represented by this typeCode
+                string typeName = Repository.GetTypeNameForId(m_id);
+                result = TypeFromTypeCodeRuntimeGenerator.GetSingleton().CreateOrGetType(typeName, this);
+            }
+            return result;
         }
 
         #endregion IMethods
@@ -928,7 +955,14 @@ namespace omg.org.CORBA {
         }
 
         internal override Type GetClsForTypeCode() {
-            return Repository.GetTypeForId(m_id);
+            Type result = Repository.GetTypeForId(m_id);
+            if (result == null) {
+                // create the type represented by this typeCode
+                string typeName = Repository.GetTypeNameForId(m_id);
+                result = TypeFromTypeCodeRuntimeGenerator.GetSingleton().CreateOrGetType(typeName, this);
+            }
+            return result;
+
         }
 
         #endregion IMethods
@@ -1057,7 +1091,13 @@ namespace omg.org.CORBA {
         }
 
         internal override Type GetClsForTypeCode() {
-            return Repository.GetTypeForId(m_id);
+            Type result = Repository.GetTypeForId(m_id);
+            if (result == null) {
+                // create the type represented by this typeCode
+                string typeName = Repository.GetTypeNameForId(m_id);
+                result = TypeFromTypeCodeRuntimeGenerator.GetSingleton().CreateOrGetType(typeName, this);
+            }
+            return result;
         }
 
         #endregion IMethods

@@ -121,21 +121,34 @@ namespace Ch.Elca.Iiop.Idl {
         /// gets a CLS Type for the repository-id
         /// </summary>
         public static Type GetTypeForId(string repId) {
+            string typeName = GetTypeNameForId(repId);
+            if (typeName != null) {
+                // now try to load the type:
+                return LoadType(typeName);
+            } else {
+                return null;
+            }
+        }
+
+        /// <summary>
+        /// gets the fully qualified type name for the repository-id
+        /// </summary>
+        internal static string GetTypeNameForId(string repId) {
             if (repId.StartsWith("RMI")) {
-                return GetTypeForRMIId(repId);
+                return GetTypeNameForRMIId(repId);
             } else if (repId.StartsWith("IDL")) {
-                return GetTypeForIDLId(repId);
+                return GetTypeNameForIDLId(repId);
             } else {
                 return null; // unknown
             }
         }
 
         /// <summary>
-        /// gets the CLS type represented by the IDL-id
+        /// gets the CLS type name represented by the IDL-id
         /// </summary>
         /// <param name="idlID"></param>
         /// <returns></returns>
-        private static Type GetTypeForIDLId(string idlID) {
+        private static string GetTypeNameForIDLId(string idlID) {
             idlID = idlID.Substring(4);
             if (idlID.IndexOf(":") < 0) { 
                 // invalid repository id: idlID
@@ -143,15 +156,14 @@ namespace Ch.Elca.Iiop.Idl {
             }
             string typeName = idlID.Substring(0, idlID.IndexOf(":"));
             typeName = IdlNaming.MapIdltoClsName(typeName);
-            // now try to load the type:
-            return LoadType(typeName);
+            return typeName;
         }
         /// <summary>
-        /// gets the CLS type represented by the RMI-id
+        /// gets the CLS type name represented by the RMI-id
         /// </summary>
         /// <param name="rmiID"></param>
         /// <returns></returns>
-        private static Type GetTypeForRMIId(string rmiID) {
+        private static string GetTypeNameForRMIId(string rmiID) {
             rmiID = rmiID.Substring(4);
             string typeName = "";
             if (rmiID.IndexOf(":") >= 0) {
@@ -178,8 +190,7 @@ namespace Ch.Elca.Iiop.Idl {
                 Debug.WriteLine("try to load boxed value type:" + typeName);
             }
             
-            // now try to load the type:
-            return LoadType(typeName);
+            return typeName;
         }
         
         /// <param name="elemNamespace">the namespace of the elementType</param>
