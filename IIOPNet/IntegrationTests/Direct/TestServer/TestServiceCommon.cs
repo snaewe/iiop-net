@@ -183,6 +183,10 @@ namespace Ch.Elca.Iiop.IntegrationTests {
 
         object EchoAnything(object arg);
 
+        System.Int32 TestRef(ref System.Int32 argRef);
+
+        System.Int32 TestOut(System.Int32 inArg, out System.Int32 argOut);
+
         int AddOverloaded(int arg1, int arg2);
 
         double AddOverloaded(double arg1, double arg2);

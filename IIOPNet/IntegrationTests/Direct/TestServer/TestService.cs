@@ -209,6 +209,16 @@ namespace Ch.Elca.Iiop.IntegrationTests {
             return arg;
         }
 
+        public System.Int32 TestRef(ref System.Int32 argRef) {
+            argRef += 1;
+            return argRef;
+        }
+
+        public System.Int32 TestOut(System.Int32 inArg, out System.Int32 argOut) {
+            argOut = inArg;
+            return inArg;
+        }
+
         public int AddOverloaded(int arg1, int arg2) {
             return arg1 + arg2;
         }
