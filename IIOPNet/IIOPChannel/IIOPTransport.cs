@@ -105,23 +105,14 @@ namespace Ch.Elca.Iiop {
         /// <summary>
         /// send the formatted request to the target
         /// </summary>
-        private void ProcessRequest(Stream networkStream, Stream requestStream) {
+        private void ProcessRequest(Stream networkStream, Stream requestStream) {                      
+            GiopTransportClientMsgHandler transportHandler = 
+                new GiopTransportClientMsgHandler();
+            
             requestStream.Seek(0, SeekOrigin.Begin); // go to the beginning of the stream
-            byte[] data = new byte[requestStream.Length];
-            requestStream.Read(data, 0, (int)requestStream.Length);
-#if TRACE
+            
             Debug.WriteLine("sending an IIOP message in the Client side Transport sink");
-	    /*
-            for (int i = 0; i < data.Length; i++) {
-                if (i % 16 == 0) { 
-                    Debug.WriteLine(""); 
-                }
-                Debug.Write(data[i] + " ");
-            }
-	    */
-	    OutputHelper.DebugBuffer(data);
-#endif
-            networkStream.Write(data, 0, (int)requestStream.Length);
+            transportHandler.SendRequestMessage(requestStream, networkStream);
             Debug.WriteLine("message sent");
         }
 
@@ -132,65 +123,19 @@ namespace Ch.Elca.Iiop {
         /// Precondition: in the networkStream, the message following is not a response
         /// to another request, than the request sent by ProcessMessage
         /// </remarks>
-        private void ProcessResponse(NetworkStream networkStream, out Stream responseStream, 
-                                     out ITransportHeaders responseHeaders) {  
+        private void ProcessResponse(NetworkStream networkStream, uint forReqId,
+                                     out Stream responseStream,
+                                     out ITransportHeaders responseHeaders) {
             responseHeaders = new TransportHeaders();
             responseStream = null;
 			          
-            FragmentedMsgAssembler fragmentAssembler = new FragmentedMsgAssembler();
-            bool fullyRead = false;
-            
-            while (!fullyRead) {
-                // create a stream for reading a new message
-                CdrInputStreamImpl reader = new CdrInputStreamImpl(networkStream);
-                GiopHeader msgHeader = new GiopHeader(reader);
-             
-            	switch(msgHeader.GiopType) {
-            		case GiopMsgTypes.Reply:
-            		    if ((msgHeader.GiopFlags & GiopHeader.FRAGMENT_MASK) > 0) {
-                            fragmentAssembler.StartFragment(reader, msgHeader);
-                        } else {
-                            // no fragmentation
-                            responseStream = new MemoryStream();
-                            msgHeader.WriteToStream(responseStream,
-                                                    msgHeader.ContentMsgLength);
-                            byte[] body = reader.ReadOpaque((int)msgHeader.ContentMsgLength);
-                            responseStream.Write(body, 0, body.Length);
-                            fullyRead = true; // no more fragments
-                        }                    
-                        break;
-            		case GiopMsgTypes.Fragment:
-            			if (!(fragmentAssembler.IsLastFragment(msgHeader))) {
-                            fragmentAssembler.AddFragment(reader, msgHeader);
-                        } else {
-                            responseStream = fragmentAssembler.FinishFragmentedMsg(reader, 
-                                                                                   msgHeader);
-                        	fullyRead = true; // no more fragments
-                        }
-                        break;            			
-            		default:
-            			throw new IOException("unsupported GIOP-msg received: " +
-            			                      msgHeader.GiopType);
-            	}
-            	
-            } // end while (!fullyRead)
-
+            GiopTransportClientMsgHandler transportHandler = 
+                new GiopTransportClientMsgHandler();
+            Debug.WriteLine("receiving an IIOP message in the Client side Transport sink");
+            responseStream = transportHandler.ReceiveResponseMessage(networkStream,
+                                                                     forReqId);            
+            Debug.WriteLine("message received");
             responseStream.Seek(0, SeekOrigin.Begin); // assure stream is read from beginning in formatter
-            byte[] data = new byte[responseStream.Length];
-            responseStream.Read(data, 0, (int)responseStream.Length);
-#if TRACE
-	    /*
-	    for (int i = 0; i < data.Length; i++) {
-                if (i % 16 == 0) { 
-                    Debug.WriteLine(""); 
-                }
-                Debug.Write(data[i] + " ");
-            }
-	    */
-	    OutputHelper.DebugBuffer(data);
-#endif
-            responseStream.Seek(0, SeekOrigin.Begin); // assure stream is read from beginning in formatter
-                                         
         }
 
         #region Implementation of IClientChannelSink
@@ -204,8 +149,9 @@ namespace Ch.Elca.Iiop {
             // wait only for response, if not oneway!
             if (!GiopMessageHandler.IsOneWayCall((IMethodCallMessage)msg)) {
             
+                uint reqNr = (uint)msg.Properties[SimpleGiopMsg.REQUEST_ID_KEY];
                 // now initate asynchronous response listener
-                AsyncResponseWaiter waiter = new AsyncResponseWaiter(sinkStack, networkStream, 
+                AsyncResponseWaiter waiter = new AsyncResponseWaiter(sinkStack, networkStream, reqNr, 
                                                                      new DataAvailableCallBack(this.AsyncResponseArrived));
                 waiter.StartWait(); // this call is non-blocking
             }
@@ -216,16 +162,18 @@ namespace Ch.Elca.Iiop {
             // called by the chain, chain expect response-stream and headers back
             TcpClient client = GetSocket(msg);
             NetworkStream networkStream = client.GetStream();
-            ProcessRequest(networkStream, requestStream);
-            ProcessResponse(networkStream, out responseStream, out responseHeaders);
+            ProcessRequest(networkStream, requestStream);            
+            ProcessResponse(networkStream, (uint)msg.Properties[SimpleGiopMsg.REQUEST_ID_KEY],
+                            out responseStream, out responseHeaders);
             // the previous sink in the chain does further process this response ...
         }
 
         /// <summary>call back to call, when the async response has arrived.</summary>
-        private void AsyncResponseArrived(NetworkStream networkStream, IClientChannelSinkStack sinkStack) {
+        private void AsyncResponseArrived(NetworkStream networkStream, IClientChannelSinkStack sinkStack,
+                                          uint reqNr) {
             ITransportHeaders responseHeaders;
             Stream responseStream;
-            ProcessResponse(networkStream, out responseStream, out responseHeaders);
+            ProcessResponse(networkStream, reqNr, out responseStream, out responseHeaders);
             // forward the response
             sinkStack.AsyncProcessResponse(responseHeaders, responseStream);
         }
@@ -259,6 +207,8 @@ namespace Ch.Elca.Iiop {
         
         /// <summary>the next sink after the transport sink on the server side</summary>
         private IServerChannelSink m_nextSink;
+        
+        private AutoResetEvent m_waitForAsyncComplete = new AutoResetEvent(false);
 
         #endregion IFields
         #region IConstructors
@@ -284,156 +234,31 @@ namespace Ch.Elca.Iiop {
 
         #endregion IProperties
         #region IMethods
-
-        /// <summary>
-        /// handles a Locate request msg: sends a LocateReply message as a result.
-        /// </summary>
-        private void HandleLocateRequest(Stream msgStream, Stream networkStream) {
-            msgStream.Seek(0, SeekOrigin.Begin); // assure stream is read from beginning in GiopMessageHandler
-
-            GiopMessageHandler handler = GiopMessageHandler.GetSingleton();
-            Stream resultMsgStream = handler.HandleIncomingLocateRequestMessage(msgStream);
-            SendResponseMessage(networkStream, resultMsgStream);
-        }
-
-        /// <summary>
-        /// handles a request msg: sends a Reply message as a result.
-        /// </summary>
-        /// <param name="msgStream"></param>
-        /// <param name="networkStream"></param>
-        private void HandleRequest(Stream msgStream, Stream networkStream) {
-            msgStream.Seek(0, SeekOrigin.Begin); // assure stream is read from beginning in formatter
-
-#if TRACE
-            byte[] data = new byte[msgStream.Length];
-            msgStream.Read(data, 0, (int)msgStream.Length);
-	    OutputHelper.DebugBuffer(data);
-            msgStream.Seek(0, SeekOrigin.Begin); // assure stream is read from beginning in formatter
-#endif
-
-            
-            // the out params returned form later sinks
-            IMessage responseMsg;
-            ITransportHeaders responseHeaders;
-            Stream responseStream;
-            
-            // create the sink stack for async processing of message
-            ServerChannelSinkStack sinkStack = new ServerChannelSinkStack();
-            sinkStack.Push(this, networkStream);
-            // empty transport headers for this protocol
-            ITransportHeaders requestHeaders = new TransportHeaders();
-            
-            // next sink will process the request-message
-            ServerProcessing result = m_nextSink.ProcessMessage(sinkStack, null, /* no RequestMessage in transport handler */
-                                                                requestHeaders, msgStream, 
-                                                                out responseMsg, out responseHeaders,
-                                                                out responseStream);
-            switch (result) {
-                case ServerProcessing.Complete :
-                    try { 
-                        sinkStack.Pop(this); 
-                    } catch (Exception) { }
-                    SendResponseMessage(networkStream, responseStream);
-                    break;
-                case ServerProcessing.Async : 
-                    sinkStack.StoreAndDispatch(this, networkStream); // this sink wants to handle response
-                    break;
-                case ServerProcessing.OneWay :
-                    try { 
-                        sinkStack.Pop(this); 
-                    } catch (Exception) { }
-                    // no message to send
-                    break;
-            }
-
-        }
-
-        /// <summary>
-        /// creates the stream for an unfragmented giop message, which can be used for deserialising the
-        /// message.
-        /// </summary>
-        /// <param name="reader"></param>
-        /// <param name="header">Giop header of the message</param>
-        /// <returns></returns>
-        private Stream CreateStreamForGiopMessage(CdrInputStreamImpl reader, GiopHeader msgHeader) {
-            Stream msgStream = new MemoryStream();
-            msgHeader.WriteToStream(msgStream, msgHeader.ContentMsgLength);
-            byte[] body = reader.ReadOpaque((int)msgHeader.ContentMsgLength);
-            msgStream.Write(body, 0, body.Length);
-            return msgStream;
-        }
-
         
         /// <summary>
         /// processes an incoming request
         /// </summary>
-        /// <param name="fragmentAssembler">
-        /// The fragmented message assembler and manager for this connection
+        /// <param name="giopTransportMsgHandler">
+        /// Knows, how to process Giop-Messages.
         /// </param>
-        internal void Process(NetworkStream networkStream, 
-                              FragmentedMsgAssembler fragmentAssembler) {
+        /// <returns>true, if more messages can be read, otherwise false</returns>
+        internal bool Process(NetworkStream networkStream, 
+                              GiopTransportServerMsgHandler giopTransportMsgHandler) {
                                                           
             // read in the message
-            CdrInputStreamImpl reader = new CdrInputStreamImpl(networkStream);
-            GiopHeader msgHeader = new GiopHeader(reader);
-            Stream msgStream;
-            switch(msgHeader.GiopType) {
-                case GiopMsgTypes.Request:
-                    if ((msgHeader.GiopFlags & GiopHeader.FRAGMENT_MASK) > 0) {
-                        fragmentAssembler.StartFragment(reader, msgHeader);
-                        // more fragments
-                    } else {
-                        // no fragmentation
-                        msgStream = CreateStreamForGiopMessage(reader, msgHeader);
-                        HandleRequest(msgStream, networkStream);
-                    }                    
-                    break;
-                case GiopMsgTypes.Fragment:
-                    if (!(fragmentAssembler.IsLastFragment(msgHeader))) {
-                        fragmentAssembler.AddFragment(reader, msgHeader);
-                        // more fragments to follow
-                    } else {
-                        msgStream = fragmentAssembler.FinishFragmentedMsg(reader, 
-                                                                          ref msgHeader);
-                        if (msgHeader.GiopType.Equals(GiopMsgTypes.Request)) {
-                            HandleRequest(msgStream, networkStream);
-                        } else if (msgHeader.GiopType.Equals(GiopMsgTypes.LocateRequest)) {
-                            HandleLocateRequest(msgStream, networkStream);
-                        }
-                    }
-                    break;
-                case GiopMsgTypes.CloseConnection:
-                    networkStream.Close();
-                    break;
-                case GiopMsgTypes.LocateRequest:
-                    // read the message, may be fragmented in GIOP 1.2
-                    if ((msgHeader.GiopFlags & GiopHeader.FRAGMENT_MASK) > 0) {
-                        fragmentAssembler.StartFragment(reader, msgHeader);
-                        // more fragments
-                    } else {
-                        msgStream = CreateStreamForGiopMessage(reader, msgHeader);
-                        HandleLocateRequest(msgStream, networkStream);
-                    }
-                    break;
-                default:
-                    throw new IOException("unsupported Giop message : " +
-                                          msgHeader.GiopType);
-            }
-            
-        }
-
-        /// <summary>sends a response message</summary>
-        private void SendResponseMessage(Stream networkStream, Stream responseMsgStream) {
-            responseMsgStream.Seek(0, SeekOrigin.Begin); // go to the beginning of the stream
-            Debug.WriteLine("sending an IIOP message in the server side Transport sink");
-
-            byte[] data = new byte[responseMsgStream.Length];
-            responseMsgStream.Read(data, 0, (int)responseMsgStream.Length);
-
-	    OutputHelper.DebugBuffer(data);
-            networkStream.Write(data, 0, data.Length);
-            responseMsgStream.Close();
-            Debug.WriteLine("message sent");
+            GiopTransportServerMsgHandler.HandlingResult result = giopTransportMsgHandler.ProcessIncomingMsg();
+            if (result == GiopTransportServerMsgHandler.HandlingResult.AsyncReply) {
+               // wait for async response               
+               Debug.WriteLine("AsyncReply: wait for async response");
+               m_waitForAsyncComplete.WaitOne();
+               Debug.WriteLine("AsyncReply: response sent");
+               // now, can read next messages
+               return true;
+            } else if (result == GiopTransportServerMsgHandler.HandlingResult.ConnectionClose) {
+                return false;    
+            } else {
+                return true;
+            }                        
         }
         
         #region Implementation of IServerChannelSink
@@ -449,8 +274,13 @@ namespace Ch.Elca.Iiop {
             throw new NotSupportedException(); // is always first sink, ProcessMessage is therefor not useful
         }
 
-        public void AsyncProcessResponse(System.Runtime.Remoting.Channels.IServerResponseChannelSinkStack sinkStack, object state, IMessage msg, ITransportHeaders headers, Stream stream) {
-            SendResponseMessage((Stream) state, stream); // send the response stream
+        public void AsyncProcessResponse(IServerResponseChannelSinkStack sinkStack, object state, 
+                                         IMessage msg, ITransportHeaders headers, Stream stream) {
+            GiopTransportServerMsgHandler giopTransportMsgHandler =
+                 (GiopTransportServerMsgHandler) state;
+            giopTransportMsgHandler.SendResponseMessage(stream); // send the response
+            // stream is now available for processing next messages
+            m_waitForAsyncComplete.Set();
         }
 
         #endregion
@@ -494,7 +324,8 @@ namespace Ch.Elca.Iiop {
     }
 
     /// <summary>this delegate is used to call back the ClientTransportSink, when response data is available</summary>
-    internal delegate void DataAvailableCallBack(NetworkStream networkStream, IClientChannelSinkStack sinkStack);
+    internal delegate void DataAvailableCallBack(NetworkStream networkStream, IClientChannelSinkStack sinkStack,
+                                                 uint forReqId);
     
     /// <summary>
     /// this class provide functionaly for waiting for an aync response
@@ -507,16 +338,18 @@ namespace Ch.Elca.Iiop {
         private IClientChannelSinkStack m_sinkStack;
         private DataAvailableCallBack m_callBack;
         private GiopConnectionContext m_connectionDesc;
+        private uint m_reqNr;
 
         #endregion IFields
         #region IConstructors
         
         public AsyncResponseWaiter(IClientChannelSinkStack sinkStack, NetworkStream networkStream,
-                                   DataAvailableCallBack callBack) {
+                                   uint reqNr, DataAvailableCallBack callBack) {
             m_sinkStack = sinkStack;
             m_stream = networkStream;
             m_callBack = callBack;
             m_connectionDesc = IiopConnectionManager.GetCurrentConnectionContext();
+            m_reqNr = reqNr;
         }
 
         #endregion IConstructors
@@ -537,7 +370,7 @@ namespace Ch.Elca.Iiop {
             }
             // call back the handler
             IiopConnectionManager.SetCurrentConnectionContext(m_connectionDesc); // make the current connection context available in this thread            
-            m_callBack(m_stream, m_sinkStack);
+            m_callBack(m_stream, m_sinkStack, m_reqNr);
         }
 
         #endregion IMethods
@@ -580,10 +413,11 @@ namespace Ch.Elca.Iiop {
             // create a connection context for the server connection
             IiopServerConnectionManager.GetManager().RegisterActiveConnection();
             
-            FragmentedMsgAssembler fragmentAssembler = new FragmentedMsgAssembler();            
+            GiopTransportServerMsgHandler serverMsgHandler = 
+                new GiopTransportServerMsgHandler(inStream, m_transportSink);
             while (connected) {
                 try {
-                    m_transportSink.Process(inStream, fragmentAssembler);
+                    m_transportSink.Process(inStream, serverMsgHandler);
                     
                     // check connected:
                     // TODO
