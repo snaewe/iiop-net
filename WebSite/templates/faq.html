@@ -24,6 +24,13 @@
     <li><a href="#NUnit2Config">How do I configure NUnit V2.0 to use the .NET Framework 1.1?</a></li>
 </ol>
 
+<H3>Accessing CORBA objects from IIOP.NET</H3>
+
+<ol START="9">
+    <li><a href="#stringifiedIOR">How can I access an object using its stringified IOR?</a></li>
+    <li><a href="#corbaLocIIOP">How can I access an object using its corbaloc:iiop address?</a></li>
+</ol>
+
 
 <a name="NET1.1"></a>
 <H3>Does IIOP.NET work with Microsoft's .NET 1.1?</H3>
@@ -103,7 +110,31 @@ The config file is processed with: <BR>
     RemotingConfiguration.Configure(configFile);
 </pre>
 
+<a name="#stringifiedIOR"></a>
+<H3>How can I access an object using its stringified IOR?</H3>
 
+The following Code reads an stringified IOR from the file iorfile and creates a proxy for
+the remote object represented by the IOR:
+
+<pre>
+    StreamReader stream = new StreamReader(iorfile);
+    String ior = stream.ReadLine();
+    MyRemoteObjectIF remoteObject = (MyRemoteObjectIF)RemotingServices.Connect(typeof(MyRemoteObjectIF),
+                                                                               ior);
+</pre>
+
+<a name="#corbaLocIIOP"></a>
+<H3>How can I access an object using its corbaloc:iiop address?</H3>
+
+The following code creates a proxy for the remote object represented by the given corbaloc:
+
+<pre>
+    string loc = "corbaloc::localhost:3528/myobject";
+    MyRemoteObjectIF remoteObject = (MyRemoteObjectIF)RemotingServices.Connect(typeof(MyRemoteObjectIF), 
+                                                                               loc);
+</pre>
+
+Note: Only supported in current CVS version (no release yet).
 
 <a name="#NUnit2Config"></a>
 <H3>How do I configure NUnit V2.0 to use the .NET Framework 1.1?</H3>
