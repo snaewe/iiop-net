@@ -486,5 +486,36 @@ The most common errors are:
 <p> If possible, you sould use UTF8, Latin1 or UTF16.
 
 </FAQ>
+</FAQ-SECTION>
+
+<FAQ-SECTION name="About">
+<FAQ question="Who maintains this project?">
+<p>This project is maintained by <a href="http://www.elca.ch/">Elca Informatique SA</a>. For all implementation-related questions please use the <a href="http://sourceforge.net/forum/forum.php?forum_id=274081">forum</a>; if you have other problems or wishes, don't esitate to <a href="contact.html">contact us</a>.
+</faq>
+
+<FAQ question="Who did help?">
+
+<p>First, we would like to thank Prof. Dr. J. Gutknecht at ETH (<a href="http://www.cs.inf.ethz.ch/gutknecht/index.html">Programming Languages and Runtime Systems Research Group</a>) and <a href="http://www.elca.ch/">Elca Informatique</a> who made this project possible.
+
+<p>Like every opensource project, many persons have helped improving IIOP.NET with important remarks, feedback, patches, and other contributions. We would like to adress you our gratitude publicly.
+
+<p>IIOP.NET Hall of Fame (in alphabetic order):
+<ul>
+<li>Atif Aziz
+<li>David Bellette
+<li>Blazej Budzynski
+<li>Stefano Delli Ponti
+<li>Dennis Homann
+<li>Aitor Illarramendi
+<li>Glen Mah
+<li>Eduardo Macarron Miegemolle
+<li>Urs C. Muff
+<li>Andre Natal
+<li>SangHyun Park
+<li>Dirk O. Siebnich
+<li>David Tzur
+</ul>
+
+</FAQ>
 
 </FAQ-SECTION>
