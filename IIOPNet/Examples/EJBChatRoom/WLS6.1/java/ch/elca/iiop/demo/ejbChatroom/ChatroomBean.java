@@ -86,15 +86,15 @@ public class ChatroomBean implements SessionBean {
 
 
     public void broadCast(Message msg) {
-        ChatroomClients clients = ChatroomClients.getSingleton();
-        MessageListener[] listeners = clients.getClients();
+        ChatroomServer server = ChatroomServer.getSingleton();
+        MessageListener[] listeners = server.getClients();
         for (int i = 0; i < listeners.length; i++) {
 			try {
 	            listeners[i].notifyMessage(msg);
 			} catch (Exception e) {
 				System.err.println("error sending msg: " + e);
 				System.err.println("--> removing listener");
-				clients.removeListener(listeners[i]);
+				server.removeListener(listeners[i]);
 			}
         }
 
@@ -102,13 +102,13 @@ public class ChatroomBean implements SessionBean {
     
     public void registerMe(MessageListener listener, String forUser) 
                      throws AlreadyRegisteredException {
-		ChatroomClients clients = ChatroomClients.getSingleton();
-		clients.addClient(listener, forUser);
+		ChatroomServer server = ChatroomServer.getSingleton();
+		server.addClient(listener, forUser);
     }    
     
     public void unregisterMe(String userName) throws NotRegisteredException {
-    	ChatroomClients clients = ChatroomClients.getSingleton();
-    	clients.removeClient(userName);    
+    	ChatroomServer server = ChatroomServer.getSingleton();
+    	server.removeClient(userName);    
     }
     
 
