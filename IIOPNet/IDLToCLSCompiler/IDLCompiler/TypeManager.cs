@@ -32,6 +32,7 @@ using System;
 using System.Reflection;
 using System.Reflection.Emit;
 using System.Collections;
+using System.Diagnostics;
 using symboltable;
 using Ch.Elca.Iiop.Idl;
 using Ch.Elca.Iiop.Util;
@@ -201,8 +202,11 @@ namespace Ch.Elca.Iiop.IdlCompiler.Action {
         /// </summary>  
         private Type GetTypeFromBuildModule(Symbol forSymbol) {
             string fullName = GetFullTypeNameForSymbol(forSymbol);
+            Debug.WriteLine("check type already defined in buildmodule: " + fullName + "; symbol: " + forSymbol.getSymbolName());
             Type result = GetTypeFromBuildModule(fullName);
+            Debug.WriteLine("type found: " + (result != null));
             if (!(result is TypeBuilder)) {  // type is fully defined (do not return not fully defined types here)
+                Debug.WriteLine("type is already complete");
                 return result;
             }
             return null;
