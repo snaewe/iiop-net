@@ -611,6 +611,70 @@ namespace omg.org.CORBA {
         #endregion IMethods
 
     }
+    
+    /// <summary>typecode used for a typedef</summary>
+    internal class AliasTC : TypeCodeImpl {
+
+        #region IFields
+
+        private string m_id;
+        private string m_name;
+        private TypeCode m_aliased;
+
+        #endregion IFields
+        #region IConstructors
+        
+        public AliasTC() : base(TCKind.tk_alias) { }
+        
+        #endregion IConstructors
+        #region IMethods
+        
+        [return:StringValueAttribute()]
+        public override string id() {
+            return m_id;
+        }
+
+        [return:StringValueAttribute()]
+        public override string name() {
+            return m_name;
+        }
+
+        public override TypeCode content_type() {
+            return m_aliased;
+        }
+
+        internal override void ReadFromStream(CdrInputStream cdrStream) {
+            CdrEncapsulationInputStream encap = cdrStream.ReadEncapsulation();    
+            m_id = ReadRepositoryId(encap);
+            m_name = encap.ReadString();
+            TypeCodeSerializer ser = new TypeCodeSerializer();
+            m_aliased = (TypeCode) ser.Deserialise(typeof(TypeCode), 
+                                                   new AttributeExtCollection(), encap);
+        }
+
+        internal override void WriteToStream(CdrOutputStream cdrStream) {
+            base.WriteToStream(cdrStream);
+            CdrEncapsulationOutputStream encap = new CdrEncapsulationOutputStream(0, cdrStream);
+            encap.WriteString(m_id);
+            encap.WriteString(m_name);
+            TypeCodeSerializer ser = new TypeCodeSerializer();
+            ser.Serialise(typeof(TypeCode), m_aliased, new AttributeExtCollection(), encap);
+            encap.WriteToTargetStream();
+        }
+
+        internal override Type GetClsForTypeCode() {
+            // resolve typedef
+            return ((TypeCodeImpl)m_aliased).GetClsForTypeCode();
+        }        
+        
+        internal override AttributeExtCollection GetClsAttributesForTypeCode() {
+            // get attributes for typedefed type
+            return ((TypeCodeImpl)m_aliased).GetClsAttributesForTypeCode();
+        }
+        
+        #endregion IMethods        
+        
+    }
 
     internal class AnyTC : TypeCodeImpl {
         
@@ -1614,7 +1678,8 @@ namespace Ch.Elca.Iiop.Marshalling {
                         result = new omg.org.CORBA.AbstractIfTC();
                         break;
                     case omg.org.CORBA.TCKind.tk_alias:
-                        throw new NotImplementedException("alias not implemented");
+                        result = new omg.org.CORBA.AliasTC();
+                        break;
                     case omg.org.CORBA.TCKind.tk_any:
                         result = new omg.org.CORBA.AnyTC();
                         break;
