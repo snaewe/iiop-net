@@ -129,6 +129,8 @@ o"></A></TD></TR>
 <br>
   <strong><a href="#faq5_7">5.7 How do I implement the _non_existant test?</a></strong>
 <br>
+  <strong><a href="#faq5_8">5.8 How do I specify the TCKind explixitly?</a></strong>
+<br>
   <H2 class="contentPart">6. Accessing .NET Objects from CORBA with IIOP.NET</H2>
   <strong><a href="#faq6_1">6.1 How do I implement the CORBA USER_ID and SYSTEM_ID policies?</a></strong>
 <br>
@@ -536,6 +538,24 @@ int PerformAddition(int val1, int val2) {
     bool nonExistant = orb.non_existent(proxy);
 </pre>
 <p>OrbServices is available only since 13 April 2004.
+	</td></tr></table>
+	<br><br>
+	<table width="100%" style="border: 1px solid #999966;" summary=""><tr><td>
+  <strong><a name="faq5_8">5.8 How do I specify the TCKind explixitly?</a></strong>
+<p>It is possible to force the marshaller to use a different type (e.g. if you need unsigned integers). Here's an example; the remote method has the following signature:
+<pre>
+  // idl method
+  CORBA::ULong ExtractFromULongAny(const CORBA::Any& arg);
+</pre>
+<p>You can pass an unsigned long to the method using the following code:
+<pre>
+  // C# client code
+  OrbServices orb = OrbServices.GetSingleton();
+  int arg2 = 89;
+  omg.org.CORBA.TypeCode ulongTC = orb.create_ulong_tc();
+  Any any = new Any(arg2, ulongTC);
+  int result2 = m_testService.ExtractFromULongAny(any);
+</pre>
 	</td></tr></table>
 	<br><br>
   <H2 class="contentPart">6. Accessing .NET Objects from CORBA with IIOP.NET</H2>

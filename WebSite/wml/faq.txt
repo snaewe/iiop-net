@@ -427,6 +427,24 @@ int PerformAddition(int val1, int val2) {
 
 </FAQ>
 
+<FAQ question="How do I specify the TCKind explixitly?">
+<p>It is possible to force the marshaller to use a different type (e.g. if you need unsigned integers). Here's an example; the remote method has the following signature:
+<pre>
+  // idl method
+  CORBA::ULong ExtractFromULongAny(const CORBA::Any& arg);
+</pre>
+
+<p>You can pass an unsigned long to the method using the following code:
+<pre>
+  // C# client code
+  OrbServices orb = OrbServices.GetSingleton();
+  int arg2 = 89;
+  omg.org.CORBA.TypeCode ulongTC = orb.create_ulong_tc();
+  Any any = new Any(arg2, ulongTC);
+  int result2 = m_testService.ExtractFromULongAny(any);
+</pre>
+</FAQ>
+
 </FAQ-SECTION>
 
 <FAQ-SECTION name="Accessing .NET Objects from CORBA with IIOP.NET">
