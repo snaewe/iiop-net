@@ -79,7 +79,7 @@ namespace Ch.Elca.Iiop.Tutorial.GettingStarted {
                 "Ch.Elca.Iiop.Security.Ssl.DefaultServerAuthenticationImpl,SSLPlugin";
 
             props[DefaultServerAuthenticationImpl.SERVER_CERTIFICATE] = 
-                "1276F0C11B3B09D833113799E384D1D930C3CA10";
+                "B0C3F311242883777B050F49F8597745B25A1896";
             props[DefaultServerAuthenticationImpl.STORE_LOCATION] = "CurrentUser";
 
             IiopChannel chan = new IiopChannel(props);

@@ -1,0 +1,7 @@
+newcerts
+*.pem
+index.txt
+index.txt.attr
+serial
+*.old
+*.new

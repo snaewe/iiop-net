@@ -65,16 +65,13 @@ namespace Ch.Elca.Iiop.Tutorial.GettingStarted {
                    "Ch.Elca.Iiop.Security.Ssl.SslTransportFactory,SSLPlugin";
             
                 props[SslTransportFactory.CLIENT_AUTHENTICATION] = 
-                    "Ch.Elca.Iiop.Security.Ssl.ClientAuthenticationLoadFromPersonalStore,SSLPlugin";
+                    "Ch.Elca.Iiop.Security.Ssl.ClientMutualAuthenticationSuitableFromStore,SSLPlugin";
                 // take certificates from the windows certificate store of the current user
-                props[ClientAuthenticationLoadFromPersonalStore.STORE_LOCATION] =
+                props[ClientMutualAuthenticationSuitableFromStore.STORE_LOCATION] =
                     "CurrentUser";
                 // the expected CN property of the server key
                 props[DefaultClientAuthenticationImpl.EXPECTED_SERVER_CERTIFICATE_CName] = 
-                    "iiop-net getting started ssl server";
-                // the hash value of the certificate
-                props[ClientAuthenticationLoadFromPersonalStore.CLIENT_CERTIFICATE] = 
-                    "BF5C6FE842E61DA237260D4114A9FF16C4FB14D2";
+                    "IIOP.NET demo server";
             
                 // register the channel
                 IiopClientChannel channel = new IiopClientChannel(props);

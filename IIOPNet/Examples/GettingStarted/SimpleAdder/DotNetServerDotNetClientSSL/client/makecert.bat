@@ -1,1 +1,0 @@
-makecert.exe -r -pe -len 1024 -a sha1 -n "CN=iiop-net getting started ssl client" -ss MY -sr CurrentUser -eku 1.3.6.1.5.5.7.3.2 -sky exchange -sp "Microsoft RSA SChannel Cryptographic Provider" -sy 12
