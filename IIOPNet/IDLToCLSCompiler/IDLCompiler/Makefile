@@ -15,7 +15,7 @@ $(Dest)IDLPreprocessor.dll: $(IDLPreprocessor)
 	copy $(IDLPreprocessor) $@
 
 $(Dest)IDLToCLSCompiler.exe: $(Dest)IIOPChannel.dll $(Dest)IDLPreprocessor.dll *.java *.jsl
-	vjc $(CSFLAGS) /r:System.Xml.dll /r:$(Dest)IIOPChannel.dll /r:$(Dest)IDLPreprocessor.dll /t:exe /out:$@ *.java *.jsl 
+	vjc $(CSFLAGS) /res:MappingPluginSchema.xsd /r:System.Xml.dll /r:$(Dest)IIOPChannel.dll /r:$(Dest)IDLPreprocessor.dll /t:exe /out:$@ *.java *.jsl 
 
 
 clean:
