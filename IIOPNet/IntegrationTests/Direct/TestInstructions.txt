@@ -1,0 +1,16 @@
+Prerequisites
+-------------
+
+For running this integration test, you need NUnit V2.0 or newer.
+
+Running the test
+----------------
+
+- before starting the test, start the server:
+  Change to the directory TestServer\bin
+  launch TestServer.exe
+
+- The test can be run using the NUnit GUI or the NUnit Console runner
+  Running the test with console launcher:
+  - change to directory TestClient\bin
+  - launch %NUNITV2_HOME%\bin\nunit-console.exe /assembly:ClientTest.dll

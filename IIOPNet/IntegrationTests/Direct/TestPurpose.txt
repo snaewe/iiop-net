@@ -1,0 +1,6 @@
+This integration test tests the functionality of IIOP.NET as a standard .NET remoting channel, i.e. no detour using IDL
+
+The remote test object provides methods to test serialisation / deserialisation of different types.
+
+
+
