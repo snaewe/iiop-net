@@ -39,6 +39,7 @@ import parser.ASTspecification;
 import Ch.Elca.Iiop.IdlPreprocessor.IDLPreprocessor;
 
 import System.Diagnostics.*;
+import System.IO.Directory;
 
 /**
  * 
@@ -51,6 +52,20 @@ import System.Diagnostics.*;
  */
 public class IDLToCLS {
 
+    #region IFields
+    
+    private String[] m_inputFileNames = null;
+    private String m_asmPrefix = null;
+    private String m_destination = ".";
+    
+    #endregion IFields
+    #region IConstructors
+
+	public IDLToCLS(String[] args) {
+		ParseArgs(args);
+	}
+
+    #endregion IConstructors
     #region SMethods
 
     public static void main(String[] args) {
@@ -60,50 +75,69 @@ public class IDLToCLS {
         // Trace.Indent();
         
         try {
-            String asmPrefix = GetAsmPrefix(args);
-            MetaDataGenerator generator = new MetaDataGenerator(asmPrefix);
-            String[] inputFileNames = GetFileArgs(args);
-            for (int i = 0; i < inputFileNames.length; i++) {
-                System.out.println("processing file: " + inputFileNames[i]);
-                Trace.WriteLine("");
-                InputStream source = Preprocess(inputFileNames[i]); // preprocess the file
-                IDLParser parser = new IDLParser(source);
-                Trace.WriteLine("parsing file: " + inputFileNames[i]);
-                ASTspecification spec = parser.specification();
-                Trace.WriteLine(parser.getSymbolTable());
-                // now parsed representation can be visited with the visitors    
-                generator.InitalizeForSource(parser.getSymbolTable());
-                spec.jjtAccept(generator, null);
-                Trace.WriteLine("");
-            }
-            // save the result to disk
-            generator.SaveAssembly();
+			IDLToCLS mapper = new IDLToCLS(args);
+			mapper.MapIdl();
         } catch (Exception e) {
             System.err.println("exception encountered: " + e);
+            System.exit(2);
         }
-        
-        
     }
     
-    private static String GetAsmPrefix(String[] args) throws Exception {
-        if ((args.length < 1) || (args[0].endsWith(".idl"))) {
-            PrintUsage();
-            throw new Exception("target assembly name missing"); 
-        }
-        return args[0];
+    private static void HowTo() {
+        System.out.println("Compiler usage:");
+        System.out.println("  IDLToCLSCompiler [options] <target assembly name> idl-files");
+        System.out.println();
+        System.out.println("creates a CLS assembly for the OMG IDL definition files.");
+        System.out.println("target assembly name is the name of the target assembly without .dll");
+        System.out.println("idl-files: one or more idl files containg OMG IDL definitions");
+        System.out.println();
+        System.out.println("options are:");
+        System.out.println("-h              help");
+        System.out.println("-o directory    output directory (default is `-o .`)");
+    }
+    
+    public static void Error(String message) {
+        System.out.println(message);
+        System.out.println();
+        HowTo();
+        System.exit(1);
     }
 
-    private static String[] GetFileArgs(String[] args) throws Exception {
-        if (args.length < 2) {
-            PrintUsage();
-            throw new Exception("file argument missing"); 
-        }
-        String[] result = new String[args.length-1];
-        System.arraycopy(args, 1, result, 0, result.length);
-        return result;
-    }
+    #endregion SMethods
+    #region IMethods
+    
+    private void ParseArgs(String[] args) {
+    	int i = 0;
 
-    private static InputStream Preprocess(String fileName) throws Exception {
+        while ((i < args.length) && (args[i].startsWith("-"))) {
+        	if (args[i].equals("-h")) {
+                HowTo();
+                i++;
+    			System.exit(0);
+            } else if (args[i].equals("-o")) {
+                i++;
+                m_destination = args[i++];
+            } else {
+                Error(String.Format("Error: invalid option {0}", args[i]));
+            }
+        }
+
+        if (!Directory.Exists(m_destination)) {
+            Directory.CreateDirectory(m_destination);
+        }
+        
+        if ((i + 2) > args.length) {
+            Error("Error: target assembly name or idl-file missing");
+        }
+        
+        m_asmPrefix = args[i];
+        i++;
+        
+		m_inputFileNames = new String[args.length - i];
+        System.arraycopy(args, i, m_inputFileNames, 0, m_inputFileNames.length);
+    }
+    
+    private InputStream Preprocess(String fileName) throws Exception {
         File file = new File(fileName);
         // all Preprocessor instances share the same symbol definitions
         IDLPreprocessor preproc = new IDLPreprocessor(file);
@@ -119,11 +153,25 @@ public class IDLToCLS {
         return result;
     }
     
-    private static void PrintUsage() {
-        System.out.println("first argument: target assembly name");
-        System.out.println("other arguments: idl-files");
+    public void MapIdl() throws Exception {
+        MetaDataGenerator generator = new MetaDataGenerator(m_asmPrefix);
+        for (int i = 0; i < m_inputFileNames.length; i++) {
+            System.out.println("processing file: " + m_inputFileNames[i]);
+            Trace.WriteLine("");
+            InputStream source = Preprocess(m_inputFileNames[i]); // preprocess the file
+            IDLParser parser = new IDLParser(source);
+            Trace.WriteLine("parsing file: " + m_inputFileNames[i]);
+            ASTspecification spec = parser.specification();
+            Trace.WriteLine(parser.getSymbolTable());
+            // now parsed representation can be visited with the visitors    
+            generator.InitalizeForSource(parser.getSymbolTable());
+            spec.jjtAccept(generator, null);
+            Trace.WriteLine("");
+        }
+        // save the result to disk
+        generator.SaveAssembly();
     }
-
-    #endregion SMethods
+    
+    #endregion IMethods
 
 }
