@@ -405,7 +405,7 @@ namespace Ch.Elca.Iiop {
             try {
                 // deserialise the request
                 deserReqMsg = DeserialiseRequest(requestStream, requestHeaders, conDesc);
-            	// processing may be done asynchronous, therefore push this sink on the stack to process a response async
+                // processing may be done asynchronous, therefore push this sink on the stack to process a response async
                 AsyncProcessingData asyncData = new AsyncProcessingData(deserReqMsg, conDesc);
                 sinkStack.Push(this, asyncData);
                 
@@ -496,6 +496,12 @@ namespace Ch.Elca.Iiop {
         public IiopClientFormatterSinkProvider() {
         }
 
+        public IiopClientFormatterSinkProvider(IDictionary properties, ICollection providerData) {
+            if ((providerData != null) && (providerData.Count > 0)) {
+                throw new ArgumentException(String.Format("Provider {0} is not expection providerData", GetType().Name));
+            }
+        }
+
         #endregion IConstructors
         #region IProperties
 
@@ -546,6 +552,12 @@ namespace Ch.Elca.Iiop {
         #region IConstructors
 
         public IiopServerFormatterSinkProvider() {
+        }
+
+        public IiopServerFormatterSinkProvider(IDictionary properties, ICollection providerData) {
+            if ((providerData != null) && (providerData.Count > 0)) {
+                throw new ArgumentException(String.Format("Provider {0} is not expection providerData", GetType().Name));
+            }
         }
 
         #endregion IConstructors
