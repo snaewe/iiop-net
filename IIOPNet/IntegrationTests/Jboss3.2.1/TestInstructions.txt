@@ -1,0 +1,26 @@
+Prerequisites
+-------------
+
+For running this integration test, you need NUnit V2.0 or newer and Weblogic 6.1.
+
+Building the test
+-----------------
+
+- use setEnv.cmd of the target WLS config to prepare the environment.
+- set NUNITV2_HOME to your NUNIT V2.0 home directory, e.g. C:\Programme\NUnitV2
+- use nmake to build the application and the integration test
+
+Deploying the test application containing the test beans
+--------------------------------------------------------
+
+- use deploy.bat TARGET_CONFIG in the directory TestBeans to deploy the application to WLS 6.1.
+
+Running the test
+----------------
+
+- start your weblogic 6.1 application server.
+
+- The test can be run using the NUnit GUI or the NUnit Console runner
+  Running the test with console launcher:
+  - change to directory TestClient
+  - launch LaunchTest.bat
