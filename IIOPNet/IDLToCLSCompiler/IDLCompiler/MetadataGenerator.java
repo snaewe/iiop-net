@@ -336,10 +336,12 @@ public class MetaDataGenerator implements IDLParserVisitor {
             TypeContainer resultType = m_typeManager.GetKnownType(sym);
             if (resultType == null) {
                 // this is an error: type must be created before it is inherited from
-                throw new RuntimeException("type not seen before in inheritance spec");
+                throw new RuntimeException("type " + sym.getSymbolName() +
+                                           " not seen before in inheritance spec");
             } else if (m_typeManager.IsFwdDeclared(sym)) {
                 // this is an error: can't inherit from a fwd declared type
-                throw new RuntimeException("type only fwd declared, but for inheritance full definition is needed");
+                throw new RuntimeException("type " + sym.getSymbolName() + 
+                                           " only fwd declared, but for inheritance full definition is needed");
             }
             result[i] = resultType.GetClsType();
         }
@@ -653,7 +655,9 @@ public class MetaDataGenerator implements IDLParserVisitor {
             if (isAbstract) {
                 attrs |= TypeAttributes.Interface;
                 if (parent != null) { 
-                    throw new RuntimeException("not possible for an abstract value type to inherit from a concrete one"); 
+                    throw new RuntimeException("not possible for an abstract value type " +
+                                               fullyQualName + " to inherit from a concrete one " +
+                                               parent.get_FullName());
                 }
             } else {
                 attrs |= TypeAttributes.Class;
@@ -884,7 +888,8 @@ public class MetaDataGenerator implements IDLParserVisitor {
 
         Type[] interfaces = ParseValueInheritSpec(node, (BuildInfo) data);
         if ((interfaces.length > 0) && (interfaces[0].get_IsClass())) { 
-            throw new RuntimeException("invalid abstract value type, can only inherit from abstract value types, but not from: " + interfaces[0]); 
+            throw new RuntimeException("invalid abstract value type, " + forSymbol.getSymbolName() + 
+                                       " can only inherit from abstract value types, but not from: " + interfaces[0]);
         }
         int bodyNodeIndex = 0;
         for (int i = 0; i < node.jjtGetNumChildren(); i++) {
@@ -1098,13 +1103,17 @@ public class MetaDataGenerator implements IDLParserVisitor {
         Type[] result = ParseInheritanceRelation(node, (BuildInfo)data);
         for (int i = 0; i < result.length; i++) {
             if ((i > 0) && (result[i].get_IsClass())) {
-                throw new RuntimeException("invalid supertype: for value types, only one concrete value type parent is possible at the first position in the inheritance spec");
+                throw new RuntimeException("invalid supertype: " + result[i].get_FullName() + " for type: " + 
+                                           ((BuildInfo)data).GetContainterType().get_FullName() +
+                                           " for value types, only one concrete value type parent is possible at the first position in the inheritance spec");
             }
             AttributeExtCollection attrs = AttributeExtCollection.ConvertToAttributeCollection(result[i].GetCustomAttributes(InterfaceTypeAttribute.class.ToType(), true));
             if (attrs.IsInCollection(InterfaceTypeAttribute.class.ToType())) {
                 InterfaceTypeAttribute ifAttr = (InterfaceTypeAttribute)attrs.GetAttributeForType(InterfaceTypeAttribute.class.ToType());
                 if (!(ifAttr.get_IdlType().equals(IdlTypeInterface.AbstractValueType))) {
-                    throw new RuntimeException("invalid supertype: only abstract value types are allowed in value inheritance clause and no interfaces");
+                    throw new RuntimeException("invalid supertype: " + result[i].get_FullName() + " for type: " + 
+                                               ((BuildInfo)data).GetContainterType().get_FullName() +
+                                               " only abstract value types are allowed in value inheritance clause and no interfaces");
                 }
             }
         }        
@@ -1121,13 +1130,17 @@ public class MetaDataGenerator implements IDLParserVisitor {
         Type[] result = ParseInheritanceRelation(node, (BuildInfo)data);
         for (int i = 0; i < result.length; i++) {
             if (result[i].get_IsClass()) {
-                throw new RuntimeException("invalid supertype: only abstract/concrete interfaces are allowed in support clause");            
+                throw new RuntimeException("invalid supertype: " + result[i].get_FullName() + " for type: " +
+                                           ((BuildInfo)data).GetContainterType().get_FullName() +
+                                           " only abstract/concrete interfaces are allowed in support clause");
             }
             AttributeExtCollection attrs = AttributeExtCollection.ConvertToAttributeCollection(result[i].GetCustomAttributes(InterfaceTypeAttribute.class.ToType(), true));
             if (attrs.IsInCollection(InterfaceTypeAttribute.class.ToType())) {
                 InterfaceTypeAttribute ifAttr = (InterfaceTypeAttribute)attrs.GetAttributeForType(InterfaceTypeAttribute.class.ToType());
                 if (ifAttr.get_IdlType().equals(IdlTypeInterface.AbstractValueType)) {
-                    throw new RuntimeException("invalid supertype: only abstract/concrete interfaces are allowed in support clause and no abstract value type");
+                    throw new RuntimeException("invalid supertype: " + result[i].get_FullName() + " for type: " +
+                                               ((BuildInfo)data).GetContainterType().get_FullName() +
+                                               " only abstract/concrete interfaces are allowed in support clause and no abstract value type");
                 }
             }
         }
