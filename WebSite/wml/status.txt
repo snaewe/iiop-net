@@ -85,6 +85,10 @@ Interoperation with J2EE applications is reported for the following application 
 	<report version="7" color="orange">in progress</report>
 	<report version="8.1" color="green">ok</report>
 </software>
+
+<software name="Borland Enterprise Server">
+	<report version="5.2.1" color="yellow">partially tested</report>
+</software>
 </reports>
 
 <p/>

@@ -486,6 +486,13 @@ The most common errors are:
 <p> If possible, you sould use UTF8, Latin1 or UTF16.
 
 </FAQ>
+<FAQ question="omg.org.CORBA.OBJECT_NOT_EXIST">
+<p>This exception is thrown when an inexistent object is requested on a remote machine. The exception it thrown by the remote name resolver, thus the connection is fine.
+
+<p>Please check the object name used. The problem can also happen when accessing a CORBA service (they are also implemented as remote objects), like the naming service.
+
+</FAQ>
+
 </FAQ-SECTION>
 
 <FAQ-SECTION name="About">
@@ -497,7 +504,7 @@ The most common errors are:
 
 <p>First, we would like to thank Prof. Dr. J. Gutknecht at ETH (<a href="http://www.cs.inf.ethz.ch/gutknecht/index.html">Programming Languages and Runtime Systems Research Group</a>) and <a href="http://www.elca.ch/">Elca Informatique</a> who made this project possible.
 
-<p>Like every opensource project, many persons have helped improving IIOP.NET with important remarks, feedback, patches, and other contributions. We would like to adress you our gratitude publicly.
+<p>Like every opensource project, many persons have helped improving IIOP.NET with important remarks, feedback, patches, and other contributions. We would like to address you our gratitude publicly.
 
 <p>IIOP.NET Hall of Fame (in alphabetic order):
 <ul>
@@ -505,6 +512,7 @@ The most common errors are:
 <li>David Bellette
 <li>Blazej Budzynski
 <li>Stefano Delli Ponti
+<li>Tina Hof
 <li>Dennis Homann
 <li>Aitor Illarramendi
 <li>Glen Mah

@@ -25,6 +25,7 @@
 # Following tags must be defined to customize the faq:
 #   FAQ-SECTION-HEADER  <-- style of an index entry
 #   FAQ-ENTRY-HEADER
+#   FAQ-ENTRY           <-- style of an entry
 #
 # Following variable must be set:
 #   FAQ-ENTRIES-FILE
@@ -61,10 +62,10 @@
 :#FAQINDEX#}
 
 {#FAQENTRIES#:
-	<p>
-	<FAQ-ENTRY-HEADER><a name="faq<get-var __SECCNT>_<get-var __FAQCNT>"><get-var __SECCNT>.<get-var __FAQCNT> <get-var question></a></FAQ-ENTRY-HEADER>
-	%body
-	<br><br><br>
+	<FAQ-ENTRY>
+		<FAQ-ENTRY-HEADER><a name="faq<get-var __SECCNT>_<get-var __FAQCNT>"><get-var __SECCNT>.<get-var __FAQCNT> <get-var question></a></FAQ-ENTRY-HEADER>
+		%body
+	</FAQ-ENTRY>
 :#FAQENTRIES#}
 
 <increment __FAQCNT>

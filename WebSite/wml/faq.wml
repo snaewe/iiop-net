@@ -11,6 +11,12 @@
   <strong>%body</strong>
 </define-tag>
 
+
+<define-tag FAQ-ENTRY endtag=required>
+	<table width="100%" style="border: 1px solid #999966;"><tr><td>%body</td></tr></table>
+	<br><br>
+</define-tag>
+
 <set-var FAQ-ENTRIES-FILE="">
 
 #include "faq.txt"
