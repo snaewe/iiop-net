@@ -310,7 +310,7 @@ public class MetaDataGenerator implements IDLParserVisitor {
                 if (defined == null) { 
                     throw new RuntimeException("internal exception, while adding nested type for a type from a previous run: " + current.getSymbolName()); 
                 }
-                m_typeManager.registerTypeDefinition(defined, current);            
+                m_typeManager.RegisterTypeDefinition(defined, current);            
             }
         }
 
@@ -858,7 +858,7 @@ public class MetaDataGenerator implements IDLParserVisitor {
         addRepIdAttribute(resultType, enclosingScope.getRepositoryIdFor(node.getIdent()));
         resultType.AddInterfaceImplementation(IIdlEntity.class.ToType());
         Type result = resultType.CreateType();
-        m_typeManager.registerTypeDefinition(result, forSymbol);        
+        m_typeManager.RegisterTypeDefinition(result, forSymbol);        
         return null;
     }
 
@@ -1533,7 +1533,7 @@ public class MetaDataGenerator implements IDLParserVisitor {
         // create the type
         Type resultType = structToCreate.CreateType();
         // type must be registered with the type-manager
-        m_typeManager.registerTypeDefinition(resultType, forSymbol);
+        m_typeManager.RegisterTypeDefinition(resultType, forSymbol);
         return new TypeContainer(resultType, new CustomAttributeBuilder[0]);
     }
 
@@ -1666,7 +1666,7 @@ public class MetaDataGenerator implements IDLParserVisitor {
         // create the type
         Type resultType = enumToCreate.CreateType();
         // type must be registered with the type-manager
-        m_typeManager.registerTypeDefinition(resultType, forSymbol);
+        m_typeManager.RegisterTypeDefinition(resultType, forSymbol);
         return new TypeContainer(resultType, new CustomAttributeBuilder[0]);
     }
 
@@ -1855,7 +1855,7 @@ public class MetaDataGenerator implements IDLParserVisitor {
         // create the type
         Type resultType = exceptToCreate.CreateType();
         // type must be registered with the type-manager
-        m_typeManager.registerTypeDefinition(resultType, forSymbol);
+        m_typeManager.RegisterTypeDefinition(resultType, forSymbol);
         return null;
     }
 

@@ -138,7 +138,7 @@ public class TypeManager {
         }
         if (!fwdDecl) {
             m_typesInCreation.remove(forSymbol); // if fwd decl --> remove
-            registerTypeDefinition(toReg, forSymbol);
+            RegisterTypeDefinition(toReg, forSymbol);
         } else {
             TypeContainer container = new TypeContainer(toReg, new CustomAttributeBuilder[0]);
             m_typesInCreation.put(forSymbol, container);    
@@ -172,7 +172,7 @@ public class TypeManager {
     
     /** add a fully defined type to the known types
      */
-    private void addTypeDefinition(TypeContainer fullDecl, Symbol forSymbol) {
+    private void AddTypeDefinition(TypeContainer fullDecl, Symbol forSymbol) {
         if (m_typesInCreation.containsKey(forSymbol)) { 
             throw new RuntimeException("type can't be registered, a fwd declaration exists"); 
         }
@@ -184,9 +184,9 @@ public class TypeManager {
     
     /** register a full type definition (CreateType() already called)
      */
-    public void registerTypeDefinition(Type fullDecl, Symbol forSymbol) {
+    public void RegisterTypeDefinition(Type fullDecl, Symbol forSymbol) {
         TypeContainer container = new TypeContainer(fullDecl, new CustomAttributeBuilder[0]);
-        addTypeDefinition(container, forSymbol);
+        AddTypeDefinition(container, forSymbol);
     }
 
     /** use this to tell the type manager, that a type is now fully created.
@@ -200,7 +200,7 @@ public class TypeManager {
     }
 
     public void RegisterTypeDef(TypeContainer fullDecl, Symbol forSymbol) {
-        addTypeDefinition(fullDecl, forSymbol);
+        AddTypeDefinition(fullDecl, forSymbol);
     }
 
     #endregion IMethods
