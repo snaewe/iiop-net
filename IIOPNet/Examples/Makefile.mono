@@ -1,0 +1,6 @@
+# Examples are not built for Mono yet.
+#
+build:
+
+clean:
+

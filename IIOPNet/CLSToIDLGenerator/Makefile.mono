@@ -1,0 +1,16 @@
+IIOPChannel=../IIOPChannel/bin/IIOPChannel.dll
+Dest=bin/
+
+build: build-exe
+
+build-exe: $(Dest)CLSIDLGenerator.exe
+
+$(Dest)IIOPChannel.dll: $(IIOPChannel)
+	[ -d $(Dest) ] || mkdir $(Dest)
+	cp $(IIOPChannel) $@
+
+$(Dest)CLSIDLGenerator.exe: $(Dest)IIOPChannel.dll *.cs
+	mcs $(CSFLAGS) /r:$(Dest)IIOPChannel.dll /t:exe /out:$@ *.cs 
+
+clean:
+	rm -fr $(Dest)

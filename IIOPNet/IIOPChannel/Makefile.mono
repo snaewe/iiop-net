@@ -1,0 +1,22 @@
+Dest=bin/
+UnitTestDest=bin/UnitTest/
+
+build: build-dll
+
+build-dll: $(Dest)IIOPChannel.dll
+
+$(Dest)IIOPChannel.dll: *.cs
+	[ -d $(Dest) ] || mkdir $(Dest)
+	mcs $(CSFLAGS) /t:library /out:$@ *.cs
+
+build-unit-tests: build nunit-var
+	[ -f $(UnitTestDest)nul ] || mkdir $(UnitTestDest)
+	mcs /nowarn:0618 $(CSFLAGS) /d:UnitTest /r:$(NUNITV2_HOME)/bin/nunit.framework.dll /t:library /out:$(UnitTestDest)IIOPChannel.dll *.cs
+
+nunit-var:
+	[ -z NUNITV2_HOME ] && echo "Define NUNITV2_HOME as the home directory of your NUNIT installation"
+	[ -z NUNITV2_HOME ] && exit 2
+
+clean:
+	rm -fr $(Dest) 
+
