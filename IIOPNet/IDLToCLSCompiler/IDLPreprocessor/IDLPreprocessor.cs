@@ -30,6 +30,7 @@
 
 using System;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Collections;
 using System.IO;
 using System.Diagnostics;
@@ -39,7 +40,7 @@ namespace Ch.Elca.Iiop.IdlPreprocessor {
 
     /// <summary>
     /// a problem was encountered during preprocessing with the
-    /// include file
+    /// idl file
     /// </summary>
     public class PreprocessingException : Exception {
         
@@ -231,6 +232,39 @@ namespace Ch.Elca.Iiop.IdlPreprocessor {
             return m_outData;
         }
 
+        /// <summary>
+        /// split a string to tokens; whitespaces are the token separating characters.
+        /// </summary>
+        private String[] SplitTokens(string toSplit) {
+            Regex tokenStringEx = new Regex(@"\s+");
+            string[] result = tokenStringEx.Split(toSplit);
+            return result;
+		    
+		    
+/*		    ArrayList tokens = new ArrayList();
+		    
+		    string currentToken = "";
+            foreach (char c in toSplit) {
+			    if (!Char.IsWhiteSpace(c)) {
+                    currentToken += c;
+			    } else {
+			        if (!currentToken.Equals("")) {
+			            // add this token to result
+			            tokens.Add(currentToken);
+			            // prepare for next token
+			            currentToken = "";
+			        }
+			    }
+            }
+            // add the last token
+            if (!currentToken.Equals("")) {
+            	tokens.Add(currentToken);
+            }
+            
+            return (string[])tokens.ToArray(typeof(string)); */
+        }
+
+
         #region implementation of the preprocessing actions
 
         /// <summary>processes an include directive</summary>
@@ -239,7 +273,7 @@ namespace Ch.Elca.Iiop.IdlPreprocessor {
         /// </exception>
         private void ProcessInclude(String currentLine) {
             currentLine = currentLine.Trim();
-            String[] tokens = currentLine.Split(null); // tokens are seperated by spaces
+            String[] tokens = SplitTokens(currentLine);
             if (tokens.Length != 2) { 
                 throw new IllegalPreprocDirectiveException(currentLine, 
                                                            "file argument not found / more than one argument");
@@ -300,8 +334,8 @@ namespace Ch.Elca.Iiop.IdlPreprocessor {
         private void ProcessDefine(String currentLine) {
 
             currentLine = currentLine.Trim();
-            // split by spaces
-            String[] tokens = currentLine.Split(null);
+            // split by whitespaces
+            String[] tokens = SplitTokens(currentLine);
             if (tokens.Length <= 1) { 
                 throw new IllegalPreprocDirectiveException(currentLine,
                                                   "define missing argument");
@@ -326,8 +360,8 @@ namespace Ch.Elca.Iiop.IdlPreprocessor {
     
     private void ProcessIfNDef(String currentLine) {        
         currentLine = currentLine.Trim();
-        // split by spaces
-        String[] tokens = currentLine.Split(null);
+        // split by whitespaces
+        String[] tokens = SplitTokens(currentLine);
         if (tokens.Length <= 1) { 
             throw new IllegalPreprocDirectiveException(currentLine,
                                               "ifndef missing argument");            
@@ -348,7 +382,7 @@ namespace Ch.Elca.Iiop.IdlPreprocessor {
     private void ProcessIfDef(String currentLine) {
         currentLine = currentLine.Trim();
         // split by spaces
-        String[] tokens = currentLine.Split(null);
+        String[] tokens = SplitTokens(currentLine);
         if (tokens.Length <= 1) { 
             throw new IllegalPreprocDirectiveException(currentLine,
                                               "ifdef missing argument");            
