@@ -1,4 +1,4 @@
-/* TcpTransportWrapper.cs
+/* SSLPlugin.cs
  * 
  * Project: IIOP.NET
  * SslPlugin for IIOPChannel using mentalis security library
