@@ -661,12 +661,45 @@ namespace Ch.Elca.Iiop.MessageHandling {
                                                 GiopVersion version) {
             // reply body
             AlignBodyIfNeeded(targetStream, version);
+            MethodBase throwingMethod = msg.MethodBase;
+            Exception exceptionToThrow = msg.Exception;
+            if (ReflectionHelper.IIdlEntityType.IsAssignableFrom(throwingMethod.DeclaringType)) {
+                exceptionToThrow = DetermineIdlExceptionToThrow(msg.Exception,
+                                                                throwingMethod);
+            }            
             // marshal the exception, TBD distinguish some cases here
-            if (SerialiseAsSystemException(msg.Exception)) {
-                SerialiseSystemException(targetStream, msg.Exception);
+            if (SerialiseAsSystemException(exceptionToThrow)) {
+                SerialiseSystemException(targetStream, exceptionToThrow);
             } else {
-                SerialiseUserException(targetStream, msg.Exception);
+                SerialiseUserException(targetStream, exceptionToThrow);
             }
+        }
+        
+        /// <summary>
+        /// for methods mapped from idl, check if exception is allowed to throw
+        /// according to throws clause and if not creae a unknown exception instead.
+        /// </summary>
+        private Exception DetermineIdlExceptionToThrow(Exception thrown, MethodBase thrower) {
+            Exception result = thrown;
+            // for idl interfaces, check if thrown exception is in the raises clause;
+            // if not, throw an unknown system exception
+            if (!SerialiseAsSystemException(thrown)) {
+                result = new UNKNOWN(189, CompletionStatus.Completed_Yes); // if not in raises clause
+                if (thrower is MethodInfo) {
+                    AttributeExtCollection methodAttributes = 
+                        ReflectionHelper.GetCustomAttriutesForMethod((MethodInfo)thrower, true);
+                    foreach (Attribute attr in methodAttributes) {
+                        if (ReflectionHelper.ThrowsIdlExceptionAttributeType.
+                                IsAssignableFrom(attr.GetType())) {
+                             if (((ThrowsIdlExceptionAttribute)attr).ExceptionType.
+                                     Equals(thrown.GetType())) {
+                                 result = thrown;
+                             }
+                        }
+                    }
+                }
+            }
+            return result;
         }
 
         private void SerialiseSystemException(CdrOutputStream targetStream, Exception corbaEx) {

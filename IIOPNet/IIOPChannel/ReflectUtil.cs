@@ -53,6 +53,7 @@ namespace Ch.Elca.Iiop.Util {
         private static Type s_wideCharAttrType = typeof(WideCharAttribute);
         private static Type s_stringValueAttrType = typeof(StringValueAttribute);
         private static Type s_fromIdlNameAttributeType = typeof(FromIdlNameAttribute);
+        private static Type s_throwsIdlExceptionAttributeType = typeof(ThrowsIdlExceptionAttribute);
         private static Type s_oneWayAttributeType = typeof(System.Runtime.Remoting.Messaging.OneWayAttribute);
                 
         private static Type s_voidType = typeof(void);
@@ -157,6 +158,13 @@ namespace Ch.Elca.Iiop.Util {
         public static Type FromIdlNameAttributeType {
             get {
                 return s_fromIdlNameAttributeType;
+            }
+        }
+        
+        /// <summary>caches typeof(ThrowsIdlExceptionAttribute)</summary>
+        public static Type ThrowsIdlExceptionAttributeType {
+            get {
+                return s_throwsIdlExceptionAttributeType;
             }
         }
         
@@ -311,9 +319,34 @@ namespace Ch.Elca.Iiop.Util {
             return AttributeExtCollection.ConvertToAttributeCollection(attributes);
         }
         
-        public static AttributeExtCollection GetCustomAttriutesForMember(MemberInfo member, bool inherit) {
+        public static AttributeExtCollection GetCustomAttriutesForField(FieldInfo member, bool inherit) {
             object[] attributes = member.GetCustomAttributes(inherit);
             return AttributeExtCollection.ConvertToAttributeCollection(attributes);    
+        }
+                
+        public static AttributeExtCollection GetCustomAttriutesForMethod(MethodInfo member, bool inherit) {
+            if (!inherit) {
+                object[] attributes = member.GetCustomAttributes(inherit);
+                return AttributeExtCollection.ConvertToAttributeCollection(attributes);            
+            } else {
+                // check also for interface methods ...
+                AttributeExtCollection result = AttributeExtCollection.ConvertToAttributeCollection(
+                    member.GetCustomAttributes(true));
+                if (member.IsVirtual) {
+                    // check also for attributes on interface method, if it's a implementation of an interface method
+                    Type declaringType = member.DeclaringType;
+                    // search interfaces for method definition
+                    Type[] interfaces = declaringType.GetInterfaces();
+                    foreach (Type interf in interfaces) {
+                        MethodInfo found = IsMethodDefinedInInterface(member, interf);
+                        if (found != null) {
+                            // add attributes from interface definition if not already present                                                
+                            result.AddMissingAttributes(found.GetCustomAttributes(true));
+                        }
+                    }                    
+                }    
+                return result;
+            }
         }
 
         /// <summary>

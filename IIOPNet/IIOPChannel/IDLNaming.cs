@@ -165,7 +165,7 @@ namespace Ch.Elca.Iiop.Idl {
             string methodName = method.Name;
             
             AttributeExtCollection methodAttributes = 
-                ReflectionHelper.GetCustomAttriutesForMember(method, true);
+                ReflectionHelper.GetCustomAttriutesForMethod(method, true);
             if (methodAttributes.IsInCollection(ReflectionHelper.FromIdlNameAttributeType)) {
                 FromIdlNameAttribute idlNameAttr = 
                     (FromIdlNameAttribute)methodAttributes.GetAttributeForType(ReflectionHelper.FromIdlNameAttributeType);

@@ -2366,11 +2366,20 @@ public class MetaDataGenerator : IDLParserVisitor {
         String transmittedName = DetermineTransmissionName(node.getIdent());
         // ready to create method
         TypeBuilder typeAtBuild = buildInfo.GetContainterType();
-        m_ilEmitHelper.AddMethod(typeAtBuild, methodName, transmittedName,
-                                 parameters, returnType,
-                                 MethodAttributes.Virtual | MethodAttributes.Abstract | MethodAttributes.Public | MethodAttributes.HideBySig);
+        MethodBuilder methodBuilder = 
+            m_ilEmitHelper.AddMethod(typeAtBuild, methodName, transmittedName,
+                                     parameters, returnType,
+                                     MethodAttributes.Virtual | MethodAttributes.Abstract | MethodAttributes.Public | MethodAttributes.HideBySig);
+        if ((node.jjtGetNumChildren() > 2) && (node.jjtGetChild(2) is ASTraises_expr)) {
+            // has a raises expression, add attributes for allowed exceptions
+            Type[] exceptionTypes = (Type[])node.jjtGetChild(2).jjtAccept(this, buildInfo);
+            foreach (Type exceptionType in exceptionTypes) {
+                methodBuilder.SetCustomAttribute(
+                    new ThrowsIdlExceptionAttribute(exceptionType).CreateAttributeBuilder());
+            }
+        }
         return null;
-    }
+    }        
         
     /** 
      * replaces a TypeContainer with the one for the custom mapped type, if a custom mapped type is
@@ -2457,8 +2466,15 @@ public class MetaDataGenerator : IDLParserVisitor {
     /**
      * @see parser.IDLParserVisitor#visit(ASTraises_expr, Object)
      */
-    public Object visit(ASTraises_expr node, Object data) {
-        return null; // TBD: check if exceptions in raise clause are declared
+    public Object visit(ASTraises_expr node, Object data) {        
+        Type[] result = new Type[node.jjtGetNumChildren()];
+        for (int i = 0; i < node.jjtGetNumChildren(); i++) {
+            Symbol exceptionSymbol = (Symbol)node.jjtGetChild(i).jjtAccept(this, data);
+            result[i] = 
+                m_typeManager.GetKnownType(exceptionSymbol).GetCompactClsType();
+            
+        }
+        return result;
     }
 
     /**

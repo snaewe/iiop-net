@@ -571,7 +571,7 @@ namespace Ch.Elca.Iiop.Idl {
         /// </summary>
         public string IdlName {
             get { 
-            	return m_idlName; 
+                return m_idlName; 
             }
         }
 
@@ -583,6 +583,51 @@ namespace Ch.Elca.Iiop.Idl {
             Type attrType = this.GetType();
             ConstructorInfo attrConstr = attrType.GetConstructor(new Type[] { ReflectionHelper.StringType } );
             CustomAttributeBuilder result = new CustomAttributeBuilder(attrConstr, new Object[] { m_idlName });
+            return result;
+        }
+
+        #endregion IMethods
+
+    }
+    
+    /// <summary>
+    /// this attribute specifies what exceptions may be thrown by a method
+    /// </summary>
+    [AttributeUsage(AttributeTargets.Method | AttributeTargets.Property, 
+                    AllowMultiple = true)]
+    public sealed class ThrowsIdlExceptionAttribute : Attribute, IIdlAttribute {
+        
+        #region IFields
+        
+        private Type m_exceptionType;
+
+        #endregion
+        #region IConstructors
+
+        public ThrowsIdlExceptionAttribute(Type exceptionType) {
+            m_exceptionType = exceptionType;
+        }
+
+        #endregion IConstructors
+        #region IProperties
+
+        /// <summary>
+        /// the type of the exception, which may be thrown
+        /// </summary>
+        public Type ExceptionType {
+            get { 
+                return m_exceptionType;
+            }
+        }
+
+        #endregion IProperties
+        #region IMethods
+
+        /// <summary>creates an attribute builder for this custom attribute</summary>
+        public CustomAttributeBuilder CreateAttributeBuilder() {
+            Type attrType = this.GetType();
+            ConstructorInfo attrConstr = attrType.GetConstructor(new Type[] { ReflectionHelper.TypeType } );
+            CustomAttributeBuilder result = new CustomAttributeBuilder(attrConstr, new Object[] { m_exceptionType });
             return result;
         }
 

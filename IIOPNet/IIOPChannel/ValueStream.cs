@@ -490,7 +490,7 @@ namespace Ch.Elca.Iiop.Cdr {
                 
             } else {
                 AttributeExtCollection attrColl = 
-                    ReflectionHelper.GetCustomAttriutesForMember(field, true);
+                    ReflectionHelper.GetCustomAttriutesForField(field, true);
                 result = marshaller.Unmarshal(field.FieldType, attrColl, this);
                 // indirection table update not needed here: if a marshalled value type was read, it's already in the indirection table, primitive types / object references are not inserted into the indirection table (15.3.4.3 in CORBA 2.3.1 99-10-07)
             }
@@ -1016,7 +1016,7 @@ namespace Ch.Elca.Iiop.Cdr {
                 WriteIndirection(fieldVal);
             } else {
                 AttributeExtCollection attrColl = 
-                    ReflectionHelper.GetCustomAttriutesForMember(field, true);
+                    ReflectionHelper.GetCustomAttriutesForField(field, true);
                 // write value                
                 marshaller.Marshal(field.FieldType, attrColl, fieldVal, this);
                 // indirection table update not needed here: if a marshalled value type was read, it's already in the indirection table, primitive types / object references are not inserted into the indirection table (15.3.4.3 in CORBA 2.3.1 99-10-07)
