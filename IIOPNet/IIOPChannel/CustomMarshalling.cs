@@ -84,6 +84,14 @@ namespace Corba {
         void write_Value([ObjectIdlType(IdlTypeObject.ValueBase)] object val);
         /// <summary>wirtes the value val, takes as formal parameter the actual type of val</summary>
         void write_ValueOfActualType(object val);
+        /// <summary>
+        /// writes a corba wstring value
+        /// </summary>
+        void write_WStringValue(string arg);
+        /// <summary>
+        /// writes a corba string value
+        /// </summary>
+        void write_StringValue(string arg);
         /// <summary>writes boxed values</summary>
         void write_boxed(object val, BoxedValueAttribute attr);
         void write_TypeCode(omg.org.CORBA.TypeCode val);
@@ -206,6 +214,9 @@ namespace Corba {
         private static Type s_mByRefType = typeof(MarshalByRefObject);
         
         private static Type s_dummyValType = typeof(DummyValTypeForNull);
+
+        private static Type s_wstringValueType = typeof(WStringValue);
+        private static Type s_stringValueType = typeof(StringValue);
 
         #endregion SFields
         #region IFields
@@ -340,6 +351,19 @@ namespace Corba {
                                      val, m_cdrOut);
             }
         }
+
+        public void write_WStringValue(string val) {
+            object boxed = new WStringValue(val);
+            m_marshaller.Marshal(s_wstringValueType, new AttributeExtCollection(),
+                                 boxed, m_cdrOut);
+        }
+
+        public void write_StringValue(string val) {
+            object boxed = new StringValue(val);
+            m_marshaller.Marshal(s_wstringValueType, new AttributeExtCollection(),
+                                 boxed, m_cdrOut);
+        }
+
 
         public void write_boxed(object val, BoxedValueAttribute attr) {
             m_marshaller.Marshal(val.GetType(), 
