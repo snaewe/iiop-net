@@ -151,6 +151,18 @@ namespace Ch.Elca.Iiop.IDLCompiler.Tests {
                                    returnType, testMethod.ReturnType);                                            
         }
         
+        private void CheckPropertyPresent(Type testType, string propName, 
+                                        Type propType, BindingFlags attrs) {            
+            PropertyInfo testProp = testType.GetProperty(propName, attrs,
+                                                       null, propType, Type.EmptyTypes,
+                                                       null);
+            Assertion.AssertNotNull(String.Format("property {0} not found", propName),
+                                    testProp);
+            
+            Assertion.AssertEquals(String.Format("wrong type {0} in property {1}", testProp.PropertyType, propName),
+                                   propType, testProp.PropertyType);                                            
+        }
+        
         private void CheckFieldPresent(Type testType, string fieldName,
                                        Type fieldType, BindingFlags flags) {
             FieldInfo testField = testType.GetField(fieldName, flags);                                           
@@ -299,6 +311,66 @@ namespace Ch.Elca.Iiop.IDLCompiler.Tests {
             
             CheckPublicInstanceMethodPresent(valType, "EchoOctet",
                                              typeof(System.Byte), new Type[] { typeof(System.Byte) });
+            CheckPropertyPresent(valType, "attr", typeof(System.Byte), 
+                                 BindingFlags.Instance | BindingFlags.Public | 
+                                 BindingFlags.DeclaredOnly);
+            CheckFieldPresent(valType, "m_x", typeof(System.Byte), 
+                              BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.DeclaredOnly);
+            CheckNumberOfFields(valType, BindingFlags.Public | BindingFlags.NonPublic |
+                                         BindingFlags.Instance | BindingFlags.DeclaredOnly,
+                                1);                                    
+            writer.Close();
+        }
+        
+        [Test]
+        public void TestConcreteValueTypeWithIfInheritance() {
+            MemoryStream testSource = new MemoryStream();
+            StreamWriter writer = new StreamWriter(testSource, s_latin1);
+            
+            // idl:
+            writer.WriteLine("module testmod {");
+            writer.WriteLine("    abstract interface TestIf {");
+            writer.WriteLine("        void Inc();");
+            writer.WriteLine("        readonly attribute boolean IsNegative;");
+            writer.WriteLine("    };");
+            writer.WriteLine("    #pragma ID TestIf \"IDL:testmod/TestIf:1.0\"");
+
+            writer.WriteLine("    valuetype Test supports TestIf {");
+            writer.WriteLine("        private octet x;");
+            writer.WriteLine("        octet EchoOctet(in octet arg);");
+            writer.WriteLine("        attribute octet attr;");
+            writer.WriteLine("    };");
+            writer.WriteLine("    #pragma ID Test \"IDL:testmod/Test:1.0\"");
+            writer.WriteLine("};");
+            
+            writer.Flush();
+            testSource.Seek(0, SeekOrigin.Begin);
+            Assembly result = CreateIdl(testSource);
+                       
+            // check if val-type is correctly created
+            Type valType = result.GetType("testmod.Test", true);
+            // check if if-type is correctly created
+            Type ifType = result.GetType("testmod.TestIf", true);
+            Assertion.Assert("no inheritance from TestIf", ifType.IsAssignableFrom(valType));
+                       
+            CheckImplClassAttr(valType, "testmod.TestImpl");
+            CheckSerializableAttributePresent(valType);
+            CheckRepId(valType, "IDL:testmod/Test:1.0");
+            
+            CheckIIdlEntityInheritance(valType);
+            
+            CheckPublicInstanceMethodPresent(valType, "EchoOctet",
+                                             typeof(System.Byte), new Type[] { typeof(System.Byte) });
+            CheckPublicInstanceMethodPresent(valType, "Inc",
+                                             typeof(void), Type.EmptyTypes);
+            CheckPropertyPresent(valType, "attr", typeof(System.Byte), 
+                                 BindingFlags.Instance | BindingFlags.Public | 
+                                 BindingFlags.DeclaredOnly);
+
+            CheckPropertyPresent(valType, "IsNegative", typeof(System.Boolean), 
+                                 BindingFlags.Instance | BindingFlags.Public | 
+                                 BindingFlags.DeclaredOnly);
+
             CheckFieldPresent(valType, "m_x", typeof(System.Byte), 
                               BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.DeclaredOnly);
             CheckNumberOfFields(valType, BindingFlags.Public | BindingFlags.NonPublic |
