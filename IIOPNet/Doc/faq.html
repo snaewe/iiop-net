@@ -133,29 +133,26 @@ o"></A></TD></TR>
   <H2 class="contentPart">7. Frequent Errors (Troubleshooting)</H2>
   <strong><a href="#faq7_1">7.1 Exception: Invalid PInvoke metadata format</a></strong>
 <br>
-  <strong><a href="#faq7_2">7.2 CORBA Exception: No_Implement (minor-code = 1)</a></strong>
+  <strong><a href="#faq7_2">7.2 omg.org.CORBA.NO_IMPLEMENT: CORBA system exception, completed: Completed_MayBe minor: 1</a></strong>
 <br>
-  <strong><a href="#faq7_3">7.3 CORBA system exception, completed: Completed_MayBe minor: 1414</a></strong>
+  <strong><a href="#faq7_3">7.3 omg.org.CORBA.INTF_REPOS: CORBA system exception, completed: Completed_MayBe minor: 1414</a></strong>
 <br>
   <strong><a href="#faq7_4">7.4 omg.org.CORBA.CODESET_INCOMPATIBLE: CORBA system exception, completed: Completed_No minor: 9501</a></strong>
 <br>
   <H2 class="contentPart">1. Platform Compatibility</H2>
+	<p>
   <strong><a name="faq1_1">1.1 Does IIOP.NET work with Microsoft's .NET 1.1?</a></strong>
-<p>
-Yes, it does. This is in fact the platform it was developed on.
+<p> Yes, it does. This is in fact the platform it was developed on.
 	<br><br><br>
+	<p>
   <strong><a name="faq1_2">1.2 Does IIOP.NET work with Microsoft's Windows CE .NET (Compact Framework)?</a></strong>
-<p>No, because Windows CE .NET has no remoting support at all.</p>
+<p> No, because Windows CE .NET has no remoting support at all.</p>
 	<br><br><br>
+	<p>
   <strong><a name="faq1_3">1.3 Does IIOP.NET support Visual Studio's Intellisense?</a></strong>
-<p>There is an implementation limitation in Intellisense for C#: it cannot
-extract type information from multimodule assemblies, thus you won't be able to
-see the interfaces and proxies generated with the IDLToCLSCompiler using Intellisense
-while writing C# code.
-<p>This limitation is not present in Intellisense for Visual Basic. Another workaround
-is to merge the multimodule assemblies into a single assembly; we know of a commercial tool
-for this purpose called "Salamander.NET linker".
+<p>Visual Studio's Intellisense is fully supported since release 1.6.0; previous releases did only work with VB.NET.
 	<br><br><br>
+	<p>
   <strong><a name="faq1_4">1.4 Does IIOP.NET work with mono?</a></strong>
 <p>
 Currently (mono 0.28) not, but only few features are missing.
@@ -163,33 +160,39 @@ We are regularly testing IIOP.NET against the mono CVS and reporting the problem
 <p>We expect IIOP.NET to work on Mono pretty soon.
 	<br><br><br>
   <H2 class="contentPart">2. ORB Compatibility</H2>
+	<p>
   <strong><a name="faq2_1">2.1 Can IIOP.NET interoperate with BEA WebLogic 6.1?</a></strong>
 <p>
 Yes, it can.
 Some hints are provided in the <a href="ejbInterop.html">EJB example tutorial</a> and in
 the <a href="weblogic6_1.html">WebLogic 6.1 interoperation howto</a>.
 	<br><br><br>
+	<p>
   <strong><a name="faq2_2">2.2 Can IIOP.NET interoperate with BEA WebLogic 8.1?</a></strong>
 <p>
 Yes, it can.
 Some hints are provided in the <a href="weblogic8_1.html">Weblogic 8.1 interoperation howto</a>.
 	<br><br><br>
+	<p>
   <strong><a name="faq2_3">2.3 Can IIOP.NET interoperate with IBM Websphere 4?</a></strong>
 <p>
 Yes, it can.
 Some hints are provided in the <a href="websphere4.html">Websphere 4 interoperation howto</a>.
 	<br><br><br>
+	<p>
   <strong><a name="faq2_4">2.4 Can IIOP.NET interoperate with IBM Websphere 5?</a></strong>
 <p>
 Yes, it can.
 Some hints are provided in the <a href="websphere5.html">Websphere 5 interoperation howto</a>.
 	<br><br><br>
+	<p>
   <strong><a name="faq2_5">2.5 Can IIOP.NET interoperate with JBoss 3.2?</a></strong>
 <p>
 Yes, it can.
 Some hints are provided in the <a href="jboss3_2.html">JBoss 3.2 interoperation howto</a>.
 	<br><br><br>
   <H2 class="contentPart">3. Configuration</H2>
+	<p>
   <strong><a name="faq3_1">3.1 Can the IIOP.NET sources be compiled without any configuration?</a></strong>
 <p>
 To compile the tutorials, you must copy the files <em>ir.idl</em> and <em>orb.idl</em>
@@ -226,6 +229,7 @@ environment variables to be set:
 	</tr>
 </table>
 	<br><br><br>
+	<p>
   <strong><a name="faq3_2">3.2 Can the IIOP.NET channel be configured with a config-file?</a></strong>
 <p>
 Yes, it can. <BR> <BR>
@@ -244,19 +248,19 @@ The following config file
     &lt;/configuration&gt;
 </pre>
 <p>
-is equivalent to the following:
+<p>is equivalent to the following:
 <pre>
     // register the channel
     IiopChannel chan = new IiopChannel(8087);
     ChannelServices.RegisterChannel(chan);
 
 </pre>
-<p>
-The config file is processed with: <BR>
+<p> The config file is processed with: <BR>
 <pre>
     RemotingConfiguration.Configure(configFile);
 </pre>
 	<br><br><br>
+	<p>
   <strong><a name="faq3_3">3.3 How do I configure NUnit V2.0 to use the .NET Framework 1.1?</a></strong>
 <p>
 Add the following configuration lines in the files <code>%NUnit2%\bin\nunit-console.exe.config</code> and <code>%NUnit2%\bin\nunit-gui.exe.config</code>:
@@ -267,22 +271,24 @@ Add the following configuration lines in the files <code>%NUnit2%\bin\nunit-cons
 </pre>
 	<br><br><br>
   <H2 class="contentPart">4. Usage</H2>
+	<p>
   <strong><a name="faq4_1">4.1 How do I use the IDLToCLSCompiler?</a></strong>
 <p>The IDLToCLSCompiler creates the .NET proxies for one or more IDL files.
 <pre>
-IDLToCLSCompiler [options] target_assembly idl-files...
-
-target_assembly   is the name of the target assembly without .dll
-idl-files         one or more idl files containg OMG IDL definitions
-
-options are
--h               help
--r assembly      assemblies to check for types in, instead of generating them
--c xmlfile       specifies custom mappings
--d define        defines a preprocessor symbol
--idir directory  directory containing idl files (multiple -idir allowed)
+  IDLToCLSCompiler [options] target_assembly idl-files...
+  
+  target_assembly   is the name of the target assembly without .dll
+  idl-files         one or more idl files containg OMG IDL definitions
+  
+  options are
+  -h               help
+  -r assembly      assemblies to check for types in, instead of generating them
+  -c xmlfile       specifies custom mappings
+  -d define        defines a preprocessor symbol
+  -idir directory  directory containing idl files (multiple -idir allowed)
 </pre>
-<h4>Examples:</h4>
+<p><strong>Examples:</strong>
+<ul>
 <dl>
 <dt>
 <pre>IDLToCLSCompiler proxy def.idl</pre>
@@ -306,10 +312,12 @@ generate <code>proxy.dll</code> from <code>def.idl</code> in the directory <code
 generate <code>proxy.dll</code> from <code>def.idl</code> in the current directory; the symbol "IIOPNet" is defined for the IDL preprocessor
 </dd>
 </dl>
-<h4>Notes:</h4>
+</ul>
+<p><strong>Notes:</strong>
 <p>The compiler will warn you that you must provide the implementation for the classes implementing the CORBA valuetypes. The article <a href="http://www.codeproject.com/csharp/iiop_net_and_EJB.asp">Accessing an EJB from .NET Using IIOP.NET: an Example</a> contains a detailed explanation and example (see step 4).
 <p>
 	<br><br><br>
+	<p>
   <strong><a name="faq4_2">4.2 How do I configure IIOP.NET to generate debug information?</a></strong>
 <strong>Availability: November 6th 2003 (CVS); release 1.5.1</strong>
 <p>The IIOP.NET channel must be recompiled with <code>/debug+ /d:DEBUG /d:TRACE</code> to enable the debugging code; using nmake:
@@ -324,6 +332,7 @@ generate <code>proxy.dll</code> from <code>def.idl</code> in the current directo
 </pre>
 	<br><br><br>
   <H2 class="contentPart">5. Accessing CORBA objects from IIOP.NET</H2>
+	<p>
   <strong><a name="faq5_1">5.1 How can I access an object using its stringified IOR?</a></strong>
 <p>
 The following Code reads an stringified IOR from the file iorfile and creates a proxy for
@@ -331,10 +340,11 @@ the remote object represented by the IOR:
 <pre>
     StreamReader stream = new StreamReader(iorfile);
     String ior = stream.ReadLine();
-    MyRemoteObjectIF remoteObject = (MyRemoteObjectIF)RemotingServices.Connect(typeof(MyRemoteObjectIF),
-                                                                               ior);
+    MyRemoteObjectIF remoteObject =
+        (MyRemoteObjectIF)RemotingServices.Connect(typeof(MyRemoteObjectIF), ior);
 </pre>
 	<br><br><br>
+	<p>
   <strong><a name="faq5_2">5.2 How can I get the stringified IOR from a proxy object?</a></strong>
 <p>
 The following method (from Ch.Elca.Iiop in IIOPChannel.dll) returns the stringified IOR of a remote object, given its local proxy:
@@ -343,18 +353,20 @@ The following method (from Ch.Elca.Iiop in IIOPChannel.dll) returns the stringif
 </pre>
 <p>This won't obviously work, when the proxy is created manually with RemotingServices.Connect using a .NET URI or a corbaloc URI. In this case the above call will return the URI used in Connect.
 	<br><br><br>
+	<p>
   <strong><a name="faq5_3">5.3 How can I access an object using its corbaloc:iiop address?</a></strong>
 <p>
 The following code creates a proxy for the remote object represented by the given corbaloc:
 <pre>
     string loc = "corbaloc::localhost:3528/myobject";
-    MyRemoteObjectIF remoteObject = (MyRemoteObjectIF)RemotingServices.Connect(typeof(MyRemoteObjectIF),
-                                                                               loc);
+    MyRemoteObjectIF remoteObject =
+        (MyRemoteObjectIF)RemotingServices.Connect(typeof(MyRemoteObjectIF), loc);
 </pre>
-Note: This feature is only available in IIOP.NET 1.4.0 and above.
+<p> Note: This feature is only available in IIOP.NET 1.4.0 and above.
 	<br><br><br>
+	<p>
   <strong><a name="faq5_4">5.4 How do I implement a callback?</a></strong>
-IIOP.NET contains two examples using callbacks:
+<p> IIOP.NET contains two examples using callbacks:
 <ul>
 <dl>
 	<dt><pre>Examples\Callback\ChatroomInterDN</pre></dt>
@@ -363,7 +375,7 @@ IIOP.NET contains two examples using callbacks:
 	<dd>contains a similar example with an IIOP.NET client and various J2EE application servers; this example is explained in detail in the <a href="http://www.codeproject.com/">Code Project</a>'s article <a href="http://www.codeproject.com/useritems/iiop_net_and_EJB.asp">Accessing an EJB from .NET Using IIOP.NET: an Example</a></dd>
 </dl>
 </ul>
-For each callback, ensure that the following points are fullfilled:
+<p> For each callback, ensure that the following points are fullfilled:
 <ul>
 	<li>The callback implementation class must inherhit from <em>MarshalByRefObject</em>
 	<li>The callback implementation class must implement the callback interface
@@ -382,6 +394,7 @@ For each callback, ensure that the following points are fullfilled:
   </pre>
 </ul>
 	<br><br><br>
+	<p>
   <strong><a name="faq5_5">5.5 How do I implement a command pattern?</a></strong>
 <p>In the command pattern, you pack the command to execute in a
 parametrized data-structure (usually a CORBA value-type) and pass it to the
@@ -420,16 +433,19 @@ int PerformAddition(int val1, int val2) {
 <img src="images/EJBCommandPatternNETSide.gif" alt="Command pattern, NET-Client side">
 	<br><br><br>
   <H2 class="contentPart">6. Accessing .NET Objects from CORBA with IIOP.NET</H2>
+	<p>
   <strong><a name="faq6_1">6.1 How do I implement the CORBA USER_ID and SYSTEM_ID policies?</a></strong>
 <p>By default, .NET uses the SYSTEM_ID policy, i.e. it assigns some random name to the object (a windows GUID I guess).
 You can override this behaviour and implement the USER_ID policy by registering the servant with RemotingServices.Marshal and the name as URI.
 Beware that using RemotingServices.Marshal without explicit URI corresponds to the SYSTEM_ID policy.
 <p>When remoting an object that has not been explicitely registered, .NET automatically registers it with RemotingServices.Marshall and assigns it a random name (SYSTEM_ID policy).
 	<br><br><br>
+	<p>
   <strong><a name="faq6_2">6.2 How do I implement the CORBA PERSISTENT policy?</a></strong>
 <p>The PERSISTENT policy assumes the USER_ID policy (the object must be accessible through the same URI).
 The persistency must be handled by the servant implementation, which should store the state whenever it changes, and restore it when the servant is created.
 	<br><br><br>
+	<p>
   <strong><a name="faq6_3">6.3 Do TRANSIENT servants have different IORs?</a></strong>
 <p>TRANSIENT servants receive different IORs as long as you implement them using the SYSTEM_ID policy, i.e. you register them with
 <pre>
@@ -438,11 +454,13 @@ The persistency must be handled by the servant implementation, which should stor
 <p>or you do not register them at all, when returning them to the client peer, in which case .NET registers them for you with the above call.
 	<br><br><br>
   <H2 class="contentPart">7. Frequent Errors (Troubleshooting)</H2>
+	<p>
   <strong><a name="faq7_1">7.1 Exception: Invalid PInvoke metadata format</a></strong>
 <p>This is usually caused by the some backward incompatibility between the .NET framework 1.0 and 1.1: the error occurs, when you run an application built for .NET framework 1.0 on the .NET framework 1.1.
 <p>A detailed description of the problem and possible solutions can be found here:
 	<br><br><br>
-  <strong><a name="faq7_2">7.2 CORBA Exception: No_Implement (minor-code = 1)</a></strong>
+	<p>
+  <strong><a name="faq7_2">7.2 omg.org.CORBA.NO_IMPLEMENT: CORBA system exception, completed: Completed_MayBe minor: 1</a></strong>
 <p>The marshaller on the .NET-side cannot find the class implementing the valuetype.
 <p>Check that:
 <ul>
@@ -455,7 +473,8 @@ The persistency must be handled by the servant implementation, which should stor
 <li><em>XYZImpl</em> implements all the inherited abstract methods and properties
 </ul>
 	<br><br><br>
-  <strong><a name="faq7_3">7.3 CORBA system exception, completed: Completed_MayBe minor: 1414</a></strong>
+	<p>
+  <strong><a name="faq7_3">7.3 omg.org.CORBA.INTF_REPOS: CORBA system exception, completed: Completed_MayBe minor: 1414</a></strong>
 <P>This exception is thrown by IIOP.NET whenever it receives an object reference of an unknown type.
 The most common errors are:
 <ul>
@@ -463,8 +482,9 @@ The most common errors are:
 <li>the assembly containing the mapped type was not found by IIOP.NET (it must be in the same directory or in the application domain's search path)
 </ul>
 	<br><br><br>
+	<p>
   <strong><a name="faq7_4">7.4 omg.org.CORBA.CODESET_INCOMPATIBLE: CORBA system exception, completed: Completed_No minor: 9501</a></strong>
-Currently, IIOP.NET does only support a limited set of codesets:
+<p> Currently, IIOP.NET does only support a limited set of codesets:
 <ul>
 	<li> Character Sets:
 	<ul>
@@ -479,7 +499,7 @@ Currently, IIOP.NET does only support a limited set of codesets:
 </ul>
 </li>
 </ul>
-If possible, you sould use UTF8, Latin1 or UTF16.
+<p> If possible, you sould use UTF8, Latin1 or UTF16.
 	<br><br><br>
   <!-- content end -->
   </TD>
