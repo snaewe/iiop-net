@@ -777,7 +777,7 @@ namespace Ch.Elca.Iiop.Idl {
             return "::CORBA::TypeCode";
         }
         public object MapException(System.Type dotNetType) {
-            return IdlNaming.MapShortTypeNameToIdl(dotNetType);
+            return IdlNaming.MapFullTypeNameToIdlScoped(dotNetType);
         }
         #endregion
 
