@@ -270,59 +270,32 @@ namespace Ch.Elca.Iiop {
 
         #endregion IProperties
         #region IMethods
-        
+
         /// <summary>
-        /// processes an incoming request
+        /// handles a Locate request msg: sends a LocateReply message as a result.
         /// </summary>
-        /// <param name="fragmentAssembler">
-        /// The fragmented message assembler and manager for this connection
-        /// </param>
-        internal void Process(NetworkStream networkStream, 
-                              FragmentedMsgAssembler fragmentAssembler) {
+        private void HandleLocateRequest(Stream msgStream, Stream networkStream) {
+            msgStream.Seek(0, SeekOrigin.Begin); // assure stream is read from beginning in GiopMessageHandler
+
+            GiopMessageHandler handler = GiopMessageHandler.GetSingleton();
+            Stream resultMsgStream = handler.HandleIncomingLocateRequestMessage(msgStream);
+            SendResponseMessage(networkStream, resultMsgStream);
+        }
+
+        /// <summary>
+        /// handles a request msg: sends a Reply message as a result.
+        /// </summary>
+        /// <param name="msgStream"></param>
+        /// <param name="networkStream"></param>
+        private void HandleRequest(Stream msgStream, Stream networkStream) {
+            msgStream.Seek(0, SeekOrigin.Begin); // assure stream is read from beginning in formatter
+
             
             // the out params returned form later sinks
             IMessage responseMsg;
             ITransportHeaders responseHeaders;
             Stream responseStream;
-                                  
-            // read in the message
-            CdrInputStreamImpl reader = new CdrInputStreamImpl(networkStream);
-            GiopHeader msgHeader = new GiopHeader(reader);
-            Stream msgStream;
-            switch(msgHeader.GiopType) {
-                case GiopMsgTypes.Request:
-                    if ((msgHeader.GiopFlags & GiopHeader.FRAGMENT_MASK) > 0) {
-                        fragmentAssembler.StartFragment(reader, msgHeader);
-                        return; // more fragments
-                    } else {
-                        // no fragmentation
-                        msgStream = new MemoryStream();
-                        msgHeader.WriteToStream(msgStream,
-                                                msgHeader.ContentMsgLength);
-                        byte[] body = reader.ReadOpaque((int)msgHeader.ContentMsgLength);
-                        msgStream.Write(body, 0, body.Length);
-                    }                    
-                    break;
-                case GiopMsgTypes.Fragment:
-                    if (!(fragmentAssembler.IsLastFragment(msgHeader))) {
-                        fragmentAssembler.AddFragment(reader, msgHeader);
-                        return; // more fragments to follow
-                    } else {
-                        msgStream = fragmentAssembler.FinishFragmentedMsg(reader, 
-                                                                          msgHeader);
-                    }
-                    // continue with request handling
-                    break;
-                case GiopMsgTypes.CloseConnection:
-                    networkStream.Close();
-                    return;
-                default:
-                    throw new IOException("unsupported Giop message : " +
-                                          msgHeader.GiopType);
-            }
-            msgStream.Seek(0, SeekOrigin.Begin); // assure stream is read from beginning in formatter
-
-
+            
             // create the sink stack for async processing of message
             ServerChannelSinkStack sinkStack = new ServerChannelSinkStack();
             sinkStack.Push(this, networkStream);
@@ -336,7 +309,9 @@ namespace Ch.Elca.Iiop {
                                                                 out responseStream);
             switch (result) {
                 case ServerProcessing.Complete :
-                    try { sinkStack.Pop(this); } catch (Exception) { }
+                    try { 
+                        sinkStack.Pop(this); 
+                    } catch (Exception) { }
                     SendResponseMessage(networkStream, responseStream);
                     break;
                 case ServerProcessing.Async : 
@@ -348,6 +323,80 @@ namespace Ch.Elca.Iiop {
                     } catch (Exception) { }
                     // no message to send
                     break;
+            }
+
+        }
+
+        /// <summary>
+        /// creates the stream for an unfragmented giop message, which can be used for deserialising the
+        /// message.
+        /// </summary>
+        /// <param name="reader"></param>
+        /// <param name="header">Giop header of the message</param>
+        /// <returns></returns>
+        private Stream CreateStreamForGiopMessage(CdrInputStreamImpl reader, GiopHeader msgHeader) {
+            Stream msgStream = new MemoryStream();
+            msgHeader.WriteToStream(msgStream, msgHeader.ContentMsgLength);
+            byte[] body = reader.ReadOpaque((int)msgHeader.ContentMsgLength);
+            msgStream.Write(body, 0, body.Length);
+            return msgStream;
+        }
+
+        
+        /// <summary>
+        /// processes an incoming request
+        /// </summary>
+        /// <param name="fragmentAssembler">
+        /// The fragmented message assembler and manager for this connection
+        /// </param>
+        internal void Process(NetworkStream networkStream, 
+                              FragmentedMsgAssembler fragmentAssembler) {
+                                                          
+            // read in the message
+            CdrInputStreamImpl reader = new CdrInputStreamImpl(networkStream);
+            GiopHeader msgHeader = new GiopHeader(reader);
+            Stream msgStream;
+            switch(msgHeader.GiopType) {
+                case GiopMsgTypes.Request:
+                    if ((msgHeader.GiopFlags & GiopHeader.FRAGMENT_MASK) > 0) {
+                        fragmentAssembler.StartFragment(reader, msgHeader);
+                        // more fragments
+                    } else {
+                        // no fragmentation
+                        msgStream = CreateStreamForGiopMessage(reader, msgHeader);
+                        HandleRequest(msgStream, networkStream);
+                    }                    
+                    break;
+                case GiopMsgTypes.Fragment:
+                    if (!(fragmentAssembler.IsLastFragment(msgHeader))) {
+                        fragmentAssembler.AddFragment(reader, msgHeader);
+                        // more fragments to follow
+                    } else {
+                        msgStream = fragmentAssembler.FinishFragmentedMsg(reader, 
+                                                                          ref msgHeader);
+                        if (msgHeader.GiopType.Equals(GiopMsgTypes.Request)) {
+                            HandleRequest(msgStream, networkStream);
+                        } else if (msgHeader.GiopType.Equals(GiopMsgTypes.LocateRequest)) {
+                            HandleLocateRequest(msgStream, networkStream);
+                        }
+                    }
+                    break;
+                case GiopMsgTypes.CloseConnection:
+                    networkStream.Close();
+                    break;
+                case GiopMsgTypes.LocateRequest:
+                    // read the message, may be fragmented in GIOP 1.2
+                    if ((msgHeader.GiopFlags & GiopHeader.FRAGMENT_MASK) > 0) {
+                        fragmentAssembler.StartFragment(reader, msgHeader);
+                        // more fragments
+                    } else {
+                        msgStream = CreateStreamForGiopMessage(reader, msgHeader);
+                        HandleLocateRequest(msgStream, networkStream);
+                    }
+                    break;
+                default:
+                    throw new IOException("unsupported Giop message : " +
+                                          msgHeader.GiopType);
             }
             
         }

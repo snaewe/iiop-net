@@ -44,6 +44,17 @@ using omg.org.CORBA;
 
 namespace Ch.Elca.Iiop.MessageHandling {
 
+    
+    /// <summary>
+    /// used to specify the LocateStatus for a locate reply
+    /// </summary>
+    public enum LocateStatus {
+        UNKNOWN_OBJECT,
+        OBJECT_HERE,
+        OBJECT_FORWARD
+    }
+    
+    
     /// <summary>
     /// simple implementation of the IMessage interface
     /// </summary>
@@ -206,7 +217,6 @@ namespace Ch.Elca.Iiop.MessageHandling {
             }
         }
 
-
         /// <summary>
         /// set the codesets for the stream after codeset service descision
         /// </summary>
@@ -225,25 +235,6 @@ namespace Ch.Elca.Iiop.MessageHandling {
             GiopConnectionContext context = IiopConnectionManager.GetCurrentConnectionContext();
             cdrStream.CharSet = context.CharSet;
             cdrStream.WCharSet = context.WCharSet;
-        }
-
-        #endregion Common
-        #region Requests
-
-        private void WriteTarget(CdrOutputStream cdrStream, 
-                                 byte[] objectKey, GiopVersion version) {
-            if (!((version.Major == 1) && (version.Minor <= 1))) {
-                // for GIOP >= 1.2
-                uint targetAdrType = 0;
-                cdrStream.WriteULong(targetAdrType); // object key adressing
-            }
-            WriteTargetKey(cdrStream, objectKey);
-        }
-
-        private void WriteTargetKey(CdrOutputStream cdrStream, byte[] objectKey) {
-            Debug.WriteLine("writing object key with length: " + objectKey.Length);
-            cdrStream.WriteULong((uint)objectKey.Length); // object-key length
-            cdrStream.WriteOpaque(objectKey);
         }
 
         /// <summary>read the target for the request</summary>
@@ -273,6 +264,25 @@ namespace Ch.Elca.Iiop.MessageHandling {
             return IiopUrlUtil.GetObjUriForObjectKey(objectKey);
         }
 
+        #endregion Common
+        #region Requests
+
+        private void WriteTarget(CdrOutputStream cdrStream, 
+                                 byte[] objectKey, GiopVersion version) {
+            if (!((version.Major == 1) && (version.Minor <= 1))) {
+                // for GIOP >= 1.2
+                uint targetAdrType = 0;
+                cdrStream.WriteULong(targetAdrType); // object key adressing
+            }
+            WriteTargetKey(cdrStream, objectKey);
+        }
+
+        private void WriteTargetKey(CdrOutputStream cdrStream, byte[] objectKey) {
+            Debug.WriteLine("writing object key with length: " + objectKey.Length);
+            cdrStream.WriteULong((uint)objectKey.Length); // object-key length
+            cdrStream.WriteOpaque(objectKey);
+        }
+       
         /// <summary>aquire the information for a specific object method call</summary>
         /// <param name="serverType">the type of the object called</param>
         /// <param name="calledMethodInfo">the MethodInfo of the method, which is called</param>
@@ -764,6 +774,41 @@ namespace Ch.Elca.Iiop.MessageHandling {
         }
 
         #endregion Replys
+        #region Locate
+
+        /// <summary>
+        /// deserialise a locate request msg.
+        /// </summary>
+        /// <param name="cdrStream"></param>
+        /// <param name="version"></param>
+        /// <param name="forRequestId">returns the request id as out param</param>
+        /// <returns>the uri of the object requested to find</returns>
+        public string DeserialiseLocateRequest(CdrInputStream cdrStream, GiopVersion version, out uint forRequestId) {
+            forRequestId = cdrStream.ReadULong(); 
+            return ReadTarget(cdrStream, version);
+        }
+
+        /// <summary>
+        /// serialises a locate reply message.
+        /// </summary>
+        /// <param name="forwardAddr">
+        /// specifies the IOR of the object to forward the call to. This parameter must be != null,
+        /// if LocateStatus is OBJECT_FORWARD.
+        ///  </param>
+        public void SerialiseLocateReply(CdrOutputStream targetStream, GiopVersion version, uint forRequestId, 
+                                         LocateStatus status, Ior forward) {
+            targetStream.WriteULong(forRequestId);
+            switch (status) {
+                case LocateStatus.OBJECT_HERE:
+                    targetStream.WriteULong(1);
+                    break;
+                default:
+                    Debug.WriteLine("Locate reply status not supported");
+                    throw new NotSupportedException("not supported");
+            }            
+        }
+
+        #endregion Locate
         
         #endregion IMethods
 

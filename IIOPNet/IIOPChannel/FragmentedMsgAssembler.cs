@@ -104,9 +104,18 @@ namespace Ch.Elca.Iiop {
 			}
 		}
 	
-		private Stream FinishFragmentedMsgInternal(object key,
+		/// <summary>
+		/// completes the fragmented msg.
+		/// </summary>
+		/// <param name="key"></param>
+		/// <param name="source"></param>
+		/// <param name="contentLength"></param>
+		/// <param name="fullMsgHeader">returns the header of the complete msg as an out parameter</param>
+		/// <returns>the full msg as a stream</returns>
+        private Stream FinishFragmentedMsgInternal(object key,
 		                                           CdrInputStream source,
-		                                           uint contentLength) {
+		                                           uint contentLength, 
+                                                   out GiopHeader fullMsgHeader) {
 			lock(m_fragmentedMsgs.SyncRoot) {
 				FragmentedMsgDesc fragmentDesc = (FragmentedMsgDesc) m_fragmentedMsgs[key];
 				if (fragmentDesc == null) {
@@ -130,6 +139,8 @@ namespace Ch.Elca.Iiop {
                 // remove for unfinished msg table
                 m_fragmentedMsgs.Remove(fragmentDesc);
                 
+                // the header of the full msg
+                fullMsgHeader = newHeader;
                 // return the complete result msg
 				return target;
 			}
@@ -185,17 +196,26 @@ namespace Ch.Elca.Iiop {
 			}		
 		}
 		
+
+                internal Stream FinishFragmentedMsg(CdrInputStream source, 
+                                                    GiopHeader header) {
+                     return FinishFragmentedMsg(source, ref header);
+                }
+
+                /// <param name="header">
+                /// The fragment header of the last fragment. As an out parameter, the header of the complete msg is returned. 
+                /// </param>
 		internal Stream FinishFragmentedMsg(CdrInputStream source, 
-		                                    GiopHeader header) {
+		                                    ref GiopHeader header) {
 			Stream result;
 			if ((header.Version.Major == 1) && (header.Version.Minor == 1)) {
 				result = FinishFragmentedMsgInternal(m_giop11Key, source,
-				                                     header.ContentMsgLength);
+				                                     header.ContentMsgLength, out header);
 			} else if (!((header.Version.Major == 1) && (header.Version.Minor == 0))) {
 				// GIOP 1.2 or newer: read request id from fragment msg header
 				uint reqId = source.ReadULong();
 				result = FinishFragmentedMsgInternal(reqId, source,
-				                                     header.ContentMsgLength - 4);
+				                                     header.ContentMsgLength - 4, out header);
 			} else {
 				// no fragmentation allowed		
 				throw new IOException("fragmentation not allowed for GIOP 1.0");

@@ -138,6 +138,32 @@ namespace Ch.Elca.Iiop.MessageHandling {
             }
         }
 
+        /// <summary>
+        /// reads a locate-request message and formulates an answer.
+        /// </summary>
+        /// <param name="sourceStream"></param>
+        /// <returns></returns>
+        public Stream HandleIncomingLocateRequestMessage(Stream sourceStream) {
+            Debug.WriteLine("receive locate request message");
+            CdrMessageInputStream msgInput = new CdrMessageInputStream(sourceStream);
+            CdrInputStream msgBody = msgInput.GetMessageContentReadingStream();
+            // deserialize message body
+            GiopMessageBodySerialiser ser = GiopMessageBodySerialiser.GetSingleton();
+            
+            uint forRequestId;
+            string targetUri = ser.DeserialiseLocateRequest(msgBody, msgInput.Header.Version, out forRequestId);
+            Debug.WriteLine("locate request for target-uri: " + targetUri);
+            Stream targetStream = new MemoryStream();
+            GiopVersion version = msgInput.Header.Version;
+            GiopHeader header = new GiopHeader(version.Major, version.Minor, 0, GiopMsgTypes.LocateReply);
+            CdrMessageOutputStream msgOutput = new CdrMessageOutputStream(targetStream, header);
+            // serialize the message
+            ser.SerialiseLocateReply(msgOutput.GetMessageContentWritingStream(), version, forRequestId, 
+                                     LocateStatus.OBJECT_HERE, null); // for the moment, do not try to find object, because forward is not possibly for IIOP.NET server
+            msgOutput.CloseStream(); // write to the stream 
+            return targetStream;
+        }                           
+
         #endregion IMethods
 
     }
