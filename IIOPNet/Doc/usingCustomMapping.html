@@ -1,0 +1,357 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<HTML>
+<HEAD>
+<TITLE>IIOP.NET - Custom mapping plugin mechanism</TITLE>
+<link type="text/css" rel="stylesheet" href="style/basic.css">
+</HEAD>
+<BODY style="margin=0px">
+<TABLE BORDER="0" CELLPADDING="0" CELLSPACING="0" width="100%" height="100%" rules="none" style="margin=0px;" summary="">
+<!--Line 0 -->
+<TR>
+  <TD width="0px" height="0px"></TD>
+  <TD width="120px" height="0px"></TD>
+  <TD width="18px" height="0px"></TD>
+  <TD width="280px" height="0px"></TD>
+  <TD height="0px"></TD>
+  <TD width="1px" height="0px"></TD>
+  <TD width="88px" height="0px"></TD>
+  <TD width="120px" height="0px"></TD>
+  <TD width="1px" height="0px"></TD>
+  <TD width="44px" height="0px"></TD>
+</TR>
+<!--Line 1 -->
+<TR>
+  <TD width="0px" height="34px"></TD>
+  <TD COLSPAN="6"></TD>
+  <TD ALIGN="RIGHT" STYLE="padding-right: 8px;">
+<a href="contact.html" class="contactLink">Contact us</A>
+|
+<a href="links.html" class="contactLink">Links</A>
+  </TD>
+  <TD bgcolor="#666633"></TD>
+  <TD height="34px"></TD>
+</TR>
+<!--Line 2 -->
+<TR>
+  <TD width="0px" height="69px"></TD>
+  <TD COLSPAN="3"><IMG SRC="images/iiop_logo_top.gif" alt=""></TD>
+  <TD COLSPAN="4"></TD>
+  <TD bgcolor="#666633" width="1px"></TD>
+  <TD height="69px"></TD>
+</TR>
+<!--Line 3 -->
+<TR>
+  <TD width="0px" height="4px"></TD>
+  <TD height="4px" COLSPAN="9" BGCOLOR="#CC3300"></TD>
+</TR>
+<!--Line 4 + 5 -->
+<TR>
+  <TD width="0"></TD>
+  <TD width="120">
+  <!-- menu begin -->
+<P class="menu">
+<TABLE border="1" rules="none" STYLE="border-width="0" 0 1 0" CELLPADDING="4" CELLSPACING="0" WIDTH="100%" STYLE="BORDER-COLOR:#CC3300; border-style: solid" summary="">
+<TR><TD class="menu"><a class="menuLink" href="index.html">Overview</A></TD></TR>
+<TR><TD class="menu"><a class="menuLink" href="documentation.html">Documentation</A></TD></TR>
+<TR><TD class="menu"><a class="menuLink" href="faq.html">FAQ</A></TD></TR>
+<TR><TD class="menu"><a class="menuLink" href="http://sourceforge.net/forum/forum.php?forum_id=274081">Forum</A></TD></TR>
+<TR><TD class="menu"><a class="menuLink" href="status.html">Status</A></TD></TR>
+<TR><TD class="menu"><a class="menuLink" href="license.html">License</A></TD></TR>
+<TR><TD class="menu"><a class="menuLink" href="download.html">Download</A></TD></TR>
+<TR><TD class="menu"><a class="menuLink" href="links.html">Links</A></TD></TR>
+<TR><TD class="menu"><a class="menuLink" href="contact.html">Contact us</A></TD></TR>
+</TABLE>
+<P class="menu">
+<TABLE BORDER="1" rules="none" CELLPADDING="4" CELLSPACING="0" WIDTH="100%" STYLE="BORDER-COLOR:#000000" summary="">
+<TR><TD class="bottomMenu"><A class="bottomMenuLink" target="_blank" href="http://www.sf.net/projects/iiop-net">SF Project Page</A></TD></TR>
+<TR><TD class="bottomMenu"><A href="http://sourceforge.net"> <IMG border="0" src="http://sourceforge.net/sflogo.php?gr
+oup_id=80227&amp;type=2" width="106" height="30" border="0" alt="SourceForge Log
+o"></A></TD></TR>
+</TABLE>
+<P class="menu">
+<TABLE border="0" bgcolor="#CC3300" width="100%" height="100%" summary="">
+<TR>
+<TD></TD>
+</TR>
+</TABLE>
+  <!-- menu end -->
+  </TD>
+  <TD></TD>
+  <TD COLSPAN="2" ROWSPAN="3" STYLE="padding-top: 15px; padding-right: 8px">
+  <!-- content begin -->
+  <H2 class="contentPart">Custom mapping plugin mechanism</H2>
+<p>
+This tutorial explains the custom mapping plugin mechanism in IIOP.NET.
+<p>
+<b>Purpose</b>
+<BR> <BR>
+The custom mapping plugin mechanism allows to specify a different mapping between a CLS type and
+an IDL type. This mechanism is most useful in connection with CORBA value types.
+If an implementation of the value type already exists on both platforms connected via CORBA,
+this mapping mechanism can map them on each other.
+<BR> <BR>
+<b>Example</b>
+<BR> <BR>
+An implementation of an <code>ArrayList</code> exists both in Java and in the .NET base class library.
+Using this custom mapping mechanism, <code>java.util.ArrayList</code> is mapped to
+<code>System.Collections.ArrayList</code> and vice versa.
+<p>
+<b>Using the mapping plugin mechanism</b>
+<BR><BR>
+This section describes, how to set up a custom mapping. <BR>
+Setting up a custom mapping for a .NET client and for a .NET server is slighty different, because
+in the first case the IIOPChannel and the IDL to CLS compiler must be configured, whereas in the second case
+the IIOPChannel and the CLS to IDL generator must be configured.
+<p>
+<a name="clientMap"></a>
+<b>Setting up a custom mapping for a .NET client</b>
+<BR> <BR>
+Setting up a custom mapping requires the following steps:
+<OL>
+<LI>Create a custom mapping configuration file</LI>
+<LI>Install mapping in the application</LI>
+<LI>Implement needed <code>InstanceMapper</code>s.</LI>
+<LI>Implement CORBA value types</LI>
+<LI>Use mapping file with the IDL to CLS compiler</LI>
+</OL><p>
+<b>Create a custom mapping configuration file</b>
+<BR><BR>
+The mapping configuration file describes the custom mapping for the IIOPChannel and
+the IDL to CLS compiler.
+For convenience reasons, the same file can be used to configure the channel and the compiler.
+<BR><BR>
+The file contains a set of mapping descriptions of the following form:
+<pre>
+    &lt;mapping&gt;
+      &lt;idlTypeName&gt;type name&lt;idlTypeName&gt;
+      &lt;idlTypeAssembly&gt;assembly name&lt;idlTypeAssembly&gt;
+      &lt;clsType&gt;assembly qualified type name&lt;clsType&gt;
+      &lt;customMapper&gt;assembly qualified type name&lt;customMapper&gt;
+    &lt;mapping&gt;
+</pre>
+<p>
+The <code>idlTypeName</code> and the <code>idlTypeAssembly</code> entries specify, which type in which assembly
+represents the IDL type (in CLS) to which / from which should be mapped.
+<BR>
+The <code>clsType</code> entry specifies the CLS type to which / from which should be mapped.
+<BR>
+The optional customMapper part describes, which type maps instances from the IDL type
+to instances of the CLS type and vice versa.
+<BR><BR>
+Hint: The following XML schema's describes the format of this configuration file: <BR>
+<a href="http://cvs.sourceforge.net/cgi-bin/viewcvs.cgi/iiop-net/IIOPNet/IIOPChannel/MappingPluginSchema.xsd?rev=HEAD&content-type=text/vnd.viewcvs-markup">
+%IIOPNet%\IIOPChannel\MappingPluginSchema.xsd</a> and
+<a href="http://cvs.sourceforge.net/cgi-bin/viewcvs.cgi/iiop-net/IIOPNet/IDLToCLSCompiler/IDLCompiler/MappingPluginSchema.xsd?rev=HEAD&content-type=text/vnd.viewcvs-markup">
+%IDLToCLSCompiler%\IDLCompiler\MappingPluginSchema.xsd</a>
+<BR><BR>
+Example:
+<pre>
+    &lt;?xml version='1.0'?&gt;
+    &lt;mappings&gt;
+
+        &lt;mapping&gt;
+            &lt;idlTypeName&gt;java.util.ArrayList&lt;idlTypeName&gt;
+            &lt;idlTypeAssembly&gt;javaCollections&lt;idlTypeAssembly&gt;
+            &lt;clsType&gt;System.Collections.ArrayList,mscorlib&lt;clsType&gt;
+            &lt;customMapper&gt;
+            Ch.Elca.Iiop.JavaCollectionMappers.ArrayListMapper,customCollectionMappings
+            &lt;customMapper&gt;
+        &lt;mapping&gt;
+    
+    &lt;mappings&gt;
+</pre>
+<p>
+<b>Install mapping in the application</b>
+<BR><BR>
+To take effect, the mapping must be installed together with the IIOPChannel in the application.
+The singleton <code>CustomMapperRegistry</code> allows to install a custom mapping
+from a file:
+<pre>
+    CustomMapperRegistry reg = CustomMapperRegistry.GetSingleton();
+    reg.AddMappingsFromFile(new FileInfo(fileName));
+</pre>
+<p>
+<b>Implement needed <code>InstanceMapper</code>s.</b>
+<BR><BR>
+If instantiable types are mapped to each other, <code>InstanceMappers</code> are needed
+to map instances of one type to instances of the other type.
+During deserialisation, an instance of the CLS type representing the IDL type is created.
+This instance must be mapped to the target CLS type with an instance mapper.
+Just before serialisation, the instance of the CLS type must be mapped to an instance
+of the CLS type representing the IDL type.
+<BR>
+The custom mapping plugin does the mapping with the help of a class implementing the
+<code>ICustomMapper</code> interface.
+This interfaces is defined as follows:
+<pre> 
+    public interface ICustomMapper {
+         object CreateIdlForClsInstance(object clsObject);
+         object CreateClsForIdlInstance(object idlObject);
+     }
+</pre>
+<p>
+The <code>CreateIdlForClsInstance</code> method takes a CLS instance, and returns an instance of the
+CLS type representing the IDL type. <BR>
+The <code>CreateClsForIdlInstance</code> method takes an instance of the CLS type representing the IDL type,
+and returns an instance of the CLS type.
+<BR><BR>
+The implementation of the instance mapper for the <code>ArrayList</code> example can be found in
+<a href="http://cvs.sourceforge.net/cgi-bin/viewcvs.cgi/iiop-net/IIOPNet/MappingPlugin/java/InstanceMappers.cs?rev=HEAD&content-type=text/vnd.viewcvs-markup">
+%IIOPNet%\MappingPlugin\java\InstanceMappers.cs</a>.
+<BR><BR>
+<b>Implement CORBA value types</b>
+<BR><BR>
+If the IDL type in the custom mapping is a CORBA value type, this CORBA value type
+must be implemented in CLS.
+This implementation is needed to support serialisation / deserialisation. <BR>
+Hint: For the methods, if present, only a dummy implementation is needed.
+<BR><BR>
+The implementation for the <code>ArrayList</code> example can be found in
+<a href="http://cvs.sourceforge.net/cgi-bin/viewcvs.cgi/iiop-net/IIOPNet/MappingPlugin/java/CollectionsImpl.cs?rev=HEAD&content-type=text/vnd.viewcvs-markup">
+%IIOPNet%\MappingPlugin\java\CollectionsImpl.cs</a>.
+<BR><BR>
+<b>Use mapping file with the IDL to CLS compiler</b>
+<BR><BR>
+The IDL to CLS compiler needs to replace the IDL type in the custom mapping with the target CLS type
+in method parameters, properties and fields.<BR>
+The information, needed to accomplish this, is given to the compiler with the <code>-c</code> option:
+<BR>
+<code>IDLToCLSCompiler.exe -c mappingFile</code>
+<BR><BR>
+A complete example can be found in:<BR>
+<a href="http://cvs.sourceforge.net/cgi-bin/viewcvs.cgi/iiop-net/IIOPNet/IntegrationTests/MappingPluginJava/">
+%IIOPNet%\IntegrationTests\MappingPluginJava</a>.
+<p>
+<b>Setting up a mapping for a .NET server</b>
+<BR> <BR>
+Setting up such a mapping requires the following steps:
+<OL>
+<LI>Create a custom mapping configuration file for the IIOPChannel</LI>
+<LI>Create a custom mapping configuration file for the CLS to IDL generator</LI>
+<LI>Install the mapping in the application</LI>
+<LI>Implement needed <code>InstanceMapper</code>'s.</LI>
+<LI>Implement CORBA value types</LI>
+<LI>Use mapping file with CLS to IDL generator</LI>
+</OL><p>
+Steps 1, 3, 4 and 5 are the same as for a .NET client. For more information see section
+<a href="#clientMap">setting up a mapping for a .NET client</a>.
+<BR> <BR>
+<b>Create a custom mapping configuration file for the CLS to IDL generator</b>
+<BR><BR>
+This mapping configuration file describes the custom mapping for the CLS to IDL
+generator.
+<BR><BR>
+This file contains a set of mapping descriptions of the following form:
+<pre>
+    &lt;mapping&gt;
+        &lt;clsType&gt;assembly qualifies type name&lt;clsType&gt;
+        &lt;idlTypeName&gt;type name&lt;idlTypeName&gt;
+        &lt;idlTypeAssembly&gt;assembly name;idlTypeAssembly&gt;
+        &lt;idlFile&gt;(relative) path to idl file&lt;idlFile&gt;
+    &lt;mapping&gt;
+</pre>
+<p>
+The clsType entry specifies the CLS type to which / from which should be mapped.
+<BR>
+The idlTypeName and the idlTypeAssembly entries specify, which type in which assembly
+represents the idltype (in CLS) to which / from which should be mapped.
+<BR>
+The idlFile specifies the location of the IDL file containing the IDL definition
+of the target IDL type.
+<BR><BR>
+Hint: The following XML schema describes the format of this configuration file: <BR>
+<a href="http://cvs.sourceforge.net/cgi-bin/viewcvs.cgi/iiop-net/IIOPNet/CLSToIDLGenerator/GeneratorMappingPluginSchema.xsd?rev=HEAD&content-type=text/vnd.viewcvs-markup">
+%IIOPNet%\CLSToIDLGenerator\GeneratorMappingPluginSchema.xsd</a>.
+<BR><BR>
+Example:
+<pre>
+    &lt;?xml version='1.0'?&gt;
+    &lt;generatorMappings&gt;
+
+        &lt;mapping&gt;
+            &lt;clsType&gt;System.Collections.ArrayList,mscorlib&lt;clsType&gt;
+            &lt;idlTypeName&gt;java.util.ArrayList&lt;idlTypeName&gt;
+            &lt;idlTypeAssembly&gt;javaCollections&lt;idlTypeAssembly&gt;
+            &lt;idlFile&gt;java\util\ArrayList.idl&lt;idlFile&gt;
+        &lt;mapping&gt;
+
+     &lt;generatorMappings&gt;
+</pre>
+<p>
+<b>Use mapping file with CLS to IDL generator</b>
+<BR><BR>
+The CLS to IDL generator needs to replace the CLS type in the custom mapping with the target IDL type
+in methods parameters, properties and fields within the generated IDL files.<BR>
+The information, needed to accomplish this, is given to the generator with the <code>-c</code> option:
+<BR>
+<code>CLSIDLGenerator.exe -c mappingFile</code>
+<BR><BR>
+A complete example can be found in:<BR>
+<a href="http://cvs.sourceforge.net/cgi-bin/viewcvs.cgi/iiop-net/IIOPNet/IntegrationTests/MappingPluginJavaAsClient/">%IIOPNet%\IntegrationTests\MappingPluginJavaAsClient</code>.
+  <!-- content end -->
+  </TD>
+  <TD BGCOLOR="#000000"></TD>
+  <TD COLSPAN="2" ROWSPAN="3" STYLE="padding-top: 15px; padding-right: 8 px; padding-left: 8px" width="208">
+  <!-- about begin -->
+<H2 class="ABOUT">About this project</H2>
+<p>
+<B>This project</B> is maintained by <A target="_blank" class="textLink" href="http://www.elca.ch">Elca Informatique SA</A> and
+ was developed in collaboration with
+the <A target="_blank" class="textLink" href="http://www.cs.inf.ethz.ch/gutknecht/index.html">Programming Languages and Runtime Systems Research Group</A> of the ETH-Zurich
+as part of Dominic Ullmann's diploma thesis.
+<p>
+<A target="_blank" href="http://www.elca.ch"><img src="images/iiop_logo_elca.gif" border="0" alt=""></A>
+<A target="_blank" href="http://www.ethz.ch"><img src="images/iiop_logo_eth.gif" border="0" alt=""></A>
+<H2 class="ABOUT">News</H2>
+<p>
+<IFRAME src="newsFeed.html" width="208px" height="100%">
+</IFRAME>
+  <!-- about end -->
+  </TD>
+  <TD BGCOLOR="#CCCC99" colspan="2" rowspan="2" height="585" valign="top" STYLE="vertical-align: top;"><IMG align="top" src="images/iiop_border_right.gif" alt=""></TD>
+  </TR>
+<!--Line 6 -->
+<TR>
+  <TD width="0" height="323"></TD>
+  <TD BGCOLOR="#CC3300"></TD>
+  <TD></TD>
+  <!-- rowspan -->
+  <!-- rowspan -->
+  <TD BGCOLOR="#000000"></TD>
+  <!-- rowspan -->
+  <!-- rowspan -->
+  <!-- rowspan -->
+  <!-- rowspan -->
+  <!--TD BGCOLOR="#CCCC99"></TD-->
+  <!--TD BGCOLOR="#CCCC99" height="323px" valign="top"><IMG src="images/iiop_border_right2.gif" alt=""></TD-->
+</TR>
+<!--Line 7: extension row -->
+<TR>
+  <TD width="0"></TD>
+  <TD BGCOLOR="#CC3300"></TD>
+  <TD>&nbsp;</TD>
+  <!-- rowspan -->
+  <!-- rowspan -->
+  <TD BGCOLOR="#000000"></TD>
+  <!-- rowspan -->
+  <!-- rowspan -->
+  <TD BGCOLOR="#CCCC99"></TD>
+  <TD BGCOLOR="#CCCC99"></TD>
+</TR>
+<!--Line 8 -->
+<TR>
+  <TD width="0" height="60"></TD>
+  <TD BGCOLOR="#CC3300"></TD>
+  <TD></TD>
+  <TD COLSPAN="2" STYLE="padding-top: 20px;">
+<!-- Disclaimer -->
+&copy; 2003 ELCA All Rights Reserved
+<!-- Disclaimer -->
+  </TD>
+  <TD COLSPAN="3"></TD>
+  <TD BGCOLOR="#CCCC99"></TD>
+  <TD BGCOLOR="#CCCC99" height="60px"></TD>
+</TR>
+</TABLE>
+</BODY>
+</HTML>
