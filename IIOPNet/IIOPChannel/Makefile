@@ -12,7 +12,7 @@ $(Dest)IIOPChannel.dll: *.cs
 	
 
 build-unit-tests: build nunit-var
-	csc /nowarn:0618 /debug+ /d:UnitTest /r:$(NUNITV2_HOME)\bin\nunit.framework.dll /t:library /out:$(UnitTestDest)IIOPChannel.dll *.cs
+	csc /nowarn:0618 $(CSFLAGS) /d:UnitTest /r:$(NUNITV2_HOME)\bin\nunit.framework.dll /t:library /out:$(UnitTestDest)IIOPChannel.dll *.cs
 
 nunit-var:
 	if not defined NUNITV2_HOME echo Define NUNITV2_HOME as the home directory of your NUNIT installation
