@@ -182,6 +182,12 @@ namespace Ch.Elca.Iiop.IntegrationTests {
         TestAbstrInterfaceImplByMarshalByVal RetriveTestInterfaceAImplemtorTheImpl(System.String initialMsg);
 
         object EchoAnything(object arg);
+
+        int AddOverloaded(int arg1, int arg2);
+
+        double AddOverloaded(double arg1, double arg2);
+
+        int AddOverloaded(int arg1, int arg2, int arg3);
         
         /// <summary>
         /// used to check, if a reference passed is equal to this object itself.

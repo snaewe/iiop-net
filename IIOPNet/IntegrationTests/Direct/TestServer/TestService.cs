@@ -206,6 +206,19 @@ namespace Ch.Elca.Iiop.IntegrationTests {
         public object EchoAnything(object arg) {
             return arg;
         }
+
+        public int AddOverloaded(int arg1, int arg2) {
+            return arg1 + arg2;
+        }
+
+        public double AddOverloaded(double arg1, double arg2) {
+            return arg1 + arg2;
+        }
+
+        public int AddOverloaded(int arg1, int arg2, int arg3) {
+            return arg1 + arg2 + arg3;
+        }
+
         
         /// <summary>
         /// used to check, if a reference passed is equal to this object itself.

@@ -512,6 +512,24 @@ namespace Ch.Elca.Iiop.IntegrationTests {
             Assertion.AssertEquals(false, result);
         }
 
+        [Test]
+        public void TestOverloadedMethods() {
+            System.Int32 arg1int = 1;
+            System.Int32 arg2int = 2;
+            System.Int32 arg3int = 2;
+
+            System.Double arg1double = 1.0;
+            System.Double arg2double = 2.0;
+
+            System.Int32 result1 = m_testService.AddOverloaded(arg1int, arg2int);
+            Assertion.AssertEquals((System.Int32)(arg1int + arg2int), result1);
+            System.Int32 result2 = m_testService.AddOverloaded(arg1int, arg2int, arg3int);
+            Assertion.AssertEquals((System.Int32)(arg1int + arg2int + arg3int), result2);
+            System.Double result3 = m_testService.AddOverloaded(arg1double, arg2double);
+            Assertion.AssertEquals((System.Double)(arg1double + arg2double), result3);
+        }
+
+
     }
 
 }
