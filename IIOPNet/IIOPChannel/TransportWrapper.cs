@@ -102,6 +102,9 @@ namespace Ch.Elca.Iiop {
         /// <summary>Results the given exception from a connection close on client side</summary>
         bool IsConnectionCloseException(Exception e);
         
+        /// <summary>returns the ip address of the client</summary>
+        IPAddress GetClientAddress();
+        
     }
             
     

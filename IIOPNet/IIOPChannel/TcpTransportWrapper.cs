@@ -195,6 +195,12 @@ namespace Ch.Elca.Iiop {
         public bool IsConnectionCloseException(Exception e) {
             return s_socketExType.IsInstanceOfType(e.InnerException);            
         }
+        
+        /// <summary><see cref="Ch.Elca.Iiop.IServerTransport.GetClientAddress"/></summary>
+        public IPAddress GetClientAddress() {
+            // TODO
+            return null;
+        }
                 
         #endregion IMethods
         

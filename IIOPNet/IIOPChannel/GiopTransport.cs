@@ -283,6 +283,7 @@ namespace Ch.Elca.Iiop {
         
         private Stream m_transportStream;
         private IServerChannelSink m_transportSink;
+        private IServerTransport m_transport;
         
         #endregion IFields
         #region IConstructors
@@ -290,6 +291,7 @@ namespace Ch.Elca.Iiop {
         /// <summary>default constructor</summary>
         public GiopTransportServerMsgHandler(IServerTransport transport, 
                                              IServerChannelSink transportSink) {
+            m_transport = transport;
             m_transportStream = transport.TransportStream;
             m_transportSink = transportSink;
         }                       
@@ -371,6 +373,7 @@ namespace Ch.Elca.Iiop {
             // empty transport headers for this protocol
             ITransportHeaders requestHeaders = new TransportHeaders();
             requestHeaders[GiopConnectionDesc.SERVER_TR_HEADER_KEY] = m_conDesc;
+            requestHeaders[CommonTransportKeys.IPAddress] = m_transport.GetClientAddress();
             
             // next sink will process the request-message
             ServerProcessing result = 
