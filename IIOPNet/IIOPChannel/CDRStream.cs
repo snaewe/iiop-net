@@ -30,6 +30,8 @@
 using System;
 using System.IO;
 using System.Text;
+using System.Collections;
+using System.Diagnostics;
 using Ch.Elca.Iiop;
 using Ch.Elca.Iiop.Util;
 using Ch.Elca.Iiop.Services;
@@ -46,7 +48,127 @@ namespace Ch.Elca.Iiop.Cdr {
         Align4 = 4,
         Align8 = 8
     }
+    
 
+    /// <summary>the type of the entity pointed to by the indirection</summary>
+    public enum IndirectionType {
+        IndirRepId, 
+        IndirValue,
+        CodeBaseUrl,
+        TypeCode
+    }
+    
+    
+    /// <summary>specifies, by what facility using indirections, the
+    /// indirection was created; needed because only the same usage is allowed (see 15.3.4.3)
+    /// </summary>
+    public enum IndirectionUsage {
+        ValueType,
+        TypeCode
+    }
+
+    /// <summary>
+    /// stores information about indirections; indirections are used in value type and typecode 
+    /// encodings.
+    /// </summary>
+    public struct IndirectionInfo {
+        
+        #region IFields
+        
+        private ulong m_streamPos;
+        private IndirectionType m_indirType;
+        private IndirectionUsage m_indirUsage;
+
+        #endregion IFields
+        #region IConstructors
+        
+        internal IndirectionInfo(ulong streamPos, IndirectionType indirType,
+                               IndirectionUsage indirUsage) {
+            m_streamPos = streamPos;
+            m_indirType = indirType;
+            m_indirUsage = indirUsage;
+        }
+
+        #endregion IConstructors
+        #region IProperties
+
+        public ulong StreamPos {
+            get { 
+                return m_streamPos; 
+            }
+        }
+
+        public IndirectionType IndirType {
+            get { 
+                return m_indirType; 
+            }
+        }
+        
+        public IndirectionUsage IndirUsage {
+            get {
+                return m_indirUsage;
+            }
+        }        
+
+        #endregion IProperties
+        #region IMethods
+        
+        public override bool Equals(object other) {
+            if (!(other is IndirectionInfo)) {
+                return false;
+            }
+            IndirectionInfo otherInfo = (IndirectionInfo)other;
+            return ((StreamPos == otherInfo.StreamPos) && 
+                    (IndirType == otherInfo.IndirType) &&
+                    (IndirUsage == otherInfo.IndirUsage));
+        }
+        
+        public override int GetHashCode() {
+            return (StreamPos.GetHashCode() ^
+                    IndirType.GetHashCode() ^
+                    IndirUsage.GetHashCode());
+        }
+        
+        #endregion IMethods
+
+    }
+    
+    /// <summary>
+    /// this class is a helper class, which holds stream positions
+    /// </summary>
+    internal class StreamPosition {
+     
+        #region IFields
+ 
+        private ulong m_position;
+ 
+        #endregion IFields
+        #region IConstructors
+ 
+        public StreamPosition(CdrInputStreamImpl inStream) {
+            inStream.MarkNextAlignedPosition(this);
+        }
+ 
+        public StreamPosition(CdrOutputStreamImpl outStream) {
+            outStream.MarkNextAlignedPosition(this);
+        }
+ 
+        #endregion IConstructors
+        #region IProperties
+       
+        public ulong Position {
+            get { 
+                return m_position; 
+            }
+            set {
+                m_position = value; 
+            }
+        }
+ 
+        #endregion IProperties
+ 
+    }
+    
 
     /// <summary>
     /// this interfaces describes the methods for reading from streams containing CDR-data, which are different for big-endian / little-endian
@@ -136,6 +258,31 @@ namespace Ch.Elca.Iiop.Cdr {
         /// <summary>skip the remaining bytes in the message</summary>
         /// <remarks>throws an exception if length not known</remarks>
         void SkipRest();
+        
+        /// <summary>checks, if an indirection tag follows in the stream;
+        /// if yes, it reads also the indirection offset and returns it in indirOffset.</summary>
+        bool CheckForIndirection(out long indirOffset);
+        
+        /// <summary>reads the indirection tag and indirection offset</summary>
+        /// <returns>the indirecitonOffset</returns>
+        long ReadIndirection();
+        
+        ///<summary>stores an indirection described by indirDesc</summary>
+        void StoreIndirection(IndirectionInfo indirDesc, object valueAtIndirPos);
+        
+        /// <summary>get the indirection matching the given desc; 
+        /// throws MarshalException, if not present</summary>
+        object GetObjectForIndir(long indirectionOffset, IndirectionType indirType,
+                                 IndirectionUsage indirUsage);
+        
+        /// <summary>returns true, if indirection is resolvable, otherwise false</summary>
+        bool IsIndirectionResolvable(long indirectionOffset, IndirectionType indirType,
+                                              IndirectionUsage indirUsage);
+        
+        
+        /// <summary>throws exception, if indirection is not resolvable, otherwise does nothing</summary>
+        void CheckIndirectionResolvable(long indirectionOffset, IndirectionType indirType,
+                                        IndirectionUsage indirUsage);        
         
         #endregion IMethods
 
@@ -229,6 +376,23 @@ namespace Ch.Elca.Iiop.Cdr {
 
         /// <summary>writes an encapsulation to this stream</summary>
         void WriteEncapsulation(CdrEncapsulationOutputStream encap);
+        
+        /// <summary>wirtes the indirection to the stream</summary>
+        void WriteIndirection(object forVal);
+        
+        /// <summary>returns true, if the value has been previously marshalled to the stream</summary>
+        bool IsPreviouslyMarshalled(object val, IndirectionType indirType, 
+                                    IndirectionUsage indirUsage);
+        
+        /// <summary>stores an indirection for the val at the next aligned position</summary>
+        void StoreIndirection(object val, IndirectionInfo indirDesc);                              
+        
+        /// <summary>calculates the indirection offset for the given indirInfo;
+        /// this method assumes, that the current stream position is directly after the
+        /// indirection tag! 
+        /// !!! before indirection tag is difficult, because of alignement: don't really know,
+        /// how much alignement bytes are before indirection tag</summary>
+        long CalculateIndirectionOffset(IndirectionInfo indirInfo);
 
         #endregion IMethods
     }
@@ -326,12 +490,17 @@ namespace Ch.Elca.Iiop.Cdr {
         #endregion IMethods
     }    
 
-    
+       
     /// <summary>
     /// this class provide some helper methods to CDRStream implementation
     /// </summary>
     public abstract class CdrStreamHelper {
         
+        #region Constants
+        
+        internal const uint INDIRECTION_TAG = 0xffffffff;
+        
+        #endregion Constants
         #region IFields
 
         /// <summary>the underlying stream</summary>
@@ -346,7 +515,7 @@ namespace Ch.Elca.Iiop.Cdr {
 
         protected uint m_charSet = CodeSetService.DEFAULT_CHAR_SET;
         protected uint m_wcharSet = CodeSetService.DEFAULT_WCHAR_SET;
-
+        
         #endregion IFields
         #region IConstructors
         
@@ -445,7 +614,7 @@ namespace Ch.Elca.Iiop.Cdr {
         internal static Encoding GetWCharEncoding(uint wcharSet, CodeSetConversionRegistry regToUse) {
             return regToUse.GetEncoding(wcharSet); // get Encoding for wcharSet
         }
-
+        
         #endregion IMethods
     }
     
@@ -471,6 +640,9 @@ namespace Ch.Elca.Iiop.Cdr {
         private ulong m_startPeekPosition = 0;
         
         private Stream m_backingStream = null;
+        
+        /// <summary>used to store indirections encountered in this stream</summary>
+        private IDictionary m_indirections = new Hashtable();
         
         #endregion IFields
         #region IConstructors
@@ -741,7 +913,90 @@ namespace Ch.Elca.Iiop.Cdr {
             }
             ReadPadding(GetBytesToFollow());
         }
+        
+        #region Indirection Handling
+        
+        public bool CheckForIndirection(out long indirectionOffset) {
+            StartPeeking();
+            uint indirTag = ReadULong();
+            StopPeeking();    
+            if (indirTag == INDIRECTION_TAG) {    
+                indirectionOffset = ReadIndirection();
+                if (indirectionOffset >= -4) { 
+                    // indirection-offset is not ok: indirectionOffset
+                    throw new MARSHAL(949, CompletionStatus.Completed_MayBe);
+                }
+                return true;
+            } else {
+                indirectionOffset = 0;
+                return false;
+            }
+        }
+        
+        public long ReadIndirection() {
+            ReadPadding(4); // read indir tag
+            return ReadLong();
+        }
+                
+        public void StoreIndirection(IndirectionInfo indirDesc, object valueAtIndirPos) {
+            m_indirections[indirDesc] = valueAtIndirPos;
+        }
+        
+        /// <summary>resolves indirection, if not possible throws marshal excpetion</summary>
+        public object GetObjectForIndir(long indirectionOffset, IndirectionType indirType,
+                                        IndirectionUsage indirUsage) {
+            // indirection-offset is negative --> therefore add to stream-position; -4, because indirectionoffset itself doesn't count --> stream-pos too high
+            IndirectionInfo info = new IndirectionInfo((ulong)((long)GetPosition() +
+                                                               indirectionOffset - 4),
+                                                       indirType, indirUsage);
+            if (!IsIndirectionResolvableInternal(info)) {    
+                // indirection not resolvable!
+                throw CreateIndirectionNotResolvableException();
+            }
+            return m_indirections[info];
+        }
 
+        public bool IsIndirectionResolvable(long indirectionOffset, IndirectionType indirType,
+                                              IndirectionUsage indirUsage) {
+            
+            // indirection-offset is negative --> therefore add to stream-position; -4, because indirectionoffset itself doesn't count --> stream-pos too high
+            IndirectionInfo info = new IndirectionInfo((ulong)((long)GetPosition() +
+                                                               indirectionOffset - 4),
+                                                       indirType, indirUsage);
+            return IsIndirectionResolvableInternal(info);
+        }
+        
+        private bool IsIndirectionResolvableInternal(IndirectionInfo indirInfo) {
+            if (!m_indirections.Contains(indirInfo)) { 
+                Debug.WriteLine("indirection not found, streamPos: " + indirInfo.StreamPos +
+                                ", type: " + indirInfo.IndirType + 
+                                ", usage: " + indirInfo.IndirUsage);
+                IEnumerator enumerator = m_indirections.Keys.GetEnumerator();
+                while (enumerator.MoveNext()) {
+                    IndirectionInfo infoEntry = (IndirectionInfo) enumerator.Current;
+                    Debug.WriteLine(infoEntry + ", pos: " + infoEntry.StreamPos + ", type: " +
+                                    infoEntry.IndirType);
+                    Debug.WriteLine("value for key: " + m_indirections[infoEntry]);
+                }
+                return false;
+            } else {
+                return true;
+            }                
+        }
+        
+        public void CheckIndirectionResolvable(long indirectionOffset, IndirectionType indirType,
+                                                 IndirectionUsage indirUsage) {
+            if (!IsIndirectionResolvable(indirectionOffset, indirType, indirUsage)) {                                                     
+                throw CreateIndirectionNotResolvableException();
+            }
+        }
+        
+        private Exception CreateIndirectionNotResolvableException() {
+            return new MARSHAL(951, CompletionStatus.Completed_MayBe);
+        }
+
+        
+        #endregion IndirectionHandling
         #endregion Implementation of CDRInputStream
 
         #endregion IMethods
@@ -762,6 +1017,10 @@ namespace Ch.Elca.Iiop.Cdr {
         /// <summary>responsible for implementing the endian dependant operation</summary>
         private CdrEndianDepOutputStreamOp m_endianOp = s_endianNotSpec;
         private GiopVersion m_giopVersion;
+        
+        /// <summary>used to store indirections encountered in this stream</summary>
+        private IDictionary m_indirections = new Hashtable();
+
 
         #endregion IFields
         #region IConstructors
@@ -931,6 +1190,51 @@ namespace Ch.Elca.Iiop.Cdr {
         public void WriteEncapsulation(CdrEncapsulationOutputStream encap) {
             encap.WriteToMessageContentStream(this);
         }
+                
+        public void WriteIndirection(object forVal) {
+            object indirInfo = m_indirections[forVal];
+            if (indirInfo != null) {                
+                WriteULong(INDIRECTION_TAG);
+                // remark: indirection offset must be calculated after indir tag has been written!
+                int indirOffset = (int)CalculateIndirectionOffset((IndirectionInfo)indirInfo);
+                WriteLong(indirOffset); // write the nr of bytes the value is before the current position
+            } else {
+                 throw CreateWriteInexistentIndirectionException();
+            }
+        }
+                
+        public bool IsPreviouslyMarshalled(object val, IndirectionType indirType,
+                                           IndirectionUsage indirUsage) {
+            object indirInfo = GetIndirectionInfoFor(val);
+            return ((indirInfo != null) && (((IndirectionInfo)indirInfo).IndirType == indirType) &&
+                    (((IndirectionInfo)indirInfo).IndirUsage == indirUsage));               
+        }
+        
+
+        public void StoreIndirection(object val, IndirectionInfo indirInfo) {
+            if (GetIndirectionInfoFor(val) == null) {
+                m_indirections[val] = indirInfo;
+            } else {
+                throw CreateReplaceIndirectionException();
+            }
+        }
+        
+        public long CalculateIndirectionOffset(IndirectionInfo indirInfo) {
+            return -1 * (long)(GetPosition() - indirInfo.StreamPos);
+        }
+        
+        internal object GetIndirectionInfoFor(object forVal) {
+            return m_indirections[forVal];
+        }
+        
+        internal Exception CreateWriteInexistentIndirectionException() {
+            return new MARSHAL(958, CompletionStatus.Completed_MayBe);
+        }
+        
+        private Exception CreateReplaceIndirectionException() {
+            return new MARSHAL(959, CompletionStatus.Completed_MayBe);
+        }
+
 
         #endregion Implementation of CDROutputStream
 
