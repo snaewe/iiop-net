@@ -55,8 +55,8 @@ namespace Ch.Elca.Iiop.Demo.EjbAdder {
                 ChannelServices.RegisterChannel(channel);
 
                 // access COS nameing service
-                CorbaInit init = CorbaInit.GetInit();
-                NamingContext nameService = init.GetNameService(nameServiceHost, nameServicePort);
+                RmiIiopInit init = new RmiIiopInit(nameServiceHost, nameServicePort);
+                NamingContext nameService = init.GetNameService();
                 NameComponent[] name = new NameComponent[] { new NameComponent("ch.elca.iiop.demo.ejbAdder.AdderHome", "") };
                 // get the reference to the adder-home
                 AdderHome adderHome = (AdderHome)nameService.resolve(name);
