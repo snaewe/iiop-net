@@ -40,11 +40,13 @@ namespace ch.elca.iiop.demo.ejbChatroom {
 
         [STAThread]
         public static void Main(string[] args) {
-            try {
-
-                string nameserviceIOR = args[0];
+            try {                
+                string nameserviceLoc = "corbaloc::localhost:3528/JBoss/Naming/root";
                 // the port the callback is listening on
                 int callbackPort = 0; // auto assign
+                if (args.Length > 0) {
+                	nameserviceLoc = args[0];
+                }
                 if (args.Length > 1) {
                     callbackPort = Int32.Parse(args[1]);
                 }
@@ -52,7 +54,7 @@ namespace ch.elca.iiop.demo.ejbChatroom {
                 IiopChannel channel = new IiopChannel(callbackPort);
                 ChannelServices.RegisterChannel(channel);
 
-                NamingContext nameService = (NamingContext)RemotingServices.Connect(typeof(NamingContext), nameserviceIOR);
+                NamingContext nameService = (NamingContext)RemotingServices.Connect(typeof(NamingContext), nameserviceLoc);
 
                 NameComponent[] name = new NameComponent[] { new NameComponent("demo", ""),
                                                              new NameComponent("chatroomHome", "") };
