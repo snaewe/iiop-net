@@ -334,6 +334,10 @@ namespace omg.org.CORBA {
         public NO_IMPLEMENT(int minor, CompletionStatus status) : 
             base(System.Reflection.MethodInfo.GetCurrentMethod().DeclaringType.FullName, minor, status) { }
 
+        public NO_IMPLEMENT(int minor, CompletionStatus status, string missingtype) : 
+            base(System.Reflection.MethodInfo.GetCurrentMethod().DeclaringType.FullName +
+			    " ["+missingtype+"] ", minor, status) { }
+
         #endregion IConstructors
 
     }

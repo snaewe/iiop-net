@@ -491,7 +491,7 @@ namespace Ch.Elca.Iiop.Marshalling {
                     if (implClass == null) {
                         Trace.WriteLine("implementation class : " + implAttr.ImplClass +
                                     " of value-type: " + baseType + " couldn't be found");
-                        throw new NO_IMPLEMENT(1, CompletionStatus.Completed_MayBe);
+                        throw new NO_IMPLEMENT(1, CompletionStatus.Completed_MayBe, implAttr.ImplClass);
                     }
                     if (implClass.Equals(forType)) {
                         return true;
@@ -700,7 +700,7 @@ namespace Ch.Elca.Iiop.Marshalling {
                     actualType = Repository.GetTypeForId(repId);
                     if (actualType == null) { 
                         // repository id used is unknown: repId
-                        throw new NO_IMPLEMENT(941, CompletionStatus.Completed_MayBe);
+                        throw new NO_IMPLEMENT(941, CompletionStatus.Completed_MayBe, repId);
                     }
                     break;
                 case 6:
@@ -742,7 +742,7 @@ namespace Ch.Elca.Iiop.Marshalling {
                 if (actualType == null) {
                     Trace.WriteLine("implementation class : " + implCl.ImplClass +
                                     " of value-type: " + actualType + " couldn't be found");
-                    throw new NO_IMPLEMENT(1, CompletionStatus.Completed_MayBe);
+                    throw new NO_IMPLEMENT(1, CompletionStatus.Completed_MayBe, implCl.ImplClass);
                 }
             }
             // type must not be abstract for beeing instantiable
