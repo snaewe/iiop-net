@@ -1,3 +1,12 @@
+bugs fixed:
+- IIOPChannel: Problem with out-arguments serialization (bug #1015505)
+
+changes:
+
+
+new features:
+
+
 version 1.6.2 final (08 June 2004)
 ----------------------------------
 
