@@ -16,13 +16,10 @@
 
 </FAQ>
 
-<FAQ question="Does IIOP.NET work with mono?">
+<FAQ question="Does IIOP.NET work with Mono?">
 
-<p>
-Currently (mono 0.28) not, but only few features are missing. 
-We are regularly testing IIOP.NET against the mono CVS and reporting the problems we find to the mono team. 
+<p>Yes, IIOP.NET does work with Mono 1.0
 
-<p>We expect IIOP.NET to work on Mono pretty soon.
 </FAQ>
 </FAQ-SECTION>
 <FAQ-SECTION name="ORB Compatibility">
@@ -238,6 +235,38 @@ generate <code>proxy.dll</code> from <code>def.idl</code> in the current directo
 </pre>
 
 </FAQ>
+
+<FAQ question="How do I handle shared IDL files?">
+<p>Sometimes, some remote object definitions are factored into a shared IDL file, and used in multiple other IDL files. Generating the .NET proxies for each IDL file causes the definitions in the shared IDL to be generated twice, and .NET compilers complain with warning "X is defined in multiple places".
+
+<p>Let assume the following configuration:
+<pre>
+    common.idl
+    //common definitions
+    
+    a.idl
+    \#include "common.idl"
+    ....
+    
+    b.idl
+    \#include "common.idl"
+    ...
+    
+</pre>
+<p>The first approach is to compile all the idls into a single dll file; this assumes that the definitions in common.idl are protected with ifdefs to avoid their redefinition due to multiple imports:
+<pre>
+    IDLToCLSCompiler defs common.idl a.idl b.idl
+</pre>
+
+<p>If you need to have separate dlls for each idl file, common.idl must be compiled separatedly to avoid duplicating its definitions. This is done with:
+<pre>
+    IDLToCLSCompiler common common.idl
+    IDLToCLSCompiler -r common.dll a a.idl
+    IDLToCLSCompiler -r common.dll b b.idl
+</pre>
+<p>The -r option forces the compiler to check into the given assembly whether some definitions (in this case common.idl) are already available, in which case no further code is generated for them.
+</FAQ>
+
 </FAQ-SECTION>
 <FAQ-SECTION name="Accessing CORBA objects from IIOP.NET">
 
@@ -495,6 +524,28 @@ The most common errors are:
 
 </FAQ>
 
+<FAQ question="scoped name not resolvable: TypeCode; currentscope: CORBA">
+<p>This error is issued when using the java orb.idl instead of the IIOP.NET orb.idl.
+<p>Since IIOP.NET 1.6.1, you don't need to copy any orb.idl into your idl
+directory, because the compiler does automatically use its own (found in directory IDLToCLSCompiler\IDL\).
+
+</FAQ>
+
+<FAQ question="omg.org.CORBA.MARSHAL: CORBA system exception : omg.org.CORBA.MARSHAL, completed: Completed_MayBe minor: 901">
+
+<p>This error was reported using a java.util.ArrayList (mapped to a CORBA chunked value) with JBoss 3.2.3; it disappeared after changing the following section in the file jacorb.properties in $JBOSS_HOME/server/all/conf will make the ArrayList mapping work.
+
+<pre>
+# Custom-marshalled RMI valuetypes should be encoded as chunks, but some
+# ORBs are not able to decode chunked values. Disable this property for
+# interoperability with the ORB in Sun's JDK 1.4.2.
+jacorb.interop.chunk_custom_rmi_valuetypes=off
+</pre>
+
+</FAQ>
+
+<FAQ question="warning CS1595: 'I' is defined in multiple places">
+<p>This warning is issued when a type is defined multiple times. This error is common when this type is defined in a shared IDL file, and thus included multiple times. See the FAQ entry on <a href="#faq4_3">how to deal with shared IDL files</a>.
 </FAQ-SECTION>
 
 <FAQ-SECTION name="About">

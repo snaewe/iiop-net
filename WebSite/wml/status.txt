@@ -93,9 +93,10 @@ Interoperation with J2EE applications is reported for the following application 
 <p/>
 IIOP.NET on Mono:
 <reports>
-<software name="Mono 0.31">
-	<report version="IntegrationTests/Basic" color="orange">
-		doesn't compile (reason unknown)
+<software name="Mono">
+	<report version="0.31" color="orange">
+		IntegrationTests/Basic doesn't compile (reason unknown)
 	</report>
+	<report version="1.0" color="yellow">IIOP.NET naming service doesn't work when using .NET as server</report>
 </software>
 </reports>
