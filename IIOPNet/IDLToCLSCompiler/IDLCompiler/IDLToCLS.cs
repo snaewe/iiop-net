@@ -62,9 +62,9 @@ public class IDLToCLS {
     private DirectoryInfo m_vtSkelTd = new DirectoryInfo(".");
     private bool m_vtSkelOverwrite = false;
     private bool m_vtSkelEnable = false;
-	
-	private string m_keyFile;
-	private bool m_delaySign = false;
+    
+    private string m_keyFile;
+    private bool m_delaySign = false;
     
     #endregion IFields
     #region IConstructors
@@ -110,8 +110,8 @@ public class IDLToCLS {
         Console.WriteLine("-vtSkelProv     The fully qualified name of the codedomprovider to use for value type skeleton generation");
         Console.WriteLine("-vtSkelTd       The targetDirectory for generated valuetype impl skeletons");
         Console.WriteLine("-vtSkelO        Overwrite already present valuetype skeleton implementations");
-    	Console.WriteLine("-snk            sign key file (used for generating strong named assemblies)");
-    	Console.WriteLine("-delaySign      delay signing of assembly (snk file contains only a pk)");
+        Console.WriteLine("-snk            sign key file (used for generating strong named assemblies)");
+        Console.WriteLine("-delaySign      delay signing of assembly (snk file contains only a pk)");
     }
     
     public static void Error(String message) {
@@ -179,8 +179,8 @@ public class IDLToCLS {
                 i++;
                 m_vtSkelOverwrite = true;
             } else if (args[i].Equals("-snk")) {
-            	i++;
-            	m_keyFile = args[i++];
+                i++;
+                m_keyFile = args[i++];
             } else if (args[i].Equals("-delaySign")) {
                 i++;
                 m_delaySign = true;
@@ -234,23 +234,23 @@ public class IDLToCLS {
     private AssemblyName GetAssemblyName() {
         AssemblyName result = new AssemblyName();
         result.Name = m_asmPrefix;
-    	if (m_keyFile != null) {
-    		if (!m_delaySign) {
-    			// load keypair
-    			StrongNameKeyPair snP = new StrongNameKeyPair(File.Open(m_keyFile, 
+        if (m_keyFile != null) {
+            if (!m_delaySign) {
+                // load keypair
+                StrongNameKeyPair snP = new StrongNameKeyPair(File.Open(m_keyFile, 
                                                                         FileMode.Open, 
                                                                         FileAccess.Read));
                 result.KeyPair = snP;
-    		} else {
-    			// deleay signing, load only pk
+            } else {
+                // deleay signing, load only pk
                 FileStream publicKeyStream = File.Open(m_keyFile, FileMode.Open);
                 byte[] publicKey = new byte[publicKeyStream.Length];
                 publicKeyStream.Read(publicKey, 0, (int)publicKeyStream.Length);
                 // Provide the assembly with a public key.
                 result.SetPublicKey(publicKey);
-    			publicKeyStream.Close();
-    		}
-    	}
+                publicKeyStream.Close();
+            }
+        }
         return result;
     }
     
