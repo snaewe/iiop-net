@@ -249,11 +249,11 @@ namespace Ch.Elca.Iiop.Marshalling {
         #region IConstructors
         
         public CharSerialiser(bool useWide) {
-        	m_useWide = useWide;
+            m_useWide = useWide;
         }
         
         #endregion IConstructors
-    	#region IMethods
+        #region IMethods
 
         internal override void Serialise(Type formal, object actual, AttributeExtCollection attributes,
                                        CdrOutputStream targetStream) {            
@@ -291,11 +291,11 @@ namespace Ch.Elca.Iiop.Marshalling {
         #region IConstructors
         
         public StringSerialiser(bool useWide) {
-        	m_useWide = useWide;
+            m_useWide = useWide;
         }
         
         #endregion IConstructors
-    	#region IMethods
+        #region IMethods
 
         internal override void Serialise(Type formal, object actual, AttributeExtCollection attributes,
                                        CdrOutputStream targetStream) {            
@@ -418,7 +418,8 @@ namespace Ch.Elca.Iiop.Marshalling {
                 interfaceType = ReflectionHelper.MarshalByRefObjectType;
             }
             if (interfaceType == null) { 
-                if (CheckAssignableRemote(formal, url)) {
+                // check, if formal can be assigned by remote object; for formal MarshalbyRefObject, every remote object is ok
+                if (formal.Equals(ReflectionHelper.MarshalByRefObjectType) || CheckAssignableRemote(formal, url)) {
                     interfaceType = formal;
                 } else {
                     Trace.WriteLine("unknown incompatible type-id in IOR: " + ior.TypID);
@@ -1077,63 +1078,63 @@ namespace Ch.Elca.Iiop.Marshalling {
     /// <summary>serializes idl sequences</summary>
     internal class IdlSequenceSerializer : Serialiser {
         
-    	#region IFields
-    	
-    	private int m_bound;
-    	
+        #region IFields
+        
+        private int m_bound;
+        
         #endregion IFields
-    	#region IConstructors
+        #region IConstructors
         
         public IdlSequenceSerializer(int bound) {
-        	m_bound = bound;	
+            m_bound = bound;    
         }
         
         #endregion IConstructors
-    	#region IMethods
+        #region IMethods
 
         /// <summary>
         /// checks, if parameter to serialise does not contain more elements than allowed
         /// </summary>
         private void CheckBound(uint sequenceLength) {
-        	if (IdlSequenceAttribute.IsBounded(m_bound) && (sequenceLength > m_bound)) {
+            if (IdlSequenceAttribute.IsBounded(m_bound) && (sequenceLength > m_bound)) {
                 throw new BAD_PARAM(3434, CompletionStatus.Completed_MayBe);
             }
         }
         
         internal override void Serialise(Type formal, object actual, AttributeExtCollection attributes,
                                        CdrOutputStream targetStream) {
-        	Array array = (Array) actual;
-        	if (array == null) {
-        		// not allowed for a sequence:
-        		throw new BAD_PARAM(3433, CompletionStatus.Completed_MayBe);
-        	}
-        	CheckBound((uint)array.Length);
-        	targetStream.WriteULong((uint)array.Length);
-        	// get marshaller for elemtype
-        	Type elemType = formal.GetElementType();
-        	MarshallerForType marshaller = new MarshallerForType(elemType, attributes);
-        	for (int i = 0; i < array.Length; i++) {
-        		// it's more efficient to not determine serialise for each element; instead use cached ser
-        		marshaller.Marshal(array.GetValue(i), targetStream);
-        	}
+            Array array = (Array) actual;
+            if (array == null) {
+                // not allowed for a sequence:
+                throw new BAD_PARAM(3433, CompletionStatus.Completed_MayBe);
+            }
+            CheckBound((uint)array.Length);
+            targetStream.WriteULong((uint)array.Length);
+            // get marshaller for elemtype
+            Type elemType = formal.GetElementType();
+            MarshallerForType marshaller = new MarshallerForType(elemType, attributes);
+            for (int i = 0; i < array.Length; i++) {
+                // it's more efficient to not determine serialise for each element; instead use cached ser
+                marshaller.Marshal(array.GetValue(i), targetStream);
+            }
         }
 
         internal override object Deserialise(Type formal, AttributeExtCollection attributes,
                                            CdrInputStream sourceStream) {
-        	// mapped from an IDL-sequence
-        	uint nrOfElements = sourceStream.ReadULong();
-        	CheckBound(nrOfElements);
-        	
-        	Array result = Array.CreateInstance(formal.GetElementType(), (int)nrOfElements);
-        	// get marshaller for array element type
-        	Type elemType = formal.GetElementType();
-        	MarshallerForType marshaller = new MarshallerForType(elemType, attributes);
-        	for (int i = 0; i < nrOfElements; i++) {
-        		// it's more efficient to not determine serialise for each element; instead use cached ser
-        		object entry = marshaller.Unmarshal(sourceStream);
-        		result.SetValue(entry, i);
-        	}
-        	return result;
+            // mapped from an IDL-sequence
+            uint nrOfElements = sourceStream.ReadULong();
+            CheckBound(nrOfElements);
+            
+            Array result = Array.CreateInstance(formal.GetElementType(), (int)nrOfElements);
+            // get marshaller for array element type
+            Type elemType = formal.GetElementType();
+            MarshallerForType marshaller = new MarshallerForType(elemType, attributes);
+            for (int i = 0; i < nrOfElements; i++) {
+                // it's more efficient to not determine serialise for each element; instead use cached ser
+                object entry = marshaller.Unmarshal(sourceStream);
+                result.SetValue(entry, i);
+            }
+            return result;
         }
 
         #endregion IMethods
@@ -1418,6 +1419,11 @@ namespace Ch.Elca.Iiop.Marshalling {
                                            CdrInputStream sourceStream) {
             bool isObjRef = sourceStream.ReadBool();
             if (isObjRef) {
+                if (formal.Equals(ReflectionHelper.ObjectType)) {
+                    // if in interface only abstract interface base type is used, set formal now
+                    // to base type of all objref for deserialization
+                    formal = ReflectionHelper.MarshalByRefObjectType;
+                }
                 object result = m_objRefSer.Deserialise(formal, attributes, sourceStream);    
                 return result;
             } else {
