@@ -1,0 +1,11 @@
+<?xml version='1.0'?>
+<mappings>
+
+    <mapping>
+        <idlTypeName>java.util.ArrayList</idlTypeName>
+        <idlTypeAssembly>javaCollections</idlTypeAssembly>
+        <clsType>System.Collections.ArrayList,mscorlib</clsType>
+        <customMapper>Ch.Elca.Iiop.JavaCollectionMappers.ArrayListMapper,customCollectionMappings</customMapper>
+    </mapping>
+
+</mappings>
