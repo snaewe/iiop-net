@@ -61,6 +61,9 @@ clean: clean-base
 	cd Examples
 	$(MAKE) clean
 	cd ..
+	cd IntegrationTests
+        $(MAKE) clean
+        cd ..
 
 rebuild-base: clean-base build-base
 
