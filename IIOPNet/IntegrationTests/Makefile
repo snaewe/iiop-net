@@ -33,6 +33,11 @@ build: nunit-var junit-var
 	@if not defined MICO_HOME echo MICO_HOME not set, skipping MICO integration test
 	@if defined MICO_HOME $(MAKE) /F Makefile.Win32 /C build
 	cd ..
+	cd OmniORB
+	@if not defined OMNIORB_HOME echo OMNIORB_HOME not set, skipping OmniORB integration test
+	@if defined OMNIORB_HOME $(MAKE) /C build
+	cd ..
+
 
 nunit-var:        
 	@if not defined NUNITV2_HOME echo Set the NUNITV2_HOME variable to the NUnit V2 home directory. Please check TestInstructions.txt.
@@ -74,6 +79,10 @@ test: nunit-var junit-var
 	@if not defined MICO_HOME echo MICO_HOME not set, skipping MICO integration test
 	@if defined MICO_HOME $(MAKE) /F Makefile.Win32 /C test
 	cd ..	
+	cd OmniORB
+	@if not defined OMNIORB_HOME echo OMNIORB_HOME not set, skipping OmniORB integration test
+	@if defined OMNIORB_HOME $(MAKE) /C test
+	cd ..
 
 
 clean:
@@ -107,4 +116,6 @@ clean:
 	cd MICO
 	$(MAKE) /F Makefile.Win32 /C clean
 	cd ..
-
+	cd OmniORB
+	$(MAKE) /C clean
+	cd ..
