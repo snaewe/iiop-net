@@ -5,11 +5,11 @@ ANTCLASSPATH="$(JAVA_HOME)\lib\tools.jar";"$(WAS_HOME)\lib\xerces.jar";"$(WAS_HO
 build: build-app build-idl
 
 build-app: 
-	$(JAVA_HOME)\bin\java -classpath $(ANTCLASSPATH) org.apache.tools.ant.Main $(ANT_ARGS) buildApp
+	"$(JAVA_HOME)\bin\java" -classpath $(ANTCLASSPATH) org.apache.tools.ant.Main $(ANT_ARGS) buildApp
 	@endlocal
 
 build-idl: 
-	$(JAVA_HOME)\bin\java -classpath $(ANTCLASSPATH) org.apache.tools.ant.Main $(ANT_ARGS) buildIdl
+	"$(JAVA_HOME)\bin\java" -classpath $(ANTCLASSPATH) org.apache.tools.ant.Main $(ANT_ARGS) buildIdl
 	@endlocal
 
 clean:
