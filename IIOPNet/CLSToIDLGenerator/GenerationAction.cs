@@ -707,7 +707,7 @@ namespace Ch.Elca.Iiop.Idl {
             // write type dependant information
             WriteModuleOpenings(modules);
             // TODO: check mapping
-            m_currentOutputStream.Write("exception " + unqualName + "{");
+            m_currentOutputStream.WriteLine("exception " + unqualName + "{");
             
             // map the state members
             FieldInfo[] fields = clsType.GetFields(BindingFlags.Public | BindingFlags.NonPublic |
