@@ -33,3 +33,13 @@ rebuild-base: clean-base build-base
 
 rebuild-base-debug: clean-base build-base-debug
 
+test:
+	cd IIOPChannel
+	$(MAKE) -C test
+	cd ..
+	cd IDLToCLSCompiler
+	$(MAKE) -C test
+	cd ..
+	cd IntegrationTests
+	$(MAKE) -C test
+	cd ..   
