@@ -72,6 +72,29 @@ namespace Ch.Elca.Iiop.Idl {
 
         #endregion IConstructors
         #region SMethods
+
+        #region simple unqualified name mapping
+        
+        /// <summary>
+        /// maps a simple Cls Name to an Idl name according to CLS to IDL spec.
+        /// </summary>
+        /// <param name="clsName">a simple unqualified cls name (e.g. a type-name or a method name)</param>
+        /// <returns></returns>
+        public static string MapClsNameToIdlName(string clsName) {
+            // TODO: handle exceptions
+            return clsName;
+        }
+
+        /// <summary>
+        /// maps a simple Idl Name to a cls name according to IDL to CLS spec.
+        /// </summary>
+        /// <param name="clsName">a simple unqualified cls name (e.g. a type-name or a method name)</param>
+        /// <returns></returns>
+        public static string MapIdlNameToClsName(string idlName) {
+            // TODO: handle exceptions
+            return idlName;
+        }
+
         
         /// <summary>creates the Idl-name for a name, which was mapped from IDL to CLS</summary>
         internal static string ReverseIdlToClsNameMapping(string mappedNameInCls) {
@@ -96,12 +119,14 @@ namespace Ch.Elca.Iiop.Idl {
             return result;
         }                
         
+        #endregion simple unqualified name mapping
+        #region method name mapping
+
         /// <summary>
         /// Maps the method name for the CLS method to IDL
         /// </summary>
-        public static string MapClsMethodNameToIdlName(MethodInfo method, bool isOverloaded) {            
-            // TODO: handle exceptions in method name mapping -> use standard name mapping
-            string methodName = method.Name;
+        public static string MapClsMethodNameToIdlName(MethodInfo method, bool isOverloaded) {                       
+            string methodName = MapClsNameToIdlName(method.Name);
             if (isOverloaded) {
                 // do the mangling                
                 ParameterInfo[] parameters = method.GetParameters();
@@ -127,6 +152,7 @@ namespace Ch.Elca.Iiop.Idl {
         internal static MethodInfo FindClsMethodForOverloadedMethodIdlName(string idlName,
                                                                            Type serverType) {            
             string methodName = idlName.Substring(0, idlName.IndexOf("__"));
+            methodName = ReverseClsToIdlNameMapping(methodName);
             MethodInfo[] methods = serverType.GetMethods(BindingFlags.Public | BindingFlags.Instance);
             foreach (MethodInfo method in methods) {
             	if (method.Name.Equals(methodName)) {
@@ -140,12 +166,14 @@ namespace Ch.Elca.Iiop.Idl {
             return null;
         }
         
+        #endregion method name mapping
+
         /// <summary>
-        /// maps a type name in IDL to a Cls name
+        /// maps the type part of an IDL repository id to a Cls type-name
         /// </summary>
         /// <param name="idlName"></param>
         /// <returns></returns>
-        public static string MapIdltoClsName(string idlName) {
+        public static string MapIdlRepIdTypePartToClsName(string idlName) {
             // replace / with .
             string result = idlName.Replace("/", ".");
             // TODO: exceptions
@@ -157,7 +185,7 @@ namespace Ch.Elca.Iiop.Idl {
         /// </summary>
         /// <param name="forType"></param>
         /// <returns></returns>
-        public static string MapFullTypeNameToIdl(Type forType) {
+        public static string MapFullTypeNameToIdlRepIdTypePart(Type forType) {
             // TODO: exceptions in naming
             string nameSpaceInIdl = MapNamespaceToIdl(forType);
             if (!nameSpaceInIdl.Equals("")) {
@@ -210,10 +238,8 @@ namespace Ch.Elca.Iiop.Idl {
                 // special
                 return (string)s_clsMapSpecial[forType];
             } else {
-                return forType.Name;
+                return MapClsNameToIdlName(forType.Name);
             }
-            // TODO: exceptions
-
         }
 
         /// <summary>
@@ -243,6 +269,8 @@ namespace Ch.Elca.Iiop.Idl {
             }
             return modules;
         }
+        
+        #region Keyword handling
         
         /// <summary>checks, if the given name clashes with a cls keyword</summary>
         internal static bool NameClashesWithClsKeyWord(string name) {
@@ -480,6 +508,8 @@ namespace Ch.Elca.Iiop.Idl {
             s_idlKeywordList.Add("wchar");
             s_idlKeywordList.Add("wstring");
         }
+
+        #endregion Keyword handling
 
         #endregion SMethods
 

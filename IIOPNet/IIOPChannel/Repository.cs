@@ -155,7 +155,7 @@ namespace Ch.Elca.Iiop.Idl {
                 throw new INV_IDENT(10001, CompletionStatus.Completed_MayBe);
             }
             string typeName = idlID.Substring(0, idlID.IndexOf(":"));
-            typeName = IdlNaming.MapIdltoClsName(typeName);
+            typeName = IdlNaming.MapIdlRepIdTypePartToClsName(typeName);
             return typeName;
         }
         /// <summary>
@@ -268,7 +268,7 @@ namespace Ch.Elca.Iiop.Idl {
             }
             
             // no Repository ID attribute on type, have to create an ID:
-            string idlName = IdlNaming.MapFullTypeNameToIdl(type);
+            string idlName = IdlNaming.MapFullTypeNameToIdlRepIdTypePart(type);
             return "IDL:" + idlName + ":1.0"; // TODO: versioning?
         }
 

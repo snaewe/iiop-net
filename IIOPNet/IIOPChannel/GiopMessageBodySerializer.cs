@@ -403,7 +403,7 @@ namespace Ch.Elca.Iiop.MessageHandling {
             WriteTarget(targetStream, targetIor.ObjectKey, version); // write the target-info
 
             Type targetType = Type.GetType(methodCall.TypeName);
-            string methodName = methodCall.MethodName;
+            string methodName = IdlNaming.ReverseIdlToClsNameMapping(methodCall.MethodName);
             // check for IIdlEntity, if not -> map first CLS  method name to IDL method name            
             if (!s_iIdlEntityType.IsAssignableFrom(targetType)) {
                 // do a CLS to IDL mapping, because .NET server expect this for every client, also for a
@@ -411,7 +411,7 @@ namespace Ch.Elca.Iiop.MessageHandling {
                 bool isOverloaded = RemotingServices.IsMethodOverloaded(methodCall);
                 methodName = IdlNaming.MapClsMethodNameToIdlName((MethodInfo)methodCall.MethodBase, isOverloaded);
             }
-            targetStream.WriteString(IdlNaming.ReverseIdlToClsNameMapping(methodName)); // write the method name
+            targetStream.WriteString(methodName); // write the method name
             
             if ((version.Major == 1) && (version.Minor <= 1)) { // GIOP 1.0 / 1.1
                 targetStream.WriteULong(0); // no principal
