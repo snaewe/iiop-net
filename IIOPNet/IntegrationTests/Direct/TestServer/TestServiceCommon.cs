@@ -259,6 +259,8 @@ namespace Ch.Elca.Iiop.IntegrationTests {
 
         /// <summary>BAD_OPERATION ERROR REPORT</summary>
         void GetAllUsagerType();
+
+        Type EchoType(Type arg);
         
     }
 

@@ -329,6 +329,9 @@ namespace Ch.Elca.Iiop.IntegrationTests {
         public void GetAllUsagerType() {
         }
 
+        public Type EchoType(Type arg) {
+            return arg;
+        }
     }
 
     [SupportedInterfaceAttribute(typeof(TestSimpleInterface1))]

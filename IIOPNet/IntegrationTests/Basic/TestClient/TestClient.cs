@@ -34,6 +34,7 @@ using NUnit.Framework;
 using Ch.Elca.Iiop;
 using Ch.Elca.Iiop.Services;
 using omg.org.CosNaming;
+using omg.org.CORBA;
 
 namespace Ch.Elca.Iiop.IntegrationTests {
 
@@ -702,6 +703,36 @@ namespace Ch.Elca.Iiop.IntegrationTests {
             } catch (Exception ex) {
                 Assertion.Fail("wrong exception type: " + ex.GetType());
             }
+        }
+
+        [Test]
+        public void TestSystemType() {
+            IOrbServices orb = OrbServices.GetSingleton();
+
+            Type arg1 = typeof(System.Int32);
+            omg.org.CORBA.TypeCode arg1Tc = orb.create_tc_for_type(arg1);
+            omg.org.CORBA.TypeCode result1TC = m_testService.EchoType(arg1Tc);
+            Type result1 = orb.get_type_for_tc(result1TC);
+            Assertion.AssertEquals("wrong type for int32 echo", arg1, result1);
+
+            Type arg2 = typeof(System.Boolean);
+            omg.org.CORBA.TypeCode arg2Tc = orb.create_tc_for_type(arg2);
+            omg.org.CORBA.TypeCode result2TC = m_testService.EchoType(arg2Tc);
+            Type result2 = orb.get_type_for_tc(result2TC);
+            Assertion.AssertEquals("wrong type for Boolean echo", arg2, result2);
+
+            Type arg3 = typeof(TestService);
+            omg.org.CORBA.TypeCode arg3Tc = orb.create_tc_for_type(arg3);
+            omg.org.CORBA.TypeCode result3TC = m_testService.EchoType(arg3Tc);
+            Type result3 = orb.get_type_for_tc(result3TC);
+            Assertion.AssertEquals("wrong type for testService type echo", arg3, result3);            
+
+            Type arg4 = null;
+            omg.org.CORBA.TypeCode arg4Tc = orb.create_tc_for_type(arg4);
+            omg.org.CORBA.TypeCode result4TC = m_testService.EchoType(arg4Tc);
+            Type result4 = orb.get_type_for_tc(result4TC);
+            Assertion.AssertEquals("wrong type for null type echo", arg4, result4);
+
         }
 
         #endregion IMethods

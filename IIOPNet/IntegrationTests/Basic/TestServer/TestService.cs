@@ -385,6 +385,9 @@ namespace Ch.Elca.Iiop.IntegrationTests {
             return new TestSimpleIfImplMissingSupIf();            
         }
 
+        public Type EchoType(Type arg) {
+            return arg;
+        }
         
         public override object InitializeLifetimeService() {
             // live forever

@@ -961,6 +961,25 @@ namespace Ch.Elca.Iiop.IntegrationTests {
         public void TestErrorReportBadOperation() {
             m_testService.GetAllUsagerType();
         }
+
+        [Test]
+        public void TestSystemType() {
+            Type arg1 = typeof(System.Int32);
+            Type result1 = m_testService.EchoType(arg1);
+            Assertion.AssertEquals("wrong type for int32 echo", arg1, result1);
+
+            Type arg2 = typeof(System.Boolean);
+            Type result2 = m_testService.EchoType(arg2);
+            Assertion.AssertEquals("wrong type for Boolean echo", arg2, result2);
+
+            Type arg3 = typeof(TestService);
+            Type result3 = m_testService.EchoType(arg3);
+            Assertion.AssertEquals("wrong type for testService type echo", arg3, result3);            
+
+            Type arg4 = null;
+            Type result4 = m_testService.EchoType(arg4);
+            Assertion.AssertEquals("wrong type for null type echo", arg4, result4);            
+        }
         
 
     }
