@@ -342,7 +342,7 @@ The following code creates a proxy for the remote object represented by the give
        // ...
   }
 </pre>
-<li>Use an <em>IiopChannel</em> to allow the client to receive the server's messages (using only an <em>IIOPClientChannel</em> won't work):
+<li>Create an <em>IiopChannel</em> with a callback port to allow the client to receive the server's messages (using only an <em>IIOPClientChannel</em> or an <em>IIOPChannel</em> without port won't work):
 <pre>
   int callbackPort = 0; // automatic assignement
   IiopChannel chan = new IiopChannel(callbackPort);
@@ -546,6 +546,13 @@ jacorb.interop.chunk_custom_rmi_valuetypes=off
 
 <FAQ question="warning CS1595: 'I' is defined in multiple places">
 <p>This warning is issued when a type is defined multiple times. This error is common when this type is defined in a shared IDL file, and thus included multiple times. See the FAQ entry on <a href="#faq4_3">how to deal with shared IDL files</a>.
+</FAQ>
+
+<FAQ question="CORBA system exception : omg.org.CORBA.INTERNAL, completed: Completed_MayBe minor: 1960
+">
+<p>This exception happens when trying to call a callback function, but only an IIOPClientChannel was registered (i.e. only outgoing connections are possible).
+<p>Register an IIOPChannel with an explicit port for listening for callbacks; IIOPChannel with no ports only creates a client channel.
+</FAQ>
 </FAQ-SECTION>
 
 <FAQ-SECTION name="About">
