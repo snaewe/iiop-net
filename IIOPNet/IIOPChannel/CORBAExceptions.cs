@@ -86,8 +86,16 @@ namespace Ch.Elca.Iiop {
         
         #region IFields
 
-        private string m_exceptionString;
-        private string m_innerExceptionMsg = null;
+        /// <summary>
+        /// recursively lists the name of the exceptions (i.e. includes inner exception names)
+        /// </summary>
+        private string m_name;
+        /// <summary>
+        /// recursively lists the exception messages (i.e. includes inner exception messages)
+        /// </summary>
+        private string m_message;
+        /// <summary>
+        /// recursively lists the methods throwed the exceptions
         private string m_throwingMethod;
 
         #endregion IFields
@@ -99,15 +107,34 @@ namespace Ch.Elca.Iiop {
 
         /// <param name="reason">the .NET exception encountered</param>
         public GenericUserException(Exception reason) : base(reason.Message) {
-            m_exceptionString = reason.Message;
-            if (reason.InnerException != null) 
-            {
-                m_innerExceptionMsg = reason.InnerException.Message;
-            }
-            m_throwingMethod = reason.TargetSite.Name;
+			AddExceptionDetails(reason);
         }
 
         #endregion IConstructors
+        #region IMethods
+        
+
+        /// <summary>
+        /// recursively adds the exception details to name, message, throwingMethod fields
+        /// </summary>
+        private void AddExceptionDetails(Exception exception) {
+        	if (exception == null) {
+        		return;
+        	}
+        	m_name += exception.GetType().Name;
+        	m_message += exception.Message;
+            if (exception.TargetSite != null) {
+	            m_throwingMethod += exception.TargetSite.Name;
+	        }
+        	if (exception.InnerException != null) {
+        		m_name += "\n";
+        		m_message += "\n";
+        		m_throwingMethod += "\n";
+        		AddExceptionDetails(exception.InnerException);
+        	}
+        }
+        
+        #endregion IMethods
 
     }
 

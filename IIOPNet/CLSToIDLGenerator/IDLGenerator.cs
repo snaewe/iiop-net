@@ -150,8 +150,8 @@ namespace Ch.Elca.Iiop.Idl {
             writer.WriteLine("            module Iiop {");
             writer.WriteLine("");
             writer.WriteLine("                exception GenericUserException {");
-            writer.WriteLine("                    ::CORBA::WStringValue exceptionString;");
-            writer.WriteLine("                    ::CORBA::WStringValue innerExceptionMsg;");
+            writer.WriteLine("                    ::CORBA::WStringValue name;");
+            writer.WriteLine("                    ::CORBA::WStringValue message;");
             writer.WriteLine("                    ::CORBA::WStringValue throwingMethod;");
             writer.WriteLine("                };");
             writer.WriteLine("");    

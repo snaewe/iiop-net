@@ -119,7 +119,8 @@ public class Client {
 				}
 			} while (!quit);
 		} catch (GenericUserException e) {
-			System.out.println("Exception " + e.exceptionString);			
+                    System.out.println("Exception " + e.name);
+                    System.out.println("  message: " + e.message);
 		}
 		
 	}
