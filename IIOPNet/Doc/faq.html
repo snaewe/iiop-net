@@ -123,6 +123,8 @@ o"></A></TD></TR>
 <br>
   <strong><a href="#faq5_5">5.5 How do I implement a command pattern?</a></strong>
 <br>
+  <strong><a href="#faq5_6">5.6 How do I implement the _is_a test?</a></strong>
+<br>
   <H2 class="contentPart">6. Accessing .NET Objects from CORBA with IIOP.NET</H2>
   <strong><a href="#faq6_1">6.1 How do I implement the CORBA USER_ID and SYSTEM_ID policies?</a></strong>
 <br>
@@ -438,6 +440,15 @@ int PerformAddition(int val1, int val2) {
 </pre>
 </ul>
 <img src="images/EJBCommandPatternNETSide.gif" alt="Command pattern, NET-Client side">
+	<br><br><br>
+	<p>
+  <strong><a name="faq5_6">5.6 How do I implement the _is_a test?</a></strong>
+<p><code>_is_a</code> is currently rudimentary supported. The <code>_is_a</code> test can be done in the following (cumbersome) way:
+<pre>
+    bool isA = ((omg.org.CORBA.IObject)proxy)._is_a(
+        Ch.Elca.Iiop.Idl.Repository.GetRepositoryID(typeof(InterfaceType)));
+</pre>
+<p>Please avoid this pattern if you can, as we are going to provide a simpler and better integrated implentation for <code>_is_a</code>.
 	<br><br><br>
   <H2 class="contentPart">6. Accessing .NET Objects from CORBA with IIOP.NET</H2>
 	<p>

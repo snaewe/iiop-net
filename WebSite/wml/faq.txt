@@ -362,6 +362,17 @@ int PerformAddition(int val1, int val2) {
 <img src="images/EJBCommandPatternNETSide.gif" alt="Command pattern, NET-Client side">
 
 </FAQ>
+
+<FAQ question="How do I implement the _is_a test?">
+<p><code>_is_a</code> is currently rudimentary supported. The <code>_is_a</code> test can be done in the following (cumbersome) way:
+<pre>
+    bool isA = ((omg.org.CORBA.IObject)proxy)._is_a(
+        Ch.Elca.Iiop.Idl.Repository.GetRepositoryID(typeof(InterfaceType)));
+</pre>
+
+<p>Please avoid this pattern if you can, as we are going to provide a simpler and better integrated implentation for <code>_is_a</code>.
+
+</FAQ>
 </FAQ-SECTION>
 
 <FAQ-SECTION name="Accessing .NET Objects from CORBA with IIOP.NET">
