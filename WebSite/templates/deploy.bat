@@ -24,5 +24,12 @@ for %%I in (Tutorial\*.html) do (
 )
 
 
+for %%I in (CompatDoc\*.html) do (
+	type %layout1% > %dest%\%%~nxI
+	type %%I       >> %dest%\%%~nxI
+	type %layout2% >> %dest%\%%~nxI
+)
+
+
 endlocal
 
