@@ -237,31 +237,7 @@ namespace Ch.Elca.Iiop.IdlPreprocessor {
         /// </summary>
         private String[] SplitTokens(string toSplit) {
             Regex tokenStringEx = new Regex(@"\s+");
-            string[] result = tokenStringEx.Split(toSplit);
-            return result;
-		    
-		    
-/*		    ArrayList tokens = new ArrayList();
-		    
-		    string currentToken = "";
-            foreach (char c in toSplit) {
-			    if (!Char.IsWhiteSpace(c)) {
-                    currentToken += c;
-			    } else {
-			        if (!currentToken.Equals("")) {
-			            // add this token to result
-			            tokens.Add(currentToken);
-			            // prepare for next token
-			            currentToken = "";
-			        }
-			    }
-            }
-            // add the last token
-            if (!currentToken.Equals("")) {
-            	tokens.Add(currentToken);
-            }
-            
-            return (string[])tokens.ToArray(typeof(string)); */
+            return tokenStringEx.Split(toSplit);
         }
 
 
