@@ -374,13 +374,15 @@ public class MetaDataGenerator : IDLParserVisitor {
     /** handles the declaration for the interface definition / fwd declaration
      * @return the TypeBuilder for this interface
      */
-    private TypeBuilder CreateOrGetInterfaceDcl(String fullyQualName, System.Type[] interfaces, bool isAbstract, bool isLocal,
-                                                Symbol forSymbol, String repId, ModuleBuilder modBuilder) {
+    private TypeBuilder CreateOrGetInterfaceDcl(String fullyQualName, System.Type[] interfaces, 
+                                                bool isAbstract, bool isLocal,
+                                                Symbol forSymbol, String repId) {
         TypeBuilder interfaceToBuild = null;
         if (!m_typeManager.IsFwdDeclared(forSymbol)) {
             Trace.WriteLine("generating code for interface: " + fullyQualName);
-            interfaceToBuild = modBuilder.DefineType(fullyQualName, TypeAttributes.Interface | TypeAttributes.Public | TypeAttributes.Abstract,
-                                                     null, interfaces);
+            interfaceToBuild = m_modBuilder.DefineType(fullyQualName, 
+                                                       TypeAttributes.Interface | TypeAttributes.Public | TypeAttributes.Abstract,
+                                                       null, interfaces);
             // add InterfaceTypeAttribute
             IdlTypeInterface ifType = IdlTypeInterface.ConcreteInterface;
             if (isAbstract) { 
@@ -438,8 +440,8 @@ public class MetaDataGenerator : IDLParserVisitor {
 
         TypeBuilder interfaceToBuild = CreateOrGetInterfaceDcl(fullyQualName, interfaces, 
                                                                header.isAbstract(), header.isLocal(),
-                                                               forSymbol, enclosingScope.getRepositoryIdFor(header.getIdent()),
-                                                               m_modBuilder);
+                                                               forSymbol, 
+                                                               enclosingScope.getRepositoryIdFor(header.getIdent()));
 
         // generate body
         ASTinterface_body body = (ASTinterface_body)node.jjtGetChild(1);
@@ -470,9 +472,9 @@ public class MetaDataGenerator : IDLParserVisitor {
         if (!(m_typeManager.IsTypeDeclarded(forSymbol))) { // ignore fwd-decl if type is already declared, if not generate type for fwd decl
             // it's no problem to add later on interfaces this type should implement with AddInterfaceImplementation,
             // here: specify no interface inheritance, because not known at this point
-            CreateOrGetInterfaceDcl(fullyQualName, Type.EmptyTypes, node.isAbstract(), node.isLocal(),
-                                    forSymbol, enclosingScope.getRepositoryIdFor(node.getIdent()), 
-                                    m_modBuilder);
+            CreateOrGetInterfaceDcl(fullyQualName, Type.EmptyTypes, 
+                                    node.isAbstract(), node.isLocal(), forSymbol, 
+                                    enclosingScope.getRepositoryIdFor(node.getIdent()));
         }
         return null;
     }
@@ -598,7 +600,7 @@ public class MetaDataGenerator : IDLParserVisitor {
      */
     private TypeBuilder CreateOrGetValueDcl(String fullyQualName, System.Type[] interfaces, 
                                             System.Type parent, bool isAbstract, Symbol forSymbol, 
-                                            String repId, ModuleBuilder modBuilder) {
+                                            String repId) {
         TypeBuilder valueToBuild;
         if (!m_typeManager.IsFwdDeclared(forSymbol)) {
             Trace.WriteLine("generating code for value type: " + fullyQualName);
@@ -613,7 +615,7 @@ public class MetaDataGenerator : IDLParserVisitor {
             } else {
                 attrs |= TypeAttributes.Class;
             }
-            valueToBuild = modBuilder.DefineType(fullyQualName, attrs, parent, interfaces);
+            valueToBuild = m_modBuilder.DefineType(fullyQualName, attrs, parent, interfaces);
             // add repository ID
             AddRepIdAttribute(valueToBuild, repId);
             if (isAbstract) {
@@ -800,8 +802,7 @@ public class MetaDataGenerator : IDLParserVisitor {
         String fullyQualName = enclosingScope.getFullyQualifiedNameForSymbol(forSymbol.getSymbolName());
         TypeBuilder valueToBuild = CreateOrGetValueDcl(fullyQualName, inheritFrom, baseClass, 
                                                        false, forSymbol, 
-                                                       enclosingScope.getRepositoryIdFor(header.getIdent()), 
-                                                       m_modBuilder);
+                                                       enclosingScope.getRepositoryIdFor(header.getIdent()));
         
         // add implementation class attribute
         valueToBuild.SetCustomAttribute(new ImplClassAttribute(fullyQualName + "Impl").CreateAttributeBuilder());
@@ -854,8 +855,7 @@ public class MetaDataGenerator : IDLParserVisitor {
         String fullyQualName = enclosingScope.getFullyQualifiedNameForSymbol(forSymbol.getSymbolName());
         TypeBuilder valueToBuild = CreateOrGetValueDcl(fullyQualName, interfaces, null,
                                                        true, forSymbol, 
-                                                       enclosingScope.getRepositoryIdFor(node.getIdent()),
-                                                       m_modBuilder);
+                                                       enclosingScope.getRepositoryIdFor(node.getIdent()));
 
         // generate elements
         BuildInfo buildInfo = new BuildInfo(enclosingScope, valueToBuild);
@@ -918,8 +918,7 @@ public class MetaDataGenerator : IDLParserVisitor {
             // it's no problem to add later on interfaces this type should implement and the base class this type should inherit from with AddInterfaceImplementation / set parent
             // here: specify no inheritance, because not known at this point
             CreateOrGetValueDcl(fullyQualName, Type.EmptyTypes, null, node.isAbstract(),
-                                forSymbol, enclosingScope.getRepositoryIdFor(node.getIdent()),
-                                m_modBuilder);
+                                forSymbol, enclosingScope.getRepositoryIdFor(node.getIdent()));
         }
         return null;
     }
