@@ -451,10 +451,15 @@ namespace Ch.Elca.Iiop.Cdr {
     /// <summary>the base class for streams, reading CDR data</summary>
     public class CdrInputStreamImpl : CdrStreamHelper, CdrInputStream {
         
+        #region SFields
+
+        private static CdrEndianOpNotSpecified s_endianNotSpec = new CdrEndianOpNotSpecified();
+
+        #endregion SFields
         #region IFields
         
         private object m_version = null;
-        private CdrEndianDepInputStreamOp m_endianOp = null;
+        private CdrEndianDepInputStreamOp m_endianOp = s_endianNotSpec;
 
         private bool m_bytesToFollowSet = false;
         private ulong m_bytesToFollow = 0;
@@ -525,7 +530,7 @@ namespace Ch.Elca.Iiop.Cdr {
         /// </remarks>
         /// <param name="endianFlag"></param>
         private void SetEndian(byte endianFlag) {
-            if (m_endianOp != null) {
+            if (m_endianOp != s_endianNotSpec) {
                 // endian flag was already set before
                 throw new INTERNAL(1202, CompletionStatus.Completed_MayBe);
             }
@@ -593,15 +598,7 @@ namespace Ch.Elca.Iiop.Cdr {
                     throw new MARSHAL(1207, CompletionStatus.Completed_MayBe);
                 }
             }
-        }
-        
-        /// <summary>checks, if endian operation are already possible</summary>
-        private void CheckEndianOp() {
-            if (m_endianOp == null) {
-                // endian flag was not set, operation not available
-                throw new INTERNAL(919, CompletionStatus.Completed_MayBe);
-            }
-        }
+        }                
         
         /// <summary>read padding for an aligned read with the requiredAlignement</summary>
         /// <param name="requiredAlignment">align to which size</param>
@@ -654,46 +651,34 @@ namespace Ch.Elca.Iiop.Cdr {
 
         #region the following read methods are subject to byte ordering
 
-        public short ReadShort() {
-            CheckEndianOp();
+        public short ReadShort() {            
             return m_endianOp.ReadShort();
         }
-        public ushort ReadUShort() {
-            CheckEndianOp();
+        public ushort ReadUShort() {            
             return m_endianOp.ReadUShort();
         }
-        public int ReadLong() {
-            CheckEndianOp();
+        public int ReadLong() {            
             return m_endianOp.ReadLong();
         }
-        public uint ReadULong() {
-            CheckEndianOp();
+        public uint ReadULong() {            
             return m_endianOp.ReadULong();
         }
-        public long ReadLongLong() {
-            CheckEndianOp();
+        public long ReadLongLong() {            
             return m_endianOp.ReadLongLong();
         }
-        public ulong ReadULongLong() {
-            CheckEndianOp();
+        public ulong ReadULongLong() {            
             return m_endianOp.ReadULongLong();
         }
-        public float ReadFloat() {
-            CheckEndianOp();
+        public float ReadFloat() {            
             return m_endianOp.ReadFloat();    
         }
-        public double ReadDouble() {
-            CheckEndianOp();
+        public double ReadDouble() {            
             return m_endianOp.ReadDouble();
         }
-
-        public char ReadWChar() {
-            CheckEndianOp();
+        public char ReadWChar() {            
             return m_endianOp.ReadWChar();
         }
-
-        public string ReadWString() {
-            CheckEndianOp();
+        public string ReadWString() {            
             return m_endianOp.ReadWString();
         }
 
@@ -744,10 +729,15 @@ namespace Ch.Elca.Iiop.Cdr {
     /// <summary>the base class for streams, writing CDR data</summary>    
     public class CdrOutputStreamImpl : CdrStreamHelper, CdrOutputStream {
         
+        #region SFields
+
+        private static CdrEndianOpNotSpecified s_endianNotSpec = new CdrEndianOpNotSpecified();
+
+        #endregion SFields
         #region IFields
         
         /// <summary>responsible for implementing the endian dependant operation</summary>
-        private CdrEndianDepOutputStreamOp m_endianOp;
+        private CdrEndianDepOutputStreamOp m_endianOp = s_endianNotSpec;
         private GiopVersion m_giopVersion;
 
         #endregion IFields
@@ -762,7 +752,7 @@ namespace Ch.Elca.Iiop.Cdr {
             if (ParseEndianFlag(flags)) {
                 m_endianOp = new CdrStreamBigEndianWriteOP(this, giopVersion);
             } else {
-                throw new NotImplementedException("little endian support not yet impelmented"); // TBD
+                throw new NotImplementedException("little endian support not yet impelmented"); // TODO
             }
         }
 
@@ -1269,6 +1259,119 @@ namespace Ch.Elca.Iiop.Cdr {
 
         #endregion IMethods
 
+    }
+
+
+    /// <summary>
+    /// An Instance of this class is used, if the endian flag is not yet specified in a CdrStream.
+    /// </summary>
+    internal class CdrEndianOpNotSpecified : CdrEndianDepInputStreamOp, CdrEndianDepOutputStreamOp {
+        
+        #region IMethods
+        
+        public short ReadShort() {
+            // endian flag was not set, operation not available
+            throw new INTERNAL(919, CompletionStatus.Completed_MayBe);
+        }
+        
+        public ushort ReadUShort() {
+            // endian flag was not set, operation not available
+            throw new INTERNAL(919, CompletionStatus.Completed_MayBe);
+        }
+
+        public int ReadLong() {
+            // endian flag was not set, operation not available
+            throw new INTERNAL(919, CompletionStatus.Completed_MayBe);
+        }
+
+        public uint ReadULong() {
+            // endian flag was not set, operation not available
+            throw new INTERNAL(919, CompletionStatus.Completed_MayBe);        
+        }
+
+        public long ReadLongLong() {
+            // endian flag was not set, operation not available
+            throw new INTERNAL(919, CompletionStatus.Completed_MayBe);
+        }
+
+        public ulong ReadULongLong() {
+            // endian flag was not set, operation not available
+            throw new INTERNAL(919, CompletionStatus.Completed_MayBe);
+        }
+
+        public float ReadFloat() {
+            // endian flag was not set, operation not available
+            throw new INTERNAL(919, CompletionStatus.Completed_MayBe);
+        }
+
+        public double ReadDouble() {
+            // endian flag was not set, operation not available
+            throw new INTERNAL(919, CompletionStatus.Completed_MayBe);
+        }
+
+        public char ReadWChar() {
+            // endian flag was not set, operation not available
+            throw new INTERNAL(919, CompletionStatus.Completed_MayBe);
+        }
+
+        public string ReadWString() {
+            // endian flag was not set, operation not available
+            throw new INTERNAL(919, CompletionStatus.Completed_MayBe);
+        }
+   
+
+        public void WriteShort(short data) {
+            // endian flag was not set, operation not available
+            throw new INTERNAL(919, CompletionStatus.Completed_MayBe);
+        }
+
+        public void WriteUShort(ushort data) {
+            // endian flag was not set, operation not available
+            throw new INTERNAL(919, CompletionStatus.Completed_MayBe);
+        }
+
+        public void WriteLong(int data) {
+            // endian flag was not set, operation not available
+            throw new INTERNAL(919, CompletionStatus.Completed_MayBe);
+        }
+
+        public void WriteULong(uint data) {
+            // endian flag was not set, operation not available
+            throw new INTERNAL(919, CompletionStatus.Completed_MayBe);
+        }
+
+        public void WriteLongLong(long data) {
+            // endian flag was not set, operation not available
+            throw new INTERNAL(919, CompletionStatus.Completed_MayBe);
+        }
+
+        public void WriteULongLong(ulong data) {
+            // endian flag was not set, operation not available
+            throw new INTERNAL(919, CompletionStatus.Completed_MayBe);
+        }
+
+        public void WriteFloat(float data) {
+            // endian flag was not set, operation not available
+            throw new INTERNAL(919, CompletionStatus.Completed_MayBe);
+        }
+
+        public void WriteDouble(double data) {
+            // endian flag was not set, operation not available
+            throw new INTERNAL(919, CompletionStatus.Completed_MayBe);
+        }
+
+        public void WriteWChar(char data) {
+            // endian flag was not set, operation not available
+            throw new INTERNAL(919, CompletionStatus.Completed_MayBe);
+        }
+
+        public void WriteWString(string data) {
+            // endian flag was not set, operation not available
+            throw new INTERNAL(919, CompletionStatus.Completed_MayBe);
+        }
+
+        #endregion IMethods
+            
     }
 
 
