@@ -30,10 +30,8 @@ The following protocol parts are not supported:
 <b>Supported types</b>
 <p/>
 <b>CLS</b>
-<BR> <BR>
-Most of the CLS types are supported.
-<p/>
-The following types are not supported:
+
+<p>All but the following types are supported:
 <UL>
 <LI>some kinds of enums, including flags</LI>
 <LI>Delegates</LI>
@@ -42,36 +40,38 @@ The following types are not supported:
 <LI>System.Decimal</LI>
 </UL>
 <p/>
+
 <b>IDL</b>
-<p/>
-Most of the IDL types are supported, including CORBA value types.
-<p>
-The following types are not supported:
+
+<p>All but the following types are supported:
 <UL>
-<LI>Union</LI>
 <LI>Array</LI>
-<LI>Long double and fixed</LI>
+<LI>Long double</LI>
+<LI>Fixed</LI>
 </UL>
 <p>
 More information can be found in the <a href="documentation.html">IDL <-> CLS specification</a>.
 
 <p/>
 <b>ORB Compatibility</b>
-<BR> <BR>
+
+<p>
 Interoperation with the following ORBs has been reported:
 <UL>
 <LI>SUN JDK 1.4 (RMI/IIOP)</LI>
 <LI>MICO (in progress)</LI>
 <LI>TAO (in progress)</LI>
+<LI>OmniORB (in progress)</li>
 </UL>
 
 <p/>
 Interoperation with J2EE applications is reported for the following application servers:
 <UL>
-<LI>BEA Weblogic 6.1</LI>
-<LI>IBM Websphere 5.0</LI>
-<LI>JBOSS 3.2.1</LI>
 <LI>IBM Websphere 4.0 (in progress)</LI>
+<LI>IBM Websphere 5.0</LI>
+<LI>JBOSS 3.0.6 (in progress)</LI>
+<LI>JBOSS 3.2.1</LI>
+<LI>BEA Weblogic 6.1</LI>
 <LI>BEA Weblogic 8.1 (in progress)</LI>
 </UL>
 
@@ -82,4 +82,5 @@ Interoperation with J2EE applications is reported for the following application 
 <UL>
 <LI>Test more ORBs</LI>
 <LI>Advancing channel, tools</LI>
+<LI>Consolidation (better installation tools, binary release)
 </UL>
