@@ -8,4 +8,12 @@
         <idlFile>java\util\ArrayList.idl</idlFile>
     </mapping>
 
+    <mapping>
+        <clsType>System.Collections.Hashtable,mscorlib</clsType>
+        <idlTypeName>java.util.HashMap</idlTypeName>
+        <idlTypeAssembly>javaCollections</idlTypeAssembly>
+        <idlFile>java\util\HashMap.idl</idlFile>
+    </mapping>
+
+
 </generatorMappings>

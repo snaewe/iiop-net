@@ -121,6 +121,36 @@ namespace Ch.Elca.Iiop.IntegrationTests.MappingPlugin {
             return arg;
         }
 
+
+        public Hashtable EchoHashtable(Hashtable arg) {
+            return arg;
+        }
+
+        public Hashtable CreateHashtableWithIntElems(int val, int nrOfElems) {
+            Hashtable result = new Hashtable();
+            for (int i = 0; i <nrOfElems; i++) {
+                result[i] = val;
+            }
+            return result;
+        }
+
+        public Hashtable CreateHashtableWithValTypeElems(String msg, int nrOfElems) {
+            Hashtable result = new Hashtable();
+            for (int i = 0; i <nrOfElems; i++) {
+    	        TestSerializableClassB1 entry = new TestSerializableClassB1();
+    	        entry.Msg = msg;
+                result[i] = entry;
+            }
+            return result;
+        }
+
+        public Hashtable CreateHashtableWithByRefElems(int nrOfElems) {
+            Hashtable result = new Hashtable();
+            for (int i = 0; i <nrOfElems; i++) {
+                result[i] = new TestServiceImpl();
+            }
+            return result;
+        }
         
         public override object InitializeLifetimeService() {
             // live forever
@@ -151,6 +181,14 @@ namespace Ch.Elca.Iiop.IntegrationTests.MappingPlugin {
         ArrayList CreateByRefTypeList(int nrOfElems);
 
         ArrayList EchoList(ArrayList arg);
+
+        Hashtable EchoHashtable(Hashtable arg);
+
+        Hashtable CreateHashtableWithIntElems(int val, int nrOfElems);
+
+        Hashtable CreateHashtableWithValTypeElems(String msg, int nrOfElems);
+
+        Hashtable CreateHashtableWithByRefElems(int nrOfElems);
                 
     }
 

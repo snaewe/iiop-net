@@ -4,7 +4,7 @@ import javax.naming.Context;
 import javax.rmi.PortableRemoteObject;
 import Ch.Elca.Iiop.IntegrationTests.MappingPlugin.*;
 import java.util.ArrayList;
-
+import java.util.HashMap;
 
 /**
  * Integration test for IIOP.NET.
@@ -36,6 +36,13 @@ public class TestClient extends TestCase {
         assertEquals(expectedNrOfElems, resultList.size());
         for (int i = 0; i < expectedNrOfElems; i++) {
             assertEquals(expectedValues, resultList.get(i));
+        }
+    }
+
+    private void CheckHashMapElems(HashMap result, Object expectedValues, int expectedNrOfElems) {
+        assertEquals(expectedNrOfElems, result.size());
+        for (int i = 0; i < expectedNrOfElems; i++) {
+            assertEquals(expectedValues, result.get(new Integer(i)));
         }
     }
 
@@ -145,6 +152,51 @@ public class TestClient extends TestCase {
         ArrayList result2 = m_testService.EchoList(result);
         CheckArrayListElems(result2, val, nrOfElems + 1);
     }
+
+    public void testEmptyHashMap() throws Exception {
+        HashMap arg = new HashMap();
+        HashMap result = m_testService.EchoHashtable(arg);
+        assertEquals(0, result.size());
+    }
+
+    public void testHashMapWithInt32Elems() throws Exception {
+        int val = 82997;
+        int nrOfElems = 4;
+        HashMap result = m_testService.CreateHashtableWithIntElems(val, nrOfElems);
+        CheckHashMapElems(result, new Integer(val), nrOfElems);
+        result.put(new Integer(nrOfElems), new Integer(val));
+        HashMap result2 = m_testService.EchoHashtable(result);
+        CheckHashMapElems(result2, new Integer(val), nrOfElems + 1);
+    }
+
+    public void testHashMapWithValTypeElems() throws Exception {
+        String msg = "msg";
+        int nrOfElems = 10;
+        TestSerializableClassB1Impl val = new TestSerializableClassB1Impl();
+        val.Msg = msg;
+        HashMap result = m_testService.CreateHashtableWithValTypeElems(msg, nrOfElems);
+        CheckHashMapElems(result, val, nrOfElems);
+        result.put(new Integer(nrOfElems), val);
+        HashMap result2 = m_testService.EchoHashtable(result);
+        CheckHashMapElems(result2, val, nrOfElems + 1);
+    }
+
+    public void testHashMapWithByRefElems() throws Exception {
+        int nrOfElems = 4;
+        HashMap result = m_testService.CreateHashtableWithByRefElems(nrOfElems);
+        assertEquals(nrOfElems, result.size());
+        for (int i = 0; i < nrOfElems; i++) {
+//            Assertion.AssertEquals(true, result[i].GetType().IsMarshalByRef);
+//            Assertion.AssertEquals(true, RemotingServices.IsTransparentProxy(result[i]));
+        }
+        HashMap result2 = m_testService.EchoHashtable(result);
+        assertEquals(nrOfElems, result2.size());
+        for (int i = 0; i < nrOfElems; i++) {
+//            Assertion.AssertEquals(true, result2[i].GetType().IsMarshalByRef);
+//            Assertion.AssertEquals(true, RemotingServices.IsTransparentProxy(result2[i]));
+        }
+    }
+
 
 
 }
