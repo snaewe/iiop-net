@@ -201,6 +201,15 @@ namespace Ch.Elca.Iiop.IdlPreprocessor {
             m_outputStream.AutoFlush = true;
         }
 
+        private bool IsPragmaHandledByCompiler(string pragmaDirective) {
+            string pragmaType = pragmaDirective.Substring(7).TrimStart();
+            pragmaType = pragmaType.ToUpper();
+            if (pragmaType.StartsWith("ID") || pragmaType.StartsWith("PREFIX")) {
+                return true;
+            } else {
+                return false;
+            }
+        }
 
 
         /// <summary>preprocess the file</summary>        
@@ -222,7 +231,12 @@ namespace Ch.Elca.Iiop.IdlPreprocessor {
                     ProcessEndIf(currentLine);
                 } else if (currentLine.StartsWith("#pragma")) {
                     // pragma directives are handles by IDL to CLS compiler
-                    m_outputStream.WriteLine(currentLine);
+                    if (IsPragmaHandledByCompiler(currentLine)) {
+                        m_outputStream.WriteLine(currentLine);
+                    } else {
+                        // CORBA2.6 10.6.5: must ignore unknown pragma directives
+                        Console.WriteLine("warning: unknown pragma ignored: " + currentLine);
+                    }
                 } else if (currentLine.StartsWith("#")) {
                     // unknown directive
                     throw new PreprocessingException("unknown directive: " + currentLine);
