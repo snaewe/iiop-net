@@ -34,7 +34,7 @@ namespace symboltable {
 /// <summary>
 /// exception is thrown, when a problem with name scopes occur
 /// </summary>
-public class ScopeException : Exception {
+public class ScopeException : Error  {
 
     public ScopeException() {
     }

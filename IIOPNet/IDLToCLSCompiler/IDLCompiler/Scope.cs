@@ -30,6 +30,7 @@
 using System;
 using System.Collections;
 using Ch.Elca.Iiop.Idl;
+using Ch.Elca.Iiop.IdlCompiler.Exceptions;
 
 namespace symboltable {
 
@@ -175,7 +176,7 @@ public class Scope {
     /** adds a pragma id to this scope */
     public void addPragmaID(String id, String value) {
         if (m_pragmas.ContainsKey(id)) { 
-            throw new Exception("pragma id error, id already defined: " + id); 
+            throw new ScopeException("pragma id error, id already defined: " + id); 
         }
         m_pragmas[id] = value;
     }
@@ -189,7 +190,7 @@ public class Scope {
      */
     public String getFullyQualifiedNameForSymbol(String symbolName) {
         if (getSymbol(symbolName) == null) { 
-            throw new Exception("error in scope " + this + ", symbol with name: " + symbolName + " not found"); 
+            throw new InternalCompilerException("error in scope " + this + ", symbol with name: " + symbolName + " not found"); 
         }
         String namespaceName = getFullyQualifiedScopeName();
         String fullyQualName = namespaceName;
@@ -215,7 +216,7 @@ public class Scope {
     /// </remarks>
     public String getFullyQualifiedNameForNested(String symbolName) {
          if (getSymbol(symbolName) == null) { 
-            throw new Exception("error in scope " + this + ", symbol with name: " + symbolName + " not found"); 
+            throw new InternalCompilerException("error in scope " + this + ", symbol with name: " + symbolName + " not found"); 
         }        
         String outerScopeName = "";
         if (getParentScope() != null) {
@@ -263,7 +264,7 @@ public class Scope {
         foreach (Symbol sym in m_symbols.Values) {            
             // in scope, all fwd symbols must be replaces by def symbols --> otherwise no def present.
             if (sym is SymbolFwdDecl) {
-                throw new Exception("type only fwd declared: " + sym);
+                throw new InvalidIdlException("type only fwd declared: " + sym);
             }                                              
         }
     }
