@@ -381,7 +381,7 @@ namespace Ch.Elca.Iiop {
         static IiopServerChannel() {
             Stream log = File.Create("IIOPNET_DebugOutputServerChannel_"+
                                      DateTime.Now.ToString("yyyyMMdd_HHmmss")+
-                                     ".txt";
+                                     ".txt");
  
             TextWriterTraceListener logListener = new TextWriterTraceListener(log);
             
