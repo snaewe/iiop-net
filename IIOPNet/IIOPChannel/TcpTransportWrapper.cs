@@ -64,10 +64,7 @@ namespace Ch.Elca.Iiop {
         /// <summary><see cref="Ch.Elca.Iiop.ITranport.CloseConnection/></summary>
         public void CloseConnection() {
             try {
-                m_stream.Close();
-            } catch (Exception) {}
-            try {
-                m_socket.Close();
+                m_socket.Close(); // closes the stream too
             } catch (Exception) {}
             m_socket = null;
         }
@@ -101,6 +98,7 @@ namespace Ch.Elca.Iiop {
                 return; // already open
             }
             m_socket = new TcpClient(m_targetHost, m_port);
+            m_socket.NoDelay = true; // send immediately; (TODO: what is better here?)
             m_stream = m_socket.GetStream();
         }
                 
@@ -109,7 +107,12 @@ namespace Ch.Elca.Iiop {
             if (m_socket == null) {
                 return false;
             } else {
-                return true; // TODO
+                try {
+                    m_socket.GetStream(); // TODO, search a better way to do this
+                } catch (Exception) {
+                    return false;
+                }                                
+                return true; 
             }
         }
         
