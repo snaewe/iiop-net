@@ -97,6 +97,31 @@ namespace Ch.Elca.Iiop.Util {
             }
         }
         
+        /// <summary>creates an IOR for the object described by the Url url</summary>
+        /// <param name="url">an url of the form IOR:--hex-- or iiop://addr/key</param>
+        /// <param name="targetType">if the url contains no info about the target type, use this type</param>
+        public static Ior CreateIorForUrl(string url, string repositoryId) {
+            Ior ior = null;
+            if (url.StartsWith("IOR")) {
+                ior = new Ior(url);                    
+            } else if (url.StartsWith("iiop")) {
+                string objectURI;
+                string host;
+                int port;
+                GiopVersion version;
+                string chanURI = IiopUrlUtil.ParseUrl(url, out objectURI);
+                IiopUrlUtil.ParseChanUri(chanURI, out host, out port);
+                byte[] objectKey = IiopUrlUtil.GetObjectInfoForObjUri(objectURI, out version);
+                // now create an IOR with the above information
+                InternetIiopProfile profile = new InternetIiopProfile(version, host,
+                                                                     (ushort)port, objectKey);
+                ior = new Ior(repositoryId, new IorProfile[] { profile });
+        	} else {
+        	    throw new INV_OBJREF(1963, CompletionStatus.Completed_MayBe);
+        	}
+            return ior;
+        }
+        
         /// <summary>
         /// This method parses an url for the IIOP channel. 
         /// It extracts the channel URI and the objectURI

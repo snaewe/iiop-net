@@ -320,37 +320,35 @@ namespace Ch.Elca.Iiop.Marshalling {
             ObjRef refToTarget =  RemotingServices.Marshal(target);
             Debug.WriteLine("marshal object reference : " + refToTarget + 
                             ", with URI: " + refToTarget.URI);
-            // get the target address and port
-            string host; int port; GiopVersion version;
-            byte[] objectKey = ExtractDataFromObjRef(refToTarget, out host, out port,
-                                                     out version);
-            if ((objectKey == null) || (host == null)) { 
-                // the objRef: " + refToTarget + ", uri: " +
-                // refToTarget.URI + is not serializable, because connection data is missing 
-                // hostName=host, objectKey=objectKey
-                throw new INV_OBJREF(1961, CompletionStatus.Completed_MayBe);
-            }
-            Debug.WriteLine("connection information for objRef, host: " + host + ", port: " +
-                            port + ", objKey-length: " + objectKey.Length); 
-
-            // get the repository id for the type of this MarshalByRef object
-            Type actualType = actual.GetType();
-            if (RemotingServices.IsTransparentProxy(actual) && 
-                actualType.Equals(typeof(MarshalByRefObject)) &&
-                formal.IsInterface && formal.IsInstanceOfType(actual)) {
+            // create the IOR for this URI, possibilities:
+            // is a server object -> create ior from key and channel-data
+            // is a proxy --> create IOR from url
+            //                url possibilities: IOR:--hex-- ; iiop://addr/key ; later: corbaloc::addr:key ; ...
+            Ior ior = null;
+            if (RemotingServices.IsTransparentProxy(target)) {
+                // proxy
+                Type actualType = actual.GetType();
+                if (actualType.Equals(typeof(MarshalByRefObject)) &&
+                    formal.IsInterface && formal.IsInstanceOfType(actual)) {
                     // when marshalling a proxy, without having adequate type information from an IOR
                     // and formal is an interface, use interface type instead of MarshalByRef to
                     // prevent problems on server
-                    actualType = formal;			
+                    actualType = formal;
+                }
+                // get the repository id for the type of this MarshalByRef object
+                string repositoryID = Repository.GetRepositoryID(actualType);
+                if (actualType.Equals(typeof(MarshalByRefObject))) { 
+                    repositoryID = ""; 
+                } // CORBA::Object has "" repository id
+                ior = IiopUrlUtil.CreateIorForUrl(refToTarget.URI, repositoryID);
+            } else {
+                // server object
+                ior = CreateIorForObjectFromThisDomain(refToTarget, target);
             }
-            string repositoryID = Repository.GetRepositoryID(actualType);
-            if (actualType.Equals(typeof(MarshalByRefObject))) { 
-                repositoryID = ""; 
-            } // CORBA::Object has "" repository id
-            // now create an IOR with the above information
-            InternetIiopProfile profile = new InternetIiopProfile(version, host,
-                                                                  (ushort)port, objectKey);
-            Ior ior = new Ior(repositoryID, new IorProfile[] { profile });
+
+            Debug.WriteLine("connection information for objRef, host: " + ior.HostName + ", port: " +
+                            ior.Port + ", objKey-length: " + ior.ObjectKey.Length); 
+
             // now write the IOR to the stream
             ior.WriteToStream(targetStream);
         }
@@ -359,30 +357,35 @@ namespace Ch.Elca.Iiop.Marshalling {
             Ior ior = new Ior("", new IorProfile[0]);
             ior.WriteToStream(targetStream); // write the null reference to the stream
         }
-
-        /// <summary>
-        /// gets the address data for the the objRef.
-        /// </summary>
-        /// <returns>the object Key for this URI</returns>
-        private byte[] ExtractDataFromObjRef(ObjRef objRef, out string host,
-                                             out int port, out GiopVersion version) {
-            // if the object pointed to by this objRef is in this appdomain, get the address-info out of the channel-data
-            IiopChannelData serverData = GetIIOPChannelData(objRef); 
+        
+        private Ior CreateIorForObjectFromThisDomain(ObjRef objRef, MarshalByRefObject obj) {
+            IiopChannelData serverData = GetIiopChannelData(objRef);
             if (serverData != null) {
-                host = serverData.HostName;
-                port = serverData.Port;
-                return IiopUrlUtil.GetObjectInfoForObjUri(objRef.URI, out version);
+                string host = serverData.HostName;
+                int port = serverData.Port;
+                GiopVersion version;
+                byte[] objectKey = IiopUrlUtil.GetObjectInfoForObjUri(objRef.URI, out version);
+                if ((objectKey == null) || (host == null)) { 
+                    // the objRef: " + refToTarget + ", uri: " +
+                    // refToTarget.URI + is not serialisable, because connection data is missing 
+                    // hostName=host, objectKey=objectKey
+                    throw new INV_OBJREF(1961, CompletionStatus.Completed_MayBe);
+                }
+                string repositoryID = Repository.GetRepositoryID(obj.GetType());
+                if (obj.GetType().Equals(typeof(MarshalByRefObject))) {
+                    repositoryID = "";
+                }
+                InternetIiopProfile profile = new InternetIiopProfile(version, host,
+                                                                      (ushort)port, objectKey);
+                Ior ior = new Ior(repositoryID, new IorProfile[] { profile });
+                return ior;                
             } else {
-                // if objref is from a proxy, the connection info is in the URI:
-                string objectURI;
-                string chanURI = IiopUrlUtil.ParseUrl(objRef.URI, out objectURI);
-                IiopUrlUtil.ParseChanUri(chanURI, out host, out port);
-                return IiopUrlUtil.GetObjectInfoForObjUri(objectURI, out version);
+                throw new INTERNAL(1960, CompletionStatus.Completed_MayBe);
             }
         }
-
+        
         /// <summary>gets the IIOPchannel-data from an ObjRef.</summary>
-        private IiopChannelData GetIIOPChannelData(ObjRef objRef) {
+        private IiopChannelData GetIiopChannelData(ObjRef objRef) {
             IChannelInfo info = objRef.ChannelInfo;
             if ((info == null) || (info.ChannelData == null)) { 
                 return null; 
@@ -406,8 +409,7 @@ namespace Ch.Elca.Iiop.Marshalling {
                 return null; 
             } // received a null reference, return null
             // create a url from this ior:
-            String objectURI = IiopUrlUtil.GetObjUriForObjectInfo(ior.ObjectKey, ior.Version);
-            string url = IiopUrlUtil.GetUrl(ior.HostName, ior.Port, objectURI);
+            string url = ior.ToString(); // use stringified form of IOR as url --> do not lose information
             Type interfaceType;
             if (!ior.TypID.Equals("")) { // empty string stands for CORBA::Object
                 interfaceType = Repository.GetTypeForId(ior.TypID);
