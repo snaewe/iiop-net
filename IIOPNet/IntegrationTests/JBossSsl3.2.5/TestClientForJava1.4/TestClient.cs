@@ -79,7 +79,7 @@ namespace ch.elca.iiop.integrationTests {
 
 
             // access COS nameing service
-            string nameserviceLoc = "corbaloc:iiop-ssl:192.168.1.37:3529/JBoss/Naming/root";
+            string nameserviceLoc = "corbaloc:iiop-ssl:localhost:3529/JBoss/Naming/root";
             m_nameService = (NamingContext)RemotingServices.Connect(typeof(NamingContext), nameserviceLoc);
 
             NameComponent[] name = new NameComponent[] { new NameComponent("IntegrationTest", ""), 
