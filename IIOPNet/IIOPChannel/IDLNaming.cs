@@ -345,11 +345,11 @@ namespace Ch.Elca.Iiop.Idl {
             s_clsMapSpecial.Add(ReflectionHelper.BooleanType, "boolean");
             s_clsMapSpecial.Add(ReflectionHelper.VoidType, "void");
 
-            s_clsMapSpecial.Add(typeof(System.Single), "float");
-            s_clsMapSpecial.Add(typeof(System.Double), "double");
+            s_clsMapSpecial.Add(ReflectionHelper.SingleType, "float");
+            s_clsMapSpecial.Add(ReflectionHelper.DoubleType, "double");
             
-            s_clsMapSpecial.Add(typeof(System.Char), "wchar");
-            s_clsMapSpecial.Add(typeof(System.String), "wstring");
+            s_clsMapSpecial.Add(ReflectionHelper.CharType, "wchar");
+            s_clsMapSpecial.Add(ReflectionHelper.StringType, "wstring");
         }
 
         
@@ -663,7 +663,7 @@ namespace Ch.Elca.Iiop.Idl {
             return IdlNaming.MapFullTypeNameToIdlScoped(dotNetType);
         }
         public object MapToIdlConcreteInterface(System.Type dotNetType) {
-            if (!dotNetType.Equals(typeof(MarshalByRefObject))) {
+            if (!dotNetType.Equals(ReflectionHelper.MarshalByRefObjectType)) {
                 return IdlNaming.MapFullTypeNameToIdlScoped(dotNetType);
             } else {
                 return "Object";

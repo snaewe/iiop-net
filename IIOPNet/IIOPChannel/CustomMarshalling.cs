@@ -211,7 +211,6 @@ namespace Corba {
         #region SFields
 
         private static Type s_objectType = typeof(object);
-        private static Type s_mByRefType = typeof(MarshalByRefObject);
         
         private static Type s_dummyValType = typeof(DummyValTypeForNull);
 
@@ -322,7 +321,7 @@ namespace Corba {
         }
 
         public void write_Object(System.MarshalByRefObject val) {
-            m_marshaller.Marshal(s_mByRefType, new AttributeExtCollection(),
+            m_marshaller.Marshal(ReflectionHelper.MarshalByRefObjectType, new AttributeExtCollection(),
                                  val, m_cdrOut);
         }
 
@@ -373,7 +372,7 @@ namespace Corba {
 
 
         public void write_TypeCode(omg.org.CORBA.TypeCode val) {
-            m_marshaller.Marshal(typeof(omg.org.CORBA.TypeCode),
+            m_marshaller.Marshal(ReflectionHelper.CorbaTypeCodeType,
                                  new AttributeExtCollection(),
                                  val, m_cdrOut);
         }
@@ -486,7 +485,6 @@ namespace Corba {
         #region SFields
 
         private static Type s_objectType = typeof(object);
-        private static Type s_mByRefType = typeof(MarshalByRefObject);
 
         private static Type s_wstringValueType = typeof(WStringValue);
         private static Type s_stringValueType = typeof(StringValue);
@@ -519,12 +517,13 @@ namespace Corba {
         }
 
         public bool read_boolean() {
-            return (bool)m_marshaller.Unmarshal(typeof(bool), new AttributeExtCollection(), m_cdrIn);
+            return (bool)m_marshaller.Unmarshal(ReflectionHelper.BooleanType, 
+                                                new AttributeExtCollection(), m_cdrIn);
         }
 
         [return:WideCharAttribute(false)]
         public char read_char() {
-            return (char)m_marshaller.Unmarshal(typeof(char), 
+            return (char)m_marshaller.Unmarshal(ReflectionHelper.CharType, 
                                                 new AttributeExtCollection(new Attribute[] { 
                                                         new WideCharAttribute(false) } ),
                                                 m_cdrIn);            
@@ -532,14 +531,15 @@ namespace Corba {
 
         [return:WideCharAttribute(true)]
         public char read_wchar() {
-            return (char)m_marshaller.Unmarshal(typeof(char),
+            return (char)m_marshaller.Unmarshal(ReflectionHelper.CharType,
                                                 new AttributeExtCollection(new Attribute[] { 
                                                         new WideCharAttribute(true) } ), 
                                                 m_cdrIn);
         }
 
         public byte read_octet() {
-            return (byte)m_marshaller.Unmarshal(typeof(byte), new AttributeExtCollection(), m_cdrIn);            
+            return (byte)m_marshaller.Unmarshal(ReflectionHelper.ByteType,
+                                                new AttributeExtCollection(), m_cdrIn);
         }
 
         public short read_short() {
@@ -567,11 +567,11 @@ namespace Corba {
         }
 
         public float read_float() {
-            return (float)m_marshaller.Unmarshal(typeof(float), new AttributeExtCollection(), m_cdrIn);
+            return (float)m_marshaller.Unmarshal(ReflectionHelper.SingleType, new AttributeExtCollection(), m_cdrIn);
         }
 
         public double read_double() {
-            return (double)m_marshaller.Unmarshal(typeof(double), new AttributeExtCollection(), m_cdrIn);
+            return (double)m_marshaller.Unmarshal(ReflectionHelper.DoubleType, new AttributeExtCollection(), m_cdrIn);
         }
 
         [return:WideCharAttribute(false)]
@@ -591,7 +591,7 @@ namespace Corba {
         }
 
         public System.MarshalByRefObject read_Object() {
-            return (MarshalByRefObject)m_marshaller.Unmarshal(s_mByRefType,
+            return (MarshalByRefObject)m_marshaller.Unmarshal(ReflectionHelper.MarshalByRefObjectType,
                                                               new AttributeExtCollection(), m_cdrIn);
         }
 

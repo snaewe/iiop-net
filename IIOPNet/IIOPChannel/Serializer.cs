@@ -367,7 +367,7 @@ namespace Ch.Elca.Iiop.Marshalling {
             if (RemotingServices.IsTransparentProxy(target)) {
                 // proxy
                 Type actualType = actual.GetType();
-                if (actualType.Equals(typeof(MarshalByRefObject)) &&
+                if (actualType.Equals(ReflectionHelper.MarshalByRefObjectType) &&
                     formal.IsInterface && formal.IsInstanceOfType(actual)) {
                     // when marshalling a proxy, without having adequate type information from an IOR
                     // and formal is an interface, use interface type instead of MarshalByRef to
@@ -376,7 +376,7 @@ namespace Ch.Elca.Iiop.Marshalling {
                 }
                 // get the repository id for the type of this MarshalByRef object
                 string repositoryID = Repository.GetRepositoryID(actualType);
-                if (actualType.Equals(typeof(MarshalByRefObject))) { 
+                if (actualType.Equals(ReflectionHelper.MarshalByRefObjectType)) { 
                     repositoryID = ""; 
                 } // CORBA::Object has "" repository id
                 ior = IiopUrlUtil.CreateIorForUrl(refToTarget.URI, repositoryID);
@@ -410,7 +410,7 @@ namespace Ch.Elca.Iiop.Marshalling {
                     throw new INV_OBJREF(1961, CompletionStatus.Completed_MayBe);
                 }
                 string repositoryID = Repository.GetRepositoryID(obj.GetType());
-                if (obj.GetType().Equals(typeof(MarshalByRefObject))) {
+                if (obj.GetType().Equals(ReflectionHelper.MarshalByRefObjectType)) {
                     repositoryID = "";
                 }
                 // this server support GIOP 1.2 --> create an GIOP 1.2 profile
@@ -456,7 +456,7 @@ namespace Ch.Elca.Iiop.Marshalling {
             if (!ior.TypID.Equals("")) { // empty string stands for CORBA::Object
                 interfaceType = Repository.GetTypeForId(ior.TypID);
             } else {
-                interfaceType = typeof(MarshalByRefObject);
+                interfaceType = ReflectionHelper.MarshalByRefObjectType;
             }
             if (interfaceType == null) { 
                 if (CheckAssignableRemote(formal, url)) {
@@ -469,7 +469,7 @@ namespace Ch.Elca.Iiop.Marshalling {
                 }
             }
 
-            if ((!(formal.Equals(typeof(MarshalByRefObject)))) && 
+            if ((!(formal.Equals(ReflectionHelper.MarshalByRefObjectType))) && 
                  !(formal.IsAssignableFrom(interfaceType))) {
                 // for formal-parameter MarshalByRefObject everything is possible, 
                 // the other formal types must be checked
@@ -913,7 +913,6 @@ namespace Ch.Elca.Iiop.Marshalling {
 
         private static Type s_supInterfaceAttrType = typeof(SupportedInterfaceAttribute);
     	private static Type s_anyType = typeof(omg.org.CORBA.Any);
-        private static Type s_typeCodeType = typeof(omg.org.CORBA.TypeCode);
 
         #endregion SFields
         #region IFields
@@ -968,7 +967,7 @@ namespace Ch.Elca.Iiop.Marshalling {
                     typeCode = Repository.CreateTypeCodeForType(actualType, attributes);
             	}
             }
-            m_typeCodeSer.Serialise(s_typeCodeType, typeCode, attributes, targetStream);
+            m_typeCodeSer.Serialise(ReflectionHelper.CorbaTypeCodeType, typeCode, attributes, targetStream);
             if (actual != null) {            	
                 Marshaller marshaller = Marshaller.GetSingleton();
                 attributes.RemoveAttributeOfType(typeof(ObjectIdlTypeAttribute));
@@ -1188,7 +1187,7 @@ namespace Ch.Elca.Iiop.Tests {
         	cdrIn.ConfigStream(0, new GiopVersion(1, 2));
 			Serialiser ser = new BooleanSerialiser();
             try {
-                ser.Deserialise(typeof(Boolean), new AttributeExtCollection(), cdrIn);
+                ser.Deserialise(ReflectionHelper.BooleanType, new AttributeExtCollection(), cdrIn);
             } catch (Exception e) {
                 inStream.Close();
                 throw e;

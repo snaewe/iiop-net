@@ -102,8 +102,7 @@ namespace Ch.Elca.Iiop.Idl {
         // for efficiency reason: the evaluation of the following expressions is cached
         private static Type s_repIdAttrType = typeof(RepositoryIDAttribute);
         private static Type s_supInterfaceAttrType = typeof(SupportedInterfaceAttribute);
-    	
-    	private static Type s_mbrType = typeof(MarshalByRefObject);
+
 
 
 
@@ -118,7 +117,7 @@ namespace Ch.Elca.Iiop.Idl {
         public static Type GetTypeForId(string repId) {
         	if ((repId == String.Empty) ||
         	    (repId == "IDL:omg.org/CORBA/Object:1.0")) {
-        	    return s_mbrType;
+        	    return ReflectionHelper.MarshalByRefObjectType;
         	}        	
         	
             string typeName = GetTypeNameForId(repId);
@@ -850,7 +849,7 @@ namespace Ch.Elca.Iiop.Idl {
             omg.org.CORBA.TypeCode baseTypeCode = new NullTC();
             // create the TypeCodes for the member
             ValueTypeMember[] valueMembers = new ValueTypeMember[1];
-            omg.org.CORBA.TypeCode memberType = CreateOrGetTypeCodeForType(typeof(System.String), 
+            omg.org.CORBA.TypeCode memberType = CreateOrGetTypeCodeForType(ReflectionHelper.StringType, 
                                                     new AttributeExtCollection(new Attribute[] { 
                                                         new WideCharAttribute(false), new StringValueAttribute() } ));
             short visibility = VISIBILITY_PUBLIC;

@@ -41,6 +41,7 @@ namespace Ch.Elca.Iiop.Util {
         #region SFields
         
         private static Type s_iIdlEntityType = typeof(IIdlEntity);
+        private static Type s_corbaTypeCodeType = typeof(omg.org.CORBA.TypeCode);
         
         private static Type s_idlEnumAttributeType = typeof(IdlEnumAttribute);
         private static Type s_implClassAttributeType = typeof(ImplClassAttribute);
@@ -50,12 +51,18 @@ namespace Ch.Elca.Iiop.Util {
         private static Type s_fromIdlNameAttributeType = typeof(FromIdlNameAttribute);
                 
         private static Type s_voidType = typeof(void);
-        private static Type s_stringType = typeof(string);
+        private static Type s_stringType = typeof(System.String);
+        private static Type s_charType = typeof(System.Char);
         private static Type s_int16Type = typeof(System.Int16);
         private static Type s_int32Type = typeof(System.Int32);
         private static Type s_int64Type = typeof(System.Int64);
         private static Type s_booleanType = typeof(System.Boolean);
         private static Type s_byteType = typeof(System.Byte);
+        private static Type s_singleType = typeof(System.Single);
+        private static Type s_doubleType = typeof(System.Double);
+        
+        private static Type s_marshalByRefType = typeof(MarshalByRefObject);
+
         
         #endregion SFields
         #region SProperties
@@ -64,6 +71,13 @@ namespace Ch.Elca.Iiop.Util {
         public static Type IIdlEntityType {
             get {
                 return s_iIdlEntityType;
+            }
+        }
+        
+        /// <summary>caches typeof(omg.org.CORBA.TypeCode)</summary>
+        public static Type CorbaTypeCodeType {
+            get {
+                return s_corbaTypeCodeType;
             }
         }
 
@@ -116,8 +130,15 @@ namespace Ch.Elca.Iiop.Util {
                 return s_voidType;               
             }
         }
+        
+        /// <summary>caches typeof(System.Char)</summary>
+        public static Type CharType {
+            get {
+                return s_charType;
+            }
+        }
                 
-        /// <summary>caches typeof(string)</summary>
+        /// <summary>caches typeof(System.String)</summary>
         public static Type StringType {
             get {
                 return s_stringType;
@@ -156,6 +177,27 @@ namespace Ch.Elca.Iiop.Util {
         public static Type BooleanType {
             get {
                 return s_booleanType;
+            }
+        }
+        
+        /// <summary>caches typeof(Single)</summary>
+        public static Type SingleType {
+            get {
+                return s_singleType;
+            }
+        }
+        
+        /// <summary>caches typof(Double)</summary>
+        public static Type DoubleType {
+            get {
+                return s_doubleType;
+            }
+        }
+        
+        /// <summary>caches typeof(MarshalByRefObject)</summary>
+        public static Type MarshalByRefObjectType {
+            get {
+                return s_marshalByRefType;
             }
         }
         

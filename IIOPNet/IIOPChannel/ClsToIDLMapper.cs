@@ -162,10 +162,6 @@ namespace Ch.Elca.Iiop.Idl {
 
 
         // the following expressions are evaluated here for efficiency reasons
-        private static Type s_singleType = typeof(System.Single);
-        private static Type s_doubleType = typeof(System.Double);
-        private static Type s_charType = typeof(System.Char);
-        private static Type s_stringType = typeof(System.String);
         private static Type s_objectType = typeof(System.Object);
         private static Type s_exceptType = typeof(System.Exception);
         private static Type s_typeType = typeof(System.Type);
@@ -181,7 +177,6 @@ namespace Ch.Elca.Iiop.Idl {
         private static Type s_interfaceTypeAttrType = typeof(InterfaceTypeAttribute);
 
         private static Type s_corbaTypeCodeImplType = typeof(TypeCodeImpl);
-        private static Type s_corbaTypeCodeType = typeof(omg.org.CORBA.TypeCode);
     	
     	private static Type s_anyType = typeof(omg.org.CORBA.Any);
 
@@ -261,10 +256,10 @@ namespace Ch.Elca.Iiop.Idl {
                 clsType.Equals(ReflectionHelper.ByteType) ||
                 clsType.Equals(ReflectionHelper.BooleanType) ||
                 clsType.Equals(ReflectionHelper.VoidType) ||
-                clsType.Equals(s_singleType) ||
-                clsType.Equals(s_doubleType) ||
-                clsType.Equals(s_charType) ||
-                clsType.Equals(s_stringType)) { 
+                clsType.Equals(ReflectionHelper.SingleType) ||
+                clsType.Equals(ReflectionHelper.DoubleType) ||
+                clsType.Equals(ReflectionHelper.CharType) ||
+                clsType.Equals(ReflectionHelper.StringType)) { 
                 return true; 
             } else {
                 return false;
@@ -337,7 +332,7 @@ namespace Ch.Elca.Iiop.Idl {
                 }
                 clsType = boxed; // transformation
                 return action.MapToIdlBoxedValueType(boxed, attributes, false);
-            } else if (IsInterface(clsType) && !(clsType.Equals(s_corbaTypeCodeType))) {
+            } else if (IsInterface(clsType) && !(clsType.Equals(ReflectionHelper.CorbaTypeCodeType))) {
                 return CallActionForDNInterface(ref clsType, action);
             } else if (IsMarshalByRef(clsType)) {
                 return action.MapToIdlConcreteInterface(clsType);
@@ -363,7 +358,7 @@ namespace Ch.Elca.Iiop.Idl {
             } else if (clsType.Equals(s_typeType) || clsType.IsSubclassOf(s_typeType)) {
                 return action.MapToTypeDesc(clsType);
             } else if (clsType.Equals(s_corbaTypeCodeImplType) || clsType.IsSubclassOf(s_corbaTypeCodeImplType) ||
-                       clsType.Equals(s_corbaTypeCodeType)) {
+                       clsType.Equals(ReflectionHelper.CorbaTypeCodeType)) {
                 return action.MapToTypeCode(clsType);
             } else if (IsDefaultMarshalByVal(clsType)) {
                 return action.MapToIdlConcreateValueType(clsType);
@@ -388,10 +383,10 @@ namespace Ch.Elca.Iiop.Idl {
                 return action.MapToIdlBoolean(clsType);
             } else if (clsType.Equals(ReflectionHelper.ByteType)) {
                 return action.MapToIdlOctet(clsType);
-            } else if (clsType.Equals(s_stringType)) {
+            } else if (clsType.Equals(ReflectionHelper.StringType)) {
                 // distinguish cases
                 return CallActionForDNString(ref clsType, attributes, action);
-            } else if (clsType.Equals(s_charType)) {
+            } else if (clsType.Equals(ReflectionHelper.CharType)) {
                 // distinguish cases
                 bool useWide = UseWideOk(attributes);
                 if (useWide) {
@@ -399,9 +394,9 @@ namespace Ch.Elca.Iiop.Idl {
                 } else {
                     return action.MapToIdlChar(clsType);
                 }
-            } else if (clsType.Equals(s_doubleType)) {
+            } else if (clsType.Equals(ReflectionHelper.DoubleType)) {
                 return action.MapToIdlDouble(clsType);
-            } else if (clsType.Equals(s_singleType)) {
+            } else if (clsType.Equals(ReflectionHelper.SingleType)) {
                 return action.MapToIdlFloat(clsType);
             } else if (clsType.Equals(ReflectionHelper.VoidType)) {
                 return action.MapToIdlVoid(clsType);
@@ -977,7 +972,7 @@ namespace Ch.Elca.Iiop.Tests {
         
         public void TestMapToIdlFloat() {
             ClsToIdlMapper mapper = ClsToIdlMapper.GetSingleton();
-            MappingToResult mapResult = (MappingToResult)mapper.MapClsType(typeof(Single), 
+            MappingToResult mapResult = (MappingToResult)mapper.MapClsType(ReflectionHelper.SingleType, 
                                                                            new AttributeExtCollection(),
                                                                            s_testAction);
 			Assertion.AssertEquals(MappingToResult.IdlFloat, mapResult);        
@@ -985,7 +980,7 @@ namespace Ch.Elca.Iiop.Tests {
         
         public void TestMapToIdlDouble() {
             ClsToIdlMapper mapper = ClsToIdlMapper.GetSingleton();
-            MappingToResult mapResult = (MappingToResult)mapper.MapClsType(typeof(Double), 
+            MappingToResult mapResult = (MappingToResult)mapper.MapClsType(ReflectionHelper.DoubleType, 
                                                                            new AttributeExtCollection(),
                                                                            s_testAction);
 			Assertion.AssertEquals(MappingToResult.IdlDouble, mapResult);
@@ -1033,7 +1028,7 @@ namespace Ch.Elca.Iiop.Tests {
 
         public void TestMapToIdlChar() {
             ClsToIdlMapper mapper = ClsToIdlMapper.GetSingleton();
-            MappingToResult mapResult = (MappingToResult)mapper.MapClsType(typeof(Char), 
+            MappingToResult mapResult = (MappingToResult)mapper.MapClsType(ReflectionHelper.CharType, 
                                                                            new AttributeExtCollection(new Attribute[] { new WideCharAttribute(false) }),
                                                                            s_testAction);
 			Assertion.AssertEquals(MappingToResult.IdlChar, mapResult);
@@ -1041,11 +1036,11 @@ namespace Ch.Elca.Iiop.Tests {
 
         public void TestMapToIdlWChar() {
             ClsToIdlMapper mapper = ClsToIdlMapper.GetSingleton();
-            MappingToResult mapResult = (MappingToResult)mapper.MapClsType(typeof(Char), 
+            MappingToResult mapResult = (MappingToResult)mapper.MapClsType(ReflectionHelper.CharType, 
                                                                            new AttributeExtCollection(new Attribute[] { new WideCharAttribute(true) }),
                                                                            s_testAction);
 			Assertion.AssertEquals(MappingToResult.IdlWChar, mapResult);
-            mapResult = (MappingToResult)mapper.MapClsType(typeof(Char), 
+            mapResult = (MappingToResult)mapper.MapClsType(ReflectionHelper.CharType, 
                                                            new AttributeExtCollection(),
                                                            s_testAction);
 			Assertion.AssertEquals(MappingToResult.IdlWChar, mapResult);
@@ -1209,7 +1204,7 @@ namespace Ch.Elca.Iiop.Tests {
                                                                            new AttributeExtCollection(),
                                                                            s_testAction);
             Assertion.AssertEquals(MappingToResult.IdlTypeCode, mapResult);
-            mapResult = (MappingToResult)mapper.MapClsType(typeof(omg.org.CORBA.TypeCode), 
+            mapResult = (MappingToResult)mapper.MapClsType(ReflectionHelper.CorbaTypeCodeType, 
                                                            new AttributeExtCollection(),
                                                            s_testAction);
             Assertion.AssertEquals(MappingToResult.IdlTypeCode, mapResult);            

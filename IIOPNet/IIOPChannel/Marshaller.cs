@@ -275,10 +275,10 @@ namespace Ch.Elca.Iiop.Marshalling {
             m_baseTypeSerializer.Add(ReflectionHelper.Int16Type, new Int16Serialiser());
             m_baseTypeSerializer.Add(ReflectionHelper.Int32Type, new Int32Serialiser());
             m_baseTypeSerializer.Add(ReflectionHelper.Int64Type, new Int64Serialiser());
-            m_baseTypeSerializer.Add(typeof(System.Single), new SingleSerialiser());
-            m_baseTypeSerializer.Add(typeof(System.Double), new DoubleSerialiser());
-            m_baseTypeSerializer.Add(typeof(System.Char), new CharSerialiser());
-            m_baseTypeSerializer.Add(typeof(System.String), new StringSerialiser());
+            m_baseTypeSerializer.Add(ReflectionHelper.SingleType, new SingleSerialiser());
+            m_baseTypeSerializer.Add(ReflectionHelper.DoubleType, new DoubleSerialiser());
+            m_baseTypeSerializer.Add(ReflectionHelper.CharType, new CharSerialiser());
+            m_baseTypeSerializer.Add(ReflectionHelper.StringType, new StringSerialiser());
         }
         
         #region Implementation of MappingAction

@@ -664,7 +664,7 @@ namespace Ch.Elca.Iiop.Idl {
                     throw new InvalidUnionDiscriminatorValue(discVal, discrTypeCls);
                 }
                 gen.Emit(OpCodes.Ldc_I4, (System.Int64)discVal);
-            } else if (discrTypeCls.Equals(typeof(System.Char))) {
+            } else if (discrTypeCls.Equals(ReflectionHelper.CharType)) {
                 if (!(discVal is System.Char)) {
                     throw new InvalidUnionDiscriminatorValue(discVal, discrTypeCls);
                 }
