@@ -324,3 +324,27 @@ The most common errors are:
 <li>the required type was not mapped with the IDLToCLSCompiler
 <li>the assembly containing the mapped type was not found by IIOP.NET (it must be in the same directory or in the application domain's search path)
 </ul>
+
+<a name="#codeset"></a>
+<H2 class="about">omg.org.CORBA.CODESET_INCOMPATIBLE: CORBA system exception, completed: Completed_No minor: 9501</H2>
+
+Currently, IIOP.NET does only support a limited set of codesets:
+<ul>
+	<li> Character Sets:
+	<ul>
+	<li> ISO 8859-1:1987; Latin Alphabet No. 1 </li>
+	<li> UTF8 </li>
+	<li> ISO 646:1991 IRV (International Reference Version) </li>
+	</ul></li>
+	<li> Wide Character Sets:
+	<ul>
+	<li> UTF16 </li>
+	<li> ISO/IEC 10646-1:1993; UCS-2, Level 1 </li>
+</ul>
+</li>
+</ul>
+
+If possible, you sould use UTF8, Latin1 or UTF16.
+
+
+
