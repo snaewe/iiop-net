@@ -264,7 +264,24 @@ namespace java.lang {
         
     }
     
-
+        
+    [Serializable]
+    public class _LongImpl : _Long {
+        
+        public _LongImpl() : base() {
+        }
+        
+        public _LongImpl(System.Int64 val) : base() {
+	        m_value = val;
+        }
+        
+        public System.Int64 longValue() {
+            return m_value;
+        }
+        
+    }
+    
+    
     [Serializable]
     public class _IntegerImpl : _Integer {
 

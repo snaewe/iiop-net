@@ -47,6 +47,7 @@ namespace Ch.Elca.Iiop.JavaCollectionMappers {
         private static Type s_charType = typeof(System.Char);
         private static Type s_stringType = typeof(System.String);
         
+        private static Type s_javaBoxLong = typeof(java.lang._Long);
         private static Type s_javaBoxInteger = typeof(java.lang._Integer);
         private static Type s_javaBoxShort = typeof(java.lang._Short);
         private static Type s_javaBoxByte = typeof(java.lang._Byte);
@@ -55,60 +56,38 @@ namespace Ch.Elca.Iiop.JavaCollectionMappers {
         private static Type s_javaBoxCharacter = typeof(java.lang.Character);
         private static Type s_javaBoxBoolean = typeof(java.lang._Boolean);
 
-        /// <summary>checks, if clsPrimitive is one of the cls primitive types, which must be boxed to java boxes
-        protected bool IsClsPrimitive(object clsPrimitive) {
-    	    if ((clsPrimitive != null) && (ClsToIdlMapper.IsMappablePrimitiveType(clsPrimitive.GetType())) &&
-                (!clsPrimitive.GetType().Equals(s_stringType))) {
-    	    	return true;
-    	    } else {
-    	        return false;
-    	    }
-        }
-
-    	/// <summary>boxes a cls base type into a java primitive box</summary>
-    	/// <remarks>clsPrimitive must be one of the mappable cls primitive types, else throws exception</remarks>
-    	protected object BoxBaseType(object clsPrimitive) {
-    		if (s_int16Type.IsInstanceOfType(clsPrimitive)) {
-                    return new java.lang._ShortImpl((System.Int16)clsPrimitive);
-    		} else if (s_int32Type.IsInstanceOfType(clsPrimitive)) {
-    		    return new java.lang._IntegerImpl((System.Int32)clsPrimitive);
-    		} else if (s_byteType.IsInstanceOfType(clsPrimitive)) {
-                    return new java.lang._ByteImpl((System.Byte)clsPrimitive);
-       		} else if (s_singleType.IsInstanceOfType(clsPrimitive)) {
-   		    return new java.lang._FloatImpl((System.Single)clsPrimitive);
-    		} else if (s_doubleType.IsInstanceOfType(clsPrimitive)) {
-   		    return new java.lang._DoubleImpl((System.Double)clsPrimitive);
-    		} else if (s_booleanType.IsInstanceOfType(clsPrimitive)) {
-   		    return new java.lang._BooleanImpl((System.Boolean)clsPrimitive);
-    		} else if (s_charType.IsInstanceOfType(clsPrimitive)) {
-   		    return new java.lang.CharacterImpl((System.Char)clsPrimitive);
+        
+    	/// <summary>boxes an instance of a cls base type into a java primitive box; for non-primitives: 
+    	/// returns instance</summary>    	
+    	protected object BoxClsInstanceIfNeeded(object clsInstance) {
+    		if (s_int16Type.IsInstanceOfType(clsInstance)) {
+                return new java.lang._ShortImpl((System.Int16)clsInstance);
+    		} else if (s_int32Type.IsInstanceOfType(clsInstance)) {
+    		    return new java.lang._IntegerImpl((System.Int32)clsInstance);
+		    } else if (s_int64Type.IsInstanceOfType(clsInstance)) {
+			    return new java.lang._LongImpl((System.Int64)clsInstance);
+    		} else if (s_byteType.IsInstanceOfType(clsInstance)) {
+                return new java.lang._ByteImpl((System.Byte)clsInstance);
+       		} else if (s_singleType.IsInstanceOfType(clsInstance)) {
+                return new java.lang._FloatImpl((System.Single)clsInstance);
+    		} else if (s_doubleType.IsInstanceOfType(clsInstance)) {
+                return new java.lang._DoubleImpl((System.Double)clsInstance);
+    		} else if (s_booleanType.IsInstanceOfType(clsInstance)) {
+                return new java.lang._BooleanImpl((System.Boolean)clsInstance);
+    		} else if (s_charType.IsInstanceOfType(clsInstance)) {
+                return new java.lang.CharacterImpl((System.Char)clsInstance);
     		} else {
-    		    throw new BAD_PARAM(7456, CompletionStatus.Completed_MayBe);
+    		    return clsInstance;
     		}
-    	}
-    	
-
-        /// <summary>checks, if javaInstance is one of the java boxes
-    	protected bool IsJavaBaseTypeBox(object javaInstance) {
-    	    if (s_javaBoxInteger.IsInstanceOfType(javaInstance) || 
-    	        s_javaBoxShort.IsInstanceOfType(javaInstance) ||
-    	        s_javaBoxByte.IsInstanceOfType(javaInstance) ||
-    	        s_javaBoxDouble.IsInstanceOfType(javaInstance) ||
-       	        s_javaBoxFloat.IsInstanceOfType(javaInstance) ||
-       	        s_javaBoxBoolean.IsInstanceOfType(javaInstance) ||
-       	        s_javaBoxCharacter.IsInstanceOfType(javaInstance)
-    	    ) {
-    	    	return true;
-    	    } else {
-    	        return false;
-    	    }
-    	}
-    	
-        /// <summary>unboxes a java primitive box to a cls base type</summary>
-        /// <remarks>javaInstance must be one of java primitive boxes, else throws exception</remarks>        	
-    	protected object UnboxBaseType(object javaInstance) {
+    	}    	
+    	    	
+        /// <summary>unboxes a java primitive box to a cls base type; otherwise return the instance unmodified</summary>
+        /// <returns>for a boxed java primitive, the unboxed version; otherwise instance</returns>        
+    	protected object UnboxJavaInstanceIfNeeded(object javaInstance) {
     	    if (s_javaBoxInteger.IsInstanceOfType(javaInstance)) {
     	    	return ((java.lang._IntegerImpl)javaInstance).intValue();
+	        } else if (s_javaBoxLong.IsInstanceOfType(javaInstance)) {
+		        return ((java.lang._LongImpl)javaInstance).longValue();
     	    } else if (s_javaBoxShort.IsInstanceOfType(javaInstance)) {
     	    	return ((java.lang._ShortImpl)javaInstance).shortValue();
     	    } else if (s_javaBoxByte.IsInstanceOfType(javaInstance)) {
@@ -122,7 +101,7 @@ namespace Ch.Elca.Iiop.JavaCollectionMappers {
       	    } else if (s_javaBoxCharacter.IsInstanceOfType(javaInstance)) {
     	        return ((java.lang.CharacterImpl)javaInstance).charValue();
     	    } else {
-                throw new BAD_PARAM(7456, CompletionStatus.Completed_MayBe);
+                return javaInstance;
     	    }
     	}
         
@@ -143,9 +122,7 @@ namespace Ch.Elca.Iiop.JavaCollectionMappers {
             object[] elements = source.GetElements();
             // check for boxed java base types
             for (int i = 0; i < elements.Length; i++) {
-                if (IsJavaBaseTypeBox(elements[i])) {
-                    elements[i] = UnboxBaseType(elements[i]);
-                }
+	            elements[i] = UnboxJavaInstanceIfNeeded(elements[i]);
             }
             result.AddRange(elements);
             return result;
@@ -157,9 +134,7 @@ namespace Ch.Elca.Iiop.JavaCollectionMappers {
             result.Capacity = source.Capacity;
             object[] elements = source.ToArray();
             for (int i = 0; i < elements.Length; i++) {
-                if (IsClsPrimitive(elements[i])) {
-                    elements[i] = BoxBaseType(elements[i]);
-                }
+                elements[i] = BoxClsInstanceIfNeeded(elements[i]);
             }
             result.SetElements(elements);
                
@@ -182,14 +157,8 @@ namespace Ch.Elca.Iiop.JavaCollectionMappers {
             
             System.Collections.DictionaryEntry[] buckets = source.GetBuckets();
             for (int i = 0; i < buckets.Length; i++) {                
-                object key = buckets[i].Key;
-                object val = buckets[i].Value;
-                if (IsJavaBaseTypeBox(key)) {
-                    key = UnboxBaseType(key);
-                }
-                if (IsJavaBaseTypeBox(val)) {
-                    val = UnboxBaseType(val);
-                }
+                object key = UnboxJavaInstanceIfNeeded(buckets[i].Key);
+                object val = UnboxJavaInstanceIfNeeded(buckets[i].Value);
                 result.Add(key, val);
             }
             
@@ -204,14 +173,8 @@ namespace Ch.Elca.Iiop.JavaCollectionMappers {
             System.Collections.DictionaryEntry[] buckets = new System.Collections.DictionaryEntry[source.Count];
             int i = 0;
             foreach (System.Collections.DictionaryEntry entry in source) {
-                object key = entry.Key;
-                object val = entry.Value;
-                if (IsClsPrimitive(key)) {
-                    key = BoxBaseType(key);
-                }
-                if (IsClsPrimitive(val)) {
-                    val = BoxBaseType(val);
-                }
+                object key = BoxClsInstanceIfNeeded(entry.Key);
+                object val = BoxClsInstanceIfNeeded(entry.Value);
                 buckets[i] = new System.Collections.DictionaryEntry(key, val);
                 i++;
             }
