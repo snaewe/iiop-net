@@ -590,6 +590,27 @@ public class MetaDataGenerator implements IDLParserVisitor {
         return result;
     }
 
+    
+    /**
+     * resolve a scoped name starting in searchScope
+     */
+    private Symbol ResolveScopedName(Scope searchScope, LinkedList parts) {
+        if ((parts == null) || (parts.size() == 0)) {
+        	return null;
+        }
+        Scope currentScope = searchScope;
+        for (int i = 0; i < parts.size() - 1; i++) {
+            // resolve scopes
+            currentScope = currentScope.getChildScope((String)parts.get(i));
+            if (currentScope == null) { 
+            	return null; // not found within this searchScope
+            }
+        }
+        // resolve symbol
+        Symbol sym = currentScope.getSymbol((String)parts.getLast());
+        return sym;
+    }
+    
     /**
      * @see parser.IDLParserVisitor#visit(ASTscoped_name, Object)
      * @param data a buildinfo instance
@@ -599,37 +620,26 @@ public class MetaDataGenerator implements IDLParserVisitor {
         CheckParameterForBuildInfo(data, node);
         LinkedList parts = node.getNameParts();
         Scope currentScope = ((BuildInfo) data).GetBuildScope();
-        if (node.hasFileScope()) { currentScope = m_symbolTable.getTopScope(); }
-        for (int i = 0; i < parts.size() - 1; i++) {
-            // resolve scopes
-            currentScope = currentScope.getChildScope((String)parts.get(i));
-            if (currentScope == null) { 
-                throw new RuntimeException("scope resolving error, subscope " + parts.get(i) + 
-                                           " not found in scope "); 
-            }
+        if (node.hasFileScope()) { 
+            currentScope = m_symbolTable.getTopScope(); 
         }
-        // resolve symbol
-        Symbol sym = currentScope.getSymbol((String)parts.getLast());
-        // if name is unqualified search in outer scopes
-        // TBD: in inherited scopes as described in CORBA2.3 3.15.2
-        if ((sym == null) && (parts.size() == 1)) {
-            sym = SearchSymbolInEnclosingScopes(currentScope, (String)parts.getLast());    
-        }
-
-        if (sym == null) { 
-            throw new RuntimeException("scoped name not resolvable: " + node.getScopedName()); 
-        }
-        return sym;
-    }
-
-    private Symbol SearchSymbolInEnclosingScopes(Scope startScope, String symbolName) {
-        Symbol result = null;
-        Scope currentScope = startScope;
-        while ((result == null) && (currentScope != null)) {
-            result = currentScope.getSymbol(symbolName);
+        
+        Symbol found = null;
+        // search in this scope and all parent scopes
+        while ((found == null) && (currentScope != null)) {
+            found = ResolveScopedName(currentScope, parts);
+            // if not found: next scope to search in is parent scope
             currentScope = currentScope.getParentScope();
         }
-        return result;
+        
+        // TODO: search in inherited scopes as described in CORBA 2.3, section 3.15.2
+        
+        if (found == null) {
+            throw new RuntimeException("scoped name not resolvable: " + node.getScopedName() + 
+                                       "; currentscope: " + ((BuildInfo) data).GetBuildScope().getScopeName()); 
+        }
+        
+        return found;
     }
 
     /**
