@@ -125,7 +125,7 @@ namespace Ch.Elca.Iiop.Cdr {
         }
         
         public bool IsBorderReached() {
-        	return (GetBytesAvailable() == 0);
+            return (GetBytesAvailable() == 0);
         }
 
         public int GetBytesAvailable() {
@@ -149,9 +149,6 @@ namespace Ch.Elca.Iiop.Cdr {
 
         #endregion Constants
         #region IFields
-
-        /// <summary>stores values, with their position to store/resolve indirections</summary>
-        protected Hashtable m_indirectionTableX = new Hashtable();
 
         /// <summary>this stack holds the chunking information</summary>
         protected Stack m_chunkStack = new Stack();
@@ -422,8 +419,8 @@ namespace Ch.Elca.Iiop.Cdr {
                 throw new MARSHAL(901, CompletionStatus.Completed_MayBe);
             }
             if (chunkInfo.IsBorderReached()) {
-            	// check if a new chunk starts here
-            	m_baseStream.StartPeeking(); // switch to peek mode
+                // check if a new chunk starts here
+                m_baseStream.StartPeeking(); // switch to peek mode
                 int tag = m_baseStream.ReadLong();
                 m_baseStream.StopPeeking(); // end peek mode
                 if ((tag > 0) && (tag < ValueBaseStream.MIN_VALUE_TAG)) {
@@ -434,8 +431,8 @@ namespace Ch.Elca.Iiop.Cdr {
                     chunkInfo.SetContinuationLength(tag);
                 } else if ((tag >= ValueBaseStream.MIN_VALUE_TAG) && (tag <= ValueBaseStream.MAX_VALUE_TAG)) {
                     // a value type starting here -> current chunk is deactived while nested val type is read
-                    chunkInfo.IsContinuationExpected = true;                	
-                }            	            	
+                    chunkInfo.IsContinuationExpected = true;                    
+                }                                
             }
         }
             
