@@ -4,15 +4,15 @@ package parser;
 public interface IDLParserConstants {
 
   int EOF = 0;
-  int ID = 90;
-  int OCTALINT = 91;
-  int DECIMALINT = 92;
-  int HEXADECIMALINT = 93;
-  int FLOATONE = 94;
-  int FLOATTWO = 95;
-  int CHARACTER = 96;
-  int STRING = 97;
-  int FIXED = 98;
+  int ID = 91;
+  int OCTALINT = 92;
+  int DECIMALINT = 93;
+  int HEXADECIMALINT = 94;
+  int FLOATONE = 95;
+  int FLOATTWO = 96;
+  int CHARACTER = 97;
+  int STRING = 98;
+  int FIXED = 99;
 
   int DEFAULT = 0;
   int IN_LINE_COMMENT = 1;
@@ -38,8 +38,9 @@ public interface IDLParserConstants {
     "\"module\"",
     "\"{\"",
     "\"}\"",
-    "\"abstract\"",
     "\"interface\"",
+    "\"abstract\"",
+    "\"local\"",
     "\":\"",
     "\",\"",
     "\"::\"",

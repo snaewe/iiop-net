@@ -633,6 +633,9 @@ namespace Ch.Elca.Iiop.Idl {
                 return "Object";
             }
         }
+        public object MapToIdlLocalInterface(System.Type dotNetType) {
+            return IdlNaming.MapFullTypeNameToIdlScoped(dotNetType);
+        }
         public object MapToIdlConcreateValueType(System.Type dotNetType) {
             return IdlNaming.MapFullTypeNameToIdlScoped(dotNetType);
         }

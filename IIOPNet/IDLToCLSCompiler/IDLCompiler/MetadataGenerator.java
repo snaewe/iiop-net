@@ -438,7 +438,7 @@ public class MetaDataGenerator implements IDLParserVisitor {
     /** handles the declaration for the interface definition / fwd declaration
      * @return the TypeBuilder for this interface
      */
-    private TypeBuilder CreateOrGetInterfaceDcl(String fullyQualName, System.Type[] interfaces, boolean isAbstract,
+    private TypeBuilder CreateOrGetInterfaceDcl(String fullyQualName, System.Type[] interfaces, boolean isAbstract, boolean isLocal,
                                                 Symbol forSymbol, String repId, ModuleBuilder modBuilder) {
         TypeBuilder interfaceToBuild;
         if (!m_typeManager.IsFwdDeclared(forSymbol)) {
@@ -449,6 +449,12 @@ public class MetaDataGenerator implements IDLParserVisitor {
             IdlTypeInterface ifType = IdlTypeInterface.ConcreteInterface;
             if (isAbstract) { 
                 ifType = IdlTypeInterface.AbstractInterface; 
+            }
+            if (isLocal) {
+                ifType = IdlTypeInterface.LocalInterface;
+            }
+            if ((isLocal) && (isAbstract)) {
+            	throw new RuntimeException("internal error: iftype precondition");
             }
             // add interface type
             CustomAttributeBuilder interfaceTypeAttrBuilder = new InterfaceTypeAttribute(ifType).CreateAttributeBuilder();
@@ -495,7 +501,7 @@ public class MetaDataGenerator implements IDLParserVisitor {
         String fullyQualName = enclosingScope.getFullyQualifiedNameForSymbol(forSymbol.getSymbolName());
 
         ModuleBuilder curModBuilder = m_modBuilderManager.GetOrCreateModuleBuilderFor(enclosingScope);
-        TypeBuilder interfaceToBuild = CreateOrGetInterfaceDcl(fullyQualName, interfaces, header.isAbstract(), 
+        TypeBuilder interfaceToBuild = CreateOrGetInterfaceDcl(fullyQualName, interfaces, header.isAbstract(), header.isLocal(), 
                                                                forSymbol, enclosingScope.getRepositoryIdFor(header.getIdent()),
                                                                curModBuilder);
 
@@ -529,7 +535,7 @@ public class MetaDataGenerator implements IDLParserVisitor {
             ModuleBuilder curModBuilder = m_modBuilderManager.GetOrCreateModuleBuilderFor(enclosingScope);
             // it's no problem to add later on interfaces this type should implement with AddInterfaceImplementation,
             // here: specify no interface inheritance, because not known at this point
-            CreateOrGetInterfaceDcl(fullyQualName, Type.EmptyTypes, node.isAbstract(), 
+            CreateOrGetInterfaceDcl(fullyQualName, Type.EmptyTypes, node.isAbstract(), node.isLocal(),
                                     forSymbol, enclosingScope.getRepositoryIdFor(node.getIdent()), 
                                     curModBuilder);
         }

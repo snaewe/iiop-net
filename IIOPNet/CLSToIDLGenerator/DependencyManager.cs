@@ -512,6 +512,9 @@ namespace Ch.Elca.Iiop.Idl {
         public object MapToIdlAbstractInterface(System.Type clsType) {
             return clsType;
         }
+        public object MapToIdlLocalInterface(System.Type clsType) {
+            return clsType;
+        }
         public object MapToIdlStruct(System.Type clsType) {
             return clsType;
         }

@@ -429,6 +429,9 @@ namespace Ch.Elca.Iiop.Idl {
         public object MapToIdlAbstractInterface(Type clsType) {
             return new AbstractIfTC(Repository.GetRepositoryID(clsType), clsType.FullName);
         }
+        public object MapToIdlLocalInterface(Type clsType) {
+            return new LocalIfTC(Repository.GetRepositoryID(clsType), clsType.FullName);
+        }
         public object MapToIdlConcreteInterface(Type clsType) {
             return new ObjRefTC(Repository.GetRepositoryID(clsType), clsType.FullName);
         }

@@ -838,6 +838,10 @@ namespace Ch.Elca.Iiop.Idl {
             throw new NotSupportedException("no type declaration possible for IDL-Sequence");
         }
 
+        public object MapToIdlLocalInterface(Type clsType) {
+            throw new NotSupportedException("no type declaration possible for local interfaces");
+        }
+
         #endregion unsupported operations for this mapping action
 
         #endregion Implementation of MappingAction
@@ -1043,6 +1047,10 @@ namespace Ch.Elca.Iiop.Idl {
 
         public object MapException(System.Type dotNetType) {
             throw new NotSupportedException("no fwd declaration possible for this IDL-type");
+        }
+
+        public object MapToIdlLocalInterface(System.Type dotNetType) {
+            throw new NotSupportedException("nothing maps to local interface, no fwd decl possible.");
         }
 
         #endregion

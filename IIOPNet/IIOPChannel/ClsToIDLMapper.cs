@@ -55,6 +55,10 @@ namespace Ch.Elca.Iiop.Idl {
         /// <summary>the CLS-type is mapped to an IDL concrete interface</summary>
         /// <returns>an optional result of the mapping, null may be possible</returns>
         object MapToIdlConcreteInterface(Type clsNetType);
+        
+        /// <summary>the CLS-type is mapped to an IDL concrete interface</summary>
+        /// <returns>an optional result of the mapping, null may be possible</returns>
+        object MapToIdlLocalInterface(Type clsNetType);
 
         /// <returns>an optional result of the mapping, null may be possible</returns>
         object MapToIdlConcreateValueType(Type clsType);
@@ -503,6 +507,8 @@ namespace Ch.Elca.Iiop.Idl {
                 return action.MapToIdlConcreteInterface(clsType);
             } else if (interfaceAttr.IdlType.Equals(IdlTypeInterface.AbstractValueType)) {
                 return action.MapToIdlAbstractValueType(clsType);
+            } else if (interfaceAttr.IdlType.Equals(IdlTypeInterface.LocalInterface)) {
+                return action.MapToIdlLocalInterface(clsType);
             } else  {
                 // ttributte IntrerfaceTypeAttribute had an unknown value for IDLType: interfaceAttr.IdlType
                 throw new MARSHAL(18809, CompletionStatus.Completed_MayBe);
@@ -528,6 +534,9 @@ namespace Ch.Elca.Iiop.Idl {
             return false;
         }
         public object MapToIdlConcreteInterface(System.Type clsType) {
+            return false;
+        }
+        public object MapToIdlLocalInterface(System.Type clsType) {
             return false;
         }
         public object MapToIdlConcreateValueType(System.Type clsType) {
@@ -634,7 +643,7 @@ namespace Ch.Elca.Iiop.Tests {
     using omg.org.CORBA;
     
     public enum MappingToResult {
-        IdlStruct, IdlAbstractIf, IdlConcreteIf, IdlConcreteValue, IdlAbstractValue, 
+        IdlStruct, IdlAbstractIf, IdlConcreteIf, IdlLocalIf, IdlConcreteValue, IdlAbstractValue, 
         IdlBoxedValue, IdlSequence, IdlAny, IdlAbstractBase, IdlValueBase,
         IdlException, IdlEnum, IdlWstringValue, IdlStringValue, IdlTypeCode,
         IdlTypeDesc, IdlBool, IdlFloat, IdlDouble, IdlShort, IdlUShort, IdlLong, IdlULong,
@@ -659,6 +668,9 @@ namespace Ch.Elca.Iiop.Tests {
         }
         public object MapToIdlConcreteInterface(System.Type clsType) {
             return MappingToResult.IdlConcreteIf;
+        }
+        public object MapToIdlLocalInterface(System.Type clsType) {
+            return MappingToResult.IdlLocalIf;
         }
         public object MapToIdlConcreateValueType(System.Type clsType) {
             return MappingToResult.IdlConcreteValue;
@@ -800,6 +812,12 @@ namespace Ch.Elca.Iiop.Tests {
     [RepositoryID("IDL:Ch/Elca/Iiop/Tests/TestConInterface:1.0")]
     public interface TestConInterface {
     }
+    
+    [InterfaceTypeAttribute(IdlTypeInterface.LocalInterface)]
+    [RepositoryID("IDL:Ch/Elca/Iiop/Tests/TestLocalInterface:1.0")]
+    public interface TestLocalInterface {
+    }
+
 
     public class TestRemotableByRef : MarshalByRefObject {
     }
@@ -1032,7 +1050,7 @@ namespace Ch.Elca.Iiop.Tests {
                                                            s_testAction);
 			Assertion.AssertEquals(MappingToResult.IdlAbstractValue, mapResult);	
             mapResult = (MappingToResult)mapper.MapClsType(typeof(TestAbsValInterface), 
-                                                           new AttributeExtCollection(new Attribute[] { new InterfaceTypeAttribute(IdlTypeInterface.AbstractValueType) }),
+                                                           new AttributeExtCollection(),
                                                            s_testAction);
 			Assertion.AssertEquals(MappingToResult.IdlAbstractValue, mapResult);	
         }
@@ -1060,7 +1078,7 @@ namespace Ch.Elca.Iiop.Tests {
                                                                            s_testAction);
             Assertion.AssertEquals(MappingToResult.IdlConcreteIf, mapResult);
             mapResult = (MappingToResult)mapper.MapClsType(typeof(TestConInterface), 
-                                                           new AttributeExtCollection(new Attribute[] { new InterfaceTypeAttribute(IdlTypeInterface.ConcreteInterface) }),
+                                                           new AttributeExtCollection(),
                                                            s_testAction);
             Assertion.AssertEquals(MappingToResult.IdlConcreteIf, mapResult);            
         }
@@ -1068,9 +1086,17 @@ namespace Ch.Elca.Iiop.Tests {
         public void TestMapToIdlAbstractInterface() {
             ClsToIdlMapper mapper = ClsToIdlMapper.GetSingleton();
             MappingToResult mapResult = (MappingToResult)mapper.MapClsType(typeof(TestAbsInterface), 
-                                                                           new AttributeExtCollection(new Attribute[] { new InterfaceTypeAttribute(IdlTypeInterface.AbstractInterface) }),
+                                                                           new AttributeExtCollection(),
                                                                            s_testAction);
             Assertion.AssertEquals(MappingToResult.IdlAbstractIf, mapResult);
+        }
+        
+        public void TestMapToIdlLocalInterface() {
+            ClsToIdlMapper mapper = ClsToIdlMapper.GetSingleton();
+            MappingToResult mapResult = (MappingToResult)mapper.MapClsType(typeof(TestLocalInterface), 
+                                                                           new AttributeExtCollection(),
+                                                                           s_testAction);
+            Assertion.AssertEquals(MappingToResult.IdlLocalIf, mapResult);
         }
         
         public void TestMapToIdlException() {

@@ -40,7 +40,8 @@ namespace Ch.Elca.Iiop.Idl {
     public enum IdlTypeInterface {
         ConcreteInterface,
         AbstractInterface,
-        AbstractValueType
+        LocalInterface,
+        AbstractValueType,
     }
 
 

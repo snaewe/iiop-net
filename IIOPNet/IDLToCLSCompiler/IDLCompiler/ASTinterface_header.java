@@ -30,6 +30,8 @@ public class ASTinterface_header extends SimpleNodeWithIdent {
     #region IFields
     
     private boolean m_isAbstract = false;
+
+    private boolean m_isLocal = false;
     
     #endregion IFields
     #region IConstructors
@@ -54,8 +56,18 @@ public class ASTinterface_header extends SimpleNodeWithIdent {
         return m_isAbstract;
     }
   
-    public void setAbstract(boolean isAbstract) {
-        m_isAbstract = isAbstract;
+    /** make sure to set either abstract or local or none, but not abstract and local */
+    public void setAbstract() {
+        m_isAbstract = true;
+    }
+
+    public boolean isLocal() {
+        return m_isLocal;
+    }
+  
+    /** make sure to set either abstract or local or none, but not abstract and local */
+    public void setLocal() {
+        m_isLocal = true;
     }
     
     #endregion IMethods

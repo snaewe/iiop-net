@@ -31,6 +31,8 @@ public class ASTforward_dcl extends SimpleNodeWithIdent {
     
     private boolean m_isAbstract = false;
 
+    private boolean m_isLocal = false;
+
     #endregion IFields
     #region IConstructors
     
@@ -54,8 +56,16 @@ public class ASTforward_dcl extends SimpleNodeWithIdent {
         return m_isAbstract;
     }
     
-    public void setAbstract(boolean isAbstract) {
-        m_isAbstract = isAbstract;
+    public void setAbstract() {
+        m_isAbstract = true;
+    }
+
+    public boolean isLocal() {
+        return m_isLocal;
+    }
+  
+    public void setLocal() {
+        m_isLocal = true;
     }
     
     #endregion IMethods

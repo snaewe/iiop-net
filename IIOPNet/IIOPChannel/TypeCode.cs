@@ -74,6 +74,7 @@ namespace omg.org.CORBA {
         tk_value_box = 30,
         tk_native = 31,
         tk_abstract_interface = 32,
+        tk_local_interface = 33
     }
 
     
@@ -353,6 +354,16 @@ namespace omg.org.CORBA {
 
         public AbstractIfTC(CdrInputStream cdrStream) : base(cdrStream, TCKind.tk_abstract_interface) { }
         public AbstractIfTC(string repositoryID, string name) : base(repositoryID, name, TCKind.tk_abstract_interface) { }
+
+        #endregion IConstructors
+    }
+
+    internal class LocalIfTC : InterfaceTC {
+        
+        #region IConstructors
+
+        public LocalIfTC(CdrInputStream cdrStream) : base(cdrStream, TCKind.tk_local_interface) { }
+        public LocalIfTC(string repositoryID, string name) : base(repositoryID, name, TCKind.tk_local_interface) { }
 
         #endregion IConstructors
     }
@@ -1192,6 +1203,8 @@ namespace Ch.Elca.Iiop.Marshalling {
                     throw new NotImplementedException("fixed not implemented");
                 case omg.org.CORBA.TCKind.tk_float:
                     return new omg.org.CORBA.FloatTC();
+                case omg.org.CORBA.TCKind.tk_local_interface :
+                    return new omg.org.CORBA.LocalIfTC(sourceStream);
                 case omg.org.CORBA.TCKind.tk_long:
                     return new omg.org.CORBA.LongTC();
                 case omg.org.CORBA.TCKind.tk_longdouble:

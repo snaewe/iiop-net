@@ -286,6 +286,10 @@ namespace Ch.Elca.Iiop.Marshalling {
         public object MapToIdlConcreteInterface(System.Type clsType) {
             return m_marshalByRefSer;
         }
+        public object MapToIdlLocalInterface(System.Type clsType) {
+            // local interfaces are non-marshable
+            throw new MARSHAL(4, CompletionStatus.Completed_MayBe);
+        }
         public object MapToIdlConcreateValueType(System.Type clsType) {
             return m_marshalByValSer;
         }
