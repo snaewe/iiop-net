@@ -70,6 +70,10 @@ public class ASTinterface_header : SimpleNodeWithIdent {
         m_isLocal = true;
     }
     
+    public override string GetIdentification() {
+      return "interface " + getIdent();
+    }
+    
     #endregion IMethods
     
 }

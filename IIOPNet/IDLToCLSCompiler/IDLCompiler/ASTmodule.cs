@@ -39,6 +39,12 @@ public class ASTmodule : SimpleNodeWithIdent {
   public override Object jjtAccept(IDLParserVisitor visitor, Object data) {
     return visitor.visit(this, data);
   }
+  
+  public override string GetIdentification() {
+      return "module " + getIdent();
+  }
+
+  
 }
 
 

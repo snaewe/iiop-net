@@ -16,6 +16,12 @@ public class ASTdefinition : SimpleNode {
   public override Object jjtAccept(IDLParserVisitor visitor, Object data) {
     return visitor.visit(this, data);
   }
+  
+  public override string GetIdentification() {
+      return ((SimpleNode)jjtGetParent()).GetIdentification();
+  }
+
+  
 }
 
 
