@@ -1,4 +1,6 @@
-<H2 class="contentPart">Custom mapping plugin mechanism</H2>
+#include "layout.wml"
+
+<SUBJECT>Custom mapping plugin mechanism</SUBJECT>
 
 <p/>
 This tutorial explains the custom mapping plugin mechanism in IIOP.NET.

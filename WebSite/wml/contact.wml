@@ -1,4 +1,7 @@
-<H2 class="contentPart">Contact</H2>
+#include "layout.wml"
+
+<SUBJECT>Contact</SUBJECT>
+
 <p/>
 <b>ELCA</b>
 <p/>

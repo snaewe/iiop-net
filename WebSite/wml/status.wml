@@ -1,4 +1,6 @@
-<H2 class="contentPart">Project status</H2>
+#include "layout.wml"
+
+<SUBJECT>Project status</SUBJECT>
 
 <p/>
 

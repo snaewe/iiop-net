@@ -1,4 +1,6 @@
-<H2 class="contentPart">Accessing a .NET MarshalByRefObject with RMI/IIOP</H2>
+#include "layout.wml"
+
+<SUBJECT>Accessing a .NET MarshalByRefObject with RMI/IIOP</SUBJECT>
 <p/>
 
 In this tutorial a RMI/IIOP client calls a method on a .NET MarshalByRefObject: an adder.

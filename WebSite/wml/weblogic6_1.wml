@@ -1,4 +1,6 @@
-<H2 class="contentPart">Bea WebLogic 6.1 compatibility howto</H2>
+#include "layout.wml"
+
+<SUBJECT>Bea WebLogic 6.1 compatibility howto</SUBJECT>
 
 <p/>
 <b>Accessing the name service</b> <BR> <BR>

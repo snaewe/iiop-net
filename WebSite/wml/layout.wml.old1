@@ -1,7 +1,18 @@
+# subject tag: used as page title and body title (as H2 contentPart)
+#
+
+<define-tag SUBJECT endtag=required>
+{#SUBJECT#:%body:##}
+</define-tag>
+
+
+# the template
+#
+
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
 <HTML>
 <HEAD>
-<TITLE>IIOP.NET</TITLE>
+<TITLE>IIOP.NET - {#SUBJECT#}</TITLE>
 <link type="text/css" rel="stylesheet" href="style/basic.css">
 </HEAD>
 <BODY style="margin=0px">
@@ -44,10 +55,10 @@
   <TD width="0px" height="4px"></TD>
   <TD height="4px" COLSPAN="9" BGCOLOR="#CC3300"></TD>
 </TR>
-<!--Line 4 -->
+<!--Line 4 + 5 -->
 <TR>
-  <TD width="0" height="141px"></TD>
-  <TD width="120" ROWSPAN="2">
+  <TD width="0"></TD>
+  <TD width="120">
   <!-- menu begin -->
 <P class="menu"/>
 <TABLE border="1" rules="none" STYLE="border-width=0 0 1 0" CELLPADDING="4" CELLSPACING="0" WIDTH="100%" STYLE="BORDER-COLOR:#CC3300; border-style: solid">
@@ -78,6 +89,82 @@ o"></A></TD></TR>
   <!-- menu end -->
 
   </TD>
-  <TD height="121px"></TD>
-  <TD COLSPAN="2" ROWSPAN="4" STYLE="padding-top: 15px; padding-right: 8px">
+  <TD></TD>
+  <TD COLSPAN="2" ROWSPAN="3" STYLE="padding-top: 15px; padding-right: 8px">
   <!-- content begin -->
+  <H2 class="contentPart">{#SUBJECT#}</H2>
+  {#BODY#}
+  <!-- content end -->
+  </TD>
+  <TD BGCOLOR="#000000"></TD>
+  <TD COLSPAN="2" ROWSPAN="3" STYLE="padding-top: 15px; padding-right: 8 px; padding-left: 8px" width="208">
+  <!-- about begin -->
+<H2 class="ABOUT">About this project</H2>
+<p/>
+<B>This project</B> is maintained by <A target="_blank" class="textLink" href="http://www.elca.ch">Elca Informatique SA</A> and
+ was developed in collaboration with
+the <A target="_blank" class="textLink" href="http://www.cs.inf.ethz.ch/gutknecht/index.html">Programming Languages and Runtime Systems Research Group</A> of the ETH-Zurich
+as part of Dominic Ullmann's diploma thesis.
+<p/>
+<A target="_blank" href="http://www.elca.ch"><img src="images/iiop_logo_elca.gif" border="0"/></A>
+<A target="_blank" href="http://www.ethz.ch"><img src="images/iiop_logo_eth.gif" border="0"/></A>
+
+<H2 class="ABOUT">News</H2>
+<p/>
+
+<IFRAME src="newsFeed.html" width="208px" height="100%">
+</IFRAME>
+
+  <!-- about end -->
+  </TD>
+  <TD bgcolor="#666633"></TD>
+  <TD BGCOLOR="#CCCC99" valign="bottom" STYLE="vertical-align: bottom;"><IMG align="bottom" src="images/iiop_border_right1.gif"/></TD>
+  </TR>
+<!--Line 6 -->
+<TR>
+  <TD width="0" height="323"></TD>
+  <TD BGCOLOR="#CC3300"></TD>
+  <TD></TD>
+  <!-- rowspan -->
+  <!-- rowspan -->
+  <TD BGCOLOR="#000000"></TD>
+  <!-- rowspan -->
+  <!-- rowspan -->
+  <TD BGCOLOR="#CCCC99"></TD>
+  <TD BGCOLOR="#CCCC99" height="323px" valign="top"><IMG src="images/iiop_border_right2.gif"/></TD>
+</TR>
+<!--Line 7: extension row -->
+<TR>
+  <TD width="0"></TD>
+  <TD BGCOLOR="#CC3300"></TD>
+  <TD>&nbsp;</TD>
+  <!-- rowspan -->
+  <!-- rowspan -->
+  <TD BGCOLOR="#000000"></TD>
+  <!-- rowspan -->
+  <!-- rowspan -->
+  <TD BGCOLOR="#CCCC99"></TD>
+  <TD BGCOLOR="#CCCC99"></TD>
+</TR>
+<!--Line 8 -->
+<TR>
+  <TD width="0" height="60"></TD>
+  <TD BGCOLOR="#CC3300"></TD>
+  <TD></TD>
+  <TD COLSPAN="2" STYLE="padding-top: 20px;">
+<!-- Disclaimer -->
+&copy; 2003 ELCA All Rights Reserved
+<!-- Disclaimer -->
+  </TD>
+  <TD COLSPAN="3"></TD>
+  <TD BGCOLOR="#CCCC99"></TD>
+  <TD BGCOLOR="#CCCC99" height="60px"></TD>
+</TR>
+</TABLE>
+
+</BODY>
+</HTML>
+
+
+
+{#BODY#:

@@ -1,4 +1,6 @@
-<H2 class="contentPart">Links</H2>
+#include "layout.wml"
+
+<SUBJECT>Links</SUBJECT>
 
 <p/>
 <b>CORBA</b>

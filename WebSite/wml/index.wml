@@ -1,4 +1,6 @@
-<H2 class="contentPart">Overview</H2>
+#include "layout.wml"
+
+<SUBJECT>Overview</SUBJECT>
 <p/>
 
 IIOP.NET allows a seamless interoperation between .NET, CORBA and J2EE distributed objects. This is done by incorporating CORBA/IIOP support into

@@ -1,4 +1,6 @@
-<H2 class="contentPart">Accessing an EJB session bean with .NET remoting</H2>
+#include "layout.wml"
+
+<SUBJECT>Accessing an EJB session bean with .NET remoting</SUBJECT>
 
 <p/>
 In this tutorial a .NET client accesses an adder object hosted in a java EJB.

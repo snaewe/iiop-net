@@ -1,4 +1,6 @@
-<H2 class="contentPart">Documentation</H2>
+#include "layout.wml"
+
+<SUBJECT>Documentation</SUBJECT>
 
 <P/>
 <b>Specifications</b>

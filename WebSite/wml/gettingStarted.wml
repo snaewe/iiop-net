@@ -1,4 +1,6 @@
-<H2 class="contentPart">Getting started</H2>
+#include "layout.wml"
+
+<SUBJECT>Getting started</SUBJECT>
 
 <p/>
 This Tutorial shows you how to setup your system for the following tutorials.

@@ -1,0 +1,80 @@
+##
+#
+# macros.wml
+#
+# this file contains commonly used macros
+#
+#
+
+##
+#
+# FAQ List Generation
+#
+# Usage:
+# <FAQ-SECTION name="section name">
+#   <FAQ question="question 1">answer 1</FAQ>
+#   <FAQ question="question 2">answer 2</FAQ>
+# </FAQ-SECTION>
+#
+# <FAQ-INDEX>    <-- inserts the index
+#
+# <FAQ-ENTRIES>  <-- inserts the entries
+#
+# Variables used: __SECCNT  __FAQCNT
+#
+# Following tags must be defined to customize the faq:
+#   FAQ-SECTION-HEADER  <-- style of an index entry
+#   FAQ-ENTRY-HEADER
+#
+# Following variable must be set:
+#   FAQ-ENTRIES-FILE
+#     file containing the faq entries (default is same file)
+#
+
+<set-var FAQ-ENTRIES-FILE="">
+
+# Reset section count
+#
+<set-var __SECCNT=1>
+
+<define-tag FAQ-SECTION endtag=required>
+	<preserve name>
+	<set-var %attributes>
+{#FAQINDEX#:
+		<FAQ-SECTION-HEADER><get-var __SECCNT>. <get-var name></FAQ-SECTION-HEADER>
+:#FAQINDEX#}
+{#FAQENTRIES#:
+	<FAQ-SECTION-HEADER><get-var __SECCNT>. <get-var name></FAQ-SECTION-HEADER>
+	<set-var __FAQCNT=1>
+	%body
+:#FAQENTRIES#}
+	<increment __SECCNT>
+	<restore name>
+</define-tag>
+
+<define-tag FAQ endtag=required>
+<preserve question>
+<set-var %attributes>
+
+{#FAQINDEX#:
+	<FAQ-ENTRY-HEADER><a href="<get-var FAQ-ENTRIES-FILE>#faq<get-var __SECCNT>_<get-var __FAQCNT>"><get-var __SECCNT>.<get-var __FAQCNT> <get-var question></a></FAQ-ENTRY-HEADER><br>
+:#FAQINDEX#}
+
+{#FAQENTRIES#:
+	<FAQ-ENTRY-HEADER><a name="faq<get-var __SECCNT>_<get-var __FAQCNT>"><get-var __SECCNT>.<get-var __FAQCNT> <get-var question></a></FAQ-ENTRY-HEADER>
+	%body
+	<br><br><br>
+:#FAQENTRIES#}
+
+<increment __FAQCNT>
+<restore question>
+</define-tag>
+
+<define-tag FAQ-INDEX>
+	{#FAQINDEX#}
+</define-tag>
+
+<define-tag FAQ-ENTRIES>
+	{#FAQENTRIES#}
+</define-tag>
+

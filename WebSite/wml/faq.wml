@@ -1,0 +1,20 @@
+#include "layout.wml"
+#include "macros.wml"
+
+<SUBJECT>FAQ List</SUBJECT>
+
+<define-tag FAQ-SECTION-HEADER endtag=required>
+  <H2 class="contentPart">%body</H2>
+</define-tag>
+
+<define-tag FAQ-ENTRY-HEADER endtag=required>
+  <strong>%body</strong>
+</define-tag>
+
+<set-var FAQ-ENTRIES-FILE="">
+
+#include "faq.txt"
+
+<FAQ-INDEX>
+
+<FAQ-ENTRIES>

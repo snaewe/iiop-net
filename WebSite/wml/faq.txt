@@ -1,16 +1,17 @@
-<a name="NET1.1"></a>
-<H2 class="about">Does IIOP.NET work with Microsoft's .NET 1.1?</H2>
+<FAQ-SECTION name="Platform Compatibility">
+
+<FAQ question="Does IIOP.NET work with Microsoft's .NET 1.1?">
 
 <p>
 Yes, it does. This is in fact the platform it was developed on.
+</FAQ>
 
-<a name="CompactNET"></a>
-<H2 class="about">Does IIOP.NET work with Microsoft's Windows CE .NET (Compact Framework)?</H2>
+<FAQ question="Does IIOP.NET work with Microsoft's Windows CE .NET (Compact Framework)?">
 
 <p>No, because Windows CE .NET has no remoting support at all.</p>
+</FAQ>
 
-<a name="intellisense"></a>
-<H2 class="about">Does IIOP.NET support Visual Studio's Intellisense?</H2>
+<FAQ question="Does IIOP.NET support Visual Studio's Intellisense?">
 
 <p>There is an implementation limitation in Intellisense for C#: it cannot
 extract type information from multimodule assemblies, thus you won't be able to 
@@ -20,55 +21,59 @@ while writing C# code.
 <p>This limitation is not present in Intellisense for Visual Basic. Another workaround
 is to merge the multimodule assemblies into a single assembly; we know of a commercial tool
 for this purpose called "Salamander.NET linker".
+</FAQ>
 
-
-<a name="mono"></a>
-<H2 class="about">Does IIOP.NET work with mono?</H2>
+<FAQ question="Does IIOP.NET work with mono?">
 
 <p>
 Currently (mono 0.28) not, but only few features are missing. 
 We are regularly testing IIOP.NET against the mono CVS and reporting the problems we find to the mono team. 
 
 <p>We expect IIOP.NET to work on Mono pretty soon.
+</FAQ>
+</FAQ-SECTION>
+<FAQ-SECTION name="ORB Compatibility">
 
-<a name="WebLogic6"></a>
-<H2 class="about">Can IIOP.NET interoperate with BEA WebLogic 6.1?</H2>
+<FAQ question="Can IIOP.NET interoperate with BEA WebLogic 6.1?">
 
 <p>
 Yes, it can.
 Some hints are provided in the <a href="ejbInterop.html">EJB example tutorial</a> and in 
 the <a href="weblogic6_1.html">WebLogic 6.1 interoperation howto</a>.
+</FAQ>
 
-<a name="WebLogic8"></a>
-<H2 class="about">Can IIOP.NET interoperate with BEA WebLogic 8.1?</H2>
+<FAQ question="Can IIOP.NET interoperate with BEA WebLogic 8.1?">
 
 <p>
 Yes, it can.
 Some hints are provided in the <a href="weblogic8_1.html">Weblogic 8.1 interoperation howto</a>.
+</FAQ>
 
-<a name="Websphere4"></a>
-<H2 class="about">Can IIOP.NET interoperate with IBM Websphere 4?</H2>
+<FAQ question="Can IIOP.NET interoperate with IBM Websphere 4?">
 
 <p>
 Yes, it can.
 Some hints are provided in the <a href="websphere4.html">Websphere 4 interoperation howto</a>.
 
-<a name="Websphere5"></a>
-<H2 class="about">Can IIOP.NET interoperate with IBM Websphere 5?</H2>
+</FAQ>
+<FAQ question="Can IIOP.NET interoperate with IBM Websphere 5?">
 
 <p>
 Yes, it can.
 Some hints are provided in the <a href="websphere5.html">Websphere 5 interoperation howto</a>.
 
-<a name="JBoss32"></a>
-<H2 class="about">Can IIOP.NET interoperate with JBoss 3.2?</H2>
+</FAQ>
+<FAQ question="Can IIOP.NET interoperate with JBoss 3.2?">
 
 <p>
 Yes, it can.
 Some hints are provided in the <a href="jboss3_2.html">JBoss 3.2 interoperation howto</a>.
 
-<a name="mainConfig"></a>
-<H2 class="about">Can the IIOP.NET sources be compiled without any configuration?</H2>
+</FAQ>
+</FAQ-SECTION>
+<FAQ-SECTION name="Configuration">
+
+<FAQ question="Can the IIOP.NET sources be compiled without any configuration?">
 <p>
 To compile the tutorials, you must copy the files <em>ir.idl</em> and <em>orb.idl</em>
 in the <em>./IDL</em> directory before compiling the tutorials. You will find 
@@ -107,8 +112,8 @@ environment variables to be set:
 	</tr>
 </table>
 
-<a name="fileConfig"></a>
-<H2 class="about">Can the IIOP.NET channel be configured with a config-file?</H2>
+</FAQ>
+<FAQ question="Can the IIOP.NET channel be configured with a config-file?">
 <p>
 Yes, it can. <BR> <BR>
 Example:
@@ -144,8 +149,8 @@ The config file is processed with: <BR>
     RemotingConfiguration.Configure(configFile);
 </pre>
 
-<a name="#NUnit2Config"></a>
-<H2 class="about">How do I configure NUnit V2.0 to use the .NET Framework 1.1?</H2>
+</FAQ>
+<FAQ question="How do I configure NUnit V2.0 to use the .NET Framework 1.1?">
 
 <p>
 Add the following configuration lines in the files <code>%NUnit2%\bin\nunit-console.exe.config</code> and <code>%NUnit2%\bin\nunit-gui.exe.config</code>:
@@ -156,8 +161,11 @@ Add the following configuration lines in the files <code>%NUnit2%\bin\nunit-cons
   &lt;/startup&gt; 
 </pre>
 
-<a name="#idltocls"></a>
-<H2 class="about">How do I use the IDLToCLSCompiler?</H2>
+</FAQ>
+</FAQ-SECTION>
+<FAQ-SECTION name="Usage">
+
+<FAQ question="How do I use the IDLToCLSCompiler?">
 
 <p>The IDLToCLSCompiler creates the .NET proxies for one or more IDL files.
 
@@ -211,8 +219,8 @@ generate <code>proxy.dll</code> from <code>def.idl</code> in the current directo
 
 <p>
 
-<a name="#debug"></a>
-<H2 class="about">How do I configure IIOP.NET to generate debug information?</H2>
+</FAQ>
+<FAQ question="How do I configure IIOP.NET to generate debug information?">
 
 <strong>Availability: November 6th 2003 (CVS); release 1.5.1</strong>
 
@@ -229,8 +237,11 @@ generate <code>proxy.dll</code> from <code>def.idl</code> in the current directo
 	nmake rebuild-base
 </pre>
 
-<a name="#stringifiedIOR"></a>
-<H2 class="about">How can I access an object using its stringified IOR?</H2>
+</FAQ>
+</FAQ-SECTION>
+<FAQ-SECTION name="Accessing CORBA objects from IIOP.NET">
+
+<FAQ question="How can I access an object using its stringified IOR?">
 
 <p>
 The following Code reads an stringified IOR from the file iorfile and creates a proxy for
@@ -243,8 +254,8 @@ the remote object represented by the IOR:
                                                                                ior);
 </pre>
 
-<a name="#getIOR"></a>
-<H2 class="about">How can I get the stringified IOR from a proxy object?</H2>
+</FAQ>
+<FAQ question="How can I get the stringified IOR from a proxy object?">
 
 <p>
 The following Code returns the stringified IOR of a remote object, given its local proxy:
@@ -255,8 +266,8 @@ The following Code returns the stringified IOR of a remote object, given its loc
 
 <p>This won't obviously work, when the proxy is created manually with RemotingServices.Connect using a .NET URI or a corbaloc URI. In this case the above call will return the URI used in Connect.
 
-<a name="#corbaLocIIOP"></a>
-<H2 class="about">How can I access an object using its corbaloc:iiop address?</H2>
+</FAQ>
+<FAQ question="How can I access an object using its corbaloc:iiop address?">
 
 <p>
 The following code creates a proxy for the remote object represented by the given corbaloc:
@@ -271,8 +282,8 @@ Note: This feature is only available in IIOP.NET 1.4.0 and above.
 
 
 
-<a name="#callback"></a>
-<H2 class="about">How do I implement a callback?</H2>
+</FAQ>
+<FAQ question="How do I implement a callback?">
 
 IIOP.NET contains two examples using callbacks:
 <ul>
@@ -306,18 +317,19 @@ For each callback, ensure that the following points are fullfilled:
 </ul> 
 
 
-<a name="#PInvokeException"></a>
-<H2 class="about">Exception: Invalid PInvoke metadata format</H2>
+</FAQ>
+</FAQ-SECTION>
+<FAQ-SECTION name="Frequent Errors (Troubleshooting)">
+
+<FAQ question="Exception: Invalid PInvoke metadata format">
 
 <p>This is usually caused by the some backward incompatibility between the .NET framework 1.0 and 1.1:  the error occurs, when you run an application built for .NET framework 1.0 on the .NET framework 1.1.
 
 <p>A detailed description of the problem and possible solutions can be found here:
-<a href="http://msdn.microsoft.com/library/default.asp?url=/library/en-us/dnnetdep/html/sidexsidenet.asp">http://msdn.microsoft.com/library/default.asp?url=/library/en-us/dnnetdep/html/sidexsidenet.asp</a>
+</FAQ>
 
 
-
-<a name="#NoImplementException"></a>
-<H2 class="about">CORBA Exception: No_Implement (minor-code = 1)</H2>
+<FAQ question="CORBA Exception: No_Implement (minor-code = 1)">
 
 <p>The marshaller on the .NET-side cannot find the class implementing the valuetype.
 
@@ -332,8 +344,8 @@ For each callback, ensure that the following points are fullfilled:
 <li><em>XYZImpl</em> implements all the inherited abstract methods and properties
 </ul>
 
-<a name="#1414"></a>
-<H2 class="about">CORBA system exception, completed: Completed_MayBe minor: 1414</H2>
+</FAQ>
+<FAQ question="CORBA system exception, completed: Completed_MayBe minor: 1414">
 
 <P>This exception is thrown by IIOP.NET whenever it receives an object reference of an unknown type.
 The most common errors are:
@@ -342,8 +354,8 @@ The most common errors are:
 <li>the assembly containing the mapped type was not found by IIOP.NET (it must be in the same directory or in the application domain's search path)
 </ul>
 
-<a name="#codeset"></a>
-<H2 class="about">omg.org.CORBA.CODESET_INCOMPATIBLE: CORBA system exception, completed: Completed_No minor: 9501</H2>
+</FAQ>
+<FAQ question="omg.org.CORBA.CODESET_INCOMPATIBLE: CORBA system exception, completed: Completed_No minor: 9501">
 
 Currently, IIOP.NET does only support a limited set of codesets:
 <ul>
@@ -363,5 +375,5 @@ Currently, IIOP.NET does only support a limited set of codesets:
 
 If possible, you sould use UTF8, Latin1 or UTF16.
 
-
-
+</FAQ>
+</FAQ-SECTION>

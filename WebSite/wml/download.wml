@@ -1,4 +1,6 @@
-<H2 class="contentPart">Download</H2>
+#include "layout.wml"
+
+<SUBJECT>Download</SUBJECT>
 
 <p/>
 <b>Binaries</b>

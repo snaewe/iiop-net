@@ -1,4 +1,6 @@
-<H2 class="contentPart">Accessing a RMI/IIOP-based CORBA object with .NET remoting</H2>
+#include "layout.wml"
+
+<SUBJECT>Accessing a RMI/IIOP-based CORBA object with .NET remoting</SUBJECT>
 
 <p/>
 In this tutorial a .NET remoting client calls a method on a RMI/IIOP-based CORBA object: an adder.
