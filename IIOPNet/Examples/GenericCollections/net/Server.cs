@@ -47,6 +47,7 @@ public class Server {
             RemotingServices.Marshal(manager, objectURI);
 			
             Console.WriteLine("server running");
+            Console.WriteLine("press any key to terminate....");
             Console.ReadLine();
         }
 
