@@ -39,39 +39,53 @@ namespace Ch.Elca.Iiop.Idl {
 
         #region IFields
 
-        public Type m_type;
-        public AttributeExtCollection m_attributes;
+        private Type m_type;
+        private AttributeExtCollection m_attributes;
 
         #endregion IFields
         #region IConstructors
         
         public MapTypeInfo(Type type, Util.AttributeExtCollection attributes) {
+            if ((type == null) || (attributes == null)) {
+                throw new ArgumentException("type and attributes must be != null");
+            }
             m_type = type;
-            m_attributes = attributes;
+            m_attributes = attributes;            
         }
         
         #endregion IConstructors
+        #region IProperties
+        
+        public Type Type {
+            get {
+                return m_type;
+            }
+        }
+        
+        public AttributeExtCollection Attributes {
+            get {
+                return m_attributes;
+            }
+        }
+        
+        #endregion IProperties
         #region IMethods
 
         public override bool Equals(object obj) {
-            if (obj == null) { 
+            if (!(obj is MapTypeInfo)) { 
+                return false; 
+            }            
+            if (!Type.Equals(((MapTypeInfo)obj).Type)) { 
                 return false; 
             }
-            if (!(obj.GetType().Equals(typeof(MapTypeInfo)))) { 
-                return false; 
-            }
-            
-            if (!m_type.Equals(((MapTypeInfo)obj).m_type)) { 
-                return false; 
-            }
-            if (!m_attributes.Equals(((MapTypeInfo)obj).m_attributes)) { 
+            if (!Attributes.Equals(((MapTypeInfo)obj).Attributes)) { 
                 return false; 
             }
             return true;
         }
 
         public override int GetHashCode() {
-            return base.GetHashCode();
+            return Type.GetHashCode() ^ Attributes.GetHashCode();
         }
 
         #endregion IMethods

@@ -123,11 +123,13 @@ namespace Ch.Elca.Iiop.Idl {
         private void EndType() {
             // close all opened modules
             CloseOpenScopes(m_openModules.Length);
+            
+            // write includes + map all fwd ref types
+            EndTypeDefinition();
+
             // close protection against redef
             m_currentOutputStream.WriteLine("#endif");
 
-            // write includes
-            EndTypeDefinition();
             // close the stream
             m_currentOutputStream.Close();
             // check for not mapped types in the deps
@@ -136,7 +138,7 @@ namespace Ch.Elca.Iiop.Idl {
             // map non-mapped:
             MapTypeInfo info = m_depManager.GetNextTypeToMap();
             while (info != null) {
-                m_mapper.MapClsType(info.m_type, info.m_attributes, 
+                m_mapper.MapClsType(info.Type, info.Attributes, 
                                     new GenerationActionDefineTypes(m_outputDirectory, m_depManager));
                 info = m_depManager.GetNextTypeToMap();
             }
@@ -202,9 +204,9 @@ namespace Ch.Elca.Iiop.Idl {
             IEnumerator enumerator = typesToMap.GetEnumerator();
             while (enumerator.MoveNext()) {
                 MapTypeInfo info = (MapTypeInfo) enumerator.Current;
-                if (!m_depManager.CheckMapped(info.m_type)) {
+                if (!m_depManager.CheckMapped(info.Type)) {
                     MappingAction mapAction = new GenerationActionDefineTypes(m_outputDirectory, m_depManager);
-                    m_mapper.MapClsType(info.m_type, info.m_attributes, mapAction);
+                    m_mapper.MapClsType(info.Type, info.Attributes, mapAction);
                 }
             }
         }
@@ -216,8 +218,8 @@ namespace Ch.Elca.Iiop.Idl {
             IEnumerator enumerator = forwardDeclTypes.GetEnumerator();
             while (enumerator.MoveNext()) {
                 MapTypeInfo info = (MapTypeInfo) enumerator.Current;
-                Debug.WriteLine("write fwd decl for type: " + info.m_type);
-                m_mapper.MapClsType(info.m_type, info.m_attributes, fwdWriteAction);
+                Debug.WriteLine("write fwd decl for type: " + info.Type);
+                m_mapper.MapClsType(info.Type, info.Attributes, fwdWriteAction);
             }
         }
 
@@ -239,14 +241,13 @@ namespace Ch.Elca.Iiop.Idl {
 
         /// <summary>write include statements for all types in the list</summary>
         private void WriteIncludes(ArrayList forTypes) {
+            GenerationActionWriteInclude includeWriteAction = 
+                new GenerationActionWriteInclude(m_currentOutputStream, m_depManager);
             IEnumerator enumerator = forTypes.GetEnumerator();
             while (enumerator.MoveNext()) {
                 MapTypeInfo info = (MapTypeInfo) enumerator.Current;
-                string idlFileName = m_depManager.GetIdlFileForMappedType(info.m_type);
-                if (idlFileName == null) { 
-                    throw new Exception("internal error in dep-manager, mapped type missing after mapped before: " + info.m_type); 
-                }
-                m_currentOutputStream.WriteLine("#include \"" + idlFileName + "\"");
+                Debug.WriteLine("write include for type: " + info.Type);
+                m_mapper.MapClsType(info.Type, info.Attributes, includeWriteAction);
             }
         }
         
@@ -1074,5 +1075,195 @@ namespace Ch.Elca.Iiop.Idl {
 
 
     }
+    
+    
+    ///<summary>this action writes include directives</summary>
+    internal class GenerationActionWriteInclude : MappingAction {
+
+        #region IFields
+        
+        private TextWriter m_writeTo;
+
+        private DependencyManager m_depManager;
+
+        #endregion IFields
+        #region IConstructors
+
+        public GenerationActionWriteInclude(TextWriter writeTo, DependencyManager depManager) {
+            m_writeTo = writeTo;
+            m_depManager = depManager;
+        }
+
+        #endregion IConstructors
+        #region IMethods
+
+        private void WriteInclude(Type forType) {
+            string idlFileName = m_depManager.GetIdlFileForMappedType(forType);
+            if (idlFileName == null) { 
+                throw new Exception("internal error in dep-manager, mapped type missing after mapped before: " + 
+                                    forType);
+            }
+            m_writeTo.WriteLine("#include \"" + idlFileName + "\"");
+        }        
+        
+        #region Implementation of MappingAction
+        
+        public object MapToIdlAbstractInterface(System.Type dotNetType) {
+            WriteInclude(dotNetType);            
+            return null;
+        }
+
+        public object MapToIdlConcreteInterface(System.Type dotNetType) {
+            WriteInclude(dotNetType);
+            return null;
+        }
+        
+        public object MapToIdlAbstractValueType(System.Type dotNetType) {
+            WriteInclude(dotNetType);
+            return null;
+        }
+
+        public object MapToIdlConcreateValueType(System.Type dotNetType) {
+            WriteInclude(dotNetType);
+            return null;
+        }
+
+        public object MapToIdlBoxedValueType(System.Type dotNetType, AttributeExtCollection attributes, bool isAlreadyBoxed) {
+            WriteInclude(dotNetType);
+            return null;
+        }
+
+        public object MapException(System.Type dotNetType) {
+            WriteInclude(dotNetType);
+            return null;            
+        }
+        
+        public object MapToIdlEnum(System.Type dotNetType) {
+            WriteInclude(dotNetType);
+            return null;            
+        }
+
+        public object MapToIdlStruct(System.Type dotNetType) {
+            WriteInclude(dotNetType);
+            return null;            
+        }
+
+        public object MapToIdlUnion(System.Type dotNetType) {
+            WriteInclude(dotNetType);
+            return null;            
+        }
+        
+        public object MapToIdlLocalInterface(System.Type dotNetType) {
+            WriteInclude(dotNetType);
+            return null;            
+        }
+        
+        public object MapToTypeDesc(System.Type dotNetType) {
+            WriteInclude(dotNetType);
+            return null;            
+        }
+        
+        public object MapToIdlSequence(System.Type dotNetType, int bound) {
+            WriteInclude(dotNetType);
+            return null;            
+        }
+        
+        public object MapToStringValue(System.Type dotNetType) {
+            // ignore, orb.idl is included in every case
+            return null;            
+        }
+        
+        public object MapToWStringValue(System.Type dotNetType) {
+            // ignore, orb.idl is included in every case
+            return null;            
+        }
+        
+        #region unsupported mappings for fwd decls
+
+        public object MapToIdlVoid(System.Type dotNetType) {
+            throw new NotSupportedException("no include possible for this IDL-type");
+        }
+
+        public object MapToIdlBoolean(System.Type dotNetType) {
+            throw new NotSupportedException("no include possible for this IDL-type");
+        }
+
+        public object MapToIdlOctet(System.Type dotNetType) {
+            throw new NotSupportedException("no include possible for this IDL-type");
+        }
+        
+        public object MapToIdlShort(System.Type dotNetType) {
+            throw new NotSupportedException("no include possible for this IDL-type");
+        }
+
+        public object MapToIdlUShort(System.Type dotNetType) {
+            throw new NotSupportedException("no include possible for this IDL-type");
+        }
+
+        public object MapToIdlLong(System.Type dotNetType){
+            throw new NotSupportedException("no include possible for this IDL-type");
+        }
+
+        public object MapToIdlULong(System.Type dotNetType) {
+            throw new NotSupportedException("no include possible for this IDL-type");
+        }
+
+        public object MapToIdlLongLong(System.Type dotNetType) {
+            throw new NotSupportedException("no include possible for this IDL-type");
+        }
+
+        public object MapToIdlULongLong(System.Type dotNetType)    {
+            throw new NotSupportedException("no include possible for this IDL-type");
+        }
+
+        public object MapToIdlFloat(System.Type dotNetType) {
+            throw new NotSupportedException("no include possible for this IDL-type");
+        }
+
+        public object MapToIdlDouble(System.Type dotNetType) {
+            throw new NotSupportedException("no include possible for this IDL-type");
+        }
+
+        public object MapToIdlChar(System.Type dotNetType) {
+            throw new NotSupportedException("no include possible for this IDL-type");
+        }
+
+        public object MapToIdlWChar(System.Type dotNetType)    {
+            throw new NotSupportedException("no include possible for this IDL-type");
+        }
+
+        public object MapToIdlString(System.Type dotNetType) {
+            throw new NotSupportedException("no include possible for this IDL-type");
+        }
+
+        public object MapToIdlWString(System.Type dotNetType) {
+            throw new NotSupportedException("no include possible for this IDL-type");
+        }
+        
+        public object MapToIdlAny(System.Type dotNetType) {
+            throw new NotSupportedException("no include possible for this IDL-type");
+        }
+
+        public object MapToValueBase(System.Type dotNetType) {
+            throw new NotSupportedException("no include possible for this IDL-type");
+        }
+
+        public object MapToAbstractBase(System.Type dotNetType) {
+            throw new NotSupportedException("no include possible for this IDL-type");
+        }
+
+        public object MapToTypeCode(System.Type dotNetType) {
+            throw new NotSupportedException("no include possible for this IDL-type");
+        }
+
+        #endregion
+                
+        #endregion
+
+        #endregion IMethods
+
+
+    }
+
 
 }
