@@ -294,13 +294,13 @@ namespace Ch.Elca.Iiop.MessageHandling {
                     resultMethodName = "_" + methodName;
                 } else if (methodName.StartsWith("_get_")) {
                     // handle properties correctly
-                    PropertyInfo prop = serverType.GetProperty(methodName.Substring(4), BindingFlags.Instance | BindingFlags.Public);
+                    PropertyInfo prop = serverType.GetProperty(methodName.Substring(5), BindingFlags.Instance | BindingFlags.Public);
                     if (prop != null) {
                         resultMethodName = prop.GetGetMethod().Name;
                     }
                 } else if (methodName.StartsWith("_set_")) {
                     // handle properties correctly
-                    PropertyInfo prop = serverType.GetProperty(methodName.Substring(4), BindingFlags.Instance | BindingFlags.Public);
+                    PropertyInfo prop = serverType.GetProperty(methodName.Substring(5), BindingFlags.Instance | BindingFlags.Public);
                     if (prop != null) {
                         resultMethodName = prop.GetSetMethod().Name;
                     }
