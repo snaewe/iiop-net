@@ -41,15 +41,24 @@ import symboltable.Scope;
  */
 public class ModuleBuilderManager {
     
+    #region IFields
+
     private AssemblyBuilder m_asmBuilder;
     private String m_targetAsmName;
 
     private Hashtable m_moduleBuilders = new Hashtable();
 
-    public ModuleBuilderManager(AssemblyBuilder assemblyBuilder, String targetAsmName) {
+    #endregion IFields
+    #region IConstructors
+
+    public ModuleBuilderManager(AssemblyBuilder assemblyBuilder, 
+                                String targetAsmName) {
         m_asmBuilder = assemblyBuilder;
         m_targetAsmName = targetAsmName;
     }
+
+    #endregion IConstructors
+    #region IMethods
 
     /** get a modulebuilder which is responsible for the specified scope */
     public ModuleBuilder GetOrCreateModuleBuilderFor(Scope scope) {
@@ -87,6 +96,8 @@ public class ModuleBuilderManager {
         modName = "_" + m_targetAsmName + modName + ".netmodule";
         return modName;        
     }
+
+    #endregion IMethods
 
     
 }
