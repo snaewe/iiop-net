@@ -318,6 +318,50 @@ For each callback, ensure that the following points are fullfilled:
 
 
 </FAQ>
+
+<FAQ question="How do I implement a command pattern?">
+<p>In the command pattern, you pack the command to execute in a
+parametrized data-structure (usually a CORBA value-type) and pass it to the 
+server, which provides one method that accepts and executes all command types.
+
+<p>You can find an example in <code>Examples/EJBCommandPattern/</code>
+
+<p>A few remarks to the server implementation:
+<ul>
+<li>Define the abstract <code>Command</code> class as <code>Serializable</code>
+<li>All commands classes inherit from Command
+<li>The EJB has method <code>execute</code> with takes at least one parameter of type <code>Command</code>
+(thus acceps all types that are compatible with Command)
+<li>To provide a nice object-oriented implementation, every command
+has a method execute to perform the command; the EJB only forward the call to this
+method (no huge switch-statement needed). We hide this method to the client by creating
+the IDL of the base command class with the option <code>-noValueMethods</code> (note that all other
+command classes should be compiled as usual, using <code>-noValueMethods</code> would hide all their
+getter and setter methods making them much more difficult to implement).
+</ul>
+
+<img src="images/EJBCommandPatternJavaSide.gif" alt="Command pattern, EJB Java-Server side">
+
+<p>A few remarks to the client implementation
+<ul>
+<li>For each command, a new instance of the appropriate command class must be instantiated
+<li>The response from the server is in a different instance as the one sent to it (these are
+value-types, every operation creates a new instance!)
+<li>Here's an example of a simple operation (a command to perform an addition):
+<pre>
+int PerformAddition(int val1, int val2) {
+  DyadicOp cmd = new AddOpImpl();
+  cmd.operand1 = val1;
+  cmd.operand2 = val2;
+  DyadicOp result = (DyadicOp)m_commandTarget.executeCommand(cmd);
+  return result.result;
+}
+</pre>
+</ul>
+
+<img src="images/EJBCommandPatternNETSide.gif" alt="Command pattern, NET-Client side">
+
+</FAQ>
 </FAQ-SECTION>
 
 <FAQ-SECTION name="Accessing .NET Objects from CORBA with IIOP.NET">
