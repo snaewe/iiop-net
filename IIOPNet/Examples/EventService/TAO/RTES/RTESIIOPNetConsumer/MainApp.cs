@@ -150,7 +150,7 @@ namespace RTES {
 			this.txtHost.Name = "txtHost";
 			this.txtHost.Size = new System.Drawing.Size(144, 21);
 			this.txtHost.TabIndex = 6;
-			this.txtHost.Text = "";
+			this.txtHost.Text = "localhost";
 			// 
 			// txtHostPort
 			// 
@@ -158,7 +158,7 @@ namespace RTES {
 			this.txtHostPort.Name = "txtHostPort";
 			this.txtHostPort.Size = new System.Drawing.Size(104, 21);
 			this.txtHostPort.TabIndex = 8;
-			this.txtHostPort.Text = "";
+			this.txtHostPort.Text = "12345";
 			// 
 			// label3
 			// 
@@ -339,7 +339,7 @@ namespace RTES {
 		}
 
 		private void MainApp_Closed(object sender, System.EventArgs e) {
-			if(EventThread.ThreadState == ThreadState.Running) {
+			if ((EventThread != null) && (EventThread.ThreadState == ThreadState.Running)) {
 				EventThread.Abort();
 			}
 		}
