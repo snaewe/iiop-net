@@ -1348,9 +1348,9 @@ public class MetaDataGenerator : IDLParserVisitor {
     }
 
     /**
-     * @see parser.IDLParserVisitor#visit(ASTprimary_expr, Object)
+     * @see parser.IDLParserVisitor#visit(ASTprimary_expr_noLit, Object)
      */
-    public Object visit(ASTprimary_expr node, Object data) {
+    public Object visit(ASTprimary_expr_noLit node, Object data) {
         // possible cases (one child):
         // scoped_name
         // literal

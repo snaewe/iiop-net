@@ -691,10 +691,10 @@ void mult_expr() :
 void unary_expr() :
 { UnaryOps unary_op = UnaryOps.UnaryNone; }
 {
-  [ unary_op = unary_operator() ] primary_expr() 
-  {
-      jjtThis.SetUnaryOperation(unary_op);
-  }
+  LOOKAHEAD(2)
+  [ unary_op = unary_operator() ] primary_expr_noLit() { jjtThis.SetUnaryOperation(unary_op); }
+| 
+  literal() { jjtThis.SetUnaryOperation(UnaryOps.UnaryNone); }
 }
 
 /* Production 37 chapter 3.4 corba 2.3.1 */
@@ -708,14 +708,12 @@ UnaryOps unary_operator() #void :
   "~" { return UnaryOps.UnaryNegate; }
 }
 
-/* Production 38 chapter 3.4 corba 2.3.1 */
+/* Production 38 chapter 3.4 corba 2.3.1; moved literal directly to unery_expr, because otherwise Int64.MinValue leads to ParseException */
 
-void primary_expr() :
+void primary_expr_noLit() :
 {}
 {
   scoped_name()
-|
-  literal()
 |
   "(" const_exp() ")"
 }
@@ -726,6 +724,7 @@ void literal() :
 { Object litVal; }
 {
 (
+  LOOKAHEAD(2)
   litVal = integer_literal() { jjtThis.setLitVal(new IntegerLiteral((Int64)litVal)); }
 |
   litVal = string_literal() { jjtThis.setLitVal(new StringLiteral((String)litVal, false)); }
@@ -738,10 +737,12 @@ void literal() :
   LOOKAHEAD(2)
   litVal = wide_character_literal() { jjtThis.setLitVal(new CharLiteral((Char)litVal, true)); }
 |
+  LOOKAHEAD(2)
   litVal = fixed_pt_literal() { throw new NotSupportedException("fixed point literal not yet supported"); }
 |
+  LOOKAHEAD(2)
   litVal = floating_pt_literal() { jjtThis.setLitVal(new FloatLiteral((Double)litVal)); }
-|
+|  
   litVal = boolean_literal() { jjtThis.setLitVal(new BooleanLiteral((Boolean)litVal)); }
 ) 
 }
@@ -753,7 +754,13 @@ System.Boolean boolean_literal() #void :
 {
   "TRUE" { return true; }
 |
+  LOOKAHEAD(2)  
+  "~" "TRUE" { return false; }
+|
   "FALSE" { return false; }
+|
+  LOOKAHEAD(2)  
+  "~" "FALSE" { return true; }
 }
 
 /* Production 41, chapter 3.4, corba 2.3.1 */
@@ -1350,9 +1357,9 @@ void param_type_spec() :
 /* Production 96, chapter 3.4, corba 2.3.1 */
 
 void fixed_pt_type() :
-{}
+{ }
 {
-	"fixed" "<" positive_int_const() "," positive_int_const() ">"
+    "fixed" "<" positive_int_const() "," positive_int_const() ">"
 }
 
 /* Production 97, chapter 3.4, corba 2.3.1 */
@@ -1382,10 +1389,10 @@ String identifier() #void :
 }
 
 System.Int64 integer_literal() #void :
-{ Token intToken; }
+{ Token intToken; string unaryOp = ""; }
 {
-
-	  intToken = <OCTALINT> { 
+[ "+" | "-" { unaryOp = "-"; } ]
+(	  intToken = <OCTALINT> { 
   								String octVal = intToken.image;
 								// remove leading 0
   								octVal = octVal.Substring(1);
@@ -1393,17 +1400,17 @@ System.Int64 integer_literal() #void :
   								if (octVal.EndsWith("l") || octVal.EndsWith("L") || octVal.EndsWith("u") || octVal.EndsWith("U")) {
   									octVal = octVal.Substring(0, octVal.Length-1); // remove u, U, L, l
   								}
-  								// TODO: // return Long.Parse(octVal, 8);
-								throw new NotSupportedException("octal constants are not yet supported");
+  								octVal = unaryOp + octVal;
+  								return StringToIntConverter.Parse(octVal, 8);
   						    }
 |
 	  intToken = <DECIMALINT> { 
-  								String val = intToken.image;
+  								String val = unaryOp + intToken.image;
   								// check for l, L, u, U at the end
   								if (val.EndsWith("l") || val.EndsWith("L") || val.EndsWith("u") || val.EndsWith("U")) {
   									val = val.Substring(0, val.Length-1); // remove u, U, L, l
   								}
-  								return System.Int64.Parse(val);
+  								return StringToIntConverter.Parse(val, 10);
   							  }
 |
  	  intToken = <HEXADECIMALINT> { 
@@ -1414,9 +1421,10 @@ System.Int64 integer_literal() #void :
   								if (hexVal.EndsWith("l") || hexVal.EndsWith("L") || hexVal.EndsWith("u") || hexVal.EndsWith("U")) {
   									hexVal = hexVal.Substring(0, hexVal.Length-1); // remove u, U, L, l
   								}
-  								return System.Int64.Parse(hexVal, System.Globalization.NumberStyles.AllowHexSpecifier);
+  								hexVal = unaryOp + hexVal;
+  								return StringToIntConverter.Parse(hexVal, 16);
  	  						  }  
-   
+)  
 }
 
 String string_literal() #void :
@@ -1459,36 +1467,45 @@ char wide_character_literal() #void :
 }
 
 System.Double floating_pt_literal() #void :
-{ Token floatLiteral; }
+{ Token floatLiteral; string unaryOp = ""; }
 {
-( (
+[ "+" | "-" { unaryOp = "-"; } ]
+(
+ ( 
+  (
 	     floatLiteral = <FLOATONE> 
 	 |
     	 floatLiteral = <FLOATTWO>
   ) { 
-	  String floatVal = floatLiteral.image;
+	  String floatVal = unaryOp + floatLiteral.image;
       if (floatVal.EndsWith("f") || floatVal.EndsWith("F") || floatVal.EndsWith("l") || floatVal.EndsWith("L")) {
       	floatVal = floatVal.Substring(0, floatVal.Length - 1);
       }
       return Double.Parse(floatVal);
     }
-)
+ )
 |
          "NaN" 
-{
-      return Double.NaN;
+{    
+    return Double.NaN;    
 }
-         |
+|
          "Infinity"
 {
-      return Double.PositiveInfinity;
+    if (unaryOp != "-") {  
+        return Double.PositiveInfinity;
+    } else {
+        return Double.NegativeInfinity;
+    }
 }
+)
 
 }
 
 System.Decimal fixed_pt_literal() #void :
-{ Token fixedLiteral; }
+{ Token fixedLiteral; string unaryOp = ""; }
 {
+    [ "+" | "-" { unaryOp = "-"; } ]
 (
 	   LOOKAHEAD(<FIXED> ".")
 	   fixedLiteral = <FIXED> "." [ <FIXED> ] ( "d" | "D" ) 
@@ -1497,7 +1514,7 @@ System.Decimal fixed_pt_literal() #void :
 	|
 	   fixedLiteral = <FIXED> ( "d" | "D" )
 ) {
-	String fixedVal = fixedLiteral.image;
+	String fixedVal = unaryOp + fixedLiteral.image;
 	if (fixedVal.EndsWith("d") || fixedVal.EndsWith("D")) {
 		fixedVal = fixedVal.Substring(0, fixedVal.Length - 1);
 	}

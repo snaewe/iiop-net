@@ -85,6 +85,27 @@ module IntegrationTests {
 		case TYPE_8:	wstring Field;
 		default: wstring Field;
 	};
+	
+	
+	// test for int / float constant values
+	const long long Max_int = 9223372036854775807;
+	const long long Min_int = -9223372036854775808;
+	const long Zero_val = 0;
+	
+	const long Zero_from_hex = 0x0;
+	const long One_from_hex = 0x1;
+	const long Minus_one_from_hex = -0x1;
+	
+	const float Zero_val_float = 0.0f;
+	const float Minus_one_float = -1.0f;
+	const float Plus_one_float = 1.0f;
+	
+	const float Plus_Inf = Infinity;
+	const float Minus_Inf = -Infinity;
+	
+	
+	
+	
 };
 };
 };

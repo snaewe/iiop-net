@@ -657,6 +657,43 @@ namespace Ch.Elca.Iiop.IntegrationTests {
         public void TestConstant() {
             Int32 constVal = MyConstant.ConstVal;
             Assertion.AssertEquals("wrong constant value", 11, constVal);
+            
+            Int64 maxIntVal = Max_int.ConstVal;
+            Assertion.AssertEquals("wrong constant value", 
+                                   Int64.MaxValue, maxIntVal);            
+            
+            // regression test for BUG #909562
+            Int64 minIntVal = Min_int.ConstVal;
+            Assertion.AssertEquals("wrong constant value", 
+                                   Int64.MinValue, minIntVal);
+                                              
+            Int64 zeroIntVal = Zero_val.ConstVal;
+            Assertion.AssertEquals("wrong constant value", 0, zeroIntVal);
+
+            Int64 zeroFromHex = Zero_from_hex.ConstVal;          	
+            Assertion.AssertEquals("wrong constant value", 0, zeroFromHex);
+            
+            Int64 oneFromHex = One_from_hex.ConstVal;          	
+            Assertion.AssertEquals("wrong constant value", 1, oneFromHex);
+            
+	        Int64 minusOneFromHex = Minus_one_from_hex.ConstVal;          	
+            Assertion.AssertEquals("wrong constant value", -1, minusOneFromHex);
+    
+            Single zeroValFloat = Zero_val_float.ConstVal;
+            Assertion.AssertEquals("wrong constant value", 0.0, zeroValFloat);
+	
+            Single minusOneFloat = Minus_one_float.ConstVal;
+            Assertion.AssertEquals("wrong constant value", -1.0, minusOneFloat);
+            
+            Single plusOneFloat = Plus_one_float.ConstVal;
+            Assertion.AssertEquals("wrong constant value", 1.0, plusOneFloat);
+            
+            Single plus_inf = Plus_Inf.ConstVal;
+            Assertion.AssertEquals("wrong constant value", Single.PositiveInfinity, plus_inf);
+            Single minus_inf = Minus_Inf.ConstVal;
+            Assertion.AssertEquals("wrong constant value", Single.NegativeInfinity, minus_inf);
+            
+            
         }
 
         [Test]

@@ -44,7 +44,7 @@ public interface IDLParserVisitor
   Object visit(ASTadd_expr node, Object data);
   Object visit(ASTmult_expr node, Object data);
   Object visit(ASTunary_expr node, Object data);
-  Object visit(ASTprimary_expr node, Object data);
+  Object visit(ASTprimary_expr_noLit node, Object data);
   Object visit(ASTliteral node, Object data);
   Object visit(ASTpositive_int_const node, Object data);
   Object visit(ASTtype_dcl node, Object data);
