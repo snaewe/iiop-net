@@ -1,6 +1,6 @@
 IDLToCLS=..\..\..\IDLToCLSCompiler\IDLCompiler\bin\IDLToCLSCompiler.exe
 TARGETASMCOLL=javaCollections
-TARGETASMMAP=customCollectionMappings.dll
+TARGETASMMAP=IIOPNetCustomJavaTypeMapping.dll
 IIOPCHANNEL = ..\..\IIOPChannel\bin\IIOPChannel.dll
 BIN=bin\ 
 IDL=IDL\ 

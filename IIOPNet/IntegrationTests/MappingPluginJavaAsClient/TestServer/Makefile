@@ -1,6 +1,7 @@
 IIOPCHANNEL = ..\..\..\IIOPChannel\bin\IIOPChannel.dll
 IIOPCHANNELPDB = ..\..\..\IIOPChannel\bin\IIOPChannel.pdb
 MAPPINGPLUGINDIR = ..\..\..\MappingPlugin\java\ 
+CUSTOMJAVATYPEMAPPING=IIOPNetCustomJavaTypeMapping
 
 LAUNCH=..\..\Utils\launch.exe
 KILL = ..\..\Utils\kill.exe
@@ -21,8 +22,8 @@ $(bin)javaCollections.dll: $(bin) $(MAPPINGPLUGINDIR)\bin\javaCollections.dll
         copy /y $(MAPPINGPLUGINDIR)bin\javaCollections.* $(bin)
         copy /y $(MAPPINGPLUGINDIR)bin\_javaCollections*.netmodule $(bin)
 
-$(bin)customCollectionMappings.dll: $(bin) $(MAPPINGPLUGINDIR)\bin\customCollectionMappings.dll
-        copy /y $(MAPPINGPLUGINDIR)bin\customCollectionMappings.* $(bin)
+$(bin)$(CUSTOMJAVATYPEMAPPING).dll: $(bin) $(MAPPINGPLUGINDIR)\bin\$(CUSTOMJAVATYPEMAPPING).dll
+        copy /y $(MAPPINGPLUGINDIR)bin\$(CUSTOMJAVATYPEMAPPING).* $(bin)
 
 $(bin)customMapping.xml: $(bin) $(MAPPINGPLUGINDIR)customMapping.xml
         copy /y $(MAPPINGPLUGINDIR)customMapping.xml .
@@ -30,7 +31,7 @@ $(bin)customMapping.xml: $(bin) $(MAPPINGPLUGINDIR)customMapping.xml
 $(bin)customGeneratorMapping.xml: $(bin) $(MAPPINGPLUGINDIR)customGeneratorMapping.xml
         copy /y $(MAPPINGPLUGINDIR)customGeneratorMapping.xml $(bin)
 
-build-server: $(bin)IIOPChannel.dll $(bin)customCollectionMappings.dll $(bin)customMapping.xml $(bin)javaCollections.dll *.cs
+build-server: $(bin)IIOPChannel.dll $(bin)$(CUSTOMJAVATYPEMAPPING).dll $(bin)customMapping.xml $(bin)javaCollections.dll *.cs
     csc $(CSFLAGS) /res:customMapping.xml /t:exe /r:$(bin)IIOPChannel.dll /out:$(bin)TestServer.exe TestService.cs TestServer.cs
     
 

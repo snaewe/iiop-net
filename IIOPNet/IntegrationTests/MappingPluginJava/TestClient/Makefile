@@ -2,6 +2,7 @@ NUNIT=$(NUNITV2_HOME)\bin\nunit.framework.dll
 IIOPCHANNEL = ..\..\..\IIOPChannel\bin\IIOPChannel.dll 
 IIOPCHANNELPDB = ..\..\..\IIOPChannel\bin\IIOPChannel.pdb 
 MAPPINGPLUGINDIR=..\..\..\MappingPlugin\java\ 
+CUSTOMJAVATYPEMAPPING=IIOPNetCustomJavaTypeMapping
 bin         = bin\ 
 
 build: build-plugin copy-idl compile-idl build-client
@@ -17,15 +18,15 @@ $(bin)javaCollections.dll: $(bin) $(MAPPINGPLUGINDIR)\bin\javaCollections.dll
 	copy /y $(MAPPINGPLUGINDIR)bin\javaCollections.* $(bin)
 	copy /y $(MAPPINGPLUGINDIR)bin\_javaCollections*.netmodule $(bin)
 
-$(bin)customCollectionMappings.dll: $(bin) $(MAPPINGPLUGINDIR)\bin\customCollectionMappings.dll
-	copy /y $(MAPPINGPLUGINDIR)bin\customCollectionMappings.* $(bin)
+$(bin)$(CUSTOMJAVATYPEMAPPING).dll: $(bin) $(MAPPINGPLUGINDIR)\bin\$(CUSTOMJAVATYPEMAPPING).dll
+	copy /y $(MAPPINGPLUGINDIR)bin\$(CUSTOMJAVATYPEMAPPING).* $(bin)
 
 $(bin)customMapping.xml: $(bin) $(MAPPINGPLUGINDIR)customMapping.xml
 	copy /y $(MAPPINGPLUGINDIR)customMapping.xml $(bin)
 	
 
-build-client: $(bin)IIOPChannel.dll $(bin)customCollectionMappings.dll $(bin)customMapping.xml $(bin)javaCollections.dll *.cs
-	csc $(CSFLAGS) /t:library /r:$(NUNIT) /r:bin\IIOPChannel.dll /r:$(bin)customCollectionMappings.dll /r:$(bin)javaCollections.dll /r:bin\Client.dll /out:bin\ClientTest.dll TestClient.cs ValueTypeImpls.cs
+build-client: $(bin)IIOPChannel.dll $(bin)$(CUSTOMJAVATYPEMAPPING).dll $(bin)customMapping.xml $(bin)javaCollections.dll *.cs
+	csc $(CSFLAGS) /t:library /r:$(NUNIT) /r:bin\IIOPChannel.dll /r:$(bin)$(CUSTOMJAVATYPEMAPPING).dll /r:$(bin)javaCollections.dll /r:bin\Client.dll /out:bin\ClientTest.dll TestClient.cs ValueTypeImpls.cs
 
 
 copy-idl:
