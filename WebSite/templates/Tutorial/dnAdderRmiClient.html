@@ -97,7 +97,7 @@ The NAdderServer class creates an adder and publishes it with .NET Remoting.
 
 In a first step the IiopChannel must be registered with .NET remoting to enable access to .NET Remoting objects using the IIOP.NET channel.
 Afterwards an instance of AdderImpl is created and published.
-The IiopChannel includes a Corba naming service, which encapsulates the .NET remoting nameing service. Therefore registering the adder object
+The IiopChannel includes a CORBA naming service, which encapsulates the .NET remoting nameing service. Therefore registering the adder object
 with a separate CORBA name service is not needed.
 
 
@@ -120,9 +120,8 @@ The two files are compiled in the following way:<BR>
 <b>Implementing the RMI/IIOP Client</b>
 <BR><BR>
 <p><b>Creating IDL for CLS types</b><BR><BR>
-Before creating the java client, the CLS types must be mapped to IDL. In this tutorial the mapping is done by hand accoring to the <A href="documentation.html">CLS -> IDL
-mapping specification</A>. 
-In later versions of IIOP.NET the CLS to IDL generator accomplishes this task automatically.
+Before creating the java client, the CLS types must be mapped to IDL. This is done by the CLS to IDL generator (accoring to the <A href="documentation.html">CLS -> IDL
+mapping specification</A>). 
 <BR>
 The following interface represents the CLS type AdderImpl in OMG ILD:
 <pre>
@@ -144,12 +143,16 @@ The following interface represents the CLS type AdderImpl in OMG ILD:
         };
     };
 </pre>
+<p/>
+Launch the following command in the directory, containing the .NET AdderServer binary, to generate the idl
+in the destination directory JAVA_SOURCES_DIRECTORY: <BR>
+<code>CLSIDLGenerator.exe -o JAVA_SOURCES_DIRECTORY Tutorial.GettingStarted.NAdderServer AdderServer.exe</code>
+
 
 <p><b>Mapping IDL to Java</b><BR><BR>
 In the next step the IDL is mapped to java using the idlj tool.
-To do this, download the <A target="_blank" href="Tutorial/GettingStartedDemo/Part1/Predef.idl">Predef.idl</A> file and the
-<A target="_blank" href="Tutorial/GettingStartedDemo/Part1/AdderImpl.idl">AdderImpl.idl</A> file.
-The predefined CORBA types are provided by the JDK ORB in the files orb.idl and ir.idl. Copy these two files into your source directory too.
+The predefined CORBA types are provided by the JDK ORB in the files orb.idl and ir.idl. Copy these two files into your 
+java source directory JAVA_SOURCES_DIRECTORY.
 Use the following commands to create the needed java classes for the idl:
 <UL>
 <LI><code>idlj AdderImpl.idl</code></LI>

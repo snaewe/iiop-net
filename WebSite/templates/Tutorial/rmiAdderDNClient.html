@@ -7,13 +7,13 @@ This RMI/IIOP adder provides a method to add two double summands.
 <p>
 This tutorial consists of the following three steps:
 <OL>
-<LI>Implementing the Server</LI>
+<LI>Implementing the server</LI>
 <LI>Implementing the client</LI>
 <LI>Running the Demo</LI>
 </OL>
 
 <p/>
-<b>Implementing the RMI/IIOP Server</b>
+<b>Implementing the RMI/IIOP server</b>
 <BR><BR>
 
 In this section the RMI/IIOP adder is implemented. The following source files are created:
@@ -72,7 +72,7 @@ implements the Adder interface.
 The AdderImpl class implements the adder functionality in the add method. <BR>
 
 <p>
-The AdderServer class creates an adder object and publishes it with a Corba naming service:
+The AdderServer class creates an adder object and publishes it with a CORBA naming service:
 <pre>
 
     import javax.naming.InitialContext; 
@@ -150,8 +150,8 @@ The following interface represents the java types Adder and AdderImpl in OMG ILD
 </pre>
 
 <p><b>Mapping IDL to CLS</b><BR><BR>
-In the next step the IDL is mapped to CLS by hand according to the <A href="documentation.html">CLS -> IDL
-mapping specification</A>. In later version of IIOP.NET the IDL to CLS compiler accomplishes this task automatically.
+In the next step the IDL is mapped to CLS using the IDL to CLS compiler (according to the <A href="documentation.html">IDL -> CLS
+mapping specification</A>).
 
 The following CLS type is generated for the above IDL:
 
@@ -171,7 +171,10 @@ namespace Tutorial.GettingStarted {
 </pre>
 
 <p/>
-The file can be downloaded <A target="_blank" href="Tutorial/GettingStartedDemo/Part2/Adder.cs">here</A>.
+Launch the following command in the java sources directory to generate the CLS for the IDL in the .NET source directory N_SOURCES: <BR>
+<code>IDLToCLSCompiler.exe -o N_SOURCES\bin adder.dll Tutorial\GettingStarted\Adder.idl</code>. <BR>
+This creates a CLS multi module assembly containing the CLS types for the IDL.
+
 
 <p><b>Client code</b><br><br>
 Now we are ready to implement the client. The following listing shows the important parts of the implementation:
@@ -227,11 +230,8 @@ The NClient.cs file can be downloaded from <A target="_blank" href="Tutorial/Get
 <p><b>Compiling</b><BR><BR>
 The client is compiled with the following steps:
 <UL>
-<LI>create a directory bin inside the source directory</LI>
 <LI>copy the IIOPChannel.dll into the bin directory</LI>
-<LI>run the following command in the source directory: <BR> 
-    <code>csc /r:bin\IIOPChannel.dll /out:bin\Adder.dll /t:library Adder.cs</code></LI>
-<LI>run the following command in the source directory: <BR> 
+<LI>run the following command in the source directory N_SOURCES: <BR> 
     <code>csc /r:bin\Adder.dll /r:bin\IIOPChannel.dll /out:bin\NClient.exe NClient.cs</code></LI>
 </UL>
 
