@@ -16,9 +16,9 @@ IIOP.NET is provided and supported by ELCA Informatique SA
 OVERVIEW
 --------
 
-This package contains:
+This project contains:
 
-IIOP.NET:
+IIOPChannel:
 	a channel for the .NET framework, which performs
 	serialization and deserialization of CLS objects
 	for the CORBA protocol
@@ -28,13 +28,17 @@ CLSToIDLGenerator:
 IDLToCLSCompiler:
 	a tool for generating CLS metadata for OMG IDL
 	definitions.
-
+Examples:
+	various examples showing the use of IIOP.NET
+IntegrationTests:
+	test files for IIOP.NET
 
 REQUIREMENTS
 ------------
 
 IIOP.NET requires Microsoft's .NET Framework 1.0 and a
 a C# compiler.
+
 The IDLToCLSCompiler requires Microsoft's J# redistributable
 package.
 
