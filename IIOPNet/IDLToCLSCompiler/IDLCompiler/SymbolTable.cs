@@ -63,6 +63,7 @@ public class SymbolTable {
         openPragmaScope("omg.org");
         openScope("CORBA");
         getCurrentScope().addSymbol("TypeCode");
+        getCurrentScope().addSymbol("AbstractBase");
         closeScope();
         closePragmaScope();
     }

@@ -318,7 +318,7 @@ public class MetaDataGenerator : IDLParserVisitor {
         m_symbolTable = symbolTable;
         m_symbolTable.CheckAllFwdDeclsComplete(); // assure symbol table is valid: all fwd decls are defined by a full definition
         // helps to find already declared types
-        m_typeManager = new TypeManager(m_modBuilder, m_typesInRefAsms);
+        m_typeManager = new TypeManager(m_modBuilder, m_typesInRefAsms, symbolTable);
         // ready for code generation
         m_initalized = true;
     }    

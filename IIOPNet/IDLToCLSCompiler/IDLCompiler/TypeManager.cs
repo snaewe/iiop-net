@@ -83,14 +83,23 @@ namespace Ch.Elca.Iiop.IdlCompiler.Action {
         #endregion IFields
         #region IConstructors
 
-        public TypeManager(ModuleBuilder modBuilder, TypesInAssemblyManager refAsmTypes) {
+        public TypeManager(ModuleBuilder modBuilder, TypesInAssemblyManager refAsmTypes,
+                           SymbolTable symTable) {
             m_modBuilder = modBuilder;
             m_refAsmTypes = refAsmTypes;
+            InitalizePredefinedSymbolMappings(symTable);
         }
 
         #endregion IConstructors
         #region IMethods
         
+        private void InitalizePredefinedSymbolMappings(SymbolTable symTable) {
+            Symbol abstrBase = symTable.ResolveScopedNameToSymbol(symTable.getTopScope(),
+                                                                  new ArrayList(new string[] { "omg.org", "CORBA", "AbstractBase" }));
+            m_completeTypeTable[abstrBase] = 
+                new TypeContainer(ReflectionHelper.ObjectType,
+                                  new AttributeExtCollection(new Attribute[] { new ObjectIdlTypeAttribute(IdlTypeObject.AbstractBase) }));
+        }
         
         #region TypeCreation
         
