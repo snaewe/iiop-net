@@ -1685,8 +1685,7 @@ public class MetaDataGenerator implements IDLParserVisitor {
         }
 
         TypeBuilder enumToCreate = null;
-        TypeAttributes typeAttrs = TypeAttributes.Class | TypeAttributes.Public | TypeAttributes.Sealed |
-                                   TypeAttributes.Serializable;
+        TypeAttributes typeAttrs = TypeAttributes.Class | TypeAttributes.Public | TypeAttributes.Sealed;
         if (buildInfo.GetContainterType() == null) {
             // independent dcl
             String fullyQualName = buildInfo.GetBuildScope().getFullyQualifiedNameForSymbol(forSymbol.getSymbolName());
@@ -1713,8 +1712,9 @@ public class MetaDataGenerator implements IDLParserVisitor {
         // add enum entries
         for (int i = 0; i < node.jjtGetNumChildren(); i++) {
             String enumeratorId = ((SimpleNodeWithIdent)node.jjtGetChild(i)).getIdent();
-            enumToCreate.DefineField(enumeratorId, enumToCreate, 
-                                     FieldAttributes.Public | FieldAttributes.Static | FieldAttributes.Literal);
+            FieldBuilder enumVal = enumToCreate.DefineField(enumeratorId, enumToCreate, 
+                                                            FieldAttributes.Public | FieldAttributes.Static | FieldAttributes.Literal);
+            enumVal.SetConstant((System.Int32) i);
         }
 
         // add IDLEnum attribute
