@@ -34,13 +34,14 @@ using System.Collections;
 using System.Reflection;
 using System.Diagnostics;
 using Ch.Elca.Iiop.Idl;
+using omg.org.CORBA;
 
 namespace Ch.Elca.Iiop {
 
     /// <summary>
     /// this class is a handler for the standard corba-ops like _is_a
     /// </summary>
-    public class StandardCorbaOps : MarshalByRefObject, omg.org.CORBA.IObject {
+    public class StandardCorbaOps : MarshalByRefObject, IObject {
 
         #region Constants
 
@@ -60,11 +61,18 @@ namespace Ch.Elca.Iiop {
         #region SConstructor
 
         static StandardCorbaOps() {
-            string standardMethodName = "_is_a";
-            s_standardOpList.Add(standardMethodName);
-        	s_opToCallTable.Add(standardMethodName, 
-        	                    s_type.GetMethod(MapMethodName(standardMethodName), 
+            string isAMethodName = "_is_a";
+            s_standardOpList.Add(isAMethodName);
+        	s_opToCallTable.Add(isAMethodName, 
+        	                    s_type.GetMethod(MapMethodName(isAMethodName), 
         	                                     BindingFlags.Public | BindingFlags.Instance));
+        	
+        	string nonExistMethodName = "_non_existent";
+            s_standardOpList.Add(nonExistMethodName);
+        	s_opToCallTable.Add(nonExistMethodName, 
+        	                    s_type.GetMethod(MapMethodName(nonExistMethodName), 
+        	                                     BindingFlags.Public | BindingFlags.Instance));
+
             
             // TODO: other standard ops
         }
@@ -127,6 +135,10 @@ namespace Ch.Elca.Iiop {
         /// <returns></returns>
         public bool is_a(string objectUri, string repositoryId) {
             Type serverType = RemotingServices.GetServerTypeForUri(objectUri);
+        	if (serverType == null) {
+        		throw new OBJECT_NOT_EXIST(0, CompletionStatus.Completed_No); 
+        	}        	
+        	
             Debug.WriteLine("test if : " + serverType + " _is_a " + repositoryId);
             Type toCheck = Repository.GetTypeForId(repositoryId);
             if (toCheck == null) { return false; }
@@ -139,6 +151,22 @@ namespace Ch.Elca.Iiop {
 
         /// <summary>this method has no implementation, is does only specify the interface of the _is_a method</summary>
         public bool _is_a([WideCharAttribute(false)][StringValueAttribute]string repositoryId) {
+            throw new NotSupportedException("this method should not be called");
+        }
+        
+        /// <summary>
+        /// this is the implementation for the non_existent operation
+        /// </summary>
+        /// <param name="objectUri">the uri of the object, for which this request is performed</param>
+        /// <param name="repositoryId"></param>
+        /// <returns></returns>
+        public bool non_existent(string objectUri) {
+            Type serverType = RemotingServices.GetServerTypeForUri(objectUri);
+        	return (serverType == null);
+        }
+
+        /// <summary>this method has no implementation, is does only specify the interface of the _non_existent method</summary>
+        public bool _non_existent() {
             throw new NotSupportedException("this method should not be called");
         }
 
@@ -157,6 +185,8 @@ namespace omg.org.CORBA {
         
         bool _is_a([WideCharAttribute(false)][StringValueAttribute]string 
                    repositoryId);
+    	
+    	bool _non_existent();
         
     }
 

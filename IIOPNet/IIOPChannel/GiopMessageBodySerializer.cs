@@ -359,6 +359,54 @@ namespace Ch.Elca.Iiop.MessageHandling {
         	}
         	return result;
         }
+        
+        /// <summary>determines method called and adds this information to the message</summary>
+        /// <param name="callForMethod">the MethodInfo of the method targeted in request</param>
+        /// <param name="regularOp">true if regular object operation (non-pseudo op), otherwise false</returns>
+        private void DecodeCall(IMessage toMessage,
+                                string objectUri, string methodName, 
+                                 CdrInputStream cdrStream, GiopVersion version) {
+            MethodInfo callForMethod;
+            bool regularOp;
+            string directedUri = objectUri;                                
+            Type serverType = RemotingServices.GetServerTypeForUri(objectUri);                        
+                                	            
+            string internalMethodName; // the implementation method name
+            if (!StandardCorbaOps.CheckIfStandardOp(methodName)) {
+                regularOp = true; // non-pseude op
+                if (serverType == null) {
+                    throw new OBJECT_NOT_EXIST(0, CompletionStatus.Completed_No); 
+                }
+                // handle object specific-ops
+                callForMethod = DecodeObjectOperation(methodName, serverType);
+                internalMethodName = callForMethod.Name;
+                // to handle overloads correctly, add signature info:
+                Type[] sig = GenerateSigForMethod(callForMethod);
+            	toMessage.Properties.Add(SimpleGiopMsg.METHOD_SIG_KEY, sig);
+            } else {
+                regularOp = false; // pseude-object op
+                // handle standard corba-ops like _is_a
+                callForMethod = DecodeStandardOperation(methodName);
+                MethodInfo internalCall = 
+                    StandardCorbaOps.GetMethodToCallForStandardMethod(callForMethod.Name);
+                if (internalCall == null) {
+                    throw new INTERNAL(2802, CompletionStatus.Completed_MayBe);    
+                }
+                internalMethodName = internalCall.Name;
+                directedUri = StandardCorbaOps.WELLKNOWN_URI; // change object-uri                    
+                serverType = StandardCorbaOps.s_type;
+            }
+            toMessage.Properties.Add(SimpleGiopMsg.URI_KEY, directedUri);
+            toMessage.Properties.Add(SimpleGiopMsg.TYPENAME_KEY, serverType.FullName);
+            toMessage.Properties.Add(SimpleGiopMsg.METHODNAME_KEY, internalMethodName);     
+                                	
+            // deserialse method arguments
+            object[] args = DeserialiseRequestBody(cdrStream, callForMethod,     
+                                                   !regularOp, objectUri, version);
+            toMessage.Properties.Add(SimpleGiopMsg.ARGS_KEY, args);            
+        }
+        
+        
 
         /// <summary>
         /// serialises the message body for a GIOP request
@@ -482,40 +530,10 @@ namespace Ch.Elca.Iiop.MessageHandling {
                 SetCodeSet(cdrStream, conDesc);
                 // request header deserialised
 
-                string calledUri = objectUri; // store received object-uri
                 Type serverType = RemotingServices.GetServerTypeForUri(objectUri);
-                if (serverType == null) { 
-                    throw new OBJECT_NOT_EXIST(0, CompletionStatus.Completed_No); 
-                }
-                MethodInfo calledMethodInfo;
-                bool standardOp = false;
-                if (!StandardCorbaOps.CheckIfStandardOp(methodName)) {
-                    // handle object specific-ops
-                    calledMethodInfo = DecodeObjectOperation(methodName, serverType);
-                    methodName = calledMethodInfo.Name;
-                    // to handle overloads correctly, add signature info:
-                    Type[] sig = GenerateSigForMethod(calledMethodInfo);
-            	    msg.Properties.Add(SimpleGiopMsg.METHOD_SIG_KEY, sig);
-                } else {
-                    // handle standard corba-ops like _is_a
-                    calledMethodInfo = DecodeStandardOperation(methodName);
-                    MethodInfo methodToCall = StandardCorbaOps.GetMethodToCallForStandardMethod(calledMethodInfo.Name);
-                    if (methodToCall == null) {
-                	    throw new INTERNAL(2802, CompletionStatus.Completed_MayBe);    
-                    }
-                    methodName = methodToCall.Name;
-                    objectUri = StandardCorbaOps.WELLKNOWN_URI; // change object-uri
-                    standardOp = true;
-                    serverType = StandardCorbaOps.s_type;
-                }
-                msg.Properties.Add(SimpleGiopMsg.URI_KEY, objectUri);
-                msg.Properties.Add(SimpleGiopMsg.TYPENAME_KEY, serverType.FullName);
-                msg.Properties.Add(SimpleGiopMsg.METHODNAME_KEY, methodName);
-                
-                // deserialise the body of this request
-                object[] args = DeserialiseRequestBody(cdrStream, calledMethodInfo,     
-                                                       standardOp, calledUri, version);
-                msg.Properties.Add(SimpleGiopMsg.ARGS_KEY, args);
+            	DecodeCall(msg, objectUri, methodName, 
+            	           cdrStream, version);            	
+                                
                 MethodCall methodCallInfo = new MethodCall(msg);
                 return methodCallInfo;
             } catch (Exception e) {

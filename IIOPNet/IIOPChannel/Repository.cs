@@ -102,6 +102,8 @@ namespace Ch.Elca.Iiop.Idl {
         // for efficiency reason: the evaluation of the following expressions is cached
         private static Type s_repIdAttrType = typeof(RepositoryIDAttribute);
         private static Type s_supInterfaceAttrType = typeof(SupportedInterfaceAttribute);
+    	
+    	private static Type s_mbrType = typeof(MarshalByRefObject);
 
 
 
@@ -114,6 +116,11 @@ namespace Ch.Elca.Iiop.Idl {
         /// gets a CLS Type for the repository-id
         /// </summary>
         public static Type GetTypeForId(string repId) {
+        	if ((repId == String.Empty) ||
+        	    (repId == "IDL:omg.org/CORBA/Object:1.0")) {
+        	    return s_mbrType;
+        	}        	
+        	
             string typeName = GetTypeNameForId(repId);
             if (typeName != null) {
                 // now try to load the type:

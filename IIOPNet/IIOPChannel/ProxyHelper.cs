@@ -32,6 +32,7 @@ using System;
 using System.Runtime.Remoting;
 using Ch.Elca.Iiop.CorbaObjRef;
 using Ch.Elca.Iiop.Util;
+using omg.org.CORBA;
 
 namespace Ch.Elca.Iiop {
 
@@ -44,29 +45,18 @@ namespace Ch.Elca.Iiop {
         }
 
         #endregion IConstructors
-        #region IMethods
+        #region SMethods
 
         /// <summary>
         /// returns a stringified ior for the proxy
         /// </summary>
+        [Obsolete("use object_to_string from OrbServices instead")]
         public static string GetIorForProxy(object proxy) {
-            MarshalByRefObject mbrProxy = proxy as MarshalByRefObject;
-            if ((mbrProxy == null) || (!RemotingServices.IsTransparentProxy(proxy))) {
-                throw new ArgumentException("argument is not a proxy");
-            }
-            string uri = RemotingServices.GetObjectUri(mbrProxy);
-            if (!IiopUrlUtil.IsUrl(uri)) {
-                throw new ArgumentException("unknown url type for proxy: " + uri);
-            }
-            if (IiopUrlUtil.IsIorString(uri)) {
-                return uri;
-            } else {
-                // create an IOR assuming type is CORBA::Object
-                return IiopUrlUtil.CreateIorForUrl(uri, "").ToString();
-            }
-        }
+            OrbServices orbSvc = OrbServices.GetSingleton();
+        	return orbSvc.object_to_string(proxy);
+        }                
 
-        #endregion IMethods
+        #endregion SMethods
 
     }
 

@@ -789,13 +789,35 @@ namespace Ch.Elca.Iiop.IntegrationTests {
 
         [Test]
         public void TestIsACall() {
-	    omg.org.CORBA.IObject proxy1 = (omg.org.CORBA.IObject)m_testService.GetSimpleService1();
+        	omg.org.CORBA.IObject proxy1 = (omg.org.CORBA.IObject)m_testService.GetSimpleService1();
             Assertion.AssertNotNull("testSimpleService1 ref not received", proxy1);            
             Assertion.AssertEquals(true, proxy1._is_a("IDL:Ch/Elca/Iiop/IntegrationTests/TestSimpleInterface1:1.0"));
             
             omg.org.CORBA.IObject proxy2 = (omg.org.CORBA.IObject)m_testService.GetSimpleService2();
             Assertion.AssertNotNull("testSimpleService2 ref not received", proxy2);
             Assertion.AssertEquals(true, proxy2._is_a("IDL:Ch/Elca/Iiop/IntegrationTests/TestSimpleInterface2:1.0"));
+        	
+        	
+        	// test using ORBServices
+        	omg.org.CORBA.OrbServices orb = omg.org.CORBA.OrbServices.GetSingleton();
+        	Assertion.AssertEquals(true, orb.is_a(proxy1, typeof(TestSimpleInterface1)));
+        	Assertion.AssertEquals(true, orb.is_a(proxy2, typeof(TestSimpleInterface2)));
+        	// target object implements both interfaces
+        	Assertion.AssertEquals(true, orb.is_a(proxy1, typeof(TestSimpleInterface2)));
+        	Assertion.AssertEquals(true, orb.is_a(proxy2, typeof(TestSimpleInterface1)));
+        	
+        	Assertion.AssertEquals(false, orb.is_a(m_testService, typeof(TestSimpleInterface1)));
+        	Assertion.AssertEquals(false, orb.is_a(m_testService, typeof(TestSimpleInterface2)));
+        }
+        
+        [Test]
+        public void TestNonExistentCall() {        	
+        	// test using ORBServices
+        	omg.org.CORBA.OrbServices orb = omg.org.CORBA.OrbServices.GetSingleton();
+
+        	Assertion.AssertEquals(false, orb.non_existent(m_testService));
+        	object nonExObject = orb.string_to_object("iiop://localhost:8087/someNonExistingObject");
+        	Assertion.AssertEquals(true, orb.non_existent(nonExObject));
         }
         
 

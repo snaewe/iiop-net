@@ -154,6 +154,13 @@ namespace Ch.Elca.Iiop.CorbaObjRef {
                 return m_typId; 
             }
         }
+        
+        /// <summary>the type represented by typeid</summary>
+        public Type Type {
+        	get {
+                return Repository.GetTypeForId(m_typId);
+        	}
+        }
 
         /// <summary>the hostname of the default InternetIIOPProfile</summary>
         public string HostName {
