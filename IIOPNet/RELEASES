@@ -20,7 +20,7 @@ changes:
 
 - loading of assemblies for serialisation / deserialisation improved:
   now considers RelativeSearchPath of Appdomain
-- chunked value types deserialisation problems corrected
+- chunked encoded value types deserialisation problems corrected
 - imporved mapping of type/method-names
 - CLS server objects; support for is_a CORBA standard methods reestablished
 - EJBChatRoom refactoring: ChatroomClients renamed to ChatroomServer
