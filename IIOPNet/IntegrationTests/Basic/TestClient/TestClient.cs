@@ -787,6 +787,8 @@ namespace Ch.Elca.Iiop.IntegrationTests {
             arg4[0] = 1;
             System.Int32[] result4 = (System.Int32[]) m_testService.EchoAnything(arg4);
             Assertion.AssertEquals(arg4[0], result4[0]);
+
+            TestJaggedArrays(); // problems with name mapping possible -> make sure to check afterwards
         }
                 
         [Test]

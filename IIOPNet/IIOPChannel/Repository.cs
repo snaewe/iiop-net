@@ -119,31 +119,48 @@ namespace Ch.Elca.Iiop.Idl {
                 (repId == "IDL:omg.org/CORBA/Object:1.0")) {
                 return ReflectionHelper.MarshalByRefObjectType;
             }           
-            
-            string typeName = GetTypeNameForId(repId);
-            if (typeName != null) {
+            Type result = null;
+            string typeNameAssumeIdlMapped = GetTypeNameForId(repId, true);
+            if (typeNameAssumeIdlMapped != null) {
                 // now try to load the type:
-                Type result = LoadType(typeName);
-                if ((result == null) && (repId.StartsWith("IDL"))) {
-                    // check, if type can be found, if it's assumed, that repId represents a type, which was
-                    // mapped from IDL to CLS and a name mapping special case prevented the type from being found.
-                    string alternativeTypeName = GetTypeNameForIDLId(repId, true);
-                    result = LoadType(alternativeTypeName);
+                // check, if type with correct repository id can be found, 
+                // if it's assumed, that repId represents a type, which was
+                // mapped from IDL to CLS
+                result = LoadType(typeNameAssumeIdlMapped);
+                bool isRepIdCorrect = false;
+                if (result != null) {
+                    try {
+                        isRepIdCorrect = GetRepositoryID(result) == repId;
+                    } catch (Exception) {
+                        // for types in construction, not supported -> ignore
+                    }
                 }
-                return result;
-            } else {
-                return null;
+                if (result == null || !isRepIdCorrect) {
+                    // check, if type can be found, if a native CLS type mapped to idl is assumed.
+                    string typeNameAssumeCls = GetTypeNameForId(repId, false);
+                    if (typeNameAssumeCls != null) {
+                        result = LoadType(typeNameAssumeCls);
+                    }
+                }
             }
+            return result;
         }
 
         /// <summary>
         /// gets the fully qualified type name for the repository-id
         /// </summary>
         internal static string GetTypeNameForId(string repId) {
+            return GetTypeNameForId(repId, false);
+        }
+
+        /// <summary>
+        /// gets the fully qualified type name for the repository-id
+        /// </summary>
+        private static string GetTypeNameForId(string repId, bool assumeMappedFromIdl) {
             if (repId.StartsWith("RMI")) {
                 return GetTypeNameForRMIId(repId);
             } else if (repId.StartsWith("IDL")) {
-                return GetTypeNameForIDLId(repId, false);
+                return GetTypeNameForIDLId(repId, assumeMappedFromIdl);
             } else {
                 return null; // unknown
             }
