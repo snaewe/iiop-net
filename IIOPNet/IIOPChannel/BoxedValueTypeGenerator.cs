@@ -366,6 +366,10 @@ namespace Ch.Elca.Iiop.Idl {
             ILGenerator bodyGen = getMethodBuilder.GetILGenerator();
             bodyGen.Emit(OpCodes.Ldarg_0); // load this
             bodyGen.Emit(OpCodes.Ldfld, valField); // load the field m_val
+            if (valField.FieldType.IsValueType) {
+                // need to box, because formal return parameter is object
+                bodyGen.Emit(OpCodes.Box, valField.FieldType);
+            }            
             bodyGen.Emit(OpCodes.Ret);
             // DefineMethodOverride is not callable, override is default, DefineMethodOverride is only used with interfaces to specify the method to override --> DefineMethodOveride is only useful, when no entry in the vtable in a base class exists for the method
         }
@@ -452,15 +456,17 @@ namespace Ch.Elca.Iiop.Idl {
             bodyGen.Emit(OpCodes.Ldarg_0); // load this
             ConstructorInfo baseConstr = ReflectionHelper.BoxedValueBaseType.GetConstructor(Type.EmptyTypes);
             bodyGen.Emit(OpCodes.Call, baseConstr);
-            // check if arg is null --> ArgumentException
-            Label afterNullTest = bodyGen.DefineLabel();
-            bodyGen.Emit(OpCodes.Ldarg_1); // load the parameter
-            bodyGen.Emit(OpCodes.Brtrue_S, afterNullTest); // branch to after the null test if not null
-            bodyGen.Emit(OpCodes.Ldstr, "boxed-value-constr: arg may not be null");
-            ConstructorInfo argExConstr = typeof(ArgumentException).GetConstructor(new Type[] { ReflectionHelper.StringType } );
-            bodyGen.Emit(OpCodes.Newobj, argExConstr); // create an argument exception instance
-            bodyGen.Emit(OpCodes.Throw); // throw the exception
-            bodyGen.MarkLabel(afterNullTest); // set the afterNullTest Label position to after the null test block
+            // check if arg is null (if it's a reference type) --> ArgumentException
+            if (!valField.FieldType.IsValueType) {
+                Label afterNullTest = bodyGen.DefineLabel();
+                bodyGen.Emit(OpCodes.Ldarg_1); // load the parameter
+                bodyGen.Emit(OpCodes.Brtrue_S, afterNullTest); // branch to after the null test if not null
+                bodyGen.Emit(OpCodes.Ldstr, "boxed-value-constr: arg may not be null");
+                ConstructorInfo argExConstr = typeof(ArgumentException).GetConstructor(new Type[] { ReflectionHelper.StringType } );
+                bodyGen.Emit(OpCodes.Newobj, argExConstr); // create an argument exception instance
+                bodyGen.Emit(OpCodes.Throw); // throw the exception
+                bodyGen.MarkLabel(afterNullTest); // set the afterNullTest Label position to after the null test block
+            }
             // set the field
             bodyGen.Emit(OpCodes.Ldarg_0); // load this
             bodyGen.Emit(OpCodes.Ldarg_1); // load the arg, which should be stored in the field valField
