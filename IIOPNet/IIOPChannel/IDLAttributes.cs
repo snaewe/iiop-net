@@ -314,9 +314,12 @@ namespace Ch.Elca.Iiop.Idl {
     /// <remarks>
     /// IDL-sequences are mapped to .NET arrays. Because .NET arrays are not mapped to sequences, but instead
     /// to boxed value types, this attribute is used to distingish these cases.
+    /// Together with the sequence attribute for the sequence, all attributes for the element type are also added.
+    /// For sequences of sequences, this means, that a sequence attribute is added for the sequence itself and also
+    /// for the inner sequence.
     /// </remarks>
     [AttributeUsage(AttributeTargets.Parameter | AttributeTargets.ReturnValue | AttributeTargets.Field | AttributeTargets.Property, 
-                    AllowMultiple = false)]
+                    AllowMultiple = true)]
     public sealed class IdlSequenceAttribute : Attribute, IIdlAttribute {
         
         #region IFields
