@@ -186,6 +186,8 @@ namespace Ch.Elca.Iiop.Tests {
         private string m_uri;
         
         private object[] m_args;
+        
+        private bool m_hasVarArgs = false;
     
         public TestMessage(MethodInfo methodToCall, object[] args, string uri) {
             m_methodToCall = methodToCall;
@@ -255,7 +257,10 @@ namespace Ch.Elca.Iiop.Tests {
         
         public bool HasVarArgs {
             get {
-                throw new NotImplementedException();
+                return m_hasVarArgs;
+            }
+            set {
+                m_hasVarArgs = value;
             }
         }
         
@@ -298,6 +303,19 @@ namespace Ch.Elca.Iiop.Tests {
             for (int i = 0; i < expected.Length; i++) {
                 byte data = (byte) cdrIn.ReadOctet();
                 Assertion.AssertEquals(expected[i], data);
+            }
+        }
+        
+        /// <summary>
+        /// skips the service contexts in a request / reply msg
+        /// </summary>
+        private void SkipServiceContexts(CdrInputStream cdrIn) {
+            uint nrOfContexts = cdrIn.ReadULong();
+            // Skip service contexts: not part of this test            
+            for (uint i = 0; i < nrOfContexts; i++) {
+                uint contextId = cdrIn.ReadULong();
+                uint lengthOfContext = cdrIn.ReadULong();
+                cdrIn.ReadPadding(lengthOfContext);
             }
         }
         
@@ -351,15 +369,8 @@ namespace Ch.Elca.Iiop.Tests {
             // now the target method follows: Add (string is terminated by a zero)
             Assertion.AssertEquals(4, cdrIn.ReadULong());
             AssertBytesFollowing(new byte[] { 65, 100, 100, 0}, cdrIn);
-            // now service context is following
-            uint nrOfContexts = cdrIn.ReadULong();
-            // Skip service contexts: not part of this test            
-            for (uint i = 0; i < nrOfContexts; i++) {
-                uint contextId = cdrIn.ReadULong();
-                uint lengthOfContext = cdrIn.ReadULong();
-                cdrIn.ReadPadding(lengthOfContext);
-            }
-            
+            // now service contexts are following
+            SkipServiceContexts(cdrIn);
             // Giop 1.2, must be aligned on 8
             cdrIn.ForceReadAlign(Aligns.Align8);
             // now params are following
@@ -367,8 +378,54 @@ namespace Ch.Elca.Iiop.Tests {
             Assertion.AssertEquals(2, cdrIn.ReadLong());
         }
         
-//        public void TestReplySerialisation() {
-//        }
+        public void TestReplySerialisation() {
+            // request msg the reply is for
+            MethodInfo methodToCall = typeof(TestService).GetMethod("Add");
+            object[] args = new object[] { ((Int32) 1), ((Int32) 2) };
+            string uri = "iiop://localhost:8087/testuri"; // Giop 1.2 will be used because no version spec in uri
+            TestMessage msg = new TestMessage(methodToCall, args, uri);
+            // create the reply
+            ReturnMessage retMsg = new ReturnMessage((Int32) 3, new object[0], 0, null, msg);
+            
+            GiopMessageHandler handler = GiopMessageHandler.GetSingleton();
+            MemoryStream targetStream = new MemoryStream();
+
+            handler.SerialiseOutgoingReplyMessage(retMsg, new GiopVersion(1, 2), 5, targetStream);
+            
+            // check to serialised stream
+            targetStream.Seek(0, SeekOrigin.Begin);
+
+            CdrInputStreamImpl cdrIn = new CdrInputStreamImpl(targetStream);
+            cdrIn.ConfigStream(0, new GiopVersion(1, 2));
+            
+            // first is Giop-magic
+            byte data;
+            AssertBytesFollowing(m_giopMagic, cdrIn);
+            // Giop version
+            data = (byte) cdrIn.ReadOctet();
+            Assertion.AssertEquals(1, data);
+            data = (byte) cdrIn.ReadOctet();
+            Assertion.AssertEquals(2, data);
+            // flags: big-endian, no fragements
+            data = (byte) cdrIn.ReadOctet();
+            Assertion.AssertEquals(0, data);
+            // Giop Msg type: reply
+            data = (byte) cdrIn.ReadOctet();
+            Assertion.AssertEquals(1, data);
+            // Giop Msg length
+            uint msgLength = cdrIn.ReadULong();
+            cdrIn.SetMaxLength(msgLength);
+            // req-id
+            Assertion.AssertEquals(5, cdrIn.ReadULong());
+            // response status: NO_EXCEPTION
+            Assertion.AssertEquals(0, cdrIn.ReadULong());
+            // ignore service contexts
+            SkipServiceContexts(cdrIn);
+            // Giop 1.2, must be aligned on 8
+            cdrIn.ForceReadAlign(Aligns.Align8);
+            // now return value is following
+            Assertion.AssertEquals(3, cdrIn.ReadLong());
+        }
         
 //        public void TestRequestDeserialisation() {
 //        }
