@@ -229,8 +229,8 @@ Now we are ready to implement the client application. The following listing show
                     ChannelServices.RegisterChannel(channel);
 
                     // access COS nameing service
-                    CorbaInit init = CorbaInit.GetInit();
-                    NamingContext nameService = init.GetNameService(nameServiceHost, nameServicePort);
+                    RmiIiopInit init = new RmiIiopInit(nameServiceHost, nameServicePort);
+                    NamingContext nameService = init.GetNameService();
                     NameComponent[] name = new NameComponent[] { new NameComponent("ch.elca.iiop.demo.ejbAdder.AdderHome", "") };
                     // get the reference to the adder-home
                     AdderHome adderHome = (AdderHome)nameService.resolve(name);
@@ -259,7 +259,7 @@ Now we are ready to implement the client application. The following listing show
     }
 </pre> <p/>
 An <code>IiopClientChannel</code> instance is registered with the ChannelServices to enable communication using the IIOP.NET channel.
-After this a reference to the CORBA name service provided by the ejb container is obtained, using the CorbaInit class.
+After this a reference to the CORBA name service provided by the ejb container is obtained, using the RmiIiopInit class.
 <BR>
 From this nameservice the client obtains a reference to the ejb home interface. Now using this home interface an adder ejb can be
 created.
