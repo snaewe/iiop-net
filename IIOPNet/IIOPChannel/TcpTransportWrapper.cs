@@ -291,7 +291,7 @@ namespace Ch.Elca.Iiop {
         }
         
         /// <summary><see cref="Ch.Elca.Iiop.IServerConnectionListener.StartListening"</summary>
-        public int StartListening(int listeningPortSuggestion, out ITaggedComponent[] additionalTaggedComponents) {
+        public int StartListening(IPAddress bindTo, int listeningPortSuggestion, out ITaggedComponent[] additionalTaggedComponents) {
             if (!m_isInitalized) {
                 throw CreateNotInitalizedException();
             }
@@ -299,10 +299,9 @@ namespace Ch.Elca.Iiop {
                 throw CreateAlreadyListeningException();
             }
             additionalTaggedComponents = new ITaggedComponent[0];
-            int resultPort = listeningPortSuggestion;
+            int resultPort = listeningPortSuggestion;            
             
-            // use IPAddress.Any and not m_myAddress, to allow connections to loopback and normal ip
-            m_listener = new TcpListener(IPAddress.Any, listeningPortSuggestion);            
+            m_listener = new TcpListener(bindTo, listeningPortSuggestion);
             // start TCP-Listening
             m_listener.Start();
             if (listeningPortSuggestion == 0) { 

@@ -61,7 +61,18 @@ namespace Ch.Elca.Iiop {
         internal const string DEFAULT_CHANNEL_NAME = "IIOPChannel";
         internal const int DEFAULT_CHANNEL_PRIORITY = 0;
                 
-        internal const string TRANSPORT_FACTORY = "TransportFactory";
+        /// <summary>
+        /// key in properties to specify a transport factory
+        /// </summary>
+        public const string TRANSPORT_FACTORY_KEY = "TransportFactory";
+        /// <summary>
+        /// key in properties to specify a channel name
+        /// </summary>
+        public const string CHANNEL_NAME_KEY = "name";
+        /// <summary>
+        /// key in properties to specify a channel priority
+        /// </summary>
+        public const string PRIORITY_KEY = "priority";
         
         #endregion Constants
         #region IFields
@@ -95,27 +106,33 @@ namespace Ch.Elca.Iiop {
             if (properties != null) {
                 foreach (DictionaryEntry entry in properties) {
                     switch ((string)entry.Key) {
-                        case "name": 
+                        case CHANNEL_NAME_KEY: 
                             m_channelName = (string)entry.Value; 
-                            clientProp["name"] = m_channelName;
-                            serverProp["name"] = m_channelName;
+                            clientProp[CHANNEL_NAME_KEY] = m_channelName;
+                            serverProp[CHANNEL_NAME_KEY] = m_channelName;
                             break;
-                        case "priority": 
+                        case PRIORITY_KEY: 
                             m_channelPriority = Convert.ToInt32(entry.Value); 
-                            clientProp["priority"] = m_channelPriority;
-                            serverProp["priority"] = m_channelPriority;
+                            clientProp[PRIORITY_KEY] = m_channelPriority;
+                            serverProp[PRIORITY_KEY] = m_channelPriority;
                             break;
-                        case "port": 
-                            serverProp["port"] = Convert.ToInt32(entry.Value); 
+                        case IiopServerChannel.PORT_KEY: 
+                            serverProp[IiopServerChannel.PORT_KEY] = Convert.ToInt32(entry.Value); 
                             isServer = true;
                             break;
-                        case "useIpAddress": 
-                            serverProp["useIpAddress"] = Convert.ToBoolean(entry.Value); 
+                        case IiopServerChannel.USE_IPADDRESS_KEY: 
+                            serverProp[IiopServerChannel.USE_IPADDRESS_KEY] = Convert.ToBoolean(entry.Value); 
                             break;
-                        case TRANSPORT_FACTORY:
-                            serverProp[IiopServerChannel.SERVER_TRANSPORT_FACTORY] =
+                        case IiopServerChannel.BIND_TO_KEY:
+                            serverProp[IiopServerChannel.BIND_TO_KEY] = entry.Value; // don't convert here, because conversion is also done in server channel constructor
+                            break;
+                        case IiopServerChannel.MACHINE_NAME_KEY:
+                            serverProp[IiopServerChannel.MACHINE_NAME_KEY] = entry.Value;
+                            break;
+                        case TRANSPORT_FACTORY_KEY:
+                            serverProp[TRANSPORT_FACTORY_KEY] =
                                 entry.Value;
-                            clientProp[IiopClientChannel.CLIENT_TRANSPORT_FACTORY] =
+                            clientProp[TRANSPORT_FACTORY_KEY] =
                                 entry.Value;
                             break;
                         default: 
@@ -210,15 +227,15 @@ namespace Ch.Elca.Iiop {
     public class IiopClientChannel : IChannelSender {
     
         #region Constants
-        
-        internal const string CLIENT_TRANSPORT_FACTORY = "ClientTransportFactory";        
+
+                
         
         #endregion Constants
         #region IFields
 
         private string m_channelName = IiopChannel.DEFAULT_CHANNEL_NAME;
         private int m_channelPriority = IiopChannel.DEFAULT_CHANNEL_PRIORITY;
-
+        
         private IClientChannelSinkProvider m_providerChain;                
         private GiopClientConnectionManager m_conManager;
 
@@ -245,6 +262,10 @@ namespace Ch.Elca.Iiop {
         public IiopClientChannel() {
             InitChannel(new TcpTransportFactory());
         }
+        
+        public IiopClientChannel(IDictionary properties) : 
+            this(properties, new IiopClientFormatterSinkProvider()) {            
+        }
 
         /// <summary>the constructor used by the config file</summary>
         public IiopClientChannel(IDictionary properties, IClientChannelSinkProvider sinkProvider) {
@@ -258,13 +279,13 @@ namespace Ch.Elca.Iiop {
             if (properties != null) {
                 foreach (DictionaryEntry entry in properties) {
                     switch ((string)entry.Key) {
-                        case "name": 
+                        case IiopChannel.CHANNEL_NAME_KEY: 
                             m_channelName = (string)entry.Value; 
                             break;
-                        case "priority": 
+                        case IiopChannel.PRIORITY_KEY: 
                             m_channelPriority = Convert.ToInt32(entry.Value);
                             break;
-                        case CLIENT_TRANSPORT_FACTORY:
+                        case IiopChannel.TRANSPORT_FACTORY_KEY:
                             Type transportFactoryType = Type.GetType((string)entry.Value, true);
                             clientTransportFactory = (IClientTransportFactory)
                                 Activator.CreateInstance(transportFactoryType);
@@ -397,7 +418,14 @@ namespace Ch.Elca.Iiop {
 
         #region Constants
         
-        internal const string SERVER_TRANSPORT_FACTORY = "ServerTransportFactory";
+        public const string PORT_KEY = "port";
+        public const string BIND_TO_KEY = "bindTo";
+        public const string USE_IPADDRESS_KEY = "useIpAddress";
+        /// <summary>
+        /// used to specify the machine name, which should be used by remote clients to connect to this server side;
+        /// if not specified, it is automatically determined or bindTo.ToString() is used if specified.
+        /// </summary>
+        public const string MACHINE_NAME_KEY = "machineName";
         
         #endregion Constants
         #region IFields
@@ -405,11 +433,13 @@ namespace Ch.Elca.Iiop {
         private string m_channelName = IiopChannel.DEFAULT_CHANNEL_NAME;
         private int m_channelPriority = IiopChannel.DEFAULT_CHANNEL_PRIORITY;
 
-        private int m_port = 8085;
+        private int m_port = 8085;        
+        private string m_hostNameToUse;
         private IiopChannelData m_channelData;
 
         private bool m_useIpAddr = true;
-        private IPAddress m_myAddress;
+        private IPAddress m_forcedBind;
+        private string m_forcedHostNameToUse; // the configured hostname to use by remote connectors, may be null
 
         private IServerChannelSinkProvider m_providerChain;
         /// <summary>the standard transport sink for this channel</summary>
@@ -461,29 +491,35 @@ namespace Ch.Elca.Iiop {
             if (properties != null) {
                 foreach (DictionaryEntry entry in properties) {
                     switch ((string)entry.Key) {
-                        case "name": 
+                        case IiopChannel.CHANNEL_NAME_KEY: 
                             m_channelName = (string)entry.Value; 
                             break;
-                        case "priority": 
+                        case IiopChannel.PRIORITY_KEY: 
                             m_channelPriority = Convert.ToInt32(entry.Value); 
                             break;
-                        case "port": 
+                        case PORT_KEY: 
                             m_port = Convert.ToInt32(entry.Value); 
                             break;
-                        case "useIpAddress": 
+                        case BIND_TO_KEY:
+                            m_forcedBind = IPAddress.Parse((string)entry.Value);
+                            break;
+                        case USE_IPADDRESS_KEY: 
                             m_useIpAddr = Convert.ToBoolean(entry.Value); 
                             break;
-                        case SERVER_TRANSPORT_FACTORY:
+                        case MACHINE_NAME_KEY:
+                            m_forcedHostNameToUse = (string)entry.Value;
+                            break;
+                        case IiopChannel.TRANSPORT_FACTORY_KEY:
                             Type transportFactoryType = Type.GetType((string)entry.Value, true);
                             serverTransportFactory = (IServerTransportFactory)
                                 Activator.CreateInstance(transportFactoryType);
                             break;
                         default: 
-                            Trace.WriteLine("unknown property found for IIOPClient channel: " + entry.Key);
+                            Trace.WriteLine("unknown property found for IIOPServer channel: " + entry.Key);
                             break; // ignore, because unknown
                     }
                 }
-            }
+            }            
             InitChannel(serverTransportFactory);
         }
         
@@ -533,9 +569,11 @@ namespace Ch.Elca.Iiop {
             if (m_port < 0) {
                 throw new ArgumentException("illegal port to listen on: " + m_port); 
             }
-            m_connectionListener = 
+            m_hostNameToUse = DetermineMachineNameToUse();
+            SetupChannelData(m_hostNameToUse, m_port, null);
+            m_connectionListener =
                 transportFactory.CreateConnectionListener(new ClientAccepted(this.ProcessClientMessages));
-            SetupChannelData(m_port);
+            
             // create the default provider chain, if no chain specified
             if (m_providerChain == null) {
                 m_providerChain = new IiopServerFormatterSinkProvider();
@@ -551,19 +589,33 @@ namespace Ch.Elca.Iiop {
             // public the handler for generic corba operations
             StandardCorbaOps.SetUpHandler();
         }
-
-        private void SetupChannelData(int listeningPort) {
-            string hostName = Dns.GetHostName();
-            IPHostEntry ipEntry = Dns.GetHostByName(hostName);
-            IPAddress[] ipAddrs = ipEntry.AddressList;
-            if ((ipAddrs == null) || (ipAddrs.Length == 0)) { 
-                throw new Exception("can't determine ip-addr of local machine, abort channel creation"); 
+        
+        private string DetermineMachineNameToUse() {
+            string hostNameToUse;
+            if (m_forcedHostNameToUse != null) {
+                hostNameToUse = m_forcedHostNameToUse;
+            } else if (m_forcedBind != null) {
+                hostNameToUse = m_forcedBind.ToString();
+            } else {            
+                string hostName = Dns.GetHostName();
+                if (m_useIpAddr) {
+                    IPHostEntry ipEntry = Dns.GetHostByName(hostName);
+                    IPAddress[] ipAddrs = ipEntry.AddressList;
+                    if ((ipAddrs == null) || (ipAddrs.Length == 0)) { 
+                        throw new ArgumentException("can't determine ip-addr of local machine, abort channel creation"); 
+                    }                    
+                    hostNameToUse = ipAddrs[0].ToString();
+                } else {
+                    hostNameToUse = hostName;
+                }
             }
-            m_myAddress = ipAddrs[0];
-            if (m_useIpAddr) {
-                m_channelData = new IiopChannelData(m_myAddress.ToString(), listeningPort);
-            } else {
-                m_channelData = new IiopChannelData(hostName, listeningPort);
+            return hostNameToUse;
+        }
+
+        private void SetupChannelData(string hostName, int port, ITaggedComponent[] additionalComponents) {
+            m_channelData = new IiopChannelData(hostName, port);
+            if ((additionalComponents != null) && (additionalComponents.Length > 0)){
+                m_channelData.AddAdditionalTaggedComponents(additionalComponents);
             }
         }
 
@@ -572,13 +624,10 @@ namespace Ch.Elca.Iiop {
             // start Listening
             if (!m_connectionListener.IsListening()) {
                 ITaggedComponent[] additionalComponents;
-                int listeningPort = m_connectionListener.StartListening(m_port, out additionalComponents);
-                if (listeningPort != m_port) {
-                    // recreate channel date for this new port
-                    SetupChannelData(listeningPort);
-                }
-                // now update additional components in the channel data:
-                m_channelData.ReplaceAdditionalTaggedComponents(additionalComponents);
+                // use IPAddress.Any and not a specific ip-address, to allow connections to loopback and normal ip; but if forcedBind use the specified one
+                IPAddress bindTo = (m_forcedBind == null ? IPAddress.Any : m_forcedBind);
+                int listeningPort = m_connectionListener.StartListening(bindTo, m_port, out additionalComponents);
+                SetupChannelData(m_hostNameToUse, listeningPort, additionalComponents);
             }
         }
 
@@ -677,6 +726,11 @@ namespace Ch.Elca.Iiop {
         /// <summary>add passed additional tagged component to all IOR for objects hosted by this appdomain.</summary>
         public void AddAdditionalTaggedComponent(ITaggedComponent taggedComponent) {
             m_additionTaggedComponents.Add(taggedComponent);
+        }
+        
+        /// <summary>adds passed additional tagged components to all IOR for objects hosted by this appdomain.</summary>
+        public void AddAdditionalTaggedComponents(ITaggedComponent[] newTaggedComponents) {
+            m_additionTaggedComponents.AddRange(newTaggedComponents);
         }
         
         /// <summary>replaces the current additional tagged components by the new ones.</summary>

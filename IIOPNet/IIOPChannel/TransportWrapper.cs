@@ -30,6 +30,7 @@
 
 using System;
 using System.IO;
+using System.Net;
 using Ch.Elca.Iiop.CorbaObjRef;
 
 
@@ -132,11 +133,12 @@ namespace Ch.Elca.Iiop {
         
         /// <summary>starts the listing for clients; calls ClientAccepted callback, when a client is accepted.</summary>
         /// <returns>the port the listener is listening on; may be different from listeningPortSuggestion</returns>
+        /// <param name="bindTo">specifies, to which address the listener should be bound to; if unimportant, use IPAddress.Any</param>
         /// <param name="additionalTaggedComponents">gives back the additional components to add to an IOR;
         /// Those additional components hold the additional information needed by clients to connect to this listener.
         /// Can contain an array with 0 elements, if default information in the IOR is enough.
         /// </param>
-        int StartListening(int listeningPortSuggestion, out ITaggedComponent[] additionalTaggedComponents);
+        int StartListening(IPAddress bindTo, int listeningPortSuggestion, out ITaggedComponent[] additionalTaggedComponents);
         
         /// <summary>is this listener active</summary>
         bool IsListening();
