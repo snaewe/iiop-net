@@ -1,0 +1,11 @@
+build: 
+
+	$(MAKE) -C IDLPreprocessor -f Makefile.mono build
+	$(MAKE) -C IDLCompiler -f Makefile.mono build
+
+
+clean:
+
+	$(MAKE) -C IDLPreprocessor -f Makefile.mono clean
+	$(MAKE) -C IDLCompiler -f Makefile.mono clean
+	

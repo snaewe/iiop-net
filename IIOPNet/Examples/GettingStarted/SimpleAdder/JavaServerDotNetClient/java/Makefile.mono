@@ -1,0 +1,24 @@
+IDLType	    = ch.elca.iiop.tutorial.gettingstarted.AdderImpl
+IDLPath     = ch/elca/iiop/tutorial/gettingstarted/
+IMPLPath    = $(IDLPath)AdderImpl
+IFPath      = $(IDLPath)Adder
+RMISTUB     = rmic
+RMI2IDL     = rmic
+IDL         = IDL/
+
+build: build-server build-idl
+
+build-server: *.java $(IFPath).java $(IMPLPath).java
+	javac -classpath . $?
+	$(RMISTUB) -iiop -classpath . $(IDLType)
+
+build-idl: $(IDL)$(IFPath).idl $(IMPLPath).java
+
+$(IDL)$(IFPath).idl: $(IMPLPath).java 
+	[ -d $(IDL) ] || mkdir $(IDL)
+	$(RMI2IDL) -idl -d $(IDL) $(IDLType)
+
+clean:
+	rm -fr $(IDL)
+	rm -fr *.class
+	rm -fr $(IDLPath)*.class	
