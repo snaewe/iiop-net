@@ -156,6 +156,10 @@ public class TestServiceImpl extends PortableRemoteObject implements TestService
     public Object EchoAnything(Object arg) throws RemoteException {
         return arg;
     }
+
+    public Object GetDoubleAsAny(double val) throws RemoteException {
+        return new Double(val);
+    }
         
     /// <summary>
     /// used to check, if a reference passed is equal to this object itself.

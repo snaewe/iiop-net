@@ -76,6 +76,8 @@ public interface TestService extends java.rmi.Remote {
 
     public TestSerializableClassD TestChangeSerilizableD(TestSerializableClassD arg, String newMessage) throws RemoteException;
 
+    public Object GetDoubleAsAny(double val) throws RemoteException;
+
     public Object EchoAnything(Object arg) throws RemoteException;
         
     /// <summary>
