@@ -39,8 +39,9 @@ using Ch.Elca.Iiop.Util;
 namespace omg.org.CORBA {
 
     /// <summary>the type code enumeration</summary>
+    /// <remarks>IDL enums are mapped to CLS with an int32 base type</remarks>
     [IdlEnumAttribute]
-    public enum TCKind : long {
+    public enum TCKind : int {
         tk_null = 0, 
         tk_void = 1,
         tk_short = 2,
@@ -1177,7 +1178,7 @@ namespace Ch.Elca.Iiop.Marshalling {
         #region IMethods
 
         public override object Deserialise(System.Type formal, AttributeExtCollection attributes, CdrInputStream sourceStream) {
-            long kindVal = (long)sourceStream.ReadULong();
+            int kindVal = (int)sourceStream.ReadULong();
             omg.org.CORBA.TCKind kind = (omg.org.CORBA.TCKind)Enum.ToObject(typeof(omg.org.CORBA.TCKind),
                                                                             kindVal);
             switch(kind) {
