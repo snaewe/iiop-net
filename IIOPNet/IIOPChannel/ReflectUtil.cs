@@ -44,6 +44,7 @@ namespace Ch.Elca.Iiop.Util {
         private static Type s_iCustomMarshalledType = typeof(Ch.Elca.Iiop.Marshalling.ICustomMarshalled);
         private static Type s_corbaTypeCodeType = typeof(omg.org.CORBA.TypeCode);
         private static Type s_boxedValueBaseType = typeof(BoxedValueBase);
+        private static Type s_iobjectType = typeof(omg.org.CORBA.IObject);
         
         private static Type s_idlEnumAttributeType = typeof(IdlEnumAttribute);
         private static Type s_implClassAttributeType = typeof(ImplClassAttribute);
@@ -103,6 +104,13 @@ namespace Ch.Elca.Iiop.Util {
         public static Type BoxedValueBaseType {
             get {
                 return s_boxedValueBaseType;
+            }
+        }
+        
+        /// <summary>caches typeof(omg.org.CORBA.IObject)</summary>
+        public static Type IObjectType {
+            get {
+                return s_iobjectType;
             }
         }
 

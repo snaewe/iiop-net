@@ -470,9 +470,11 @@ namespace Ch.Elca.Iiop.Marshalling {
                 }
             }
 
-            if ((!(formal.Equals(ReflectionHelper.MarshalByRefObjectType))) && 
-                 !(formal.IsAssignableFrom(interfaceType))) {
-                // for formal-parameter MarshalByRefObject everything is possible, 
+            if ((!formal.Equals(ReflectionHelper.MarshalByRefObjectType)) && 
+                (!formal.IsAssignableFrom(interfaceType)) &&
+                (!formal.Equals(ReflectionHelper.IObjectType))) {
+                // for formal-parameter MarshalByRefObject and omg.org.CORBA.IObject
+                // everything is possible (i.e. every remote object type can be assigned to it),
                 // the other formal types must be checked
                 if (CheckAssignableRemote(formal, url)) {
                     interfaceType = formal;

@@ -632,9 +632,59 @@ namespace Ch.Elca.Iiop.Tests {
                 ChannelServices.UnregisterChannel(chan);            
             }
         }
+                
+        [Ignore("can prevent the test domain from unloading, find a solution for this before adding definitively")]
+        public void TestLocationForwardOnIsA() {
+            // tests location forward, if we forward on is_a call            
+            IiopChannel chan = new IiopChannel(8090);
+            ChannelServices.RegisterChannel(chan);
+            // publish location fwd target
+            TestService target = new TestService();            
+            string fwdTargetUri = "testuriFwdForIsA";
+            RemotingServices.Marshal(target, fwdTargetUri);
+            
+            // request msg the reply is for
+            MethodInfo methodToCall = typeof(omg.org.CORBA.IObject).GetMethod("_is_a");
+            object[] args = new object[] { "IDL:Ch/Elca/Iiop/Tests/TestService:1.0" };
+            string origUrl = "iiop://localhost:8090/testuri"; // Giop 1.2 will be used because no version spec in uri
+            TestMessage requestMsg = new TestMessage(methodToCall, args, origUrl);
+            // prepare connection desc
+            GiopClientConnectionDesc conDesc = new GiopClientConnectionDesc();
+            
+            try {
+                Stream locFwdStream = PrepareLocationFwdStream("localhost", 8090,
+                                                               target);
+                GiopMessageHandler handler = GiopMessageHandler.GetSingleton();
+                ReturnMessage result = 
+                    (ReturnMessage) handler.ParseIncomingReplyMessage(locFwdStream, requestMsg, conDesc);
+                Assertion.AssertEquals(true, result.ReturnValue);
+                Assertion.AssertEquals(0, result.OutArgCount);                
+            } finally {
+                // unpublish target + channel
+                RemotingServices.Disconnect(target);
+                chan.StopListening(null);
+                ChannelServices.UnregisterChannel(chan);            
+            }
+
+            
+            
+        }
         
         private Stream PrepareLocationFwdStream(string host, short port,
                                                 MarshalByRefObject target) {
+                       
+            // loc fwd ior
+            byte[] objectKey = IiopUrlUtil.GetObjectKeyForObj(target);
+            string repositoryID = Repository.GetRepositoryID(target.GetType());
+            // this server support GIOP 1.2 --> create an GIOP 1.2 profile
+            InternetIiopProfile profile = new InternetIiopProfile(new GiopVersion(1, 2), host,
+                                                                  (ushort)port, objectKey);                           
+            Ior locFwdTarget = new Ior(repositoryID, new IorProfile[] { profile });
+            CdrOutputStreamImpl iorStream = new CdrOutputStreamImpl(new MemoryStream(), 
+                                                                    0, new GiopVersion(1, 2));
+            locFwdTarget.WriteToStream(iorStream);            
+            uint encodedIorLength = (uint)iorStream.GetPosition();
+            
             // create the location fwd reply
             MemoryStream sourceStream = new MemoryStream();
             CdrOutputStreamImpl cdrOut = new CdrOutputStreamImpl(sourceStream, 0, new GiopVersion(1, 2));
@@ -648,7 +698,7 @@ namespace Ch.Elca.Iiop.Tests {
             cdrOut.WriteOctet(1);
             
             // msg-length
-            cdrOut.WriteULong(176);
+            cdrOut.WriteULong(28 + encodedIorLength);
             // request-id
             cdrOut.WriteULong(5);
             // reply-status: location fwd
@@ -662,13 +712,7 @@ namespace Ch.Elca.Iiop.Tests {
             // svc context end            
             // body: 8 aligned
             cdrOut.ForceWriteAlign(Aligns.Align8);
-            // loc fwd ior
-            byte[] objectKey = IiopUrlUtil.GetObjectKeyForObj(target);
-            string repositoryID = Repository.GetRepositoryID(target.GetType());
-            // this server support GIOP 1.2 --> create an GIOP 1.2 profile
-            InternetIiopProfile profile = new InternetIiopProfile(new GiopVersion(1, 2), host,
-                                                                  (ushort)port, objectKey);                           
-            Ior locFwdTarget = new Ior(repositoryID, new IorProfile[] { profile });
+
             locFwdTarget.WriteToStream(cdrOut);
                 
             sourceStream.Seek(0, SeekOrigin.Begin);                
