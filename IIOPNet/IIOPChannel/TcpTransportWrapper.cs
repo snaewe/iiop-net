@@ -241,6 +241,7 @@ namespace Ch.Elca.Iiop {
             ThreadStart listenerStart = new ThreadStart(ListenForMessages);
             m_listenerThread = new Thread(listenerStart);
             m_listenerThread.IsBackground = true;
+            m_listenerThread.Name = "IIOPNet_ServerChannel_TcpPortListener";
         }
         
         private void ListenForMessages() {

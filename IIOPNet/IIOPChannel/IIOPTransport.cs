@@ -395,6 +395,7 @@ namespace Ch.Elca.Iiop {
             Thread handleThread = new Thread(start);
             // do not prevent main thread from exiting on app end:
             handleThread.IsBackground = true;
+            handleThread.Name = "IIOPNet_ServerChannel_RequestHandler";
             handleThread.Start();
         }
 
