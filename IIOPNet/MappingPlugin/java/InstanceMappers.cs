@@ -35,8 +35,8 @@ namespace Ch.Elca.Iiop.JavaCollectionMappers {
 
 
     /// <summary>base class supporting the mapping of collection instances</summary>
-    public class CollectionMapperBase {    	
-    	
+    public class CollectionMapperBase {     
+        
         private static Type s_int16Type = typeof(System.Int16);
         private static Type s_int32Type = typeof(System.Int32);
         private static Type s_int64Type = typeof(System.Int64);
@@ -57,60 +57,60 @@ namespace Ch.Elca.Iiop.JavaCollectionMappers {
         private static Type s_javaBoxBoolean = typeof(java.lang._Boolean);
 
         
-    	/// <summary>boxes an instance of a cls base type into a java primitive box; for non-primitives: 
-    	/// returns instance</summary>    	
-    	protected object BoxClsInstanceIfNeeded(object clsInstance) {
-    		if (s_int16Type.IsInstanceOfType(clsInstance)) {
+        /// <summary>boxes an instance of a cls base type into a java primitive box; for non-primitives: 
+        /// returns instance</summary>      
+        protected object BoxClsInstanceIfNeeded(object clsInstance) {
+            if (s_int16Type.IsInstanceOfType(clsInstance)) {
                 return new java.lang._ShortImpl((System.Int16)clsInstance);
-    		} else if (s_int32Type.IsInstanceOfType(clsInstance)) {
-    		    return new java.lang._IntegerImpl((System.Int32)clsInstance);
-		    } else if (s_int64Type.IsInstanceOfType(clsInstance)) {
-			    return new java.lang._LongImpl((System.Int64)clsInstance);
-    		} else if (s_byteType.IsInstanceOfType(clsInstance)) {
+            } else if (s_int32Type.IsInstanceOfType(clsInstance)) {
+                return new java.lang._IntegerImpl((System.Int32)clsInstance);
+            } else if (s_int64Type.IsInstanceOfType(clsInstance)) {
+                return new java.lang._LongImpl((System.Int64)clsInstance);
+            } else if (s_byteType.IsInstanceOfType(clsInstance)) {
                 return new java.lang._ByteImpl((System.Byte)clsInstance);
-       		} else if (s_singleType.IsInstanceOfType(clsInstance)) {
+            } else if (s_singleType.IsInstanceOfType(clsInstance)) {
                 return new java.lang._FloatImpl((System.Single)clsInstance);
-    		} else if (s_doubleType.IsInstanceOfType(clsInstance)) {
+            } else if (s_doubleType.IsInstanceOfType(clsInstance)) {
                 return new java.lang._DoubleImpl((System.Double)clsInstance);
-    		} else if (s_booleanType.IsInstanceOfType(clsInstance)) {
+            } else if (s_booleanType.IsInstanceOfType(clsInstance)) {
                 return new java.lang._BooleanImpl((System.Boolean)clsInstance);
-    		} else if (s_charType.IsInstanceOfType(clsInstance)) {
+            } else if (s_charType.IsInstanceOfType(clsInstance)) {
                 return new java.lang.CharacterImpl((System.Char)clsInstance);
-    		} else {
-    		    return clsInstance;
-    		}
-    	}    	
-    	    	
+            } else {
+                return clsInstance;
+            }
+        }       
+                
         /// <summary>unboxes a java primitive box to a cls base type; otherwise return the instance unmodified</summary>
         /// <returns>for a boxed java primitive, the unboxed version; otherwise instance</returns>        
-    	protected object UnboxJavaInstanceIfNeeded(object javaInstance) {
-    	    if (s_javaBoxInteger.IsInstanceOfType(javaInstance)) {
-    	    	return ((java.lang._IntegerImpl)javaInstance).intValue();
-	        } else if (s_javaBoxLong.IsInstanceOfType(javaInstance)) {
-		        return ((java.lang._LongImpl)javaInstance).longValue();
-    	    } else if (s_javaBoxShort.IsInstanceOfType(javaInstance)) {
-    	    	return ((java.lang._ShortImpl)javaInstance).shortValue();
-    	    } else if (s_javaBoxByte.IsInstanceOfType(javaInstance)) {
-    	    	return ((java.lang._ByteImpl)javaInstance).byteValue();
-    	    } else if (s_javaBoxDouble.IsInstanceOfType(javaInstance)) {
-    	    	return ((java.lang._DoubleImpl)javaInstance).doubleValue();
-    	    } else if (s_javaBoxFloat.IsInstanceOfType(javaInstance)) {
-    	        return ((java.lang._FloatImpl)javaInstance).floatValue();
-      	    } else if (s_javaBoxBoolean.IsInstanceOfType(javaInstance)) {
-    	        return ((java.lang._BooleanImpl)javaInstance).booleanValue();
-      	    } else if (s_javaBoxCharacter.IsInstanceOfType(javaInstance)) {
-    	        return ((java.lang.CharacterImpl)javaInstance).charValue();
-    	    } else {
+        protected object UnboxJavaInstanceIfNeeded(object javaInstance) {
+            if (s_javaBoxInteger.IsInstanceOfType(javaInstance)) {
+                return ((java.lang._IntegerImpl)javaInstance).intValue();
+            } else if (s_javaBoxLong.IsInstanceOfType(javaInstance)) {
+                return ((java.lang._LongImpl)javaInstance).longValue();
+            } else if (s_javaBoxShort.IsInstanceOfType(javaInstance)) {
+                return ((java.lang._ShortImpl)javaInstance).shortValue();
+            } else if (s_javaBoxByte.IsInstanceOfType(javaInstance)) {
+                return ((java.lang._ByteImpl)javaInstance).byteValue();
+            } else if (s_javaBoxDouble.IsInstanceOfType(javaInstance)) {
+                return ((java.lang._DoubleImpl)javaInstance).doubleValue();
+            } else if (s_javaBoxFloat.IsInstanceOfType(javaInstance)) {
+                return ((java.lang._FloatImpl)javaInstance).floatValue();
+            } else if (s_javaBoxBoolean.IsInstanceOfType(javaInstance)) {
+                return ((java.lang._BooleanImpl)javaInstance).booleanValue();
+            } else if (s_javaBoxCharacter.IsInstanceOfType(javaInstance)) {
+                return ((java.lang.CharacterImpl)javaInstance).charValue();
+            } else {
                 return javaInstance;
-    	    }
-    	}
+            }
+        }
         
     }
 
 
     /// <summary>
     /// maps instances of java.util.ArrayListImpl to instances 
-    ///	of System.Collections.ArrayList and vice versa.
+    /// of System.Collections.ArrayList and vice versa.
     /// </summary>
     public class ArrayListMapper : CollectionMapperBase, ICustomMapper {
      
@@ -122,7 +122,7 @@ namespace Ch.Elca.Iiop.JavaCollectionMappers {
             object[] elements = source.GetElements();
             // check for boxed java base types
             for (int i = 0; i < elements.Length; i++) {
-	            elements[i] = UnboxJavaInstanceIfNeeded(elements[i]);
+                elements[i] = UnboxJavaInstanceIfNeeded(elements[i]);
             }
             result.AddRange(elements);
             return result;
@@ -146,7 +146,7 @@ namespace Ch.Elca.Iiop.JavaCollectionMappers {
 
     /// <summary>
     /// maps instances of java.util.HashMapImpl to instances 
-    ///	of System.Collections.Hashtable and vice versa.
+    /// of System.Collections.Hashtable and vice versa.
     /// </summary>
     public class HashMapMapper : CollectionMapperBase, ICustomMapper {
      
@@ -183,6 +183,39 @@ namespace Ch.Elca.Iiop.JavaCollectionMappers {
             return result;
         }
 
+    }
+    
+    public class DateMapper : ICustomMapper {
+        
+        private static DateTime s_javaOffsetBase = new DateTime(1970, 1, 1, 0, 0, 0);
+    
+        public object CreateClsForIdlInstance(object idlInstance) {
+            java.util._DateImpl source = (java.util._DateImpl)idlInstance;
+            long offsetTicks = source.Offset * TimeSpan.TicksPerMillisecond;      
+            System.DateTime result;
+            if (offsetTicks >= 0) {      
+                 result = s_javaOffsetBase + new TimeSpan(offsetTicks);
+            } else {
+                 result = s_javaOffsetBase - new TimeSpan(offsetTicks * -1);
+            }
+            return result;
+        }
+        
+        public object CreateIdlForClsInstance(object clsInstance) {
+            java.util._DateImpl result = new java.util._DateImpl();
+            System.DateTime source = (System.DateTime)clsInstance;
+             
+            long tickOffset;           
+            if (source >= s_javaOffsetBase) {
+                tickOffset = (source - s_javaOffsetBase).Ticks;
+            } else {
+                tickOffset = -1 * ((s_javaOffsetBase - source).Ticks);
+            }
+            result.Offset = tickOffset / TimeSpan.TicksPerMillisecond;
+            return result;
+        }
+        
+        
     }
 
 

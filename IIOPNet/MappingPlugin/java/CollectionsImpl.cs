@@ -42,8 +42,8 @@ namespace java.util {
         private int m_backArraySize;
     
         public ArrayListImpl() {
-        	m_elements = new object[0];
-        	m_backArraySize = 0;
+            m_elements = new object[0];
+            m_backArraySize = 0;
         }    
 
         #region methods needed by mapper
@@ -101,8 +101,8 @@ namespace java.util {
         }
 
         public int Size {
-        	get {
-        	    return m_elements.Length;
+            get {
+                return m_elements.Length;
             }
         }
 
@@ -274,7 +274,7 @@ namespace java.util {
         public HashMapImpl() {
             m_loadFactor = 0.75f;
             m_capacity = 16; // for websphere 5, capacity 0 is not allowed!
-        	m_buckets = new System.Collections.DictionaryEntry[0];        	
+            m_buckets = new System.Collections.DictionaryEntry[0];          
         }
 
         #endregion IConstructors
@@ -400,6 +400,58 @@ namespace java.util {
 
         #endregion methods needed by mapper
 
+    }
+    
+    
+    
+    [Serializable]
+    public class _DateImpl : _Date {
+    
+        #region IFields
+        
+        private long m_offsetInMillis;
+        
+        #endregion IFields
+        #region IConstructors
+        
+        public _DateImpl() {
+        }
+                
+        #endregion IConstructors
+        #region IProperties
+        
+        /// <summary>offset in milliseconds from January 1, 1970, 00:00:00 GMT 
+        public long Offset {
+            get {
+                return m_offsetInMillis;
+            }
+            set {
+                m_offsetInMillis = value;
+            }
+        }
+        
+        #endregion IProperties
+        #region IMethods
+        
+        public override void Deserialise(Corba.DataInputStream arg) {
+            // skip rmi data
+            arg.read_octet();
+            arg.read_octet();
+            // offset in milliseconds
+            m_offsetInMillis = arg.read_longlong();
+        }
+        
+        public override void Serialize(Corba.DataOutputStream arg) {
+            // rmi data
+            arg.write_octet(1);
+            arg.write_octet(1);
+            // offset in milliseconds
+            arg.write_longlong(m_offsetInMillis);            
+        }
+
+        #endregion IMethods
+        
+                
     }
 
 }
