@@ -52,10 +52,10 @@ public class ModuleBuilderManager {
     }
 
     /** get a modulebuilder which is responsible for the specified scope */
-    public ModuleBuilder getOrCreateModuleBuilderFor(Scope scope) {
+    public ModuleBuilder GetOrCreateModuleBuilderFor(Scope scope) {
         String modName = null;
-        modName = getModuleName(scope);
-        ModuleBuilder result = getModuleBuilderFor(scope);
+        modName = GetModuleName(scope);
+        ModuleBuilder result = GetModuleBuilderFor(scope);
         if (result == null) {    
             // create a new module builder for the scope
             result = m_asmBuilder.DefineDynamicModule(modName, modName);
@@ -64,9 +64,9 @@ public class ModuleBuilderManager {
         return result;
     }
 
-    public ModuleBuilder getModuleBuilderFor(Scope scope) {
+    public ModuleBuilder GetModuleBuilderFor(Scope scope) {
         String modName = null;
-        modName = getModuleName(scope);
+        modName = GetModuleName(scope);
         if (m_moduleBuilders.containsKey(scope)) {
             return (ModuleBuilder)m_moduleBuilders.get(scope);    
         } else if (m_asmBuilder.GetDynamicModule(modName) != null) { // needed if independant idl-files are specified at compiler command line arguments
@@ -77,7 +77,7 @@ public class ModuleBuilderManager {
     }
 
     /** construct the name of the target module */
-    private String getModuleName(Scope scope) {
+    private String GetModuleName(Scope scope) {
         String modName = scope.getFullyQualifiedScopeName();
         modName = modName.replace(':', '_');
         modName = modName.replace('.', '_');

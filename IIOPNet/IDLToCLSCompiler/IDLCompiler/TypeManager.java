@@ -104,7 +104,7 @@ public class TypeManager {
     public Type getTypeFromBuildModule(Symbol forSymbol) {
         Scope declIn = null;
         declIn = forSymbol.getDeclaredIn();
-        ModuleBuilder modBuilder = m_manager.getModuleBuilderFor(declIn);
+        ModuleBuilder modBuilder = m_manager.GetModuleBuilderFor(declIn);
         if (modBuilder != null) {
             String fullName = declIn.getFullyQualifiedNameForSymbol(forSymbol.getSymbolName());
             Type result = modBuilder.GetType(fullName);
