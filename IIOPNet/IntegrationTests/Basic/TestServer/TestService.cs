@@ -100,7 +100,7 @@ namespace Ch.Elca.Iiop.IntegrationTests {
         
         private System.String m_msg = "standard";
 
-        private TestAbstrInterfaceImplByMarshalByVal() {
+        public TestAbstrInterfaceImplByMarshalByVal() {
         }
 
         public TestAbstrInterfaceImplByMarshalByVal(System.String msg) {

@@ -57,7 +57,7 @@ namespace Ch.Elca.Iiop.IntegrationTests {
     
     }
 
-    /* [Serializable]
+    [Serializable]
     public class TestAbstrInterfaceImplByMarshalByValImpl : TestAbstrInterfaceImplByMarshalByVal {
     
         public override System.String Msg {
@@ -66,6 +66,6 @@ namespace Ch.Elca.Iiop.IntegrationTests {
             }
         }
 
-    } */
+    }
 
 }
