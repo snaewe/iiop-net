@@ -1160,19 +1160,27 @@ public class MetaDataGenerator : IDLParserVisitor {
     public Object visit(ASTconst_dcl node, Object data) {
         CheckParameterForBuildInfo(data, node);
         BuildInfo buildInfo = (BuildInfo)data;
+        Scope enclosingScope = buildInfo.GetBuildScope();
+        
+        SymbolValue constSymbol = (SymbolValue)enclosingScope.getSymbol(node.getIdent());
+        // check if type is known from a previous run over a parse tree --> if so: skip
+        // not needed to check if const is nested inside a type, because parent type should already be skipped 
+        // --> code generation for all nested types skipped too
+        if (m_typeManager.CheckSkip(constSymbol)) {
+            return null; 
+        }        
+        Scope targetScope = enclosingScope;
+        if (enclosingScope.IsTypeScope()) {
+            targetScope = buildInfo.GetBuildScope().GetScopeForNested(constSymbol);
+        }
+        
         TypeContainer constType = (TypeContainer)node.jjtGetChild(0).jjtAccept(this, data);
         Literal val = (Literal)node.jjtGetChild(1).jjtAccept(this, data);
-        Scope enclosingScope = buildInfo.GetBuildScope();
-        SymbolValue constSymbol = (SymbolValue)enclosingScope.getSymbol(node.getIdent());        
         if (val == null) {
             throw new InvalidIdlException("constant can't be evaluated: " + constSymbol.getSymbolName());
         }
         // set the value of the constant:
         constSymbol.SetValueAsLiteral(val);
-        Scope targetScope = enclosingScope;
-        if (enclosingScope.IsTypeScope()) {
-            targetScope = buildInfo.GetBuildScope().GetScopeForNested(constSymbol);
-        }
         
         String constContainerName = targetScope.getFullyQualifiedNameForSymbol(constSymbol.getSymbolName());
         TypeBuilder constContainer = m_typeManager.StartTypeDefinition(constSymbol, constContainerName,
