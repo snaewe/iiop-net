@@ -55,20 +55,24 @@ namespace Ch.Elca.Iiop.Idl {
             public Assembly AssemblyResolve(object sender, ResolveEventArgs args) {
                 Debug.WriteLine("custom resolve");
                 Debug.WriteLine("assembly: " + args.Name);
+                string asmSimpleName = args.Name;
+                if (asmSimpleName.IndexOf(",") > 0) {
+                	asmSimpleName = asmSimpleName.Substring(0, asmSimpleName.IndexOf(",")).Trim();
+                }
                 
-                Assembly found = LoadByRelativePath(args.Name + ".dll");
+                Assembly found = LoadByRelativePath(asmSimpleName + ".dll");
                 if (found != null) {
                     return found;
                 }
-                found = LoadByRelativePath(args.Name + ".exe");
+                found = LoadByRelativePath(asmSimpleName + ".exe");
                 if (found != null) {
                     return found;
                 }
-                found = LoadByRelativePath(args.Name + Path.PathSeparator + args.Name + ".dll");
+                found = LoadByRelativePath(asmSimpleName + Path.PathSeparator + asmSimpleName + ".dll");
                 if (found != null) {
                     return found;
                 }
-                found = LoadByRelativePath(args.Name + Path.PathSeparator + args.Name + ".exe");
+                found = LoadByRelativePath(asmSimpleName + Path.PathSeparator + asmSimpleName + ".exe");
                 if (found != null) {
                     return found;
                 }
