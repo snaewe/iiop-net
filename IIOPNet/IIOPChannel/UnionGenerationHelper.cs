@@ -184,7 +184,7 @@ namespace Ch.Elca.Iiop.Idl {
                                        TypeAttributes.BeforeFieldInit | /* TypeAttributes.SequentialLayout | */
                                        TypeAttributes.Sealed | visibility;
 
-            m_builder = modBuilder.DefineType(fullName, typeAttrs, typeof(System.ValueType),
+            m_builder = modBuilder.DefineType(fullName, typeAttrs, ReflectionHelper.ValueTypeType,
                                               new System.Type[] { ReflectionHelper.IIdlEntityType });            
             BeginType();
         }
@@ -251,7 +251,7 @@ namespace Ch.Elca.Iiop.Idl {
         /// </summary>
         private void AddTypeField() {
             m_unionTypeCache = m_ilEmitHelper.AddFieldWithCustomAttrs(m_builder, "s_type", 
-                                                                      new TypeContainer(typeof(Type)), 
+                                                                      new TypeContainer(ReflectionHelper.TypeType), 
                                                                       FieldAttributes.Public | FieldAttributes.Static);
         }
 
@@ -265,7 +265,7 @@ namespace Ch.Elca.Iiop.Idl {
                                                                           Type.EmptyTypes);
             ILGenerator staticConstrIl = staticConstr.GetILGenerator();
             staticConstrIl.Emit(OpCodes.Ldtoken, m_builder);
-            MethodInfo getTypeFromH = typeof(Type).GetMethod("GetTypeFromHandle", BindingFlags.Public | BindingFlags.Static);
+            MethodInfo getTypeFromH = ReflectionHelper.TypeType.GetMethod("GetTypeFromHandle", BindingFlags.Public | BindingFlags.Static);
             staticConstrIl.Emit(OpCodes.Call, getTypeFromH);
             // store Type in cache field
             staticConstrIl.Emit(OpCodes.Stsfld, m_unionTypeCache);
@@ -515,7 +515,7 @@ namespace Ch.Elca.Iiop.Idl {
             gen.Emit(OpCodes.Ldsfld, m_unionTypeCache); // load the typecachefield
             gen.Emit(OpCodes.Ldstr, elemField.Name);
             gen.Emit(OpCodes.Ldc_I4, Convert.ToInt32(BindingFlags.NonPublic | BindingFlags.Instance));
-            MethodInfo getField = typeof(Type).GetMethod("GetField", 
+            MethodInfo getField = ReflectionHelper.TypeType.GetMethod("GetField", 
                                                          BindingFlags.Public | BindingFlags.Instance, 
                                                          null, new Type[] { ReflectionHelper.StringType, typeof(BindingFlags) }, null);
             gen.Emit(OpCodes.Callvirt, getField); // call getField to retrieve the fieldInfo: pushed result on stack
@@ -612,7 +612,7 @@ namespace Ch.Elca.Iiop.Idl {
             LocalBuilder resultRef = gen.DeclareLocal(typeof(object[]));
 
             gen.Emit(OpCodes.Ldc_I4, m_coveredDiscrs.Count);
-            gen.Emit(OpCodes.Newarr, typeof(object));
+            gen.Emit(OpCodes.Newarr, ReflectionHelper.ObjectType);
             gen.Emit(OpCodes.Stloc_0);
             
             for (int i = 0; i < m_coveredDiscrs.Count; i++) {                

@@ -686,7 +686,7 @@ namespace omg.org.CORBA {
         #region IMethods
 
         internal override Type GetClsForTypeCode() {
-            return typeof(System.Object);
+            return ReflectionHelper.ObjectType;
         }
 
         #endregion IMethods
@@ -1287,7 +1287,7 @@ namespace omg.org.CORBA {
             }
 
             public object[] GetDiscriminatorValues() {
-                return (object[])discriminatorValues.ToArray(typeof(object));
+                return (object[])discriminatorValues.ToArray(ReflectionHelper.ObjectType);
             }
 
             #endregion IConstructors
@@ -1634,7 +1634,7 @@ namespace omg.org.CORBA {
         }
 
         internal override Type CreateType(ModuleBuilder modBuilder, string fullTypeName) {
-            Type baseType = typeof(object);
+            Type baseType = ReflectionHelper.ObjectType;
             if (!(m_baseClass is NullTC)) {
                 baseType = ((TypeCodeImpl)m_baseClass).GetClsForTypeCode();
             }

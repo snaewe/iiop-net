@@ -660,7 +660,7 @@ namespace Ch.Elca.Iiop.Idl {
         }
         public object MapToIdlConcreateValueType(Type clsType) {
             omg.org.CORBA.TypeCode baseTypeCode;
-            if (clsType.BaseType.Equals(typeof(System.Object)) || 
+            if (clsType.BaseType.Equals(ReflectionHelper.ObjectType) || 
                 clsType.BaseType.Equals(typeof(System.ComponentModel.MarshalByValueComponent))) {
                 baseTypeCode = new NullTC();
             } else {
@@ -693,7 +693,7 @@ namespace Ch.Elca.Iiop.Idl {
         }
         public object MapToIdlAbstractValueType(Type clsType) {                       
             omg.org.CORBA.TypeCode baseTypeCode;
-            if (clsType.BaseType.Equals(typeof(System.Object)) || 
+            if (clsType.BaseType.Equals(ReflectionHelper.ObjectType) || 
                 clsType.BaseType.Equals(typeof(System.ComponentModel.MarshalByValueComponent))) {
                 baseTypeCode = new NullTC();
             } else {

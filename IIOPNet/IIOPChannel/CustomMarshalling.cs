@@ -209,9 +209,7 @@ namespace Corba {
         
         #endregion Types
         #region SFields
-
-        private static Type s_objectType = typeof(object);
-        
+       
         private static Type s_dummyValType = typeof(DummyValTypeForNull);
 
         private static Type s_wstringValueType = typeof(WStringValue);
@@ -236,7 +234,7 @@ namespace Corba {
 
         #region Implementation of DataOutputStream
         public void write_any([ObjectIdlType(IdlTypeObject.Any)] object val) {
-            m_marshaller.Marshal(typeof(object), 
+            m_marshaller.Marshal(ReflectionHelper.ObjectType, 
                                  new AttributeExtCollection(new Attribute[] { 
                                          new ObjectIdlTypeAttribute(IdlTypeObject.Any)}),
                                  val, m_cdrOut);
@@ -326,14 +324,14 @@ namespace Corba {
         }
 
         public void write_Abstract([ObjectIdlType(IdlTypeObject.AbstractBase)]object val) {
-            m_marshaller.Marshal(s_objectType, 
+            m_marshaller.Marshal(ReflectionHelper.ObjectType, 
                                  new AttributeExtCollection(new Attribute[] { 
                                          new ObjectIdlTypeAttribute(IdlTypeObject.AbstractBase) } ),
                                  val, m_cdrOut);
         }
 
         public void write_Value([ObjectIdlType(IdlTypeObject.ValueBase)]object val) {
-            m_marshaller.Marshal(s_objectType, 
+            m_marshaller.Marshal(ReflectionHelper.ObjectType, 
                                  new AttributeExtCollection(new Attribute[] { 
                                           new ObjectIdlTypeAttribute(IdlTypeObject.ValueBase) } ),
                                  val, m_cdrOut);
@@ -484,8 +482,6 @@ namespace Corba {
         
         #region SFields
 
-        private static Type s_objectType = typeof(object);
-
         private static Type s_wstringValueType = typeof(WStringValue);
         private static Type s_stringValueType = typeof(StringValue);
 
@@ -510,7 +506,7 @@ namespace Corba {
         
         [return:ObjectIdlTypeAttribute(IdlTypeObject.Any)]
         public object read_any() {
-            return m_marshaller.Unmarshal(s_objectType, 
+            return m_marshaller.Unmarshal(ReflectionHelper.ObjectType, 
                                           new AttributeExtCollection(new Attribute[] { 
                                                   new ObjectIdlTypeAttribute(IdlTypeObject.Any) } ),
                                           m_cdrIn);
@@ -597,7 +593,7 @@ namespace Corba {
 
         [return:ObjectIdlType(IdlTypeObject.AbstractBase)]
         public object read_Abstract() {
-            return m_marshaller.Unmarshal(s_objectType, 
+            return m_marshaller.Unmarshal(ReflectionHelper.ObjectType, 
                                           new AttributeExtCollection(new Attribute[] { 
                                                   new ObjectIdlTypeAttribute(IdlTypeObject.AbstractBase) } ),
                                           m_cdrIn);
@@ -605,7 +601,7 @@ namespace Corba {
 
         [return:ObjectIdlType(IdlTypeObject.ValueBase)]
         public object read_Value() {
-            return m_marshaller.Unmarshal(s_objectType, 
+            return m_marshaller.Unmarshal(ReflectionHelper.ObjectType, 
                                           new AttributeExtCollection(new Attribute[] { 
                                                   new ObjectIdlTypeAttribute(IdlTypeObject.ValueBase) } ),
                                           m_cdrIn);

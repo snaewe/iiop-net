@@ -179,7 +179,7 @@ namespace Ch.Elca.Iiop.Cdr {
                 }
 
                 currentType = currentType.BaseType;
-                if (currentType == typeof(System.Object) || currentType == typeof(System.ValueType) ||
+                if (currentType == ReflectionHelper.ObjectType || currentType == ReflectionHelper.ValueTypeType ||
                    (ClsToIdlMapper.IsMappedToAbstractValueType(currentType, 
                                                                new AttributeExtCollection()))) { // abstract value types are not serialized
                     break;                

@@ -355,7 +355,9 @@ namespace Ch.Elca.Iiop.Idl {
 
         /// <summary>adds the getValue method needed by the generic unbox operation</summary>
         private void DefineGetValue(TypeBuilder builder, FieldBuilder valField) {
-            MethodBuilder getMethodBuilder = builder.DefineMethod("GetValue", MethodAttributes.Public | MethodAttributes.Virtual | MethodAttributes.HideBySig, typeof(object), new Type[0]);
+            MethodBuilder getMethodBuilder = builder.DefineMethod("GetValue", 
+                                                                  MethodAttributes.Public | MethodAttributes.Virtual | MethodAttributes.HideBySig, 
+                                                                  ReflectionHelper.ObjectType, new Type[0]);
             ILGenerator bodyGen = getMethodBuilder.GetILGenerator();
             bodyGen.Emit(OpCodes.Ldarg_0); // load this
             bodyGen.Emit(OpCodes.Ldfld, valField); // load the field m_val
@@ -368,11 +370,11 @@ namespace Ch.Elca.Iiop.Idl {
             MethodBuilder getMethodBuilder = boxBuilder.DefineMethod(BoxedValueBase.GET_BOXED_TYPE_METHOD_NAME,
                                                                      MethodAttributes.Static | MethodAttributes.Public |
                                                                         MethodAttributes.HideBySig,
-                                                                     typeof(object), new Type[0]);
+                                                                     ReflectionHelper.ObjectType, new Type[0]);
             ILGenerator bodyGen = getMethodBuilder.GetILGenerator();
             bodyGen.Emit(OpCodes.Ldtoken, valField.FieldType); // load token for the field-type
             // now use Type.GetTypeFromHandle to get a Type-object
-            MethodInfo getTypeFromH = typeof(Type).GetMethod("GetTypeFromHandle", BindingFlags.Public | BindingFlags.Static);
+            MethodInfo getTypeFromH = ReflectionHelper.TypeType.GetMethod("GetTypeFromHandle", BindingFlags.Public | BindingFlags.Static);
             bodyGen.Emit(OpCodes.Call, getTypeFromH); // call the static method --> therefore no need to push this to the stack
             bodyGen.Emit(OpCodes.Ret); // return the type
         }
@@ -382,11 +384,11 @@ namespace Ch.Elca.Iiop.Idl {
             MethodBuilder getMethodBuilder = boxBuilder.DefineMethod(BoxedValueBase.GET_FIRST_NONBOXED_TYPE_METHODNAME,
                                                                      MethodAttributes.Static | MethodAttributes.Public |
                                                                         MethodAttributes.HideBySig,
-                                                                     typeof(object), new Type[0]);
+                                                                     ReflectionHelper.ObjectType, new Type[0]);
             ILGenerator bodyGen = getMethodBuilder.GetILGenerator();
             bodyGen.Emit(OpCodes.Ldtoken, fullUnboxed); // load token for the field-type
             // now use Type.GetTypeFromHandle to get a Type-object
-            MethodInfo getTypeFromH = typeof(Type).GetMethod("GetTypeFromHandle", BindingFlags.Public | BindingFlags.Static);
+            MethodInfo getTypeFromH = ReflectionHelper.TypeType.GetMethod("GetTypeFromHandle", BindingFlags.Public | BindingFlags.Static);
             bodyGen.Emit(OpCodes.Call, getTypeFromH); // call the static method --> therefore no need to push this to the stack
             bodyGen.Emit(OpCodes.Ret); // return the type                
         }
@@ -415,10 +417,10 @@ namespace Ch.Elca.Iiop.Idl {
             ILGenerator bodyGen = getMethodBuilder.GetILGenerator();
             bodyGen.Emit(OpCodes.Ldtoken, boxBuilder); // load token for the boxed type
             // now use Type.GetTypeFromHandle to get a Type-object
-            MethodInfo getTypeFromH = typeof(Type).GetMethod("GetTypeFromHandle", BindingFlags.Public | BindingFlags.Static);
+            MethodInfo getTypeFromH = ReflectionHelper.TypeType.GetMethod("GetTypeFromHandle", BindingFlags.Public | BindingFlags.Static);
             bodyGen.Emit(OpCodes.Call, getTypeFromH); // call the static method --> therefore no need to push this to the stack
             // now use GetField to get the field type, this is on stack: the Type-object
-            MethodInfo getFieldMethod = typeof(Type).GetMethod("GetField", BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Instance, null,
+            MethodInfo getFieldMethod = ReflectionHelper.TypeType.GetMethod("GetField", BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Instance, null,
                                                                new Type[] { ReflectionHelper.StringType, typeof(BindingFlags) }, null);
             bodyGen.Emit(OpCodes.Ldstr, valField.Name);
             bodyGen.Emit(OpCodes.Ldc_I4, (Int32)(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance));
@@ -426,7 +428,7 @@ namespace Ch.Elca.Iiop.Idl {
             // now call GetCustomAttributes on field, args: methodInfo, true
             bodyGen.Emit(OpCodes.Ldc_I4_1);
             MethodInfo getCustomAttrsMethod = typeof(FieldInfo).GetMethod("GetCustomAttributes", BindingFlags.Public | BindingFlags.Instance, null, 
-                                                                          new Type[] { typeof(bool) }, null);
+                                                                          new Type[] { ReflectionHelper.BooleanType }, null);
             bodyGen.EmitCall(OpCodes.Callvirt, getCustomAttrsMethod, null);
             bodyGen.Emit(OpCodes.Ret); // return the array of attributes
         }
@@ -468,7 +470,7 @@ namespace Ch.Elca.Iiop.Idl {
             ConstructorBuilder assignConstrBuilder = boxBuilder.DefineConstructor(MethodAttributes.Public, CallingConventions.Standard, new Type[] { arrayType } );
             ILGenerator bodyGen = assignConstrBuilder.GetILGenerator();
             // define one local variable:
-            LocalBuilder local = bodyGen.DeclareLocal(typeof(object));
+            LocalBuilder local = bodyGen.DeclareLocal(ReflectionHelper.ObjectType);
             // call the base constructor with no args
             bodyGen.Emit(OpCodes.Ldarg_0); // load this
             ConstructorInfo baseConstr = typeof(BoxedValueBase).GetConstructor(Type.EmptyTypes);
@@ -486,7 +488,7 @@ namespace Ch.Elca.Iiop.Idl {
             // transform the arg
             // prepare arguments for BoxedArrayHelper.boxOneDimArray, first argument is type of the value box, in which the array should be boxed: --> val=this.GetType()
             bodyGen.Emit(OpCodes.Ldarg_0); // load this: hidden paramter for GetType()
-            MethodInfo getTypeInfo = typeof(object).GetMethod("GetType", BindingFlags.Public | BindingFlags.Instance);
+            MethodInfo getTypeInfo = ReflectionHelper.ObjectType.GetMethod("GetType", BindingFlags.Public | BindingFlags.Instance);
             bodyGen.Emit(OpCodes.Call, getTypeInfo); // call this.GetType()
             // second argument for BoxedArrayHelper.boxOneDimArray: the array to box
             bodyGen.Emit(OpCodes.Ldarg_1); // load the constr. arg
@@ -494,7 +496,7 @@ namespace Ch.Elca.Iiop.Idl {
             MethodInfo boxOneDim = typeof(BoxedArrayHelper).GetMethod(BoxedArrayHelper.BOX_ONEDIM_ARRAY_METHODNAME,
                                                                       BindingFlags.Public | BindingFlags.NonPublic |
                                                                           BindingFlags.Static | BindingFlags.DeclaredOnly,
-                                                                      null, new Type[] { typeof(Type), typeof(object) },
+                                                                      null, new Type[] { ReflectionHelper.TypeType, ReflectionHelper.ObjectType },
                                                                       new ParameterModifier[0]);
             bodyGen.Emit(OpCodes.Call, boxOneDim); // call the static method
             // store result in local.0

@@ -61,7 +61,10 @@ namespace Ch.Elca.Iiop.Util {
         private static Type s_singleType = typeof(System.Single);
         private static Type s_doubleType = typeof(System.Double);
         
+        private static Type s_objectType = typeof(System.Object);
+        private static Type s_valueTypeType = typeof(System.ValueType);
         private static Type s_marshalByRefType = typeof(MarshalByRefObject);
+        private static Type s_typeType = typeof(System.Type);
 
         
         #endregion SFields
@@ -194,10 +197,31 @@ namespace Ch.Elca.Iiop.Util {
             }
         }
         
+        /// <summary>caches typeof(Object)</summary>
+        public static Type ObjectType {
+            get {
+                return s_objectType;
+            }
+        }
+        
+        /// <summary>caches typeof(ValueType)</summary>
+        public static Type ValueTypeType {
+            get {
+                return s_valueTypeType;
+            }
+        }
+        
         /// <summary>caches typeof(MarshalByRefObject)</summary>
         public static Type MarshalByRefObjectType {
             get {
                 return s_marshalByRefType;
+            }
+        }
+        
+        /// <summary>caches typeof(Type)</summary>
+        public static Type TypeType {
+            get {
+                return s_typeType;
             }
         }
         

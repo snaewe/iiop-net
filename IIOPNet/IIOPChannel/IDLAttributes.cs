@@ -152,7 +152,7 @@ namespace Ch.Elca.Iiop.Idl {
         /// <summary>creates an attribute builder for this custom attribute</summary>
         public CustomAttributeBuilder CreateAttributeBuilder() {
             Type attrType = this.GetType();
-            ConstructorInfo attrConstr = attrType.GetConstructor(new Type[] { typeof(Type) } );
+            ConstructorInfo attrConstr = attrType.GetConstructor(new Type[] { ReflectionHelper.TypeType } );
             CustomAttributeBuilder result = new CustomAttributeBuilder(attrConstr, new Object[] { m_type });
             return result;
         }
