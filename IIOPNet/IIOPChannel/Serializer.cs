@@ -423,6 +423,9 @@ namespace Ch.Elca.Iiop.Marshalling {
                 Ior ior = new Ior(repositoryID, new IorProfile[] { profile });
                 return ior;                
             } else {
+                Debug.WriteLine("ERROR: no server-channel information found!");
+                Debug.WriteLine("Please make sure, that an IIOPChannel has been created with specifying a listen port number (0 for automatic)!");
+                Debug.WriteLine("e.g. IIOPChannel chan = new IIOPChannel(0);");
                 throw new INTERNAL(1960, CompletionStatus.Completed_MayBe);
             }
         }
