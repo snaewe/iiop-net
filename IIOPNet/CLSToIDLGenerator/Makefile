@@ -5,13 +5,11 @@ build: build-exe
 
 build-exe: bin\CLSIDLGenerator.exe
 
-$(Dest):
-	mkdir $(Dest)
-
 $(Dest)IIOPChannel.dll: $(IIOPChannel)
 	copy $(IIOPChannel) $@
 
-$(Dest)CLSIDLGenerator.exe: $(Dest) $(Dest)IIOPChannel.dll *.cs
+$(Dest)CLSIDLGenerator.exe: $(Dest)IIOPChannel.dll *.cs
+	if not exist $@nul mkdir $@
 	csc $(CSFLAGS) /r:$(Dest)IIOPChannel.dll /t:exe /out:$@ *.cs 
 
 

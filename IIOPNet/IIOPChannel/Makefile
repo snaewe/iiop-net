@@ -3,12 +3,10 @@ Dest = bin\
 
 build: build-dll
 
-$(Dest):
-	mkdir $(Dest)
-
-build-dll: $(Dest) $(Dest)IIOPChannel.dll
+build-dll: $(Dest)IIOPChannel.dll
 	
 $(Dest)IIOPChannel.dll: *.cs
+	if not exist $@nul mkdir $@
 	csc $(CSFLAGS) /t:library /out:$@ $? 
 	
 clean:
