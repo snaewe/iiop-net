@@ -2197,7 +2197,7 @@ public class IDLParser{/*@bgen(jjtree)*/
                 litVal = fixed_pt_literal();
                                 jjtree.closeNodeScope(jjtn000, true);
                                 jjtc000 = false;
-                                {if (true) throw new NotSupportedException("fixed point literal not yet supported");}
+                                throw new NotSupportedException("fixed point literal not yet supported");
               case 36:
               case 89:
               case IDLParserConstants.FLOATONE:
@@ -4577,12 +4577,15 @@ public class IDLParser{/*@bgen(jjtree)*/
         floatVal = floatVal.Substring(0, floatVal.Length - 1);
       }
       {if (true) return Double.Parse(floatVal);}
+      break;
     case 36:
       jj_consume_token(36);
       {if (true) return Double.NaN;}
+      break;
     case 89:
       jj_consume_token(89);
       {if (true) return Double.PositiveInfinity;}
+      break;
     default:
       jj_la1[85] = jj_gen;
       jj_consume_token(-1);
