@@ -180,6 +180,10 @@ namespace Ch.Elca.Iiop {
         
         private static Type s_socketExType = typeof(SocketException);
         
+        private static System.Reflection.PropertyInfo s_tcpClientClientPropertyInfo =
+            typeof(TcpClient).GetProperty("Client",
+                System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+        
         #endregion SFields
         #region IConstructors
         
@@ -198,8 +202,8 @@ namespace Ch.Elca.Iiop {
         
         /// <summary><see cref="Ch.Elca.Iiop.IServerTransport.GetClientAddress"/></summary>
         public IPAddress GetClientAddress() {
-            // TODO
-            return null;
+            Socket socket = (Socket)s_tcpClientClientPropertyInfo.GetValue(m_socket, null);
+            return ((IPEndPoint)socket.RemoteEndPoint).Address;
         }
                 
         #endregion IMethods

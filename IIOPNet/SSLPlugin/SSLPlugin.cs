@@ -180,6 +180,10 @@ namespace Ch.Elca.Iiop.Security.Ssl {
         
         private static Type s_socketExType = typeof(SocketException);
         
+        private static System.Reflection.PropertyInfo s_secureTcpClientClientPropertyInfo =
+            typeof(SecureTcpClient).GetProperty("Client",
+                System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+        
         #endregion SFields
         #region IConstructors
         
@@ -198,8 +202,8 @@ namespace Ch.Elca.Iiop.Security.Ssl {
         
         /// <summary><see cref="Ch.Elca.Iiop.IServerTransport.GetClientAddress"/></summary>
         public IPAddress GetClientAddress() {
-            // TODO
-            return null;
+            SecureSocket secureSocket = (SecureSocket)s_secureTcpClientClientPropertyInfo.GetValue(m_socket, null);
+            return ((IPEndPoint)secureSocket.RemoteEndPoint).Address;
         }
                 
         #endregion IMethods
