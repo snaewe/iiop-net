@@ -64,7 +64,7 @@ namespace Ch.Elca.Iiop.Services {
         
         internal static byte[] s_corbaObjKey = new byte[] { 0x49, 0x4E, 0x49, 0x54 };
 
-        private static CORBAInitServiceImpl s_CORBAInitServie;
+        private static CORBAInitServiceImpl s_corbaInitService;
 
         private static object s_lockObject = new Object();
 
@@ -79,9 +79,9 @@ namespace Ch.Elca.Iiop.Services {
         
         public static void Publish() {
             lock(s_lockObject) {
-                if (s_CORBAInitServie == null) {    
-                    s_CORBAInitServie = new CORBAInitServiceImpl();
-                    RemotingServices.Marshal(s_CORBAInitServie, 
+                if (s_corbaInitService == null) {    
+                    s_corbaInitService = new CORBAInitServiceImpl();
+                    RemotingServices.Marshal(s_corbaInitService, 
                                              IiopUrlUtil.GetObjUriForObjectInfo(s_corbaObjKey,
                                                                                 new GiopVersion(1, 0)));
                 }

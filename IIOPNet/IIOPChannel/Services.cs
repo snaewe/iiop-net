@@ -96,25 +96,25 @@ namespace Ch.Elca.Iiop.Services {
 
         #region IFields
         
-        private uint m_serviceID;
+        private uint m_serviceId;
         private byte[] m_contextData;
 
         #endregion IFields
         #region IConstructors
 
-        protected ServiceContext(uint serviceID) : this(serviceID, new byte[0]) {
+        protected ServiceContext(uint serviceId) : this(serviceId, new byte[0]) {
         }
 
-        public ServiceContext(uint serviceID, byte[] contextData) {
-            m_serviceID = serviceID;
+        public ServiceContext(uint serviceId, byte[] contextData) {
+            m_serviceId = serviceId;
             m_contextData = contextData;
             if (m_contextData == null) { 
                 m_contextData = new byte[0]; 
             }
         }
 
-        public ServiceContext(CdrEncapsulationInputStream encap, uint serviceID) {
-            m_serviceID = serviceID;
+        public ServiceContext(CdrEncapsulationInputStream encap, uint serviceId) {
+            m_serviceId = serviceId;
             Deserialize(encap);
         }
 
@@ -124,7 +124,7 @@ namespace Ch.Elca.Iiop.Services {
         /// <summary>the service id for this context</summary>
         public uint ServiceID {
             get { 
-                return m_serviceID; 
+                return m_serviceId; 
             }
         }
 
@@ -142,11 +142,11 @@ namespace Ch.Elca.Iiop.Services {
         }
 
         public override string ToString() {
-            return "service-id: " + m_serviceID + ", data length: " + m_contextData.Length;
+            return "service-id: " + m_serviceId + ", data length: " + m_contextData.Length;
         }
 
         public virtual void Serialize(CdrOutputStream stream) {
-            stream.WriteULong(m_serviceID);
+            stream.WriteULong(m_serviceId);
             CdrEncapsulationOutputStream encapStream = new CdrEncapsulationOutputStream(0);
             stream.WriteOpaque(m_contextData);
             stream.WriteEncapsulation(encapStream);

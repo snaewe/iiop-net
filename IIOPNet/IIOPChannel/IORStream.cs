@@ -169,7 +169,7 @@ namespace Ch.Elca.Iiop.CorbaObjRef {
         private bool m_prefixWritten = false;
         
         // byre rep for IOR:
-        private byte[] m_ior_magic = { 0x49, 0x4F, 0x52, 0x3A };
+        private byte[] m_iorMagic = { 0x49, 0x4F, 0x52, 0x3A };
 
         #endregion IFields
         #region IConstructors
@@ -256,8 +256,8 @@ namespace Ch.Elca.Iiop.CorbaObjRef {
         /// </summary>
         private void CheckReadPrefix() {
             if (!m_prefixRead) {
-                for (int i = 0; i < m_ior_magic.Length; i++) {
-                    if (m_stream.ReadByte() != m_ior_magic[i]) {
+                for (int i = 0; i < m_iorMagic.Length; i++) {
+                    if (m_stream.ReadByte() != m_iorMagic[i]) {
                         throw new ArgumentException("invalid ior-stream, must start with IOR:");
                     }
                 }
@@ -270,8 +270,8 @@ namespace Ch.Elca.Iiop.CorbaObjRef {
         /// </summary>
         private void CheckWritePrefix() {
             if (!m_prefixWritten) {
-                for (int i = 0; i < m_ior_magic.Length; i++) {
-                    m_stream.WriteByte(m_ior_magic[i]);
+                for (int i = 0; i < m_iorMagic.Length; i++) {
+                    m_stream.WriteByte(m_iorMagic[i]);
                 }
                 m_prefixWritten = true;
             }
