@@ -6,8 +6,17 @@ home directory of NUNIT V2.
 Building the tests:
 - call nmake in this directory.
 
-
 Running the tests:
 - check the instructions in the test-directories.
 
+Known Problems
+--------------
 
+1. Using .NET Framework 1.1
+
+When using the .NET Framework 1.1, you must configure NUnit 2.0 to use the same Framework version. To do so,
+add the line
+  <startup> 
+    <supportedRuntime version="v1.1.4322" /> 
+  </startup> 
+in %NUNTIV2_HOME%/bin/nunit-gui.exe.config and %NUNTIV2_HOME%/bin/nunit-console.exe.config
