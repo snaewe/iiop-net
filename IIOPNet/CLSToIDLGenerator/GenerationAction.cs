@@ -277,6 +277,24 @@ namespace Ch.Elca.Iiop.Idl {
         /// <param name="shouldThrowException">if true, generate a raise clause for method: GenericUserException</param>
         private void MapMethod(MethodInfo methodToMap, Type declaringType, bool shouldThrowException) {
             Type returnType = methodToMap.ReturnType;
+
+            // check for oneway method
+            object[] oneWayAttr = methodToMap.GetCustomAttributes(typeof(System.Runtime.Remoting.Messaging.OneWayAttribute),
+                                                                  true);
+            bool isOneWaySet = false;
+            if ((oneWayAttr != null) && (oneWayAttr.Length > 0)) {
+                isOneWaySet = true;
+            }
+            if (((declaringType.IsInterface) || (typeof(MarshalByRefObject)).IsAssignableFrom(declaringType)) &&
+                (isOneWaySet)) {
+                // a one-way call
+                shouldThrowException = false; // no throws allowed
+                m_currentOutputStream.Write("oneway ");
+                if (returnType != typeof(void)) {
+                    throw new Exception("invalid method: " + methodToMap.Name + "; OneWay only allowed, if return type is void");
+                }
+            }                
+
             string returnTypeMapped = (string)m_mapper.MapClsType(returnType, 
                                                                   Util.AttributeExtCollection.ConvertToAttributeCollection(methodToMap.ReturnTypeCustomAttributes.GetCustomAttributes(true)),
                                                                   m_refMapper);
