@@ -467,7 +467,7 @@ public class MetaDataGenerator implements IDLParserVisitor {
     
         // create the type
         Type resultType = interfaceToBuild.CreateType();
-        m_typeManager.replaceFwdDeclWithFullDecl(resultType, forSymbol);
+        m_typeManager.ReplaceFwdDeclWithFullDecl(resultType, forSymbol);
         return null;
     }
     
@@ -783,7 +783,7 @@ public class MetaDataGenerator implements IDLParserVisitor {
 
         // finally create the type
         Type resultType = valueToBuild.CreateType();
-        m_typeManager.replaceFwdDeclWithFullDecl(resultType, forSymbol);
+        m_typeManager.ReplaceFwdDeclWithFullDecl(resultType, forSymbol);
         return null;
     }
     
@@ -828,7 +828,7 @@ public class MetaDataGenerator implements IDLParserVisitor {
 
         // finally create the type
         Type resultType = valueToBuild.CreateType();
-        m_typeManager.replaceFwdDeclWithFullDecl(resultType, forSymbol);
+        m_typeManager.ReplaceFwdDeclWithFullDecl(resultType, forSymbol);
         return null;
     }
     
@@ -1181,7 +1181,7 @@ public class MetaDataGenerator implements IDLParserVisitor {
                 // inform the type-manager of this typedef
                 Debug.WriteLine("typedef defined here, type: " + typeUsedInDefine.getCLSType() +
                                 ", symbol: " + typedefSymbol);
-                m_typeManager.registerTypeDef(typeUsedInDefine, typedefSymbol);
+                m_typeManager.RegisterTypeDef(typeUsedInDefine, typedefSymbol);
             }
         }    
         return null;

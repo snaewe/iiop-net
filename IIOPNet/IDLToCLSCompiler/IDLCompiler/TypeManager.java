@@ -192,14 +192,14 @@ public class TypeManager {
     /** use this to tell the type manager, that a type is now fully created.
      *  The typemanager checks at the end, if not fully declared types exists and throw an error, if so
      */
-    public void replaceFwdDeclWithFullDecl(Type fullDecl, Symbol forSymbol) {
+    public void ReplaceFwdDeclWithFullDecl(Type fullDecl, Symbol forSymbol) {
         m_typesInCreation.remove(forSymbol);
         // add to the fully created types
         TypeContainer container = new TypeContainer(fullDecl, new CustomAttributeBuilder[0]);
         m_typeTable.put(forSymbol, container);
     }
 
-    public void registerTypeDef(TypeContainer fullDecl, Symbol forSymbol) {
+    public void RegisterTypeDef(TypeContainer fullDecl, Symbol forSymbol) {
         addTypeDefinition(fullDecl, forSymbol);
     }
 
