@@ -337,7 +337,21 @@ namespace Ch.Elca.Iiop.IntegrationTests {
             Assertion.AssertEquals(result.val1, result.val2);
             Assertion.AssertEquals(result.val1.Msg, result.val2.Msg);
         }
-
+        
+        /// <summary>
+        /// checks, if recursive values are serialised using an indirection
+        /// </summary>
+        [Test]
+        public void TestRecursiveValueTypeInstance() {            
+            TestSerializableClassE arg = new TestSerializableClassEImpl();
+            arg.RecArrEntry = new TestSerializableClassE[1];
+            arg.RecArrEntry[0] = arg;
+            TestSerializableClassE result = m_testService.TestEchoSerializableE(arg);
+            Assertion.AssertNotNull(result);
+            Assertion.AssertNotNull(result.RecArrEntry);
+            Assertion.AssertEquals(arg.RecArrEntry.Length, result.RecArrEntry.Length);
+            Assertion.Assert("invalid entry in recArrEntry", (result == result.RecArrEntry[0]));            
+        }
 
         [Test]
         public void TestValueTypeWithMixedContent() {

@@ -153,6 +153,10 @@ public class TestServiceImpl extends PortableRemoteObject implements TestService
         arg.val1.Msg = newMessage;
         return arg;
     }
+    
+    public TestSerializableClassE TestEchoSerializableE(TestSerializableClassE arg) throws RemoteException {
+        return arg;
+    }
 
     public TestSerializableMixedValAndBase TestMixedSerType(boolean arg1, short arg2, int arg3, String arg4) throws RemoteException {
         TestSerializableMixedValAndBase result = new TestSerializableMixedValAndBase();

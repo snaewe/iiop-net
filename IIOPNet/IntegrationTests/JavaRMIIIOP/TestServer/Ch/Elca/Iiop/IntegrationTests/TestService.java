@@ -75,6 +75,8 @@ public interface TestService extends java.rmi.Remote {
     public TestNonSerializableBaseClass TestAbstractValueTypeEcho(TestNonSerializableBaseClass arg) throws RemoteException;
 
     public TestSerializableClassD TestChangeSerilizableD(TestSerializableClassD arg, String newMessage) throws RemoteException;
+    
+    public TestSerializableClassE TestEchoSerializableE(TestSerializableClassE arg) throws RemoteException;
 
     public TestSerializableMixedValAndBase TestMixedSerType(boolean arg1, short arg2, int arg3, String arg4) throws RemoteException;
 

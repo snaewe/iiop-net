@@ -52,6 +52,11 @@ namespace Ch.Elca.Iiop.IntegrationTests {
     public class TestSerializableClassDImpl : TestSerializableClassD {    
     
     }
+    
+    [Serializable]
+    public class TestSerializableClassEImpl : TestSerializableClassE {    
+    
+    }
 
     [Serializable]
     public class TestSerializableMixedValAndBaseImpl : TestSerializableMixedValAndBase {
