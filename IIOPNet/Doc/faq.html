@@ -166,6 +166,8 @@ o"></A></TD></TR>
 <br>
   <strong><a href="#faq7_11">7.11 JacORB throws a 'org.omg.CORBA.MARSHAL: Cannot handle TypeCode with kind 30 minor code: 0 completed: No'</a></strong>
 <br>
+  <strong><a href="#faq7_12">7.12 BAD_OPERATION exception accessing a Java server</a></strong>
+<br>
   <H2 class="contentPart">8. About</H2>
   <strong><a href="#faq8_1">8.1 Who maintains this project?</a></strong>
 <br>
@@ -723,6 +725,12 @@ jacorb.interop.chunk_custom_rmi_valuetypes=off
 <p>This <a href="http://sourceforge.net/forum/forum.php?thread_id=1051887&forum_id=274081">forum thread</a> contains a longer discussion of the problem.
 	</td></tr></table>
 	<br><br>
+	<table width="100%" style="border: 1px solid #999966;" summary=""><tr><td>
+  <strong><a name="faq7_12">7.12 BAD_OPERATION exception accessing a Java server</a></strong>
+<p>The client is requesting an unknown operation from the server. This often happens when the code and the stubs get out of sync (i.e. the code changes but the stubs are not recreated).
+<p>Try to refresh the stubs with <code>rmic -iiop</code>.
+	</td></tr></table>
+	<br><br>
   <H2 class="contentPart">8. About</H2>
 	<table width="100%" style="border: 1px solid #999966;" summary=""><tr><td>
   <strong><a name="faq8_1">8.1 Who maintains this project?</a></strong>
@@ -739,6 +747,7 @@ jacorb.interop.chunk_custom_rmi_valuetypes=off
 <li>David Bellette
 <li>Blazej Budzynski
 <li>Stefano Delli Ponti
+<li>Erik Doernenburg
 <li>Alexej Gapotchenko
 <li>Steven Hartland
 <li>Tina Hofmann

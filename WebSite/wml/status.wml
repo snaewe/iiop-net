@@ -47,7 +47,6 @@ The following protocol parts are not supported:
 
 <p>All but the following types are supported:
 <UL>
-<LI>Array</LI>
 <LI>Long double</LI>
 <LI>Fixed</LI>
 </UL>
