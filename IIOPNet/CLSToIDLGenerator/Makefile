@@ -14,5 +14,5 @@ $(Dest)CLSIDLGenerator.exe: $(Dest)IIOPChannel.dll *.cs
 
 
 clean:
-	del /s /q $(Dest)*
-	rmdir $(Dest)
+	if exist $(Dest)* del /s /q $(Dest)*
+	if exist $(Dest) rmdir $(Dest)

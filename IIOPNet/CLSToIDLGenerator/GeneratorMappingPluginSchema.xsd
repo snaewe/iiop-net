@@ -8,7 +8,7 @@
 </xsd:annotation>
 
 
-<xsd:complexType name="mappingType">
+<xsd:complexType name="mappingTypeGenerator">
     <xsd:sequence>
         <xsd:element name="clsType" type="xsd:string"/>
         <xsd:element name="idlTypeName" type="xsd:string"/>
@@ -22,7 +22,7 @@
 <xsd:element name="generatorMappings">
     <xsd:complexType>
     <xsd:sequence>
-        <xsd:element name="mapping" type="mappingType" minOccurs="1" maxOccurs="unbounded"></xsd:element>
+        <xsd:element name="mapping" type="mappingTypeGenerator" minOccurs="1" maxOccurs="unbounded"></xsd:element>
     </xsd:sequence>
     </xsd:complexType>        
 </xsd:element>
