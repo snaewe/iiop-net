@@ -1,0 +1,1 @@
+copy bin\jboss3-2-1-integration_ejb.jar %JBOSS_HOME%\server\%1\deploy
