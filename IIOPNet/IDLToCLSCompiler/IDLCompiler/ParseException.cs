@@ -24,6 +24,7 @@ public class ParseException : Exception {
    * print the error message in the form:
    *     ParseException: <result of getMessage>
    */
+  [CLSCompliant(false)]
   public ParseException(Token currentTokenVal,
                         int[][] expectedTokenSequencesVal,
                         String[] tokenImageVal
@@ -72,6 +73,7 @@ public class ParseException : Exception {
    * of integers represents a sequence of tokens (by their ordinal
    * values) that is expected at this point of the parse.
    */
+  [CLSCompliant(false)]
   public int[][] expectedTokenSequences;
 
   /**
