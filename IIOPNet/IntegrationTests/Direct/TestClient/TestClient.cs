@@ -877,9 +877,18 @@ namespace Ch.Elca.Iiop.IntegrationTests {
             Ior adderIor = new Ior(marshalUrl);
             byte[] objectKey = adderIor.ObjectKey;
             ASCIIEncoding enc = new ASCIIEncoding();
-            string marshalUri = new String(enc.GetChars(objectKey));
-            int indexOfSysId = marshalUri.IndexOf("IIOPNET_SYSTEM_ID/");
-            Assertion.Assert("sys-id tag not found", indexOfSysId >= 0);
+            string marshalUri = new String(enc.GetChars(objectKey));            
+            if (marshalUri.StartsWith("/")) {
+                marshalUri = marshalUri.Substring(1);
+            }
+            Assertion.Assert("no appdomain-guid", marshalUri.IndexOf("/") > 0);
+            string guid_string = marshalUri.Substring(0, marshalUri.IndexOf("/"));
+            guid_string = guid_string.Replace("_", "-");
+            try {
+                Guid guid = new Guid(guid_string);
+            } catch (Exception ex) {
+                Assertion.Fail("guid not in uri: " + ex);
+            }            
             
             // check if callable
             int arg1 = 1;

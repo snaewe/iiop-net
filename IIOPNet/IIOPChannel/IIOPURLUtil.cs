@@ -54,8 +54,6 @@ namespace Ch.Elca.Iiop.Util {
 
         private static ASCIIEncoding s_asciiEncoder = new ASCIIEncoding();
         
-        private static SystemIDGenerator s_sysIdGenerator = new SystemIDGenerator();
-
         #endregion SFields
         #region IConstructors
         
@@ -157,10 +155,36 @@ namespace Ch.Elca.Iiop.Util {
             return "iiop" + Uri.SchemeDelimiter + host + ":" + port + "/" + objectUri;
         }
 
+
+        /// <summary>
+        /// checks if a uri is assigned by .NET remoting -> this will be marshalled as
+        /// CORBA system-id; user-assigned id's will be marshalled as CORBA user-id's.
+        /// </summary>
+        private static bool IsSystemGeneratedId(string uri) {
+            // checks if uri endswith _seqNr.rem, where seqNr is a base 10 number
+            bool result = true;
+            if (uri == null) {
+                throw new INTERNAL(58, CompletionStatus.Completed_MayBe);
+            } else {
+                int endPartIndex = uri.LastIndexOf("_");
+                if ((endPartIndex >= 0) && (uri.EndsWith(".rem"))) {
+                    string lastPart = uri.Substring(endPartIndex + 1);
+                    for (int i = 0; i < lastPart.Length - 4; i++) {
+                        if (!Char.IsDigit(lastPart, i)) {
+                            result = false;
+                        }
+                    }              
+                } else {
+                    result = false;
+                }
+            }
+            return result;
+        }
+
         /// <summary>
         /// takes a marshalled object and calculate the corba object key to send from it
         /// </summary>
-        /// <param name="objectUri"></param>
+        /// <param name="mbr">the object for which to get the object key</param>
         /// <returns></returns>
         internal static byte[] GetObjectKeyForObj(MarshalByRefObject mbr) {
             string objectUri = RemotingServices.GetObjectUri(mbr);
@@ -168,7 +192,7 @@ namespace Ch.Elca.Iiop.Util {
                 throw new INTERNAL(57, CompletionStatus.Completed_MayBe);
             }
             
-            if (!s_sysIdGenerator.IsSystemId(objectUri)) {
+            if (!IsSystemGeneratedId(objectUri)) {
                 // remove appdomain-id in front of uri which is automatically appended 
                 // (see comment for RemotingServices.SetObjectUriForMarshal);
                 // to support user-id policy, this appdomain-guid must be removed!
@@ -193,13 +217,6 @@ namespace Ch.Elca.Iiop.Util {
             return s_asciiEncoder.GetBytes(objectUri);
         }
         
-        /// <summary>
-        /// generates an IIOP.NET CORBA System-ID
-        /// </summary>
-        internal static string GenerateSystemId() {
-            return s_sysIdGenerator.GenerateId();
-        }
-
         /// <summary>
         /// get the key-bytes for the id; doesn't any more transformations
         /// </summary>
@@ -297,58 +314,10 @@ namespace Ch.Elca.Iiop.Util {
 
     }
         
-        /// <summary>
-    /// helper class, which supports generation of system id's
-        /// </summary>
-    internal class SystemIDGenerator {
-
-        #region Constants
-
-        private const string SYSTEM_ID_MARKER = "IIOPNET_SYSTEM_ID/";
-        private const int RND_PART_LENGTH = 16;
-        
-        #endregion Constants
-        #region IFields
-        
-        private long m_seqNr;        
-        
-        private System.Security.Cryptography.RandomNumberGenerator m_rndGen;
-        
-        #endregion IFields
-        #region IConstructors
-        
-        internal SystemIDGenerator() {            
-            m_seqNr = 0;
-            m_rndGen = new System.Security.Cryptography.RNGCryptoServiceProvider();            
-        }
-        
-        #endregion IConstructors
-        #region IMethods
-        
-        private long GetNextSeqNr() {            
-            return System.Threading.Interlocked.Increment(ref m_seqNr);
-        }                
-        
-        public string GenerateId() {            
-            byte[] rndPart = new byte[RND_PART_LENGTH];
-            m_rndGen.GetNonZeroBytes(rndPart);
-            string rndString = Convert.ToBase64String(rndPart);
-            rndString.Replace('/', '_');
-            return SYSTEM_ID_MARKER + rndString + "_" + GetNextSeqNr();
-        }            
-        
-        public bool IsSystemId(string id) {
-            return (id.IndexOf(SYSTEM_ID_MARKER) >= 0);
-        }
-
-        #endregion IMethods
-        
-    }
-    
-    
-        /// <summary>
+ 
+    /// <summary>
     /// handles addresses of the form iiop://host:port/objectKey
-        /// </summary>
+    /// </summary>
     internal class IiopLoc {
         
         #region IFields

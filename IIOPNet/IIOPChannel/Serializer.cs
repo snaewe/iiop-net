@@ -396,32 +396,9 @@ namespace Ch.Elca.Iiop.Marshalling {
             Ior ior = new Ior("", new IorProfile[0]);
             ior.WriteToStream(targetStream); // write the null reference to the stream
         }
-        
-        private ObjRef MarshalWithSystemId(MarshalByRefObject obj) {            
-            int nrOfRetries = 3;
-            ObjRef result = null;
-            while (nrOfRetries > 0) {
-                try {
-                    string systemID = IiopUrlUtil.GenerateSystemId();
-                    result = RemotingServices.Marshal(obj, systemID);
-                    return result;
-                } catch (RemotingException) {
-                    // it's extremely unlikely, that two times the same systemID is generated,
-                    // but if it happens, try again!
-                }
-                nrOfRetries++;
-            }
-            throw new INTERNAL(189, CompletionStatus.Completed_MayBe);
-        }
-        
+                
         private Ior CreateIorForObjectFromThisDomain(MarshalByRefObject obj) {                        
-            ObjRef objRef;
-            if (RemotingServices.GetObjectUri(obj) == null) {
-                // assign a SYSTEM-ID
-                objRef = MarshalWithSystemId(obj);
-            } else {
-                objRef = RemotingServices.Marshal(obj); // make sure, the object is marshalled and get obj-ref
-            }
+            ObjRef objRef = RemotingServices.Marshal(obj); // make sure, the object is marshalled and get obj-ref
             byte[] objectKey = IiopUrlUtil.GetObjectKeyForObj(obj);
             IiopChannelData serverData = GetIiopChannelData(objRef);
             if (serverData != null) {
