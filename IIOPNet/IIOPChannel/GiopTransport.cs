@@ -44,18 +44,80 @@ namespace Ch.Elca.Iiop {
     /// Messages on a client. Fragmented Messages are Reassembled</summary>
     internal sealed class GiopTransportClientMsgHandler {
         
+        
+        #region IFields
+        
+        private Stream m_transportStream;
+        
         private FragmentedMsgAssembler m_fragmentAssembler =
             new FragmentedMsgAssembler();
         
+        #endregion IFields
+        #region IConstructors
+        
         /// <summary>default constructor</summary>
-        public GiopTransportClientMsgHandler() {
+        public GiopTransportClientMsgHandler(Stream transportStream) {
+            m_transportStream = transportStream;
         }
+        
+        #endregion IConstructor
+        #region IProperties
+        
+        internal Stream TransportStream {
+            get {
+                return m_transportStream;
+            }
+        }        
+        
+        #endregion IProperties
+        #region IMethods
+        
+        /// <summary>processes a request synchronous</summary>
+        /// <param name="reqId">the request id of the message</param>
+        /// <returns>the response message stream (already fully assembled message)</returns>
+        public Stream ProcessRequestSynchronous(Stream msgStream, uint reqId,
+                                                out ITransportHeaders responseHeaders) {
+            ProcessRequest(msgStream);            
+            return ProcessResponse(reqId, out responseHeaders);
+                        
+        }
+        
+        /// <summary>
+        /// send the formatted request to the target
+        /// </summary>
+        public void ProcessRequest(Stream requestStream) {                                 
+            requestStream.Seek(0, SeekOrigin.Begin); // go to the beginning of the stream
+            
+            Debug.WriteLine("sending an IIOP message in the Client side Transport sink");
+            SendRequestMessage(requestStream);
+            Debug.WriteLine("message sent");
+        }
+
+        
+        /// <summary>
+        /// process the response stream, before forwarding it to the formatter
+        /// </summary>
+        /// <remarks>
+        /// Precondition: in the networkStream, the message following is not a response
+        /// to another request, than the request sent by ProcessMessage
+        /// </remarks>
+        public Stream ProcessResponse(uint forReqId,                                     
+                                      out ITransportHeaders responseHeaders) {
+            responseHeaders = new TransportHeaders();
+            Stream responseStream = null;
+			          
+            Debug.WriteLine("receiving an IIOP message in the Client side Transport sink");
+            responseStream = ReceiveResponseMessage(forReqId);
+            Debug.WriteLine("message received");
+            responseStream.Seek(0, SeekOrigin.Begin); // assure stream is read from beginning in formatter
+            return responseStream;
+        }        
         
         /// <summary>
         /// sends the message from messageStream
         /// to the transport Stream
         /// </summary>
-        public void SendRequestMessage(Stream msgStream, Stream transportStream) {            
+        private void SendRequestMessage(Stream msgStream) {            
             
 #if TRACE            
             msgStream.Seek(0, SeekOrigin.Begin); // go to the beginning of the stream
@@ -66,7 +128,7 @@ namespace Ch.Elca.Iiop {
             
             msgStream.Seek(0, SeekOrigin.Begin); // go to the beginning of the stream
                         
-            IoUtil.StreamCopyExactly(msgStream, transportStream, 
+            IoUtil.StreamCopyExactly(msgStream, m_transportStream, 
                                      (int)msgStream.Length);                        
         }
         
@@ -77,14 +139,14 @@ namespace Ch.Elca.Iiop {
         /// <returns>the response message for request reqNr or        
         /// IOException if something goes wrong while reading or message
         /// received is not a reply for the request.</returns>
-        public Stream ReceiveResponseMessage(Stream transportStream, uint reqNr) {
+        private Stream ReceiveResponseMessage(uint reqNr) {
             
             Stream responseStream = null;
             bool fullyRead = false;
             
             while (!fullyRead) {
                 // create a stream for reading a new message
-                CdrInputStreamImpl reader = new CdrInputStreamImpl(transportStream);
+                CdrInputStreamImpl reader = new CdrInputStreamImpl(m_transportStream);
                 GiopHeader msgHeader = new GiopHeader(reader);
              
             	switch(msgHeader.GiopType) {
@@ -96,7 +158,7 @@ namespace Ch.Elca.Iiop {
                             responseStream = new MemoryStream();
                             msgHeader.WriteToStream(responseStream,
                                                     msgHeader.ContentMsgLength);
-                            IoUtil.StreamCopyExactly(transportStream, 
+                            IoUtil.StreamCopyExactly(m_transportStream, 
                                                      responseStream,
                                                      (int)msgHeader.ContentMsgLength);
                             fullyRead = true; // no more fragments
@@ -170,6 +232,7 @@ namespace Ch.Elca.Iiop {
             }
         }
 
+        #endregion IMethods
                 
     }
     
@@ -178,9 +241,14 @@ namespace Ch.Elca.Iiop {
     /// Messages on a server. Fragmented Messages are Reassembled</summary>
     internal sealed class GiopTransportServerMsgHandler {
         
+        #region Types
+        
         internal enum HandlingResult {
             ConnectionClose, ReplyOk, AsyncReply
         }
+        
+        #endregion Types
+        #region IFields
         
         
         private FragmentedMsgAssembler m_fragmentAssembler =
@@ -189,6 +257,9 @@ namespace Ch.Elca.Iiop {
         private Stream m_transportStream;
         private IServerChannelSink m_transportSink;
         
+        #endregion IFields
+        #region IConstructors
+        
         /// <summary>default constructor</summary>
         public GiopTransportServerMsgHandler(Stream transportStream, 
                                              IServerChannelSink transportSink) {
@@ -196,6 +267,8 @@ namespace Ch.Elca.Iiop {
             m_transportSink = transportSink;
         }                       
 
+        #endregion IConstructors
+        #region IMethods
         
         /// <summary>
         /// sends the message from messageStream
@@ -370,6 +443,8 @@ namespace Ch.Elca.Iiop {
             }
             // can not reach here            
         }
+        
+        #endregion IMethods
       
     }
 

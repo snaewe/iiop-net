@@ -102,56 +102,23 @@ namespace Ch.Elca.Iiop {
             }
         }
 
-        /// <summary>
-        /// send the formatted request to the target
-        /// </summary>
-        private void ProcessRequest(Stream networkStream, Stream requestStream) {                      
-            GiopTransportClientMsgHandler transportHandler = 
-                new GiopTransportClientMsgHandler();
-            
-            requestStream.Seek(0, SeekOrigin.Begin); // go to the beginning of the stream
-            
-            Debug.WriteLine("sending an IIOP message in the Client side Transport sink");
-            transportHandler.SendRequestMessage(requestStream, networkStream);
-            Debug.WriteLine("message sent");
-        }
-
-        /// <summary>
-        /// process the response stream, before forwarding it to the formatter
-        /// </summary>
-        /// <remarks>
-        /// Precondition: in the networkStream, the message following is not a response
-        /// to another request, than the request sent by ProcessMessage
-        /// </remarks>
-        private void ProcessResponse(NetworkStream networkStream, uint forReqId,
-                                     out Stream responseStream,
-                                     out ITransportHeaders responseHeaders) {
-            responseHeaders = new TransportHeaders();
-            responseStream = null;
-			          
-            GiopTransportClientMsgHandler transportHandler = 
-                new GiopTransportClientMsgHandler();
-            Debug.WriteLine("receiving an IIOP message in the Client side Transport sink");
-            responseStream = transportHandler.ReceiveResponseMessage(networkStream,
-                                                                     forReqId);            
-            Debug.WriteLine("message received");
-            responseStream.Seek(0, SeekOrigin.Begin); // assure stream is read from beginning in formatter
-        }
-
         #region Implementation of IClientChannelSink
         public void AsyncProcessRequest(IClientChannelSinkStack sinkStack, IMessage msg, 
                                         ITransportHeaders headers, Stream requestStream) {
             // this is the last sink in the chain, therefore the call is not forwarded, instead the request is sent
             TcpClient client = GetSocket(msg);
             NetworkStream networkStream = client.GetStream();
-            ProcessRequest(networkStream, requestStream); // send the request
+            GiopTransportClientMsgHandler giopTransport =
+                new GiopTransportClientMsgHandler(networkStream);
+
+            giopTransport.ProcessRequest(requestStream); // send the request
             
             // wait only for response, if not oneway!
             if (!GiopMessageHandler.IsOneWayCall((IMethodCallMessage)msg)) {
             
                 uint reqNr = (uint)msg.Properties[SimpleGiopMsg.REQUEST_ID_KEY];
                 // now initate asynchronous response listener
-                AsyncResponseWaiter waiter = new AsyncResponseWaiter(sinkStack, networkStream, reqNr, 
+                AsyncResponseWaiter waiter = new AsyncResponseWaiter(sinkStack, giopTransport, reqNr, 
                                                                      new DataAvailableCallBack(this.AsyncResponseArrived));
                 waiter.StartWait(); // this call is non-blocking
             }
@@ -162,18 +129,21 @@ namespace Ch.Elca.Iiop {
             // called by the chain, chain expect response-stream and headers back
             TcpClient client = GetSocket(msg);
             NetworkStream networkStream = client.GetStream();
-            ProcessRequest(networkStream, requestStream);            
-            ProcessResponse(networkStream, (uint)msg.Properties[SimpleGiopMsg.REQUEST_ID_KEY],
-                            out responseStream, out responseHeaders);
+            GiopTransportClientMsgHandler giopTransport =
+                new GiopTransportClientMsgHandler(networkStream);
+            responseStream = giopTransport.ProcessRequestSynchronous(requestStream,
+                                              (uint)msg.Properties[SimpleGiopMsg.REQUEST_ID_KEY],
+                                              out responseHeaders);
             // the previous sink in the chain does further process this response ...
         }
 
         /// <summary>call back to call, when the async response has arrived.</summary>
-        private void AsyncResponseArrived(NetworkStream networkStream, IClientChannelSinkStack sinkStack,
+        private void AsyncResponseArrived(GiopTransportClientMsgHandler giopTransport, 
+                                          IClientChannelSinkStack sinkStack,
                                           uint reqNr) {
             ITransportHeaders responseHeaders;
-            Stream responseStream;
-            ProcessResponse(networkStream, reqNr, out responseStream, out responseHeaders);
+            Stream responseStream =
+                giopTransport.ProcessResponse(reqNr, out responseHeaders);
             // forward the response
             sinkStack.AsyncProcessResponse(responseHeaders, responseStream);
         }
@@ -324,7 +294,8 @@ namespace Ch.Elca.Iiop {
     }
 
     /// <summary>this delegate is used to call back the ClientTransportSink, when response data is available</summary>
-    internal delegate void DataAvailableCallBack(NetworkStream networkStream, IClientChannelSinkStack sinkStack,
+    internal delegate void DataAvailableCallBack(GiopTransportClientMsgHandler giopTransport, 
+                                                 IClientChannelSinkStack sinkStack,
                                                  uint forReqId);
     
     /// <summary>
@@ -334,7 +305,7 @@ namespace Ch.Elca.Iiop {
 
         #region IFields
         
-        private NetworkStream m_stream;
+        private GiopTransportClientMsgHandler m_giopTransport;
         private IClientChannelSinkStack m_sinkStack;
         private DataAvailableCallBack m_callBack;
         private GiopConnectionContext m_connectionDesc;
@@ -343,10 +314,11 @@ namespace Ch.Elca.Iiop {
         #endregion IFields
         #region IConstructors
         
-        public AsyncResponseWaiter(IClientChannelSinkStack sinkStack, NetworkStream networkStream,
+        public AsyncResponseWaiter(IClientChannelSinkStack sinkStack,
+                                   GiopTransportClientMsgHandler giopTransport,
                                    uint reqNr, DataAvailableCallBack callBack) {
             m_sinkStack = sinkStack;
-            m_stream = networkStream;
+            m_giopTransport = giopTransport;
             m_callBack = callBack;
             m_connectionDesc = IiopConnectionManager.GetCurrentConnectionContext();
             m_reqNr = reqNr;
@@ -364,13 +336,13 @@ namespace Ch.Elca.Iiop {
 
         /// <summary>wait for data on the stream</summary>
         private void WaitForData() {
-            while (!(m_stream.DataAvailable)) {
+            while (!(((NetworkStream)m_giopTransport.TransportStream).DataAvailable)) {
                 // let the other threads continue ...
                 Thread.Sleep(0);
             }
             // call back the handler
             IiopConnectionManager.SetCurrentConnectionContext(m_connectionDesc); // make the current connection context available in this thread            
-            m_callBack(m_stream, m_sinkStack, m_reqNr);
+            m_callBack(m_giopTransport, m_sinkStack, m_reqNr);
         }
 
         #endregion IMethods
