@@ -450,7 +450,8 @@ namespace Ch.Elca.Iiop.Cdr {
             if ((ClsToIdlMapper.IsDefaultMarshalByVal(field.FieldType)) &&
                 (CheckForIndirection(out indirectionOffset))) { 
                 // load the value for the indirection
-                result = GetObjectForIndir(indirectionOffset, IndirectionType.IndirValue,
+                result = GetObjectForIndir(indirectionOffset, false,
+                                           IndirectionType.IndirValue,
                                            IndirectionUsage.ValueType);
                 // here a problem is possible: in the indirection table, the boxed from is present for boxed values, 
                 // but for setting the field, the unboxed version may be needed
@@ -468,11 +469,13 @@ namespace Ch.Elca.Iiop.Cdr {
         /// <summary>reads in a whole value-type instance</summary>
         public object ReadValue(Type formal) {
             // a reference to the whole value is also possible for an indirection, prepare the position to add to indir table
-            StreamPosition indirPos = new StreamPosition(m_baseStream); // indirPos will contain the next aligned position in the base stream, after next read-op is performed
+            StreamPosition indirPos = new StreamPosition(m_baseStream, 
+                                                         false); // indirPos will contain the next aligned position in the base stream, after next read-op is performed
             
             long indirOffset = 0;
             if (CheckForIndirection(out indirOffset)) { // check if an indirection will follow instead of a value
-                return GetObjectForIndir(indirOffset, IndirectionType.IndirValue,
+                return GetObjectForIndir(indirOffset, false,
+                                         IndirectionType.IndirValue,
                                          IndirectionUsage.ValueType);
             }
             
@@ -674,10 +677,12 @@ namespace Ch.Elca.Iiop.Cdr {
                     long indirectionOffset;
                     string repId = "";
                     if (CheckForIndirection(out indirectionOffset)) {
-                        repId = (string)GetObjectForIndir(indirectionOffset, IndirectionType.IndirRepId,
+                        repId = (string)GetObjectForIndir(indirectionOffset, false,
+                                                          IndirectionType.IndirRepId,
                                                           IndirectionUsage.ValueType);
                     } else {
-                        StreamPosition indirPos = new StreamPosition(m_baseStream); // indirPos will contain the next aligned position in the base stream after next read-Op
+                        StreamPosition indirPos = new StreamPosition(m_baseStream, 
+                                                                     false); // indirPos will contain the next aligned position in the base stream after next read-Op
                         repId = ReadString();
                         // add repository id to indirection table
                         StoreIndirection(new IndirectionInfo(indirPos.Position,
@@ -721,11 +726,12 @@ namespace Ch.Elca.Iiop.Cdr {
             if ((valueTag & 0x00000001) > 0) {
                 long indirectionOffset;
                 if (CheckForIndirection(out indirectionOffset)) {
-                    CheckIndirectionResolvable(indirectionOffset, 
+                    CheckIndirectionResolvable(indirectionOffset, false, 
                                                IndirectionType.CodeBaseUrl,
                                                IndirectionUsage.ValueType);
                 } else {
-                    StreamPosition indirPos = new StreamPosition(m_baseStream); // indirPos will contain the next aligned position in the base stream, after next read-op is performed
+                    StreamPosition indirPos = new StreamPosition(m_baseStream,
+                                                                 false); // indirPos will contain the next aligned position in the base stream, after next read-op is performed
                     string codeBaseURL = ReadString();    
                     // add codebase url to indirection table
                     StoreIndirection(new IndirectionInfo(indirPos.Position, 
@@ -751,19 +757,42 @@ namespace Ch.Elca.Iiop.Cdr {
             m_baseStream.StoreIndirection(info, value);
         }
         
-        public bool IsIndirectionResolvable(long indirOffset, IndirectionType indirType,
+        /// <param name="resolveGlobal">must be false for ValueStream, because indirections are not resolved across encapsulation bounderies</param>
+        public bool IsIndirectionResolvable(long indirOffset, bool resolveGlobal,
+                                            IndirectionType indirType,
                                             IndirectionUsage indirUsage) {
-            return m_baseStream.IsIndirectionResolvable(indirOffset, indirType, indirUsage);
+            return m_baseStream.IsIndirectionResolvable(indirOffset, false,
+                                                        indirType, indirUsage);
         }
         
-        public void CheckIndirectionResolvable(long indirOffset, IndirectionType indirType,
+        /// <param name="resolveGlobal">must be false for ValueStream, because indirections are not resolved across encapsulation bounderies</param>
+        public void CheckIndirectionResolvable(long indirOffset, bool resolveGlobal,
+                                               IndirectionType indirType,
                                                IndirectionUsage indirUsage) {
-            m_baseStream.CheckIndirectionResolvable(indirOffset, indirType, indirUsage);                                                   
+            m_baseStream.CheckIndirectionResolvable(indirOffset, false, indirType, indirUsage);                                                   
         }
         
-        public object GetObjectForIndir(long indirOffset, IndirectionType indirType,
+        /// <param name="resolveGlobal">must be false for ValueStream, because indirections are not resolved across encapsulation bounderies</param>
+        public object GetObjectForIndir(long indirOffset, bool resolveGlobal,
+                                        IndirectionType indirType,
                                         IndirectionUsage indirUsage) {
-            return m_baseStream.GetObjectForIndir(indirOffset, indirType, indirUsage);
+            return m_baseStream.GetObjectForIndir(indirOffset, false, indirType, indirUsage);
+        }
+        
+        public ulong GetPosition() {
+            return m_baseStream.GetPosition();
+        }
+        
+        public ulong GetGlobalOffset() {
+            return m_baseStream.GetGlobalOffset();
+        }
+        
+        public ulong GetNextAlignedPosition(Aligns align) {
+            return m_baseStream.GetNextAlignedPosition(align);
+        }
+        
+        public void MarkNextAlignedPosition(StreamPosition streamPosition) {
+            m_baseStream.MarkNextAlignedPosition(streamPosition);
         }
 
         #endregion IMethods
@@ -1019,10 +1048,22 @@ namespace Ch.Elca.Iiop.Cdr {
         
         public void StoreIndirection(object val, IndirectionInfo indirInfo) {
             m_baseStream.StoreIndirection(val, indirInfo);
-        }
+        }                
         
         public long CalculateIndirectionOffset(IndirectionInfo indirInfo) {
             return m_baseStream.CalculateIndirectionOffset(indirInfo);
+        }
+        
+        public ulong GetPosition() {
+            return m_baseStream.GetPosition();
+        }
+        
+        public ulong GetNextAlignedPosition(Aligns align) {
+            return m_baseStream.GetNextAlignedPosition(align);
+        }
+        
+        public void MarkNextAlignedPosition(StreamPosition streamPosition) {
+            m_baseStream.MarkNextAlignedPosition(streamPosition);
         }
         
         #endregion IMethods

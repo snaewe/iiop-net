@@ -216,7 +216,7 @@ namespace omg.org.CORBA {
         /// <remarks>helper which is used by the constructor with arg CdrInputStream</remarks>
         internal virtual void ReadFromStream(CdrInputStream cdrStream) { }
         
-        protected string ReadRepositoryId(CdrInputStreamImpl cdrStream) {
+        protected string ReadRepositoryId(CdrInputStream cdrStream) {
             return cdrStream.ReadString();
         }
 
@@ -1034,7 +1034,16 @@ namespace omg.org.CORBA {
         }
 
         internal override Type GetClsForTypeCode() {
-            Type arrayType = Array.CreateInstance(((TypeCodeImpl)m_seqType).GetClsForTypeCode(), 0).GetType();
+            Type elemType = ((TypeCodeImpl)m_seqType).GetClsForTypeCode();
+            Type arrayType;
+            // handle types in creation correctly
+            if (elemType is TypeBuilder) {
+                Module declModule = ((TypeBuilder)elemType).Module;
+                arrayType = declModule.GetType(elemType.FullName + "[]"); // not nice, better solution ?
+            } else {
+                Assembly declAssembly = elemType.Assembly;
+                arrayType = declAssembly.GetType(elemType.FullName + "[]"); // not nice, better solution ?
+            }                                    
             return arrayType;
         }
 
@@ -1565,7 +1574,7 @@ namespace Ch.Elca.Iiop.Marshalling {
 
         public override object Deserialise(System.Type formal, AttributeExtCollection attributes, CdrInputStream sourceStream) {
             // indirPos will contain the next aligned position in the base stream, after next read-op is performed
-            StreamPosition indirPos = new StreamPosition((CdrInputStreamImpl)sourceStream);
+            StreamPosition indirPos = new StreamPosition(sourceStream, true);
             
             uint kindVal = (uint)sourceStream.ReadULong();
             if (kindVal != CdrStreamHelper.INDIRECTION_TAG) {
@@ -1686,9 +1695,11 @@ namespace Ch.Elca.Iiop.Marshalling {
             } else {
                 // resolve indirection:
                 long indirectionOffset = sourceStream.ReadLong();
-                sourceStream.CheckIndirectionResolvable(indirectionOffset, IndirectionType.TypeCode,
+                sourceStream.CheckIndirectionResolvable(indirectionOffset, true,
+                                                        IndirectionType.TypeCode,
                                                         IndirectionUsage.TypeCode);
-                return sourceStream.GetObjectForIndir(indirectionOffset, IndirectionType.TypeCode,
+                return sourceStream.GetObjectForIndir(indirectionOffset, true,
+                                                      IndirectionType.TypeCode,
                                                       IndirectionUsage.TypeCode);
             }
         }
