@@ -1840,13 +1840,11 @@ public class MetaDataGenerator : IDLParserVisitor {
         UnionGenerationHelper genHelper = 
             m_typeManager.StartUnionTypeDefinition(forSymbol, fullyQualName);
         
-        UnionBuildInfo thisInfoBuildScope = new UnionBuildInfo(buildInfo.GetBuildScope(), genHelper,
-                                                               forSymbol);
-        UnionBuildInfo thisInfoInnerScope = new UnionBuildInfo(buildInfo.GetBuildScope().getChildScope(forSymbol.getSymbolName()), genHelper,
+        UnionBuildInfo thisInfo = new UnionBuildInfo(buildInfo.GetBuildScope().getChildScope(forSymbol.getSymbolName()), genHelper,
                                                                forSymbol);        
 
         Node switchBody = node.jjtGetChild(1);
-        TypeContainer discrType = (TypeContainer)node.jjtGetChild(0).jjtAccept(this, thisInfoBuildScope);
+        TypeContainer discrType = (TypeContainer)node.jjtGetChild(0).jjtAccept(this, thisInfo);
         if (discrType == null) {
             throw new InvalidIdlException(
                 String.Format("dicriminator type {0} not (yet) defined for union {1}",
@@ -1855,10 +1853,10 @@ public class MetaDataGenerator : IDLParserVisitor {
         }
         discrType = ReplaceByCustomMappedIfNeeded(discrType);
         ArrayList coveredDiscriminatorRange = ExtractCoveredDiscriminatorRange((ASTswitch_body)switchBody, 
-                                                                               discrType, thisInfoInnerScope);
+                                                                               discrType, thisInfo);
         
         genHelper.AddDiscriminatorFieldAndProperty(discrType, coveredDiscriminatorRange);
-        switchBody.jjtAccept(this, thisInfoInnerScope);        
+        switchBody.jjtAccept(this, thisInfo);        
         
         // create the resulting type
         Type resultType = m_typeManager.EndUnionTypeDefinition(forSymbol, genHelper);
