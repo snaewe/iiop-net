@@ -52,8 +52,6 @@ namespace Ch.Elca.Iiop.Idl {
     	/// <summary>used as helper to map type names to idl for Cls types</summary>
     	private static GenerationActionReference s_genIdlNameforClsType = new GenerationActionReference();
     	
-    	private static Type s_idlEntityType = typeof(IIdlEntity);
-
         #endregion SFields
         #region SConstructor
 
@@ -271,7 +269,7 @@ namespace Ch.Elca.Iiop.Idl {
         /// <returns></returns>
         // generator needs scoped form
         public static string MapFullTypeNameToIdlScoped(Type forType) {
-            bool isTypeMappedFromIdl = s_idlEntityType.IsAssignableFrom(forType);
+            bool isTypeMappedFromIdl = ReflectionHelper.IIdlEntityType.IsAssignableFrom(forType);
             string result = MapNamespaceToIdl(forType, "::", isTypeMappedFromIdl);
             if (result.Length > 0) { 
                 result += "::"; 
@@ -338,9 +336,9 @@ namespace Ch.Elca.Iiop.Idl {
         }
         
         private static void InitMapClsToIdlSpecial() {
-            s_clsMapSpecial.Add(typeof(System.Int16), "short");
-            s_clsMapSpecial.Add(typeof(System.Int32), "long");
-            s_clsMapSpecial.Add(typeof(System.Int64), "long long");
+            s_clsMapSpecial.Add(ReflectionHelper.Int16Type, "short");
+            s_clsMapSpecial.Add(ReflectionHelper.Int32Type, "long");
+            s_clsMapSpecial.Add(ReflectionHelper.Int64Type, "long long");
             s_clsMapSpecial.Add(typeof(System.Byte), "octet");
             s_clsMapSpecial.Add(typeof(System.Boolean), "boolean");
             s_clsMapSpecial.Add(typeof(void), "void");

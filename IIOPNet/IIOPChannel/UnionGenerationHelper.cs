@@ -645,21 +645,21 @@ namespace Ch.Elca.Iiop.Idl {
                     throw new InvalidUnionDiscriminatorValue(discVal, discrTypeCls);
                 }
                 gen.Emit(OpCodes.Ldc_I4, Convert.ToInt32(discVal));
-            } else if (discrTypeCls.Equals(typeof(System.Int16))) {
+            } else if (discrTypeCls.Equals(ReflectionHelper.Int16Type)) {
                 if ((!(discVal is System.Int64)) || 
                     ((System.Int64)discVal < System.Int16.MinValue) ||
                     ((System.Int64)discVal > System.Int16.MaxValue)) {
                     throw new InvalidUnionDiscriminatorValue(discVal, discrTypeCls);
                 }
                 gen.Emit(OpCodes.Ldc_I4, Convert.ToInt32(discVal));
-            } else if (discrTypeCls.Equals(typeof(System.Int32))) {
+            } else if (discrTypeCls.Equals(ReflectionHelper.Int32Type)) {
                 if ((!(discVal is System.Int64)) ||
                     ((System.Int64)discVal < System.Int32.MinValue) ||
                     ((System.Int64)discVal > System.Int32.MaxValue)) {
                     throw new InvalidUnionDiscriminatorValue(discVal, discrTypeCls);
                 }
                 gen.Emit(OpCodes.Ldc_I4, Convert.ToInt32(discVal));
-            } else if (discrTypeCls.Equals(typeof(System.Int64))) {
+            } else if (discrTypeCls.Equals(ReflectionHelper.Int64Type)) {
                 if (!(discVal is System.Int64)) {
                     throw new InvalidUnionDiscriminatorValue(discVal, discrTypeCls);
                 }

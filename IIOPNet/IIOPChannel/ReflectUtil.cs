@@ -37,88 +37,118 @@ namespace Ch.Elca.Iiop.Util {
     /// Adds some missing reflection functionalty.
     /// </summary>
     public sealed class ReflectionHelper {
-    	
-    	#region SFields
-    	
-    	private static Type s_iIdlEntityType = typeof(IIdlEntity);
-    	
-    	private static Type s_idlEnumAttributeType = typeof(IdlEnumAttribute);
-    	private static Type s_implClassAttributeType = typeof(ImplClassAttribute);
-    	    	
-    	private static Type s_stringType = typeof(string);
-    	
-    	#endregion SFields
-    	#region SProperties
-    	
-    	/// <summary>
-    	/// caches typeof(IIdlEntity)
-    	/// </summary>
-    	public static Type IIdlEntityType {
-    		get {
-    			return s_iIdlEntityType;
-    		}
-    	}
+        
+        #region SFields
+        
+        private static Type s_iIdlEntityType = typeof(IIdlEntity);
+        
+        private static Type s_idlEnumAttributeType = typeof(IdlEnumAttribute);
+        private static Type s_implClassAttributeType = typeof(ImplClassAttribute);
+    	private static Type s_idlSequenceAttributeType = typeof(IdlSequenceAttribute);
+                
+        private static Type s_stringType = typeof(string);
+        private static Type s_int16Type = typeof(System.Int16);
+        private static Type s_int32Type = typeof(System.Int32);
+        private static Type s_int64Type = typeof(System.Int64);
+        
+        #endregion SFields
+        #region SProperties
+        
+        /// <summary>caches typeof(IIdlEntity)</summary>
+        public static Type IIdlEntityType {
+            get {
+                return s_iIdlEntityType;
+            }
+        }
 
-		/// <summary>caches typeof(IdlEnumAttribute)</summary>    	
-    	public static Type IdlEnumAttributeType {
-    		get {
-    			return s_idlEnumAttributeType;
-    		}
-    	}
-    	    	
-    	/// <summary>
-    	/// caches typeof(string)
-    	/// </summary>
-    	public static Type StringType {
-    		get {
-    			return s_stringType;
-    		}
-    	}    	    	
-    	
-    	public static Type ImplClassAttributeType {
-    		get {
-    			return s_implClassAttributeType;
-    		}
-    	}
-    	
-    	#endregion SProperties    	
-    	#region SMethods
-    	
-    	/// <summary>
-    	/// gets all the public instance methods for Type type.
-    	/// </summary>
-    	/// <param name="type">The type to get the methods for</param>
-    	/// <param name="declaredOnly">return only methods directly declared in type</param>
-    	/// <returns></returns>
-    	public static MethodInfo[] GetPublicInstanceMethods(Type type, bool declaredOnly) {
-    		BindingFlags flags = BindingFlags.Instance | BindingFlags.Public;
-    		if (declaredOnly) {
-    		    flags |= BindingFlags.DeclaredOnly;	
-    		}
-    		return type.GetMethods(flags);
-    	}
-    	
-    	/// <summary>
-    	/// get all the instance fields directly declared in Type type.
-    	/// </summary>
-    	/// <param name="type">The type to get the fields for</param>
-    	/// <returns></returns>
-    	public static FieldInfo[] GetAllDeclaredInstanceFields(Type type) {
-    		BindingFlags flags = BindingFlags.Instance | BindingFlags.Public |
-    		                     BindingFlags.NonPublic | BindingFlags.DeclaredOnly;
-    		return type.GetFields(flags);
-    	}    	
-    	
-    	/// <summary>
-    	/// get the custom attributes for the Type type.
-    	/// </summary>
-    	/// <param name="type">the type to get the attributes for</param>
-    	/// <param name="inherit">should attributes on inherited type also be returned</param>
-    	/// <returns></returns>
-    	public static AttributeExtCollection GetCustomAttributesForType(Type type, bool inherit) {
-    		object[] attributes = type.GetCustomAttributes(inherit);
-    		return AttributeExtCollection.ConvertToAttributeCollection(attributes);
-    	}
+        /// <summary>caches typeof(IdlEnumAttribute)</summary>        
+        public static Type IdlEnumAttributeType {
+            get {
+                return s_idlEnumAttributeType;
+            }
+        }
+        
+        /// <summary>caches typeof(ImplClassAttribute)</summary>        
+        public static Type ImplClassAttributeType {
+            get {
+                return s_implClassAttributeType;
+            }
+        }
+        
+        /// <summary>caches typeof(IdlSequenceAttribute)</summary>        
+        public static Type IdlSequenceAttributeType {
+        	get {
+        		return s_idlSequenceAttributeType;
+        	}
+        }
+
+                
+        /// <summary>caches typeof(string)</summary>
+        public static Type StringType {
+            get {
+                return s_stringType;
+            }
+        }                
+        
+        /// <summary>caches typeof(Int16)</summary>
+        public static Type Int16Type {
+            get {
+                return s_int16Type;
+            }
+        }
+        
+        /// <summary>caches typeof(Int32)</summary>
+        public static Type Int32Type {
+            get {
+                return s_int32Type;
+            }
+        }
+        
+        /// <summary>caches typeof(Int64)</summary>
+        public static Type Int64Type {
+            get {
+                return s_int64Type;
+            }
+        }        
+        
+        #endregion SProperties        
+        #region SMethods
+        
+        /// <summary>
+        /// gets all the public instance methods for Type type.
+        /// </summary>
+        /// <param name="type">The type to get the methods for</param>
+        /// <param name="declaredOnly">return only methods directly declared in type</param>
+        /// <returns></returns>
+        public static MethodInfo[] GetPublicInstanceMethods(Type type, bool declaredOnly) {
+            BindingFlags flags = BindingFlags.Instance | BindingFlags.Public;
+            if (declaredOnly) {
+                flags |= BindingFlags.DeclaredOnly;    
+            }
+            return type.GetMethods(flags);
+        }
+        
+        /// <summary>
+        /// get all the instance fields directly declared in Type type.
+        /// </summary>
+        /// <param name="type">The type to get the fields for</param>
+        /// <returns></returns>
+        public static FieldInfo[] GetAllDeclaredInstanceFields(Type type) {
+            BindingFlags flags = BindingFlags.Instance | BindingFlags.Public |
+                                 BindingFlags.NonPublic | BindingFlags.DeclaredOnly;
+            return type.GetFields(flags);
+        }        
+        
+        /// <summary>
+        /// get the custom attributes for the Type type.
+        /// </summary>
+        /// <param name="type">the type to get the attributes for</param>
+        /// <param name="inherit">should attributes on inherited type also be returned</param>
+        /// <returns></returns>
+        public static AttributeExtCollection GetCustomAttributesForType(Type type, bool inherit) {
+            object[] attributes = type.GetCustomAttributes(inherit);
+            return AttributeExtCollection.ConvertToAttributeCollection(attributes);
+        }
 
         /// <summary>
         /// collects the custom attributes on the current parameter and from
@@ -219,9 +249,9 @@ namespace Ch.Elca.Iiop.Util {
         
         /// <summary>checks, if a method matching the MethodInfo method is defined on the type</summary>
         public static bool IsMethodDefinedOnType(MethodInfo method, Type type,
-                                                 BindingFlags flags) {        	
-        	MethodInfo foundMethod = type.GetMethod(method.Name, flags, null, ExtractMethodTypes(method),
-        	                                        null);
+                                                 BindingFlags flags) {            
+            MethodInfo foundMethod = type.GetMethod(method.Name, flags, null, ExtractMethodTypes(method),
+                                                    null);
             return (foundMethod != null);            
         }
         

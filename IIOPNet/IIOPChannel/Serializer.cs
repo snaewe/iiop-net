@@ -847,10 +847,10 @@ namespace Ch.Elca.Iiop.Marshalling {
         
         public override void Serialise(Type formal, object actual, AttributeExtCollection attributes,
                                        CdrOutputStream targetStream) {
-            if (attributes.IsInCollection(typeof(IdlSequenceAttribute))) {                
+            if (attributes.IsInCollection(ReflectionHelper.IdlSequenceAttributeType)) {                
                 // mapped from an IDL-sequence or CLS to IDL mapping
                 IdlSequenceAttribute seqAttr = (IdlSequenceAttribute)
-                    attributes.RemoveAttributeOfType(typeof(IdlSequenceAttribute)); // this attribute is handled --> remove it
+                    attributes.RemoveAttributeOfType(ReflectionHelper.IdlSequenceAttributeType); // this attribute is handled --> remove it
 
                 Array array = (Array) actual;
                 if (array == null) {
@@ -876,10 +876,10 @@ namespace Ch.Elca.Iiop.Marshalling {
 
         public override object Deserialise(Type formal, AttributeExtCollection attributes,
                                            CdrInputStream sourceStream) {
-            if (attributes.IsInCollection(typeof(IdlSequenceAttribute))) {
+            if (attributes.IsInCollection(ReflectionHelper.IdlSequenceAttributeType)) {
                 // mapped from an IDL-sequence
                 IdlSequenceAttribute seqAttr = 
-                    (IdlSequenceAttribute)attributes.RemoveAttributeOfType(typeof(IdlSequenceAttribute));
+                    (IdlSequenceAttribute)attributes.RemoveAttributeOfType(ReflectionHelper.IdlSequenceAttributeType);
                 uint nrOfElements = sourceStream.ReadULong();
                 CheckBound(nrOfElements, seqAttr);
                 

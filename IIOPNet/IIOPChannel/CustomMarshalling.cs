@@ -543,27 +543,27 @@ namespace Corba {
         }
 
         public short read_short() {
-            return (short)m_marshaller.Unmarshal(typeof(short), new AttributeExtCollection(), m_cdrIn);
+            return (short)m_marshaller.Unmarshal(ReflectionHelper.Int16Type, new AttributeExtCollection(), m_cdrIn);
         }
 
         public short read_ushort() {
-            return (short)m_marshaller.Unmarshal(typeof(short), new AttributeExtCollection(), m_cdrIn);
+            return (short)m_marshaller.Unmarshal(ReflectionHelper.Int16Type, new AttributeExtCollection(), m_cdrIn);
         }
 
         public int read_long() {
-            return (int)m_marshaller.Unmarshal(typeof(int), new AttributeExtCollection(), m_cdrIn);
+            return (int)m_marshaller.Unmarshal(ReflectionHelper.Int32Type, new AttributeExtCollection(), m_cdrIn);
         }
 
         public int read_ulong() {
-            return (int)m_marshaller.Unmarshal(typeof(int), new AttributeExtCollection(), m_cdrIn);
+            return (int)m_marshaller.Unmarshal(ReflectionHelper.Int32Type, new AttributeExtCollection(), m_cdrIn);
         }
 
         public long read_longlong() {
-            return (long)m_marshaller.Unmarshal(typeof(long), new AttributeExtCollection(), m_cdrIn);
+            return (long)m_marshaller.Unmarshal(ReflectionHelper.Int64Type, new AttributeExtCollection(), m_cdrIn);
         }
 
         public long read_ulonglong() {
-            return (long)m_marshaller.Unmarshal(typeof(long), new AttributeExtCollection(), m_cdrIn);
+            return (long)m_marshaller.Unmarshal(ReflectionHelper.Int64Type, new AttributeExtCollection(), m_cdrIn);
         }
 
         public float read_float() {

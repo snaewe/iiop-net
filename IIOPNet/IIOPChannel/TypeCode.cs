@@ -462,7 +462,7 @@ namespace omg.org.CORBA {
         #region IMethods
         
         internal override Type GetClsForTypeCode() {
-            return typeof(System.Int16);
+            return ReflectionHelper.Int16Type;
         }
 
         #endregion IMethods
@@ -478,7 +478,7 @@ namespace omg.org.CORBA {
         #region IMethods
 
         internal override Type GetClsForTypeCode() {
-            return typeof(System.Int32);
+            return ReflectionHelper.Int32Type;
         }
 
         #endregion IMethods
@@ -495,7 +495,7 @@ namespace omg.org.CORBA {
         #region IMethods
         
         internal override Type GetClsForTypeCode() {
-            return typeof(System.Int16);
+            return ReflectionHelper.Int16Type;
         }
 
         #endregion IMethods
@@ -512,7 +512,7 @@ namespace omg.org.CORBA {
         #region IMethods
 
         internal override Type GetClsForTypeCode() {
-            return typeof(System.Int32);
+            return ReflectionHelper.Int32Type;
         }
 
         #endregion IMethods
@@ -848,7 +848,7 @@ namespace omg.org.CORBA {
         #region IMethods
 
         internal override Type GetClsForTypeCode() {
-            return typeof(System.Int64);
+            return ReflectionHelper.Int64Type;
         }
 
         #endregion IMethods
@@ -865,7 +865,7 @@ namespace omg.org.CORBA {
         #region IMethods
 
         internal override Type GetClsForTypeCode() {
-            return typeof(System.Int64);
+            return ReflectionHelper.Int64Type;
         }
 
         #endregion IMethods

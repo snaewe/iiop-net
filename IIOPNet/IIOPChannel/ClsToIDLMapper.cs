@@ -162,9 +162,6 @@ namespace Ch.Elca.Iiop.Idl {
 
 
         // the following expressions are evaluated here for efficiency reasons
-        private static Type s_int16Type = typeof(System.Int16);
-        private static Type s_int32Type = typeof(System.Int32);
-        private static Type s_int64Type = typeof(System.Int64);
         private static Type s_byteType = typeof(System.Byte);
         private static Type s_booleanType = typeof(System.Boolean);
         private static Type s_voidType = typeof(void);
@@ -182,7 +179,6 @@ namespace Ch.Elca.Iiop.Idl {
 
         private static Type s_idlStructAttrType = typeof(IdlStructAttribute);
         private static Type s_idlUnionAttrType = typeof(IdlUnionAttribute);
-        private static Type s_idlSequenceAttrType = typeof(IdlSequenceAttribute);
         private static Type s_boxedValAttrType = typeof(BoxedValueAttribute);
         private static Type s_widecharAttrType = typeof(WideCharAttribute);
         private static Type s_stringValueAttrType = typeof(StringValueAttribute);
@@ -266,9 +262,9 @@ namespace Ch.Elca.Iiop.Idl {
         /// checks if the CLS type belongs to the mappable primitive types
         /// </summary>
         public static bool IsMappablePrimitiveType(Type clsType) {
-            if (clsType.Equals(s_int16Type) ||
-                clsType.Equals(s_int32Type) ||
-                clsType.Equals(s_int64Type) ||
+            if (clsType.Equals(ReflectionHelper.Int16Type) ||
+                clsType.Equals(ReflectionHelper.Int32Type) ||
+                clsType.Equals(ReflectionHelper.Int64Type) ||
                 clsType.Equals(s_byteType) ||
                 clsType.Equals(s_booleanType) ||
                 clsType.Equals(s_voidType) ||
@@ -397,11 +393,11 @@ namespace Ch.Elca.Iiop.Idl {
 
         /// <summary>determines the mapping for primitive types</summary>
         private object CallActionForDNPrimitveType(ref Type clsType, AttributeExtCollection attributes, MappingAction action) {
-            if (clsType.Equals(s_int16Type)) {
+            if (clsType.Equals(ReflectionHelper.Int16Type)) {
                 return action.MapToIdlShort(clsType);
-            } else if (clsType.Equals(s_int32Type)) {
+            } else if (clsType.Equals(ReflectionHelper.Int32Type)) {
                 return action.MapToIdlLong(clsType);
-            } else if (clsType.Equals(s_int64Type)) {
+            } else if (clsType.Equals(ReflectionHelper.Int64Type)) {
                 return action.MapToIdlLongLong(clsType);
             } else if (clsType.Equals(s_booleanType)) {
                 return action.MapToIdlBoolean(clsType);
@@ -501,9 +497,9 @@ namespace Ch.Elca.Iiop.Idl {
         /// </summary>
         private object CallActionForDNArray(ref Type clsType, AttributeExtCollection attributes, MappingAction action) {
             // distinguish the different cases here
-            if (attributes.IsInCollection(s_idlSequenceAttrType)) {
+            if (attributes.IsInCollection(ReflectionHelper.IdlSequenceAttributeType)) {
                 int bound = (int)
-                    ((IdlSequenceAttribute)attributes.GetAttributeForType(s_idlSequenceAttrType)).Bound;                
+                    ((IdlSequenceAttribute)attributes.GetAttributeForType(ReflectionHelper.IdlSequenceAttributeType)).Bound;
                 return action.MapToIdlSequence(clsType, bound);
             } else {
                 Type boxed = Repository.GetBoxedArrayType(clsType);
@@ -937,7 +933,7 @@ namespace Ch.Elca.Iiop.Tests {
         
         public void TestMapToIdlShort() {
             ClsToIdlMapper mapper = ClsToIdlMapper.GetSingleton();
-            MappingToResult mapResult = (MappingToResult)mapper.MapClsType(typeof(Int16), 
+            MappingToResult mapResult = (MappingToResult)mapper.MapClsType(ReflectionHelper.Int16Type, 
                                                                            new AttributeExtCollection(),
                                                                            s_testAction);
 			Assertion.AssertEquals(MappingToResult.IdlShort, mapResult);        	
@@ -945,7 +941,7 @@ namespace Ch.Elca.Iiop.Tests {
 
         public void TestMapToIdlLong() {
             ClsToIdlMapper mapper = ClsToIdlMapper.GetSingleton();
-            MappingToResult mapResult = (MappingToResult)mapper.MapClsType(typeof(Int32), 
+            MappingToResult mapResult = (MappingToResult)mapper.MapClsType(ReflectionHelper.Int32Type, 
                                                                            new AttributeExtCollection(),
                                                                            s_testAction);
             Assertion.AssertEquals(MappingToResult.IdlLong, mapResult);
@@ -953,7 +949,7 @@ namespace Ch.Elca.Iiop.Tests {
         
         public void TestMapToIdlLongLong() {
             ClsToIdlMapper mapper = ClsToIdlMapper.GetSingleton();
-            MappingToResult mapResult = (MappingToResult)mapper.MapClsType(typeof(Int64), 
+            MappingToResult mapResult = (MappingToResult)mapper.MapClsType(ReflectionHelper.Int64Type, 
                                                                            new AttributeExtCollection(),
                                                                            s_testAction);
             Assertion.AssertEquals(MappingToResult.IdlLongLong, mapResult);

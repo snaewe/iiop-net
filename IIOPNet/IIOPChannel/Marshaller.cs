@@ -272,9 +272,9 @@ namespace Ch.Elca.Iiop.Marshalling {
             // for primitive types
             m_baseTypeSerializer.Add(typeof(System.Byte), new ByteSerialiser());
             m_baseTypeSerializer.Add(typeof(System.Boolean), new BooleanSerialiser());
-            m_baseTypeSerializer.Add(typeof(System.Int16), new Int16Serialiser());
-            m_baseTypeSerializer.Add(typeof(System.Int32), new Int32Serialiser());
-            m_baseTypeSerializer.Add(typeof(System.Int64), new Int64Serialiser());
+            m_baseTypeSerializer.Add(ReflectionHelper.Int16Type, new Int16Serialiser());
+            m_baseTypeSerializer.Add(ReflectionHelper.Int32Type, new Int32Serialiser());
+            m_baseTypeSerializer.Add(ReflectionHelper.Int64Type, new Int64Serialiser());
             m_baseTypeSerializer.Add(typeof(System.Single), new SingleSerialiser());
             m_baseTypeSerializer.Add(typeof(System.Double), new DoubleSerialiser());
             m_baseTypeSerializer.Add(typeof(System.Char), new CharSerialiser());
