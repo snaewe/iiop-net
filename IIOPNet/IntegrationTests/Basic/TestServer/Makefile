@@ -7,7 +7,7 @@ build: build-server build-idl
 $(bin):
         if not exist $@nul mkdir $@
 
-$(bin)IIOPChannel.dll: $(IIOPCHANNEL)
+$(bin)IIOPChannel.dll: $(bin) $(IIOPCHANNEL)
         copy /y $(IIOPCHANNEL) $(bin)IIOPChannel.dll
 	if exist $(IIOPCHANNELPDB) copy /y $(IIOPCHANNELPDB) $(bin)IIOPChannel.pdb
 
