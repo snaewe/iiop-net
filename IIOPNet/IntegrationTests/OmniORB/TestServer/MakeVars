@@ -23,7 +23,7 @@ LDFLAGS      = -nologo $(CXXLINKOPTIONS)
 LDLIBS       = $(CORBA_LIB)
 
 IDLOpts  = -bcxx -I.
-IDL      = omniidl $(IDLOpts)
+IDL      = $(OMNIORB_HOME)\bin\x86_win32\omniidl $(IDLOpts)
 
 
 .SUFFIXES: .cc
