@@ -14,6 +14,27 @@ The Websphere nameservice can be accessed from a .NET client with the following 
     NamingContext nameService = (NamingContext)init.GetService("NameServiceServerRoot");
 </pre> <p/>
 
+Because the type of the NamingContext returned is Websphere-specific,
+the following file must be added to every IIOP.NET Websphere client:
+
+<pre>
+    //IbmNaming.cs
+    
+    using Ch.Elca.Iiop.Idl; 
+    using Ch.Elca.Iiop.Services; 
+
+    namespace com.ibm.WsnOptimizedNaming { 
+    
+        [RepositoryIDAttribute("IDL:com.ibm/WsnOptimizedNaming/NamingContext:1.0")] 
+        [InterfaceTypeAttribute(IdlTypeInterface.ConcreteInterface)] 
+        public interface NamingContext : omg.org.CosNaming.NamingContext { 
+        } 
+
+    } 
+
+</pre>
+<p/>
+
 Hint: The nameservice is listening normally on port 2809.
 
 <p/>
@@ -37,7 +58,8 @@ The ejb can now be created using this home interface (standard ejb pattern):
 <p/>
 <b>Known problems</b> <BR> <BR>
 <UL>
-<LI>The java String type does not work at the moment</LI>
+<LI>The java String type does not work up to and including IIOP.NET 1.2.3; 
+The problem was first fixed in IIOP.NET 1.3.0.</LI>
 </UL>
 
 
