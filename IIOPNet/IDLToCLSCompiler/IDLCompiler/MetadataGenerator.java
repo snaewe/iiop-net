@@ -347,7 +347,7 @@ public class MetaDataGenerator implements IDLParserVisitor {
                 // this is an error: can't inherit from a fwd declared type
                 throw new RuntimeException("type only fwd declared, but for inheritance full definition is needed");
             }
-            result[i] = resultType.getCLSType();
+            result[i] = resultType.GetClsType();
         }
         return result;        
     }
@@ -467,7 +467,7 @@ public class MetaDataGenerator implements IDLParserVisitor {
         } else {
             // get incomplete type
             Trace.WriteLine("complete interface: " + fullyQualName);
-            interfaceToBuild = (TypeBuilder)(m_typeManager.GetKnownType(forSymbol).getCLSType());
+            interfaceToBuild = (TypeBuilder)(m_typeManager.GetKnownType(forSymbol).GetClsType());
             // add inheritance relationship:
             for (int i = 0; i < interfaces.length; i++) {
                 interfaceToBuild.AddInterfaceImplementation(interfaces[i]);
@@ -683,7 +683,7 @@ public class MetaDataGenerator implements IDLParserVisitor {
         } else {
             // get incomplete type
             Trace.WriteLine("complete valuetype: " + fullyQualName);
-            valueToBuild = (TypeBuilder)m_typeManager.GetKnownType(forSymbol).getCLSType();
+            valueToBuild = (TypeBuilder)m_typeManager.GetKnownType(forSymbol).GetClsType();
             // add inheritance relationship:
             for (int i = 0; i < interfaces.length; i++) {
                 valueToBuild.AddInterfaceImplementation(interfaces[i]);
@@ -879,8 +879,8 @@ public class MetaDataGenerator implements IDLParserVisitor {
         TypeContainer boxedType = (TypeContainer)node.jjtGetChild(0).jjtAccept(this, data);
         Trace.WriteLine("generating code for boxed value type: " + fullyQualName);
         BoxedValueTypeGenerator boxedValueGen = new BoxedValueTypeGenerator();
-        TypeBuilder resultType = boxedValueGen.CreateBoxedType(boxedType.getCLSType(), curModBuilder,
-                                                               fullyQualName, boxedType.getAttrs());
+        TypeBuilder resultType = boxedValueGen.CreateBoxedType(boxedType.GetClsType(), curModBuilder,
+                                                               fullyQualName, boxedType.GetAttrs());
         AddRepIdAttribute(resultType, enclosingScope.getRepositoryIdFor(node.getIdent()));
         resultType.AddInterfaceImplementation(IIdlEntity.class.ToType());
         Type result = resultType.CreateType();
@@ -1006,8 +1006,8 @@ public class MetaDataGenerator implements IDLParserVisitor {
         ASTtype_spec typeSpecNode = (ASTtype_spec)node.jjtGetChild(0);
         TypeContainer fieldType = (TypeContainer)typeSpecNode.jjtAccept(this, info);
         // special handling for BoxedValue types --> unbox it
-        if (fieldType.getCLSType().IsSubclassOf(BoxedValueBase.class.ToType())) {
-            fieldType = mapBoxedValueTypeToUnboxed(fieldType.getCLSType());
+        if (fieldType.GetClsType().IsSubclassOf(BoxedValueBase.class.ToType())) {
+            fieldType = mapBoxedValueTypeToUnboxed(fieldType.GetClsType());
         }
         String[] decl = (String[])node.jjtGetChild(1).jjtAccept(this, data);
         FieldBuilder fieldBuild;
@@ -1019,13 +1019,13 @@ public class MetaDataGenerator implements IDLParserVisitor {
                 if (!privateName.startsWith("m_")) { 
                     privateName = "m_" + privateName; 
                 }
-                fieldBuild = builder.DefineField(privateName, fieldType.getCLSType(), FieldAttributes.Family);
+                fieldBuild = builder.DefineField(privateName, fieldType.GetClsType(), FieldAttributes.Family);
             } else { // map to public field
-                fieldBuild = builder.DefineField(decl[i], fieldType.getCLSType(), FieldAttributes.Public);
+                fieldBuild = builder.DefineField(decl[i], fieldType.GetClsType(), FieldAttributes.Public);
             }
             // add custom attributes
-            for (int j = 0; j < fieldType.getAttrs().length; j++) {
-                fieldBuild.SetCustomAttribute(fieldType.getAttrs()[j]);    
+            for (int j = 0; j < fieldType.GetAttrs().length; j++) {
+                fieldBuild.SetCustomAttribute(fieldType.GetAttrs()[j]);    
             }
         }
         return null;
@@ -1208,7 +1208,7 @@ public class MetaDataGenerator implements IDLParserVisitor {
                 String ident = ((SimpleNodeWithIdent) decl.jjtGetChild(0)).getIdent();
                 Symbol typedefSymbol = currentScope.getSymbol(ident);
                 // inform the type-manager of this typedef
-                Debug.WriteLine("typedef defined here, type: " + typeUsedInDefine.getCLSType() +
+                Debug.WriteLine("typedef defined here, type: " + typeUsedInDefine.GetClsType() +
                                 ", symbol: " + typedefSymbol);
                 m_typeManager.RegisterTypeDef(typeUsedInDefine, typedefSymbol);
             }
@@ -1587,16 +1587,16 @@ public class MetaDataGenerator implements IDLParserVisitor {
         ASTtype_spec typeSpecNode = (ASTtype_spec)node.jjtGetChild(0);
         TypeContainer fieldType = (TypeContainer)typeSpecNode.jjtAccept(this, info);
         // special handling for BoxedValue types --> unbox it
-        if (fieldType.getCLSType().IsSubclassOf(BoxedValueBase.class.ToType())) {
-            fieldType = mapBoxedValueTypeToUnboxed(fieldType.getCLSType());
+        if (fieldType.GetClsType().IsSubclassOf(BoxedValueBase.class.ToType())) {
+            fieldType = mapBoxedValueTypeToUnboxed(fieldType.GetClsType());
         }
         String[] decl = (String[])node.jjtGetChild(1).jjtAccept(this, info);
         FieldBuilder fieldBuild;
         for (int i = 0; i < decl.length; i++) {
-            fieldBuild = builder.DefineField(decl[i], fieldType.getCLSType(), FieldAttributes.Public);
+            fieldBuild = builder.DefineField(decl[i], fieldType.GetClsType(), FieldAttributes.Public);
             // add custom attributes
-            for (int j = 0; j < fieldType.getAttrs().length; j++) {
-                fieldBuild.SetCustomAttribute(fieldType.getAttrs()[j]);    
+            for (int j = 0; j < fieldType.GetAttrs().length; j++) {
+                fieldBuild.SetCustomAttribute(fieldType.GetAttrs()[j]);    
             }
         }
         return null;
@@ -1724,17 +1724,17 @@ public class MetaDataGenerator implements IDLParserVisitor {
         Node elemTypeNode = node.jjtGetChild(0);
         Debug.WriteLine("determine element type of IDLSequence");
         TypeContainer elemType = (TypeContainer)elemTypeNode.jjtAccept(this, data);
-        Debug.WriteLine("seq type determined: " + elemType.getCLSType());
+        Debug.WriteLine("seq type determined: " + elemType.GetClsType());
         // create CLS array type with the help of GetType(), otherwise not possible
         Type arrayType;
-        if (elemType.getCLSType() instanceof TypeBuilder) {
-            Module declModule = ((TypeBuilder)elemType.getCLSType()).get_Module();
-            Debug.WriteLine("get-elem-Type: " + declModule.GetType(elemType.getCLSType().get_FullName()));
-            arrayType = declModule.GetType(elemType.getCLSType().get_FullName() + "[]"); // not nice, better solution ?
+        if (elemType.GetClsType() instanceof TypeBuilder) {
+            Module declModule = ((TypeBuilder)elemType.GetClsType()).get_Module();
+            Debug.WriteLine("get-elem-Type: " + declModule.GetType(elemType.GetClsType().get_FullName()));
+            arrayType = declModule.GetType(elemType.GetClsType().get_FullName() + "[]"); // not nice, better solution ?
         } else {
-            Assembly declAssembly = elemType.getCLSType().get_Assembly();
+            Assembly declAssembly = elemType.GetClsType().get_Assembly();
             Debug.WriteLine("decl-Assembly: " + declAssembly);
-            arrayType = declAssembly.GetType(elemType.getCLSType().get_FullName() + "[]"); // not nice, better solution ?
+            arrayType = declAssembly.GetType(elemType.GetClsType().get_FullName() + "[]"); // not nice, better solution ?
         }
         
         Debug.WriteLine("created array type: " + arrayType);        
@@ -1791,24 +1791,24 @@ public class MetaDataGenerator implements IDLParserVisitor {
         ASTparam_type_spec typeSpecNode = (ASTparam_type_spec)node.jjtGetChild(0);
         TypeContainer propType = (TypeContainer)typeSpecNode.jjtAccept(this, info);
         // special handling for BoxedValue types --> unbox it
-        if (propType.getCLSType().IsSubclassOf(BoxedValueBase.class.ToType())) {
-            propType = mapBoxedValueTypeToUnboxed(propType.getCLSType());
+        if (propType.GetClsType().IsSubclassOf(BoxedValueBase.class.ToType())) {
+            propType = mapBoxedValueTypeToUnboxed(propType.GetClsType());
         }
         PropertyBuilder propBuild;
         for (int i = 1; i < node.jjtGetNumChildren(); i++) {
             ASTsimple_declarator simpleDecl = (ASTsimple_declarator) node.jjtGetChild(i);
             propBuild = builder.DefineProperty(simpleDecl.getIdent(), PropertyAttributes.None, 
-                                               propType.getCLSType(), System.Type.EmptyTypes);
+                                               propType.GetClsType(), System.Type.EmptyTypes);
             // set the methods for the property
             MethodBuilder getAccessor = builder.DefineMethod("get_" + simpleDecl.getIdent(), 
                                                              MethodAttributes.Virtual | MethodAttributes.Abstract | MethodAttributes.Public | MethodAttributes.HideBySig | MethodAttributes.SpecialName, 
-                                                             propType.getCLSType(), System.Type.EmptyTypes);
+                                                             propType.GetClsType(), System.Type.EmptyTypes);
             propBuild.SetGetMethod(getAccessor);
             MethodBuilder setAccessor = null;
             if (!(node.isReadOnly())) {
                 setAccessor = builder.DefineMethod("set_" + simpleDecl.getIdent(), 
                                                    MethodAttributes.Virtual | MethodAttributes.Abstract | MethodAttributes.Public | MethodAttributes.HideBySig | MethodAttributes.SpecialName, 
-                                                   null, new System.Type[] { propType.getCLSType() });
+                                                   null, new System.Type[] { propType.GetClsType() });
                 propBuild.SetSetMethod(setAccessor);
             }
             
@@ -1818,12 +1818,12 @@ public class MetaDataGenerator implements IDLParserVisitor {
                 valParam = setAccessor.DefineParameter(1, ParameterAttributes.None, "value"); 
             }
             // add custom attributes
-            for (int j = 0; j < propType.getAttrs().length; j++) {
-                propBuild.SetCustomAttribute(propType.getAttrs()[j]);    
+            for (int j = 0; j < propType.GetAttrs().length; j++) {
+                propBuild.SetCustomAttribute(propType.GetAttrs()[j]);    
                 
-                retParamGet.SetCustomAttribute(propType.getAttrs()[j]);
+                retParamGet.SetCustomAttribute(propType.GetAttrs()[j]);
                 if (setAccessor != null) {
-                    valParam.SetCustomAttribute(propType.getAttrs()[j]);
+                    valParam.SetCustomAttribute(propType.GetAttrs()[j]);
                 }
             }
             
@@ -1922,8 +1922,8 @@ public class MetaDataGenerator implements IDLParserVisitor {
         // return type
         TypeContainer returnType = (TypeContainer)node.jjtGetChild(0).jjtAccept(this, buildInfo);
         // special handling for BoxedValue types --> unbox it
-        if (returnType.getCLSType().IsSubclassOf(BoxedValueBase.class.ToType())) {
-            returnType = mapBoxedValueTypeToUnboxed(returnType.getCLSType());
+        if (returnType.GetClsType().IsSubclassOf(BoxedValueBase.class.ToType())) {
+            returnType = mapBoxedValueTypeToUnboxed(returnType.GetClsType());
         }
         // parameters
         ParameterSpec[] params = (ParameterSpec[])node.jjtGetChild(1).jjtAccept(this, buildInfo);
@@ -1937,15 +1937,15 @@ public class MetaDataGenerator implements IDLParserVisitor {
         TypeBuilder typeAtBuild = buildInfo.GetContainterType();
         MethodBuilder methodBuild = typeAtBuild.DefineMethod(methodName,  
                                                              MethodAttributes.Virtual | MethodAttributes.Abstract | MethodAttributes.Public | MethodAttributes.HideBySig,
-                                                             returnType.getCLSType(), paramTypes);
+                                                             returnType.GetClsType(), paramTypes);
         // define the paramter-names / attributes
         for (int i = 0; i < params.length; i++) {
             DefineParamter(methodBuild, params[i], i+1);
         }
         // add custom attributes for the return type
         ParameterBuilder paramBuild = CreateParamBuilderForRetParam(methodBuild);
-        for (int i = 0; i < returnType.getAttrs().length; i++) {
-            paramBuild.SetCustomAttribute(returnType.getAttrs()[i]);
+        for (int i = 0; i < returnType.GetAttrs().length; i++) {
+            paramBuild.SetCustomAttribute(returnType.GetAttrs()[i]);
         }
         return null;
     }
@@ -1954,16 +1954,16 @@ public class MetaDataGenerator implements IDLParserVisitor {
     private Type GetParamType(ParameterSpec spec) {
         TypeContainer specType = spec.GetParamType();
         // special handling for BoxedValue types --> unbox it
-        if (specType.getCLSType().IsSubclassOf(BoxedValueBase.class.ToType())) {
-            specType = mapBoxedValueTypeToUnboxed(specType.getCLSType());
+        if (specType.GetClsType().IsSubclassOf(BoxedValueBase.class.ToType())) {
+            specType = mapBoxedValueTypeToUnboxed(specType.GetClsType());
         }
         Type resultType;
         if (spec.IsIn()) {
-            resultType = specType.getCLSType();
+            resultType = specType.GetClsType();
         } else { // out or inout parameter
             // need a type which represents a reference to the parametertype
-            Assembly declAssembly = specType.getCLSType().get_Assembly();
-            resultType = declAssembly.GetType(specType.getCLSType().get_FullName() + "&"); // not nice, better solution ?
+            Assembly declAssembly = specType.GetClsType().get_Assembly();
+            resultType = declAssembly.GetType(specType.GetClsType().get_FullName() + "&"); // not nice, better solution ?
         }
         return resultType;
     }
@@ -1977,11 +1977,11 @@ public class MetaDataGenerator implements IDLParserVisitor {
         // custom attribute spec
         TypeContainer specType = spec.GetParamType();
         // special handling for BoxedValue types --> unbox it
-        if (specType.getCLSType().IsSubclassOf(BoxedValueBase.class.ToType())) {
-            specType = mapBoxedValueTypeToUnboxed(specType.getCLSType());
+        if (specType.GetClsType().IsSubclassOf(BoxedValueBase.class.ToType())) {
+            specType = mapBoxedValueTypeToUnboxed(specType.GetClsType());
         }
-        for (int i = 0; i < specType.getAttrs().length; i++) {
-            paramBuild.SetCustomAttribute(specType.getAttrs()[i]);    
+        for (int i = 0; i < specType.GetAttrs().length; i++) {
+            paramBuild.SetCustomAttribute(specType.GetAttrs()[i]);    
         }
     }
 

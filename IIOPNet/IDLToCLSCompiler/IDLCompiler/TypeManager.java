@@ -68,7 +68,7 @@ public class TypeManager {
         }
         if (IsTypeDeclarded(forSymbol)) {
             throw new RuntimeException("a type with the name " + 
-                                       GetKnownType(forSymbol).getCLSType().get_FullName() +
+                                       GetKnownType(forSymbol).GetClsType().get_FullName() +
                                        " is already declared for symbol: " + forSymbol);
         }
         TypeContainer container = new TypeContainer(type, new CustomAttributeBuilder[0]);
@@ -152,7 +152,7 @@ public class TypeManager {
             java.util.Enumeration enum = m_typesInCreation.elements();
             while (enum.hasMoreElements()) {
                 System.out.println("only forward declared: " + 
-                                   ((TypeContainer)enum.nextElement()).getCLSType());
+                                   ((TypeContainer)enum.nextElement()).GetClsType());
             }
             return false;
         } else {
@@ -230,11 +230,11 @@ class TypeContainer {
     #endregion IConstructors
     #region IMethods
 
-    public Type getCLSType() {
+    public Type GetClsType() {
         return m_clsType;
     }
 
-    public CustomAttributeBuilder[] getAttrs() {
+    public CustomAttributeBuilder[] GetAttrs() {
         return m_attrs;
     }
 
