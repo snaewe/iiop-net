@@ -1,5 +1,5 @@
-Current (CVS Version)
----------------------
+Version 1.4.0 (26 August 2003)
+------------------------------
 
 new features:
 
@@ -21,9 +21,10 @@ changes:
 - loading of assemblies for serialisation / deserialisation improved:
   now considers RelativeSearchPath of Appdomain
 - chunked encoded value types deserialisation problems corrected
-- imporved mapping of type/method-names
+- improved mapping of type/method-names
 - CLS server objects; support for is_a CORBA standard methods reestablished
 - EJBChatRoom refactoring: ChatroomClients renamed to ChatroomServer
+
 
 
 Version 1.3.1 (05 August 2003)
