@@ -182,6 +182,14 @@ namespace Ch.Elca.Iiop.IntegrationTests {
             
         }
 
+        [Test]
+        public void TestNestedStructTypes() {
+            TestService_package.InnerStruct arg = new TestService_package.InnerStruct();
+            arg.Field1 = 21;
+            TestService_package.InnerStruct result = m_testService.EchoInnerStruct(arg);
+            Assertion.AssertNotNull(result);
+            Assertion.AssertEquals(arg.Field1, result.Field1);
+        }
 
 
     }

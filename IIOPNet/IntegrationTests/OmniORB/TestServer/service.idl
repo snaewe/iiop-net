@@ -22,6 +22,11 @@ typedef sequence<wstring> wstringSeq;
 typedef sequence<wstringSeq> seqOfWStringSeq;
 
 interface TestService {
+
+    struct InnerStruct {
+        long Field1;
+    };
+
     TestUnion EchoTestUnion(in TestUnion arg);
     TestUnionE EchoTestUnionE(in TestUnionE arg);   
     any EchoAny(in any arg);
@@ -31,6 +36,8 @@ interface TestService {
     wstringSeq RetrieveWstringSeq(in wstring val, in long nrOfElems);
     wstringSeq EchoWstringSeq(in wstringSeq arg);
     seqOfWStringSeq EchoSeqOfWStringSeq(in seqOfWStringSeq arg);
+
+    InnerStruct EchoInnerStruct(in InnerStruct arg);
 }; 
 
 
