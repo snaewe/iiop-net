@@ -23,11 +23,11 @@ build-java: $(StorageSystem)*.java *.java
 	javac -classpath . $?
 
 clean:
-	del /q Ch\Elca\Iiop\*.java
-	del /q Ch\Elca\Iiop\*.class
+	if exist Ch\Elca\Iiop\*.java del /q Ch\Elca\Iiop\*.java
+	if exist Ch\Elca\Iiop\*.class del /q Ch\Elca\Iiop\*.class
 	move $(EntryImpl) tmp.java
-	del /q Ch\Elca\Iiop\Demo\StorageSystem\*.java
-	del /q Ch\Elca\Iiop\Demo\StorageSystem\*.class
+	if exist Ch\Elca\Iiop\Demo\StorageSystem\*.java del /q Ch\Elca\Iiop\Demo\StorageSystem\*.java
+	if exist Ch\Elca\Iiop\Demo\StorageSystem\*.class del /q Ch\Elca\Iiop\Demo\StorageSystem\*.class
 	if exist IDL\nul rmdir /q /s IDL
 	if exist org\nul rmdir /q /s org
 	if exist *.class del /q *.class
