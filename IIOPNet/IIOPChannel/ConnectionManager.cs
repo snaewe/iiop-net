@@ -36,6 +36,7 @@ using System.Runtime.Remoting.Messaging;
 using omg.org.CORBA;
 
 using Ch.Elca.Iiop.Services;
+using Ch.Elca.Iiop.Util;
 
 namespace Ch.Elca.Iiop {
 

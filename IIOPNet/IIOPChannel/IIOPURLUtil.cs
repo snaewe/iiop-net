@@ -29,11 +29,10 @@
 
 
 using System;
-using Ch.Elca.Iiop.CorbaObjRef;
-using Ch.Elca.Iiop.Util;
 using omg.org.CORBA;
+using Ch.Elca.Iiop.CorbaObjRef;
 
-namespace Ch.Elca.Iiop {
+namespace Ch.Elca.Iiop.Util {
 
     /// <summary>
     /// This class is able to handle urls, object uris for the IIOP-channel

@@ -40,6 +40,7 @@ using System.Text;
 using Ch.Elca.Iiop.Services;
 using Ch.Elca.Iiop.Cdr;
 using Ch.Elca.Iiop.MessageHandling;
+using Ch.Elca.Iiop.Util;
 
 namespace Ch.Elca.Iiop {   
 

@@ -35,6 +35,7 @@ using System.IO;
 using System.Diagnostics;
 using Ch.Elca.Iiop.Cdr;
 using Ch.Elca.Iiop.Services;
+using Ch.Elca.Iiop.Util;
 
 namespace Ch.Elca.Iiop.MessageHandling {
 

@@ -37,6 +37,7 @@ using System.Collections;
 using System.Diagnostics;
 using System.Net.Sockets;
 using System.Threading;
+using Ch.Elca.Iiop.Util;
 
 namespace Ch.Elca.Iiop {
 

@@ -33,6 +33,7 @@ using System.Collections;
 using System.Runtime.Remoting;
 using System.Runtime.Remoting.Channels;
 using Ch.Elca.Iiop;
+using Ch.Elca.Iiop.Util;
 
 namespace Ch.Elca.Iiop.Services {
 
