@@ -167,6 +167,9 @@ namespace Ch.Elca.Iiop {
 
         internal bool CheckConnected() {
             try {
+                if (m_socket == null) {
+                    return false;
+                }
                 m_socket.GetStream();
                 return true;
             } catch (Exception) {
