@@ -152,15 +152,17 @@ namespace Ch.Elca.Iiop {
                                               IMessage requestMsg,
                                               GiopConnectionDesc conDesc) {
             
-            GiopMessageHandler handler = GiopMessageHandler.GetSingleton();
-            IMessage result = handler.ParseIncomingReplyMessage(responseStream, 
-                                                                (IMethodCallMessage) requestMsg,
-                                                                conDesc);
-            responseStream.Close(); // stream not needed any more
-            
-            conDesc.MessagesAlreadyExchanged = true; // a message exchange completed
-            m_conManager.ReleaseConnectionFor(requestMsg); // release the connection, because this interaction is complete
-            
+            IMessage result;
+            try {
+                GiopMessageHandler handler = GiopMessageHandler.GetSingleton();
+                result = handler.ParseIncomingReplyMessage(responseStream, 
+                                                           (IMethodCallMessage) requestMsg,
+                                                           conDesc);
+            } finally {
+                responseStream.Close(); // stream not needed any more
+                conDesc.MessagesAlreadyExchanged = true; // a message exchange completed
+                m_conManager.ReleaseConnectionFor(requestMsg); // release the connection, because this interaction is complete            
+            }            
             return result;
         }
         
