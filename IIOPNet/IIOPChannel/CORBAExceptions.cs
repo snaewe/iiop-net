@@ -41,7 +41,8 @@ namespace Ch.Elca.Iiop {
         
         #region IConstructors
 
-        public UnknownSystemException(int minor, omg.org.CORBA.CompletionStatus status) : base(minor, status) { }
+        public UnknownSystemException(int minor, omg.org.CORBA.CompletionStatus status) : 
+            base(System.Reflection.MethodInfo.GetCurrentMethod().DeclaringType.FullName, minor, status) { }
 
         #endregion IConstructors
     }
@@ -169,7 +170,9 @@ namespace omg.org.CORBA {
         public AbstractCORBASystemException() : base("CORBA system exception") {
         }
         
-        public AbstractCORBASystemException(int minor, CompletionStatus status) : base("CORBA system exception, completed: " + status + " minor: " + minor) {
+        public AbstractCORBASystemException(string exceptionDesc, int minor, CompletionStatus status) : 
+            base("CORBA system exception : " + exceptionDesc +                   
+                 ", completed: " + status + " minor: " + minor) {
             m_minor = minor;
             m_status = status;
         }
@@ -199,7 +202,8 @@ namespace omg.org.CORBA {
         
         #region IConstructors
 
-        public UNKNOWN(int minor, CompletionStatus status) : base(minor, status) { }
+        public UNKNOWN(int minor, CompletionStatus status) : 
+            base(System.Reflection.MethodInfo.GetCurrentMethod().DeclaringType.FullName, minor, status) { }
 
         #endregion IConstructors
 
@@ -211,7 +215,8 @@ namespace omg.org.CORBA {
         
         #region IConstructors
         
-        public BAD_PARAM(int minor, CompletionStatus status) : base(minor, status) { }
+        public BAD_PARAM(int minor, CompletionStatus status) : 
+            base(System.Reflection.MethodInfo.GetCurrentMethod().DeclaringType.FullName, minor, status) { }
 
         #endregion IConstructors
 
@@ -223,7 +228,8 @@ namespace omg.org.CORBA {
 
         #region IConstructors
 
-        public NO_MEMORY(int minor, CompletionStatus status) : base(minor, status) { }
+        public NO_MEMORY(int minor, CompletionStatus status) : 
+            base(System.Reflection.MethodInfo.GetCurrentMethod().DeclaringType.FullName, minor, status) { }
 
         #endregion IConstructors
 
@@ -235,7 +241,8 @@ namespace omg.org.CORBA {
 
         #region IConstructors
 
-        public IMP_LIMIT(int minor, CompletionStatus status) : base(minor, status) { }
+        public IMP_LIMIT(int minor, CompletionStatus status) : 
+            base(System.Reflection.MethodInfo.GetCurrentMethod().DeclaringType.FullName, minor, status) { }
 
         #endregion IConstructors
 
@@ -247,7 +254,8 @@ namespace omg.org.CORBA {
  
         #region IConstructors
 
-        public COMM_FAILURE(int minor, CompletionStatus status) : base(minor, status) { }
+        public COMM_FAILURE(int minor, CompletionStatus status) : 
+            base(System.Reflection.MethodInfo.GetCurrentMethod().DeclaringType.FullName, minor, status) { }
 
         #endregion IConstructors
 
@@ -259,7 +267,8 @@ namespace omg.org.CORBA {
 
         #region IConstructors
 
-        public INV_OBJREF(int minor, CompletionStatus status) : base(minor, status) { }
+        public INV_OBJREF(int minor, CompletionStatus status) : 
+            base(System.Reflection.MethodInfo.GetCurrentMethod().DeclaringType.FullName, minor, status) { }
 
         #endregion IConstructors
 
@@ -271,7 +280,8 @@ namespace omg.org.CORBA {
  
         #region IConstructors
 
-        public NO_PERMISSION(int minor, CompletionStatus status) : base(minor, status) { }
+        public NO_PERMISSION(int minor, CompletionStatus status) : 
+            base(System.Reflection.MethodInfo.GetCurrentMethod().DeclaringType.FullName, minor, status) { }
 
         #endregion IConstructors
 
@@ -283,7 +293,8 @@ namespace omg.org.CORBA {
 
         #region IConstructors
 
-        public INTERNAL(int minor, CompletionStatus status) : base(minor, status) { }
+        public INTERNAL(int minor, CompletionStatus status) : 
+            base(System.Reflection.MethodInfo.GetCurrentMethod().DeclaringType.FullName, minor, status) { }
 
         #endregion IConstructors
 
@@ -295,7 +306,8 @@ namespace omg.org.CORBA {
 
         #region IConstructors
 
-        public MARSHAL(int minor, CompletionStatus status) : base(minor, status) { }
+        public MARSHAL(int minor, CompletionStatus status) : 
+            base(System.Reflection.MethodInfo.GetCurrentMethod().DeclaringType.FullName, minor, status) { }
 
         #endregion IConstructors
     }
@@ -306,7 +318,8 @@ namespace omg.org.CORBA {
 
         #region IConstructors
 
-        public INITALIZE(int minor, CompletionStatus status) : base(minor, status) { }
+        public INITALIZE(int minor, CompletionStatus status) : 
+            base(System.Reflection.MethodInfo.GetCurrentMethod().DeclaringType.FullName, minor, status) { }
 
         #endregion IConstructors
         
@@ -318,7 +331,8 @@ namespace omg.org.CORBA {
  
         #region IConstructors
 
-        public NO_IMPLEMENT(int minor, CompletionStatus status) : base(minor, status) { }
+        public NO_IMPLEMENT(int minor, CompletionStatus status) : 
+            base(System.Reflection.MethodInfo.GetCurrentMethod().DeclaringType.FullName, minor, status) { }
 
         #endregion IConstructors
 
@@ -330,7 +344,8 @@ namespace omg.org.CORBA {
 
         #region IConstructors
 
-        public BAD_TYPECODE(int minor, CompletionStatus status) : base(minor, status) { }
+        public BAD_TYPECODE(int minor, CompletionStatus status) : 
+            base(System.Reflection.MethodInfo.GetCurrentMethod().DeclaringType.FullName, minor, status) { }
 
         #endregion IConstructors
 
@@ -342,7 +357,8 @@ namespace omg.org.CORBA {
 
         #region IConstructors
 
-        public BAD_OPERATION(int minor, CompletionStatus status) : base(minor, status) { }
+        public BAD_OPERATION(int minor, CompletionStatus status) : 
+            base(System.Reflection.MethodInfo.GetCurrentMethod().DeclaringType.FullName, minor, status) { }
 
         #endregion IConstructors
 
@@ -354,7 +370,8 @@ namespace omg.org.CORBA {
 
         #region IConstructors
 
-        public NO_RESOURCES(int minor, CompletionStatus status) : base(minor, status) { }
+        public NO_RESOURCES(int minor, CompletionStatus status) : 
+            base(System.Reflection.MethodInfo.GetCurrentMethod().DeclaringType.FullName, minor, status) { }
 
         #endregion IConstructors
 
@@ -366,7 +383,8 @@ namespace omg.org.CORBA {
 
         #region IConstructors
 
-        public NO_RESPONSE(int minor, CompletionStatus status) : base(minor, status) { }
+        public NO_RESPONSE(int minor, CompletionStatus status) : 
+            base(System.Reflection.MethodInfo.GetCurrentMethod().DeclaringType.FullName, minor, status) { }
 
         #endregion IConstructors
 
@@ -378,7 +396,8 @@ namespace omg.org.CORBA {
  
         #region IConstructors
 
-        public PERSIST_STORE(int minor, CompletionStatus status) : base(minor, status) { }
+        public PERSIST_STORE(int minor, CompletionStatus status) : 
+            base(System.Reflection.MethodInfo.GetCurrentMethod().DeclaringType.FullName, minor, status) { }
 
         #endregion IConstructors
 
@@ -390,7 +409,8 @@ namespace omg.org.CORBA {
 
         #region IConstructors
 
-        public BAD_INV_ORDER(int minor, CompletionStatus status) : base(minor, status) { }
+        public BAD_INV_ORDER(int minor, CompletionStatus status) : 
+            base(System.Reflection.MethodInfo.GetCurrentMethod().DeclaringType.FullName, minor, status) { }
 
         #endregion IConstructors
 
@@ -402,7 +422,8 @@ namespace omg.org.CORBA {
 
         #region IConstructors
 
-        public TRANSIENT(int minor, CompletionStatus status) : base(minor, status) { }
+        public TRANSIENT(int minor, CompletionStatus status) : 
+            base(System.Reflection.MethodInfo.GetCurrentMethod().DeclaringType.FullName, minor, status) { }
 
         #endregion IConstructors
 
@@ -414,7 +435,8 @@ namespace omg.org.CORBA {
 
         #region IConstructors
 
-        public FREE_MEM(int minor, CompletionStatus status) : base(minor, status) { }
+        public FREE_MEM(int minor, CompletionStatus status) : 
+            base(System.Reflection.MethodInfo.GetCurrentMethod().DeclaringType.FullName, minor, status) { }
 
         #endregion IConstructors
 
@@ -426,7 +448,8 @@ namespace omg.org.CORBA {
 
         #region IConstructors
 
-        public INV_IDENT(int minor, CompletionStatus status) : base(minor, status) { }
+        public INV_IDENT(int minor, CompletionStatus status) : 
+            base(System.Reflection.MethodInfo.GetCurrentMethod().DeclaringType.FullName, minor, status) { }
 
         #endregion IConstructors
 
@@ -438,7 +461,8 @@ namespace omg.org.CORBA {
 
         #region IConstructors
 
-        public INV_FLAG(int minor, CompletionStatus status) : base(minor, status) { }
+        public INV_FLAG(int minor, CompletionStatus status) : 
+            base(System.Reflection.MethodInfo.GetCurrentMethod().DeclaringType.FullName, minor, status) { }
 
         #endregion IConstructors
 
@@ -450,7 +474,8 @@ namespace omg.org.CORBA {
 
         #region IConstructors
 
-        public INTF_REPOS(int minor, CompletionStatus status) : base(minor, status) { }
+        public INTF_REPOS(int minor, CompletionStatus status) : 
+            base(System.Reflection.MethodInfo.GetCurrentMethod().DeclaringType.FullName, minor, status) { }
 
         #endregion IConstructors
 
@@ -462,7 +487,8 @@ namespace omg.org.CORBA {
 
         #region IConstructors
 
-        public BAD_CONTEXT(int minor, CompletionStatus status) : base(minor, status) { }
+        public BAD_CONTEXT(int minor, CompletionStatus status) : 
+            base(System.Reflection.MethodInfo.GetCurrentMethod().DeclaringType.FullName, minor, status) { }
 
         #endregion IConstructors
 
@@ -474,7 +500,8 @@ namespace omg.org.CORBA {
  
         #region IConstructors
 
-        public OBJ_ADAPTER(int minor, CompletionStatus status) : base(minor, status) { }
+        public OBJ_ADAPTER(int minor, CompletionStatus status) : 
+            base(System.Reflection.MethodInfo.GetCurrentMethod().DeclaringType.FullName, minor, status) { }
 
         #endregion IConstructors
 
@@ -486,7 +513,8 @@ namespace omg.org.CORBA {
  
         #region IConstructors
 
-        public DATA_CONVERSION(int minor, CompletionStatus status) : base(minor, status) { }
+        public DATA_CONVERSION(int minor, CompletionStatus status) : 
+            base(System.Reflection.MethodInfo.GetCurrentMethod().DeclaringType.FullName, minor, status) { }
 
         #endregion IConstructors
 
@@ -498,7 +526,8 @@ namespace omg.org.CORBA {
 
         #region IConstructors
 
-        public OBJECT_NOT_EXIST(int minor, CompletionStatus status) : base(minor, status) { }
+        public OBJECT_NOT_EXIST(int minor, CompletionStatus status) : 
+            base(System.Reflection.MethodInfo.GetCurrentMethod().DeclaringType.FullName, minor, status) { }
 
         #endregion IConstructors
 
@@ -510,7 +539,8 @@ namespace omg.org.CORBA {
  
         #region IConstructors
 
-        public TRANSACTION_REQUIRED(int minor, CompletionStatus status) : base(minor, status) { }
+        public TRANSACTION_REQUIRED(int minor, CompletionStatus status) : 
+            base(System.Reflection.MethodInfo.GetCurrentMethod().DeclaringType.FullName, minor, status) { }
 
         #endregion IConstructors
 
@@ -522,7 +552,8 @@ namespace omg.org.CORBA {
 
         #region IConstructors
 
-        public INV_POLICY(int minor, CompletionStatus status) : base(minor, status) { }
+        public INV_POLICY(int minor, CompletionStatus status) : 
+            base(System.Reflection.MethodInfo.GetCurrentMethod().DeclaringType.FullName, minor, status) { }
 
         #endregion IConstructors
 
@@ -534,7 +565,8 @@ namespace omg.org.CORBA {
 
         #region IConstructors
 
-        public CODESET_INCOMPATIBLE(int minor, CompletionStatus status) : base(minor, status) { }
+        public CODESET_INCOMPATIBLE(int minor, CompletionStatus status) : 
+            base(System.Reflection.MethodInfo.GetCurrentMethod().DeclaringType.FullName, minor, status) { }
 
         #endregion IConstructors
 
@@ -546,7 +578,8 @@ namespace omg.org.CORBA {
 
         #region IConstructors
 
-        public TRANSACTION_MODE(int minor, CompletionStatus status) : base(minor, status) { }
+        public TRANSACTION_MODE(int minor, CompletionStatus status) : 
+            base(System.Reflection.MethodInfo.GetCurrentMethod().DeclaringType.FullName, minor, status) { }
 
         #endregion IConstructors
 
@@ -558,7 +591,8 @@ namespace omg.org.CORBA {
 
         #region IConstructors
 
-        public TRANSACTION_UNAVAILABLE(int minor, CompletionStatus status) : base(minor, status) { }
+        public TRANSACTION_UNAVAILABLE(int minor, CompletionStatus status) : 
+            base(System.Reflection.MethodInfo.GetCurrentMethod().DeclaringType.FullName, minor, status) { }
 
         #endregion IConstructors
 
@@ -570,7 +604,8 @@ namespace omg.org.CORBA {
 
         #region IConstructors
 
-        public REBIND(int minor, CompletionStatus status) : base(minor, status) { }
+        public REBIND(int minor, CompletionStatus status) : 
+            base(System.Reflection.MethodInfo.GetCurrentMethod().DeclaringType.FullName, minor, status) { }
 
         #endregion IConstructors
 
@@ -582,7 +617,8 @@ namespace omg.org.CORBA {
 
         #region IConstructors
 
-        public TIMEOUT(int minor, CompletionStatus status) : base(minor, status) { }
+        public TIMEOUT(int minor, CompletionStatus status) : 
+            base(System.Reflection.MethodInfo.GetCurrentMethod().DeclaringType.FullName, minor, status) { }
 
         #endregion IConstructors
 
@@ -594,7 +630,8 @@ namespace omg.org.CORBA {
 
         #region IConstructors
 
-        public BAD_QOS(int minor, CompletionStatus status) : base(minor, status) { }
+        public BAD_QOS(int minor, CompletionStatus status) : 
+            base(System.Reflection.MethodInfo.GetCurrentMethod().DeclaringType.FullName, minor, status) { }
 
         #endregion IConstructors
 
