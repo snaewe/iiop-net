@@ -1,4 +1,30 @@
-Latest Changes (02 July 2003)
+Latest Changes (15 July 2003)
+-----------------------------
+
+This release is a bug-fix and compatibility improvement release.
+
+- improved compatibility with websphere 5.0 (passing String is now ok)
+
+- bugs fixed in CLS to IDL generator:
+  IDL generated for CLS properties is now correct
+  no longer generate IDL files in some cases, which reference themself (bug #770106)
+  MarshalByRef now correctly mapped to IDL (bug #770104)
+
+- bug fixed in IDL to CLS compiler:
+  code generated for idl enums now correct (bug #768271)
+  code generated for idl wchar is now correct (bug #768298)
+  CLS for IDL attributes is now correct
+
+- IIOP.NET channel
+  wchar for IIOP 1.2 now correct
+  client does not ignore codeset in IOR's anymore (bug #767166)
+  corrected problems when passing string[] (bug #768328)
+  corrected some problems with jagged arrays (bug #770854)
+  
+- added Integration tests  
+
+
+Version 1.2.3 (02 July 2003)
 -----------------------------
 
 - improved compatibility with Websphere 4.0 / 5.0
