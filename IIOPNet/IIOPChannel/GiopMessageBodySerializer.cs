@@ -592,8 +592,9 @@ namespace Ch.Elca.Iiop.MessageHandling {
             if (paramMarshaller.HasRequestArgs(calledMethodInfo)) {
                 AlignBodyIfNeeded(cdrStream, version);
                 args = paramMarshaller.DeserialiseRequestArgs(calledMethodInfo, cdrStream);
-            } else {
-                args = new object[0];
+            } else {                
+                // no args or only out args
+                args = new object[calledMethodInfo.GetParameters().Length];
                 cdrStream.SkipRest(); // ignore paddings, if included
             }            
 
@@ -748,10 +749,10 @@ namespace Ch.Elca.Iiop.MessageHandling {
                         // the error .NET message for this exception is created in the formatter
                         throw new MARSHAL(2401, CompletionStatus.Completed_MayBe);
                 }
-            } catch (Exception e) {
+            } catch (Exception) {
                 // do not corrupt stream --> skip
                 cdrStream.SkipRest();
-                throw e;
+                throw;
             }
 
             return response;
