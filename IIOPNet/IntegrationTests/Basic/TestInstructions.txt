@@ -1,0 +1,10 @@
+Prerequisites
+-------------
+
+For running this integration test, you need NUnit V2.0 or newer.
+
+Running the test
+----------------
+
+- before starting the test, start the server.
+- The test can be run using the NUnit GUI or the NUnit Console runner
