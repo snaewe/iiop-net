@@ -1,0 +1,1 @@
+copy bin\command_ejb.jar %JBOSS_HOME%\server\%1\deploy

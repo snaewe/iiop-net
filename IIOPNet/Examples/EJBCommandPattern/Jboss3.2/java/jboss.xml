@@ -1,0 +1,14 @@
+<jboss>
+<enterprise-beans>
+<session>
+<ejb-name>CommandTargetBean</ejb-name>
+<jndi-name>demo/commandTargetHome</jndi-name>
+<configuration-name>Standard Stateless SessionBean</configuration-name>
+<invoker-bindings>
+<invoker>
+<invoker-proxy-binding-name>iiop</invoker-proxy-binding-name>
+</invoker>
+</invoker-bindings>
+</session>
+</enterprise-beans>
+</jboss>
