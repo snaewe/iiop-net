@@ -32,6 +32,7 @@ using System.Collections;
 using System.Reflection;
 using System.Reflection.Emit;
 using omg.org.CORBA;
+using Ch.Elca.Iiop.Util;
 
 namespace Ch.Elca.Iiop.Idl {
 
@@ -516,7 +517,7 @@ namespace Ch.Elca.Iiop.Idl {
             gen.Emit(OpCodes.Ldc_I4, Convert.ToInt32(BindingFlags.NonPublic | BindingFlags.Instance));
             MethodInfo getField = typeof(Type).GetMethod("GetField", 
                                                          BindingFlags.Public | BindingFlags.Instance, 
-                                                         null, new Type[] { typeof(string), typeof(BindingFlags) }, null);
+                                                         null, new Type[] { ReflectionHelper.StringType, typeof(BindingFlags) }, null);
             gen.Emit(OpCodes.Callvirt, getField); // call getField to retrieve the fieldInfo: pushed result on stack
         }
 

@@ -1012,7 +1012,7 @@ namespace Ch.Elca.Iiop.Tests {
 
         public void TestMapToIdlString() {
             ClsToIdlMapper mapper = ClsToIdlMapper.GetSingleton();
-            MappingToResult mapResult = (MappingToResult)mapper.MapClsType(typeof(String), 
+            MappingToResult mapResult = (MappingToResult)mapper.MapClsType(ReflectionHelper.StringType, 
                                                                            new AttributeExtCollection(new Attribute[] { new StringValueAttribute(), new WideCharAttribute(false) }),
                                                                            s_testAction);
 			Assertion.AssertEquals(MappingToResult.IdlString, mapResult);
@@ -1020,11 +1020,11 @@ namespace Ch.Elca.Iiop.Tests {
 
         public void TestMapToIdlWString() {
             ClsToIdlMapper mapper = ClsToIdlMapper.GetSingleton();
-            MappingToResult mapResult = (MappingToResult)mapper.MapClsType(typeof(String), 
+            MappingToResult mapResult = (MappingToResult)mapper.MapClsType(ReflectionHelper.StringType, 
                                                                            new AttributeExtCollection(new Attribute[] { new StringValueAttribute(), new WideCharAttribute(true) }),
                                                                            s_testAction);
 			Assertion.AssertEquals(MappingToResult.IdlWString, mapResult);
-            mapResult = (MappingToResult)mapper.MapClsType(typeof(String), 
+            mapResult = (MappingToResult)mapper.MapClsType(ReflectionHelper.StringType, 
                                                            new AttributeExtCollection(new Attribute[] { new StringValueAttribute() }),
                                                            s_testAction);
 			Assertion.AssertEquals(MappingToResult.IdlWString, mapResult);
@@ -1032,7 +1032,7 @@ namespace Ch.Elca.Iiop.Tests {
 
         public void TestMapToIdlStringValue() {
             ClsToIdlMapper mapper = ClsToIdlMapper.GetSingleton();
-            MappingToResult mapResult = (MappingToResult)mapper.MapClsType(typeof(String), 
+            MappingToResult mapResult = (MappingToResult)mapper.MapClsType(ReflectionHelper.StringType, 
                                                                            new AttributeExtCollection(new Attribute[] { new WideCharAttribute(false) }),
                                                                            s_testAction);
 			Assertion.AssertEquals(MappingToResult.IdlStringValue, mapResult);
@@ -1040,11 +1040,11 @@ namespace Ch.Elca.Iiop.Tests {
 
         public void TestMapToIdlWStringValue() {
             ClsToIdlMapper mapper = ClsToIdlMapper.GetSingleton();
-            MappingToResult mapResult = (MappingToResult)mapper.MapClsType(typeof(String), 
+            MappingToResult mapResult = (MappingToResult)mapper.MapClsType(ReflectionHelper.StringType, 
                                                                            new AttributeExtCollection(new Attribute[] { new WideCharAttribute(true) }),
                                                                            s_testAction);
 			Assertion.AssertEquals(MappingToResult.IdlWstringValue, mapResult);
-            mapResult = (MappingToResult)mapper.MapClsType(typeof(String), 
+            mapResult = (MappingToResult)mapper.MapClsType(ReflectionHelper.StringType, 
                                                            new AttributeExtCollection(),
                                                            s_testAction);
 			Assertion.AssertEquals(MappingToResult.IdlWstringValue, mapResult);

@@ -30,6 +30,7 @@
 using System;
 using System.Reflection;
 using System.Reflection.Emit;
+using Ch.Elca.Iiop.Util;
 
 namespace Ch.Elca.Iiop.Idl {
 
@@ -205,7 +206,7 @@ namespace Ch.Elca.Iiop.Idl {
                                                                new Type[] { typeof(MethodBuilder), 
                                                                             typeof(System.Int32), 
                                                                             typeof(ParameterAttributes),
-                                                                            typeof(String) }, 
+                                                                            ReflectionHelper.StringType }, 
                                                                null);
         }
 

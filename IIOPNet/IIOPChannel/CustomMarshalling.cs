@@ -486,7 +486,6 @@ namespace Corba {
         #region SFields
 
         private static Type s_objectType = typeof(object);
-        private static Type s_stringType = typeof(string);
         private static Type s_mByRefType = typeof(MarshalByRefObject);
 
         private static Type s_wstringValueType = typeof(WStringValue);
@@ -577,7 +576,7 @@ namespace Corba {
 
         [return:WideCharAttribute(false)]
         public string read_string() {
-            return (string)m_marshaller.Unmarshal(s_stringType, 
+            return (string)m_marshaller.Unmarshal(ReflectionHelper.StringType, 
                                                   new AttributeExtCollection(new Attribute[] { 
                                                           new WideCharAttribute(false) } ),
                                                   m_cdrIn);
@@ -585,7 +584,7 @@ namespace Corba {
 
         [return:WideCharAttribute(true)]
         public string read_wstring() {
-            return (string)m_marshaller.Unmarshal(s_stringType, 
+            return (string)m_marshaller.Unmarshal(ReflectionHelper.StringType, 
                                                   new AttributeExtCollection(new Attribute[] { 
                                                           new WideCharAttribute(false) } ),
                                                   m_cdrIn);

@@ -32,6 +32,7 @@ using System.Collections;
 using System.Reflection;
 using System.Reflection.Emit;
 using omg.org.CORBA;
+using Ch.Elca.Iiop.Util;
 
 
 namespace Ch.Elca.Iiop.Idl {
@@ -395,7 +396,7 @@ namespace Ch.Elca.Iiop.Idl {
             MethodBuilder getMethodBuilder = boxBuilder.DefineMethod(BoxedValueBase.GET_FIRST_NONBOXED_TYPENAME_METHODNAME,
                                                                      MethodAttributes.Static | MethodAttributes.Public |
                                                                         MethodAttributes.HideBySig,
-                                                                     typeof(string), new Type[0]);
+                                                                     ReflectionHelper.StringType, new Type[0]);
             ILGenerator bodyGen = getMethodBuilder.GetILGenerator();
             bodyGen.Emit(OpCodes.Ldstr, fullUnboxed.FullName); // load name for the field-type
             bodyGen.Emit(OpCodes.Ret); // return the type-name
@@ -418,7 +419,7 @@ namespace Ch.Elca.Iiop.Idl {
             bodyGen.Emit(OpCodes.Call, getTypeFromH); // call the static method --> therefore no need to push this to the stack
             // now use GetField to get the field type, this is on stack: the Type-object
             MethodInfo getFieldMethod = typeof(Type).GetMethod("GetField", BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Instance, null,
-                                                               new Type[] { typeof(string), typeof(BindingFlags) }, null);
+                                                               new Type[] { ReflectionHelper.StringType, typeof(BindingFlags) }, null);
             bodyGen.Emit(OpCodes.Ldstr, valField.Name);
             bodyGen.Emit(OpCodes.Ldc_I4, (Int32)(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance));
             bodyGen.EmitCall(OpCodes.Callvirt, getFieldMethod, null);
@@ -449,7 +450,7 @@ namespace Ch.Elca.Iiop.Idl {
             bodyGen.Emit(OpCodes.Ldarg_1); // load the parameter
             bodyGen.Emit(OpCodes.Brtrue_S, afterNullTest); // branch to after the null test if not null
             bodyGen.Emit(OpCodes.Ldstr, "boxed-value-constr: arg may not be null");
-            ConstructorInfo argExConstr = typeof(ArgumentException).GetConstructor(new Type[] { typeof(string) } );
+            ConstructorInfo argExConstr = typeof(ArgumentException).GetConstructor(new Type[] { ReflectionHelper.StringType } );
             bodyGen.Emit(OpCodes.Newobj, argExConstr); // create an argument exception instance
             bodyGen.Emit(OpCodes.Throw); // throw the exception
             bodyGen.MarkLabel(afterNullTest); // set the afterNullTest Label position to after the null test block
@@ -478,7 +479,7 @@ namespace Ch.Elca.Iiop.Idl {
             bodyGen.Emit(OpCodes.Ldarg_1); // load the parameter
             bodyGen.Emit(OpCodes.Brtrue_S, afterNullTest); // branch to after the null test if not null
             bodyGen.Emit(OpCodes.Ldstr, "boxed-value-constr: arg may not be null");
-            ConstructorInfo argExConstr = typeof(ArgumentException).GetConstructor(new Type[] { typeof(string) } );
+            ConstructorInfo argExConstr = typeof(ArgumentException).GetConstructor(new Type[] { ReflectionHelper.StringType } );
             bodyGen.Emit(OpCodes.Newobj, argExConstr); // create an argument exception instance
             bodyGen.Emit(OpCodes.Throw); // throw the exception
             bodyGen.MarkLabel(afterNullTest); // set the afterNullTest Label position to after the null test block

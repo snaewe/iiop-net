@@ -31,6 +31,7 @@
 using System;
 using System.Reflection;
 using Ch.Elca.Iiop.Idl;
+using Ch.Elca.Iiop.Util;
 using omg.org.CORBA;
 
 namespace Ch.Elca.Iiop.Idl {
@@ -136,7 +137,7 @@ namespace omg.org.CORBA {
         #endregion IConstructors
         #region SMethods
         public static Type GetBoxedType() {
-            return typeof(string);
+            return ReflectionHelper.StringType;
         }
         
         internal static Type GetFirstNonBoxedType() {
@@ -183,7 +184,7 @@ namespace omg.org.CORBA {
         #region SMethods
         
         public static Type GetBoxedType() {
-            return typeof(string);
+            return ReflectionHelper.StringType;
         }
 
         public static object[] GetBoxedTypeAttributes() {

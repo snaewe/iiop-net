@@ -793,7 +793,7 @@ namespace Ch.Elca.Iiop.Marshalling {
                                        CdrOutputStream targetStream) {
             // check for IDL-enum mapped to a .NET enum
             AttributeExtCollection attrs = ReflectionHelper.GetCustomAttributesForType(formal, true);
-            if (attrs.IsInCollection(typeof(IdlEnumAttribute))) {
+            if (attrs.IsInCollection(ReflectionHelper.IdlEnumAttributeType)) {
                 // idl enum's are mapped to .NET enums with long base-type, therefore all possible 2^32 idl-values can be represented
                 int enumVal = (int) actual;
                 targetStream.WriteULong((uint)enumVal);
@@ -810,7 +810,7 @@ namespace Ch.Elca.Iiop.Marshalling {
         public override object Deserialise(Type formal, AttributeExtCollection attributes, 
                                            CdrInputStream sourceStream) {
             AttributeExtCollection attrs = ReflectionHelper.GetCustomAttributesForType(formal, true);
-            if (attrs.IsInCollection(typeof(IdlEnumAttribute))) {
+            if (attrs.IsInCollection(ReflectionHelper.IdlEnumAttributeType)) {
                 uint enumVal = sourceStream.ReadULong();
                 return Enum.ToObject(formal, enumVal);    
             } else {

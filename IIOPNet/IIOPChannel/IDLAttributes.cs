@@ -31,6 +31,7 @@
 using System;
 using System.Reflection;
 using System.Reflection.Emit;
+using Ch.Elca.Iiop.Util;
 
 namespace Ch.Elca.Iiop.Idl {
 
@@ -106,7 +107,7 @@ namespace Ch.Elca.Iiop.Idl {
         /// <summary>creates an attribute builder for this custom attribute</summary>
         public CustomAttributeBuilder CreateAttributeBuilder() {
             Type attrType = this.GetType();
-            ConstructorInfo attrConstr = attrType.GetConstructor(new Type[] { typeof(string) } );
+            ConstructorInfo attrConstr = attrType.GetConstructor(new Type[] { ReflectionHelper.StringType } );
             CustomAttributeBuilder result = new CustomAttributeBuilder(attrConstr, new Object[] { m_id });
             return result;
         }
@@ -193,7 +194,7 @@ namespace Ch.Elca.Iiop.Idl {
         /// <summary>creates an attribute builder for this custom attribute</summary>
         public CustomAttributeBuilder CreateAttributeBuilder() {
             Type attrType = this.GetType();
-            ConstructorInfo attrConstr = attrType.GetConstructor(new Type[] { typeof(string) } );
+            ConstructorInfo attrConstr = attrType.GetConstructor(new Type[] { ReflectionHelper.StringType } );
             CustomAttributeBuilder result = new CustomAttributeBuilder(attrConstr, new Object[] { m_implClass });
             return result;
         }
@@ -298,7 +299,7 @@ namespace Ch.Elca.Iiop.Idl {
         /// <summary>creates an attribute builder for this custom attribute</summary>
         public CustomAttributeBuilder CreateAttributeBuilder() {
             Type attrType = this.GetType();
-            ConstructorInfo attrConstr = attrType.GetConstructor(new Type[] { typeof(string) } );
+            ConstructorInfo attrConstr = attrType.GetConstructor(new Type[] { ReflectionHelper.StringType } );
             CustomAttributeBuilder result = new CustomAttributeBuilder(attrConstr, 
                                                                        new Object[] { m_repositoryId });
             return result;

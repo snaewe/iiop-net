@@ -42,16 +42,37 @@ namespace Ch.Elca.Iiop.Util {
     	
     	private static Type s_iIdlEntityType = typeof(IIdlEntity);
     	
-    	private static Type s_idlEnumAttribute = typeof(IdlEnumAttribute);
+    	private static Type s_idlEnumAttributeType = typeof(IdlEnumAttribute);
+    	    	
+    	private static Type s_stringType = typeof(string);
     	
     	#endregion SFields
     	#region SProperties
     	
+    	/// <summary>
+    	/// caches typeof(IIdlEntity)
+    	/// </summary>
     	public static Type IIdlEntityType {
     		get {
     			return s_iIdlEntityType;
     		}
     	}
+
+		/// <summary>caches typeof(IdlEnumAttribute)</summary>    	
+    	public static Type IdlEnumAttributeType {
+    		get {
+    			return s_idlEnumAttributeType;
+    		}
+    	}
+    	    	
+    	/// <summary>
+    	/// caches typeof(string)
+    	/// </summary>
+    	public static Type StringType {
+    		get {
+    			return s_stringType;
+    		}
+    	}    	    	
     	
     	#endregion SProperties    	
     	#region SMethods
