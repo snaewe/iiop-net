@@ -52,10 +52,20 @@ public class SymbolTable {
     public SymbolTable() {
         m_currentScope = new Scope("", null, false);
         m_topScope = m_currentScope;
+        AddPredefinedSymbols();
     }
 
     #endregion IConstructors
     #region IMethods
+    
+    private void AddPredefinedSymbols() {
+        // add CORBA::TypeCode
+        openPragmaScope("omg.org");
+        openScope("CORBA");
+        getCurrentScope().addSymbol("TypeCode");
+        closeScope();
+        closePragmaScope();
+    }
 
     /** opens a scope in the current scope */
     public Scope openScope(String scopeName, bool isTypeScope) {
