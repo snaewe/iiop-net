@@ -1,5 +1,11 @@
 DELAY = ..\Utils\delay.exe
 
+build-with-setup:
+	cd TestBeans
+	$(MAKE) check-setup
+	cd ..
+	$(MAKE) /C build
+
 setup:
 	cd TestBeans
 	$(MAKE) setup

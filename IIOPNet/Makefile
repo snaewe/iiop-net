@@ -39,9 +39,14 @@ build-tests: build-base
     cd IDLToCLSCompiler
     $(MAKE) build-unit-tests
     cd ..
-        cd IntegrationTests
-        $(MAKE) build
-        cd ..
+    cd IntegrationTests
+    $(MAKE) build
+    cd ..
+
+build-tests-ssl: build-tests
+    cd IntegrationTests
+    $(MAKE) build-ssl
+    cd ..
 
 test:
     cd IIOPChannel
@@ -53,6 +58,11 @@ test:
     cd IntegrationTests
     $(MAKE) test
     cd ..   
+
+test-ssl : test
+    cd IntegrationTests
+    $(MAKE) test-ssl
+    cd ..
 
 clean-base:
     cd IIOPChannel
@@ -66,15 +76,15 @@ clean-base:
     cd ..
 
 clean: clean-base
-	cd SslPlugin
-        $(MAKE) clean
-        cd ..
+    cd SslPlugin
+    $(MAKE) clean
+    cd ..
     cd Examples
     $(MAKE) clean
     cd ..
     cd IntegrationTests
-        $(MAKE) clean
-        cd ..
+    $(MAKE) clean
+    cd ..
 
 rebuild-base: clean-base build-base
 
