@@ -24,12 +24,12 @@ build-idl:
 
 
 start-server:
-	$(LAUNCH) bin\TestServer.exe >> pid
+	@$(LAUNCH) bin\TestServer.exe >> pid
 #	for /F "usebackq" %%r in (`..\..\Utils\launch.exe bin\TestServer.exe`) do set pid=%%r
 
 stop-server:
-	for /F %%p in (pid) do $(KILL) %%p
-	del pid
+	@for /F %%p in (pid) do @$(KILL) %%p
+	@del pid
 
 clean:
 	if exist IDL del /s /q IDL

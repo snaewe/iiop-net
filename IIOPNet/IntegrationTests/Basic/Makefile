@@ -14,24 +14,24 @@ build-client:
 
 start-server:
 	@cd TestServer
-	$(MAKE) /C start-server
+	@$(MAKE) /C start-server
 	@cd ..
 
 stop-server:
 	@cd TestServer
-	$(MAKE) /C stop-server
+	@$(MAKE) /C stop-server
 	@cd ..	
 
 start-client:
 	@cd TestClient
-	$(MAKE) /C /I start-client
+	@$(MAKE) /C /I start-client
 	@cd ..
 
 test:
-	$(MAKE) /C start-server
-	$(DELAY) 10
-	$(MAKE) /C start-client
-	$(MAKE) /C stop-server
+	@$(MAKE) /C start-server
+	@$(DELAY) 10
+	@$(MAKE) /C start-client
+	@$(MAKE) /C stop-server
 
 clean:
 	cd TestServer
