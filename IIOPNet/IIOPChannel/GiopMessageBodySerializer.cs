@@ -343,12 +343,10 @@ namespace Ch.Elca.Iiop.MessageHandling {
         /// <summary>
         /// aquire the information needed to call a standard corba operation, which is possible for every object
         /// </summary>
-        /// <param name="serverType">the type of the object called</param>
-        /// <param name="calledMethodInfo">the MethodInfo of the method, which is called</param>
-        /// <returns>the method-name of the method implementing the operation</returns>
-        private MethodInfo DecodeStandardOperation(string objectUri, string methodName) {
+        /// <param name="methodName">the name of the method called</param>
+        /// <returns>the method-info of the method which describes signature for deserialisation</returns>
+        private MethodInfo DecodeStandardOperation(string methodName) {
             Type serverType = StandardCorbaOps.s_type; // generic handler
-            string resultMethodName = StandardCorbaOps.MapMethodName(methodName);
             MethodInfo calledMethodInfo = serverType.GetMethod(methodName); // for parameter unmarshalling, use info of the signature method
             if (calledMethodInfo == null) { 
                 // unexpected exception: can't load method of type StandardCorbaOps
@@ -506,8 +504,9 @@ namespace Ch.Elca.Iiop.MessageHandling {
             	    msg.Properties.Add(SimpleGiopMsg.METHOD_SIG_KEY, sig);
                 } else {
                     // handle standard corba-ops like _is_a
-                    calledMethodInfo = DecodeStandardOperation(objectUri, methodName);
-                    methodName = calledMethodInfo.Name;
+                    calledMethodInfo = DecodeStandardOperation(methodName);
+                	MethodInfo methodToCall = StandardCorbaOps.GetMethodToCallForStandardMethod(calledMethodInfo.Name);
+                    methodName = methodToCall.Name;
                     objectUri = StandardCorbaOps.WELLKNOWN_URI; // change object-uri
                     standardOp = true;
                     serverType = StandardCorbaOps.s_type;

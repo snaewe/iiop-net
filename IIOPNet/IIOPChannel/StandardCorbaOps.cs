@@ -31,6 +31,7 @@
 using System;
 using System.Runtime.Remoting;
 using System.Collections;
+using System.Reflection;
 using System.Diagnostics;
 using Ch.Elca.Iiop.Idl;
 
@@ -50,6 +51,7 @@ namespace Ch.Elca.Iiop {
         
         private static MarshalByRefObject s_standardOpsH;
         private static ArrayList s_standardOpList = new ArrayList();
+    	private static Hashtable s_opToCallTable = new Hashtable();
         private static object s_lock = new object();
     	
     	internal static Type s_type = typeof(StandardCorbaOps);
@@ -58,8 +60,11 @@ namespace Ch.Elca.Iiop {
         #region SConstructor
 
         static StandardCorbaOps() {
-            s_standardOpList.Add("_is_a");
-            // TODO
+            string standardMethodName = "_is_a";
+            s_standardOpList.Add(standardMethodName);
+        	s_opToCallTable.Add(standardMethodName, 
+        	                    s_type.GetMethod(MapMethodName(standardMethodName), BindingFlags.Public | BindingFlags.Instance));
+            // TODO: other standard ops
         }
 
         #endregion SConstructor
@@ -96,6 +101,12 @@ namespace Ch.Elca.Iiop {
             } else {
                 return false;
             }
+        }
+        
+        /// <summary>gets the method, which should be called on this object,
+        /// when methodName is received</summary>
+        internal static MethodInfo GetMethodToCallForStandardMethod(string methodName) {
+            return (MethodInfo)s_opToCallTable[methodName];
         }
 
         #endregion SMethods
