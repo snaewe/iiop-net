@@ -120,12 +120,12 @@ public class IDLParser{/*@bgen(jjtree)*/
       case 25:
       case 26:
       case 35:
-      case 50:
       case 51:
-      case 63:
+      case 52:
       case 64:
-      case 68:
-      case 78:
+      case 65:
+      case 69:
+      case 79:
         while (true) {
           if (jj_2_1(2)) {
             definition();
@@ -144,12 +144,12 @@ public class IDLParser{/*@bgen(jjtree)*/
           case 25:
           case 26:
           case 35:
-          case 50:
           case 51:
-          case 63:
+          case 52:
           case 64:
-          case 68:
-          case 78:
+          case 65:
+          case 69:
+          case 79:
             ;
             break;
           default:
@@ -210,11 +210,11 @@ public class IDLParser{/*@bgen(jjtree)*/
   jjtree.openNodeScope(jjtn000);
     try {
       switch ((jj_ntk==-1)?jj_ntk_calc():jj_ntk) {
-      case 50:
       case 51:
-      case 63:
+      case 52:
       case 64:
-      case 68:
+      case 65:
+      case 69:
         type_dcl();
         jj_consume_token(15);
         break;
@@ -222,7 +222,7 @@ public class IDLParser{/*@bgen(jjtree)*/
         const_dcl();
         jj_consume_token(15);
         break;
-      case 78:
+      case 79:
         except_dcl();
         jj_consume_token(15);
         break;
@@ -288,7 +288,7 @@ public class IDLParser{/*@bgen(jjtree)*/
     try {
       jj_consume_token(16);
       ident = identifier();
-                                  m_symbolTable.openScope(ident);
+                                  m_symbolTable.openScope(ident, false);
       jj_consume_token(17);
       while (true) {
         definition();
@@ -301,12 +301,12 @@ public class IDLParser{/*@bgen(jjtree)*/
         case 25:
         case 26:
         case 35:
-        case 50:
         case 51:
-        case 63:
+        case 52:
         case 64:
-        case 68:
-        case 78:
+        case 65:
+        case 69:
+        case 79:
           ;
           break;
         default:
@@ -393,7 +393,7 @@ public class IDLParser{/*@bgen(jjtree)*/
         SimpleNodeWithIdent header = (SimpleNodeWithIdent) jjtree.peekNode();
         Scope currentScope = m_symbolTable.getCurrentScope();
         currentScope.addSymbol(header.getIdent());
-        m_symbolTable.openScope(header.getIdent()); // open a scope for type declaration inside the interface
+        m_symbolTable.openScope(header.getIdent(), true); // open a scope for type declaration inside the interface
 
       jj_consume_token(17);
       interface_body();
@@ -566,7 +566,6 @@ public class IDLParser{/*@bgen(jjtree)*/
         case 12:
         case 24:
         case 35:
-        case 50:
         case 51:
         case 52:
         case 53:
@@ -581,15 +580,16 @@ public class IDLParser{/*@bgen(jjtree)*/
         case 62:
         case 63:
         case 64:
-        case 68:
-        case 72:
+        case 65:
+        case 69:
         case 73:
-        case 76:
+        case 74:
         case 77:
         case 78:
         case 79:
         case 80:
-        case 86:
+        case 81:
+        case 87:
         case IDLParserConstants.ID:
           ;
           break;
@@ -631,11 +631,11 @@ public class IDLParser{/*@bgen(jjtree)*/
   jjtree.openNodeScope(jjtn000);
     try {
       switch ((jj_ntk==-1)?jj_ntk_calc():jj_ntk) {
-      case 50:
       case 51:
-      case 63:
+      case 52:
       case 64:
-      case 68:
+      case 65:
+      case 69:
         type_dcl();
         jj_consume_token(15);
         break;
@@ -643,17 +643,16 @@ public class IDLParser{/*@bgen(jjtree)*/
         const_dcl();
         jj_consume_token(15);
         break;
-      case 78:
+      case 79:
         except_dcl();
         jj_consume_token(15);
         break;
-      case 76:
       case 77:
+      case 78:
         attr_dcl();
         jj_consume_token(15);
         break;
       case 24:
-      case 52:
       case 53:
       case 54:
       case 55:
@@ -664,11 +663,12 @@ public class IDLParser{/*@bgen(jjtree)*/
       case 60:
       case 61:
       case 62:
-      case 72:
+      case 63:
       case 73:
-      case 79:
+      case 74:
       case 80:
-      case 86:
+      case 81:
+      case 87:
       case IDLParserConstants.ID:
         op_dcl();
         jj_consume_token(15);
@@ -992,12 +992,16 @@ public class IDLParser{/*@bgen(jjtree)*/
         break;
       }
       jj_consume_token(17);
+        jjtn000.setIdent(ident);
+        Scope currentScope = m_symbolTable.getCurrentScope();
+        currentScope.addSymbol(ident);
+        m_symbolTable.openScope(ident, true); // open a scope for type declaration inside this abstract value type
+
       while (true) {
         switch ((jj_ntk==-1)?jj_ntk_calc():jj_ntk) {
         case 12:
         case 24:
         case 35:
-        case 50:
         case 51:
         case 52:
         case 53:
@@ -1012,15 +1016,16 @@ public class IDLParser{/*@bgen(jjtree)*/
         case 62:
         case 63:
         case 64:
-        case 68:
-        case 72:
+        case 65:
+        case 69:
         case 73:
-        case 76:
+        case 74:
         case 77:
         case 78:
         case 79:
         case 80:
-        case 86:
+        case 81:
+        case 87:
         case IDLParserConstants.ID:
           ;
           break;
@@ -1037,9 +1042,7 @@ public class IDLParser{/*@bgen(jjtree)*/
       jj_consume_token(15);
           jjtree.closeNodeScope(jjtn000, true);
           jjtc000 = false;
-        jjtn000.setIdent(ident);
-      Scope currentScope = m_symbolTable.getCurrentScope();
-      currentScope.addSymbol(ident);
+            m_symbolTable.closeScope();
     } catch (Exception jjte000) {
           if (jjtc000) {
             jjtree.clearNodeScope(jjtn000);
@@ -1074,7 +1077,7 @@ public class IDLParser{/*@bgen(jjtree)*/
             // add the symbol for this value type to the symbol table
             Scope currentScope = m_symbolTable.getCurrentScope();
             currentScope.addSymbol(header.getIdent());
-            m_symbolTable.openScope(header.getIdent()); // open a scope for type declaration inside this concrete value type
+            m_symbolTable.openScope(header.getIdent(), true); // open a scope for type declaration inside this concrete value type
 
       jj_consume_token(17);
       while (true) {
@@ -1085,7 +1088,6 @@ public class IDLParser{/*@bgen(jjtree)*/
         case 30:
         case 31:
         case 35:
-        case 50:
         case 51:
         case 52:
         case 53:
@@ -1100,15 +1102,16 @@ public class IDLParser{/*@bgen(jjtree)*/
         case 62:
         case 63:
         case 64:
-        case 68:
-        case 72:
+        case 65:
+        case 69:
         case 73:
-        case 76:
+        case 74:
         case 77:
         case 78:
         case 79:
         case 80:
-        case 86:
+        case 81:
+        case 87:
         case IDLParserConstants.ID:
           ;
           break;
@@ -1347,7 +1350,6 @@ public class IDLParser{/*@bgen(jjtree)*/
       case 12:
       case 24:
       case 35:
-      case 50:
       case 51:
       case 52:
       case 53:
@@ -1362,15 +1364,16 @@ public class IDLParser{/*@bgen(jjtree)*/
       case 62:
       case 63:
       case 64:
-      case 68:
-      case 72:
+      case 65:
+      case 69:
       case 73:
-      case 76:
+      case 74:
       case 77:
       case 78:
       case 79:
       case 80:
-      case 86:
+      case 81:
+      case 87:
       case IDLParserConstants.ID:
         export();
         break;
@@ -1598,11 +1601,24 @@ public class IDLParser{/*@bgen(jjtree)*/
     try {
       jj_consume_token(35);
       const_type();
-      ident = identifier();
-      jj_consume_token(36);
+      switch ((jj_ntk==-1)?jj_ntk_calc():jj_ntk) {
+      case IDLParserConstants.ID:
+        ident = identifier();
+        break;
+      case 36:
+        jj_consume_token(36);
+                                     ident = "NotANumber";
+        break;
+      default:
+        jj_la1[30] = jj_gen;
+        jj_consume_token(-1);
+        throw new ParseException();
+        break;
+      }
+      jj_consume_token(37);
       const_exp();
-                                                              jjtree.closeNodeScope(jjtn000, true);
-                                                              jjtc000 = false;
+                      jjtree.closeNodeScope(jjtn000, true);
+                      jjtc000 = false;
         jjtn000.setIdent(ident);
         Scope currentScope = m_symbolTable.getCurrentScope();
         currentScope.addSymbolValue(ident);
@@ -1638,38 +1654,38 @@ public class IDLParser{/*@bgen(jjtree)*/
         integer_type();
       } else {
         switch ((jj_ntk==-1)?jj_ntk_calc():jj_ntk) {
-        case 57:
+        case 58:
           char_type();
           break;
-        case 58:
+        case 59:
           wide_char_type();
           break;
-        case 59:
+        case 60:
           boolean_type();
           break;
-        case 52:
         case 53:
         case 54:
+        case 55:
           floating_pt_type();
           break;
-        case 72:
+        case 73:
           string_type();
           break;
-        case 73:
+        case 74:
           wide_string_type();
           break;
-        case 85:
+        case 86:
           fixed_pt_const_type();
           break;
         case 24:
         case IDLParserConstants.ID:
           scoped_name();
           break;
-        case 60:
+        case 61:
           octet_type();
           break;
         default:
-          jj_la1[30] = jj_gen;
+          jj_la1[31] = jj_gen;
           jj_consume_token(-1);
           throw new ParseException();
           break;
@@ -1735,15 +1751,15 @@ public class IDLParser{/*@bgen(jjtree)*/
       xor_expr();
       while (true) {
         switch ((jj_ntk==-1)?jj_ntk_calc():jj_ntk) {
-        case 37:
+        case 38:
           ;
           break;
         default:
-          jj_la1[31] = jj_gen;
+          jj_la1[32] = jj_gen;
           goto label_11;
           break;
         }
-        jj_consume_token(37);
+        jj_consume_token(38);
         xor_expr();
       }
       label_11: ;
@@ -1779,15 +1795,15 @@ public class IDLParser{/*@bgen(jjtree)*/
       and_expr();
       while (true) {
         switch ((jj_ntk==-1)?jj_ntk_calc():jj_ntk) {
-        case 38:
+        case 39:
           ;
           break;
         default:
-          jj_la1[32] = jj_gen;
+          jj_la1[33] = jj_gen;
           goto label_12;
           break;
         }
-        jj_consume_token(38);
+        jj_consume_token(39);
         and_expr();
       }
       label_12: ;
@@ -1823,15 +1839,15 @@ public class IDLParser{/*@bgen(jjtree)*/
       shift_expr();
       while (true) {
         switch ((jj_ntk==-1)?jj_ntk_calc():jj_ntk) {
-        case 39:
+        case 40:
           ;
           break;
         default:
-          jj_la1[33] = jj_gen;
+          jj_la1[34] = jj_gen;
           goto label_13;
           break;
         }
-        jj_consume_token(39);
+        jj_consume_token(40);
         shift_expr();
       }
       label_13: ;
@@ -1867,24 +1883,24 @@ public class IDLParser{/*@bgen(jjtree)*/
       add_expr();
       while (true) {
         switch ((jj_ntk==-1)?jj_ntk_calc():jj_ntk) {
-        case 40:
         case 41:
+        case 42:
           ;
           break;
         default:
-          jj_la1[34] = jj_gen;
+          jj_la1[35] = jj_gen;
           goto label_14;
           break;
         }
         switch ((jj_ntk==-1)?jj_ntk_calc():jj_ntk) {
-        case 40:
-          jj_consume_token(40);
-          break;
         case 41:
           jj_consume_token(41);
           break;
+        case 42:
+          jj_consume_token(42);
+          break;
         default:
-          jj_la1[35] = jj_gen;
+          jj_la1[36] = jj_gen;
           jj_consume_token(-1);
           throw new ParseException();
           break;
@@ -1924,24 +1940,24 @@ public class IDLParser{/*@bgen(jjtree)*/
       mult_expr();
       while (true) {
         switch ((jj_ntk==-1)?jj_ntk_calc():jj_ntk) {
-        case 42:
         case 43:
+        case 44:
           ;
           break;
         default:
-          jj_la1[36] = jj_gen;
+          jj_la1[37] = jj_gen;
           goto label_15;
           break;
         }
         switch ((jj_ntk==-1)?jj_ntk_calc():jj_ntk) {
-        case 42:
-          jj_consume_token(42);
-          break;
         case 43:
           jj_consume_token(43);
           break;
+        case 44:
+          jj_consume_token(44);
+          break;
         default:
-          jj_la1[37] = jj_gen;
+          jj_la1[38] = jj_gen;
           jj_consume_token(-1);
           throw new ParseException();
           break;
@@ -1981,28 +1997,28 @@ public class IDLParser{/*@bgen(jjtree)*/
       unary_expr();
       while (true) {
         switch ((jj_ntk==-1)?jj_ntk_calc():jj_ntk) {
-        case 44:
         case 45:
         case 46:
+        case 47:
           ;
           break;
         default:
-          jj_la1[38] = jj_gen;
+          jj_la1[39] = jj_gen;
           goto label_16;
           break;
         }
         switch ((jj_ntk==-1)?jj_ntk_calc():jj_ntk) {
-        case 44:
-          jj_consume_token(44);
-          break;
         case 45:
           jj_consume_token(45);
           break;
         case 46:
           jj_consume_token(46);
           break;
+        case 47:
+          jj_consume_token(47);
+          break;
         default:
-          jj_la1[39] = jj_gen;
+          jj_la1[40] = jj_gen;
           jj_consume_token(-1);
           throw new ParseException();
           break;
@@ -2037,20 +2053,23 @@ public class IDLParser{/*@bgen(jjtree)*/
  /*@bgen(jjtree) unary_expr */
   ASTunary_expr jjtn000 = new ASTunary_expr(this, IDLParserTreeConstants.JJTUNARY_EXPR);
   bool jjtc000 = true;
-  jjtree.openNodeScope(jjtn000);int unary_op = ASTunary_expr.UNARY_NONE;
+  jjtree.openNodeScope(jjtn000);UnaryOps unary_op = UnaryOps.UnaryNone;
     try {
       switch ((jj_ntk==-1)?jj_ntk_calc():jj_ntk) {
-      case 42:
       case 43:
-      case 47:
+      case 44:
+      case 48:
         unary_op = unary_operator();
         break;
       default:
-        jj_la1[40] = jj_gen;
+        jj_la1[41] = jj_gen;
         ;
         break;
       }
       primary_expr();
+    jjtree.closeNodeScope(jjtn000, true);
+    jjtc000 = false;
+      jjtn000.SetUnaryOperation(unary_op);
     } catch (Exception jjte000) {
     if (jjtc000) {
       jjtree.clearNodeScope(jjtn000);
@@ -2073,22 +2092,22 @@ public class IDLParser{/*@bgen(jjtree)*/
   }
 
 /* Production 37 chapter 3.4 corba 2.3.1 */
-  public int unary_operator() {
+  public UnaryOps unary_operator() {
     switch ((jj_ntk==-1)?jj_ntk_calc():jj_ntk) {
+    case 44:
+      jj_consume_token(44);
+        {if (true) return UnaryOps.UnaryMinus;}
+      break;
     case 43:
       jj_consume_token(43);
-        {if (true) return ASTunary_expr.UNARY_MINUS;}
+        {if (true) return UnaryOps.UnaryPlus;}
       break;
-    case 42:
-      jj_consume_token(42);
-        {if (true) return ASTunary_expr.UNARY_PLUS;}
-      break;
-    case 47:
-      jj_consume_token(47);
-        {if (true) return ASTunary_expr.UNARY_NEGATE;}
+    case 48:
+      jj_consume_token(48);
+        {if (true) return UnaryOps.UnaryNegate;}
       break;
     default:
-      jj_la1[41] = jj_gen;
+      jj_la1[42] = jj_gen;
       jj_consume_token(-1);
       throw new ParseException();
       break;
@@ -2108,10 +2127,12 @@ public class IDLParser{/*@bgen(jjtree)*/
       case IDLParserConstants.ID:
         scoped_name();
         break;
-      case 48:
+      case 36:
       case 49:
-      case 87:
+      case 50:
       case 88:
+      case 89:
+      case 90:
       case IDLParserConstants.OCTALINT:
       case IDLParserConstants.DECIMALINT:
       case IDLParserConstants.HEXADECIMALINT:
@@ -2128,7 +2149,7 @@ public class IDLParser{/*@bgen(jjtree)*/
         jj_consume_token(33);
         break;
       default:
-        jj_la1[42] = jj_gen;
+        jj_la1[43] = jj_gen;
         jj_consume_token(-1);
         throw new ParseException();
         break;
@@ -2166,39 +2187,65 @@ public class IDLParser{/*@bgen(jjtree)*/
       case IDLParserConstants.DECIMALINT:
       case IDLParserConstants.HEXADECIMALINT:
         litVal = integer_literal();
+                               jjtree.closeNodeScope(jjtn000, true);
+                               jjtc000 = false;
+                               jjtn000.setLitVal(new IntegerLiteral((Int64)litVal));
         break;
       case IDLParserConstants.STRING:
         litVal = string_literal();
+                              jjtree.closeNodeScope(jjtn000, true);
+                              jjtc000 = false;
+                              jjtn000.setLitVal(new StringLiteral((String)litVal));
         break;
       default:
-        jj_la1[43] = jj_gen;
+        jj_la1[44] = jj_gen;
         if (jj_2_12(2)) {
           litVal = wide_string_literal();
+                                   jjtree.closeNodeScope(jjtn000, true);
+                                   jjtc000 = false;
+                                   jjtn000.setLitVal(new StringLiteral((String)litVal));
         } else {
           switch ((jj_ntk==-1)?jj_ntk_calc():jj_ntk) {
           case IDLParserConstants.CHARACTER:
             litVal = character_literal();
+                                 jjtree.closeNodeScope(jjtn000, true);
+                                 jjtc000 = false;
+                                 jjtn000.setLitVal(new CharLiteral((Char)litVal));
             break;
           default:
-            jj_la1[44] = jj_gen;
+            jj_la1[45] = jj_gen;
             if (jj_2_13(2)) {
               litVal = wide_character_literal();
+                                      jjtree.closeNodeScope(jjtn000, true);
+                                      jjtc000 = false;
+                                      jjtn000.setLitVal(new CharLiteral((Char)litVal));
             } else {
               switch ((jj_ntk==-1)?jj_ntk_calc():jj_ntk) {
-              case 88:
+              case 90:
               case IDLParserConstants.FIXED:
                 litVal = fixed_pt_literal();
+                                jjtree.closeNodeScope(jjtn000, true);
+                                jjtc000 = false;
+                                {if (true) throw new NotSupportedException("fixed point literal not yet supported");}
                 break;
+              case 36:
+              case 89:
               case IDLParserConstants.FLOATONE:
               case IDLParserConstants.FLOATTWO:
                 litVal = floating_pt_literal();
+                                   jjtree.closeNodeScope(jjtn000, true);
+                                   jjtc000 = false;
+                                   jjtn000.setLitVal(new FloatLiteral((Double)litVal));
                 break;
-              case 48:
               case 49:
+              case 50:
                 litVal = boolean_literal();
+                               jjtree.closeNodeScope(jjtn000, true);
+                               jjtc000 = false;
+                               jjtn000.setLitVal(new BooleanLiteral((Boolean)litVal));
                 break;
               default:
-                jj_la1[45] = jj_gen;
+                jj_la1[46] = jj_gen;
                 jj_consume_token(-1);
                 throw new ParseException();
                 break;
@@ -2209,9 +2256,6 @@ public class IDLParser{/*@bgen(jjtree)*/
         }
         break;
       }
-    jjtree.closeNodeScope(jjtn000, true);
-    jjtc000 = false;
-    jjtn000.setLitVal(litVal);
     } catch (Exception jjte000) {
   if (jjtc000) {
     jjtree.clearNodeScope(jjtn000);
@@ -2236,16 +2280,16 @@ public class IDLParser{/*@bgen(jjtree)*/
 /* Production 40, chapter 3.4 corba 2.3.1 */
   public System.Boolean boolean_literal() {
     switch ((jj_ntk==-1)?jj_ntk_calc():jj_ntk) {
-    case 48:
-      jj_consume_token(48);
-           {if (true) return true;}
-      break;
     case 49:
       jj_consume_token(49);
+           {if (true) return true;}
+      break;
+    case 50:
+      jj_consume_token(50);
             {if (true) return false;}
       break;
     default:
-      jj_la1[46] = jj_gen;
+      jj_la1[47] = jj_gen;
       jj_consume_token(-1);
       throw new ParseException();
       break;
@@ -2290,25 +2334,25 @@ public class IDLParser{/*@bgen(jjtree)*/
   jjtree.openNodeScope(jjtn000);
     try {
       switch ((jj_ntk==-1)?jj_ntk_calc():jj_ntk) {
-      case 50:
-        jj_consume_token(50);
-        type_declarator();
-        break;
-      case 63:
-        struct_type();
-        break;
-      case 64:
-        union_type();
-        break;
-      case 68:
-        enum_type();
-        break;
       case 51:
         jj_consume_token(51);
+        type_declarator();
+        break;
+      case 64:
+        struct_type();
+        break;
+      case 65:
+        union_type();
+        break;
+      case 69:
+        enum_type();
+        break;
+      case 52:
+        jj_consume_token(52);
         simple_declarator();
         break;
       default:
-        jj_la1[47] = jj_gen;
+        jj_la1[48] = jj_gen;
         jj_consume_token(-1);
         throw new ParseException();
         break;
@@ -2384,7 +2428,6 @@ public class IDLParser{/*@bgen(jjtree)*/
     try {
       switch ((jj_ntk==-1)?jj_ntk_calc():jj_ntk) {
       case 24:
-      case 52:
       case 53:
       case 54:
       case 55:
@@ -2395,21 +2438,22 @@ public class IDLParser{/*@bgen(jjtree)*/
       case 60:
       case 61:
       case 62:
-      case 69:
-      case 72:
+      case 63:
+      case 70:
       case 73:
-      case 85:
+      case 74:
       case 86:
+      case 87:
       case IDLParserConstants.ID:
         simple_type_spec();
         break;
-      case 63:
       case 64:
-      case 68:
+      case 65:
+      case 69:
         constr_type_spec();
         break;
       default:
-        jj_la1[48] = jj_gen;
+        jj_la1[49] = jj_gen;
         jj_consume_token(-1);
         throw new ParseException();
         break;
@@ -2443,7 +2487,6 @@ public class IDLParser{/*@bgen(jjtree)*/
   jjtree.openNodeScope(jjtn000);
     try {
       switch ((jj_ntk==-1)?jj_ntk_calc():jj_ntk) {
-      case 52:
       case 53:
       case 54:
       case 55:
@@ -2454,13 +2497,14 @@ public class IDLParser{/*@bgen(jjtree)*/
       case 60:
       case 61:
       case 62:
-      case 86:
+      case 63:
+      case 87:
         base_type_spec();
         break;
-      case 69:
-      case 72:
+      case 70:
       case 73:
-      case 85:
+      case 74:
+      case 86:
         template_type_spec();
         break;
       case 24:
@@ -2468,7 +2512,7 @@ public class IDLParser{/*@bgen(jjtree)*/
         scoped_name();
         break;
       default:
-        jj_la1[49] = jj_gen;
+        jj_la1[50] = jj_gen;
         jj_consume_token(-1);
         throw new ParseException();
         break;
@@ -2505,34 +2549,34 @@ public class IDLParser{/*@bgen(jjtree)*/
         floating_pt_type();
       } else {
         switch ((jj_ntk==-1)?jj_ntk_calc():jj_ntk) {
-        case 54:
         case 55:
         case 56:
+        case 57:
           integer_type();
           break;
-        case 57:
+        case 58:
           char_type();
           break;
-        case 58:
+        case 59:
           wide_char_type();
           break;
-        case 59:
+        case 60:
           boolean_type();
           break;
-        case 60:
+        case 61:
           octet_type();
           break;
-        case 61:
+        case 62:
           any_type();
           break;
-        case 62:
+        case 63:
           object_type();
           break;
-        case 86:
+        case 87:
           value_base_type();
           break;
         default:
-          jj_la1[50] = jj_gen;
+          jj_la1[51] = jj_gen;
           jj_consume_token(-1);
           throw new ParseException();
           break;
@@ -2567,20 +2611,20 @@ public class IDLParser{/*@bgen(jjtree)*/
   jjtree.openNodeScope(jjtn000);
     try {
       switch ((jj_ntk==-1)?jj_ntk_calc():jj_ntk) {
-      case 69:
+      case 70:
         sequence_type();
         break;
-      case 72:
+      case 73:
         string_type();
         break;
-      case 73:
+      case 74:
         wide_string_type();
         break;
-      case 85:
+      case 86:
         fixed_pt_type();
         break;
       default:
-        jj_la1[51] = jj_gen;
+        jj_la1[52] = jj_gen;
         jj_consume_token(-1);
         throw new ParseException();
         break;
@@ -2614,17 +2658,17 @@ public class IDLParser{/*@bgen(jjtree)*/
   jjtree.openNodeScope(jjtn000);
     try {
       switch ((jj_ntk==-1)?jj_ntk_calc():jj_ntk) {
-      case 63:
+      case 64:
         struct_type();
         break;
-      case 64:
+      case 65:
         union_type();
         break;
-      case 68:
+      case 69:
         enum_type();
         break;
       default:
-        jj_la1[52] = jj_gen;
+        jj_la1[53] = jj_gen;
         jj_consume_token(-1);
         throw new ParseException();
         break;
@@ -2664,7 +2708,7 @@ public class IDLParser{/*@bgen(jjtree)*/
           ;
           break;
         default:
-          jj_la1[53] = jj_gen;
+          jj_la1[54] = jj_gen;
           goto label_17;
           break;
         }
@@ -2709,7 +2753,7 @@ public class IDLParser{/*@bgen(jjtree)*/
           simple_declarator();
           break;
         default:
-          jj_la1[54] = jj_gen;
+          jj_la1[55] = jj_gen;
           jj_consume_token(-1);
           throw new ParseException();
           break;
@@ -2805,17 +2849,17 @@ public class IDLParser{/*@bgen(jjtree)*/
   jjtree.openNodeScope(jjtn000);
     try {
       switch ((jj_ntk==-1)?jj_ntk_calc():jj_ntk) {
-      case 54:
+      case 55:
         floating_pt_type_longdouble();
         break;
-      case 52:
+      case 53:
         floating_pt_type_float();
         break;
-      case 53:
+      case 54:
         floating_pt_type_double();
         break;
       default:
-        jj_la1[55] = jj_gen;
+        jj_la1[56] = jj_gen;
         jj_consume_token(-1);
         throw new ParseException();
         break;
@@ -2848,7 +2892,7 @@ public class IDLParser{/*@bgen(jjtree)*/
   bool jjtc000 = true;
   jjtree.openNodeScope(jjtn000);
     try {
-      jj_consume_token(52);
+      jj_consume_token(53);
     } finally {
     if (jjtc000) {
       jjtree.closeNodeScope(jjtn000, true);
@@ -2863,7 +2907,7 @@ public class IDLParser{/*@bgen(jjtree)*/
   bool jjtc000 = true;
   jjtree.openNodeScope(jjtn000);
     try {
-      jj_consume_token(53);
+      jj_consume_token(54);
     } finally {
     if (jjtc000) {
       jjtree.closeNodeScope(jjtn000, true);
@@ -2878,8 +2922,8 @@ public class IDLParser{/*@bgen(jjtree)*/
   bool jjtc000 = true;
   jjtree.openNodeScope(jjtn000);
     try {
+      jj_consume_token(55);
       jj_consume_token(54);
-      jj_consume_token(53);
     } finally {
     if (jjtc000) {
       jjtree.closeNodeScope(jjtn000, true);
@@ -2895,15 +2939,15 @@ public class IDLParser{/*@bgen(jjtree)*/
   jjtree.openNodeScope(jjtn000);
     try {
       switch ((jj_ntk==-1)?jj_ntk_calc():jj_ntk) {
-      case 54:
       case 55:
+      case 56:
         signed_int();
         break;
-      case 56:
+      case 57:
         unsigned_int();
         break;
       default:
-        jj_la1[56] = jj_gen;
+        jj_la1[57] = jj_gen;
         jj_consume_token(-1);
         throw new ParseException();
         break;
@@ -2942,11 +2986,11 @@ public class IDLParser{/*@bgen(jjtree)*/
         signed_long_int();
       } else {
         switch ((jj_ntk==-1)?jj_ntk_calc():jj_ntk) {
-        case 55:
+        case 56:
           signed_short_int();
           break;
         default:
-          jj_la1[57] = jj_gen;
+          jj_la1[58] = jj_gen;
           jj_consume_token(-1);
           throw new ParseException();
           break;
@@ -2980,7 +3024,7 @@ public class IDLParser{/*@bgen(jjtree)*/
   bool jjtc000 = true;
   jjtree.openNodeScope(jjtn000);
     try {
-      jj_consume_token(55);
+      jj_consume_token(56);
     } finally {
     if (jjtc000) {
       jjtree.closeNodeScope(jjtn000, true);
@@ -2995,7 +3039,7 @@ public class IDLParser{/*@bgen(jjtree)*/
   bool jjtc000 = true;
   jjtree.openNodeScope(jjtn000);
     try {
-      jj_consume_token(54);
+      jj_consume_token(55);
     } finally {
     if (jjtc000) {
       jjtree.closeNodeScope(jjtn000, true);
@@ -3010,8 +3054,8 @@ public class IDLParser{/*@bgen(jjtree)*/
   bool jjtc000 = true;
   jjtree.openNodeScope(jjtn000);
     try {
-      jj_consume_token(54);
-      jj_consume_token(54);
+      jj_consume_token(55);
+      jj_consume_token(55);
     } finally {
     if (jjtc000) {
       jjtree.closeNodeScope(jjtn000, true);
@@ -3032,11 +3076,11 @@ public class IDLParser{/*@bgen(jjtree)*/
         unsigned_long_int();
       } else {
         switch ((jj_ntk==-1)?jj_ntk_calc():jj_ntk) {
-        case 56:
+        case 57:
           unsigned_short_int();
           break;
         default:
-          jj_la1[58] = jj_gen;
+          jj_la1[59] = jj_gen;
           jj_consume_token(-1);
           throw new ParseException();
           break;
@@ -3070,8 +3114,8 @@ public class IDLParser{/*@bgen(jjtree)*/
   bool jjtc000 = true;
   jjtree.openNodeScope(jjtn000);
     try {
+      jj_consume_token(57);
       jj_consume_token(56);
-      jj_consume_token(55);
     } finally {
     if (jjtc000) {
       jjtree.closeNodeScope(jjtn000, true);
@@ -3086,8 +3130,8 @@ public class IDLParser{/*@bgen(jjtree)*/
   bool jjtc000 = true;
   jjtree.openNodeScope(jjtn000);
     try {
-      jj_consume_token(56);
-      jj_consume_token(54);
+      jj_consume_token(57);
+      jj_consume_token(55);
     } finally {
     if (jjtc000) {
       jjtree.closeNodeScope(jjtn000, true);
@@ -3102,9 +3146,9 @@ public class IDLParser{/*@bgen(jjtree)*/
   bool jjtc000 = true;
   jjtree.openNodeScope(jjtn000);
     try {
-      jj_consume_token(56);
-      jj_consume_token(54);
-      jj_consume_token(54);
+      jj_consume_token(57);
+      jj_consume_token(55);
+      jj_consume_token(55);
     } finally {
     if (jjtc000) {
       jjtree.closeNodeScope(jjtn000, true);
@@ -3119,7 +3163,7 @@ public class IDLParser{/*@bgen(jjtree)*/
   bool jjtc000 = true;
   jjtree.openNodeScope(jjtn000);
     try {
-      jj_consume_token(57);
+      jj_consume_token(58);
     } finally {
     if (jjtc000) {
       jjtree.closeNodeScope(jjtn000, true);
@@ -3134,7 +3178,7 @@ public class IDLParser{/*@bgen(jjtree)*/
   bool jjtc000 = true;
   jjtree.openNodeScope(jjtn000);
     try {
-      jj_consume_token(58);
+      jj_consume_token(59);
     } finally {
     if (jjtc000) {
       jjtree.closeNodeScope(jjtn000, true);
@@ -3149,7 +3193,7 @@ public class IDLParser{/*@bgen(jjtree)*/
   bool jjtc000 = true;
   jjtree.openNodeScope(jjtn000);
     try {
-      jj_consume_token(59);
+      jj_consume_token(60);
     } finally {
     if (jjtc000) {
       jjtree.closeNodeScope(jjtn000, true);
@@ -3164,7 +3208,7 @@ public class IDLParser{/*@bgen(jjtree)*/
   bool jjtc000 = true;
   jjtree.openNodeScope(jjtn000);
     try {
-      jj_consume_token(60);
+      jj_consume_token(61);
     } finally {
     if (jjtc000) {
       jjtree.closeNodeScope(jjtn000, true);
@@ -3179,7 +3223,7 @@ public class IDLParser{/*@bgen(jjtree)*/
   bool jjtc000 = true;
   jjtree.openNodeScope(jjtn000);
     try {
-      jj_consume_token(61);
+      jj_consume_token(62);
     } finally {
     if (jjtc000) {
       jjtree.closeNodeScope(jjtn000, true);
@@ -3194,7 +3238,7 @@ public class IDLParser{/*@bgen(jjtree)*/
   bool jjtc000 = true;
   jjtree.openNodeScope(jjtn000);
     try {
-      jj_consume_token(62);
+      jj_consume_token(63);
     } finally {
     if (jjtc000) {
       jjtree.closeNodeScope(jjtn000, true);
@@ -3209,7 +3253,7 @@ public class IDLParser{/*@bgen(jjtree)*/
   bool jjtc000 = true;
   jjtree.openNodeScope(jjtn000);String ident = "";
     try {
-      jj_consume_token(63);
+      jj_consume_token(64);
       ident = identifier();
         // recursive definition using a sequence is permitted --> publish symbol already here
         Scope currentScope = m_symbolTable.getCurrentScope();
@@ -3252,7 +3296,6 @@ public class IDLParser{/*@bgen(jjtree)*/
         member();
         switch ((jj_ntk==-1)?jj_ntk_calc():jj_ntk) {
         case 24:
-        case 52:
         case 53:
         case 54:
         case 55:
@@ -3265,17 +3308,18 @@ public class IDLParser{/*@bgen(jjtree)*/
         case 62:
         case 63:
         case 64:
-        case 68:
+        case 65:
         case 69:
-        case 72:
+        case 70:
         case 73:
-        case 85:
+        case 74:
         case 86:
+        case 87:
         case IDLParserConstants.ID:
           ;
           break;
         default:
-          jj_la1[59] = jj_gen;
+          jj_la1[60] = jj_gen;
           goto label_18;
           break;
         }
@@ -3341,12 +3385,12 @@ public class IDLParser{/*@bgen(jjtree)*/
   bool jjtc000 = true;
   jjtree.openNodeScope(jjtn000);String ident = "";
     try {
-      jj_consume_token(64);
+      jj_consume_token(65);
       ident = identifier();
         // recursive definition using a sequence is permitted --> publish symbol already here
         Scope currentScope = m_symbolTable.getCurrentScope();
         currentScope.addSymbol(ident);
-      jj_consume_token(65);
+      jj_consume_token(66);
       jj_consume_token(32);
       switch_type_spec();
       jj_consume_token(33);
@@ -3385,18 +3429,18 @@ public class IDLParser{/*@bgen(jjtree)*/
   jjtree.openNodeScope(jjtn000);
     try {
       switch ((jj_ntk==-1)?jj_ntk_calc():jj_ntk) {
-      case 54:
       case 55:
       case 56:
+      case 57:
         integer_type();
         break;
-      case 57:
+      case 58:
         char_type();
         break;
-      case 59:
+      case 60:
         boolean_type();
         break;
-      case 68:
+      case 69:
         enum_type();
         break;
       case 24:
@@ -3404,7 +3448,7 @@ public class IDLParser{/*@bgen(jjtree)*/
         scoped_name();
         break;
       default:
-        jj_la1[60] = jj_gen;
+        jj_la1[61] = jj_gen;
         jj_consume_token(-1);
         throw new ParseException();
         break;
@@ -3440,12 +3484,12 @@ public class IDLParser{/*@bgen(jjtree)*/
       while (true) {
         casex();
         switch ((jj_ntk==-1)?jj_ntk_calc():jj_ntk) {
-        case 66:
         case 67:
+        case 68:
           ;
           break;
         default:
-          jj_la1[61] = jj_gen;
+          jj_la1[62] = jj_gen;
           goto label_19;
           break;
         }
@@ -3483,12 +3527,12 @@ public class IDLParser{/*@bgen(jjtree)*/
       while (true) {
         case_label();
         switch ((jj_ntk==-1)?jj_ntk_calc():jj_ntk) {
-        case 66:
         case 67:
+        case 68:
           ;
           break;
         default:
-          jj_la1[62] = jj_gen;
+          jj_la1[63] = jj_gen;
           goto label_20;
           break;
         }
@@ -3526,20 +3570,20 @@ public class IDLParser{/*@bgen(jjtree)*/
   jjtree.openNodeScope(jjtn000);
     try {
       switch ((jj_ntk==-1)?jj_ntk_calc():jj_ntk) {
-      case 66:
-        jj_consume_token(66);
+      case 67:
+        jj_consume_token(67);
         const_exp();
         jj_consume_token(22);
         break;
-      case 67:
-        jj_consume_token(67);
+      case 68:
+        jj_consume_token(68);
         jj_consume_token(22);
                   jjtree.closeNodeScope(jjtn000, true);
                   jjtc000 = false;
                    jjtn000.setDefault();
         break;
       default:
-        jj_la1[63] = jj_gen;
+        jj_la1[64] = jj_gen;
         jj_consume_token(-1);
         throw new ParseException();
         break;
@@ -3602,7 +3646,7 @@ public class IDLParser{/*@bgen(jjtree)*/
   bool jjtc000 = true;
   jjtree.openNodeScope(jjtn000);String ident = "";
     try {
-      jj_consume_token(68);
+      jj_consume_token(69);
       ident = identifier();
       jj_consume_token(17);
       enumerator();
@@ -3612,7 +3656,7 @@ public class IDLParser{/*@bgen(jjtree)*/
           ;
           break;
         default:
-          jj_la1[64] = jj_gen;
+          jj_la1[65] = jj_gen;
           goto label_21;
           break;
         }
@@ -3689,8 +3733,8 @@ public class IDLParser{/*@bgen(jjtree)*/
   bool jjtc000 = true;
   jjtree.openNodeScope(jjtn000);
     try {
-      jj_consume_token(69);
       jj_consume_token(70);
+      jj_consume_token(71);
       simple_type_spec();
       switch ((jj_ntk==-1)?jj_ntk_calc():jj_ntk) {
       case 23:
@@ -3698,11 +3742,11 @@ public class IDLParser{/*@bgen(jjtree)*/
         positive_int_const();
         break;
       default:
-        jj_la1[65] = jj_gen;
+        jj_la1[66] = jj_gen;
         ;
         break;
       }
-      jj_consume_token(71);
+      jj_consume_token(72);
     } catch (Exception jjte000) {
     if (jjtc000) {
       jjtree.clearNodeScope(jjtn000);
@@ -3731,15 +3775,15 @@ public class IDLParser{/*@bgen(jjtree)*/
   bool jjtc000 = true;
   jjtree.openNodeScope(jjtn000);
     try {
-      jj_consume_token(72);
+      jj_consume_token(73);
       switch ((jj_ntk==-1)?jj_ntk_calc():jj_ntk) {
-      case 70:
-        jj_consume_token(70);
-        positive_int_const();
+      case 71:
         jj_consume_token(71);
+        positive_int_const();
+        jj_consume_token(72);
         break;
       default:
-        jj_la1[66] = jj_gen;
+        jj_la1[67] = jj_gen;
         ;
         break;
       }
@@ -3771,15 +3815,15 @@ public class IDLParser{/*@bgen(jjtree)*/
   bool jjtc000 = true;
   jjtree.openNodeScope(jjtn000);
     try {
-      jj_consume_token(73);
+      jj_consume_token(74);
       switch ((jj_ntk==-1)?jj_ntk_calc():jj_ntk) {
-      case 70:
-        jj_consume_token(70);
-        positive_int_const();
+      case 71:
         jj_consume_token(71);
+        positive_int_const();
+        jj_consume_token(72);
         break;
       default:
-        jj_la1[67] = jj_gen;
+        jj_la1[68] = jj_gen;
         ;
         break;
       }
@@ -3815,11 +3859,11 @@ public class IDLParser{/*@bgen(jjtree)*/
       while (true) {
         fixed_array_size();
         switch ((jj_ntk==-1)?jj_ntk_calc():jj_ntk) {
-        case 74:
+        case 75:
           ;
           break;
         default:
-          jj_la1[68] = jj_gen;
+          jj_la1[69] = jj_gen;
           goto label_22;
           break;
         }
@@ -3857,9 +3901,9 @@ public class IDLParser{/*@bgen(jjtree)*/
   bool jjtc000 = true;
   jjtree.openNodeScope(jjtn000);
     try {
-      jj_consume_token(74);
-      positive_int_const();
       jj_consume_token(75);
+      positive_int_const();
+      jj_consume_token(76);
     } catch (Exception jjte000) {
     if (jjtc000) {
       jjtree.clearNodeScope(jjtn000);
@@ -3889,16 +3933,16 @@ public class IDLParser{/*@bgen(jjtree)*/
   jjtree.openNodeScope(jjtn000);bool isReadOnly = false;
     try {
       switch ((jj_ntk==-1)?jj_ntk_calc():jj_ntk) {
-      case 76:
-        jj_consume_token(76);
+      case 77:
+        jj_consume_token(77);
                  isReadOnly = true;
         break;
       default:
-        jj_la1[69] = jj_gen;
+        jj_la1[70] = jj_gen;
         ;
         break;
       }
-      jj_consume_token(77);
+      jj_consume_token(78);
       param_type_spec();
       simple_declarator();
       while (true) {
@@ -3907,7 +3951,7 @@ public class IDLParser{/*@bgen(jjtree)*/
           ;
           break;
         default:
-          jj_la1[70] = jj_gen;
+          jj_la1[71] = jj_gen;
           goto label_23;
           break;
         }
@@ -3947,13 +3991,12 @@ public class IDLParser{/*@bgen(jjtree)*/
   bool jjtc000 = true;
   jjtree.openNodeScope(jjtn000);String ident = "";
     try {
-      jj_consume_token(78);
+      jj_consume_token(79);
       ident = identifier();
       jj_consume_token(17);
       while (true) {
         switch ((jj_ntk==-1)?jj_ntk_calc():jj_ntk) {
         case 24:
-        case 52:
         case 53:
         case 54:
         case 55:
@@ -3966,17 +4009,18 @@ public class IDLParser{/*@bgen(jjtree)*/
         case 62:
         case 63:
         case 64:
-        case 68:
+        case 65:
         case 69:
-        case 72:
+        case 70:
         case 73:
-        case 85:
+        case 74:
         case 86:
+        case 87:
         case IDLParserConstants.ID:
           ;
           break;
         default:
-          jj_la1[71] = jj_gen;
+          jj_la1[72] = jj_gen;
           goto label_24;
           break;
         }
@@ -4020,11 +4064,11 @@ public class IDLParser{/*@bgen(jjtree)*/
   int opAttr = ASTop_dcl.OP_Attr_NONE;
     try {
       switch ((jj_ntk==-1)?jj_ntk_calc():jj_ntk) {
-      case 79:
+      case 80:
         opAttr = op_attribute();
         break;
       default:
-        jj_la1[72] = jj_gen;
+        jj_la1[73] = jj_gen;
         ;
         break;
       }
@@ -4032,20 +4076,20 @@ public class IDLParser{/*@bgen(jjtree)*/
       ident = identifier();
       parameter_dcls();
       switch ((jj_ntk==-1)?jj_ntk_calc():jj_ntk) {
-      case 83:
+      case 84:
         raises_expr();
         break;
       default:
-        jj_la1[73] = jj_gen;
+        jj_la1[74] = jj_gen;
         ;
         break;
       }
       switch ((jj_ntk==-1)?jj_ntk_calc():jj_ntk) {
-      case 84:
+      case 85:
         context_expr();
         break;
       default:
-        jj_la1[74] = jj_gen;
+        jj_la1[75] = jj_gen;
         ;
         break;
       }
@@ -4076,7 +4120,7 @@ public class IDLParser{/*@bgen(jjtree)*/
 
 /* Production 88, chapter 3.4, corba 2.3.1 */
   public int op_attribute() {
-    jj_consume_token(79);
+    jj_consume_token(80);
              {if (true) return ASTop_dcl.OP_Attr_ONEWAY;}
     throw new Error("Missing return statement in function");
   }
@@ -4090,7 +4134,6 @@ public class IDLParser{/*@bgen(jjtree)*/
     try {
       switch ((jj_ntk==-1)?jj_ntk_calc():jj_ntk) {
       case 24:
-      case 52:
       case 53:
       case 54:
       case 55:
@@ -4101,17 +4144,18 @@ public class IDLParser{/*@bgen(jjtree)*/
       case 60:
       case 61:
       case 62:
-      case 72:
+      case 63:
       case 73:
-      case 86:
+      case 74:
+      case 87:
       case IDLParserConstants.ID:
         param_type_spec();
         break;
-      case 80:
-        jj_consume_token(80);
+      case 81:
+        jj_consume_token(81);
         break;
       default:
-        jj_la1[75] = jj_gen;
+        jj_la1[76] = jj_gen;
         jj_consume_token(-1);
         throw new ParseException();
         break;
@@ -4147,8 +4191,8 @@ public class IDLParser{/*@bgen(jjtree)*/
       jj_consume_token(32);
       switch ((jj_ntk==-1)?jj_ntk_calc():jj_ntk) {
       case 34:
-      case 81:
       case 82:
+      case 83:
         param_dcl();
         while (true) {
           switch ((jj_ntk==-1)?jj_ntk_calc():jj_ntk) {
@@ -4156,7 +4200,7 @@ public class IDLParser{/*@bgen(jjtree)*/
             ;
             break;
           default:
-            jj_la1[76] = jj_gen;
+            jj_la1[77] = jj_gen;
             goto label_25;
             break;
           }
@@ -4167,7 +4211,7 @@ public class IDLParser{/*@bgen(jjtree)*/
         
         break;
       default:
-        jj_la1[77] = jj_gen;
+        jj_la1[78] = jj_gen;
         ;
         break;
       }
@@ -4238,20 +4282,20 @@ public class IDLParser{/*@bgen(jjtree)*/
          jjtc000 = false;
          jjtn000.setParamDir(ASTparam_attribute.ParamDir_IN);
         break;
-      case 81:
-        jj_consume_token(81);
+      case 82:
+        jj_consume_token(82);
           jjtree.closeNodeScope(jjtn000, true);
           jjtc000 = false;
           jjtn000.setParamDir(ASTparam_attribute.ParamDir_OUT);
         break;
-      case 82:
-        jj_consume_token(82);
+      case 83:
+        jj_consume_token(83);
             jjtree.closeNodeScope(jjtn000, true);
             jjtc000 = false;
             jjtn000.setParamDir(ASTparam_attribute.ParamDir_INOUT);
         break;
       default:
-        jj_la1[78] = jj_gen;
+        jj_la1[79] = jj_gen;
         jj_consume_token(-1);
         throw new ParseException();
         break;
@@ -4270,7 +4314,7 @@ public class IDLParser{/*@bgen(jjtree)*/
   bool jjtc000 = true;
   jjtree.openNodeScope(jjtn000);
     try {
-      jj_consume_token(83);
+      jj_consume_token(84);
       jj_consume_token(32);
       scoped_name();
       while (true) {
@@ -4279,7 +4323,7 @@ public class IDLParser{/*@bgen(jjtree)*/
           ;
           break;
         default:
-          jj_la1[79] = jj_gen;
+          jj_la1[80] = jj_gen;
           goto label_26;
           break;
         }
@@ -4317,7 +4361,7 @@ public class IDLParser{/*@bgen(jjtree)*/
   bool jjtc000 = true;
   jjtree.openNodeScope(jjtn000);String contElem = "";
     try {
-      jj_consume_token(84);
+      jj_consume_token(85);
       jj_consume_token(32);
       contElem = string_literal();
                                               jjtn000.AddContextElement(contElem);
@@ -4327,7 +4371,7 @@ public class IDLParser{/*@bgen(jjtree)*/
           ;
           break;
         default:
-          jj_la1[80] = jj_gen;
+          jj_la1[81] = jj_gen;
           goto label_27;
           break;
         }
@@ -4367,7 +4411,6 @@ public class IDLParser{/*@bgen(jjtree)*/
   jjtree.openNodeScope(jjtn000);
     try {
       switch ((jj_ntk==-1)?jj_ntk_calc():jj_ntk) {
-      case 52:
       case 53:
       case 54:
       case 55:
@@ -4378,13 +4421,14 @@ public class IDLParser{/*@bgen(jjtree)*/
       case 60:
       case 61:
       case 62:
-      case 86:
+      case 63:
+      case 87:
         base_type_spec();
         break;
-      case 72:
+      case 73:
         string_type();
         break;
-      case 73:
+      case 74:
         wide_string_type();
         break;
       case 24:
@@ -4392,7 +4436,7 @@ public class IDLParser{/*@bgen(jjtree)*/
         scoped_name();
         break;
       default:
-        jj_la1[81] = jj_gen;
+        jj_la1[82] = jj_gen;
         jj_consume_token(-1);
         throw new ParseException();
         break;
@@ -4425,12 +4469,12 @@ public class IDLParser{/*@bgen(jjtree)*/
   bool jjtc000 = true;
   jjtree.openNodeScope(jjtn000);
     try {
-      jj_consume_token(85);
-      jj_consume_token(70);
+      jj_consume_token(86);
+      jj_consume_token(71);
       positive_int_const();
       jj_consume_token(23);
       positive_int_const();
-      jj_consume_token(71);
+      jj_consume_token(72);
     } catch (Exception jjte000) {
           if (jjtc000) {
             jjtree.clearNodeScope(jjtn000);
@@ -4459,7 +4503,7 @@ public class IDLParser{/*@bgen(jjtree)*/
   bool jjtc000 = true;
   jjtree.openNodeScope(jjtn000);
     try {
-      jj_consume_token(85);
+      jj_consume_token(86);
     } finally {
           if (jjtc000) {
             jjtree.closeNodeScope(jjtn000, true);
@@ -4474,7 +4518,7 @@ public class IDLParser{/*@bgen(jjtree)*/
   bool jjtc000 = true;
   jjtree.openNodeScope(jjtn000);
     try {
-      jj_consume_token(86);
+      jj_consume_token(87);
     } finally {
           if (jjtc000) {
             jjtree.closeNodeScope(jjtn000, true);
@@ -4526,7 +4570,7 @@ public class IDLParser{/*@bgen(jjtree)*/
                                                                 {if (true) return System.Int64.Parse(hexVal, System.Globalization.NumberStyles.AllowHexSpecifier);}
       break;
     default:
-      jj_la1[82] = jj_gen;
+      jj_la1[83] = jj_gen;
       jj_consume_token(-1);
       throw new ParseException();
       break;
@@ -4545,7 +4589,7 @@ public class IDLParser{/*@bgen(jjtree)*/
 
   public String wide_string_literal() {
   Token stringToken;
-    jj_consume_token(87);
+    jj_consume_token(88);
     stringToken = jj_consume_token(IDLParserConstants.STRING);
                                                                         String result = stringToken.image;
                                                                         // remove "" around the literal
@@ -4564,7 +4608,7 @@ public class IDLParser{/*@bgen(jjtree)*/
 
   public char wide_character_literal() {
   Token charToken;
-    jj_consume_token(87);
+    jj_consume_token(88);
     charToken = jj_consume_token(IDLParserConstants.CHARACTER);
                                                                  // TBD: not correct: escaped chars
                                                                  char val = charToken.image[0];
@@ -4576,22 +4620,40 @@ public class IDLParser{/*@bgen(jjtree)*/
   Token floatLiteral;
     switch ((jj_ntk==-1)?jj_ntk_calc():jj_ntk) {
     case IDLParserConstants.FLOATONE:
-      floatLiteral = jj_consume_token(IDLParserConstants.FLOATONE);
-      break;
     case IDLParserConstants.FLOATTWO:
-      floatLiteral = jj_consume_token(IDLParserConstants.FLOATTWO);
-      break;
-    default:
-      jj_la1[83] = jj_gen;
-      jj_consume_token(-1);
-      throw new ParseException();
-      break;
-    }
+      switch ((jj_ntk==-1)?jj_ntk_calc():jj_ntk) {
+      case IDLParserConstants.FLOATONE:
+        floatLiteral = jj_consume_token(IDLParserConstants.FLOATONE);
+        break;
+      case IDLParserConstants.FLOATTWO:
+        floatLiteral = jj_consume_token(IDLParserConstants.FLOATTWO);
+        break;
+      default:
+        jj_la1[84] = jj_gen;
+        jj_consume_token(-1);
+        throw new ParseException();
+        break;
+      }
           String floatVal = floatLiteral.image;
       if (floatVal.EndsWith("f") || floatVal.EndsWith("F") || floatVal.EndsWith("l") || floatVal.EndsWith("L")) {
         floatVal = floatVal.Substring(0, floatVal.Length - 1);
       }
       {if (true) return Double.Parse(floatVal);}
+      break;
+    case 36:
+      jj_consume_token(36);
+      {if (true) return Double.NaN;}
+      break;
+    case 89:
+      jj_consume_token(89);
+      {if (true) return Double.PositiveInfinity;}
+      break;
+    default:
+      jj_la1[85] = jj_gen;
+      jj_consume_token(-1);
+      throw new ParseException();
+      break;
+    }
     throw new Error("Missing return statement in function");
   }
 
@@ -4599,43 +4661,43 @@ public class IDLParser{/*@bgen(jjtree)*/
   Token fixedLiteral;
     if (jj_2_20(2147483647)) {
       fixedLiteral = jj_consume_token(IDLParserConstants.FIXED);
-      jj_consume_token(88);
+      jj_consume_token(90);
       switch ((jj_ntk==-1)?jj_ntk_calc():jj_ntk) {
       case IDLParserConstants.FIXED:
         jj_consume_token(IDLParserConstants.FIXED);
         break;
       default:
-        jj_la1[84] = jj_gen;
+        jj_la1[86] = jj_gen;
         ;
         break;
       }
       switch ((jj_ntk==-1)?jj_ntk_calc():jj_ntk) {
-      case 89:
-        jj_consume_token(89);
+      case 91:
+        jj_consume_token(91);
         break;
-      case 90:
-        jj_consume_token(90);
+      case 92:
+        jj_consume_token(92);
         break;
       default:
-        jj_la1[85] = jj_gen;
+        jj_la1[87] = jj_gen;
         jj_consume_token(-1);
         throw new ParseException();
         break;
       }
     } else {
       switch ((jj_ntk==-1)?jj_ntk_calc():jj_ntk) {
-      case 88:
-        fixedLiteral = jj_consume_token(88);
+      case 90:
+        fixedLiteral = jj_consume_token(90);
         jj_consume_token(IDLParserConstants.FIXED);
         switch ((jj_ntk==-1)?jj_ntk_calc():jj_ntk) {
-        case 89:
-          jj_consume_token(89);
+        case 91:
+          jj_consume_token(91);
           break;
-        case 90:
-          jj_consume_token(90);
+        case 92:
+          jj_consume_token(92);
           break;
         default:
-          jj_la1[86] = jj_gen;
+          jj_la1[88] = jj_gen;
           jj_consume_token(-1);
           throw new ParseException();
           break;
@@ -4644,21 +4706,21 @@ public class IDLParser{/*@bgen(jjtree)*/
       case IDLParserConstants.FIXED:
         fixedLiteral = jj_consume_token(IDLParserConstants.FIXED);
         switch ((jj_ntk==-1)?jj_ntk_calc():jj_ntk) {
-        case 89:
-          jj_consume_token(89);
+        case 91:
+          jj_consume_token(91);
           break;
-        case 90:
-          jj_consume_token(90);
+        case 92:
+          jj_consume_token(92);
           break;
         default:
-          jj_la1[87] = jj_gen;
+          jj_la1[89] = jj_gen;
           jj_consume_token(-1);
           throw new ParseException();
           break;
         }
         break;
       default:
-        jj_la1[88] = jj_gen;
+        jj_la1[90] = jj_gen;
         jj_consume_token(-1);
         throw new ParseException();
         break;
@@ -4812,59 +4874,8 @@ public class IDLParser{/*@bgen(jjtree)*/
     finally { jj_save(19, xla); }
   }
 
-  private bool jj_3R_178() {
-    if (jj_scan_token(69)) return true;
-    if (jj_scan_token(70)) return true;
-    return false;
-  }
-
-  private bool jj_3R_135() {
-    if (jj_3R_147()) return true;
-    return false;
-  }
-
-  private bool jj_3R_134() {
-    if (jj_3R_155()) return true;
-    return false;
-  }
-
-  private bool jj_3R_104() {
-    Token xsp;
-    xsp = jj_scanpos;
-    if (jj_3R_133()) {
-    jj_scanpos = xsp;
-    if (jj_3R_134()) {
-    jj_scanpos = xsp;
-    if (jj_3R_135()) return true;
-    }
-    }
-    return false;
-  }
-
-  private bool jj_3R_133() {
-    if (jj_3R_154()) return true;
-    return false;
-  }
-
-  private bool jj_3R_156() {
-    if (jj_scan_token(24)) return true;
-    return false;
-  }
-
   private bool jj_3R_84() {
     if (jj_3R_105()) return true;
-    return false;
-  }
-
-  private bool jj_3R_147() {
-    Token xsp;
-    xsp = jj_scanpos;
-    if (jj_3R_156()) jj_scanpos = xsp;
-    if (jj_3R_55()) return true;
-    while (true) {
-      xsp = jj_scanpos;
-      if (jj_3R_172()) { jj_scanpos = xsp; break; }
-    }
     return false;
   }
 
@@ -4883,6 +4894,29 @@ public class IDLParser{/*@bgen(jjtree)*/
     return false;
   }
 
+  private bool jj_3R_156() {
+    if (jj_scan_token(24)) return true;
+    return false;
+  }
+
+  private bool jj_3R_147() {
+    Token xsp;
+    xsp = jj_scanpos;
+    if (jj_3R_156()) jj_scanpos = xsp;
+    if (jj_3R_55()) return true;
+    while (true) {
+      xsp = jj_scanpos;
+      if (jj_3R_172()) { jj_scanpos = xsp; break; }
+    }
+    return false;
+  }
+
+  private bool jj_3R_112() {
+    if (jj_scan_token(69)) return true;
+    if (jj_3R_55()) return true;
+    return false;
+  }
+
   private bool jj_3R_123() {
     if (jj_3R_147()) return true;
     return false;
@@ -4893,14 +4927,19 @@ public class IDLParser{/*@bgen(jjtree)*/
     return false;
   }
 
-  private bool jj_3R_112() {
-    if (jj_scan_token(68)) return true;
-    if (jj_3R_55()) return true;
+  private bool jj_3R_109() {
+    if (jj_3R_60()) return true;
     return false;
   }
 
-  private bool jj_3R_109() {
-    if (jj_3R_60()) return true;
+  private bool jj_3R_95() {
+    if (jj_scan_token(52)) return true;
+    if (jj_3R_113()) return true;
+    return false;
+  }
+
+  private bool jj_3R_94() {
+    if (jj_3R_112()) return true;
     return false;
   }
 
@@ -4910,44 +4949,13 @@ public class IDLParser{/*@bgen(jjtree)*/
     return false;
   }
 
-  private bool jj_3R_95() {
-    if (jj_scan_token(51)) return true;
-    if (jj_3R_113()) return true;
-    return false;
-  }
-
-  private bool jj_3R_129() {
-    if (jj_3R_151()) return true;
-    return false;
-  }
-
-  private bool jj_3R_94() {
-    if (jj_3R_112()) return true;
-    return false;
-  }
-
-  private bool jj_3R_128() {
-    if (jj_3R_150()) return true;
-    return false;
-  }
-
   private bool jj_3R_93() {
     if (jj_3R_111()) return true;
     return false;
   }
 
-  private bool jj_3R_127() {
-    if (jj_3R_149()) return true;
-    return false;
-  }
-
   private bool jj_3R_92() {
     if (jj_3R_110()) return true;
-    return false;
-  }
-
-  private bool jj_3R_126() {
-    if (jj_3R_70()) return true;
     return false;
   }
 
@@ -4971,8 +4979,28 @@ public class IDLParser{/*@bgen(jjtree)*/
   }
 
   private bool jj_3R_91() {
-    if (jj_scan_token(50)) return true;
+    if (jj_scan_token(51)) return true;
     if (jj_3R_109()) return true;
+    return false;
+  }
+
+  private bool jj_3R_129() {
+    if (jj_3R_151()) return true;
+    return false;
+  }
+
+  private bool jj_3R_128() {
+    if (jj_3R_150()) return true;
+    return false;
+  }
+
+  private bool jj_3R_127() {
+    if (jj_3R_149()) return true;
+    return false;
+  }
+
+  private bool jj_3R_126() {
+    if (jj_3R_70()) return true;
     return false;
   }
 
@@ -5022,6 +5050,12 @@ public class IDLParser{/*@bgen(jjtree)*/
     return false;
   }
 
+  private bool jj_3_20() {
+    if (jj_scan_token(IDLParserConstants.FIXED)) return true;
+    if (jj_scan_token(90)) return true;
+    return false;
+  }
+
   private bool jj_3R_100() {
     if (jj_scan_token(21)) return true;
     return false;
@@ -5047,25 +5081,19 @@ public class IDLParser{/*@bgen(jjtree)*/
     return false;
   }
 
-  private bool jj_3_20() {
-    if (jj_scan_token(IDLParserConstants.FIXED)) return true;
-    if (jj_scan_token(88)) return true;
-    return false;
-  }
-
-  private bool jj_3R_73() {
-    if (jj_3R_76()) return true;
-    return false;
-  }
-
   private bool jj_3_12() {
     if (jj_3R_39()) return true;
     return false;
   }
 
   private bool jj_3R_111() {
-    if (jj_scan_token(64)) return true;
+    if (jj_scan_token(65)) return true;
     if (jj_3R_55()) return true;
+    return false;
+  }
+
+  private bool jj_3R_73() {
+    if (jj_3R_76()) return true;
     return false;
   }
 
@@ -5077,6 +5105,12 @@ public class IDLParser{/*@bgen(jjtree)*/
     if (jj_3R_55()) return true;
     xsp = jj_scanpos;
     if (jj_3R_74()) jj_scanpos = xsp;
+    return false;
+  }
+
+  private bool jj_3R_110() {
+    if (jj_scan_token(64)) return true;
+    if (jj_3R_55()) return true;
     return false;
   }
 
@@ -5094,20 +5128,24 @@ public class IDLParser{/*@bgen(jjtree)*/
     return false;
   }
 
-  private bool jj_3R_110() {
-    if (jj_scan_token(63)) return true;
-    if (jj_3R_55()) return true;
-    return false;
-  }
-
   private bool jj_3R_176() {
-    if (jj_scan_token(62)) return true;
+    if (jj_scan_token(63)) return true;
     return false;
   }
 
   private bool jj_3R_40() {
-    if (jj_scan_token(87)) return true;
+    if (jj_scan_token(88)) return true;
     if (jj_scan_token(IDLParserConstants.CHARACTER)) return true;
+    return false;
+  }
+
+  private bool jj_3R_175() {
+    if (jj_scan_token(62)) return true;
+    return false;
+  }
+
+  private bool jj_3R_148() {
+    if (jj_scan_token(61)) return true;
     return false;
   }
 
@@ -5119,18 +5157,19 @@ public class IDLParser{/*@bgen(jjtree)*/
     return false;
   }
 
-  private bool jj_3R_175() {
-    if (jj_scan_token(61)) return true;
+  private bool jj_3R_143() {
+    if (jj_scan_token(60)) return true;
+    return false;
+  }
+
+  private bool jj_3R_39() {
+    if (jj_scan_token(88)) return true;
+    if (jj_scan_token(IDLParserConstants.STRING)) return true;
     return false;
   }
 
   private bool jj_3_6() {
     if (jj_3R_33()) return true;
-    return false;
-  }
-
-  private bool jj_3R_148() {
-    if (jj_scan_token(60)) return true;
     return false;
   }
 
@@ -5149,14 +5188,13 @@ public class IDLParser{/*@bgen(jjtree)*/
     return false;
   }
 
-  private bool jj_3R_143() {
+  private bool jj_3R_142() {
     if (jj_scan_token(59)) return true;
     return false;
   }
 
-  private bool jj_3R_39() {
-    if (jj_scan_token(87)) return true;
-    if (jj_scan_token(IDLParserConstants.STRING)) return true;
+  private bool jj_3R_141() {
+    if (jj_scan_token(58)) return true;
     return false;
   }
 
@@ -5166,8 +5204,10 @@ public class IDLParser{/*@bgen(jjtree)*/
     return false;
   }
 
-  private bool jj_3R_142() {
-    if (jj_scan_token(58)) return true;
+  private bool jj_3R_45() {
+    if (jj_scan_token(57)) return true;
+    if (jj_scan_token(55)) return true;
+    if (jj_scan_token(55)) return true;
     return false;
   }
 
@@ -5176,25 +5216,19 @@ public class IDLParser{/*@bgen(jjtree)*/
     return false;
   }
 
-  private bool jj_3R_141() {
-    if (jj_scan_token(57)) return true;
-    return false;
-  }
-
   private bool jj_3_4() {
     if (jj_3R_31()) return true;
     return false;
   }
 
-  private bool jj_3R_50() {
-    if (jj_3R_71()) return true;
+  private bool jj_3R_46() {
+    if (jj_scan_token(57)) return true;
+    if (jj_scan_token(55)) return true;
     return false;
   }
 
-  private bool jj_3R_45() {
-    if (jj_scan_token(56)) return true;
-    if (jj_scan_token(54)) return true;
-    if (jj_scan_token(54)) return true;
+  private bool jj_3R_50() {
+    if (jj_3R_71()) return true;
     return false;
   }
 
@@ -5210,6 +5244,17 @@ public class IDLParser{/*@bgen(jjtree)*/
 
   private bool jj_3R_48() {
     if (jj_3R_69()) return true;
+    return false;
+  }
+
+  private bool jj_3R_122() {
+    if (jj_3R_148()) return true;
+    return false;
+  }
+
+  private bool jj_3R_140() {
+    if (jj_scan_token(57)) return true;
+    if (jj_scan_token(56)) return true;
     return false;
   }
 
@@ -5243,35 +5288,8 @@ public class IDLParser{/*@bgen(jjtree)*/
     return false;
   }
 
-  private bool jj_3R_46() {
-    if (jj_scan_token(56)) return true;
-    if (jj_scan_token(54)) return true;
-    return false;
-  }
-
-  private bool jj_3R_122() {
-    if (jj_3R_148()) return true;
-    return false;
-  }
-
   private bool jj_3R_121() {
     if (jj_3R_147()) return true;
-    return false;
-  }
-
-  private bool jj_3R_140() {
-    if (jj_scan_token(56)) return true;
-    if (jj_scan_token(55)) return true;
-    return false;
-  }
-
-  private bool jj_3_2() {
-    if (jj_3R_29()) return true;
-    return false;
-  }
-
-  private bool jj_3R_79() {
-    if (jj_3R_82()) return true;
     return false;
   }
 
@@ -5285,8 +5303,8 @@ public class IDLParser{/*@bgen(jjtree)*/
     return false;
   }
 
-  private bool jj_3_1() {
-    if (jj_3R_28()) return true;
+  private bool jj_3R_79() {
+    if (jj_3R_82()) return true;
     return false;
   }
 
@@ -5295,8 +5313,18 @@ public class IDLParser{/*@bgen(jjtree)*/
     return false;
   }
 
+  private bool jj_3R_107() {
+    if (jj_3R_140()) return true;
+    return false;
+  }
+
   private bool jj_3R_117() {
     if (jj_3R_41()) return true;
+    return false;
+  }
+
+  private bool jj_3_2() {
+    if (jj_3R_29()) return true;
     return false;
   }
 
@@ -5305,8 +5333,8 @@ public class IDLParser{/*@bgen(jjtree)*/
     return false;
   }
 
-  private bool jj_3R_107() {
-    if (jj_3R_140()) return true;
+  private bool jj_3_19() {
+    if (jj_3R_46()) return true;
     return false;
   }
 
@@ -5315,13 +5343,8 @@ public class IDLParser{/*@bgen(jjtree)*/
     return false;
   }
 
-  private bool jj_3_19() {
-    if (jj_3R_46()) return true;
-    return false;
-  }
-
-  private bool jj_3R_114() {
-    if (jj_3R_141()) return true;
+  private bool jj_3_1() {
+    if (jj_3R_28()) return true;
     return false;
   }
 
@@ -5348,8 +5371,13 @@ public class IDLParser{/*@bgen(jjtree)*/
     return false;
   }
 
-  private bool jj_3R_153() {
-    if (jj_scan_token(30)) return true;
+  private bool jj_3R_114() {
+    if (jj_3R_141()) return true;
+    return false;
+  }
+
+  private bool jj_3R_177() {
+    if (jj_scan_token(87)) return true;
     return false;
   }
 
@@ -5392,19 +5420,24 @@ public class IDLParser{/*@bgen(jjtree)*/
     return false;
   }
 
-  private bool jj_3R_177() {
-    if (jj_scan_token(86)) return true;
+  private bool jj_3R_153() {
+    if (jj_scan_token(30)) return true;
     return false;
   }
 
   private bool jj_3R_43() {
-    if (jj_scan_token(54)) return true;
-    if (jj_scan_token(54)) return true;
+    if (jj_scan_token(55)) return true;
+    if (jj_scan_token(55)) return true;
     return false;
   }
 
   private bool jj_3R_146() {
-    if (jj_scan_token(85)) return true;
+    if (jj_scan_token(86)) return true;
+    return false;
+  }
+
+  private bool jj_3R_44() {
+    if (jj_scan_token(55)) return true;
     return false;
   }
 
@@ -5414,14 +5447,9 @@ public class IDLParser{/*@bgen(jjtree)*/
     return false;
   }
 
-  private bool jj_3R_44() {
-    if (jj_scan_token(54)) return true;
-    return false;
-  }
-
   private bool jj_3R_179() {
-    if (jj_scan_token(85)) return true;
-    if (jj_scan_token(70)) return true;
+    if (jj_scan_token(86)) return true;
+    if (jj_scan_token(71)) return true;
     return false;
   }
 
@@ -5431,7 +5459,7 @@ public class IDLParser{/*@bgen(jjtree)*/
   }
 
   private bool jj_3R_139() {
-    if (jj_scan_token(55)) return true;
+    if (jj_scan_token(56)) return true;
     return false;
   }
 
@@ -5445,12 +5473,6 @@ public class IDLParser{/*@bgen(jjtree)*/
     return false;
   }
 
-  private bool jj_3R_29() {
-    if (jj_scan_token(12)) return true;
-    if (jj_scan_token(14)) return true;
-    return false;
-  }
-
   private bool jj_3R_106() {
     if (jj_3R_139()) return true;
     return false;
@@ -5458,11 +5480,6 @@ public class IDLParser{/*@bgen(jjtree)*/
 
   private bool jj_3R_184() {
     if (jj_3R_144()) return true;
-    return false;
-  }
-
-  private bool jj_3R_132() {
-    if (jj_scan_token(31)) return true;
     return false;
   }
 
@@ -5510,33 +5527,24 @@ public class IDLParser{/*@bgen(jjtree)*/
     return false;
   }
 
-  private bool jj_3R_172() {
-    if (jj_scan_token(24)) return true;
+  private bool jj_3R_132() {
+    if (jj_scan_token(31)) return true;
     return false;
   }
 
-  private bool jj_3R_59() {
-    if (jj_3R_82()) return true;
-    return false;
-  }
-
-  private bool jj_3R_152() {
-    if (jj_scan_token(29)) return true;
-    return false;
-  }
-
-  private bool jj_3R_131() {
-    Token xsp;
-    xsp = jj_scanpos;
-    if (jj_3R_152()) {
-    jj_scanpos = xsp;
-    if (jj_3R_153()) return true;
-    }
+  private bool jj_3R_29() {
+    if (jj_scan_token(12)) return true;
+    if (jj_scan_token(14)) return true;
     return false;
   }
 
   private bool jj_3R_63() {
     if (jj_3R_86()) return true;
+    return false;
+  }
+
+  private bool jj_3R_152() {
+    if (jj_scan_token(29)) return true;
     return false;
   }
 
@@ -5555,8 +5563,29 @@ public class IDLParser{/*@bgen(jjtree)*/
     return false;
   }
 
-  private bool jj_3R_151() {
-    if (jj_scan_token(12)) return true;
+  private bool jj_3R_131() {
+    Token xsp;
+    xsp = jj_scanpos;
+    if (jj_3R_152()) {
+    jj_scanpos = xsp;
+    if (jj_3R_153()) return true;
+    }
+    return false;
+  }
+
+  private bool jj_3R_172() {
+    if (jj_scan_token(24)) return true;
+    return false;
+  }
+
+  private bool jj_3R_59() {
+    if (jj_3R_82()) return true;
+    return false;
+  }
+
+  private bool jj_3R_87() {
+    if (jj_scan_token(55)) return true;
+    if (jj_scan_token(54)) return true;
     return false;
   }
 
@@ -5588,13 +5617,17 @@ public class IDLParser{/*@bgen(jjtree)*/
     return false;
   }
 
-  private bool jj_3R_87() {
-    if (jj_scan_token(54)) return true;
-    if (jj_scan_token(53)) return true;
+  private bool jj_3R_151() {
+    if (jj_scan_token(12)) return true;
     return false;
   }
 
   private bool jj_3R_89() {
+    if (jj_scan_token(54)) return true;
+    return false;
+  }
+
+  private bool jj_3R_88() {
     if (jj_scan_token(53)) return true;
     return false;
   }
@@ -5604,14 +5637,8 @@ public class IDLParser{/*@bgen(jjtree)*/
     return false;
   }
 
-  private bool jj_3R_72() {
-    if (jj_scan_token(12)) return true;
-    if (jj_scan_token(13)) return true;
-    return false;
-  }
-
-  private bool jj_3R_88() {
-    if (jj_scan_token(52)) return true;
+  private bool jj_3R_66() {
+    if (jj_3R_89()) return true;
     return false;
   }
 
@@ -5621,27 +5648,14 @@ public class IDLParser{/*@bgen(jjtree)*/
     return false;
   }
 
-  private bool jj_3R_58() {
-    if (jj_3R_81()) return true;
-    return false;
-  }
-
-  private bool jj_3R_66() {
-    if (jj_3R_89()) return true;
-    return false;
-  }
-
-  private bool jj_3R_81() {
-    if (jj_scan_token(22)) return true;
-    Token xsp;
-    xsp = jj_scanpos;
-    if (jj_scan_token(27)) jj_scanpos = xsp;
-    if (jj_3R_130()) return true;
-    return false;
-  }
-
   private bool jj_3R_65() {
     if (jj_3R_88()) return true;
+    return false;
+  }
+
+  private bool jj_3R_72() {
+    if (jj_scan_token(12)) return true;
+    if (jj_scan_token(13)) return true;
     return false;
   }
 
@@ -5663,8 +5677,42 @@ public class IDLParser{/*@bgen(jjtree)*/
     return false;
   }
 
+  private bool jj_3R_81() {
+    if (jj_scan_token(22)) return true;
+    Token xsp;
+    xsp = jj_scanpos;
+    if (jj_scan_token(27)) jj_scanpos = xsp;
+    if (jj_3R_130()) return true;
+    return false;
+  }
+
+  private bool jj_3R_58() {
+    if (jj_3R_81()) return true;
+    return false;
+  }
+
+  private bool jj_3R_42() {
+    if (jj_3R_67()) return true;
+    return false;
+  }
+
   private bool jj_3R_77() {
     if (jj_scan_token(26)) return true;
+    return false;
+  }
+
+  private bool jj_3R_174() {
+    if (jj_3R_180()) return true;
+    return false;
+  }
+
+  private bool jj_3R_159() {
+    Token xsp;
+    xsp = jj_scanpos;
+    if (jj_3R_174()) {
+    jj_scanpos = xsp;
+    if (jj_scan_token(81)) return true;
+    }
     return false;
   }
 
@@ -5681,23 +5729,8 @@ public class IDLParser{/*@bgen(jjtree)*/
     return false;
   }
 
-  private bool jj_3R_42() {
-    if (jj_3R_67()) return true;
-    return false;
-  }
-
-  private bool jj_3R_174() {
-    if (jj_3R_180()) return true;
-    return false;
-  }
-
-  private bool jj_3R_159() {
-    Token xsp;
-    xsp = jj_scanpos;
-    if (jj_3R_174()) {
-    jj_scanpos = xsp;
-    if (jj_scan_token(80)) return true;
-    }
+  private bool jj_3R_113() {
+    if (jj_3R_55()) return true;
     return false;
   }
 
@@ -5706,25 +5739,8 @@ public class IDLParser{/*@bgen(jjtree)*/
     return false;
   }
 
-  private bool jj_3R_113() {
-    if (jj_3R_55()) return true;
-    return false;
-  }
-
   private bool jj_3R_173() {
-    if (jj_scan_token(79)) return true;
-    return false;
-  }
-
-  private bool jj_3R_34() {
-    if (jj_3R_56()) return true;
-    if (jj_scan_token(17)) return true;
-    Token xsp;
-    while (true) {
-      xsp = jj_scanpos;
-      if (jj_3R_57()) { jj_scanpos = xsp; break; }
-    }
-    if (jj_scan_token(18)) return true;
+    if (jj_scan_token(80)) return true;
     return false;
   }
 
@@ -5746,16 +5762,15 @@ public class IDLParser{/*@bgen(jjtree)*/
     return false;
   }
 
-  private bool jj_3R_35() {
-    if (jj_scan_token(20)) return true;
-    if (jj_scan_token(25)) return true;
-    if (jj_3R_55()) return true;
-    Token xsp;
-    xsp = jj_scanpos;
-    if (jj_3R_58()) jj_scanpos = xsp;
-    xsp = jj_scanpos;
-    if (jj_3R_59()) jj_scanpos = xsp;
+  private bool jj_3R_34() {
+    if (jj_3R_56()) return true;
     if (jj_scan_token(17)) return true;
+    Token xsp;
+    while (true) {
+      xsp = jj_scanpos;
+      if (jj_3R_57()) { jj_scanpos = xsp; break; }
+    }
+    if (jj_scan_token(18)) return true;
     return false;
   }
 
@@ -5770,7 +5785,7 @@ public class IDLParser{/*@bgen(jjtree)*/
   }
 
   private bool jj_3R_70() {
-    if (jj_scan_token(78)) return true;
+    if (jj_scan_token(79)) return true;
     if (jj_3R_55()) return true;
     return false;
   }
@@ -5798,16 +5813,21 @@ public class IDLParser{/*@bgen(jjtree)*/
     return false;
   }
 
-  private bool jj_3R_157() {
-    if (jj_scan_token(76)) return true;
+  private bool jj_3R_35() {
+    if (jj_scan_token(20)) return true;
+    if (jj_scan_token(25)) return true;
+    if (jj_3R_55()) return true;
+    Token xsp;
+    xsp = jj_scanpos;
+    if (jj_3R_58()) jj_scanpos = xsp;
+    xsp = jj_scanpos;
+    if (jj_3R_59()) jj_scanpos = xsp;
+    if (jj_scan_token(17)) return true;
     return false;
   }
 
-  private bool jj_3R_36() {
-    if (jj_scan_token(25)) return true;
-    if (jj_3R_55()) return true;
-    if (jj_3R_60()) return true;
-    if (jj_scan_token(15)) return true;
+  private bool jj_3R_157() {
+    if (jj_scan_token(77)) return true;
     return false;
   }
 
@@ -5815,7 +5835,7 @@ public class IDLParser{/*@bgen(jjtree)*/
     Token xsp;
     xsp = jj_scanpos;
     if (jj_3R_157()) jj_scanpos = xsp;
-    if (jj_scan_token(77)) return true;
+    if (jj_scan_token(78)) return true;
     return false;
   }
 
@@ -5856,32 +5876,25 @@ public class IDLParser{/*@bgen(jjtree)*/
   }
 
   private bool jj_3R_108() {
-    if (jj_scan_token(74)) return true;
+    if (jj_scan_token(75)) return true;
+    return false;
+  }
+
+  private bool jj_3R_36() {
+    if (jj_scan_token(25)) return true;
+    if (jj_3R_55()) return true;
+    if (jj_3R_60()) return true;
+    if (jj_scan_token(15)) return true;
     return false;
   }
 
   private bool jj_3R_182() {
-    if (jj_scan_token(70)) return true;
-    return false;
-  }
-
-  private bool jj_3R_61() {
-    if (jj_scan_token(20)) return true;
+    if (jj_scan_token(71)) return true;
     return false;
   }
 
   private bool jj_3R_167() {
     if (jj_3R_177()) return true;
-    return false;
-  }
-
-  private bool jj_3R_37() {
-    Token xsp;
-    xsp = jj_scanpos;
-    if (jj_3R_61()) jj_scanpos = xsp;
-    if (jj_scan_token(25)) return true;
-    if (jj_3R_55()) return true;
-    if (jj_scan_token(15)) return true;
     return false;
   }
 
@@ -5907,7 +5920,7 @@ public class IDLParser{/*@bgen(jjtree)*/
   }
 
   private bool jj_3R_181() {
-    if (jj_scan_token(70)) return true;
+    if (jj_scan_token(71)) return true;
     return false;
   }
 
@@ -5922,7 +5935,7 @@ public class IDLParser{/*@bgen(jjtree)*/
   }
 
   private bool jj_3R_145() {
-    if (jj_scan_token(73)) return true;
+    if (jj_scan_token(74)) return true;
     Token xsp;
     xsp = jj_scanpos;
     if (jj_3R_182()) jj_scanpos = xsp;
@@ -5934,23 +5947,28 @@ public class IDLParser{/*@bgen(jjtree)*/
     return false;
   }
 
+  private bool jj_3R_61() {
+    if (jj_scan_token(20)) return true;
+    return false;
+  }
+
+  private bool jj_3R_37() {
+    Token xsp;
+    xsp = jj_scanpos;
+    if (jj_3R_61()) jj_scanpos = xsp;
+    if (jj_scan_token(25)) return true;
+    if (jj_3R_55()) return true;
+    if (jj_scan_token(15)) return true;
+    return false;
+  }
+
   private bool jj_3R_161() {
     if (jj_3R_141()) return true;
     return false;
   }
 
-  private bool jj_3_10() {
-    if (jj_3R_37()) return true;
-    return false;
-  }
-
   private bool jj_3R_160() {
     if (jj_3R_38()) return true;
-    return false;
-  }
-
-  private bool jj_3_9() {
-    if (jj_3R_36()) return true;
     return false;
   }
 
@@ -5991,15 +6009,59 @@ public class IDLParser{/*@bgen(jjtree)*/
   }
 
   private bool jj_3R_144() {
-    if (jj_scan_token(72)) return true;
+    if (jj_scan_token(73)) return true;
     Token xsp;
     xsp = jj_scanpos;
     if (jj_3R_181()) jj_scanpos = xsp;
     return false;
   }
 
+  private bool jj_3_10() {
+    if (jj_3R_37()) return true;
+    return false;
+  }
+
+  private bool jj_3R_178() {
+    if (jj_scan_token(70)) return true;
+    if (jj_scan_token(71)) return true;
+    return false;
+  }
+
+  private bool jj_3R_135() {
+    if (jj_3R_147()) return true;
+    return false;
+  }
+
+  private bool jj_3_9() {
+    if (jj_3R_36()) return true;
+    return false;
+  }
+
+  private bool jj_3R_134() {
+    if (jj_3R_155()) return true;
+    return false;
+  }
+
   private bool jj_3_8() {
     if (jj_3R_35()) return true;
+    return false;
+  }
+
+  private bool jj_3R_104() {
+    Token xsp;
+    xsp = jj_scanpos;
+    if (jj_3R_133()) {
+    jj_scanpos = xsp;
+    if (jj_3R_134()) {
+    jj_scanpos = xsp;
+    if (jj_3R_135()) return true;
+    }
+    }
+    return false;
+  }
+
+  private bool jj_3R_133() {
+    if (jj_3R_154()) return true;
     return false;
   }
 
@@ -6033,7 +6095,7 @@ public class IDLParser{/*@bgen(jjtree)*/
   public bool lookingAhead = false;
   private bool jj_semLA;
   private int jj_gen;
-  private int[] jj_la1 = new int[89];
+  private int[] jj_la1 = new int[91];
   static private uint[] jj_la1_0;
   static private uint[] jj_la1_1;
   static private uint[] jj_la1_2;
@@ -6045,16 +6107,16 @@ public class IDLParser{/*@bgen(jjtree)*/
       jj_la1_3_init();
    }
    private static void jj_la1_0_init() {
-      jj_la1_0 = new uint[] {0x6391000,0x6391001,0x0,0x10000,0x1000,0x6391000,0x300000,0x300000,0x400000,0x300000,0x1001000,0x1001000,0x800000,0x1000000,0x1000000,0x100000,0x400000,0x10000000,0x1001000,0xe1001000,0x4000000,0x400000,0x10000000,0x8000000,0x800000,0x800000,0xe1001000,0x60000000,0x0,0x800000,0x1000000,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x1000000,0x0,0x0,0x0,0x0,0x0,0x1000000,0x1000000,0x0,0x0,0x0,0x800000,0x0,0x0,0x0,0x0,0x0,0x1000000,0x1000000,0x0,0x0,0x0,0x800000,0x800000,0x0,0x0,0x0,0x0,0x800000,0x1000000,0x0,0x0,0x0,0x1000000,0x800000,0x0,0x0,0x800000,0x800000,0x1000000,0x0,0x0,0x0,0x0,0x0,0x0,0x0,};
+      jj_la1_0 = new uint[] {0x6391000,0x6391001,0x0,0x10000,0x1000,0x6391000,0x300000,0x300000,0x400000,0x300000,0x1001000,0x1001000,0x800000,0x1000000,0x1000000,0x100000,0x400000,0x10000000,0x1001000,0xe1001000,0x4000000,0x400000,0x10000000,0x8000000,0x800000,0x800000,0xe1001000,0x60000000,0x0,0x800000,0x0,0x1000000,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x1000000,0x0,0x0,0x0,0x0,0x0,0x1000000,0x1000000,0x0,0x0,0x0,0x800000,0x0,0x0,0x0,0x0,0x0,0x1000000,0x1000000,0x0,0x0,0x0,0x800000,0x800000,0x0,0x0,0x0,0x0,0x800000,0x1000000,0x0,0x0,0x0,0x1000000,0x800000,0x0,0x0,0x800000,0x800000,0x1000000,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,};
    }
    private static void jj_la1_1_init() {
-      jj_la1_1 = new uint[] {0x800c0008,0x800c0008,0x800c0008,0x0,0x0,0x800c0008,0x0,0x0,0x0,0x0,0xfffc0008,0xfffc0008,0x0,0x0,0x0,0x0,0x0,0x0,0xfffc0008,0xfffc0008,0x0,0x0,0x0,0x0,0x0,0x0,0xfffc0008,0x0,0x4,0x0,0x1e700000,0x20,0x40,0x80,0x300,0x300,0xc00,0xc00,0x7000,0x7000,0x8c00,0x8c00,0x30001,0x0,0x0,0x30000,0x30000,0x800c0000,0xfff00000,0x7ff00000,0x7fc00000,0x0,0x80000000,0x0,0x0,0x700000,0x1c00000,0x800000,0x1000000,0xfff00000,0xbc00000,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0xfff00000,0x0,0x0,0x0,0x7ff00000,0x0,0x4,0x4,0x0,0x0,0x7ff00000,0x0,0x0,0x0,0x0,0x0,0x0,0x0,};
+      jj_la1_1 = new uint[] {0x180008,0x180008,0x180008,0x0,0x0,0x180008,0x0,0x0,0x0,0x0,0xfff80008,0xfff80008,0x0,0x0,0x0,0x0,0x0,0x0,0xfff80008,0xfff80008,0x0,0x0,0x0,0x0,0x0,0x0,0xfff80008,0x0,0x4,0x0,0x10,0x3ce00000,0x40,0x80,0x100,0x600,0x600,0x1800,0x1800,0xe000,0xe000,0x11800,0x11800,0x60011,0x0,0x0,0x60010,0x60000,0x180000,0xffe00000,0xffe00000,0xff800000,0x0,0x0,0x0,0x0,0xe00000,0x3800000,0x1000000,0x2000000,0xffe00000,0x17800000,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0xffe00000,0x0,0x0,0x0,0xffe00000,0x0,0x4,0x4,0x0,0x0,0xffe00000,0x0,0x0,0x10,0x0,0x0,0x0,0x0,0x0,};
    }
    private static void jj_la1_2_init() {
-      jj_la1_2 = new uint[] {0x4011,0x4011,0x4011,0x0,0x0,0x4011,0x0,0x0,0x0,0x0,0x841f311,0x841f311,0x0,0x0,0x0,0x0,0x0,0x0,0x841f311,0x841f311,0x0,0x0,0x0,0x0,0x0,0x0,0x841f311,0x0,0x0,0x0,0x8200300,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0xf9800000,0x70000000,0x0,0x81000000,0x0,0x11,0x8600331,0x8600320,0x400000,0x200320,0x11,0x0,0x8000000,0x0,0x0,0x0,0x0,0x8600331,0x8000010,0xc,0xc,0xc,0x0,0x0,0x40,0x40,0x400,0x1000,0x0,0x8600331,0x8000,0x80000,0x100000,0x8410300,0x0,0x60000,0x60000,0x0,0x0,0x8400300,0x70000000,0x80000000,0x0,0x6000000,0x6000000,0x6000000,0x1000000,};
+      jj_la1_2 = new uint[] {0x8023,0x8023,0x8023,0x0,0x0,0x8023,0x0,0x0,0x0,0x0,0x2083e623,0x2083e623,0x0,0x0,0x0,0x0,0x0,0x0,0x2083e623,0x2083e623,0x0,0x0,0x0,0x0,0x0,0x0,0x2083e623,0x0,0x0,0x0,0x20000000,0x20400600,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0xe7000000,0xc0000000,0x0,0x6000000,0x0,0x23,0x20c00663,0x20c00640,0x800000,0x400640,0x23,0x0,0x20000000,0x0,0x0,0x0,0x0,0x20c00663,0x20000020,0x18,0x18,0x18,0x0,0x0,0x80,0x80,0x800,0x2000,0x0,0x20c00663,0x10000,0x100000,0x200000,0x20820600,0x0,0xc0000,0xc0000,0x0,0x0,0x20800600,0xc0000000,0x0,0x2000000,0x0,0x18000000,0x18000000,0x18000000,0x4000000,};
    }
    private static void jj_la1_3_init() {
-      jj_la1_3 = new uint[] {0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0xf,0x4,0x2,0x9,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x1,0x8,0x0,0x0,0x0,0x8,};
+      jj_la1_3 = new uint[] {0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x3f,0x11,0x8,0x26,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x1,0x6,0x6,0x20,0x0,0x0,0x0,0x20,};
    }
   private JJCalls[] jj_2_rtns = new JJCalls[20];
   private bool jj_rescan = false;
@@ -6066,7 +6128,7 @@ public class IDLParser{/*@bgen(jjtree)*/
     token = new Token();
     jj_ntk = -1;
     jj_gen = 0;
-    for (int i = 0; i < 89; i++) jj_la1[i] = -1;
+    for (int i = 0; i < 91; i++) jj_la1[i] = -1;
     for (int i = 0; i < jj_2_rtns.Length; i++) jj_2_rtns[i] = new JJCalls();
   }
 
@@ -6077,7 +6139,7 @@ public class IDLParser{/*@bgen(jjtree)*/
     jj_ntk = -1;
     jjtree.reset();
     jj_gen = 0;
-    for (int i = 0; i < 89; i++) jj_la1[i] = -1;
+    for (int i = 0; i < 91; i++) jj_la1[i] = -1;
     for (int i = 0; i < jj_2_rtns.Length; i++) jj_2_rtns[i] = new JJCalls();
   }
 
@@ -6087,7 +6149,7 @@ public class IDLParser{/*@bgen(jjtree)*/
     token = new Token();
     jj_ntk = -1;
     jj_gen = 0;
-    for (int i = 0; i < 89; i++) jj_la1[i] = -1;
+    for (int i = 0; i < 91; i++) jj_la1[i] = -1;
     for (int i = 0; i < jj_2_rtns.Length; i++) jj_2_rtns[i] = new JJCalls();
   }
 
@@ -6098,7 +6160,7 @@ public class IDLParser{/*@bgen(jjtree)*/
     jj_ntk = -1;
     jjtree.reset();
     jj_gen = 0;
-    for (int i = 0; i < 89; i++) jj_la1[i] = -1;
+    for (int i = 0; i < 91; i++) jj_la1[i] = -1;
     for (int i = 0; i < jj_2_rtns.Length; i++) jj_2_rtns[i] = new JJCalls();
   }
 
@@ -6107,7 +6169,7 @@ public class IDLParser{/*@bgen(jjtree)*/
     token = new Token();
     jj_ntk = -1;
     jj_gen = 0;
-    for (int i = 0; i < 89; i++) jj_la1[i] = -1;
+    for (int i = 0; i < 91; i++) jj_la1[i] = -1;
     for (int i = 0; i < jj_2_rtns.Length; i++) jj_2_rtns[i] = new JJCalls();
   }
 
@@ -6117,7 +6179,7 @@ public class IDLParser{/*@bgen(jjtree)*/
     jj_ntk = -1;
     jjtree.reset();
     jj_gen = 0;
-    for (int i = 0; i < 89; i++) jj_la1[i] = -1;
+    for (int i = 0; i < 91; i++) jj_la1[i] = -1;
     for (int i = 0; i < jj_2_rtns.Length; i++) jj_2_rtns[i] = new JJCalls();
   }
 
@@ -6227,15 +6289,15 @@ public class IDLParser{/*@bgen(jjtree)*/
 
   public ParseException generateParseException() {
     jj_expentries.Clear();
-    bool[] la1tokens = new bool[100];
-    for (int i = 0; i < 100; i++) {
+    bool[] la1tokens = new bool[102];
+    for (int i = 0; i < 102; i++) {
       la1tokens[i] = false;
     }
     if (jj_kind >= 0) {
       la1tokens[jj_kind] = true;
       jj_kind = -1;
     }
-    for (int i = 0; i < 89; i++) {
+    for (int i = 0; i < 91; i++) {
       if (jj_la1[i] == jj_gen) {
         for (int j = 0; j < 32; j++) {
           if ((jj_la1_0[i] & (1<<j)) != 0) {
@@ -6253,7 +6315,7 @@ public class IDLParser{/*@bgen(jjtree)*/
         }
       }
     }
-    for (int i = 0; i < 100; i++) {
+    for (int i = 0; i < 102; i++) {
       if (la1tokens[i]) {
         jj_expentry = new int[1];
         jj_expentry[0] = i;

@@ -4,15 +4,15 @@ using System;
 public class IDLParserConstants {
 
   int EOF = 0;
-  public const int ID = 91;
-  public const int OCTALINT = 92;
-  public const int DECIMALINT = 93;
-  public const int HEXADECIMALINT = 94;
-  public const int FLOATONE = 95;
-  public const int FLOATTWO = 96;
-  public const int CHARACTER = 97;
-  public const int STRING = 98;
-  public const int FIXED = 99;
+  public const int ID = 93;
+  public const int OCTALINT = 94;
+  public const int DECIMALINT = 95;
+  public const int HEXADECIMALINT = 96;
+  public const int FLOATONE = 97;
+  public const int FLOATTWO = 98;
+  public const int CHARACTER = 99;
+  public const int STRING = 100;
+  public const int FIXED = 101;
 
   public const int DEFAULT = 0;
   public const int IN_LINE_COMMENT = 1;
@@ -55,6 +55,7 @@ public class IDLParserConstants {
     "\")\"",
     "\"in\"",
     "\"const\"",
+    "\"NaN\"",
     "\"=\"",
     "\"|\"",
     "\"^\"",
@@ -107,6 +108,7 @@ public class IDLParserConstants {
     "\"fixed\"",
     "\"ValueBase\"",
     "\"L\"",
+    "\"Infinity\"",
     "\".\"",
     "\"d\"",
     "\"D\"",
