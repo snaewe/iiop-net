@@ -723,6 +723,22 @@ namespace Ch.Elca.Iiop.Cdr {
                 CheckChunkInfoAtEnd((ChunkInfo) enumerator.Current); // check if chunk can end here!
                 ((ChunkInfo) enumerator.Current).IsFinished = true;
             }
+            if (enumerator.MoveNext()) {
+                // was a nested value, continue chunk if no val type follows ...
+                ChunkInfo continuation = (ChunkInfo) enumerator.Current;
+                if (continuation.IsContinuationExpected) {
+                    // check for non-val chunk start ...
+                    m_baseStream.StartPeeking(); // switch to peek mode
+                    int tag = m_baseStream.ReadLong();
+                    m_baseStream.StopPeeking(); // end peek mode
+                    if ((tag > 0) && (tag < ValueBaseStream.MIN_VALUE_TAG)) {
+                        // a chunk starts here
+                        m_baseStream.ReadLong(); // read start chunk                        
+                        continuation.SetContinuationLength(tag); // set chunk length
+                        continuation.IsContinuationExpected = false;
+                    }
+                }
+            }
         }
 
         /// <summary>checks, if a chunk can end at the specified position</summary>
