@@ -33,14 +33,14 @@ the IIOPChannel and the CLS to IDL generator must be configured.
 <BR> <BR>
 Setting up such a mapping requires the following steps:
 <OL>
-<LI>Create a customMapping configuration file</LI>
+<LI>Create a custom mapping configuration file</LI>
 <LI>Install mapping in the application</LI>
 <LI>Implement needed <code>InstanceMapper</code>'s.</LI>
 <LI>implement CORBA value types</LI>
 <LI>Use mapping file with compiler</LI>
-</OL>
+</OL><p/>
 
-Create a customMapping configuration file
+Create a custom mapping configuration file
 <BR><BR>
 This mapping configuration file describes the custom mapping for the IIOPChannel and 
 the IDL to CLS compiler.
@@ -58,10 +58,10 @@ This file contains a set of mapping descriptions of the following form:
 </pre>
 <p/>
 
-The idlTypeName and the idlTypeAssembly specifies, which type in which assembly 
-represents the idltype (in CLS) to which / from which should be mapped.
+The idlTypeName and the idlTypeAssembly entries specify, which type in which assembly 
+represents the IDL type (in CLS) to which / from which should be mapped.
 <BR>
-The clsType specifies the CLS type to which / from which should be mapped.
+The clsType entry specifies the CLS type to which / from which should be mapped.
 <BR>
 The optional customMapper part describes, which type maps instances from the IDL type
 to instances of the CLS type and vice versa.
@@ -81,7 +81,9 @@ Example:
             &lt;idlTypeName&gt;java.util.ArrayList&lt;idlTypeName&gt;
             &lt;idlTypeAssembly&gt;javaCollections&lt;idlTypeAssembly&gt;
             &lt;clsType&gt;System.Collections.ArrayList,mscorlib&lt;clsType&gt;
-            &lt;customMapper&gt;Ch.Elca.Iiop.JavaCollectionMappers.ArrayListMapper,customCollectionMappings&lt;customMapper&gt;
+            &lt;customMapper&gt;
+            Ch.Elca.Iiop.JavaCollectionMappers.ArrayListMapper,customCollectionMappings
+            &lt;customMapper&gt;
         &lt;mapping&gt;
     
     &lt;mappings&gt;
@@ -122,12 +124,12 @@ This interfaces is defined as follows:
      }
 </pre>
 <p/>
-The CreateIdlForClsInstance method takes a CLS instance and returns an instance of the
+The CreateIdlForClsInstance method takes a CLS instance, and returns an instance of the
 CLS type representing the IDL type. <BR>
 The CreateClsForIdlInstance method takes an instance of the CLS type representing the IDL type,
 and returns an instance of the CLS type.
 <BR><BR>
-The instance mapper for the <code>ArrayList</code> example can be found in 
+The implementation of the instance mapper for the <code>ArrayList</code> example can be found in 
 <code>%IIOPNet%\MappingPlugin\java\InstanceMappers.cs</code>.
 
 <BR><BR>
@@ -145,7 +147,7 @@ The implementation for the <code>ArrayList</code> example can be found in
 Use mapping file with compiler
 <BR><BR>
 The IDL to CLS compiler needs to replace the IDL type in the custom mapping with the target CLS type
-in methods parameters, properties and fields.<BR>
+in method parameters, properties and fields.<BR>
 The information, needed to accomplish this, is given to the compiler with the <code>-c</code> option:
 <BR>
 <code>IDLToCLSCompiler.exe -c mappingFile</code>
@@ -161,13 +163,13 @@ A complete example can be found in:<BR>
 <BR> <BR>
 Setting up such a mapping requires the following steps:
 <OL>
-<LI>Create a customMapping configuration file for the IIOPChannel</LI>
-<LI>Create a customMapping configuration file for the CLS to IDL generator</LI>
+<LI>Create a custom mapping configuration file for the IIOPChannel</LI>
+<LI>Create a custom mapping configuration file for the CLS to IDL generator</LI>
 <LI>Install the mapping in the application</LI>
 <LI>Implement needed <code>InstanceMapper</code>'s.</LI>
 <LI>implement CORBA value types</LI>
 <LI>Use mapping file with generator</LI>
-</OL>
+</OL><p/>
 
 Steps 1, 3, 4 and 5 doesn't differ from setting up a mapping for a .NET client. For more information see section
 <a href="#clientMap">setting up a mapping for a .NET client</a>.
@@ -190,17 +192,17 @@ This file contains a set of mapping descriptions of the following form:
 </pre>
 <p/>
 
-The clsType specifies the CLS type to which / from which should be mapped.
+The clsType entry specifies the CLS type to which / from which should be mapped.
 <BR>
-The idlTypeName and the idlTypeAssembly specifies, which type in which assembly 
+The idlTypeName and the idlTypeAssembly entries specify, which type in which assembly 
 represents the idltype (in CLS) to which / from which should be mapped.
 <BR>
 The idlFile specifies the location of the IDL file containing the IDL definition
 of the target IDL type.
 
 <BR><BR>
-Hint: The following XML schema's describes the format of this configuration file: <BR>
-<code>%IIOPNet%\IIOPChannel\MappingPluginSchema.xsd</code> and
+Hint: The following XML schema describes the format of this configuration file: <BR>
+<code>%IIOPNet%\CLSToIDLGenerator\GeneratorMappingPluginSchema.xsd</code>.
 
 <BR><BR>
 Example:
