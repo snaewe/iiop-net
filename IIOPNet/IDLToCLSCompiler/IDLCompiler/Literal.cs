@@ -235,12 +235,16 @@ namespace parser {
         #region IFields
         
         private Char m_value;
+        
+        /// <summary>constructed from a wide char literal?</summary>
+        private bool m_isWide;
 
         #endregion IFields
         #region IConstructors
     
-        public CharLiteral(Char val) {
+        public CharLiteral(Char val, bool isWide) {
             m_value = val;
+            m_isWide = isWide;
         }
 
         #endregion IConstructors
@@ -290,12 +294,16 @@ namespace parser {
         #region IFields
         
         private String m_value;
+        
+        /// <summary>constructed from a wide string literal?</summary>
+        private bool m_isWide;
 
         #endregion IFields
         #region IConstructors
     
-        public StringLiteral(String val) {
+        public StringLiteral(String val, bool isWide) {
             m_value = val;
+            m_isWide = isWide;
         }
 
         #endregion IConstructors

@@ -4,13 +4,14 @@ using System;
 public class IDLParserConstants {
 
   int EOF = 0;
-  public const int ID = 93;
-  public const int OCTALINT = 94;
-  public const int DECIMALINT = 95;
-  public const int HEXADECIMALINT = 96;
-  public const int FLOATONE = 97;
-  public const int FLOATTWO = 98;
-  public const int CHARACTER = 99;
+  public const int ID = 92;
+  public const int OCTALINT = 93;
+  public const int DECIMALINT = 94;
+  public const int HEXADECIMALINT = 95;
+  public const int FLOATONE = 96;
+  public const int FLOATTWO = 97;
+  public const int CHARACTER = 98;
+  public const int WIDECHARACTER = 99;
   public const int STRING = 100;
   public const int WIDESTRING = 101;
   public const int REPIDVAL_STRING = 102;
@@ -109,7 +110,6 @@ public class IDLParserConstants {
     "\"context\"",
     "\"fixed\"",
     "\"ValueBase\"",
-    "\"L\"",
     "\"Infinity\"",
     "\".\"",
     "\"d\"",
@@ -121,6 +121,7 @@ public class IDLParserConstants {
     "<FLOATONE>",
     "<FLOATTWO>",
     "<CHARACTER>",
+    "<WIDECHARACTER>",
     "<STRING>",
     "<WIDESTRING>",
     "<REPIDVAL_STRING>",

@@ -6,6 +6,7 @@ namespace parser {
 
 using symboltable;
 using System.Collections;
+using System.Globalization;
 
 public class IDLParser{/*@bgen(jjtree)*/
   protected JJTIDLParserState jjtree = new JJTIDLParserState();
@@ -31,6 +32,32 @@ public class IDLParser{/*@bgen(jjtree)*/
         private ASTmodule m_modForPrefix = null;
         // stores reference to definition for the module node inserted for a pragma prefix (if any)
         private ASTdefinition m_defForPrefix = null;
+
+
+        private Char ParseCharLiteral(String charLiteral) {
+            if (!charLiteral.StartsWith("\\")) {
+                return charLiteral[0];
+            } else if (charLiteral.StartsWith("\\0x")) {
+                Int32 charValHex = Int32.Parse(charLiteral.Substring(3), NumberStyles.AllowHexSpecifier);
+                return Convert.ToChar(charValHex);
+            } else if (charLiteral.Equals("\\0")) {
+                return Convert.ToChar(0);
+            } else if (!charLiteral.StartsWith("\\0")) {
+                Int32 charValDec = Int32.Parse(charLiteral.Substring(1));
+                return Convert.ToChar(charValDec);
+            } else {
+                throw new NotSupportedException("unsupported escape in character literal: " + charLiteral);
+            }
+        }
+
+        private Char ParseWideCharLiteral(String wideCharLiteral) {
+            if (!wideCharLiteral.StartsWith("\\u")) {
+                return ParseCharLiteral(wideCharLiteral);
+            } else {
+                Int32 charVal = Int32.Parse(wideCharLiteral.Substring(2), NumberStyles.AllowHexSpecifier);
+                return Convert.ToChar(charVal);
+            }
+        }
 
   public String repIdVal() {
   Token repIdValToken; String result;
@@ -2156,13 +2183,13 @@ public class IDLParser{/*@bgen(jjtree)*/
       case 50:
       case 88:
       case 89:
-      case 90:
       case IDLParserConstants.OCTALINT:
       case IDLParserConstants.DECIMALINT:
       case IDLParserConstants.HEXADECIMALINT:
       case IDLParserConstants.FLOATONE:
       case IDLParserConstants.FLOATTWO:
       case IDLParserConstants.CHARACTER:
+      case IDLParserConstants.WIDECHARACTER:
       case IDLParserConstants.STRING:
       case IDLParserConstants.WIDESTRING:
       case IDLParserConstants.FIXED:
@@ -2220,7 +2247,7 @@ public class IDLParser{/*@bgen(jjtree)*/
         litVal = string_literal();
                               jjtree.closeNodeScope(jjtn000, true);
                               jjtc000 = false;
-                              jjtn000.setLitVal(new StringLiteral((String)litVal));
+                              jjtn000.setLitVal(new StringLiteral((String)litVal, false));
         break;
       default:
         jj_la1[45] = jj_gen;
@@ -2228,14 +2255,14 @@ public class IDLParser{/*@bgen(jjtree)*/
           litVal = wide_string_literal();
                                    jjtree.closeNodeScope(jjtn000, true);
                                    jjtc000 = false;
-                                   jjtn000.setLitVal(new StringLiteral((String)litVal));
+                                   jjtn000.setLitVal(new StringLiteral((String)litVal, true));
         } else {
           switch ((jj_ntk==-1)?jj_ntk_calc():jj_ntk) {
           case IDLParserConstants.CHARACTER:
             litVal = character_literal();
                                  jjtree.closeNodeScope(jjtn000, true);
                                  jjtc000 = false;
-                                 jjtn000.setLitVal(new CharLiteral((Char)litVal));
+                                 jjtn000.setLitVal(new CharLiteral((Char)litVal, false));
             break;
           default:
             jj_la1[46] = jj_gen;
@@ -2243,10 +2270,10 @@ public class IDLParser{/*@bgen(jjtree)*/
               litVal = wide_character_literal();
                                       jjtree.closeNodeScope(jjtn000, true);
                                       jjtc000 = false;
-                                      jjtn000.setLitVal(new CharLiteral((Char)litVal));
+                                      jjtn000.setLitVal(new CharLiteral((Char)litVal, true));
             } else {
               switch ((jj_ntk==-1)?jj_ntk_calc():jj_ntk) {
-              case 90:
+              case 89:
               case IDLParserConstants.FIXED:
                 litVal = fixed_pt_literal();
                                 jjtree.closeNodeScope(jjtn000, true);
@@ -2254,7 +2281,7 @@ public class IDLParser{/*@bgen(jjtree)*/
                                 {if (true) throw new NotSupportedException("fixed point literal not yet supported");}
                 break;
               case 36:
-              case 89:
+              case 88:
               case IDLParserConstants.FLOATONE:
               case IDLParserConstants.FLOATTWO:
                 litVal = floating_pt_literal();
@@ -4624,26 +4651,16 @@ public class IDLParser{/*@bgen(jjtree)*/
   public char character_literal() {
   Token charToken;
     charToken = jj_consume_token(IDLParserConstants.CHARACTER);
-                                                                // TBD: not correct: escaped chars
-                                                                if (charToken.image.IndexOf("\\") >= 0) {
-                                                                    {if (true) throw new NotSupportedException("\\ not yet supported in char literals");}
-                                                                }
-                                                                // char token is of form: 'x'
-                                                                char val = charToken.image[1];
-                                                                {if (true) return val;}
+          // char is enclosed by ''
+          {if (true) return ParseCharLiteral(charToken.image.Substring(1, charToken.image.Length - 2));}
     throw new Error("Missing return statement in function");
   }
 
   public char wide_character_literal() {
   Token charToken;
-    jj_consume_token(88);
-    charToken = jj_consume_token(IDLParserConstants.CHARACTER);
-                                                                 // TBD: not correct: escaped chars
-                                                                if (charToken.image.IndexOf("\\") >= 0) {
-                                                                    {if (true) throw new NotSupportedException("\\ not yet supported in char literals");}
-                                                                }
-                                                                 char val = charToken.image[1];
-                                                                 {if (true) return val;}
+    charToken = jj_consume_token(IDLParserConstants.WIDECHARACTER);
+          // wide char is prepended by a L and enclosed by ''
+          {if (true) return ParseWideCharLiteral(charToken.image.Substring(2, charToken.image.Length - 3));}
     throw new Error("Missing return statement in function");
   }
 
@@ -4675,8 +4692,8 @@ public class IDLParser{/*@bgen(jjtree)*/
       jj_consume_token(36);
       {if (true) return Double.NaN;}
       break;
-    case 89:
-      jj_consume_token(89);
+    case 88:
+      jj_consume_token(88);
       {if (true) return Double.PositiveInfinity;}
       break;
     default:
@@ -4692,7 +4709,7 @@ public class IDLParser{/*@bgen(jjtree)*/
   Token fixedLiteral;
     if (jj_2_20(2147483647)) {
       fixedLiteral = jj_consume_token(IDLParserConstants.FIXED);
-      jj_consume_token(90);
+      jj_consume_token(89);
       switch ((jj_ntk==-1)?jj_ntk_calc():jj_ntk) {
       case IDLParserConstants.FIXED:
         jj_consume_token(IDLParserConstants.FIXED);
@@ -4703,11 +4720,11 @@ public class IDLParser{/*@bgen(jjtree)*/
         break;
       }
       switch ((jj_ntk==-1)?jj_ntk_calc():jj_ntk) {
+      case 90:
+        jj_consume_token(90);
+        break;
       case 91:
         jj_consume_token(91);
-        break;
-      case 92:
-        jj_consume_token(92);
         break;
       default:
         jj_la1[88] = jj_gen;
@@ -4717,15 +4734,15 @@ public class IDLParser{/*@bgen(jjtree)*/
       }
     } else {
       switch ((jj_ntk==-1)?jj_ntk_calc():jj_ntk) {
-      case 90:
-        fixedLiteral = jj_consume_token(90);
+      case 89:
+        fixedLiteral = jj_consume_token(89);
         jj_consume_token(IDLParserConstants.FIXED);
         switch ((jj_ntk==-1)?jj_ntk_calc():jj_ntk) {
+        case 90:
+          jj_consume_token(90);
+          break;
         case 91:
           jj_consume_token(91);
-          break;
-        case 92:
-          jj_consume_token(92);
           break;
         default:
           jj_la1[89] = jj_gen;
@@ -4737,11 +4754,11 @@ public class IDLParser{/*@bgen(jjtree)*/
       case IDLParserConstants.FIXED:
         fixedLiteral = jj_consume_token(IDLParserConstants.FIXED);
         switch ((jj_ntk==-1)?jj_ntk_calc():jj_ntk) {
+        case 90:
+          jj_consume_token(90);
+          break;
         case 91:
           jj_consume_token(91);
-          break;
-        case 92:
-          jj_consume_token(92);
           break;
         default:
           jj_la1[90] = jj_gen;
@@ -4905,78 +4922,6 @@ public class IDLParser{/*@bgen(jjtree)*/
     finally { jj_save(19, xla); }
   }
 
-  private bool jj_3R_123() {
-    if (jj_3R_147()) return true;
-    return false;
-  }
-
-  private bool jj_3R_74() {
-    if (jj_3R_97()) return true;
-    return false;
-  }
-
-  private bool jj_3R_109() {
-    if (jj_3R_60()) return true;
-    return false;
-  }
-
-  private bool jj_3R_95() {
-    if (jj_scan_token(52)) return true;
-    if (jj_3R_113()) return true;
-    return false;
-  }
-
-  private bool jj_3R_94() {
-    if (jj_3R_112()) return true;
-    return false;
-  }
-
-  private bool jj_3R_97() {
-    if (jj_scan_token(22)) return true;
-    if (jj_3R_123()) return true;
-    return false;
-  }
-
-  private bool jj_3R_93() {
-    if (jj_3R_111()) return true;
-    return false;
-  }
-
-  private bool jj_3R_92() {
-    if (jj_3R_110()) return true;
-    return false;
-  }
-
-  private bool jj_3R_68() {
-    Token xsp;
-    xsp = jj_scanpos;
-    if (jj_3R_91()) {
-    jj_scanpos = xsp;
-    if (jj_3R_92()) {
-    jj_scanpos = xsp;
-    if (jj_3R_93()) {
-    jj_scanpos = xsp;
-    if (jj_3R_94()) {
-    jj_scanpos = xsp;
-    if (jj_3R_95()) return true;
-    }
-    }
-    }
-    }
-    return false;
-  }
-
-  private bool jj_3R_91() {
-    if (jj_scan_token(51)) return true;
-    if (jj_3R_109()) return true;
-    return false;
-  }
-
-  private bool jj_3R_129() {
-    if (jj_3R_151()) return true;
-    return false;
-  }
-
   private bool jj_3R_128() {
     if (jj_3R_150()) return true;
     return false;
@@ -5024,12 +4969,6 @@ public class IDLParser{/*@bgen(jjtree)*/
     return false;
   }
 
-  private bool jj_3_20() {
-    if (jj_scan_token(IDLParserConstants.FIXED)) return true;
-    if (jj_scan_token(90)) return true;
-    return false;
-  }
-
   private bool jj_3R_75() {
     if (jj_3R_98()) return true;
     return false;
@@ -5041,6 +4980,12 @@ public class IDLParser{/*@bgen(jjtree)*/
       xsp = jj_scanpos;
       if (jj_3R_75()) { jj_scanpos = xsp; break; }
     }
+    return false;
+  }
+
+  private bool jj_3_20() {
+    if (jj_scan_token(IDLParserConstants.FIXED)) return true;
+    if (jj_scan_token(89)) return true;
     return false;
   }
 
@@ -5122,8 +5067,7 @@ public class IDLParser{/*@bgen(jjtree)*/
   }
 
   private bool jj_3R_40() {
-    if (jj_scan_token(88)) return true;
-    if (jj_scan_token(IDLParserConstants.CHARACTER)) return true;
+    if (jj_scan_token(IDLParserConstants.WIDECHARACTER)) return true;
     return false;
   }
 
@@ -6116,8 +6060,80 @@ public class IDLParser{/*@bgen(jjtree)*/
     return false;
   }
 
+  private bool jj_3R_123() {
+    if (jj_3R_147()) return true;
+    return false;
+  }
+
+  private bool jj_3R_74() {
+    if (jj_3R_97()) return true;
+    return false;
+  }
+
+  private bool jj_3R_109() {
+    if (jj_3R_60()) return true;
+    return false;
+  }
+
+  private bool jj_3R_95() {
+    if (jj_scan_token(52)) return true;
+    if (jj_3R_113()) return true;
+    return false;
+  }
+
+  private bool jj_3R_94() {
+    if (jj_3R_112()) return true;
+    return false;
+  }
+
+  private bool jj_3R_97() {
+    if (jj_scan_token(22)) return true;
+    if (jj_3R_123()) return true;
+    return false;
+  }
+
+  private bool jj_3R_93() {
+    if (jj_3R_111()) return true;
+    return false;
+  }
+
+  private bool jj_3R_92() {
+    if (jj_3R_110()) return true;
+    return false;
+  }
+
+  private bool jj_3R_68() {
+    Token xsp;
+    xsp = jj_scanpos;
+    if (jj_3R_91()) {
+    jj_scanpos = xsp;
+    if (jj_3R_92()) {
+    jj_scanpos = xsp;
+    if (jj_3R_93()) {
+    jj_scanpos = xsp;
+    if (jj_3R_94()) {
+    jj_scanpos = xsp;
+    if (jj_3R_95()) return true;
+    }
+    }
+    }
+    }
+    return false;
+  }
+
+  private bool jj_3R_91() {
+    if (jj_scan_token(51)) return true;
+    if (jj_3R_109()) return true;
+    return false;
+  }
+
+  private bool jj_3R_129() {
+    if (jj_3R_151()) return true;
+    return false;
+  }
+
   public IDLParserTokenManager token_source;
-  JavaCharStream jj_input_stream;
+  SimpleCharStream jj_input_stream;
   public Token token, jj_nt;
   private int jj_ntk;
   private Token jj_scanpos, jj_lastpos;
@@ -6143,17 +6159,17 @@ public class IDLParser{/*@bgen(jjtree)*/
       jj_la1_1 = new uint[] {0x0,0x180008,0x180008,0x180008,0x0,0x0,0x180008,0x0,0x0,0x0,0x0,0xfff80008,0xfff80008,0x0,0x0,0x0,0x0,0x0,0x0,0xfff80008,0xfff80008,0x0,0x0,0x0,0x0,0x0,0x0,0xfff80008,0x0,0x4,0x0,0x10,0x3ce00000,0x40,0x80,0x100,0x600,0x600,0x1800,0x1800,0xe000,0xe000,0x11800,0x11800,0x60011,0x0,0x0,0x60010,0x60000,0x180000,0xffe00000,0xffe00000,0xff800000,0x0,0x0,0x0,0x0,0xe00000,0x3800000,0x1000000,0x2000000,0xffe00000,0x17800000,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0xffe00000,0x0,0x0,0x0,0xffe00000,0x0,0x4,0x4,0x0,0x0,0xffe00000,0x0,0x0,0x10,0x0,0x0,0x0,0x0,0x0,};
    }
    private static void jj_la1_2_init() {
-      jj_la1_2 = new uint[] {0x0,0x8023,0x8023,0x8023,0x0,0x0,0x8023,0x0,0x0,0x0,0x0,0x2083e623,0x2083e623,0x0,0x0,0x0,0x0,0x0,0x0,0x2083e623,0x2083e623,0x0,0x0,0x0,0x0,0x0,0x0,0x2083e623,0x0,0x0,0x0,0x20000000,0x20400600,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0xe7000000,0xc0000000,0x0,0x6000000,0x0,0x23,0x20c00663,0x20c00640,0x800000,0x400640,0x23,0x0,0x20000000,0x0,0x0,0x0,0x0,0x20c00663,0x20000020,0x18,0x18,0x18,0x0,0x0,0x80,0x80,0x800,0x2000,0x0,0x20c00663,0x10000,0x100000,0x200000,0x20820600,0x0,0xc0000,0xc0000,0x0,0x0,0x20800600,0xc0000000,0x0,0x2000000,0x0,0x18000000,0x18000000,0x18000000,0x4000000,};
+      jj_la1_2 = new uint[] {0x0,0x8023,0x8023,0x8023,0x0,0x0,0x8023,0x0,0x0,0x0,0x0,0x1083e623,0x1083e623,0x0,0x0,0x0,0x0,0x0,0x0,0x1083e623,0x1083e623,0x0,0x0,0x0,0x0,0x0,0x0,0x1083e623,0x0,0x0,0x0,0x10000000,0x10400600,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0xf3000000,0xe0000000,0x0,0x3000000,0x0,0x23,0x10c00663,0x10c00640,0x800000,0x400640,0x23,0x0,0x10000000,0x0,0x0,0x0,0x0,0x10c00663,0x10000020,0x18,0x18,0x18,0x0,0x0,0x80,0x80,0x800,0x2000,0x0,0x10c00663,0x10000,0x100000,0x200000,0x10820600,0x0,0xc0000,0xc0000,0x0,0x0,0x10800600,0xe0000000,0x0,0x1000000,0x0,0xc000000,0xc000000,0xc000000,0x2000000,};
    }
    private static void jj_la1_3_init() {
-      jj_la1_3 = new uint[] {0x50,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0xbf,0x11,0x8,0x86,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x1,0x6,0x6,0x80,0x0,0x0,0x0,0x80,};
+      jj_la1_3 = new uint[] {0x50,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0xbf,0x10,0x4,0x83,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x3,0x3,0x80,0x0,0x0,0x0,0x80,};
    }
   private JJCalls[] jj_2_rtns = new JJCalls[20];
   private bool jj_rescan = false;
   private int jj_gc = 0;
 
   public IDLParser(System.IO.Stream stream) {
-    jj_input_stream = new JavaCharStream(stream, 1, 1);
+    jj_input_stream = new SimpleCharStream(stream, 1, 1);
     token_source = new IDLParserTokenManager(jj_input_stream);
     token = new Token();
     jj_ntk = -1;
@@ -6174,7 +6190,7 @@ public class IDLParser{/*@bgen(jjtree)*/
   }
 
   public IDLParser(System.IO.StreamReader stream) {
-    jj_input_stream = new JavaCharStream(stream, 1, 1);
+    jj_input_stream = new SimpleCharStream(stream, 1, 1);
     token_source = new IDLParserTokenManager(jj_input_stream);
     token = new Token();
     jj_ntk = -1;
