@@ -2070,12 +2070,15 @@ public class IDLParser{/*@bgen(jjtree)*/
     case 44:
       jj_consume_token(44);
         {if (true) return UnaryOps.UnaryMinus;}
+      break;
     case 43:
       jj_consume_token(43);
         {if (true) return UnaryOps.UnaryPlus;}
+      break;
     case 48:
       jj_consume_token(48);
         {if (true) return UnaryOps.UnaryNegate;}
+      break;
     default:
       jj_la1[42] = jj_gen;
       jj_consume_token(-1);
@@ -2249,9 +2252,11 @@ public class IDLParser{/*@bgen(jjtree)*/
     case 49:
       jj_consume_token(49);
            {if (true) return true;}
+      break;
     case 50:
       jj_consume_token(50);
             {if (true) return false;}
+      break;
     default:
       jj_la1[47] = jj_gen;
       jj_consume_token(-1);
@@ -4483,7 +4488,7 @@ public class IDLParser{/*@bgen(jjtree)*/
                                                                         octVal = octVal.Substring(0, octVal.Length-1); // remove u, U, L, l
                                                                 }
                                                                 // TODO: // return Long.Parse(octVal, 8);
-                                                                {if (true) throw new NotSupportedException("octal constants are not yet supported");}
+                                                                throw new NotSupportedException("octal constants are not yet supported");
     case IDLParserConstants.DECIMALINT:
       intToken = jj_consume_token(IDLParserConstants.DECIMALINT);
                                                                 String val = intToken.image;
@@ -4492,6 +4497,7 @@ public class IDLParser{/*@bgen(jjtree)*/
                                                                         val = val.Substring(0, val.Length-1); // remove u, U, L, l
                                                                 }
                                                                 {if (true) return System.Int64.Parse(val);}
+      break;
     case IDLParserConstants.HEXADECIMALINT:
       intToken = jj_consume_token(IDLParserConstants.HEXADECIMALINT);
                                                         String hexVal = intToken.image;
@@ -4502,6 +4508,7 @@ public class IDLParser{/*@bgen(jjtree)*/
                                                                         hexVal = hexVal.Substring(0, hexVal.Length-1); // remove u, U, L, l
                                                                 }
                                                                 {if (true) return System.Int64.Parse(hexVal, System.Globalization.NumberStyles.AllowHexSpecifier);}
+      break;
     default:
       jj_la1[83] = jj_gen;
       jj_consume_token(-1);
