@@ -166,24 +166,15 @@ namespace Ch.Elca.Iiop.Cdr {
         public bool IsBorderCrossed() {
             return (GetBytesAvailable() < 0);
         }
+        
+        public bool IsBorderReached() {
+        	return (GetBytesAvailable() == 0);
+        }
 
         public int GetBytesAvailable() {
             return (int) (m_streamStartPos + m_chunkLength - m_stream.GetPosition());
         }
-
         
-        /// <summary>
-        /// gets the nr of bytes read across the chunk border (if read accross)
-        /// </summary>
-        /// <returns>nr of bytes after border, if border was crossed; 0 if border not crossed</returns>
-        internal uint GetNrOfBytesReadPassBorder() {
-            if (!IsBorderCrossed()) {
-                return 0;
-            } else {
-                return (uint) (m_stream.GetPosition() - (m_streamStartPos + m_chunkLength));
-            }
-        }
-
         #endregion IMethods
 
     }
@@ -433,10 +424,6 @@ namespace Ch.Elca.Iiop.Cdr {
 
         public int ReadLong() {
             int result = m_baseStream.ReadLong();
-            // if chunking is enabled and chunk is finished just before reading this long, 
-            // check, if this long is a legal chunk start, if yes -> update chunkinfo's
-            CheckChunkStart(result); 
-            // check if chunk border is crossed, if chunking is enabled
             CheckPosition();
             return result;
         }
@@ -474,35 +461,6 @@ namespace Ch.Elca.Iiop.Cdr {
 
         #region value-type specific operation
 
-        /// <summary>
-        /// checks, if chunk is finished just before reading possibleStart.
-        /// If yes, checks if possible start is a legal start for a new chunk and
-        /// updates chunk-info's accordingly
-        /// </summary>
-        /// <param name="possibleStart"></param>
-        private void CheckChunkStart(int possibleStart) {
-            if (!IsChunkActive()) {
-                return;
-            }
-            // get active chunk
-            ChunkInfo info = (ChunkInfo)m_chunkStack.Peek();
-            uint passedBy = info.GetNrOfBytesReadPassBorder();
-            if ((passedBy >= 4) && (passedBy < 8)) { // read a long, with alignement max 7 over border, at least 4
-                // possibleStart must be a chunk-start, because read accross border with last
-                // read-long.
-                if (possibleStart < 0) {
-                    // end tag
-                    // TODO: What to do here?
-                } else if ((possibleStart > 0) && (possibleStart < MIN_VALUE_TAG)) {
-                    info.IsContinuationExpected = false; // set chunk to active
-                    info.SetContinuationLength(possibleStart); // set chunk to start after possible start and contains possibleStart bytes
-                } else if (possibleStart <= MAX_VALUE_TAG) {
-                    // a value type starting here -> current chunk is deactived while nested val type is read
-                    info.IsContinuationExpected = true;
-                }
-            }
-        }
-
         /// <summary>check if a chunk is active</summary>
         /// <returns></returns>
         private bool IsChunkActive() {
@@ -518,7 +476,8 @@ namespace Ch.Elca.Iiop.Cdr {
         }
         
         /// <summary>
-        /// check, if the current position violates chunk constraints
+        /// check, if the current position violates chunk constraints.
+        /// See if new chunk starts, if last ended at current position.
         /// </summary>
         private void CheckPosition() {
             if (IsChunkActive()) { // when a chunk is active, use chunk aware increment
@@ -527,7 +486,7 @@ namespace Ch.Elca.Iiop.Cdr {
         }
         
         /// <summary>
-        /// check chunk border
+        /// check chunk border, see if new chunk starts if on chunk border
         /// </summary>
         private void CheckChunkPosition() {
             if (m_chunkStack.Count == 0) { 
@@ -537,6 +496,22 @@ namespace Ch.Elca.Iiop.Cdr {
             if (chunkInfo.IsBorderCrossed()) {
                 // invlaid serialized value-type, try to read over the chunk border
                 throw new MARSHAL(901, CompletionStatus.Completed_MayBe);
+            }
+            if (chunkInfo.IsBorderReached()) {
+            	// check if a new chunk starts here
+            	m_baseStream.StartPeeking(); // switch to peek mode
+                int tag = m_baseStream.ReadLong();
+                m_baseStream.StopPeeking(); // end peek mode
+                if ((tag > 0) && (tag < ValueBaseStream.MIN_VALUE_TAG)) {
+                    // a chunk starts here
+                    m_baseStream.ReadLong(); // read start chunk
+                    chunkInfo.IsContinuationExpected = false;
+                    // set chunk to start after tag and contains tag bytes
+                    chunkInfo.SetContinuationLength(tag);
+                } else if ((tag >= ValueBaseStream.MIN_VALUE_TAG) && (tag <= ValueBaseStream.MAX_VALUE_TAG)) {
+                    // a value type starting here -> current chunk is deactived while nested val type is read
+                    chunkInfo.IsContinuationExpected = true;                	
+                }            	            	
             }
         }
             
