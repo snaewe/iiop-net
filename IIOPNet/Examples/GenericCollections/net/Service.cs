@@ -112,6 +112,10 @@ namespace Ch.Elca.Iiop.Demo.StorageSystem {
 		public void DeleteContainer(Container c) {
 			m_containers.Remove(c);
 		}
+
+                public override object InitializeLifetimeService() {
+                    return null; // live forever
+                }
 	}
 
 
