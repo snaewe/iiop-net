@@ -49,7 +49,7 @@ namespace Ch.Elca.Iiop {
         /// <summary>
         /// returns a stringified ior for the proxy
         /// </summary>
-        public static string GetUriForProxy(object proxy) {
+        public static string GetIorForProxy(object proxy) {
             MarshalByRefObject mbrProxy = proxy as MarshalByRefObject;
             if ((mbrProxy == null) || (!RemotingServices.IsTransparentProxy(proxy))) {
                 throw new ArgumentException("argument is not a proxy");
