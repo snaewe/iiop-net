@@ -170,6 +170,28 @@ namespace Ch.Elca.Iiop.Util {
         }
 
         /// <summary>
+        /// Get highest order ordered attribute
+        /// </summary>
+        /// <remarks>
+        /// this returns the attribute with the highest order number or null if not available
+        /// </remarks>
+        public Attribute GetHighestOrderAttribute() {
+            Attribute result = null;
+            IEnumerator enumerator = GetEnumerator();
+            while (enumerator.MoveNext()) {
+                Attribute attr = (Attribute)enumerator.Current;
+                if ((attr is IOrderedAttribute) && 
+                    ((result == null) ||
+                    (((IOrderedAttribute)result).OrderNr <
+                     ((IOrderedAttribute)attr).OrderNr))) {
+                    result = attr;        
+                }
+            }
+            return result;
+        }
+
+
+        /// <summary>
         /// removes the first attribute of the given type
         /// </summary>
         /// <remarks>
@@ -180,12 +202,39 @@ namespace Ch.Elca.Iiop.Util {
         public AttributeExtCollection RemoveAttributeOfType(Type attrType, out Attribute foundAttr) {
             foundAttr = GetAttributeForType(attrType);
             if (foundAttr != null) {
-                ArrayList newCollection = (ArrayList)m_attributes.Clone();                
-                newCollection.Remove(foundAttr);
-                return new AttributeExtCollection(newCollection);
+                return RemoveAttribute(foundAttr);
             } else {
                 return this;
             }
+        }
+
+        /// <summary>
+        /// removes the first attribute of the given type
+        /// </summary>
+        /// <remarks>
+        /// for attributes implementing IOrderedAttribute, this removes the attribute
+        /// with the highest order number
+        /// </remarks>
+        /// <returns>The removed attribute, or null if not found</returns>
+        public AttributeExtCollection RemoveAssociatedAttributes(long associatedTo, out IList removedAttributes) {
+            removedAttributes = new ArrayList();
+            ArrayList newCollection = (ArrayList)m_attributes.Clone();
+            for (int i = 0; i < m_attributes.Count; i++) {
+                if ((m_attributes[i] is IAssociatedAttribute) &&
+                    (((IAssociatedAttribute)m_attributes[i]).AssociatedToAttributeWithKey == associatedTo)) {
+                    removedAttributes.Add(m_attributes[i]); 
+                    newCollection.Remove(m_attributes[i]);
+                }
+            }
+            return new AttributeExtCollection(newCollection);
+        }
+
+
+        /// <summary>returns a new collection without the Attribute attribute</summary
+        public AttributeExtCollection RemoveAttribute(Attribute attribute) {
+            ArrayList newCollection = (ArrayList)m_attributes.Clone();
+            newCollection.Remove(attribute);
+            return new AttributeExtCollection(newCollection);
         }
 
         /// <summary>

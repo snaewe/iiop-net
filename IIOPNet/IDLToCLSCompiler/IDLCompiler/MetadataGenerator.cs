@@ -1056,11 +1056,13 @@ public class MetaDataGenerator : IDLParserVisitor {
                               typeSpecNode.GetIdentification(), 
                               node.GetIdentification()));
         }
-        String[] decl = (String[])node.jjtGetChild(1).jjtAccept(this, data);
-
-        for (int i = 0; i < decl.Length; i++) {
+        ASTdeclarators decl = (ASTdeclarators)node.jjtGetChild(1);
+        for (int i = 0; i < decl.jjtGetNumChildren(); i++) {
+            string declFieldName = 
+                DetermineTypeAndNameForDeclarator((ASTdeclarator)decl.jjtGetChild(i), data,
+                                                  ref fieldType);
             if (node.isPrivate()) { // map to protected field
-                String privateName = decl[i];
+                String privateName = declFieldName;
                 // compensate a problem in the java rmi compiler, which can produce illegal idl:
                 // it produces idl-files with name clashes if a method getx() and a field x exists
                 if (!privateName.StartsWith("m_")) { 
@@ -1070,7 +1072,7 @@ public class MetaDataGenerator : IDLParserVisitor {
                 m_ilEmitHelper.AddFieldWithCustomAttrs(builder, privateName, 
                                                        fieldType, FieldAttributes.Family);
             } else { // map to public field
-                String fieldName = IdlNaming.MapIdlNameToClsName(decl[i]);
+                String fieldName = IdlNaming.MapIdlNameToClsName(declFieldName);
                 m_ilEmitHelper.AddFieldWithCustomAttrs(builder, fieldName, 
                                                        fieldType, FieldAttributes.Public);
             }
@@ -1409,14 +1411,18 @@ public class MetaDataGenerator : IDLParserVisitor {
         Node declarators = node.jjtGetChild(1);    
         for (int i = 0; i < declarators.jjtGetNumChildren(); i++) {
             ASTdeclarator decl = (ASTdeclarator) declarators.jjtGetChild(i);
-            if (decl.jjtGetChild(0) is ASTsimple_declarator) {
-                String ident = ((SimpleNodeWithIdent) decl.jjtGetChild(0)).getIdent();
-                Symbol typedefSymbol = currentScope.getSymbol(ident);
-                // inform the type-manager of this typedef
-                Debug.WriteLine("typedef defined here, type: " + typeUsedInDefine.GetCompactClsType() +
-                                ", symbol: " + typedefSymbol);
-                m_typeManager.RegisterTypeDef(typeUsedInDefine, typedefSymbol);
+            if (decl.jjtGetChild(0) is ASTcomplex_declarator) {
+                // check for custom mapping, because will become element type of array
+                typeUsedInDefine = ReplaceByCustomMappedIfNeeded(typeUsedInDefine);
             }
+            string ident = 
+                DetermineTypeAndNameForDeclarator(decl, data, 
+                                                  ref typeUsedInDefine);
+            Symbol typedefSymbol = currentScope.getSymbol(ident);
+            // inform the type-manager of this typedef
+            Debug.WriteLine("typedef defined here, type: " + typeUsedInDefine.GetCompactClsType() +
+                            ", symbol: " + typedefSymbol);
+            m_typeManager.RegisterTypeDef(typeUsedInDefine, typedefSymbol);
         }    
         return null;
     }
@@ -1491,23 +1497,67 @@ public class MetaDataGenerator : IDLParserVisitor {
         return child.jjtAccept(this, data);
     }
 
+    private TypeContainer GetTypeContainerForMultiDimArray(TypeContainer elemType, int[] dimensions) {
+        string clsArrayRep = "[";
+        for (int i = 1; i < dimensions.Length; i++) {
+            clsArrayRep = clsArrayRep + ",";
+        }
+        clsArrayRep = clsArrayRep + "]";
+        // create CLS array type with the help of GetType(), otherwise not possible
+        Type arrayType;
+        // because not fully defined types are possible, use module and not assembly to get type from
+        Module declModule = elemType.GetCompactClsType().Module;
+        arrayType = declModule.GetType(elemType.GetCompactClsType().FullName + clsArrayRep); // not nice, better solution ?        
+        Debug.WriteLine("created array type: " + arrayType);
+
+        // determine the needed attributes: IdlArray is required by the array itself (+optional dimension attrs); 
+        // combine with the attribute from the element type
+        // possible are: IdlArray (for array of array), IdlSequence (for array of sequence), ObjectIdlType,
+        // WideChar, StringValue
+        // invariant: boxed value attribute is not among them, because elem type 
+        // is in the compact form        
+        AttributeExtCollection elemAttributes = elemType.GetCompactTypeAttrInstances();
+        long arrayAttrOrderNr = IdlArrayAttribute.DetermineArrayAttributeOrderNr(elemAttributes);
+        
+        IdlArrayAttribute arrayAttr = new IdlArrayAttribute(arrayAttrOrderNr, dimensions[0]); // at least one dimension available, because of grammar
+        AttributeExtCollection arrayAttributes = 
+            new AttributeExtCollection(elemAttributes);
+        arrayAttributes = arrayAttributes.MergeAttribute(arrayAttr);        
+        for (int i = 1; i < dimensions.Length; i++) {
+            IdlArrayDimensionAttribute dimAttr = new IdlArrayDimensionAttribute(arrayAttrOrderNr, i, dimensions[i]);
+            arrayAttributes = arrayAttributes.MergeAttribute(dimAttr);
+        }
+        
+        return new TypeContainer(arrayType,
+                                 arrayAttributes);        
+    }
+
+    /// <summary>
+    /// returns the name of the declared identity. For array declarators, creates the array type out of the typeSpecType
+    /// </summary>
+    private string DetermineTypeAndNameForDeclarator(ASTdeclarator node, object visitorData, ref TypeContainer typeSpecType) {
+        Node child = node.jjtGetChild(0); // child of declarator
+        if (child is ASTsimple_declarator) {
+            // a simple delcarator
+            ASTsimple_declarator simpleDecl = (ASTsimple_declarator) child;
+            return simpleDecl.getIdent();
+        } else if (child is ASTcomplex_declarator) {
+            ASTarray_declarator arrayDecl = (ASTarray_declarator) child.jjtGetChild(0);
+            int[] dimensions = (int[])arrayDecl.jjtAccept(this, visitorData);
+            typeSpecType = GetTypeContainerForMultiDimArray(typeSpecType, dimensions);
+            return arrayDecl.getIdent();
+        } else {
+            throw new NotSupportedException("unexpected delcarator: " + child.GetType()); // should never occur
+        }
+    }
+
     /**
      * @see parser.IDLParserVisitor#visit(ASTdeclarators, Object)
      * @param data unused
      * @return an array of all declared elements here
      */
     public Object visit(ASTdeclarators node, Object data) {
-        String[] result = new String[node.jjtGetNumChildren()];
-        for (int i = 0; i < node.jjtGetNumChildren(); i++) {
-            Node child = node.jjtGetChild(i).jjtGetChild(0); // child of i-th declarator
-            if (child is ASTcomplex_declarator) {
-                throw new NotSupportedException("complex_declarator is unsupported by this compiler");
-            }
-            // a simple delcarator
-            ASTsimple_declarator simpleDecl = (ASTsimple_declarator) child;
-            result[i] = simpleDecl.getIdent();
-        }
-        return result;
+        return null; // nothing to do, used by parent node
     }
 
     /**
@@ -1783,9 +1833,12 @@ public class MetaDataGenerator : IDLParserVisitor {
                               node.GetIdentification()));
         }
         fieldType = ReplaceByCustomMappedIfNeeded(fieldType);
-        String[] decl = (String[])node.jjtGetChild(1).jjtAccept(this, info);
-        for (int i = 0; i < decl.Length; i++) {
-            m_ilEmitHelper.AddFieldWithCustomAttrs(builder, decl[i], fieldType, 
+        ASTdeclarators decl = (ASTdeclarators)node.jjtGetChild(1);        
+        for (int i = 0; i < decl.jjtGetNumChildren(); i++) {
+            string fieldName = IdlNaming.MapIdlNameToClsName(
+                                   DetermineTypeAndNameForDeclarator((ASTdeclarator)decl.jjtGetChild(i), data,
+                                                                     ref fieldType));
+            m_ilEmitHelper.AddFieldWithCustomAttrs(builder, fieldName, fieldType, 
                                                    FieldAttributes.Public);
         }
         return null;
@@ -1948,11 +2001,10 @@ public class MetaDataGenerator : IDLParserVisitor {
                               node.GetIdentification()));
         }
         elemType = ReplaceByCustomMappedIfNeeded(elemType);
-        Node elemDecl = elemSpec.jjtGetChild(1).jjtGetChild(0);
-        if (elemDecl is ASTcomplex_declarator) {
-            throw new NotSupportedException("complex_declarator is unsupported by this compiler");
-        }            
-        string elemDeclIdent = ((ASTsimple_declarator) elemDecl).getIdent(); // a simple delcarator        
+        Node elemDecl = elemSpec.jjtGetChild(1);
+        string elemDeclIdent = 
+                DetermineTypeAndNameForDeclarator((ASTdeclarator)elemDecl, data,
+                                                  ref elemType);
         // generate the methods/field for this switch-case
         buildInfo.GetGenerationHelper().GenerateSwitchCase(elemType, elemDeclIdent, discriminatorValues);
 
@@ -2112,21 +2164,25 @@ public class MetaDataGenerator : IDLParserVisitor {
         return containter;
     }
 
-    #region array unsupported at the moment
     /**
      * @see parser.IDLParserVisitor#visit(ASTarray_declarator, Object)
      */
     public Object visit(ASTarray_declarator node, Object data) {
-        throw new NotSupportedException("array type is not supported by this compiler");
+        int[] dimensions = new int[node.jjtGetNumChildren()];
+        for (int i = 0; i < node.jjtGetNumChildren(); i++) {            
+            long dimension = (long)node.jjtGetChild(i).jjtAccept(this, data);
+            dimensions[i] = (int)dimension;
+        }
+        return dimensions;
     }
 
     /**
      * @see parser.IDLParserVisitor#visit(ASTfixed_array_size, Object)
      */
     public Object visit(ASTfixed_array_size node, Object data) {
-        throw new NotSupportedException("array type is not supported by this compiler");
+        long dimensionSize = (long)node.jjtGetChild(0).jjtAccept(this, data);                                  
+        return dimensionSize;
     }
-    #endregion
 
     /**
      * @see parser.IDLParserVisitor#visit(ASTattr_dcl, Object)

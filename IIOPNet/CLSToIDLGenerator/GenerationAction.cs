@@ -580,6 +580,36 @@ namespace Ch.Elca.Iiop.Idl {
             return null;
         }        
 
+        public object MapToIdlArray(Type clsType, int[] dimensions, AttributeExtCollection allAttributes, AttributeExtCollection elemTypeAttributes) {
+            // for arrays, the attributes of the element type also influence the mapped type
+            // therefore, use attributes also to check mapped type
+            if (m_depManager.CheckMappedType(clsType, allAttributes)) {
+                return null; // already mapped
+            }
+            string namespaceName;
+            string elemTypeMapped;
+            string typedefName =
+                IdlNaming.GetTypeDefAliasForArrayType(clsType, dimensions, elemTypeAttributes, out namespaceName, out elemTypeMapped);
+                        
+            string[] modules = IdlNaming.MapNamespaceNameToIdlModules(namespaceName);
+            BeginTypeWithName(clsType, allAttributes, elemTypeAttributes, modules, typedefName);
+            
+            // write type dependant information
+            WriteModuleOpenings(modules);
+
+            // write typedef
+            string dimensionsRep = String.Empty;
+            for (int i = 0; i < dimensions.Length; i++) {
+                dimensionsRep = dimensionsRep + "[" + dimensions[i] + "]";
+            }
+            m_currentOutputStream.WriteLine("typedef {0} {1}{2};", elemTypeMapped, typedefName, dimensionsRep);
+                                                        
+            m_currentOutputStream.WriteLine("");
+
+            EndType();
+            return null;
+        }        
+
         public object MapToIdlStruct(Type clsType) {
             if (m_depManager.CheckMappedType(clsType)) { 
                 return null; 
@@ -1051,6 +1081,10 @@ namespace Ch.Elca.Iiop.Idl {
             throw new NotSupportedException("no fwd declaration possible for this IDL-type");
         }
 
+        public object MapToIdlArray(System.Type dotNetType, int[] dimensions, AttributeExtCollection allAttributes, AttributeExtCollection elemTypeAttributes) {
+            throw new NotSupportedException("no fwd declaration possible for this IDL-type");
+        }
+
         public object MapToIdlAny(System.Type dotNetType) {
             throw new NotSupportedException("no fwd declaration possible for this IDL-type");
         }
@@ -1180,6 +1214,11 @@ namespace Ch.Elca.Iiop.Idl {
         }
         
         public object MapToIdlSequence(System.Type dotNetType, int bound, AttributeExtCollection allAttributes, AttributeExtCollection elementTypeAttributes) {
+            WriteInclude(dotNetType, allAttributes);
+            return null;            
+        }
+
+        public object MapToIdlArray(System.Type dotNetType, int[] dimensions, AttributeExtCollection allAttributes, AttributeExtCollection elementTypeAttributes) {
             WriteInclude(dotNetType, allAttributes);
             return null;            
         }

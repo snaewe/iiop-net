@@ -1183,6 +1183,103 @@ namespace omg.org.CORBA {
 
     }
 
+    internal class ArrayTC : TypeCodeImpl {
+        
+        #region IFields
+
+        private int m_length;
+        private TypeCode m_innerDimension;
+
+        #endregion IFields
+        #region IConstructors
+        
+        /// <summary>constructor used during deserialisation; call ReadFromStream afterwards</summary>
+        internal ArrayTC() : base(TCKind.tk_array) {
+        }     
+
+
+        /// <summary>constructs the typecode for the current dimension by taking the next dimension typecode
+        /// and the length of the current dimension; the innermost dimension tc contains the element type</summary>
+        public ArrayTC(TypeCode innerDimension, int length) : base(TCKind.tk_array) {
+            Initalize(innerDimension, length);
+        }
+
+        #endregion IConstructors
+        #region IMethods
+        
+        private void Initalize(TypeCode innerDimension, int length) {
+            m_innerDimension = innerDimension;    
+            m_length = length;            
+        }
+
+        public override int length() {
+            return m_length;
+        }
+    
+        public override TypeCode content_type() {
+            return m_innerDimension;
+        }
+
+        internal override void ReadFromStream(CdrInputStream cdrStream) {
+            CdrEncapsulationInputStream encap = cdrStream.ReadEncapsulation();    
+            TypeCodeSerializer ser = new TypeCodeSerializer();
+            m_innerDimension = (TypeCode) ser.Deserialise(ReflectionHelper.CorbaTypeCodeType, 
+                                                          new AttributeExtCollection(new Attribute[0]), encap);
+            m_length = (int)encap.ReadULong();
+        }
+
+        internal override void WriteToStream(CdrOutputStream cdrStream) {
+            base.WriteToStream(cdrStream);
+            CdrEncapsulationOutputStream encap = new CdrEncapsulationOutputStream(0, cdrStream);
+            TypeCodeSerializer ser = new TypeCodeSerializer();
+            ser.Serialise(ReflectionHelper.CorbaTypeCodeType, m_innerDimension, 
+                          new AttributeExtCollection(new Attribute[0]), encap);
+            encap.WriteULong((uint)m_length);
+            encap.WriteToTargetStream();
+        }
+
+        internal override Type GetClsForTypeCode() {
+/*            Type elemType = ((TypeCodeImpl)m_seqType).GetClsForTypeCode();
+            Type arrayType;
+            // handle types in creation correctly (use module and not assembly to get type)
+            Module declModule = elemType.Module;
+            arrayType = declModule.GetType(elemType.FullName + "[]"); // not nice, better solution ?                                    
+            return arrayType; */
+            throw new NotImplementedException();
+        }
+        
+        private IdlArrayAttribute CreateArrayAttribute() {
+/*            AttributeExtCollection attrColl = ((TypeCodeImpl)m_seqType).GetClsAttributesForTypeCode();
+            long orderNr = IdlSequenceAttribute.DetermineSequenceAttributeOrderNr(attrColl);
+            if (m_length == 0) {
+                return new IdlSequenceAttribute(orderNr);
+            } else {
+                return new IdlSequenceAttribute(orderNr, m_length);
+            } */
+            throw new NotImplementedException();
+        }
+        
+        internal override AttributeExtCollection GetClsAttributesForTypeCode() {
+/*            AttributeExtCollection resultColl =
+                new AttributeExtCollection(new Attribute[] { CreateSequenceAttribute() } );
+            resultColl = resultColl.MergeAttributeCollections(((TypeCodeImpl)m_seqType).GetClsAttributesForTypeCode());
+            return resultColl; */
+           throw new NotImplementedException();
+        }
+
+        internal override CustomAttributeBuilder[] GetAttributes() {            
+/*            CustomAttributeBuilder[] elemAttrBuilders = ((TypeCodeImpl)m_seqType).GetAttributes();
+            CustomAttributeBuilder[] result = new CustomAttributeBuilder[elemAttrBuilders.Length + 1];
+            result[0] = CreateSequenceAttribute().CreateAttributeBuilder();
+            elemAttrBuilders.CopyTo((Array)result, 1);
+            return result; */
+            throw new NotImplementedException();
+        }
+
+        #endregion IMethods
+
+    }
+
 
     /// <summary>base class for struct and exception</summary>
     internal abstract class BaseStructTC : TypeCodeImpl {

@@ -779,6 +779,13 @@ namespace Ch.Elca.Iiop.Idl {
                                                    elemTypeAttributes);
             return new SequenceTC(elementTC, bound);
         }
+        public object MapToIdlArray(Type clsType, int[] dimensions, AttributeExtCollection allAttributes, AttributeExtCollection elemTypeAttributes) {
+/*            // array should not contain itself! -> do not register typecode
+            omg.org.CORBA.TypeCode elementTC = CreateOrGetTypeCodeForType(clsType.GetElementType(),
+                                                   elemTypeAttributes);
+            return new ArrayTC(elementTC, bound); */
+            throw new NotImplementedException();
+        }
         public object MapToIdlAny(Type clsType) {
             return new AnyTC();
         }
@@ -807,7 +814,7 @@ namespace Ch.Elca.Iiop.Idl {
             }
         }
         public object MapException(Type clsType) {
-        	// TODO: check this, generic user exception handling ...
+            // TODO: check this, generic user exception handling ...
             ExceptTC result = new ExceptTC();
             RegisterCreatedTypeCodeForType(clsType, AttributeExtCollection.EmptyCollection,
                                            result);

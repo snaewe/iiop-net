@@ -1,4 +1,4 @@
-/* DotNetToIDLMapper.cs
+/* CLSToIDLMapper.cs
  * 
  * Project: IIOP.NET
  * IIOPChannel
@@ -30,6 +30,7 @@
 using System;
 using System.ComponentModel;
 using System.Diagnostics;
+using System.Collections;
 using Ch.Elca.Iiop.Util;
 using Corba;
 using omg.org.CORBA;
@@ -80,6 +81,12 @@ namespace Ch.Elca.Iiop.Idl {
         /// <param name="elemTypeAttributes">the attributes of the sequence element</param>
         /// <returns>an optional result of the mapping, null may be possible</returns>
         object MapToIdlSequence(Type clsType, int bound, AttributeExtCollection allAttributes, AttributeExtCollection elemTypeAttributes);
+
+        /// <param name="dimensions">fixed size array: the dimensions of the array</param>
+        /// <param name="allAttributes">the attributes including the IdlArrayAttributes lead to calling this map action</param>
+        /// <param name="elemTypeAttributes">the attributes of the array element</param>
+        /// <returns>an optional result of the mapping, null may be possible</returns>
+        object MapToIdlArray(Type clsType, int[] dimensions, AttributeExtCollection allAttributes, AttributeExtCollection elemTypeAttributes);
 
         /// <summary>map to the IDL-type any</summary>
         /// <returns>an optional result of the mapping, null may be possible</returns>
@@ -225,7 +232,7 @@ namespace Ch.Elca.Iiop.Idl {
         }
         
         public static bool IsException(Type type) {
-        	return (s_exceptType.IsAssignableFrom(type));
+            return (s_exceptType.IsAssignableFrom(type));
         }
         
         /// <summary>
@@ -276,27 +283,27 @@ namespace Ch.Elca.Iiop.Idl {
         /// <summary>determines, if a CLS Type is mapped to an IDL abstract value type</summary>
         public static bool IsMappedToAbstractValueType(Type clsType, AttributeExtCollection attributes) {
             return (MappingToResult)s_singleton.MapClsType(clsType, attributes, s_mappingToAction) ==
-            	MappingToResult.IdlAbstractValue;
+                MappingToResult.IdlAbstractValue;
         }
         
         /// <summary>determines, if a CLS Type is mapped to an IDL abstract value type</summary>
         public static bool IsMappedToAbstractValueType(Type clsType) {
-        	return IsMappedToAbstractValueType(clsType, AttributeExtCollection.EmptyCollection);
+            return IsMappedToAbstractValueType(clsType, AttributeExtCollection.EmptyCollection);
         }        
         
         /// <summary>
         /// Checks, if the CLS type is mapped to an IDL concrete value type.
         /// </summary>
         public static bool IsMappedToConcreteValueType(Type clsType) {
-        	return IsMappedToConcreteValueType(clsType, AttributeExtCollection.EmptyCollection);
+            return IsMappedToConcreteValueType(clsType, AttributeExtCollection.EmptyCollection);
         }
         
         /// <summary>
         /// Checks, if the CLS type is mapped to an IDL concrete value type.
         /// </summary>
         public static bool IsMappedToConcreteValueType(Type clsType, AttributeExtCollection attributes) {
-        	return (MappingToResult) s_singleton.MapClsType(clsType, attributes, s_mappingToAction) ==
-        		MappingToResult.IdlConcreteValue;
+            return (MappingToResult) s_singleton.MapClsType(clsType, attributes, s_mappingToAction) ==
+                MappingToResult.IdlConcreteValue;
         }        
 
         public static bool IsMappedToConcreteInterface(Type clsType) {
@@ -305,41 +312,41 @@ namespace Ch.Elca.Iiop.Idl {
         
         public static bool IsMappedToConcreteInterface(Type clsType, AttributeExtCollection attributes) {
             return (MappingToResult) s_singleton.MapClsType(clsType, attributes, s_mappingToAction) ==
-        		MappingToResult.IdlConcreteIf;
+                MappingToResult.IdlConcreteIf;
         }
 
         public static bool IsMappedToAbstractInterface(Type clsType) {
-        	return IsMappedToAbstractInterface(clsType, AttributeExtCollection.EmptyCollection);
+            return IsMappedToAbstractInterface(clsType, AttributeExtCollection.EmptyCollection);
         }        
         
         public static bool IsMappedToAbstractInterface(Type clsType, AttributeExtCollection attributes) {
             return (MappingToResult) s_singleton.MapClsType(clsType, attributes, s_mappingToAction) ==
-        		MappingToResult.IdlAbstractIf;
+                MappingToResult.IdlAbstractIf;
         }
         
         public static bool IsMappedToLocalInterface(Type clsType) {
-        	return IsMappedToLocalInterface(clsType, AttributeExtCollection.EmptyCollection);
+            return IsMappedToLocalInterface(clsType, AttributeExtCollection.EmptyCollection);
         }        
         
         public static bool IsMappedToLocalInterface(Type clsType, AttributeExtCollection attributes) {
             return (MappingToResult) s_singleton.MapClsType(clsType, attributes, s_mappingToAction) ==
-        		MappingToResult.IdlLocalIf;
+                MappingToResult.IdlLocalIf;
         }        
         
         public static bool IsMappedToBoxedValueType(Type clsType) {
-        	return IsMappedToBoxedValueType(clsType, AttributeExtCollection.EmptyCollection);
+            return IsMappedToBoxedValueType(clsType, AttributeExtCollection.EmptyCollection);
         }        
         
         public static bool IsMappedToBoxedValueType(Type clsType, AttributeExtCollection attributes) {
             return (MappingToResult) s_singleton.MapClsType(clsType, attributes, s_mappingToAction) ==
-        		MappingToResult.IdlBoxedValue;
+                MappingToResult.IdlBoxedValue;
         }        
 
         /// <summary>checks, if the type is unmappable</summary>
         public static bool UnmappableType(Type clsType) {
             if (clsType.Equals(s_intPtrType) || clsType.Equals(s_uint16Type) ||
                 clsType.Equals(s_uint32Type) || clsType.Equals(s_uint64Type) ||
-            	clsType.Equals(s_uintPtrType)) {
+                clsType.Equals(s_uintPtrType)) {
                 return true; 
             }
             return false;
@@ -352,37 +359,37 @@ namespace Ch.Elca.Iiop.Idl {
         /// <param name="implementorType">the CLS class/interface, which implements the interface</param>
         /// <returns></returns>
         public static bool MapInheritanceFromInterfaceToIdl(Type interfaceType, Type implementorType) {
-        	if (!interfaceType.IsInterface) {
-        		return false;
-        	}
-        	if (ClsToIdlMapper.IsMappedToAbstractInterface(implementorType)) {
-        	    // an abstract interface child can only inherit from an abstract interface parent
-        	    return ClsToIdlMapper.IsMappedToAbstractInterface(interfaceType);
-        	}
-        	if (ClsToIdlMapper.IsMappedToConcreteInterface(implementorType)) {
-        	    // a concrete interface may inherit from abstract and concrete interfaces
-        		return ClsToIdlMapper.IsMappedToAbstractInterface(interfaceType) ||
-        	           ClsToIdlMapper.IsMappedToConcreteInterface(interfaceType);
-        	}
-        	if (ClsToIdlMapper.IsMappedToLocalInterface(implementorType)) {
-        		// a local interface may inherit from local, abstract and concrete interfaces
-        	    return ClsToIdlMapper.IsMappedToAbstractInterface(interfaceType) ||
-        	           ClsToIdlMapper.IsMappedToConcreteInterface(interfaceType) ||
-        	           ClsToIdlMapper.IsMappedToLocalInterface(interfaceType);
-        	}
-        	if (ClsToIdlMapper.IsMappedToAbstractValueType(implementorType)) {
-        	    // a abstract value type may inherit from local, abstract and concrete interfaces
-        		return ClsToIdlMapper.IsMappedToAbstractInterface(interfaceType) ||
-        	           ClsToIdlMapper.IsMappedToConcreteInterface(interfaceType) ||
-        	           ClsToIdlMapper.IsMappedToLocalInterface(interfaceType);        		
-        	}
-        	if (ClsToIdlMapper.IsMappedToConcreteValueType(implementorType)) {
-        	    // a abstract value type may inherit from local, abstract and concrete interfaces
-        		return ClsToIdlMapper.IsMappedToAbstractInterface(interfaceType) ||
-        	           ClsToIdlMapper.IsMappedToConcreteInterface(interfaceType) ||
-        	           ClsToIdlMapper.IsMappedToLocalInterface(interfaceType);        		
-        	}
-        	return false;
+            if (!interfaceType.IsInterface) {
+                return false;
+            }
+            if (ClsToIdlMapper.IsMappedToAbstractInterface(implementorType)) {
+                // an abstract interface child can only inherit from an abstract interface parent
+                return ClsToIdlMapper.IsMappedToAbstractInterface(interfaceType);
+            }
+            if (ClsToIdlMapper.IsMappedToConcreteInterface(implementorType)) {
+                // a concrete interface may inherit from abstract and concrete interfaces
+                return ClsToIdlMapper.IsMappedToAbstractInterface(interfaceType) ||
+                       ClsToIdlMapper.IsMappedToConcreteInterface(interfaceType);
+            }
+            if (ClsToIdlMapper.IsMappedToLocalInterface(implementorType)) {
+                // a local interface may inherit from local, abstract and concrete interfaces
+                return ClsToIdlMapper.IsMappedToAbstractInterface(interfaceType) ||
+                       ClsToIdlMapper.IsMappedToConcreteInterface(interfaceType) ||
+                       ClsToIdlMapper.IsMappedToLocalInterface(interfaceType);
+            }
+            if (ClsToIdlMapper.IsMappedToAbstractValueType(implementorType)) {
+                // a abstract value type may inherit from local, abstract and concrete interfaces
+                return ClsToIdlMapper.IsMappedToAbstractInterface(interfaceType) ||
+                       ClsToIdlMapper.IsMappedToConcreteInterface(interfaceType) ||
+                       ClsToIdlMapper.IsMappedToLocalInterface(interfaceType);              
+            }
+            if (ClsToIdlMapper.IsMappedToConcreteValueType(implementorType)) {
+                // a abstract value type may inherit from local, abstract and concrete interfaces
+                return ClsToIdlMapper.IsMappedToAbstractInterface(interfaceType) ||
+                       ClsToIdlMapper.IsMappedToConcreteInterface(interfaceType) ||
+                       ClsToIdlMapper.IsMappedToLocalInterface(interfaceType);              
+            }
+            return false;
         }
 
         #endregion SMethods
@@ -401,9 +408,9 @@ namespace Ch.Elca.Iiop.Idl {
         /// <param name="action">the action to take for the determined mapping</param>
         /// <param name="attributes">the attributes on the param, field, return value; a new collection without the considered attributes is returned</param>
         public object MapClsTypeWithTransform(ref Type clsType, ref AttributeExtCollection attributes, MappingAction action) {            
-        	// handle out, ref types correctly: no other action needs to be taken than for in-types
+            // handle out, ref types correctly: no other action needs to be taken than for in-types
             AttributeExtCollection originalAttributes = attributes; // used to save reference to the passed in attributes
-        	if (clsType.IsByRef) {
+            if (clsType.IsByRef) {
                 clsType = clsType.GetElementType(); 
             }
             
@@ -454,12 +461,12 @@ namespace Ch.Elca.Iiop.Idl {
                        clsType.Equals(ReflectionHelper.CorbaTypeCodeType)) {
                 return action.MapToTypeCode(clsType);
             } else if (!UnmappableType(clsType)) {
-            	if (IsValueTypeConcrete(clsType)) {
-            		return action.MapToIdlConcreateValueType(clsType);
-            	} else {
-	                // other types are mapped to an abstract value type
-    	            return action.MapToIdlAbstractValueType(clsType);            		
-            	}
+                if (IsValueTypeConcrete(clsType)) {
+                    return action.MapToIdlConcreateValueType(clsType);
+                } else {
+                    // other types are mapped to an abstract value type
+                    return action.MapToIdlAbstractValueType(clsType);                   
+                }
             } else {
                 // not mappable: clsType
                 throw new BAD_PARAM(18800, CompletionStatus.Completed_MayBe);
@@ -509,7 +516,7 @@ namespace Ch.Elca.Iiop.Idl {
             Attribute wideAttr;
             modifiedAttributes = modifiedAttributes.RemoveAttributeOfType(ReflectionHelper.WideCharAttributeType, out wideAttr);
             if (wideAttr != null) {
-            	useWide = ((WideCharAttribute)wideAttr).IsAllowed;
+                useWide = ((WideCharAttribute)wideAttr).IsAllowed;
             }
             return useWide;
         }
@@ -518,7 +525,7 @@ namespace Ch.Elca.Iiop.Idl {
         private bool MapStringAsValueType(ref AttributeExtCollection modifiedAttributes) {
             Attribute mapAsWStringValueAttr;
             modifiedAttributes = modifiedAttributes.RemoveAttributeOfType(ReflectionHelper.StringValueAttributeType, out mapAsWStringValueAttr);
-        	return mapAsWStringValueAttr != null;
+            return mapAsWStringValueAttr != null;
         }
 
         private object CallActionForDNString(ref Type clsType, ref AttributeExtCollection modifiedAttributes, MappingAction action) {
@@ -552,10 +559,10 @@ namespace Ch.Elca.Iiop.Idl {
         private object CallActionForDNObject(ref Type clsType, ref AttributeExtCollection modifiedAttributes, MappingAction action) {
             // distinguis the different cases here
             Attribute typeAttr;
-            modifiedAttributes = modifiedAttributes.RemoveAttributeOfType(s_objectIdlTypeAttrType, out typeAttr);            	
+            modifiedAttributes = modifiedAttributes.RemoveAttributeOfType(s_objectIdlTypeAttrType, out typeAttr);               
             IdlTypeObject oType = IdlTypeObject.Any;
             if (typeAttr != null) { 
-            	oType = ((ObjectIdlTypeAttribute)typeAttr).IdlType;
+                oType = ((ObjectIdlTypeAttribute)typeAttr).IdlType;
             }
             switch (oType) {
                 case IdlTypeObject.Any: 
@@ -570,20 +577,49 @@ namespace Ch.Elca.Iiop.Idl {
             }
         }
         
+        private int[] DetermineIdlArrayDimensions(Type clsType, IdlArrayAttribute arrayAttr,
+                                                  ref AttributeExtCollection modifiedAttributes) {
+            // get all the array dimensions, first is inside the IDLArrayAttribute; others are separate
+            int[] dimensions = new int[clsType.GetArrayRank()];
+            if (dimensions.Length < 1) {
+                throw new INTERNAL(5643, CompletionStatus.Completed_MayBe); // should never occur
+            }
+            dimensions[0] = arrayAttr.FirstDimensionSize;
+            if (dimensions.Length > 1) {
+                IList dimensionAttrs;
+                modifiedAttributes = 
+                    modifiedAttributes.RemoveAssociatedAttributes(arrayAttr.OrderNr, out dimensionAttrs);
+                if (dimensionAttrs.Count != dimensions.Length - 1) {
+                    throw new INTERNAL(5644, CompletionStatus.Completed_MayBe); // should never occur
+                }
+                for (int i = 0; i < dimensionAttrs.Count; i++) {
+                    IdlArrayDimensionAttribute arrayDim = ((IdlArrayDimensionAttribute)dimensionAttrs[i]);                    
+                    dimensions[arrayDim.DimensionNr] = arrayDim.DimensionSize;
+                }
+            }
+            return dimensions;
+        }
+
+
         /// <summary>
         /// call the appropriate mapping action for a CLSType array
         /// </summary>
         private object CallActionForDNArray(ref Type clsType,
                                             ref AttributeExtCollection modifiedAttributes, 
-											AttributeExtCollection allAttributes,                                            
+                                            AttributeExtCollection allAttributes,                                            
                                             MappingAction action) {
             // distinguish the different cases here
-            Attribute seqAttr;
-            modifiedAttributes = modifiedAttributes.RemoveAttributeOfType(ReflectionHelper.IdlSequenceAttributeType, out seqAttr);
-            if (seqAttr != null) {
+            Attribute idlMappingAttr = modifiedAttributes.GetHighestOrderAttribute();
+            if (idlMappingAttr is IdlSequenceAttribute) {
+                modifiedAttributes = modifiedAttributes.RemoveAttribute(idlMappingAttr);
                 int bound = (int)
-                	((IdlSequenceAttribute)seqAttr).Bound;
+                    ((IdlSequenceAttribute)idlMappingAttr).Bound;
                 return action.MapToIdlSequence(clsType, bound, allAttributes, modifiedAttributes);
+            } else if (idlMappingAttr is IdlArrayAttribute) {
+                IdlArrayAttribute arrayAttr = (IdlArrayAttribute)idlMappingAttr;
+                modifiedAttributes = modifiedAttributes.RemoveAttribute(idlMappingAttr);
+                int[] dimensions = DetermineIdlArrayDimensions(clsType, arrayAttr, ref modifiedAttributes);
+                return action.MapToIdlArray(clsType, dimensions, allAttributes, modifiedAttributes);
             } else {
                 Type boxed = Repository.GetBoxedArrayType(clsType);
                 clsType = boxed; // transform
@@ -627,7 +663,7 @@ namespace Ch.Elca.Iiop.Idl {
     /// </summary>
     internal enum MappingToResult {
         IdlStruct, IdlUnion, IdlAbstractIf, IdlConcreteIf, IdlLocalIf, IdlConcreteValue, IdlAbstractValue, 
-        IdlBoxedValue, IdlSequence, IdlAny, IdlAbstractBase, IdlValueBase,
+        IdlBoxedValue, IdlSequence, IdlArray, IdlAny, IdlAbstractBase, IdlValueBase,
         IdlException, IdlEnum, IdlWstringValue, IdlStringValue, IdlTypeCode,
         IdlTypeDesc, IdlBool, IdlFloat, IdlDouble, IdlShort, IdlUShort, IdlLong, IdlULong,
         IdlLongLong, IdlULongLong, IdlOctet, IdlVoid, IdlChar, IdlWChar, IdlString, IdlWString
@@ -665,6 +701,9 @@ namespace Ch.Elca.Iiop.Idl {
         }
         public object MapToIdlSequence(System.Type clsType, int bound, AttributeExtCollection allAttributes, AttributeExtCollection elemTypeAttributes) {
             return MappingToResult.IdlSequence;
+        }
+        public object MapToIdlArray(System.Type clsType, int[] dimensions, AttributeExtCollection allAttributes, AttributeExtCollection elemTypeAttributes) {
+            return MappingToResult.IdlArray;
         }
         public object MapToIdlAny(System.Type clsType) {
             return MappingToResult.IdlAny;
@@ -1045,6 +1084,25 @@ namespace Ch.Elca.Iiop.Tests {
                                                                            new AttributeExtCollection(new Attribute[] { new IdlSequenceAttribute(0) } ),
                                                                            s_testAction);
             Assertion.AssertEquals(MappingToResult.IdlSequence, mapResult);
+        }
+
+        public void TestMapToIdlArray() {
+            ClsToIdlMapper mapper = ClsToIdlMapper.GetSingleton();
+            MappingToResult mapResult = (MappingToResult)mapper.MapClsType(typeof(int[]), 
+                                                                           new AttributeExtCollection(new Attribute[] { new IdlArrayAttribute(0, 10) } ),
+                                                                           s_testAction);
+            Assertion.AssertEquals(MappingToResult.IdlArray, mapResult);
+
+            mapResult = (MappingToResult)mapper.MapClsType(typeof(int[,]), 
+                                                           new AttributeExtCollection(new Attribute[] { new IdlArrayAttribute(0, 10), new IdlArrayDimensionAttribute(0, 1, 20) } ),
+                                                           s_testAction);
+            Assertion.AssertEquals(MappingToResult.IdlArray, mapResult);
+
+            mapResult = (MappingToResult)mapper.MapClsType(typeof(int[,,]), 
+                                                           new AttributeExtCollection(new Attribute[] { new IdlArrayAttribute(0, 10), 
+                                                                                                        new IdlArrayDimensionAttribute(0, 1, 20), new IdlArrayDimensionAttribute(0, 2, 5) } ),
+                                                           s_testAction);
+            Assertion.AssertEquals(MappingToResult.IdlArray, mapResult);
         }
 
         public void TestMapToIdlAny() {

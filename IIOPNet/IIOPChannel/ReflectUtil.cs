@@ -50,6 +50,7 @@ namespace Ch.Elca.Iiop.Util {
         private static Type s_idlEnumAttributeType = typeof(IdlEnumAttribute);
         private static Type s_implClassAttributeType = typeof(ImplClassAttribute);
         private static Type s_idlSequenceAttributeType = typeof(IdlSequenceAttribute);
+        private static Type s_idlArrayAttributeType = typeof(IdlArrayAttribute);
         private static Type s_idlStructAttrType = typeof(IdlStructAttribute);
         private static Type s_idlUnionAttrType = typeof(IdlUnionAttribute);
         private static Type s_wideCharAttrType = typeof(WideCharAttribute);
@@ -145,6 +146,13 @@ namespace Ch.Elca.Iiop.Util {
         public static Type IdlSequenceAttributeType {
             get {
                 return s_idlSequenceAttributeType;
+            }
+        }
+
+        /// <summary>caches typeof(IdlArrayAttribute)</summary>        
+        public static Type IdlArrayAttributeType {
+            get {
+                return s_idlArrayAttributeType;
             }
         }
         
@@ -576,18 +584,18 @@ namespace Ch.Elca.Iiop.Util {
         /// checks, if thrown is part of the raises attributes (the ThrowsIdlException attributes) of thrower
         /// </summary>        
         public static bool IsExceptionInRaiseAttributes(Exception thrown, MethodInfo thrower) {
-        	AttributeExtCollection methodAttributes =
-        		ReflectionHelper.GetCustomAttriutesForMethod(thrower, true);
-        	foreach (Attribute attr in methodAttributes) {
-        		if (ReflectionHelper.ThrowsIdlExceptionAttributeType.
-        		    IsAssignableFrom(attr.GetType())) {
-        			if (((ThrowsIdlExceptionAttribute)attr).ExceptionType.
-        			    Equals(thrown.GetType())) {
-        				return true;
-        			}
-        		}
-        	}
-        	return false;
+            AttributeExtCollection methodAttributes =
+                ReflectionHelper.GetCustomAttriutesForMethod(thrower, true);
+            foreach (Attribute attr in methodAttributes) {
+                if (ReflectionHelper.ThrowsIdlExceptionAttributeType.
+                    IsAssignableFrom(attr.GetType())) {
+                    if (((ThrowsIdlExceptionAttribute)attr).ExceptionType.
+                        Equals(thrown.GetType())) {
+                        return true;
+                    }
+                }
+            }
+            return false;
         }        
         
         #endregion SMethods
