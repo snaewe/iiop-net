@@ -168,10 +168,10 @@ public class MetaDataGenerator implements IDLParserVisitor {
         #endregion IConstructors
         #region IMethods
 
-        public TypeBuilder getContainterType() {
+        public TypeBuilder GetContainterType() {
             return m_containerType;
         }
-        public Scope getBuildScope() {
+        public Scope GetBuildScope() {
             return m_buildScope;
         }
 
@@ -374,9 +374,9 @@ public class MetaDataGenerator implements IDLParserVisitor {
         Trace.WriteLine("accepting module with ident: " + node.getIdent());
         BuildInfo info = (BuildInfo) data;
         // info contains the scope this module is defined in
-        Scope enclosingScope = info.getBuildScope();
+        Scope enclosingScope = info.GetBuildScope();
         Scope moduleScope = enclosingScope.getChildScope(node.getIdent());
-        BuildInfo modInfo = new BuildInfo(moduleScope, info.getContainterType());
+        BuildInfo modInfo = new BuildInfo(moduleScope, info.GetContainterType());
         node.childrenAccept(this, modInfo);
         Trace.WriteLine("module with ident sucessfully accepted: " + node.getIdent());
         return null;
@@ -436,7 +436,7 @@ public class MetaDataGenerator implements IDLParserVisitor {
     public Object visit(ASTinterface_dcl node, Object data) {
         checkParameterForBuildInfo(data, node);
         // data contains the scope, this interface is declared in
-        Scope enclosingScope = ((BuildInfo) data).getBuildScope();
+        Scope enclosingScope = ((BuildInfo) data).GetBuildScope();
         
         
         // an IDL concrete interface
@@ -444,7 +444,10 @@ public class MetaDataGenerator implements IDLParserVisitor {
         ASTinterface_header header = (ASTinterface_header)node.jjtGetChild(0);
         Symbol forSymbol = enclosingScope.getSymbol(header.getIdent());
         // check if a type declaration exists from a previous run
-        if (checkSkip(forSymbol)) { registerSkipped(forSymbol, false); return null; }
+        if (checkSkip(forSymbol)) { 
+            registerSkipped(forSymbol, false); 
+            return null; 
+        }
 
         // retrieve first types for the inherited
         System.Type[] interfaces = (System.Type[])header.jjtAccept(this, data);
@@ -470,11 +473,14 @@ public class MetaDataGenerator implements IDLParserVisitor {
      */
     public Object visit(ASTforward_dcl node, Object data) {
         checkParameterForBuildInfo(data, node);
-        Scope enclosingScope = ((BuildInfo) data).getBuildScope();
+        Scope enclosingScope = ((BuildInfo) data).GetBuildScope();
         // create only the type-builder, but don't call createType()
         Symbol forSymbol = enclosingScope.getSymbol(node.getIdent());
         // check if type is known from a previous run over a parse tree --> if so: skip
-        if (checkSkip(forSymbol)) { registerSkipped(forSymbol, true); return null; }
+        if (checkSkip(forSymbol)) { 
+            registerSkipped(forSymbol, true); 
+            return null; 
+        }
         
         String fullyQualName = enclosingScope.getFullyQualifiedNameForSymbol(forSymbol.getSymbolName());
         if (!(m_typeManager.IsTypeDeclarded(forSymbol))) { // ignore fwd-decl if type is already declared, if not generate type for fwd decl
@@ -573,7 +579,7 @@ public class MetaDataGenerator implements IDLParserVisitor {
     public Object visit(ASTscoped_name node, Object data) {
         checkParameterForBuildInfo(data, node);
         LinkedList parts = node.getNameParts();
-        Scope currentScope = ((BuildInfo) data).getBuildScope();
+        Scope currentScope = ((BuildInfo) data).GetBuildScope();
         if (node.hasFileScope()) { currentScope = m_symbolTable.getTopScope(); }
         for (int i = 0; i < parts.size() - 1; i++) {
             // resolve scopes
@@ -712,7 +718,7 @@ public class MetaDataGenerator implements IDLParserVisitor {
     public Object visit(ASTvalue_decl node, Object data) {
         checkParameterForBuildInfo(data, node);
         // data contains the scope, this value type is declared in
-        Scope enclosingScope = ((BuildInfo) data).getBuildScope();
+        Scope enclosingScope = ((BuildInfo) data).GetBuildScope();
         // an IDL concrete value type
         // get the header
         ASTvalue_header header = (ASTvalue_header)node.jjtGetChild(0);
@@ -769,7 +775,7 @@ public class MetaDataGenerator implements IDLParserVisitor {
     public Object visit(ASTvalue_abs_decl node, Object data) {
         checkParameterForBuildInfo(data, node);
         // data contains the scope, this value type is declared in
-        Scope enclosingScope = ((BuildInfo) data).getBuildScope();
+        Scope enclosingScope = ((BuildInfo) data).GetBuildScope();
         // an IDL abstract value type
         
         Symbol forSymbol = enclosingScope.getSymbol(node.getIdent());
@@ -809,7 +815,7 @@ public class MetaDataGenerator implements IDLParserVisitor {
      */
     public Object visit(ASTvalue_box_decl node, Object data) {
         checkParameterForBuildInfo(data, node);
-        Scope enclosingScope = ((BuildInfo) data).getBuildScope();
+        Scope enclosingScope = ((BuildInfo) data).GetBuildScope();
         Symbol forSymbol = enclosingScope.getSymbol(node.getIdent());
         // check if type is known from a previous run over a parse tree --> if so: skip
         if (checkSkip(forSymbol)) { registerSkipped(forSymbol, false); return null; }
@@ -836,7 +842,7 @@ public class MetaDataGenerator implements IDLParserVisitor {
     public Object visit(ASTvalue_forward_decl node, Object data) {
         checkParameterForBuildInfo(data, node);
         // is possible to do with reflection emit, because interface and class inheritance can be specified later on with setParent() and AddInterfaceImplementation()
-        Scope enclosingScope = ((BuildInfo) data).getBuildScope();
+        Scope enclosingScope = ((BuildInfo) data).GetBuildScope();
         Symbol forSymbol = enclosingScope.getSymbol(node.getIdent());
         // check if type is known from a previous run over a parse tree --> if so: skip
         if (checkSkip(forSymbol)) { registerSkipped(forSymbol, true); return null; }
@@ -940,7 +946,7 @@ public class MetaDataGenerator implements IDLParserVisitor {
     public Object visit(ASTstate_member node, Object data) {
         checkParameterForBuildInfo(data, node);
         BuildInfo info = (BuildInfo) data;
-        TypeBuilder builder = info.getContainterType();
+        TypeBuilder builder = info.GetContainterType();
         ASTtype_spec typeSpecNode = (ASTtype_spec)node.jjtGetChild(0);
         TypeContainer fieldType = (TypeContainer)typeSpecNode.jjtAccept(this, info);
         // special handling for BoxedValue types --> unbox it
@@ -1135,7 +1141,7 @@ public class MetaDataGenerator implements IDLParserVisitor {
      */
     public Object visit(ASTtype_declarator node, Object data) {
         checkParameterForBuildInfo(data, node);
-        Scope currentScope = ((BuildInfo) data).getBuildScope();
+        Scope currentScope = ((BuildInfo) data).GetBuildScope();
         TypeContainer typeUsedInDefine = (TypeContainer) node.jjtGetChild(0).jjtAccept(this, data);
         Node declarators = node.jjtGetChild(1);    
         for (int i = 0; i < declarators.jjtGetNumChildren(); i++) {
@@ -1456,32 +1462,32 @@ public class MetaDataGenerator implements IDLParserVisitor {
     public Object visit(ASTstruct_type node, Object data) {
         checkParameterForBuildInfo(data, node);
         BuildInfo buildInfo = (BuildInfo) data;
-        Symbol forSymbol = buildInfo.getBuildScope().getSymbol(node.getIdent());
+        Symbol forSymbol = buildInfo.GetBuildScope().getSymbol(node.getIdent());
         // check if type is known from a previous run over a parse tree --> if so: skip
         if (checkSkip(forSymbol)) { registerSkipped(forSymbol, false); return null; }
         
         TypeBuilder structToCreate = null;
         BuildInfo thisTypeInfo = null;
         TypeAttributes typeAttrs = TypeAttributes.Class | TypeAttributes.Public | TypeAttributes.Serializable | TypeAttributes.BeforeFieldInit | TypeAttributes.SequentialLayout | TypeAttributes.Sealed;
-        if (buildInfo.getContainterType() == null) {
+        if (buildInfo.GetContainterType() == null) {
             // independent dcl
-            ModuleBuilder curModBuilder = m_modBuilderManager.getOrCreateModuleBuilderFor(buildInfo.getBuildScope());
-            String fullyQualName = buildInfo.getBuildScope().getFullyQualifiedNameForSymbol(forSymbol.getSymbolName());
+            ModuleBuilder curModBuilder = m_modBuilderManager.getOrCreateModuleBuilderFor(buildInfo.GetBuildScope());
+            String fullyQualName = buildInfo.GetBuildScope().getFullyQualifiedNameForSymbol(forSymbol.getSymbolName());
             structToCreate = curModBuilder.DefineType(fullyQualName, typeAttrs, System.ValueType.class.ToType(), new System.Type[] { IIdlEntity.class.ToType() });
-            thisTypeInfo = new BuildInfo(buildInfo.getBuildScope(), structToCreate);
+            thisTypeInfo = new BuildInfo(buildInfo.GetBuildScope(), structToCreate);
         } else {
             // nested dcl
-            if (buildInfo.getContainterType().get_IsClass()) {
-                String fullyQualName = buildInfo.getBuildScope().getFullyQualifiedNameForSymbol(forSymbol.getSymbolName());
-                structToCreate = buildInfo.getContainterType().DefineNestedType(fullyQualName, typeAttrs, System.ValueType.class.ToType(), new System.Type[] { IIdlEntity.class.ToType() });
+            if (buildInfo.GetContainterType().get_IsClass()) {
+                String fullyQualName = buildInfo.GetBuildScope().getFullyQualifiedNameForSymbol(forSymbol.getSymbolName());
+                structToCreate = buildInfo.GetContainterType().DefineNestedType(fullyQualName, typeAttrs, System.ValueType.class.ToType(), new System.Type[] { IIdlEntity.class.ToType() });
             } else {
                 // only a class can contain nested types --> therefore use another solution than a nested type for container types which are not classes
-                Scope nestedScope = getScopeForNested(buildInfo.getBuildScope(), forSymbol);
+                Scope nestedScope = getScopeForNested(buildInfo.GetBuildScope(), forSymbol);
                 String fullyQualName = nestedScope.getFullyQualifiedNameForSymbol(forSymbol.getSymbolName());
                 ModuleBuilder curModBuilder = m_modBuilderManager.getOrCreateModuleBuilderFor(nestedScope);
                 structToCreate = curModBuilder.DefineType(fullyQualName, typeAttrs, System.ValueType.class.ToType(), new System.Type[] { IIdlEntity.class.ToType() });
             }
-            thisTypeInfo = new BuildInfo(buildInfo.getBuildScope(), structToCreate);
+            thisTypeInfo = new BuildInfo(buildInfo.GetBuildScope(), structToCreate);
         }
 
         // add fileds
@@ -1512,7 +1518,7 @@ public class MetaDataGenerator implements IDLParserVisitor {
     public Object visit(ASTmember node, Object data) {
         checkParameterForBuildInfo(data, node);
         BuildInfo info = (BuildInfo) data;
-        TypeBuilder builder = info.getContainterType();
+        TypeBuilder builder = info.GetContainterType();
         ASTtype_spec typeSpecNode = (ASTtype_spec)node.jjtGetChild(0);
         TypeContainer fieldType = (TypeContainer)typeSpecNode.jjtAccept(this, info);
         // special handling for BoxedValue types --> unbox it
@@ -1583,25 +1589,25 @@ public class MetaDataGenerator implements IDLParserVisitor {
     public Object visit(ASTenum_type node, Object data) {
         checkParameterForBuildInfo(data, node);
         BuildInfo buildInfo = (BuildInfo) data;
-        Symbol forSymbol = buildInfo.getBuildScope().getSymbol(node.getIdent());
+        Symbol forSymbol = buildInfo.GetBuildScope().getSymbol(node.getIdent());
         // check if type is known from a previous run over a parse tree --> if so: skip
         if (checkSkip(forSymbol)) { registerSkipped(forSymbol, false); return null; }
 
         TypeBuilder enumToCreate = null;
         TypeAttributes typeAttrs = TypeAttributes.Class | TypeAttributes.Public | TypeAttributes.Sealed | TypeAttributes.Serializable;
-        if (buildInfo.getContainterType() == null) {
+        if (buildInfo.GetContainterType() == null) {
             // independent dcl
-            String fullyQualName = buildInfo.getBuildScope().getFullyQualifiedNameForSymbol(forSymbol.getSymbolName());
-            ModuleBuilder curModBuilder = m_modBuilderManager.getOrCreateModuleBuilderFor(buildInfo.getBuildScope());
+            String fullyQualName = buildInfo.GetBuildScope().getFullyQualifiedNameForSymbol(forSymbol.getSymbolName());
+            ModuleBuilder curModBuilder = m_modBuilderManager.getOrCreateModuleBuilderFor(buildInfo.GetBuildScope());
             enumToCreate = curModBuilder.DefineType(fullyQualName, typeAttrs, System.Enum.class.ToType());
         } else {
             // nested dcl
-            if (buildInfo.getContainterType().get_IsClass()) {
-                String fullyQualName = buildInfo.getBuildScope().getFullyQualifiedNameForSymbol(forSymbol.getSymbolName());
-                enumToCreate = buildInfo.getContainterType().DefineNestedType(fullyQualName, typeAttrs, System.Enum.class.ToType());
+            if (buildInfo.GetContainterType().get_IsClass()) {
+                String fullyQualName = buildInfo.GetBuildScope().getFullyQualifiedNameForSymbol(forSymbol.getSymbolName());
+                enumToCreate = buildInfo.GetContainterType().DefineNestedType(fullyQualName, typeAttrs, System.Enum.class.ToType());
             } else {
                 // only a class can contain nested types --> therefore use another solution than a nested type for container types which are not classes
-                Scope nestedScope = getScopeForNested(buildInfo.getBuildScope(), forSymbol);
+                Scope nestedScope = getScopeForNested(buildInfo.GetBuildScope(), forSymbol);
                 String fullyQualName = nestedScope.getFullyQualifiedNameForSymbol(forSymbol.getSymbolName());
                 ModuleBuilder curModBuilder = m_modBuilderManager.getOrCreateModuleBuilderFor(nestedScope);
                 enumToCreate = curModBuilder.DefineType(fullyQualName, typeAttrs, System.Enum.class.ToType());    
@@ -1713,7 +1719,7 @@ public class MetaDataGenerator implements IDLParserVisitor {
     public Object visit(ASTattr_dcl node, Object data) {
         checkParameterForBuildInfo(data, node);
         BuildInfo info = (BuildInfo) data;
-        TypeBuilder builder = info.getContainterType();
+        TypeBuilder builder = info.GetContainterType();
         ASTparam_type_spec typeSpecNode = (ASTparam_type_spec)node.jjtGetChild(0);
         TypeContainer propType = (TypeContainer)typeSpecNode.jjtAccept(this, info);
         // special handling for BoxedValue types --> unbox it
@@ -1760,32 +1766,32 @@ public class MetaDataGenerator implements IDLParserVisitor {
     public Object visit(ASTexcept_dcl node, Object data) {
         checkParameterForBuildInfo(data, node);
         BuildInfo buildInfo = (BuildInfo) data;
-        Symbol forSymbol = buildInfo.getBuildScope().getSymbol(node.getIdent());
+        Symbol forSymbol = buildInfo.GetBuildScope().getSymbol(node.getIdent());
         // check if type is known from a previous run over a parse tree --> if so: skip
         if (checkSkip(forSymbol)) { registerSkipped(forSymbol, false); return null; }
 
         TypeBuilder exceptToCreate = null;
         BuildInfo thisTypeInfo = null;
         
-        if (buildInfo.getContainterType() == null) {
+        if (buildInfo.GetContainterType() == null) {
             // independent dcl
-            String fullyQualName = buildInfo.getBuildScope().getFullyQualifiedNameForSymbol(forSymbol.getSymbolName());
-            ModuleBuilder curModBuilder = m_modBuilderManager.getOrCreateModuleBuilderFor(buildInfo.getBuildScope());
+            String fullyQualName = buildInfo.GetBuildScope().getFullyQualifiedNameForSymbol(forSymbol.getSymbolName());
+            ModuleBuilder curModBuilder = m_modBuilderManager.getOrCreateModuleBuilderFor(buildInfo.GetBuildScope());
             exceptToCreate = curModBuilder.DefineType(fullyQualName, TypeAttributes.Class | TypeAttributes.Public, AbstractUserException.class.ToType());
-            thisTypeInfo = new BuildInfo(buildInfo.getBuildScope(), exceptToCreate);
+            thisTypeInfo = new BuildInfo(buildInfo.GetBuildScope(), exceptToCreate);
         } else {
             // nested dcl
-            if (buildInfo.getContainterType().get_IsClass()) {
-                String fullyQualName = buildInfo.getBuildScope().getFullyQualifiedNameForSymbol(forSymbol.getSymbolName());                
-                exceptToCreate = buildInfo.getContainterType().DefineNestedType(fullyQualName, TypeAttributes.Class | TypeAttributes.NestedPublic, AbstractUserException.class.ToType());
+            if (buildInfo.GetContainterType().get_IsClass()) {
+                String fullyQualName = buildInfo.GetBuildScope().getFullyQualifiedNameForSymbol(forSymbol.getSymbolName());                
+                exceptToCreate = buildInfo.GetContainterType().DefineNestedType(fullyQualName, TypeAttributes.Class | TypeAttributes.NestedPublic, AbstractUserException.class.ToType());
             } else {
                 // only a class can contain nested types --> therefore use another solution than a nested type for container types which are not classes
-                Scope nestedScope = getScopeForNested(buildInfo.getBuildScope(), forSymbol);
+                Scope nestedScope = getScopeForNested(buildInfo.GetBuildScope(), forSymbol);
                 String fullyQualName = nestedScope.getFullyQualifiedNameForSymbol(forSymbol.getSymbolName());
                 ModuleBuilder curModBuilder = m_modBuilderManager.getOrCreateModuleBuilderFor(nestedScope);
                 exceptToCreate = curModBuilder.DefineType(fullyQualName, TypeAttributes.Class | TypeAttributes.Public, AbstractUserException.class.ToType());                
             }
-            thisTypeInfo = new BuildInfo(buildInfo.getBuildScope(), exceptToCreate);
+            thisTypeInfo = new BuildInfo(buildInfo.GetBuildScope(), exceptToCreate);
         }
         String repId = getRepIdForException(forSymbol);
         addRepIdAttribute(exceptToCreate, repId);
@@ -1842,7 +1848,7 @@ public class MetaDataGenerator implements IDLParserVisitor {
         // name
         String methodName = node.getIdent();
         // ready to create method
-        TypeBuilder typeAtBuild = buildInfo.getContainterType();
+        TypeBuilder typeAtBuild = buildInfo.GetContainterType();
         MethodBuilder methodBuild = typeAtBuild.DefineMethod(methodName,  MethodAttributes.Virtual | MethodAttributes.Abstract | MethodAttributes.Public | MethodAttributes.HideBySig, returnType.getCLSType(), paramTypes);
         // define the paramter-names / attributes
         for (int i = 0; i < params.length; i++) {
