@@ -191,9 +191,7 @@ namespace Ch.Elca.Iiop.MessageHandling {
 
         #region SFields
 
-        private static GiopMessageBodySerialiser s_singleton = new GiopMessageBodySerialiser();
-               
-        private static Type s_iIdlEntityType = typeof(IIdlEntity);
+        private static GiopMessageBodySerialiser s_singleton = new GiopMessageBodySerialiser();               
         
         #endregion SFields
         #region SMethods
@@ -318,7 +316,7 @@ namespace Ch.Elca.Iiop.MessageHandling {
         private MethodInfo DecodeObjectOperation(string methodName, Type serverType) {
             // method name mapping
             string resultMethodName;
-            if (s_iIdlEntityType.IsAssignableFrom(serverType)) {
+            if (ReflectionHelper.IIdlEntityType.IsAssignableFrom(serverType)) {
                 resultMethodName = methodName;
                 // an interface mapped to from Idl is implemented by server ->
                 // compensate 3.2.3.1: removal of _ for names, which clashes with CLS id's
@@ -489,19 +487,8 @@ namespace Ch.Elca.Iiop.MessageHandling {
             targetStream.WritePadding(3); // reserved bytes
             WriteTarget(targetStream, targetIor.ObjectKey, version); // write the target-info
 
-            Type targetType = Type.GetType(methodCall.TypeName);
-            string methodName = methodCall.MethodName;
-            // for a pseudo-object operation, do not remove the leading underscore
-            if (!StandardCorbaOps.CheckIfStandardOp(methodName)) {
-                methodName = IdlNaming.ReverseIdlToClsNameMapping(methodCall.MethodName);
-            }
-            // check for IIdlEntity, if not -> map first CLS  method name to IDL method name            
-            if (!s_iIdlEntityType.IsAssignableFrom(targetType)) {
-                // do a CLS to IDL mapping, because .NET server expect this for every client, also for a
-                // native .NET client, which uses not CLS -> IDL -> CLS mapping
-                bool isOverloaded = RemotingServices.IsMethodOverloaded(methodCall);
-                methodName = IdlNaming.MapClsMethodNameToIdlName((MethodInfo)methodCall.MethodBase, isOverloaded);
-            }
+            string methodName = IdlNaming.GetRequestMethodName((MethodInfo)methodCall.MethodBase,
+                                                               RemotingServices.IsMethodOverloaded(methodCall));
             targetStream.WriteString(methodName); // write the method name
             
             if ((version.Major == 1) && (version.Minor <= 1)) { // GIOP 1.0 / 1.1
