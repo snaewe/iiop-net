@@ -331,6 +331,21 @@ namespace Ch.Elca.Iiop.Marshalling {
     /// <summary>serializes object references</summary>
     public class ObjRefSerializer : Serialiser {
 
+        #region SFields
+        
+        private static Type s_iObjectType;
+        private static MethodInfo s_isAMethod;
+        
+        #endregion SFields
+        #region SConstructor
+        
+        static ObjRefSerializer() {
+             s_iObjectType = typeof(omg.org.CORBA.IObject);
+             s_isAMethod = s_iObjectType.GetMethod("_is_a", BindingFlags.Public |
+                                                            BindingFlags.Instance);
+        }
+        
+        #endregion SConstructor        
         #region IMethods
         
         public override void Serialise(Type formal, object actual, AttributeExtCollection attributes,
@@ -441,20 +456,42 @@ namespace Ch.Elca.Iiop.Marshalling {
                 interfaceType = typeof(MarshalByRefObject);
             }
             if (interfaceType == null) { 
-                // unknown repository id encountered:  ior.TypID
-                throw new INTF_REPOS(1414, CompletionStatus.Completed_MayBe);
+                if (CheckAssignableRemote(formal, url)) {
+                    interfaceType = formal;
+                } else {
+                    Trace.WriteLine("unknown incompatible type-id in IOR: " + ior.TypID);
+                    // unknown repository id encountered:  ior.TypID
+                    // and is_a check failed
+                    throw new INTF_REPOS(1414, CompletionStatus.Completed_MayBe);
+                }
             }
 
-            if ((!(formal.Equals(typeof(MarshalByRefObject)))) && !(formal.IsAssignableFrom(interfaceType))) {
-                // for formal-parameter MarshalByRefObject everything is possible, the other formal types must be checked    
-                Trace.WriteLine("received obj-reference is not compatible with the required formal parameter, formal: " +
-                                formal + ", received: " + interfaceType);
-                throw new BAD_PARAM(20010, CompletionStatus.Completed_MayBe);
+            if ((!(formal.Equals(typeof(MarshalByRefObject)))) && 
+                 !(formal.IsAssignableFrom(interfaceType))) {
+                // for formal-parameter MarshalByRefObject everything is possible, 
+                // the other formal types must be checked
+                if (CheckAssignableRemote(formal, url)) {
+                    interfaceType = formal;
+                } else {
+                    Trace.WriteLine("received obj-reference is not compatible with " + 
+                                    "the required formal parameter, formal: " +
+                                    formal + ", received: " + interfaceType);
+                    throw new BAD_PARAM(20010, CompletionStatus.Completed_MayBe);
+                }
             }
             
             // create a proxy
             object proxy = RemotingServices.Connect(interfaceType, url);
             return proxy;
+        }
+        
+        /// <summary>if compatibility is not checkable with type information included in
+        /// IOR, call _is_a method to check.</summary>
+        private bool CheckAssignableRemote(Type formal, string url) {
+            object proxy = RemotingServices.Connect(s_iObjectType, url);
+            bool isAssignable = (bool)s_isAMethod.Invoke(proxy, 
+                                                         new object[] { Repository.GetRepositoryID(formal)});
+            return isAssignable;
         }
 
         #endregion IMethods

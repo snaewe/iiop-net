@@ -94,4 +94,8 @@ public interface TestService extends java.rmi.Remote {
     
     public _TestStartByUnderscore[] TestArrayWithElemTypeNameStartByUnderscore(int nrOfElems, int val) throws RemoteException;
 
+    public TestSimpleInterface1 GetSimpleService1() throws RemoteException;
+    public TestSimpleInterface2 GetSimpleService2() throws RemoteException;
+
+
 }

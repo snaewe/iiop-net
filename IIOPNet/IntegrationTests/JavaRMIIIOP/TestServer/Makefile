@@ -25,15 +25,17 @@ $(bin)$(TestServiceDir)_TestServiceImpl_Tie.class $(bin)$(TestServiceDir)_TestSe
     cd bin
     rmic -iiop Ch.Elca.Iiop.IntegrationTests.TestServiceImpl
     rmic -iiop Ch.Elca.Iiop.IntegrationTests.AdderImpl
+    rmic -iiop Ch.Elca.Iiop.IntegrationTests.TestSimpleIfImpl
     cd ..
 
-build-idl: $(IDL)$(TestServiceDir)TestService.idl $(IDL)$(TestServiceDir)Adder.idl
+build-idl: $(IDL)$(TestServiceDir)TestService.idl $(IDL)$(TestServiceDir)Adder.idl $(IDL)$(TestServiceDir)TestSimpleInterface1.idl $(IDL)$(TestServiceDir)TestSimpleInterface2.idl
 
-$(IDL)$(TestServiceDir)TestService.idl $(IDL)$(TestServiceDir)Adder.idl: $(bin)$(TestServiceDir)TestServiceImpl.class $(bin)$(TestServiceDir)AdderImpl.class
+$(IDL)$(TestServiceDir)TestService.idl $(IDL)$(TestServiceDir)Adder.idl $(IDL)$(TestServiceDir)TestSimpleInterface1.idl $(IDL)$(TestServiceDir)TestSimpleInterface2.idl: $(bin)$(TestServiceDir)TestServiceImpl.class $(bin)$(TestServiceDir)AdderImpl.class
     if not exist $(IDL) mkdir $(IDL)
     cd bin
     rmic -d ..\$(IDL) -idl Ch.Elca.Iiop.IntegrationTests.TestServiceImpl
     rmic -d ..\$(IDL) -idl Ch.Elca.Iiop.IntegrationTests.AdderImpl
+    rmic -d ..\$(IDL) -idl Ch.Elca.Iiop.IntegrationTests.TestSimpleIfImpl
     cd ..
 
 start-server:

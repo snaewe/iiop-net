@@ -405,7 +405,11 @@ namespace Ch.Elca.Iiop.MessageHandling {
             WriteTarget(targetStream, targetIor.ObjectKey, version); // write the target-info
 
             Type targetType = Type.GetType(methodCall.TypeName);
-            string methodName = IdlNaming.ReverseIdlToClsNameMapping(methodCall.MethodName);
+            string methodName = methodCall.MethodName;
+            // for a pseudo-object operation, do not remove the leading underscore
+            if (!StandardCorbaOps.CheckIfStandardOp(methodName)) {
+                methodName = IdlNaming.ReverseIdlToClsNameMapping(methodCall.MethodName);
+            }
             // check for IIdlEntity, if not -> map first CLS  method name to IDL method name            
             if (!s_iIdlEntityType.IsAssignableFrom(targetType)) {
                 // do a CLS to IDL mapping, because .NET server expect this for every client, also for a

@@ -347,6 +347,19 @@ namespace Ch.Elca.Iiop.IntegrationTests {
         public bool CheckEqualityWithServiceV2(TestService toCheck) {
         	return toCheck.Equals(this);
         }
+
+        public TestSimpleInterface1 GetSimpleService1() {
+            return new TestSimpleIfImpl();
+        }
+
+        public TestSimpleInterface2 GetSimpleService2() {
+            return new TestSimpleIfImpl();            
+        }
+
+        public TestSimpleInterface1 GetWhenSuppIfMissing() {
+            return new TestSimpleIfImplMissingSupIf();            
+        }
+
         
         public override object InitializeLifetimeService() {
             // live forever
@@ -354,5 +367,44 @@ namespace Ch.Elca.Iiop.IntegrationTests {
         }
 
     }
+
+    /// <summary>Simple interface used to check obj-ref deserialisation, if compatibility is not
+    /// checkable without server object help</summary>
+    public interface TestSimpleInterface1 {
+        bool ReturnTrue();
+    }
+
+    /// <summary>Simple interface used to check obj-ref deserialisation, if compatibility is not
+    /// checkable without server object help</summary>
+    public interface TestSimpleInterface2 {
+        bool ReturnFalse();
+    }
+
+
+    [SupportedInterfaceAttribute(typeof(TestSimpleInterface1))]
+    public class TestSimpleIfImpl : MarshalByRefObject, TestSimpleInterface1, TestSimpleInterface2 {
+
+        public bool ReturnTrue() {
+            return true;
+        }
+
+        public bool ReturnFalse() {
+            return false;
+        }
+
+    }
+
+    public class TestSimpleIfImplMissingSupIf : MarshalByRefObject, TestSimpleInterface1, TestSimpleInterface2 {
+
+        public bool ReturnTrue() {
+            return true;
+        }
+
+        public bool ReturnFalse() {
+            return false;
+        }
+
+    }
+
 
 }

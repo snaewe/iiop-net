@@ -586,6 +586,34 @@ namespace Ch.Elca.Iiop.IntegrationTests {
             Assertion.AssertEquals(arg, result);
         }
 
+        /// <summary>checks, if channel uses is_a to check interface compatiblity on IOR deser,
+        /// if other checks don't work</summary>
+        [Test]
+        public void TestInterfaceCompMbrDeser() {
+	    TestSimpleInterface1 proxy1 = (TestSimpleInterface1)m_testService.GetSimpleService1();
+            Assertion.AssertNotNull("testSimpleService1 ref not received", proxy1);
+            Assertion.AssertEquals(true, proxy1.ReturnTrue());
+
+	    TestSimpleInterface2 proxy2 = (TestSimpleInterface2)m_testService.GetSimpleService2();
+            Assertion.AssertNotNull("testSimpleService2 ref not received", proxy2);
+            Assertion.AssertEquals(false, proxy2.ReturnFalse());
+
+            TestSimpleInterface1 proxy3 = (TestSimpleInterface1)m_testService.GetWhenSuppIfMissing();
+            Assertion.AssertNotNull("testSimpleService1 ref not received", proxy3);
+            Assertion.AssertEquals(true, proxy3.ReturnTrue());
+                        
+        }
+
+        [Test]
+        public void TestIsACall() {
+	    omg.org.CORBA.IObject proxy1 = (omg.org.CORBA.IObject)m_testService.GetSimpleService1();
+            Assertion.AssertNotNull("testSimpleService1 ref not received", proxy1);            
+            Assertion.AssertEquals(true, proxy1._is_a("IDL:Ch/Elca/Iiop/IntegrationTests/TestSimpleInterface1:1.0"));
+            
+            omg.org.CORBA.IObject proxy2 = (omg.org.CORBA.IObject)m_testService.GetSimpleService2();
+            Assertion.AssertNotNull("testSimpleService2 ref not received", proxy2);
+            Assertion.AssertEquals(true, proxy2._is_a("IDL:Ch/Elca/Iiop/IntegrationTests/TestSimpleInterface2:1.0"));
+        }
 
     }
 

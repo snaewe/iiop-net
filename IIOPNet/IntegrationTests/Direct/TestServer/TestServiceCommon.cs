@@ -235,7 +235,25 @@ namespace Ch.Elca.Iiop.IntegrationTests {
         bool CheckEqualityWithService(MarshalByRefObject toCheck);
         
         bool CheckEqualityWithServiceV2(TestService toCheck);
+
+        TestSimpleInterface1 GetSimpleService1();
+        TestSimpleInterface2 GetSimpleService2();
+
+        TestSimpleInterface1 GetWhenSuppIfMissing();
         
+    }
+
+    
+    /// <summary>Simple interface used to check obj-ref deserialisation, if compatibility is not
+    /// checkable without server object help</summary>
+    public interface TestSimpleInterface1 {
+        bool ReturnTrue();
+    }
+
+    /// <summary>Simple interface used to check obj-ref deserialisation, if compatibility is not
+    /// checkable without server object help</summary>
+    public interface TestSimpleInterface2 {
+        bool ReturnFalse();
     }
 
 }

@@ -40,7 +40,7 @@ namespace Ch.Elca.Iiop {
     /// <summary>
     /// this class is a handler for the standard corba-ops like _is_a
     /// </summary>
-    public class StandardCorbaOps : MarshalByRefObject {
+    public class StandardCorbaOps : MarshalByRefObject, omg.org.CORBA.IObject {
 
         #region Constants
 
@@ -63,7 +63,9 @@ namespace Ch.Elca.Iiop {
             string standardMethodName = "_is_a";
             s_standardOpList.Add(standardMethodName);
         	s_opToCallTable.Add(standardMethodName, 
-        	                    s_type.GetMethod(MapMethodName(standardMethodName), BindingFlags.Public | BindingFlags.Instance));
+        	                    s_type.GetMethod(MapMethodName(standardMethodName), 
+        	                                     BindingFlags.Public | BindingFlags.Instance));
+            
             // TODO: other standard ops
         }
 
@@ -143,4 +145,19 @@ namespace Ch.Elca.Iiop {
         #endregion IMethods
 
     }
+}
+
+
+namespace omg.org.CORBA {
+
+
+    /// <summary>mapping of the CORBA Object interface</summary>
+    [InterfaceType(IdlTypeInterface.ConcreteInterface)]
+    public interface IObject : IIdlEntity {
+        
+        bool _is_a([WideCharAttribute(false)][StringValueAttribute]string 
+                   repositoryId);
+        
+    }
+
 }

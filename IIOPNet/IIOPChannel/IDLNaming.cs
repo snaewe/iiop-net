@@ -162,6 +162,9 @@ namespace Ch.Elca.Iiop.Idl {
         /// </summary>
         internal static MethodInfo FindClsMethodForOverloadedMethodIdlName(string idlName,
                                                                            Type serverType) {            
+            if (idlName.IndexOf("__") < 0) {
+                return null;
+            }
             string methodName = idlName.Substring(0, idlName.IndexOf("__"));
             methodName = ReverseClsToIdlNameMapping(methodName);
             MethodInfo[] methods = serverType.GetMethods(BindingFlags.Public | BindingFlags.Instance);

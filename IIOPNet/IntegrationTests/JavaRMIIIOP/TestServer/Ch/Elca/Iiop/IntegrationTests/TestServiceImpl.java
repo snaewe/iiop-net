@@ -209,5 +209,12 @@ public class TestServiceImpl extends PortableRemoteObject implements TestService
         return result;
     }
 
+    public TestSimpleInterface1 GetSimpleService1() throws RemoteException {
+        return new TestSimpleIfImpl();        
+    }
+    
+    public TestSimpleInterface2 GetSimpleService2() throws RemoteException {
+        return new TestSimpleIfImpl();        
+    }
         
 }

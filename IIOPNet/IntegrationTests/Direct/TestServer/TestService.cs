@@ -285,6 +285,46 @@ namespace Ch.Elca.Iiop.IntegrationTests {
             return null;
         }
 
+        public TestSimpleInterface1 GetSimpleService1() {
+            return new TestSimpleIfImpl();
+        }
+
+        public TestSimpleInterface2 GetSimpleService2() {
+            return new TestSimpleIfImpl();            
+        }
+
+        public TestSimpleInterface1 GetWhenSuppIfMissing() {
+            return new TestSimpleIfImplMissingSupIf();            
+        }
+
+
     }
+
+    [SupportedInterfaceAttribute(typeof(TestSimpleInterface1))]
+    public class TestSimpleIfImpl : MarshalByRefObject, TestSimpleInterface1, TestSimpleInterface2 {
+
+        public bool ReturnTrue() {
+            return true;
+        }
+
+        public bool ReturnFalse() {
+            return false;
+        }
+
+    }
+
+    public class TestSimpleIfImplMissingSupIf : MarshalByRefObject, TestSimpleInterface1, TestSimpleInterface2 {
+
+        public bool ReturnTrue() {
+            return true;
+        }
+
+        public bool ReturnFalse() {
+            return false;
+        }
+
+    }
+
+
 
 }
