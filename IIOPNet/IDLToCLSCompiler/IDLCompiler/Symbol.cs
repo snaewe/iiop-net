@@ -61,6 +61,15 @@ public abstract class Symbol {
         return m_symbolName;
     }
 
+    public string ConstructRepositoryId() {
+        string scopeIdParent = getDeclaredIn().ConstructRepositoryIDPart();
+        if (!scopeIdParent.Equals("")) {
+            scopeIdParent = scopeIdParent + "/";    
+        }
+        return "IDL:" + scopeIdParent + (!m_symbolName.StartsWith("_") ? m_symbolName : m_symbolName.Substring(1)) +
+               ":1.0";
+    }    
+
     #endregion IMethods
 
 }

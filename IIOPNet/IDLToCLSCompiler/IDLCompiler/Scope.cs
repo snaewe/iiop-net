@@ -210,14 +210,14 @@ public class Scope {
         return getScopeName() + "_package";     
     }
     
-	private String getTypeScopeName() {
+    private String getTypeScopeName() {
         // for a type scope, the nested name must be used, because types are always nested in a special namespace    
-	    if (!IsTypeScope()) {
-		    return m_scopeName;
-		} else {
-		    return getNestedScopeNameForScope();
-	    }
-	}
+        if (!IsTypeScope()) {
+            return m_scopeName;
+        } else {
+            return getNestedScopeNameForScope();
+        }
+    }
 
     /// <summary>returns the fully qualified CLS name of this scope (usable for type generation)</summary>
     /// <remarks>for type-scopes, returns the nested scope name, because this one is needed for type generation</remarks>
@@ -227,9 +227,9 @@ public class Scope {
         }
         Stack scopeStack = new Stack();        
         scopeStack.Push(getTypeScopeName());        
-		Scope parent = getParentScope();
+        Scope parent = getParentScope();
         while (parent.getParentScope() != null) {
-			scopeStack.Push(parent.getTypeScopeName());
+            scopeStack.Push(parent.getTypeScopeName());
             parent = parent.getParentScope();
         }
         
@@ -280,6 +280,18 @@ public class Scope {
             result += (scopeEnum.Current + "\n");
         }
         result += ("scope ends");
+        return result;
+    }
+
+    /// <summary>
+    /// constructs a repository id part for this scope and the parent scopes.
+    /// </summary>  
+    public virtual string ConstructRepositoryIDPart() {
+        string result = (!m_scopeName.StartsWith("_") ? m_scopeName : m_scopeName.Substring(1));
+        if (getParentScope() != null) { 
+             string parentIdPart = getParentScope().ConstructRepositoryIDPart();             
+             result = (!parentIdPart.Equals("") ? parentIdPart + "/" + result : result); 
+        }
         return result;
     }
 

@@ -61,6 +61,13 @@ public class PragmaScope : Scope {
         return result;
     }
 
+    /// <summary>
+    /// constructs a repository id part for this scope and the parent scopes.
+    /// </summary>  
+    public override string ConstructRepositoryIDPart() {
+        return getScopeName(); // special for pragma prefix; according to CORBA 2.6 standard, chapter 10.6.5.4        
+    }
+
     #endregion SMethods
 }
 

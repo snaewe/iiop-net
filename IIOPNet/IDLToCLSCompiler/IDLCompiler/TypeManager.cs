@@ -322,7 +322,12 @@ namespace Ch.Elca.Iiop.IdlCompiler.Action {
         }
         
         private void AddRepositoryIdAttribute(TypeBuilder typeBuild, Symbol typeSymbol) {
-            string repositoryId = FindRepositoryId(typeSymbol);    
+            string repositoryId = FindRepositoryId(typeSymbol);
+            if (repositoryId == null) {
+                // no repository id specified, create one from the idl, because of special name mappings
+                // creating a rep-id in Channel code can lead to the wrong one ...                
+                repositoryId = typeSymbol.ConstructRepositoryId();
+            }
             AddRepositoryIdAttribute(typeBuild, repositoryId);
         }
                 
