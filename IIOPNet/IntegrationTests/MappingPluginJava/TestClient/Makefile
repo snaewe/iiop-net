@@ -14,11 +14,11 @@ $(bin)IIOPChannel.dll: $(bin) $(IIOPCHANNEL)
         if exist $(IIOPCHANNELPDB) copy /y $(IIOPCHANNELPDB) $(bin)IIOPChannel.pdb
 
 $(bin)javaCollections.dll: $(bin) $(MAPPINGPLUGINDIR)\bin\javaCollections.dll
-	copy /y $(MAPPINGPLUGINDIR)\bin\javaCollections.* $(bin)
-	copy /y $(MAPPINGPLUGINDIR)\bin\_javaCollections*.netmodule $(bin)
+	copy /y $(MAPPINGPLUGINDIR)bin\javaCollections.* $(bin)
+	copy /y $(MAPPINGPLUGINDIR)bin\_javaCollections*.netmodule $(bin)
 
 $(bin)customCollectionMappings.dll: $(bin) $(MAPPINGPLUGINDIR)\bin\customCollectionMappings.dll
-	copy /y $(MAPPINGPLUGINDIR)\bin\customCollectionMappings.* $(bin)
+	copy /y $(MAPPINGPLUGINDIR)bin\customCollectionMappings.* $(bin)
 
 $(bin)customMapping.xml: $(bin) $(MAPPINGPLUGINDIR)customMapping.xml
 	copy /y $(MAPPINGPLUGINDIR)customMapping.xml $(bin)
