@@ -156,7 +156,7 @@ namespace Ch.Elca.Iiop.IntegrationTests {
         }
         
         public System.String[,] EchoMultiDimStringArray(System.String[,] arg) {
-        	return arg;
+            return arg;
         }
 
         public Adder RetrieveAdder() {
@@ -186,6 +186,10 @@ namespace Ch.Elca.Iiop.IntegrationTests {
 
         public TestSerializableClassD TestChangeSerilizableD(TestSerializableClassD arg, System.String newMessage) {
             arg.val1.Msg = newMessage;
+            return arg;
+        }
+        
+        public TestSerializableClassE TestEchoSerializableE(TestSerializableClassE arg) {
             return arg;
         }
 
@@ -250,7 +254,7 @@ namespace Ch.Elca.Iiop.IntegrationTests {
         
         /// <summary>checks, if inherited parameter attributes are considered correctly</summary>
         public System.String CheckParamAttrs(System.String arg) {
-        	return arg;
+            return arg;
         }
 
         public TestUnion EchoUnion(TestUnion arg) {
@@ -273,11 +277,11 @@ namespace Ch.Elca.Iiop.IntegrationTests {
         /// used to check, if a reference passed is equal to this object itself.
         /// </summary>
         public bool CheckEqualityWithService(MarshalByRefObject toCheck) {
-        	return toCheck.Equals(this);
+            return toCheck.Equals(this);
         }
         
         public bool CheckEqualityWithServiceV2(TestService toCheck) {
-        	return toCheck.Equals(this);
+            return toCheck.Equals(this);
         }
         
         public override object InitializeLifetimeService() {

@@ -70,7 +70,11 @@ namespace Ch.Elca.Iiop.IntegrationTests {
         public TestSerializableClassB1 val1;
         public TestSerializableClassB1 val2;
     }
-
+    
+    [Serializable]
+    public class TestSerializableClassE {
+        public TestSerializableClassE[] RecArrEntry;
+    }
 
     public class Adder : MarshalByRefObject {
         public System.Int32 Add(System.Int32 sum1, System.Int32 sum2) {
@@ -172,6 +176,8 @@ namespace Ch.Elca.Iiop.IntegrationTests {
         TestNonSerializableBaseClass TestAbstractValueTypeEcho(TestNonSerializableBaseClass arg);
 
         TestSerializableClassD TestChangeSerilizableD(TestSerializableClassD arg, System.String newMessage);
+        
+        TestSerializableClassE TestEchoSerializableE(TestSerializableClassE arg);
 
         TestEchoInterface RetrieveEchoInterfaceImplementor();
 

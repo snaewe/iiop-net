@@ -233,7 +233,7 @@ namespace Ch.Elca.Iiop.IntegrationTests {
 
         [Test]
         public void TestJaggedArraysWithNullElems() {
-	    System.Int32[][] arg1 = null;
+        System.Int32[][] arg1 = null;
             System.Int32[][] result1 = m_testService.EchoJaggedIntArray(arg1);
             Assertion.AssertEquals(arg1, result1);
 
@@ -385,6 +385,19 @@ namespace Ch.Elca.Iiop.IntegrationTests {
             Assertion.AssertEquals(result.val1, result.val2);
             Assertion.AssertEquals(result.val1.Msg, result.val2.Msg);
         }
+        
+        [Test]
+        public void TestRecursiveValueType() {            
+            TestSerializableClassE arg = new TestSerializableClassE();
+            arg.RecArrEntry = new TestSerializableClassE[1];
+            arg.RecArrEntry[0] = arg;
+            TestSerializableClassE result = m_testService.TestEchoSerializableE(arg);
+            Assertion.AssertNotNull(result);
+            Assertion.AssertNotNull(result.RecArrEntry);
+            Assertion.AssertEquals(arg.RecArrEntry.Length, result.RecArrEntry.Length);
+            Assertion.Assert("invalid entry in recArrEntry", (result == result.RecArrEntry[0]));
+            
+        }        
 
         /// <summary>
         /// Checks if a ByRef actual value for a formal parameter interface is passed correctly
@@ -462,12 +475,12 @@ namespace Ch.Elca.Iiop.IntegrationTests {
         
         [Test]
         public void TestCustomAnyTypeCode() {
-        	System.String testString = "abcd";
-        	OrbServices orb = OrbServices.GetSingleton();
-        	omg.org.CORBA.TypeCode wstringTc = orb.create_wstring_tc(0);
-        	Any any = new Any(testString, wstringTc);
-        	System.String echo = (System.String)m_testService.EchoAnything(any);
-        	Assertion.AssertEquals(testString, echo);
+            System.String testString = "abcd";
+            OrbServices orb = OrbServices.GetSingleton();
+            omg.org.CORBA.TypeCode wstringTc = orb.create_wstring_tc(0);
+            Any any = new Any(testString, wstringTc);
+            System.String echo = (System.String)m_testService.EchoAnything(any);
+            Assertion.AssertEquals(testString, echo);
         }
 
         [Test]
@@ -602,14 +615,14 @@ namespace Ch.Elca.Iiop.IntegrationTests {
             Assertion.AssertEquals(case0Val, result.Getval0());
             Assertion.AssertEquals(0, result.Discriminator);
 
-	    TestUnion arg2 = new TestUnion();
+        TestUnion arg2 = new TestUnion();
             int case1Val = 12;
             arg2.Setval1(case1Val, 2);
             TestUnion result2 = m_testService.EchoUnion(arg2);
             Assertion.AssertEquals(case1Val, result2.Getval1());
             Assertion.AssertEquals(2, result2.Discriminator);
 
-	    TestUnion arg3 = new TestUnion();
+        TestUnion arg3 = new TestUnion();
             bool case2Val = true;
             arg3.Setval2(case2Val, 7);
             TestUnion result3 = m_testService.EchoUnion(arg3);
@@ -627,7 +640,7 @@ namespace Ch.Elca.Iiop.IntegrationTests {
             Assertion.AssertEquals(case0Val, result.GetvalE0());
             Assertion.AssertEquals(TestEnumForU.A, result.Discriminator);
 
-	    TestUnionE arg2 = new TestUnionE();
+        TestUnionE arg2 = new TestUnionE();
             TestEnumForU case1Val = TestEnumForU.A;
             arg2.SetvalE1(case1Val, TestEnumForU.B);
             TestUnionE result2 = m_testService.EchoUnionE(arg2);
@@ -681,18 +694,18 @@ namespace Ch.Elca.Iiop.IntegrationTests {
             Int64 zeroIntVal = Zero_val.ConstVal;
             Assertion.AssertEquals("wrong constant value", 0, zeroIntVal);
 
-            Int64 zeroFromHex = Zero_from_hex.ConstVal;          	
+            Int64 zeroFromHex = Zero_from_hex.ConstVal;             
             Assertion.AssertEquals("wrong constant value", 0, zeroFromHex);
             
-            Int64 oneFromHex = One_from_hex.ConstVal;          	
+            Int64 oneFromHex = One_from_hex.ConstVal;           
             Assertion.AssertEquals("wrong constant value", 1, oneFromHex);
             
-	        Int64 minusOneFromHex = Minus_one_from_hex.ConstVal;          	
+            Int64 minusOneFromHex = Minus_one_from_hex.ConstVal;            
             Assertion.AssertEquals("wrong constant value", -1, minusOneFromHex);
     
             Single zeroValFloat = Zero_val_float.ConstVal;
             Assertion.AssertEquals("wrong constant value", 0.0, zeroValFloat);
-	
+    
             Single minusOneFloat = Minus_one_float.ConstVal;
             Assertion.AssertEquals("wrong constant value", -1.0, minusOneFloat);
             
@@ -716,7 +729,7 @@ namespace Ch.Elca.Iiop.IntegrationTests {
             Assertion.AssertEquals(case0Val, result.Getval0());
             Assertion.AssertEquals(0, result.Discriminator);
 
-	    TestUnionE arg2 = new TestUnionE();
+        TestUnionE arg2 = new TestUnionE();
             TestEnumForU case1Val = TestEnumForU.A;
             arg2.SetvalE1(case1Val, TestEnumForU.B);
             TestUnionE result2 = (TestUnionE)m_testService.EchoAnything(arg2);
@@ -726,7 +739,7 @@ namespace Ch.Elca.Iiop.IntegrationTests {
 
         [Test]
         public void TestReceivingUnknownUnionsAsAny() {
-	    object result = m_testService.RetrieveUnknownUnionAsAny();
+        object result = m_testService.RetrieveUnknownUnionAsAny();
             Assertion.AssertNotNull("union not retrieved", result);
             Assertion.AssertEquals("type name", "Ch.Elca.Iiop.IntegrationTests.TestUnionE2", result.GetType().FullName);
         }
@@ -784,11 +797,11 @@ namespace Ch.Elca.Iiop.IntegrationTests {
         /// if other checks don't work</summary>
         [Test]
         public void TestInterfaceCompMbrDeser() {
-	    TestSimpleInterface1 proxy1 = (TestSimpleInterface1)m_testService.GetSimpleService1();
+        TestSimpleInterface1 proxy1 = (TestSimpleInterface1)m_testService.GetSimpleService1();
             Assertion.AssertNotNull("testSimpleService1 ref not received", proxy1);
             Assertion.AssertEquals(true, proxy1.ReturnTrue());
 
-	    TestSimpleInterface2 proxy2 = (TestSimpleInterface2)m_testService.GetSimpleService2();
+        TestSimpleInterface2 proxy2 = (TestSimpleInterface2)m_testService.GetSimpleService2();
             Assertion.AssertNotNull("testSimpleService2 ref not received", proxy2);
             Assertion.AssertEquals(false, proxy2.ReturnFalse());
 
@@ -800,35 +813,35 @@ namespace Ch.Elca.Iiop.IntegrationTests {
 
         [Test]
         public void TestIsACall() {
-        	omg.org.CORBA.IObject proxy1 = (omg.org.CORBA.IObject)m_testService.GetSimpleService1();
+            omg.org.CORBA.IObject proxy1 = (omg.org.CORBA.IObject)m_testService.GetSimpleService1();
             Assertion.AssertNotNull("testSimpleService1 ref not received", proxy1);            
             Assertion.AssertEquals(true, proxy1._is_a("IDL:Ch/Elca/Iiop/IntegrationTests/TestSimpleInterface1:1.0"));
             
             omg.org.CORBA.IObject proxy2 = (omg.org.CORBA.IObject)m_testService.GetSimpleService2();
             Assertion.AssertNotNull("testSimpleService2 ref not received", proxy2);
             Assertion.AssertEquals(true, proxy2._is_a("IDL:Ch/Elca/Iiop/IntegrationTests/TestSimpleInterface2:1.0"));
-        	
-        	
-        	// test using ORBServices
-        	omg.org.CORBA.OrbServices orb = omg.org.CORBA.OrbServices.GetSingleton();
-        	Assertion.AssertEquals(true, orb.is_a(proxy1, typeof(TestSimpleInterface1)));
-        	Assertion.AssertEquals(true, orb.is_a(proxy2, typeof(TestSimpleInterface2)));
-        	// target object implements both interfaces
-        	Assertion.AssertEquals(true, orb.is_a(proxy1, typeof(TestSimpleInterface2)));
-        	Assertion.AssertEquals(true, orb.is_a(proxy2, typeof(TestSimpleInterface1)));
-        	
-        	Assertion.AssertEquals(false, orb.is_a(m_testService, typeof(TestSimpleInterface1)));
-        	Assertion.AssertEquals(false, orb.is_a(m_testService, typeof(TestSimpleInterface2)));
+            
+            
+            // test using ORBServices
+            omg.org.CORBA.OrbServices orb = omg.org.CORBA.OrbServices.GetSingleton();
+            Assertion.AssertEquals(true, orb.is_a(proxy1, typeof(TestSimpleInterface1)));
+            Assertion.AssertEquals(true, orb.is_a(proxy2, typeof(TestSimpleInterface2)));
+            // target object implements both interfaces
+            Assertion.AssertEquals(true, orb.is_a(proxy1, typeof(TestSimpleInterface2)));
+            Assertion.AssertEquals(true, orb.is_a(proxy2, typeof(TestSimpleInterface1)));
+            
+            Assertion.AssertEquals(false, orb.is_a(m_testService, typeof(TestSimpleInterface1)));
+            Assertion.AssertEquals(false, orb.is_a(m_testService, typeof(TestSimpleInterface2)));
         }
         
         [Test]
-        public void TestNonExistentCall() {        	
-        	// test using ORBServices
-        	omg.org.CORBA.OrbServices orb = omg.org.CORBA.OrbServices.GetSingleton();
+        public void TestNonExistentCall() {         
+            // test using ORBServices
+            omg.org.CORBA.OrbServices orb = omg.org.CORBA.OrbServices.GetSingleton();
 
-        	Assertion.AssertEquals(false, orb.non_existent(m_testService));
-        	object nonExObject = orb.string_to_object("iiop://localhost:8087/someNonExistingObject");
-        	Assertion.AssertEquals(true, orb.non_existent(nonExObject));
+            Assertion.AssertEquals(false, orb.non_existent(m_testService));
+            object nonExObject = orb.string_to_object("iiop://localhost:8087/someNonExistingObject");
+            Assertion.AssertEquals(true, orb.non_existent(nonExObject));
         }
         
 
