@@ -249,6 +249,9 @@ namespace Ch.Elca.Iiop.IntegrationTests {
 
         TestSimpleInterface1 GetWhenSuppIfMissing();
         
+        Adder CreateNewWithSystemID();
+        Adder CreateNewWithUserID(string userId);
+        
     }
 
     

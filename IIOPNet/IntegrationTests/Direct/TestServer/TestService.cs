@@ -27,6 +27,7 @@
 
 
 using System;
+using System.Runtime.Remoting;
 using Ch.Elca.Iiop.Idl;
 
 namespace Ch.Elca.Iiop.IntegrationTests {
@@ -305,6 +306,17 @@ namespace Ch.Elca.Iiop.IntegrationTests {
             return new TestSimpleIfImplMissingSupIf();            
         }
 
+        public Adder CreateNewWithSystemID() {
+            return new Adder();
+        }
+        
+        public Adder CreateNewWithUserID(string userId) {
+            Adder result = new Adder();
+            RemotingServices.Marshal(result, userId);
+            return result;
+        }
+
+        
 
     }
 

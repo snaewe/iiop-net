@@ -887,6 +887,24 @@ namespace Ch.Elca.Iiop.IntegrationTests {
             Assertion.AssertEquals("wrong adder result", arg1 + arg2, adder.Add(arg1, arg2));
         }
         
+        [Test]
+        public void TestIdsIncludingNonAscii() {
+            string id = "myAdderId" + '\u0765' + "1" + @"\uA";
+            string expectedMarshalledId = @"myAdderId\u07651\\uA";
+            Adder adder = m_testService.CreateNewWithUserID(id);
+            string marshalUrl = RemotingServices.GetObjectUri(adder);
+            Ior adderIor = new Ior(marshalUrl);
+            byte[] objectKey = adderIor.ObjectKey;
+            ASCIIEncoding enc = new ASCIIEncoding();
+            string marshalUri = new String(enc.GetChars(objectKey));
+            Assertion.AssertEquals("wrong user id", expectedMarshalledId, marshalUri);
+            
+            // check if callable
+            int arg1 = 1;
+            int arg2 = 2;
+            Assertion.AssertEquals("wrong adder result", arg1 + arg2, adder.Add(arg1, arg2));
+        }
+        
 
     }
 
