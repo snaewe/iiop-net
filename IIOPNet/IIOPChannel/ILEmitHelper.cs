@@ -241,7 +241,7 @@ namespace Ch.Elca.Iiop.Idl {
                                                              paramTypes);
             // define the paramter-names / attributes
             for (int i = 0; i < parameters.Length; i++) {
-                DefineParamter(methodBuild, parameters[i], i+1);
+                DefineParameter(methodBuild, parameters[i], i+1);
             }
             // add custom attributes for the return type
             ParameterBuilder paramBuild = CreateParamBuilderForRetParam(methodBuild);
@@ -365,7 +365,7 @@ namespace Ch.Elca.Iiop.Idl {
         /// <param name="methodBuild"></param>
         /// <param name="spec"></param>
         /// <param name="paramNr"></param>
-        private void DefineParamter(MethodBuilder methodBuild, ParameterSpec spec, int paramNr) {
+        private void DefineParameter(MethodBuilder methodBuild, ParameterSpec spec, int paramNr) {
             ParameterAttributes paramAttr = ParameterAttributes.None;
             if (spec.IsOut()) { 
                 paramAttr = paramAttr | ParameterAttributes.Out; 
