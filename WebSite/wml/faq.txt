@@ -621,6 +621,7 @@ jacorb.interop.chunk_custom_rmi_valuetypes=off
 <li>Andre Natal
 <li>SangHyun Park
 <li>Bill Petheram
+<li>Andreas Rullmann
 <li>Dirk O. Siebnich
 <li>Arne Sostack
 <li>Andrew S. Townley 

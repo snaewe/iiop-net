@@ -72,6 +72,7 @@ Interoperation with J2EE applications is reported for the following application 
 <software name="IBM Websphere">
 	<report version="4.0" color="green">ok</report>
 	<report version="5.0" color="green">ok</report>
+	<report version="5.1" color="green">ok</report>
 </software>
 <software name="JBoss">
 	<report version="3.0.6" color="yellow">in progress</report>
