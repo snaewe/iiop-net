@@ -4,6 +4,9 @@ build: nunit-var
 	cd Basic
 	$(MAKE) build
 	cd ..
+        cd Direct
+	$(MAKE) build
+        cd ..
         cd JavaRMIIIOP
 	$(MAKE) build
 	cd ..
@@ -16,6 +19,9 @@ clean:
 	cd Basic
 	$(MAKE) clean
 	cd ..
+        cd Direct
+	$(MAKE) clean
+        cd ..
 	cd JavaRMIIIOP
 	$(MAKE) clean
 	cd ..
