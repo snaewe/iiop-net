@@ -82,6 +82,8 @@ namespace Corba {
         void write_Abstract([ObjectIdlType(IdlTypeObject.AbstractBase)]object val);
         /// <param name="val">no boxed value types, no primitive types and no arrays are supported here</param>
         void write_Value([ObjectIdlType(IdlTypeObject.ValueBase)] object val);
+        /// <summary>wirtes the value val, takes as formal parameter the actual type of val</summary>
+        void write_ValueOfActualType(object val);
         /// <summary>writes boxed values</summary>
         void write_boxed(object val, BoxedValueAttribute attr);
         void write_TypeCode(omg.org.CORBA.TypeCode val);
@@ -187,10 +189,22 @@ namespace Corba {
     /// </summary>
     internal class DataOutputStreamImpl : DataOutputStream {
 
+        #region Types
+        
+        /// <summary>dummy typed needed to serialize null as true value type, not as any
+        /// see write_ValueOfActualType
+        /// </summary>
+        [Serializable]
+        internal class DummyValTypeForNull {
+        }
+        
+        #endregion Types
         #region SFields
 
         private static Type s_objectType = typeof(object);
         private static Type s_mByRefType = typeof(MarshalByRefObject);
+        
+        private static Type s_dummyValType = typeof(DummyValTypeForNull);
 
         #endregion SFields
         #region IFields
@@ -312,6 +326,18 @@ namespace Corba {
                                  new AttributeExtCollection(new Attribute[] { 
                                           new ObjectIdlTypeAttribute(IdlTypeObject.ValueBase) } ),
                                  val, m_cdrOut);
+        }
+        
+        public void write_ValueOfActualType(object val) {
+            if (val != null) {
+                m_marshaller.Marshal(val.GetType(), 
+                                     new AttributeExtCollection(),
+                                     val, m_cdrOut);
+            } else {
+                m_marshaller.Marshal(s_dummyValType, 
+                                     new AttributeExtCollection(),
+                                     val, m_cdrOut);
+            }
         }
 
         public void write_boxed(object val, BoxedValueAttribute attr) {
