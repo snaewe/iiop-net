@@ -63,7 +63,7 @@ namespace Ch.Elca.Iiop {
     /// <summary>the interface to implement by a client side transport wrapper</summary>
     internal interface IClientTransport : ITransport {
         
-        /// <summary>opens a connection to the target</summary>
+        /// <summary>opens a connection to the target, if not already open (when open do nothing)</summary>
         void OpenConnection();
                 
         /// <summary>is the connection to the target open</summary>
