@@ -80,14 +80,14 @@ namespace Ch.Elca.Iiop.IntegrationTests {
             Assertion.AssertEquals(case0Val, result.Getval0());
             Assertion.AssertEquals(0, result.Discriminator);
 
-	    TestUnion arg2 = new TestUnion();
+        TestUnion arg2 = new TestUnion();
             int case1Val = 12;
             arg2.Setval1(case1Val, 2);
             TestUnion result2 = m_testService.EchoTestUnion(arg2);
             Assertion.AssertEquals(case1Val, result2.Getval1());
             Assertion.AssertEquals(2, result2.Discriminator);
 
-	    TestUnion arg3 = new TestUnion();
+        TestUnion arg3 = new TestUnion();
             bool case2Val = true;
             arg3.Setval2(case2Val, 7);
             TestUnion result3 = m_testService.EchoTestUnion(arg3);
@@ -104,7 +104,7 @@ namespace Ch.Elca.Iiop.IntegrationTests {
             Assertion.AssertEquals(case0Val, result.GetvalE0());
             Assertion.AssertEquals(TestEnumForU.A, result.Discriminator);
 
-	    TestUnionE arg2 = new TestUnionE();
+        TestUnionE arg2 = new TestUnionE();
             TestEnumForU case1Val = TestEnumForU.A;
             arg2.SetvalE1(case1Val, TestEnumForU.B);
             TestUnionE result2 = m_testService.EchoTestUnionE(arg2);
@@ -149,10 +149,20 @@ namespace Ch.Elca.Iiop.IntegrationTests {
             int result = (int)m_testService.EchoAny(arg);
             Assertion.AssertEquals(arg, result);
         }
+        
+        [Test]
+        public void TestRecursiveAny() {
+            TestUnionE3 arg = new TestUnionE3();
+            TestEnumForU3 case0Val = TestEnumForU3.A3;
+            arg.SetvalE0(case0Val);
+            TestUnionE3 result = (TestUnionE3)m_testService.EchoAny(arg);
+            Assertion.AssertEquals(case0Val, result.GetvalE0());
+            Assertion.AssertEquals(TestEnumForU3.A3, result.Discriminator);            
+        }
 
         [Test]
         public void TestReceivingUnknownUnionsAsAny() {
-	        object result = m_testService.RetrieveUnknownUnion();
+            object result = m_testService.RetrieveUnknownUnion();
             Assertion.AssertNotNull("union not retrieved", result);
             Assertion.AssertEquals("type name", "TestUnionE2", result.GetType().FullName);
         }

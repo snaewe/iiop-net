@@ -17,6 +17,21 @@ union TestUnionE switch(TestEnumForU) {
     case C: TestEnumForU valE1;
 };
 
+enum TestEnumForU3 {
+    A3, B3, C3, D3
+};
+
+
+union TestUnionE3 switch(TestEnumForU3) {    
+    case A3: TestEnumForU3 valE0;
+    case B3: 
+    // test recursive typecode + indirections
+    case C3: sequence<TestUnionE3> valE1;
+    // test indirections
+    case D3: sequence<TestEnumForU3> valE2;
+};
+
+
 struct RecStruct {
     sequence<RecStruct> seq;
 };
