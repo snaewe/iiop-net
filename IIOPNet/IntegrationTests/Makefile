@@ -25,7 +25,10 @@ build: nunit-var junit-var
 	@if not defined JBOSS_HOME echo JBOSS_HOME not set, skipping JBOSS integration test
 	@if defined JBOSS_HOME $(MAKE) build
 	cd ..
-
+	cd WAS5
+	@if not defined WAS_HOME echo WAS_HOME not set, skipping WAS5 integration test
+	@if defined WAS_HOME $(MAKE) build
+	cd ..
 
 nunit-var:        
 	@if not defined NUNITV2_HOME echo Set the NUNITV2_HOME variable to the NUnit V2 home directory. Please check TestInstructions.txt.
@@ -59,6 +62,10 @@ test: nunit-var junit-var
 	@if not defined JBOSS_HOME echo JBOSS_HOME not set, skipping JBOSS integration test
 	@if defined JBOSS_HOME $(MAKE) test
 	cd ..
+	cd WAS5
+	@if not defined WAS_HOME echo WAS_HOME not set, skipping WAS5 integration test
+	@if defined WAS_HOME $(MAKE) test
+	cd ..
 
 
 clean:
@@ -84,6 +91,9 @@ clean:
 	$(MAKE) clean
 	cd ..
 	cd Jboss3.2.1
+	$(MAKE) clean
+	cd ..
+	cd WAS5
 	$(MAKE) clean
 	cd ..
 
