@@ -28,6 +28,7 @@
  */
 
 using System;
+using parser;
 
 namespace symboltable {
 
@@ -38,7 +39,7 @@ public class SymbolValue : Symbol {
 
     #region IFields
     
-    private object m_value;
+    private Literal m_valueAsLiteral;
     
     #endregion IFields
     #region IConstructors
@@ -53,12 +54,16 @@ public class SymbolValue : Symbol {
         return " declaration with name: " + m_symbolName;
     }
     
-    public void SetValue(object value) {
-        m_value = value;
+    public void SetValueAsLiteral(Literal value) {
+        m_valueAsLiteral = value;
     }
     
     public object GetValue() {
-        return m_value;
+        return m_valueAsLiteral.GetValue();
+    }
+
+    public Literal GetValueAsLiteral() {
+        return m_valueAsLiteral;
     }
     
     #endregion IMethods

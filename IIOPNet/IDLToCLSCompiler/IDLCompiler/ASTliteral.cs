@@ -32,7 +32,7 @@ public class ASTliteral : SimpleNode {
 
     #region IFields
 
-    private Object m_litVal;
+    private Literal m_litVal;
     
     #endregion IFields
     #region IConstructors
@@ -51,10 +51,10 @@ public class ASTliteral : SimpleNode {
         return visitor.visit(this, data);
     }
 
-    public void setLitVal(Object litVal) {
+    public void setLitVal(Literal litVal) {
         m_litVal = litVal;
     }
-    public Object getLitVal() {
+    public Literal getLitVal() {
         return m_litVal;
     }
     
