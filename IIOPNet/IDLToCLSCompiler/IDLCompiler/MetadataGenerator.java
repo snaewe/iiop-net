@@ -717,8 +717,8 @@ public class MetaDataGenerator implements IDLParserVisitor {
                 // add custom attributes for the return type
                 ParameterBuilder paramBuild = CreateParamBuilderForRetParam(method);
                 for (int k = 0; k < retAttrs.length; k++) {
-                    if (retAttrs[i] instanceof IIdlAttribute) {
-                        CustomAttributeBuilder attrBuilder = ((IIdlAttribute) retAttrs[i]).CreateAttributeBuilder();
+                    if (retAttrs[k] instanceof IIdlAttribute) {
+                        CustomAttributeBuilder attrBuilder = ((IIdlAttribute) retAttrs[k]).CreateAttributeBuilder();
                         paramBuild.SetCustomAttribute(attrBuilder);    
                     }
                 }
