@@ -151,3 +151,233 @@ namespace Ch.Elca.Iiop.MessageHandling {
 
     }
 }
+
+
+#if UnitTest
+
+namespace Ch.Elca.Iiop.Tests {
+	
+    using System.Reflection;
+    using System.Collections;
+    using System.IO;
+    using NUnit.Framework;
+    using Ch.Elca.Iiop;
+    using Ch.Elca.Iiop.Idl;
+    using Ch.Elca.Iiop.Util;
+    using Ch.Elca.Iiop.MessageHandling;
+    using Ch.Elca.Iiop.Cdr;
+    using omg.org.CORBA;
+
+
+	public class TestService : MarshalByRefObject {
+	
+	    public int Add(Int32 arg1, Int32 arg2) {
+	        return arg1 + arg2;
+	    }
+	
+	}
+
+    public class TestMessage : IMethodCallMessage {
+    
+        private IDictionary m_props = new Hashtable();
+
+        private MethodInfo m_methodToCall;
+        
+        private string m_uri;
+        
+        private object[] m_args;
+    
+        public TestMessage(MethodInfo methodToCall, object[] args, string uri) {
+            m_methodToCall = methodToCall;
+            m_uri = uri;
+            m_args = args;
+        }
+        
+        public IDictionary Properties {
+            get {
+                return m_props;
+            }
+        }
+        
+        public string Uri {
+            get {
+                return m_uri;
+            }
+        }
+        
+        public string TypeName {
+            get {
+                return m_methodToCall.DeclaringType.FullName;
+            }
+        }
+        
+        public string MethodName {
+            get {
+                return m_methodToCall.Name;
+            }
+        }
+               
+        public MethodBase MethodBase {
+            get {
+                return m_methodToCall;
+            }
+        }
+        
+        public object MethodSignature {
+            get {
+                throw new NotImplementedException();
+            }
+        }
+        
+        public int ArgCount {
+            get {
+                return m_args.Length;
+            }
+        }
+        
+        public int InArgCount {
+            get {
+                throw new NotImplementedException();
+            }
+        }
+        
+        public object[] Args {
+            get {
+                return m_args;
+            }
+        }
+        
+        public object[] InArgs {
+            get {
+                throw new NotImplementedException();
+            }
+        }
+        
+        public bool HasVarArgs {
+            get {
+                throw new NotImplementedException();
+            }
+        }
+        
+        public LogicalCallContext LogicalCallContext {
+            get {
+                return null;
+            }
+        }
+        
+        public object GetArg(int nr) {
+            return m_args[nr];
+        }
+        
+        public object GetInArg(int nr) {
+            throw new NotImplementedException();
+        }
+        
+        public string GetArgName(int nr) {
+            throw new NotImplementedException();
+        }
+        
+        public string GetInArgName(int nr) {
+            throw new NotImplementedException();
+        }
+                                    
+    }
+
+
+    /// <summary>
+    /// Unit-tests for testing request/reply serialisation/deserialisation
+    /// </summary>
+    public class RequestReplySerialisationTest : TestCase {
+    
+        private byte[] m_giopMagic = { 71, 73, 79, 80 };    
+                
+        /// <summary>
+        /// asserts that the expected byte sequence is following in the stream
+        /// </summary>
+        private void AssertBytesFollowing(byte[] expected, CdrInputStream cdrIn) {
+            for (int i = 0; i < expected.Length; i++) {
+                byte data = (byte) cdrIn.ReadOctet();
+                Assertion.AssertEquals(expected[i], data);
+            }
+        }
+        
+        public void TestRequestSerialisation() {
+            MethodInfo methodToCall = typeof(TestService).GetMethod("Add");
+            object[] args = new object[] { ((Int32) 1), ((Int32) 2) };
+            string uri = "iiop://localhost:8087/testuri"; // Giop 1.2 will be used because no version spec in uri
+            TestMessage msg = new TestMessage(methodToCall, args, uri);
+            
+            GiopMessageHandler handler = GiopMessageHandler.GetSingleton();
+            MemoryStream targetStream = new MemoryStream();
+
+            handler.SerialiseOutgoingRequestMessage(msg, targetStream, new GiopRequestNumberGenerator());
+            
+            // check to serialised stream
+            targetStream.Seek(0, SeekOrigin.Begin);
+            
+            CdrInputStreamImpl cdrIn = new CdrInputStreamImpl(targetStream);
+            cdrIn.ConfigStream(0, new GiopVersion(1, 2));
+            
+            // first is Giop-magic                        
+            byte data;
+            AssertBytesFollowing(m_giopMagic, cdrIn);
+            // Giop version
+            data = (byte) cdrIn.ReadOctet();
+            Assertion.AssertEquals(1, data);
+            data = (byte) cdrIn.ReadOctet();
+            Assertion.AssertEquals(2, data);
+            // flags: big-endian, no fragements
+            data = (byte) cdrIn.ReadOctet();
+            Assertion.AssertEquals(0, data);
+            // Giop Msg type: request
+            data = (byte) cdrIn.ReadOctet();
+            Assertion.AssertEquals(0, data);
+            // Giop Msg length
+            uint msgLength = cdrIn.ReadULong();
+            cdrIn.SetMaxLength(msgLength);
+            // req-id
+            Assertion.AssertEquals(5, cdrIn.ReadULong());
+            // response flags
+            data = (byte) cdrIn.ReadOctet();
+            Assertion.AssertEquals(3, data);
+            cdrIn.ReadPadding(3); // reserved
+            // target
+            Assertion.AssertEquals(0, cdrIn.ReadUShort());
+            // target must be testuri encoded as wide-characters followed by nonStringifyTag ( 44, 115, 116, 114, 61, 102 );
+            Assertion.AssertEquals(20 , cdrIn.ReadULong());
+            AssertBytesFollowing(
+                new byte[] { 0, 116, 0, 101, 0, 115, 0, 116, 0, 117, 0, 114, 0, 105, 44, 115, 116, 114, 61, 102 }, 
+                cdrIn);
+            // now the target method follows: Add (string is terminated by a zero)
+            Assertion.AssertEquals(4, cdrIn.ReadULong());
+            AssertBytesFollowing(new byte[] { 65, 100, 100, 0}, cdrIn);
+            // now service context is following
+            uint nrOfContexts = cdrIn.ReadULong();
+            // Skip service contexts: not part of this test            
+            for (uint i = 0; i < nrOfContexts; i++) {
+                uint contextId = cdrIn.ReadULong();
+                uint lengthOfContext = cdrIn.ReadULong();
+                cdrIn.ReadPadding(lengthOfContext);
+            }
+            
+            // Giop 1.2, must be aligned on 8
+            cdrIn.ForceReadAlign(Aligns.Align8);
+            // now params are following
+            Assertion.AssertEquals(1, cdrIn.ReadLong());
+            Assertion.AssertEquals(2, cdrIn.ReadLong());
+        }
+        
+//        public void TestReplySerialisation() {
+//        }
+        
+//        public void TestRequestDeserialisation() {
+//        }
+        
+//        public void TestReplyDeserialisation() {
+//        }
+    
+    }
+
+}
+
+#endif
