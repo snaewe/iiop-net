@@ -709,17 +709,25 @@ public class MetaDataGenerator implements IDLParserVisitor {
             if (parent != null) { valueToBuild.SetParent(parent); }
         }
         // add abstract methods for all interface methods, a class inherit from (only if valueToBuild is a class an not an interface)
-        AddMethodAbstractDeclToClassForIf(valueToBuild, interfaces);
+        // add property to abstract class for all properties defined in an interface (only if valueToBuild is a class an not an interface)
+        AddInheritedMembersAbstractDeclToClassForIf(valueToBuild, interfaces);
         return valueToBuild;
     }
 
-    /** add abstract methods for all implemented interfaces to the abstract class */
-    private void AddMethodAbstractDeclToClassForIf(TypeBuilder classBuilder, System.Type[] interfaces) {
-        if (!(classBuilder.get_IsClass())) { return; } // only needed for classes
+    /** add abstract methods for all implemented interfaces to the abstract class,
+     *  add properties for all implemented interfaces to the abstrct class */
+    private void AddInheritedMembersAbstractDeclToClassForIf(TypeBuilder classBuilder, System.Type[] interfaces) {
+        if (!(classBuilder.get_IsClass())) { 
+            return; 
+        } // only needed for classes
         for (int i = 0; i < interfaces.length; i++) {
             Type ifType = interfaces[i];    
+            // methods
             MethodInfo[] methods = ifType.GetMethods(BindingFlags.Instance | BindingFlags.Public);
             for (int j = 0; j < methods.length; j++) {
+                if (methods[j].get_IsSpecialName()) {
+                    continue; // do not add methods with special name, e.g. property accessor methods
+                }
                 // normal parameters
                 ParameterInfo[] params = methods[j].GetParameters();
                 System.Type[] paramTypes = new System.Type[params.length];
@@ -743,6 +751,47 @@ public class MetaDataGenerator implements IDLParserVisitor {
                     }
                 }
             }
+            // properties
+            PropertyInfo[] properties = ifType.GetProperties(BindingFlags.Instance | BindingFlags.Public);
+            for (int j = 0; j < properties.length; j++) {
+                PropertyBuilder propBuild = classBuilder.DefineProperty(properties[i].get_Name(), PropertyAttributes.None,
+                                                                        properties[i].get_PropertyType(), System.Type.EmptyTypes);
+
+
+                // set the methods for the property
+                MethodBuilder getAccessor = classBuilder.DefineMethod("get_" + properties[i].get_Name(), 
+                                                                      MethodAttributes.Virtual | MethodAttributes.Abstract | MethodAttributes.Public | MethodAttributes.HideBySig | MethodAttributes.SpecialName, 
+                                                                      properties[i].get_PropertyType(), System.Type.EmptyTypes);
+                propBuild.SetGetMethod(getAccessor);
+                MethodBuilder setAccessor = null;
+                if (properties[i].get_CanWrite()) {
+                    setAccessor = classBuilder.DefineMethod("set_" + properties[i].get_Name(), 
+                                                            MethodAttributes.Virtual | MethodAttributes.Abstract | MethodAttributes.Public | MethodAttributes.HideBySig | MethodAttributes.SpecialName, 
+                                                            null, new System.Type[] { properties[i].get_PropertyType() });
+                    propBuild.SetSetMethod(setAccessor);
+                }
+            
+                ParameterBuilder retParamGet = CreateParamBuilderForRetParam(getAccessor);
+                ParameterBuilder valParam = null;
+                if (setAccessor != null) { 
+                    valParam = setAccessor.DefineParameter(1, ParameterAttributes.None, "value"); 
+                }
+                // add custom attributes
+                Object[] attrs = properties[i].GetCustomAttributes(true);
+                for (int k = 0; k < attrs.length; k++) {
+                    if (attrs[k] instanceof IIdlAttribute) {
+                        CustomAttributeBuilder attrBuilder = ((IIdlAttribute) attrs[k]).CreateAttributeBuilder();
+                        propBuild.SetCustomAttribute(attrBuilder);
+                
+                        retParamGet.SetCustomAttribute(attrBuilder);
+                        if (setAccessor != null) {
+                            valParam.SetCustomAttribute(attrBuilder);
+                        }
+                    }
+                } 
+
+            }
+
         }
     }
     
