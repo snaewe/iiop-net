@@ -81,7 +81,7 @@ public class Client {
 		Entry en[];
 			en = c.Enumerate();
 			for (int i = 0; i < en.length; i++) {
-				System.out.println("Entry[" + en[i].key + "] = " + en[i].value);
+				System.out.println("  Entry[" + en[i].key + "] = " + en[i].value);
 			}
 	}
 	
@@ -89,8 +89,9 @@ public class Client {
 		boolean quit = false;
 		try {
 			do {
+				System.out.println();
 				System.out.println("Container Menu:");
-				System.out.println("0. Terminate");
+				System.out.println("0. Return to previous menu");
 				System.out.println("1. Set Entry");
 				System.out.println("2. Show Entries");
 				System.out.println("3. Delete Container");
@@ -117,6 +118,7 @@ public class Client {
 	}
 
 	void selectContainer(Manager m) {
+		System.out.println();
 		System.out.println("Select Containers: enter a list of key / values pairs; terminate with an empty key");
 		Vector keys = new Vector();
 		Vector values = new Vector();
@@ -139,14 +141,17 @@ public class Client {
 				list[i].value = (String)values.elementAt(i);
 			}
 			
+			System.out.println();
+			System.out.println("Matches:");	
 			Container clist[] = m.FilterContainers(list);
 			for (int i=0; i < clist.length; i++) {
+				System.out.println();
 				System.out.println("Container " + (i+1));
 				dumpContainer(clist[i]);
 			}
 			int i = 0;
 			do {
-				System.out.println("Select Container or 0 to terminate");
+				System.out.println("Select container number or 0 to return to previous menu");
 				i = readInt();
 				if ((i > 0) && (i <= clist.length)) {
 					manageContainer(clist[i-1]);
@@ -162,6 +167,7 @@ public class Client {
 		boolean quit = false;
 		try {
 			do {
+				System.out.println();
 				System.out.println("Main Menu:");
 				System.out.println("0. Terminate");
 				System.out.println("1. Create Container");
@@ -175,7 +181,6 @@ public class Client {
 						break;
 					case 2:
 						selectContainer(m);
-						System.out.println("Select Container not implemented");						
 						break;
 					default:
 						System.out.println("Invalid entry");
