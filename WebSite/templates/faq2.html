@@ -205,6 +205,25 @@ generate <code>proxy.dll</code> from <code>def.idl</code> in the current directo
 <p>The compiler will warn you that you must provide the implementation for the classes implementing the CORBA valuetypes. The article <a href="http://www.codeproject.com/csharp/iiop_net_and_EJB.asp">Accessing an EJB from .NET Using IIOP.NET: an Example</a> contains a detailed explanation and example (see step 4).
 
 <p>
+
+<a name="#debug"></a>
+<H2 class="about">How do I configure IIOP.NET to generate debug information?</H2>
+
+<strong>Availability: November 6th 2003 (CVS); release 1.5.1</strong>
+
+<p>The IIOP.NET channel must be recompiled with <code>/debug+ /d:DEBUG /d:TRACE</code> to enable the debugging code; using nmake:
+<pre>
+	nmake rebuild-base-debug
+</pre>
+<p>This will delete the channel's binaries and recompile them with debug enabled.
+
+<p>You can now recompile the example or code that need inspection and execute it. After execution, you will find in the same directory a file named <strong>IIOPNET_DebugOutput_<i>timestamp</i></strong> containing additional information.
+
+<p>After debugging remember to recompile the channel without debugging, as this can generate fairly big trace files whenever used:
+<pre>
+	nmake rebuild-base
+</pre>
+
 <a name="#stringifiedIOR"></a>
 <H2 class="about">How can I access an object using its stringified IOR?</H2>
 
