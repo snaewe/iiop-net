@@ -5,7 +5,7 @@ build: copy-idl compile-idl build-client
 
 build-client:
 	if not exist bin\nul mkdir bin
-	csc /t:library /r:$(NUNIT) /r:bin\IIOPChannel.dll /r:bin\Client.dll /out:bin\ClientTest.dll TestClient.cs
+	csc $(CSFLAGS) /t:library /r:$(NUNIT) /r:bin\IIOPChannel.dll /r:bin\Client.dll /out:bin\ClientTest.dll TestClient.cs ValueTypeImpls.cs
 
 
 copy-idl:

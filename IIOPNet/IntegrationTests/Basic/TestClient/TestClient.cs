@@ -197,6 +197,15 @@ namespace Ch.Elca.Iiop.IntegrationTests {
             Assertion.AssertEquals("hik", result[0]);
         }
 
+        public void TestStruct() {
+            TestStructA arg = new TestStructAImpl();
+            arg.X = 11;
+            arg.Y = -15;
+            TestStructA result = m_testService.TestEchoStruct(arg);
+            Assertion.AssertEquals(arg.X, result.X);
+            Assertion.AssertEquals(arg.Y, result.Y);
+        }
+
     }
 
 }

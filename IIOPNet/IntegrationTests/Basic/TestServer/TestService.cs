@@ -34,6 +34,11 @@ namespace Ch.Elca.Iiop.IntegrationTests {
         A, B, C, D
     }
 
+    [Serializable]
+    public struct TestStructA {
+        public System.Int32 X;
+        public System.Int32 Y;
+    }
 
     public class TestService : MarshalByRefObject {
 
@@ -104,6 +109,11 @@ namespace Ch.Elca.Iiop.IntegrationTests {
             result[result.Length - 1] = toAppend;
             return result;
         }
+
+        public TestStructA TestEchoStruct(TestStructA test) {
+            return test;
+        }
+
 
         public override object InitializeLifetimeService() {
             // live forever
