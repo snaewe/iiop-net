@@ -270,7 +270,20 @@ namespace Ch.Elca.Iiop.IntegrationTests {
                 for (int j = 0; j < result[i].Length; j++) {
                     Assertion.AssertEquals(arg[i][j], result[i][j]);
                 }
-            }            
+            }          
+
+            // too long test:
+            byte[] innerSeqLengthTooBig = new byte[20];
+            byte[][] argNotOk = new byte[10][];
+            for (int i = 0; i < argNotOk.Length; i++) {
+                argNotOk[i] = innerSeqLengthTooBig;
+            }
+            try {
+                byte[][] result2 = m_testService.EchoUuids(argNotOk);
+                Assertion.Fail("expected BAD_PARAM exception, because sequence too long, but not thrown");
+            } catch(BAD_PARAM badParamE) {
+                Assertion.AssertEquals(badParamE.Minor, 3434);
+            }
         }
 
         [Test]
