@@ -55,6 +55,7 @@ stop:
         @$(LAUNCH) -d $(JBOSS_HOME)\bin shutdown.bat -S >> pid
         @$(DELAY) 30
 	@for /F %%p in (pid) do @$(KILL) %%p
+	@del /q pid
 
 
 clean:
