@@ -33,7 +33,6 @@ package Ch.Elca.Iiop.IdlCompiler.Action;
 import System.Reflection.*;
 import System.Reflection.Emit.*;
 
-import java.util.Hashtable;
 import symboltable.Scope;
 
 /**
@@ -46,7 +45,7 @@ public class ModuleBuilderManager {
     private AssemblyBuilder m_asmBuilder;
     private String m_targetAsmName;
 
-    private Hashtable m_moduleBuilders = new Hashtable();
+    private ModuleBuilder m_builder;
 
     #endregion IFields
     #region IConstructors
@@ -55,6 +54,8 @@ public class ModuleBuilderManager {
                                 String targetAsmName) {
         m_asmBuilder = assemblyBuilder;
         m_targetAsmName = targetAsmName;
+        String modName = GetModuleName();
+        m_builder = m_asmBuilder.DefineDynamicModule(modName, modName);
     }
 
     #endregion IConstructors
@@ -62,40 +63,18 @@ public class ModuleBuilderManager {
 
     /** get a modulebuilder which is responsible for the specified scope */
     public ModuleBuilder GetOrCreateModuleBuilderFor(Scope scope) {
-        String modName = null;
-        modName = GetModuleName(scope);
         ModuleBuilder result = GetModuleBuilderFor(scope);
-        if (result == null) {    
-            // create a new module builder for the scope
-            result = m_asmBuilder.DefineDynamicModule(modName, modName);
-            m_moduleBuilders.put(scope, result);
-        }
         return result;
     }
 
     public ModuleBuilder GetModuleBuilderFor(Scope scope) {
-        String modName = null;
-        modName = GetModuleName(scope);
-        if (m_moduleBuilders.containsKey(scope)) {
-            return (ModuleBuilder)m_moduleBuilders.get(scope);    
-        } else if (m_asmBuilder.GetDynamicModule(modName) != null) { // needed if independant idl-files are specified at compiler command line arguments
-            return (ModuleBuilder) m_asmBuilder.GetDynamicModule(modName);
-        } else {
-            return null;
-        }
+        return m_builder;
     }
 
     /** construct the name of the target module */
-    private String GetModuleName(Scope scope) {
-        String modName = scope.getFullyQualifiedScopeName();
-        modName = modName.replace(':', '_');
-        modName = modName.replace('.', '_');
-        modName = modName.trim();
-        if (modName.equals("")) { modName = "default"; } 
-        else { modName = "_" + modName; }
-        modName = "_" + m_targetAsmName + modName + ".netmodule";
-        return modName;        
-    }
+    private String GetModuleName() {
+		return "_" + m_targetAsmName + ".netmodule";
+	}
 
     #endregion IMethods
 
