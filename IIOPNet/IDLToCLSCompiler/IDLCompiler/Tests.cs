@@ -42,6 +42,7 @@ namespace Ch.Elca.Iiop.IDLCompiler.Tests {
     using Ch.Elca.Iiop.Idl;
     using parser;
     using Ch.Elca.Iiop.IdlCompiler.Action;
+    using Ch.Elca.Iiop.IdlCompiler.Exceptions;
 
     /// <summary>
     /// Unit-tests for testing assembly generation
@@ -492,6 +493,47 @@ namespace Ch.Elca.Iiop.IDLCompiler.Tests {
                                             BindingFlags.Instance | BindingFlags.Static | BindingFlags.DeclaredOnly,
                                 1);            
         }
+        
+        [Test]
+        [ExpectedException(typeof(InvalidIdlException))]
+        public void TestInvalidIdlBoxedValueType() {
+            MemoryStream testSource = new MemoryStream();
+            StreamWriter writer = new StreamWriter(testSource, s_latin1);
+            
+            // idl:
+            // incorrect, because TestStruct referenced before defined
+            writer.WriteLine("module testmod {");
+            writer.WriteLine("    valuetype BoxedTest TestStruct;");
+            writer.WriteLine("");
+            writer.WriteLine("    struct TestStruct {");
+            writer.WriteLine("        long field;");
+            writer.WriteLine("    };");
+            writer.WriteLine("};");
+            writer.Flush();
+            testSource.Seek(0, SeekOrigin.Begin);
+            Assembly result = CreateIdl(testSource);
+        }
+        
+        [Test]
+        [ExpectedException(typeof(InvalidIdlException))]
+        public void TestInvalidIdlSequenceType() {
+            MemoryStream testSource = new MemoryStream();
+            StreamWriter writer = new StreamWriter(testSource, s_latin1);
+            
+            // idl:
+            // incorrect, because TestStruct referenced before defined
+            writer.WriteLine("module testmod {");
+            writer.WriteLine("    typedef sequence<TestStruct> invalidSeq;");
+            writer.WriteLine("");
+            writer.WriteLine("    struct TestStruct {");
+            writer.WriteLine("        long field;");
+            writer.WriteLine("    };");
+            writer.WriteLine("};");
+            writer.Flush();
+            testSource.Seek(0, SeekOrigin.Begin);
+            Assembly result = CreateIdl(testSource);
+        }
+
 
         #endregion
         
