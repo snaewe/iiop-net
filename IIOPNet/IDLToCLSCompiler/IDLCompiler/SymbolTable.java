@@ -135,6 +135,12 @@ public class SymbolTable {
 
     #endregion
 
+    /** assures, that for all fwd decls, a full definition is present. */
+    public void CheckAllFwdDeclsComplete() {
+        getTopScope().CheckAllFwdCompleted();
+    }
+
+
     /**
      * @see java.lang.Object#toString()
      */

@@ -197,6 +197,18 @@ public class Scope {
         return result;
     }
 
+    /** Assures, that for all forward declarations, a full declaration is present.
+     *  Otherwise: throw exception */
+    public void CheckAllFwdCompleted() {
+        Enumeration symEnum = m_symbols.elements();
+        while (symEnum.hasMoreElements()) {
+            Symbol sym = (Symbol) symEnum.nextElement();
+            // in scope, all fwd symbols must be replaces by def symbols --> otherwise no def present.
+            if (sym instanceof SymbolFwdDecl) {                
+                throw new RuntimeException("type only fwd declared: " + sym);
+            }                                              
+        }
+    }
 
     /**
      * @see java.lang.Object#toString()

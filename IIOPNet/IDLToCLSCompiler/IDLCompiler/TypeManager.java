@@ -70,7 +70,7 @@ public class TypeManager {
                                        type.get_FullName() + ", symbol may not be null"); 
         }
         if (IsTypeDeclarded(forSymbol)) {
-            throw new RuntimeException("a type with the name " + 
+            throw new RuntimeException("internal error; a type with the name " + 
                                        GetKnownType(forSymbol).GetClsType().get_FullName() +
                                        " is already declared for symbol: " + forSymbol);
         }
@@ -112,14 +112,18 @@ public class TypeManager {
     }
 
     #region methods for supporting generation for more than one parse result    
-    public Type GetTypeFromBuildModule(Symbol forSymbol) {
+    
+    /** checks if a type is fully declared in a module of the resulting assembly.
+     *  Does only return fully defined types, others are not interesting here. 
+     **/
+    private Type GetTypeFromBuildModule(Symbol forSymbol) {
         Scope declIn = null;
         declIn = forSymbol.getDeclaredIn();
         ModuleBuilder modBuilder = m_manager.GetModuleBuilderFor(declIn);
         if (modBuilder != null) {
             String fullName = declIn.getFullyQualifiedNameForSymbol(forSymbol.getSymbolName());
             Type result = modBuilder.GetType(fullName);
-            if (!(result instanceof TypeBuilder)) {  // type is fully defined
+            if (!(result instanceof TypeBuilder)) {  // type is fully defined (do not return not fully defined types here)
                 return result;
             }
         }
@@ -135,36 +139,19 @@ public class TypeManager {
         }
     }
 
-    /** register the type from a previous run in the current type table. This is used to check
-     * if current file is legal or not. 
-     * @param fwdDecl tells, if this action is triggered by a fwd declaration or a full declaration */
-    public void RegisterTypeFromBuildModule(Symbol forSymbol, boolean fwdDecl) {
-        Type toReg = GetTypeFromBuildModule(forSymbol);
-        if (toReg == null) { 
-            throw new RuntimeException("internal error, illegal argument for registerTypeFromBuildModule: " +
-                                       forSymbol); 
-        }
-        if (!fwdDecl) {
-            m_typesInCreation.remove(forSymbol); // if fwd decl --> remove
-            RegisterTypeDefinition(toReg, forSymbol);
-        } else {
-            TypeContainer container = new TypeContainer(toReg, new CustomAttributeBuilder[0]);
-            m_typesInCreation.put(forSymbol, container);    
-        }
-    }
-    #endregion
+    #endregion methods for supporting generation for more than one parse result
 
-    /** are there any types not defined left */
-    public boolean AllTypesDefined() {
+    /** check, that no types not defined left; if so this is an internal error, 
+     * because already checked during symbol table build. */
+    public void AssertAllTypesDefined() {
         if (m_typesInCreation.size() > 0) {
             java.util.Enumeration enum = m_typesInCreation.elements();
             while (enum.hasMoreElements()) {
-                System.out.println("only forward declared: " + 
+                System.err.println("internal error, only forward declared: " + 
                                    ((TypeContainer)enum.nextElement()).GetClsType());
+                // this should not occur, because checked by symbol table
             }
-            return false;
-        } else {
-            return true;
+            throw new RuntimeException("internal error occured, not all types fully defined");
         }
     }
 
@@ -174,6 +161,12 @@ public class TypeManager {
         TypeContainer result = (TypeContainer)m_typeTable.get(forSymbol);
         if (result == null) {
             result = (TypeContainer)m_typesInCreation.get(forSymbol);
+        }
+        if (result == null) {
+            Type fromBuildMod = GetTypeFromBuildModule(forSymbol);
+            if (fromBuildMod != null) {
+                result = new TypeContainer(fromBuildMod, new CustomAttributeBuilder[0]);
+            }        
         }
         if (result == null) { 
             // check in types, which are defined in referenced assemblies
@@ -189,10 +182,10 @@ public class TypeManager {
      */
     private void AddTypeDefinition(TypeContainer fullDecl, Symbol forSymbol) {
         if (m_typesInCreation.containsKey(forSymbol)) { 
-            throw new RuntimeException("type can't be registered, a fwd declaration exists"); 
+            throw new RuntimeException("type can't be registered, a fwd declaration exists");  // should not occur, check by sym table
         }
         if (m_typeTable.containsKey(forSymbol)) { 
-            throw new RuntimeException("type already defined"); 
+            throw new RuntimeException("type already defined"); // should not occur, checked by sym table
         }
         m_typeTable.put(forSymbol, fullDecl);
     }
