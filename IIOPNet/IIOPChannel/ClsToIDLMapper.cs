@@ -633,6 +633,10 @@ namespace Ch.Elca.Iiop.Tests {
         IdlLongLong, IdlULongLong, IdlOctet, IdlVoid, IdlChar, IdlWChar, IdlString, IdlWString
     }
 
+    public enum TestEnum { 
+        a, b, c 
+    }
+
     /// <summary>
     /// Test class for helping to test ClsToIdlMapper
     /// </summary>
@@ -754,7 +758,44 @@ namespace Ch.Elca.Iiop.Tests {
     
     public class TestClsNonSerializableClass {
     }
-    
+
+    [RepositoryID("IDL:Ch/Elca/Iiop/Tests/TestBoxedVal:1.0")]
+    [Serializable]
+    public class TestBoxedVal : BoxedValueBase, IIdlEntity {
+
+        private Int16 m_val;
+
+        public TestBoxedVal() {
+        }
+
+        public TestBoxedVal(Int16 val) {
+            m_val = val;
+        }
+
+        protected override object GetValue() {
+            return m_val;
+        }
+        
+    }
+   
+    [InterfaceTypeAttribute(IdlTypeInterface.AbstractInterface)]
+    [RepositoryID("IDL:Ch/Elca/Iiop/Tests/TestAbsInterface:1.0")]
+    public interface TestAbsInterface {
+    }
+
+    [InterfaceTypeAttribute(IdlTypeInterface.AbstractValueType)]
+    [RepositoryID("IDL:Ch/Elca/Iiop/Tests/TestAbsValInterface:1.0")]
+    public interface TestAbsValInterface {
+    }
+
+    [InterfaceTypeAttribute(IdlTypeInterface.ConcreteInterface)]
+    [RepositoryID("IDL:Ch/Elca/Iiop/Tests/TestConInterface:1.0")]
+    public interface TestConInterface {
+    }
+
+    public class TestRemotableByRef : MarshalByRefObject {
+    }
+  
     /// <summary>
     /// Unit-tests for testing the ClsToIdlMapper
     /// </summary>
@@ -792,12 +833,46 @@ namespace Ch.Elca.Iiop.Tests {
                                                                            s_testAction);
 			Assertion.AssertEquals(MappingToResult.IdlShort, mapResult);        	
         }
+
+        public void TestMapToIdlLong() {
+            ClsToIdlMapper mapper = ClsToIdlMapper.GetSingleton();
+            MappingToResult mapResult = (MappingToResult)mapper.MapClsType(typeof(Int32), 
+                                                                           new AttributeExtCollection(),
+                                                                           s_testAction);
+            Assertion.AssertEquals(MappingToResult.IdlLong, mapResult);
+        }
         
+        public void TestMapToIdlLongLong() {
+            ClsToIdlMapper mapper = ClsToIdlMapper.GetSingleton();
+            MappingToResult mapResult = (MappingToResult)mapper.MapClsType(typeof(Int64), 
+                                                                           new AttributeExtCollection(),
+                                                                           s_testAction);
+            Assertion.AssertEquals(MappingToResult.IdlLongLong, mapResult);
+        }
+
         [ExpectedException(typeof(BAD_PARAM))]
         public void TestMapUInt16() {
         	// System.UInt16 is not mappable, because UInt16 is not CLS compatible
             ClsToIdlMapper mapper = ClsToIdlMapper.GetSingleton();
             MappingToResult mapResult = (MappingToResult)mapper.MapClsType(typeof(UInt16), 
+                                                                           new AttributeExtCollection(),
+                                                                           s_testAction);
+        }
+
+        [ExpectedException(typeof(BAD_PARAM))]
+        public void TestMapUInt32() {
+            // System.UInt32 is not mappable, because UInt32 is not CLS compatible
+            ClsToIdlMapper mapper = ClsToIdlMapper.GetSingleton();
+            MappingToResult mapResult = (MappingToResult)mapper.MapClsType(typeof(UInt32), 
+                                                                           new AttributeExtCollection(),
+                                                                           s_testAction);
+        }
+
+        [ExpectedException(typeof(BAD_PARAM))]
+        public void TestMapUInt64() {
+            // System.UInt64 is not mappable, because UInt64 is not CLS compatible
+            ClsToIdlMapper mapper = ClsToIdlMapper.GetSingleton();
+            MappingToResult mapResult = (MappingToResult)mapper.MapClsType(typeof(UInt64), 
                                                                            new AttributeExtCollection(),
                                                                            s_testAction);
         }
@@ -824,14 +899,106 @@ namespace Ch.Elca.Iiop.Tests {
                                                                            new AttributeExtCollection(),
                                                                            s_testAction);
 			Assertion.AssertEquals(MappingToResult.IdlDouble, mapResult);
-        }                
+        }
+
+        public void TestMapToIdlString() {
+            ClsToIdlMapper mapper = ClsToIdlMapper.GetSingleton();
+            MappingToResult mapResult = (MappingToResult)mapper.MapClsType(typeof(String), 
+                                                                           new AttributeExtCollection(new Attribute[] { new StringValueAttribute(), new WideCharAttribute(false) }),
+                                                                           s_testAction);
+			Assertion.AssertEquals(MappingToResult.IdlString, mapResult);
+        }
+
+        public void TestMapToIdlWString() {
+            ClsToIdlMapper mapper = ClsToIdlMapper.GetSingleton();
+            MappingToResult mapResult = (MappingToResult)mapper.MapClsType(typeof(String), 
+                                                                           new AttributeExtCollection(new Attribute[] { new StringValueAttribute(), new WideCharAttribute(true) }),
+                                                                           s_testAction);
+			Assertion.AssertEquals(MappingToResult.IdlWString, mapResult);
+            mapResult = (MappingToResult)mapper.MapClsType(typeof(String), 
+                                                           new AttributeExtCollection(new Attribute[] { new StringValueAttribute() }),
+                                                           s_testAction);
+			Assertion.AssertEquals(MappingToResult.IdlWString, mapResult);
+        }
+
+        public void TestMapToIdlStringValue() {
+            ClsToIdlMapper mapper = ClsToIdlMapper.GetSingleton();
+            MappingToResult mapResult = (MappingToResult)mapper.MapClsType(typeof(String), 
+                                                                           new AttributeExtCollection(new Attribute[] { new WideCharAttribute(false) }),
+                                                                           s_testAction);
+			Assertion.AssertEquals(MappingToResult.IdlStringValue, mapResult);
+        }
+
+        public void TestMapToIdlWStringValue() {
+            ClsToIdlMapper mapper = ClsToIdlMapper.GetSingleton();
+            MappingToResult mapResult = (MappingToResult)mapper.MapClsType(typeof(String), 
+                                                                           new AttributeExtCollection(new Attribute[] { new WideCharAttribute(true) }),
+                                                                           s_testAction);
+			Assertion.AssertEquals(MappingToResult.IdlWstringValue, mapResult);
+            mapResult = (MappingToResult)mapper.MapClsType(typeof(String), 
+                                                           new AttributeExtCollection(),
+                                                           s_testAction);
+			Assertion.AssertEquals(MappingToResult.IdlWstringValue, mapResult);
+        }
+
+        public void TestMapToIdlChar() {
+            ClsToIdlMapper mapper = ClsToIdlMapper.GetSingleton();
+            MappingToResult mapResult = (MappingToResult)mapper.MapClsType(typeof(Char), 
+                                                                           new AttributeExtCollection(new Attribute[] { new WideCharAttribute(false) }),
+                                                                           s_testAction);
+			Assertion.AssertEquals(MappingToResult.IdlChar, mapResult);
+        }
+
+        public void TestMapToIdlWChar() {
+            ClsToIdlMapper mapper = ClsToIdlMapper.GetSingleton();
+            MappingToResult mapResult = (MappingToResult)mapper.MapClsType(typeof(Char), 
+                                                                           new AttributeExtCollection(new Attribute[] { new WideCharAttribute(true) }),
+                                                                           s_testAction);
+			Assertion.AssertEquals(MappingToResult.IdlWChar, mapResult);
+            mapResult = (MappingToResult)mapper.MapClsType(typeof(Char), 
+                                                           new AttributeExtCollection(),
+                                                           s_testAction);
+			Assertion.AssertEquals(MappingToResult.IdlWChar, mapResult);
+        }
+
+        public void TestMapToIdlSequence() {
+            ClsToIdlMapper mapper = ClsToIdlMapper.GetSingleton();
+            MappingToResult mapResult = (MappingToResult)mapper.MapClsType(typeof(int[]), 
+                                                                           new AttributeExtCollection(new Attribute[] { new IdlSequenceAttribute() } ),
+                                                                           s_testAction);
+            Assertion.AssertEquals(MappingToResult.IdlSequence, mapResult);
+        }
+
+        public void TestMapToIdlAny() {
+            ClsToIdlMapper mapper = ClsToIdlMapper.GetSingleton();
+            MappingToResult mapResult = (MappingToResult)mapper.MapClsType(typeof(object), 
+                                                                           new AttributeExtCollection(),
+                                                                           s_testAction);
+			Assertion.AssertEquals(MappingToResult.IdlAny, mapResult);
+            mapResult = (MappingToResult)mapper.MapClsType(typeof(object), 
+                                                           new AttributeExtCollection(new Attribute[] { new ObjectIdlTypeAttribute(IdlTypeObject.Any) }),
+                                                           s_testAction);
+            Assertion.AssertEquals(MappingToResult.IdlAny, mapResult);
+        }
+
+        public void TestMapToIdlEnum() {
+            ClsToIdlMapper mapper = ClsToIdlMapper.GetSingleton();
+            MappingToResult mapResult = (MappingToResult)mapper.MapClsType(typeof(TestEnum), 
+                                                                           new AttributeExtCollection(),
+                                                                           s_testAction);
+            Assertion.AssertEquals(MappingToResult.IdlEnum, mapResult);
+            mapResult = (MappingToResult)mapper.MapClsType(typeof(TestEnum), 
+                                                           new AttributeExtCollection(new Attribute[] { new IdlEnumAttribute() }),
+                                                           s_testAction);
+			Assertion.AssertEquals(MappingToResult.IdlEnum, mapResult);            
+        }
         
         public void TestMapToIdlStruct() {
             ClsToIdlMapper mapper = ClsToIdlMapper.GetSingleton();
             MappingToResult mapResult = (MappingToResult)mapper.MapClsType(typeof(TestIdlStruct), 
                                                                            new AttributeExtCollection(),
                                                                            s_testAction);
-			Assertion.AssertEquals(MappingToResult.IdlStruct, mapResult);
+            Assertion.AssertEquals(MappingToResult.IdlStruct, mapResult);
         }
         
         public void TestMapToIdlConcreteValueType() {
@@ -855,7 +1022,47 @@ namespace Ch.Elca.Iiop.Tests {
             mapResult = (MappingToResult)mapper.MapClsType(typeof(TestClsNonSerializableClass), 
                                                            new AttributeExtCollection(),
                                                            s_testAction);
-			Assertion.AssertEquals(MappingToResult.IdlAbstractValue, mapResult);						
+			Assertion.AssertEquals(MappingToResult.IdlAbstractValue, mapResult);	
+            mapResult = (MappingToResult)mapper.MapClsType(typeof(TestAbsValInterface), 
+                                                           new AttributeExtCollection(new Attribute[] { new InterfaceTypeAttribute(IdlTypeInterface.AbstractValueType) }),
+                                                           s_testAction);
+			Assertion.AssertEquals(MappingToResult.IdlAbstractValue, mapResult);	
+        }
+
+        public void TestMapToIdlBoxedValueType() {
+            ClsToIdlMapper mapper = ClsToIdlMapper.GetSingleton();
+            MappingToResult mapResult = (MappingToResult)mapper.MapClsType(typeof(Int16[]), 
+                                                                           new AttributeExtCollection(),
+                                                                           s_testAction);
+            Assertion.AssertEquals(MappingToResult.IdlBoxedValue, mapResult);
+            mapResult = (MappingToResult)mapper.MapClsType(typeof(TestBoxedVal ), 
+                                                           new AttributeExtCollection(),
+                                                           s_testAction);
+            Assertion.AssertEquals(MappingToResult.IdlBoxedValue, mapResult);
+            mapResult = (MappingToResult)mapper.MapClsType(typeof(Int16), 
+                                                           new AttributeExtCollection(new Attribute[] { new BoxedValueAttribute("IDL:Ch/Elca/Iiop/Tests/TestBoxedVal:1.0") }),
+                                                           s_testAction);
+            Assertion.AssertEquals(MappingToResult.IdlBoxedValue, mapResult);
+        }
+
+        public void TestMapToIdlConcreteInterface() {
+            ClsToIdlMapper mapper = ClsToIdlMapper.GetSingleton();
+            MappingToResult mapResult = (MappingToResult)mapper.MapClsType(typeof(TestRemotableByRef), 
+                                                                           new AttributeExtCollection(),
+                                                                           s_testAction);
+            Assertion.AssertEquals(MappingToResult.IdlConcreteIf, mapResult);
+            mapResult = (MappingToResult)mapper.MapClsType(typeof(TestConInterface), 
+                                                           new AttributeExtCollection(new Attribute[] { new InterfaceTypeAttribute(IdlTypeInterface.ConcreteInterface) }),
+                                                           s_testAction);
+            Assertion.AssertEquals(MappingToResult.IdlConcreteIf, mapResult);            
+        }
+
+        public void TestMapToIdlAbstractInterface() {
+            ClsToIdlMapper mapper = ClsToIdlMapper.GetSingleton();
+            MappingToResult mapResult = (MappingToResult)mapper.MapClsType(typeof(TestAbsInterface), 
+                                                                           new AttributeExtCollection(new Attribute[] { new InterfaceTypeAttribute(IdlTypeInterface.AbstractInterface) }),
+                                                                           s_testAction);
+            Assertion.AssertEquals(MappingToResult.IdlAbstractIf, mapResult);
         }
         
     }
