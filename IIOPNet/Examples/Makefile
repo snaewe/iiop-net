@@ -37,7 +37,7 @@ clean:
 	cd ..
 	cd EJBChatroom
 	cd Websphere_5
-	nmake clean
+        @if defined WAS_HOME $(MAKE) clean
 	cd ..
 	cd Jboss3.2.1
 	nmake clean
