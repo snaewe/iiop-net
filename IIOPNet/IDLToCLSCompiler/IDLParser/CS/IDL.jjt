@@ -1056,7 +1056,11 @@ void member() :
 void union_type() :
 { String ident = ""; }
 {
-  "union" ident = identifier() "switch" "(" switch_type_spec() ")" "{" switch_body() "}" { jjtThis.setIdent(ident); }
+  "union" ident = identifier() {
+  	// recursive definition using a sequence is permitted --> publish symbol already here
+  	Scope currentScope = m_symbolTable.getCurrentScope();
+  	currentScope.addSymbol(ident);  	
+  } "switch" "(" switch_type_spec() ")" "{" switch_body() "}" { jjtThis.setIdent(ident); }
 }
 
 /* Production 73, chapter 3.4, corba 2.3.1 */
