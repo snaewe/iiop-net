@@ -33,11 +33,13 @@ using System.Runtime.Remoting;
 using System.Runtime.Remoting.Channels;
 using Ch.Elca.Iiop;
 using Ch.Elca.Iiop.Services;
+using Ch.Elca.Iiop.Idl;
 using omg.org.CosNaming;
 
 namespace Ch.Elca.Iiop.Benchmarks {
     
     
+    [SupportedInterface(typeof(RefType))]
     public class RefTypeLocalImpl : MarshalByRefObject, RefType {
     }
     
