@@ -61,6 +61,10 @@ public class ASTvalue_header : SimpleNodeWithIdent {
         return getIdent();
     }
     
+    public override string GetEmbedderDesc() {
+        return ((SimpleNode)jjtGetParent()).GetEmbedderDesc();
+    }
+    
     #endregion IMethods
     
 }

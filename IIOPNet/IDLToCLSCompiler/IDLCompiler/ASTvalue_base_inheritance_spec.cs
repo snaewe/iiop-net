@@ -5,17 +5,29 @@ using System;
 namespace parser {
 
 public class ASTvalue_base_inheritance_spec : SimpleNode {
+  
+  #region IConstructors
+
   public ASTvalue_base_inheritance_spec(int id) : base(id) {
   }
 
   public ASTvalue_base_inheritance_spec(IDLParser p, int id) : base(p, id) {
   }
-
+  
+  #endregion IConstructors
+  #region IMethods
 
   /** Accept the visitor. **/
   public override Object jjtAccept(IDLParserVisitor visitor, Object data) {
     return visitor.visit(this, data);
   }
+  
+  public override string GetEmbedderDesc() {
+      return ((SimpleNode)jjtGetParent()).GetEmbedderDesc();
+  }
+  
+  #endregion IMethods
+
 }
 
 
