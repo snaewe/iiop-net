@@ -769,6 +769,14 @@ namespace Ch.Elca.Iiop.Tests {
         public ClsToIdlMapperTest() {
         }
 
+        public void TestMapToIdlVoid() {
+            ClsToIdlMapper mapper = ClsToIdlMapper.GetSingleton();
+            MappingToResult mapResult = (MappingToResult)mapper.MapClsType(typeof(void), 
+                                                                           new AttributeExtCollection(),
+                                                                           s_testAction);
+			Assertion.AssertEquals(MappingToResult.IdlVoid, mapResult);        
+        }
+
         public void TestMapToIdlOctet() {
             ClsToIdlMapper mapper = ClsToIdlMapper.GetSingleton();
             MappingToResult mapResult = (MappingToResult)mapper.MapClsType(typeof(Byte), 
@@ -777,6 +785,23 @@ namespace Ch.Elca.Iiop.Tests {
 			Assertion.AssertEquals(MappingToResult.IdlOctet, mapResult);
         }
         
+        public void TestMapToIdlShort() {
+            ClsToIdlMapper mapper = ClsToIdlMapper.GetSingleton();
+            MappingToResult mapResult = (MappingToResult)mapper.MapClsType(typeof(Int16), 
+                                                                           new AttributeExtCollection(),
+                                                                           s_testAction);
+			Assertion.AssertEquals(MappingToResult.IdlShort, mapResult);        	
+        }
+        
+        [ExpectedException(typeof(BAD_PARAM))]
+        public void TestMapUInt16() {
+        	// System.UInt16 is not mappable, because UInt16 is not CLS compatible
+            ClsToIdlMapper mapper = ClsToIdlMapper.GetSingleton();
+            MappingToResult mapResult = (MappingToResult)mapper.MapClsType(typeof(UInt16), 
+                                                                           new AttributeExtCollection(),
+                                                                           s_testAction);
+        }
+                        
         public void TestMapToIdlBoolean() {
             ClsToIdlMapper mapper = ClsToIdlMapper.GetSingleton();
             MappingToResult mapResult = (MappingToResult)mapper.MapClsType(typeof(Boolean), 
@@ -784,6 +809,22 @@ namespace Ch.Elca.Iiop.Tests {
                                                                            s_testAction);
 			Assertion.AssertEquals(MappingToResult.IdlBool, mapResult);
         }
+        
+        public void TestMapToIdlFloat() {
+            ClsToIdlMapper mapper = ClsToIdlMapper.GetSingleton();
+            MappingToResult mapResult = (MappingToResult)mapper.MapClsType(typeof(Single), 
+                                                                           new AttributeExtCollection(),
+                                                                           s_testAction);
+			Assertion.AssertEquals(MappingToResult.IdlFloat, mapResult);        
+        }
+        
+        public void TestMapToIdlDouble() {
+            ClsToIdlMapper mapper = ClsToIdlMapper.GetSingleton();
+            MappingToResult mapResult = (MappingToResult)mapper.MapClsType(typeof(Double), 
+                                                                           new AttributeExtCollection(),
+                                                                           s_testAction);
+			Assertion.AssertEquals(MappingToResult.IdlDouble, mapResult);
+        }                
         
         public void TestMapToIdlStruct() {
             ClsToIdlMapper mapper = ClsToIdlMapper.GetSingleton();
