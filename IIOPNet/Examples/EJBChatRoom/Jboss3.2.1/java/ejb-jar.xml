@@ -1,0 +1,21 @@
+<?xml version="1.0"?>
+<!DOCTYPE ejb-jar PUBLIC
+'-//Sun Microsystems, Inc.//DTD Enterprise JavaBeans 2.0//EN' 
+'http://java.sun.com/dtd/ejb-jar_2_0.dtd'>
+
+
+<!-- Generated XML! -->
+
+<ejb-jar>
+  <enterprise-beans>
+    <session>
+      <ejb-name>ChatroomBean</ejb-name>
+      <home>ch.elca.iiop.demo.ejbChatroom.ChatroomHome</home>
+      <remote>ch.elca.iiop.demo.ejbChatroom.Chatroom</remote>
+      <ejb-class>ch.elca.iiop.demo.ejbChatroom.ChatroomBean</ejb-class>
+      <session-type>Stateless</session-type>
+      <transaction-type>Bean</transaction-type>
+    </session>
+  </enterprise-beans>
+
+</ejb-jar>
