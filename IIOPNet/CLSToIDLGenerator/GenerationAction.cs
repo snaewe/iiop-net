@@ -282,7 +282,7 @@ namespace Ch.Elca.Iiop.Idl {
                                                                   m_refMapper);
             m_currentOutputStream.Write(returnTypeMapped + " ");
             
-            string mappedMethodName = IdlNaming.MapClsMethodNameToIdlName(methodToMap.Name, declaringType);
+            string mappedMethodName = IdlNaming.MapClsMethodNameToIdlName(methodToMap);
             m_currentOutputStream.Write(mappedMethodName + "(");
             
             ParameterInfo[] methodParams = methodToMap.GetParameters();

@@ -759,13 +759,13 @@ public class MetaDataGenerator implements IDLParserVisitor {
 
 
                 // set the methods for the property
-                MethodBuilder getAccessor = classBuilder.DefineMethod("get_" + properties[i].get_Name(), 
+                MethodBuilder getAccessor = classBuilder.DefineMethod("__get_" + properties[i].get_Name(), 
                                                                       MethodAttributes.Virtual | MethodAttributes.Abstract | MethodAttributes.Public | MethodAttributes.HideBySig | MethodAttributes.SpecialName, 
                                                                       properties[i].get_PropertyType(), System.Type.EmptyTypes);
                 propBuild.SetGetMethod(getAccessor);
                 MethodBuilder setAccessor = null;
                 if (properties[i].get_CanWrite()) {
-                    setAccessor = classBuilder.DefineMethod("set_" + properties[i].get_Name(), 
+                    setAccessor = classBuilder.DefineMethod("__set_" + properties[i].get_Name(), 
                                                             MethodAttributes.Virtual | MethodAttributes.Abstract | MethodAttributes.Public | MethodAttributes.HideBySig | MethodAttributes.SpecialName, 
                                                             null, new System.Type[] { properties[i].get_PropertyType() });
                     propBuild.SetSetMethod(setAccessor);
@@ -1872,13 +1872,13 @@ public class MetaDataGenerator implements IDLParserVisitor {
             propBuild = builder.DefineProperty(simpleDecl.getIdent(), PropertyAttributes.None, 
                                                propType.GetClsType(), System.Type.EmptyTypes);
             // set the methods for the property
-            MethodBuilder getAccessor = builder.DefineMethod("get_" + simpleDecl.getIdent(), 
+            MethodBuilder getAccessor = builder.DefineMethod("__get_" + simpleDecl.getIdent(), 
                                                              MethodAttributes.Virtual | MethodAttributes.Abstract | MethodAttributes.Public | MethodAttributes.HideBySig | MethodAttributes.SpecialName, 
                                                              propType.GetClsType(), System.Type.EmptyTypes);
             propBuild.SetGetMethod(getAccessor);
             MethodBuilder setAccessor = null;
             if (!(node.isReadOnly())) {
-                setAccessor = builder.DefineMethod("set_" + simpleDecl.getIdent(), 
+                setAccessor = builder.DefineMethod("__set_" + simpleDecl.getIdent(), 
                                                    MethodAttributes.Virtual | MethodAttributes.Abstract | MethodAttributes.Public | MethodAttributes.HideBySig | MethodAttributes.SpecialName, 
                                                    null, new System.Type[] { propType.GetClsType() });
                 propBuild.SetSetMethod(setAccessor);

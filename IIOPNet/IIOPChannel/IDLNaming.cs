@@ -41,8 +41,10 @@ namespace Ch.Elca.Iiop.Idl {
 
         #region SFields
         
-        private static ArrayList s_keywordList = new ArrayList();
-        private static Hashtable s_mapSpecial = new Hashtable();
+        private static ArrayList s_clsKeywordList = new ArrayList();
+        private static Hashtable s_clsMapSpecial = new Hashtable();
+        
+        private static ArrayList s_idlKeywordList = new ArrayList();
 
         private static IComparer s_keyWordComparer = new CaseInsensitiveComparer();
 
@@ -52,8 +54,10 @@ namespace Ch.Elca.Iiop.Idl {
         static IdlNaming() {
             // creates the list of reserved CLS words
             InitClsKeyWordList();
+            // creates the list of reserved IDL words
+            InitIdlKeyWordList();
             // create mapping table for primitive types and special types
-            InitMapSpecial();
+            InitMapClsToIdlSpecial();
         }
 
         #endregion SConstructor
@@ -64,45 +68,45 @@ namespace Ch.Elca.Iiop.Idl {
 
         #endregion IConstructors
         #region SMethods
-
-        /// <summary>
-        /// converts an IDL name to a .NET name
-        /// </summary>
-        /// <param name="idlName"></param>
-        /// <param name="serverType">needed to handle overloaded method-names correctly</param>
-        /// <returns></returns>
-        public static string MapIdlMethodNameToClsName(string idlName, Type serverType) {
-            // TODO: exception in 1 to 1 mapping rule, e.g. handling of overloaded method names
-            if (idlName.StartsWith("_")) { 
-                // remove underscore: see CORBA2.3, 3.2.3.1
-                idlName = idlName.Substring(1);
-            }
-            string result = idlName;
-            if (s_keywordList.BinarySearch(idlName, s_keyWordComparer) >= 0) {
-                // check for key-words, .NET keyworks are escaped
-                result = "_" + result;
+        
+        /// <summary>creates the Idl-name for a name, which was mapped from IDL to CLS</summary>
+        internal static string ReverseIdlToClsNameMapping(string mappedNameInCls) {
+        	string result = mappedNameInCls;
+        	if (result.StartsWith("_")) {
+        	    // remove leading underscore, according to section 3.2.3.1 in CORBA 2.3.1 standard
+        	    // the underscore is not removed during name mapping, to handle idl id's which would be mapped
+        	    // to a CLS keyword easily
+        	    result = result.Substring(1);
+        	}
+        	return result;
+        }
+        
+        /// <summary>creates the CLS-name for a name, which was mapped from CLS to IDL</summary>
+        internal static string ReverseClsToIdlNameMapping(string mappedNameInIdl) {
+            string result = mappedNameInIdl;
+            if (result.StartsWith("_")) {
+                result = result.Substring(1); // because of property accessor methods: .NET accessor have no _ before get/set
+            } else if (result.StartsWith("N_")) {
+                result = result.Substring(1);
             }
             return result;
         }
 
         /// <summary>
-        /// returns the IDLName for a CLS name
+        /// Maps the method name for the CLS method to IDL
         /// </summary>
-        /// <param name="dotNetName"></param>
-        /// <param name="serverType">needed to handle overloaded method-names correctly</param>
-        /// <returns></returns>
-        public static string MapClsMethodNameToIdlName(string dotNetName, Type serverType) {
-            // TODO: handle exceptions
-            if (typeof(IIdlEntity).IsAssignableFrom(serverType)) {
-                // method name collided with .NET identifier must be mapped to the original identifier
-                if (dotNetName.StartsWith("_")) { 
-                    dotNetName = dotNetName.Substring(1); 
-                }
-            } else {
-            
-            }
-            
-            return dotNetName;
+        public static string MapClsMethodNameToIdlName(MethodInfo method) {
+            // TODO: handle overloaded methods
+            // TODO: handle exceptions in method name mapping -> use standard name mapping
+            return method.Name;
+        }
+        
+        /// <summary>
+        /// find the CLS method for the idl name of an overloaded CLS method, defined in type serverType
+        /// </summary>
+        internal static MethodInfo FindClsMethodForOverloadedMethodIdlName(string idlName, Type serverType) {
+            // TODO: implement this
+            throw new omg.org.CORBA.BAD_OPERATION(247, omg.org.CORBA.CompletionStatus.Completed_No);
         }
         
         /// <summary>
@@ -171,9 +175,9 @@ namespace Ch.Elca.Iiop.Idl {
         /// <param name="forType"></param>
         /// <returns></returns>
         public static string MapShortTypeNameToIdl(Type forType) {
-            if (s_mapSpecial.ContainsKey(forType)) {
+            if (s_clsMapSpecial.ContainsKey(forType)) {
                 // special
-                return (string)s_mapSpecial[forType];
+                return (string)s_clsMapSpecial[forType];
             } else {
                 return forType.Name;
             }
@@ -208,173 +212,242 @@ namespace Ch.Elca.Iiop.Idl {
             }
             return modules;
         }
+        
+        /// <summary>checks, if the given name clashes with a cls keyword</summary>
+        internal static bool NameClashesWithClsKeyWord(string name) {
+            if (s_clsKeywordList.BinarySearch(name, s_keyWordComparer) >= 0) {
+                return true;
+            } else {
+                return false;
+            }
+        }
+        
+        /// <summary>checks, if the given name clashes with an idl keyword</summary>
+        internal static bool NameClashesWithIdlKeyWord(string name) {
+            if (s_idlKeywordList.BinarySearch(name, s_keyWordComparer) >= 0) {
+                return true;
+            } else {
+                return false;
+            }
+        }
 
-        private static void InitMapSpecial() {
-            s_mapSpecial.Add(typeof(System.Int16), "short");
-            s_mapSpecial.Add(typeof(System.Int32), "long");
-            s_mapSpecial.Add(typeof(System.Int64), "long long");
-            s_mapSpecial.Add(typeof(System.Byte), "octet");
-            s_mapSpecial.Add(typeof(System.Boolean), "boolean");
-            s_mapSpecial.Add(typeof(void), "void");
+        private static void InitMapClsToIdlSpecial() {
+            s_clsMapSpecial.Add(typeof(System.Int16), "short");
+            s_clsMapSpecial.Add(typeof(System.Int32), "long");
+            s_clsMapSpecial.Add(typeof(System.Int64), "long long");
+            s_clsMapSpecial.Add(typeof(System.Byte), "octet");
+            s_clsMapSpecial.Add(typeof(System.Boolean), "boolean");
+            s_clsMapSpecial.Add(typeof(void), "void");
 
-            s_mapSpecial.Add(typeof(System.Single), "float");
-            s_mapSpecial.Add(typeof(System.Double), "double");
+            s_clsMapSpecial.Add(typeof(System.Single), "float");
+            s_clsMapSpecial.Add(typeof(System.Double), "double");
             
-            s_mapSpecial.Add(typeof(System.Char), "wchar");
-            s_mapSpecial.Add(typeof(System.String), "wstring");
+            s_clsMapSpecial.Add(typeof(System.Char), "wchar");
+            s_clsMapSpecial.Add(typeof(System.String), "wstring");
         }
         
         /// <summary>initalize the CLS keyword-list</summary>
         private static void InitClsKeyWordList() {
-            s_keywordList.Add("AddHandler");
-            s_keywordList.Add("AddressOf");
-            s_keywordList.Add("Alias");
-            s_keywordList.Add("And");
-            s_keywordList.Add("Ansi");
-            s_keywordList.Add("As");
-            s_keywordList.Add("Assembly");
-            s_keywordList.Add("Auto");
-            s_keywordList.Add("Base");
-            s_keywordList.Add("Boolean");
-            s_keywordList.Add("bool");
-            s_keywordList.Add("ByRef");
-            s_keywordList.Add("Byte");
-            s_keywordList.Add("ByVal");
-            s_keywordList.Add("Call");
-            s_keywordList.Add("Case");
-            s_keywordList.Add("Catch");
-            s_keywordList.Add("CBool");
-            s_keywordList.Add("CByte");
-            s_keywordList.Add("CChar");
-            s_keywordList.Add("CDate");
-            s_keywordList.Add("CDec");
-            s_keywordList.Add("CDbl");
-            s_keywordList.Add("Char");
-            s_keywordList.Add("CInt");
-            s_keywordList.Add("Class");
-            s_keywordList.Add("CLng");
-            s_keywordList.Add("CObj");
-            s_keywordList.Add("Const");
-            s_keywordList.Add("CShort");
-            s_keywordList.Add("CSng");
-            s_keywordList.Add("CStr");
-            s_keywordList.Add("CType");
-            s_keywordList.Add("Date");
-            s_keywordList.Add("Decimal");
-            s_keywordList.Add("Declare");
-            s_keywordList.Add("Default");
-            s_keywordList.Add("Delegate");
-            s_keywordList.Add("Dim");
-            s_keywordList.Add("Do");
-            s_keywordList.Add("Double");
-            s_keywordList.Add("Each");
-            s_keywordList.Add("Else");
-            s_keywordList.Add("ElseIf");
-            s_keywordList.Add("End");
-            s_keywordList.Add("Enum");
-            s_keywordList.Add("Erase");
-            s_keywordList.Add("Error");
-            s_keywordList.Add("Event");
-            s_keywordList.Add("Exit");
-            s_keywordList.Add("ExternalSource");
-            s_keywordList.Add("False");
-            s_keywordList.Add("Finalize");
-            s_keywordList.Add("Finally");
-            s_keywordList.Add("Float");
-            s_keywordList.Add("For");
-            s_keywordList.Add("foreach");
-            s_keywordList.Add("Friend");
-            s_keywordList.Add("Function");
-            s_keywordList.Add("Get");
-            s_keywordList.Add("GetType");
-            s_keywordList.Add("Goto");
-            s_keywordList.Add("Handles");
-            s_keywordList.Add("If");
-            s_keywordList.Add("Implements");
-            s_keywordList.Add("Imports");
-            s_keywordList.Add("In");
-            s_keywordList.Add("Inherits");
-            s_keywordList.Add("Integer");
-            s_keywordList.Add("int");
-            s_keywordList.Add("Interface");
-            s_keywordList.Add("Is");
-            s_keywordList.Add("Let");
-            s_keywordList.Add("Lib");
-            s_keywordList.Add("Like");
-            s_keywordList.Add("lock");
-            s_keywordList.Add("Long");
-            s_keywordList.Add("Loop");
-            s_keywordList.Add("Me");
-            s_keywordList.Add("Mod");
-            s_keywordList.Add("Module");
-            s_keywordList.Add("MustInherit");
-            s_keywordList.Add("MustOverride");
-            s_keywordList.Add("MyBase"); 
-            s_keywordList.Add("MyClass");
-            s_keywordList.Add("Namespace");
-            s_keywordList.Add("New");
-            s_keywordList.Add("Next");
-            s_keywordList.Add("Not");
-            s_keywordList.Add("Nothing");
-            s_keywordList.Add("NotInheritable");
-            s_keywordList.Add("NotOverridable");
-            s_keywordList.Add("Object");
-            s_keywordList.Add("On");
-            s_keywordList.Add("Option");
-            s_keywordList.Add("Optional");
-            s_keywordList.Add("Or");
-            s_keywordList.Add("Overloads");
-            s_keywordList.Add("Overridable"); 
-            s_keywordList.Add("override");
-            s_keywordList.Add("Overrides");
-            s_keywordList.Add("ParamArray");
-            s_keywordList.Add("Preserve");
-            s_keywordList.Add("Private");
-            s_keywordList.Add("Property"); 
-            s_keywordList.Add("Protected");
-            s_keywordList.Add("Public");
-            s_keywordList.Add("RaiseEvent");
-            s_keywordList.Add("ReadOnly");
-            s_keywordList.Add("ReDim");
-            s_keywordList.Add("Region");
-            s_keywordList.Add("REM"); 
-            s_keywordList.Add("RemoveHandler");
-            s_keywordList.Add("Resume");
-            s_keywordList.Add("Return");
-            s_keywordList.Add("Select");
-            s_keywordList.Add("Set");
-            s_keywordList.Add("Shadows");
-            s_keywordList.Add("Shared");
-            s_keywordList.Add("Short"); 
-            s_keywordList.Add("Single");
-            s_keywordList.Add("Static");
-            s_keywordList.Add("Step");
-            s_keywordList.Add("Stop");
-            s_keywordList.Add("String");
-            s_keywordList.Add("Structure");
-            s_keywordList.Add("struct");
-            s_keywordList.Add("Sub");
-            s_keywordList.Add("SyncLock");
-            s_keywordList.Add("Then");
-            s_keywordList.Add("Throw");
-            s_keywordList.Add("To");
-            s_keywordList.Add("True");
-            s_keywordList.Add("Try");
-            s_keywordList.Add("TypeOf");
-            s_keywordList.Add("Unicode");
-            s_keywordList.Add("Until");
-            s_keywordList.Add("volatile");
-            s_keywordList.Add("When");
-            s_keywordList.Add("While");
-            s_keywordList.Add("With");
-            s_keywordList.Add("WithEvents");
-            s_keywordList.Add("WriteOnly");
-            s_keywordList.Add("Xor");
-            s_keywordList.Add("eval");
-            s_keywordList.Add("extends");
-            s_keywordList.Add("instanceof");
-            s_keywordList.Add("package");
-            s_keywordList.Add("var");            
+            s_clsKeywordList.Add("AddHandler");
+            s_clsKeywordList.Add("AddressOf");
+            s_clsKeywordList.Add("Alias");
+            s_clsKeywordList.Add("And");
+            s_clsKeywordList.Add("Ansi");
+            s_clsKeywordList.Add("As");
+            s_clsKeywordList.Add("Assembly");
+            s_clsKeywordList.Add("Auto");
+            s_clsKeywordList.Add("Base");
+            s_clsKeywordList.Add("Boolean");
+            s_clsKeywordList.Add("bool");
+            s_clsKeywordList.Add("ByRef");
+            s_clsKeywordList.Add("Byte");
+            s_clsKeywordList.Add("ByVal");
+            s_clsKeywordList.Add("Call");
+            s_clsKeywordList.Add("Case");
+            s_clsKeywordList.Add("Catch");
+            s_clsKeywordList.Add("CBool");
+            s_clsKeywordList.Add("CByte");
+            s_clsKeywordList.Add("CChar");
+            s_clsKeywordList.Add("CDate");
+            s_clsKeywordList.Add("CDec");
+            s_clsKeywordList.Add("CDbl");
+            s_clsKeywordList.Add("Char");
+            s_clsKeywordList.Add("CInt");
+            s_clsKeywordList.Add("Class");
+            s_clsKeywordList.Add("CLng");
+            s_clsKeywordList.Add("CObj");
+            s_clsKeywordList.Add("Const");
+            s_clsKeywordList.Add("CShort");
+            s_clsKeywordList.Add("CSng");
+            s_clsKeywordList.Add("CStr");
+            s_clsKeywordList.Add("CType");
+            s_clsKeywordList.Add("Date");
+            s_clsKeywordList.Add("Decimal");
+            s_clsKeywordList.Add("Declare");
+            s_clsKeywordList.Add("Default");
+            s_clsKeywordList.Add("Delegate");
+            s_clsKeywordList.Add("Dim");
+            s_clsKeywordList.Add("Do");
+            s_clsKeywordList.Add("Double");
+            s_clsKeywordList.Add("Each");
+            s_clsKeywordList.Add("Else");
+            s_clsKeywordList.Add("ElseIf");
+            s_clsKeywordList.Add("End");
+            s_clsKeywordList.Add("Enum");
+            s_clsKeywordList.Add("Erase");
+            s_clsKeywordList.Add("Error");
+            s_clsKeywordList.Add("Event");
+            s_clsKeywordList.Add("Exit");
+            s_clsKeywordList.Add("ExternalSource");
+            s_clsKeywordList.Add("False");
+            s_clsKeywordList.Add("Finalize");
+            s_clsKeywordList.Add("Finally");
+            s_clsKeywordList.Add("Float");
+            s_clsKeywordList.Add("For");
+            s_clsKeywordList.Add("foreach");
+            s_clsKeywordList.Add("Friend");
+            s_clsKeywordList.Add("Function");
+            s_clsKeywordList.Add("Get");
+            s_clsKeywordList.Add("GetType");
+            s_clsKeywordList.Add("Goto");
+            s_clsKeywordList.Add("Handles");
+            s_clsKeywordList.Add("If");
+            s_clsKeywordList.Add("Implements");
+            s_clsKeywordList.Add("Imports");
+            s_clsKeywordList.Add("In");
+            s_clsKeywordList.Add("Inherits");
+            s_clsKeywordList.Add("Integer");
+            s_clsKeywordList.Add("int");
+            s_clsKeywordList.Add("Interface");
+            s_clsKeywordList.Add("Is");
+            s_clsKeywordList.Add("Let");
+            s_clsKeywordList.Add("Lib");
+            s_clsKeywordList.Add("Like");
+            s_clsKeywordList.Add("lock");
+            s_clsKeywordList.Add("Long");
+            s_clsKeywordList.Add("Loop");
+            s_clsKeywordList.Add("Me");
+            s_clsKeywordList.Add("Mod");
+            s_clsKeywordList.Add("Module");
+            s_clsKeywordList.Add("MustInherit");
+            s_clsKeywordList.Add("MustOverride");
+            s_clsKeywordList.Add("MyBase"); 
+            s_clsKeywordList.Add("MyClass");
+            s_clsKeywordList.Add("Namespace");
+            s_clsKeywordList.Add("New");
+            s_clsKeywordList.Add("Next");
+            s_clsKeywordList.Add("Not");
+            s_clsKeywordList.Add("Nothing");
+            s_clsKeywordList.Add("NotInheritable");
+            s_clsKeywordList.Add("NotOverridable");
+            s_clsKeywordList.Add("Object");
+            s_clsKeywordList.Add("On");
+            s_clsKeywordList.Add("Option");
+            s_clsKeywordList.Add("Optional");
+            s_clsKeywordList.Add("Or");
+            s_clsKeywordList.Add("Overloads");
+            s_clsKeywordList.Add("Overridable"); 
+            s_clsKeywordList.Add("override");
+            s_clsKeywordList.Add("Overrides");
+            s_clsKeywordList.Add("ParamArray");
+            s_clsKeywordList.Add("Preserve");
+            s_clsKeywordList.Add("Private");
+            s_clsKeywordList.Add("Property"); 
+            s_clsKeywordList.Add("Protected");
+            s_clsKeywordList.Add("Public");
+            s_clsKeywordList.Add("RaiseEvent");
+            s_clsKeywordList.Add("ReadOnly");
+            s_clsKeywordList.Add("ReDim");
+            s_clsKeywordList.Add("Region");
+            s_clsKeywordList.Add("REM"); 
+            s_clsKeywordList.Add("RemoveHandler");
+            s_clsKeywordList.Add("Resume");
+            s_clsKeywordList.Add("Return");
+            s_clsKeywordList.Add("Select");
+            s_clsKeywordList.Add("Set");
+            s_clsKeywordList.Add("Shadows");
+            s_clsKeywordList.Add("Shared");
+            s_clsKeywordList.Add("Short"); 
+            s_clsKeywordList.Add("Single");
+            s_clsKeywordList.Add("Static");
+            s_clsKeywordList.Add("Step");
+            s_clsKeywordList.Add("Stop");
+            s_clsKeywordList.Add("String");
+            s_clsKeywordList.Add("Structure");
+            s_clsKeywordList.Add("struct");
+            s_clsKeywordList.Add("Sub");
+            s_clsKeywordList.Add("SyncLock");
+            s_clsKeywordList.Add("Then");
+            s_clsKeywordList.Add("Throw");
+            s_clsKeywordList.Add("To");
+            s_clsKeywordList.Add("True");
+            s_clsKeywordList.Add("Try");
+            s_clsKeywordList.Add("TypeOf");
+            s_clsKeywordList.Add("Unicode");
+            s_clsKeywordList.Add("Until");
+            s_clsKeywordList.Add("volatile");
+            s_clsKeywordList.Add("When");
+            s_clsKeywordList.Add("While");
+            s_clsKeywordList.Add("With");
+            s_clsKeywordList.Add("WithEvents");
+            s_clsKeywordList.Add("WriteOnly");
+            s_clsKeywordList.Add("Xor");
+            s_clsKeywordList.Add("eval");
+            s_clsKeywordList.Add("extends");
+            s_clsKeywordList.Add("instanceof");
+            s_clsKeywordList.Add("package");
+            s_clsKeywordList.Add("var");            
+        }
+        /// <summary>initalize the IDL keyword-list</summary>        
+        /// <remarks>see section 3.2.4, Corba 2.3.1</remarks>
+        private static void InitIdlKeyWordList() {
+            s_idlKeywordList.Add("abstract");
+            s_idlKeywordList.Add("any");
+            s_idlKeywordList.Add("attribute");
+            s_idlKeywordList.Add("boolean");
+            s_idlKeywordList.Add("case");
+            s_idlKeywordList.Add("char");
+            s_idlKeywordList.Add("const");
+            s_idlKeywordList.Add("context");
+            s_idlKeywordList.Add("custom");
+            s_idlKeywordList.Add("default");
+            s_idlKeywordList.Add("double");
+            s_idlKeywordList.Add("enum");
+            s_idlKeywordList.Add("exception");
+            s_idlKeywordList.Add("factory");
+            s_idlKeywordList.Add("FALSE");
+            s_idlKeywordList.Add("fixed");
+            s_idlKeywordList.Add("float");
+            s_idlKeywordList.Add("in");
+            s_idlKeywordList.Add("inout");
+            s_idlKeywordList.Add("interface");
+            s_idlKeywordList.Add("long");
+            s_idlKeywordList.Add("module");
+            s_idlKeywordList.Add("native");
+            s_idlKeywordList.Add("Object");
+            s_idlKeywordList.Add("octet");
+            s_idlKeywordList.Add("oneway");
+            s_idlKeywordList.Add("out");
+            s_idlKeywordList.Add("private");
+            s_idlKeywordList.Add("public");
+            s_idlKeywordList.Add("raises");
+            s_idlKeywordList.Add("readonly");
+            s_idlKeywordList.Add("sequence");
+            s_idlKeywordList.Add("short");
+            s_idlKeywordList.Add("string");
+            s_idlKeywordList.Add("struct");
+            s_idlKeywordList.Add("supports");
+            s_idlKeywordList.Add("switch");
+            s_idlKeywordList.Add("TRUE");
+            s_idlKeywordList.Add("truncatable");
+            s_idlKeywordList.Add("typedef");
+            s_idlKeywordList.Add("unsigned");
+            s_idlKeywordList.Add("union");
+            s_idlKeywordList.Add("ValueBase");
+            s_idlKeywordList.Add("valuetype");
+            s_idlKeywordList.Add("void");
+            s_idlKeywordList.Add("wchar");
+            s_idlKeywordList.Add("wstring");
         }
 
         #endregion SMethods
