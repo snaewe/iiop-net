@@ -84,28 +84,32 @@ namespace Ch.Elca.Iiop.MessageHandling {
         /// <remarks>Precondition: sourceStream contains a Giop reply Msg</remarks>
         /// <returns>the .NET reply Msg created from the Giop Reply</returns>
         public IMessage ParseIncomingReplyMessage(Stream sourceStream, 
-                                                  IMethodCallMessage requestMessage) {
+                                                  IMethodCallMessage requestMessage,
+                                                  GiopConnectionDesc conDesc) {
             Debug.WriteLine("receive reply message at client side");            
             CdrMessageInputStream msgInput = new CdrMessageInputStream(sourceStream);
             CdrInputStream msgBody = msgInput.GetMessageContentReadingStream();
             // deserialize message body
             GiopMessageBodySerialiser ser = GiopMessageBodySerialiser.GetSingleton();
-            return ser.DeserialiseReply(msgBody, msgInput.Header.Version, requestMessage);
+            return ser.DeserialiseReply(msgBody, msgInput.Header.Version, requestMessage,
+                                        conDesc);
         }
 
         /// <summary>reads an incoming Giop request-message from the Stream sourceStream</summary>
         /// <returns>the .NET request message created from this Giop-message</returns>
-        public IMessage ParseIncomingRequestMessage(Stream sourceStream) {
+        public IMessage ParseIncomingRequestMessage(Stream sourceStream, 
+                                                    GiopConnectionDesc conDesc) {
             CdrMessageInputStream msgInput = new CdrMessageInputStream(sourceStream);
             CdrInputStream msgBody = msgInput.GetMessageContentReadingStream();
             // deserialize the message body (the GIOP-request id is included in this message)
             GiopMessageBodySerialiser ser = GiopMessageBodySerialiser.GetSingleton();
-            return ser.DeserialiseRequest(msgBody, msgInput.Header.Version);
+            return ser.DeserialiseRequest(msgBody, msgInput.Header.Version,
+                                          conDesc);
         }
 
         /// <summary>serialises an outgoing .NET request Message on client side</summary>
         public void SerialiseOutgoingRequestMessage(IMessage msg, Stream targetStream, 
-                                                    GiopRequestNumberGenerator reqNumberGen) {
+                                                    uint requestId, GiopConnectionDesc conDesc) {
             if (msg is IConstructionCallMessage) {
                 // not supported in CORBA, TBD: replace through do nothing instead of exception
                 throw new NotSupportedException("client activated objects are not supported with this channel");
@@ -119,11 +123,10 @@ namespace Ch.Elca.Iiop.MessageHandling {
                 CdrMessageOutputStream msgOutput = new CdrMessageOutputStream(targetStream, header);
                 // serialize the message, this insert some data into msg, e.g. request-id
                 GiopMessageBodySerialiser ser = GiopMessageBodySerialiser.GetSingleton();
-                uint requestId = reqNumberGen.GenerateRequestId();
                 msg.Properties[SimpleGiopMsg.REQUEST_ID_KEY] = requestId; // set request-id
                 ser.SerialiseRequest(msg as IMethodCallMessage, 
                                      msgOutput.GetMessageContentWritingStream(),
-                                     ior, requestId);
+                                     ior, requestId, conDesc);
                 msgOutput.CloseStream();
             } else {
                 throw new NotImplementedException("handling for this type of .NET message is not implemented at the moment, type: " +
@@ -133,7 +136,7 @@ namespace Ch.Elca.Iiop.MessageHandling {
 
         /// <summary>serialises an outgoing .NET reply Message on server side</summary>
         public void SerialiseOutgoingReplyMessage(IMessage msg, GiopVersion version, uint forRequstId,
-                                                   Stream targetStream) {
+                                                   Stream targetStream, GiopConnectionDesc conDesc) {
             if (msg is ReturnMessage) {
                 // write a CORBA response message into the stream targetStream
                 GiopHeader header = new GiopHeader(version.Major, version.Minor, 0, GiopMsgTypes.Reply);
@@ -141,7 +144,7 @@ namespace Ch.Elca.Iiop.MessageHandling {
                 // serialize the message
                 GiopMessageBodySerialiser ser = GiopMessageBodySerialiser.GetSingleton();
                 ser.SerialiseReply((ReturnMessage)msg, msgOutput.GetMessageContentWritingStream(), 
-                                   version, forRequstId);
+                                   version, forRequstId, conDesc);
                 msgOutput.CloseStream(); // write to the stream
             } else {
                 throw new NotImplementedException("handling for this type of .NET message is not implemented at the moment, type: " +
@@ -354,14 +357,14 @@ namespace Ch.Elca.Iiop.Tests {
             string uri = "iiop://localhost:8087/testuri"; // Giop 1.2 will be used because no version spec in uri
             TestMessage msg = new TestMessage(methodToCall, args, uri);
             // prepare connection context
-            IiopClientConnectionManager manager = IiopClientConnectionManager.GetManager();
-			GiopClientConnectionContext context = manager.AllocateConnection(msg);
+            GiopClientConnectionDesc conDesc = new GiopClientConnectionDesc();
 
             // serialise            
             GiopMessageHandler handler = GiopMessageHandler.GetSingleton();
             MemoryStream targetStream = new MemoryStream();
-
-            handler.SerialiseOutgoingRequestMessage(msg, targetStream, new GiopRequestNumberGenerator());
+            
+            uint reqId = 5;
+            handler.SerialiseOutgoingRequestMessage(msg, targetStream, reqId, conDesc);
             
             // check to serialised stream
             targetStream.Seek(0, SeekOrigin.Begin);
@@ -387,7 +390,7 @@ namespace Ch.Elca.Iiop.Tests {
             uint msgLength = cdrIn.ReadULong();
             cdrIn.SetMaxLength(msgLength);
             // req-id
-            Assertion.AssertEquals(5, cdrIn.ReadULong());
+            Assertion.AssertEquals(reqId, cdrIn.ReadULong());
             // response flags
             data = (byte) cdrIn.ReadOctet();
             Assertion.AssertEquals(3, data);
@@ -409,8 +412,6 @@ namespace Ch.Elca.Iiop.Tests {
             // now params are following
             Assertion.AssertEquals(1, cdrIn.ReadLong());
             Assertion.AssertEquals(2, cdrIn.ReadLong());
-            // release connection context
-            manager.ReleaseConnection(msg);
         }
         
         public void TestReplySerialisation() {
@@ -420,7 +421,7 @@ namespace Ch.Elca.Iiop.Tests {
             string uri = "iiop://localhost:8087/testuri"; // Giop 1.2 will be used because no version spec in uri
             TestMessage msg = new TestMessage(methodToCall, args, uri);
             // create a connection context
-            IiopServerConnectionManager.GetManager().RegisterActiveConnection();
+            GiopConnectionDesc conDesc = new GiopConnectionDesc();
 
             // create the reply
             ReturnMessage retMsg = new ReturnMessage((Int32) 3, new object[0], 0, null, msg);
@@ -428,7 +429,8 @@ namespace Ch.Elca.Iiop.Tests {
             GiopMessageHandler handler = GiopMessageHandler.GetSingleton();
             MemoryStream targetStream = new MemoryStream();
 
-            handler.SerialiseOutgoingReplyMessage(retMsg, new GiopVersion(1, 2), 5, targetStream);
+            handler.SerialiseOutgoingReplyMessage(retMsg, new GiopVersion(1, 2), 5, 
+                                                  targetStream, conDesc);
             
             // check to serialised stream
             targetStream.Seek(0, SeekOrigin.Begin);
@@ -463,9 +465,6 @@ namespace Ch.Elca.Iiop.Tests {
             cdrIn.ForceReadAlign(Aligns.Align8);
             // now return value is following
             Assertion.AssertEquals(3, cdrIn.ReadLong());
-
-            // release connection context
-            IiopServerConnectionManager.GetManager().UnregisterActiveConnection();
         }
         
         public void TestRequestDeserialisation() {          
@@ -501,7 +500,7 @@ namespace Ch.Elca.Iiop.Tests {
             cdrOut.WriteLong(2);
 
             // create a connection context: this is needed for request deserialisation
-            IiopServerConnectionManager.GetManager().RegisterActiveConnection();
+            GiopConnectionDesc conDesc = new GiopConnectionDesc();
 
             // go to stream begin
             sourceStream.Seek(0, SeekOrigin.Begin);
@@ -513,10 +512,9 @@ namespace Ch.Elca.Iiop.Tests {
                 string uri = "testobject";
                 RemotingServices.Marshal(service, uri);
 
-
                 // deserialise request message
                 GiopMessageHandler handler = GiopMessageHandler.GetSingleton();
-                result = handler.ParseIncomingRequestMessage(sourceStream);
+                result = handler.ParseIncomingRequestMessage(sourceStream, conDesc);
             } catch (RequestDeserializationException e) {
                 Console.WriteLine("Request deser exception, reason: " + e.Reason);
                 throw e;
@@ -537,8 +535,6 @@ namespace Ch.Elca.Iiop.Tests {
             Assertion.AssertEquals(2, args.Length);
             Assertion.AssertEquals(1, args[0]);
             Assertion.AssertEquals(2, args[1]);
-            // release connection context
-            IiopServerConnectionManager.GetManager().UnregisterActiveConnection();
         }
         
         public void TestReplyDeserialisation() {
@@ -547,9 +543,8 @@ namespace Ch.Elca.Iiop.Tests {
             object[] args = new object[] { ((Int32) 1), ((Int32) 2) };
             string uri = "iiop://localhost:8087/testuri"; // Giop 1.2 will be used because no version spec in uri
             TestMessage requestMsg = new TestMessage(methodToCall, args, uri);
-            // prepare connection context
-            IiopClientConnectionManager manager = IiopClientConnectionManager.GetManager();
-			GiopClientConnectionContext context = manager.AllocateConnection(requestMsg);            
+            // prepare connection desc
+            GiopClientConnectionDesc conDesc = new GiopClientConnectionDesc();
             // create the reply
             MemoryStream sourceStream = new MemoryStream();
             CdrOutputStreamImpl cdrOut = new CdrOutputStreamImpl(sourceStream, 0, new GiopVersion(1, 2));
@@ -576,12 +571,9 @@ namespace Ch.Elca.Iiop.Tests {
             // check deser of msg:
             sourceStream.Seek(0, SeekOrigin.Begin);
             GiopMessageHandler handler = GiopMessageHandler.GetSingleton();
-            ReturnMessage result = (ReturnMessage) handler.ParseIncomingReplyMessage(sourceStream, requestMsg);
+            ReturnMessage result = (ReturnMessage) handler.ParseIncomingReplyMessage(sourceStream, requestMsg, conDesc);
             Assertion.AssertEquals(3, result.ReturnValue);
             Assertion.AssertEquals(0, result.OutArgCount);
-            // release connection context
-            manager.ReleaseConnection(requestMsg);
-
         }
     
     }

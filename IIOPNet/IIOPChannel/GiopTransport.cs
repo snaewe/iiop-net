@@ -52,12 +52,16 @@ namespace Ch.Elca.Iiop {
         private FragmentedMsgAssembler m_fragmentAssembler =
             new FragmentedMsgAssembler();
         
+        private GiopConnectionDesc m_conDesc;
+        
         #endregion IFields
         #region IConstructors
         
         /// <summary>default constructor</summary>
-        public GiopTransportClientMsgHandler(Stream transportStream) {
+        public GiopTransportClientMsgHandler(Stream transportStream,
+                                             GiopConnectionDesc conDesc) {
             m_transportStream = transportStream;
+            m_conDesc = conDesc;
         }
         
         #endregion IConstructor
@@ -68,6 +72,12 @@ namespace Ch.Elca.Iiop {
                 return m_transportStream;
             }
         }        
+        
+        internal GiopConnectionDesc ConDesc {
+            get {
+                return m_conDesc;
+            }
+        }
         
         #endregion IProperties
         #region IMethods
@@ -104,6 +114,7 @@ namespace Ch.Elca.Iiop {
         public Stream ProcessResponse(uint forReqId,                                     
                                       out ITransportHeaders responseHeaders) {
             responseHeaders = new TransportHeaders();
+            responseHeaders[GiopConnectionDesc.CLIENT_TR_HEADER_KEY]= m_conDesc; // add to response headers
             Stream responseStream = null;
 			          
             Debug.WriteLine("receiving an IIOP message in the Client side Transport sink");
@@ -249,7 +260,9 @@ namespace Ch.Elca.Iiop {
         
         #endregion Types
         #region IFields
-        
+
+        // create a connection desc for the server connection                    
+        private GiopConnectionDesc m_conDesc = new GiopConnectionDesc();
         
         private FragmentedMsgAssembler m_fragmentAssembler =
             new FragmentedMsgAssembler();
@@ -289,6 +302,8 @@ namespace Ch.Elca.Iiop {
                         
             IoUtil.StreamCopyExactly(msgStream, m_transportStream, 
                                      (int)msgStream.Length);                        
+            
+            m_conDesc.MessagesAlreadyExchanged |= true;
             
             Debug.WriteLine("Send response message complete");
         }
@@ -341,6 +356,7 @@ namespace Ch.Elca.Iiop {
             sinkStack.Push(m_transportSink, m_transportStream);
             // empty transport headers for this protocol
             ITransportHeaders requestHeaders = new TransportHeaders();
+            requestHeaders[GiopConnectionDesc.SERVER_TR_HEADER_KEY] = m_conDesc;
             
             // next sink will process the request-message
             ServerProcessing result = 

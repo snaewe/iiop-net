@@ -227,7 +227,7 @@ namespace Ch.Elca.Iiop {
         #region IConstructors
         
         public IiopClientChannel() {
-            InitChannel();
+            InitChannel(new TcpClientTransportFactory());
         }
 
         /// <summary>the constructor used by the config file</summary>
@@ -254,7 +254,7 @@ namespace Ch.Elca.Iiop {
                 }
             }
 
-            InitChannel();
+            InitChannel(new TcpClientTransportFactory());
         }
 
         #endregion IConstructors
@@ -293,16 +293,22 @@ namespace Ch.Elca.Iiop {
         }
         
         /// <summary>initalize this channel</summary>
-        private void InitChannel() {
+        private void InitChannel(IClientTransportFactory transportFactory) {
+            
+            GiopClientConnectionManager conManager =
+                new GiopClientConnectionManager(transportFactory);
+            
+            IiopClientTransportSinkProvider transportProvider =
+                new IiopClientTransportSinkProvider(conManager);
             if (m_providerChain != null) {
                 // append transport provider to the chain
                 IClientChannelSinkProvider prov = m_providerChain;
                 while (prov.Next != null) { prov = prov.Next; }
-                prov.Next = new IiopClientTransportSinkProvider(); // append the transport provider at the end
+                prov.Next = transportProvider; // append the transport provider at the end
             } else {
                 // create the default provider chain
                 IClientFormatterSinkProvider formatterProv = new IiopClientFormatterSinkProvider();
-                formatterProv.Next = new IiopClientTransportSinkProvider();
+                formatterProv.Next = transportProvider;
                 m_providerChain = formatterProv;
             }
         }

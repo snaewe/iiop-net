@@ -56,17 +56,21 @@ namespace Ch.Elca.Iiop {
         private IDictionary m_properties = new Hashtable();
 
         private Uri         m_target;
+        
+        private GiopClientConnectionManager m_conManager;
 
         #endregion IFields
         #region IConstructors
 
-        public IiopClientTransportSink(string url, object channelData) {
+        internal IiopClientTransportSink(string url, object channelData, 
+                                         GiopClientConnectionManager conManager) {
             Trace.WriteLine("create transport sink for URL: " + url);
             
             string objectURI;
             m_target = IiopUrlUtil.ParseUrl(url, out objectURI);
 
             Trace.WriteLine("client transport, host: " + m_target.Host + ", port :" + m_target.Port);
+            m_conManager = conManager;    
         }
 
         #endregion IConstructors
@@ -75,6 +79,13 @@ namespace Ch.Elca.Iiop {
         public IClientChannelSink NextChannelSink {
         	get {
                 return null; // no more sinks
+            }
+        }
+        
+        /// <summary>the transport factory to use for this channel</summary>
+        internal GiopClientConnectionManager ConnectionManager {
+            get {
+                return m_conManager;
             }
         }
 
@@ -87,7 +98,7 @@ namespace Ch.Elca.Iiop {
         #endregion IProperties
         #region IMethods
 
-        /// <summary>
+/*        /// <summary>
         /// gets a socket to the target to send the message
         /// </summary>
         /// <param name="msg">The message to send</param>
@@ -100,16 +111,29 @@ namespace Ch.Elca.Iiop {
             } else {
                 return con.ClientSocket;
             }
+        } */
+                
+        private GiopClientConnection GetClientConnection(IMessage msg) {
+            GiopClientConnection con = m_conManager.GetConnectionFor(msg);            
+            if (con ==  null) {
+                // should not occur, because AllocateConnectionFor has been previouse called
+                throw new omg.org.CORBA.INTERNAL(998, omg.org.CORBA.CompletionStatus.Completed_No);
+            }
+            if (!con.CheckConnected()) {
+                // a new connection must not be open, because this would require a remarshal of the message (service-contexts)
+                throw new omg.org.CORBA.COMM_FAILURE(999, omg.org.CORBA.CompletionStatus.Completed_No);
+            }
+            return con;
         }
 
         #region Implementation of IClientChannelSink
         public void AsyncProcessRequest(IClientChannelSinkStack sinkStack, IMessage msg, 
                                         ITransportHeaders headers, Stream requestStream) {
             // this is the last sink in the chain, therefore the call is not forwarded, instead the request is sent
-            TcpClient client = GetSocket(msg);
-            NetworkStream networkStream = client.GetStream();
+            GiopClientConnection clientCon = GetClientConnection(msg);
+            Stream transportStream = clientCon.ClientTransport.TransportStream;                        
             GiopTransportClientMsgHandler giopTransport =
-                new GiopTransportClientMsgHandler(networkStream);
+                new GiopTransportClientMsgHandler(transportStream, clientCon.Desc);
 
             giopTransport.ProcessRequest(requestStream); // send the request
             
@@ -127,10 +151,10 @@ namespace Ch.Elca.Iiop {
         public void ProcessMessage(IMessage msg, ITransportHeaders requestHeaders, Stream requestStream,
                                    out ITransportHeaders responseHeaders, out Stream responseStream) {
             // called by the chain, chain expect response-stream and headers back
-            TcpClient client = GetSocket(msg);
-            NetworkStream networkStream = client.GetStream();
+            GiopClientConnection clientCon = GetClientConnection(msg);
+            Stream transportStream = clientCon.ClientTransport.TransportStream;
             GiopTransportClientMsgHandler giopTransport =
-                new GiopTransportClientMsgHandler(networkStream);
+                new GiopTransportClientMsgHandler(transportStream, clientCon.Desc);
             responseStream = giopTransport.ProcessRequestSynchronous(requestStream,
                                               (uint)msg.Properties[SimpleGiopMsg.REQUEST_ID_KEY],
                                               out responseHeaders);
@@ -215,7 +239,8 @@ namespace Ch.Elca.Iiop {
         internal bool Process(GiopTransportServerMsgHandler giopTransportMsgHandler) {
                                                           
             // read in the message
-            GiopTransportServerMsgHandler.HandlingResult result = giopTransportMsgHandler.ProcessIncomingMsg();
+            GiopTransportServerMsgHandler.HandlingResult result = 
+                giopTransportMsgHandler.ProcessIncomingMsg();
             if (result == GiopTransportServerMsgHandler.HandlingResult.AsyncReply) {
                // wait for async response               
                Debug.WriteLine("AsyncReply: wait for async response");
@@ -261,8 +286,21 @@ namespace Ch.Elca.Iiop {
     /// <summary>
     /// this class is a provider for the IIOPClientTransportSink
     /// </summary>
-    public class IiopClientTransportSinkProvider : IClientChannelSinkProvider {
+    internal class IiopClientTransportSinkProvider : IClientChannelSinkProvider {
     
+        #region IFields
+        
+        private GiopClientConnectionManager m_conManager;
+        
+        #endregion IFiels
+        #region IConstructors
+        
+        internal IiopClientTransportSinkProvider(GiopClientConnectionManager conManager) {
+            Debug.Assert(conManager != null);
+            m_conManager = conManager;
+        }
+        
+        #endregion IConstructors
         #region IProperties
 
         public IClientChannelSinkProvider Next {
@@ -273,7 +311,7 @@ namespace Ch.Elca.Iiop {
                 throw new NotSupportedException("a provider after client side transport is not allowed");
             }
         }
-
+        
         #endregion IProperties
         #region IMethods
 
@@ -283,7 +321,9 @@ namespace Ch.Elca.Iiop {
             if ((!(channel is IiopChannel)) && (!(channel is IiopClientChannel))) {
                 throw new ArgumentException("this provider is only usable with the IIOPChannel, but not with : " + channel);
             }
-            return new IiopClientTransportSink(url, remoteChannelData);
+            
+            return new IiopClientTransportSink(url, remoteChannelData,
+                                               m_conManager);
         }
 
         #endregion
@@ -307,7 +347,6 @@ namespace Ch.Elca.Iiop {
         private GiopTransportClientMsgHandler m_giopTransport;
         private IClientChannelSinkStack m_sinkStack;
         private DataAvailableCallBack m_callBack;
-        private GiopConnectionContext m_connectionDesc;
         private uint m_reqNr;
 
         #endregion IFields
@@ -319,7 +358,6 @@ namespace Ch.Elca.Iiop {
             m_sinkStack = sinkStack;
             m_giopTransport = giopTransport;
             m_callBack = callBack;
-            m_connectionDesc = IiopConnectionManager.GetCurrentConnectionContext();
             m_reqNr = reqNr;
         }
 
@@ -340,7 +378,6 @@ namespace Ch.Elca.Iiop {
                 Thread.Sleep(0);
             }
             // call back the handler
-            IiopConnectionManager.SetCurrentConnectionContext(m_connectionDesc); // make the current connection context available in this thread            
             m_callBack(m_giopTransport, m_sinkStack, m_reqNr);
         }
 
@@ -380,8 +417,6 @@ namespace Ch.Elca.Iiop {
 
         private void HandleRequests() {
             bool connected = true;            
-            // create a connection context for the server connection
-            IiopServerConnectionManager.GetManager().RegisterActiveConnection();
             
             GiopTransportServerMsgHandler serverMsgHandler = 
                 new GiopTransportServerMsgHandler(m_transport, m_transportSink);
@@ -404,8 +439,7 @@ namespace Ch.Elca.Iiop {
                         } catch (Exception) { }
                     }
                 }
-            }
-            IiopServerConnectionManager.GetManager().UnregisterActiveConnection(); // discard connection
+            }            
         }
 
         #endregion IMethods

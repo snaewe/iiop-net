@@ -42,19 +42,27 @@ namespace Ch.Elca.Iiop {
     /// Stores information associated with a GIOP connection,
     /// e.g. the Codesets chosen
     /// </summary>
-    public class GiopConnectionContext {
+    public class GiopConnectionDesc {
 
+        #region Constants
+        
+        internal const string SERVER_TR_HEADER_KEY = "_server_giop_con_desc_";
+        internal const string CLIENT_TR_HEADER_KEY = "_client_giop_con_desc_";
+        
+        #endregion Constants
         #region IFields
 
         private uint m_charSetChosen = CodeSetService.DEFAULT_CHAR_SET;
         private uint m_wcharSetChosen = CodeSetService.DEFAULT_WCHAR_SET;
     	
-    	private Hashtable m_items = new Hashtable();
+    	private Hashtable m_items = new Hashtable();                
+        
+        private bool m_messagesExchanged = false;
 
         #endregion IFields
         #region IConstructors
 
-        internal GiopConnectionContext() {
+        internal GiopConnectionDesc() {
         }
 
         #endregion IConstructors
@@ -83,13 +91,26 @@ namespace Ch.Elca.Iiop {
         		return m_items;
         	}
         }
-
+        
+        /// <summary>
+        /// Were any messages (request/reply) already exchanged
+        /// on this connection
+        /// </summary>
+        public bool MessagesAlreadyExchanged {
+            get {
+                return m_messagesExchanged;    
+            }
+            set {
+                m_messagesExchanged = value;
+            }
+        }
+        
         #endregion IProperties
 
     }
     
     /// <summary>the connection context for the client side</summary>
-    internal class GiopClientConnectionContext : GiopConnectionContext {
+    internal class GiopClientConnectionDesc : GiopConnectionDesc {
 		
 		#region IFields
 		
@@ -99,12 +120,12 @@ namespace Ch.Elca.Iiop {
     	#endregion IFields
     	#region IProperties 
     	
-    	public GiopRequestNumberGenerator ReqNumberGen {
+    	internal GiopRequestNumberGenerator ReqNumberGen {
             get {
                 return m_reqNumGen;
             }
         }
-    	
+            	
     	#endregion IProporties
     }
 
@@ -112,32 +133,34 @@ namespace Ch.Elca.Iiop {
     /// stores the relevant information of an IIOP client side
     /// connection
     /// </summary>
-    public class IiopClientConnection {
+    internal class GiopClientConnection {
 
         #region IFields
 
-        private GiopClientConnectionContext m_assocContext;
+        private GiopClientConnectionDesc m_assocDesc;
 
         private Uri m_chanUri;
-
-        private TcpClient m_socket;
+        
         private string m_host;
         private int m_port;
+        
+        private IClientTransport m_clientTransport;
 
         #endregion IFields
         #region IConstructors
 
-        public IiopClientConnection(Uri chanUri) {
+        internal GiopClientConnection(Uri chanUri, IClientTransport transport) {
             m_chanUri = chanUri;
-        	m_assocContext = new GiopClientConnectionContext();
+        	m_assocDesc = new GiopClientConnectionDesc();
+            m_clientTransport = transport;            
         }
 
         #endregion IConstructors
         #region IProperties
 
-        internal GiopClientConnectionContext Context {
+        internal GiopClientConnectionDesc Desc {
             get {
-                return m_assocContext;
+                return m_assocDesc;
             }
         }
 
@@ -151,9 +174,9 @@ namespace Ch.Elca.Iiop {
             }
         }
 
-        internal TcpClient ClientSocket {
+        internal IClientTransport ClientTransport {
             get {
-                return m_socket;
+                return m_clientTransport;
             }
         }
 
@@ -162,30 +185,17 @@ namespace Ch.Elca.Iiop {
 
 
         internal void ConnectTo(string host, int port) {
-            TcpClient tcpSocket = new TcpClient(host, port);
-            tcpSocket.NoDelay = false; // what is better here ?
-            m_socket = tcpSocket;
+            m_clientTransport.OpenConnection();
             m_host = host;
             m_port = port;
         }
 
         internal bool CheckConnected() {
-            try {
-                if (m_socket == null) {
-                    return false;
-                }
-                m_socket.GetStream();
-                return true;
-            } catch (Exception) {
-                // not connected any more
-                return false;
-            }
+            return m_clientTransport.IsConnectionOpen();
         }
 
         internal void CloseConnection() {
-            try {
-                m_socket.Close();
-            } catch (Exception) { }
+            m_clientTransport.CloseConnection();
         }
 
         #endregion IMethods

@@ -73,7 +73,8 @@ namespace Ch.Elca.Iiop.Services {
             return new CodeSetServiceContext(encap);
         }
 
-        public override void HandleContextForReceivedReply(ServiceContext context) {
+        public override void HandleContextForReceivedReply(ServiceContext context,
+                                                           GiopConnectionDesc conDesc) {
             // nothing to do at the moment
         }
 
@@ -115,7 +116,8 @@ namespace Ch.Elca.Iiop.Services {
             return null;
         }
 
-        public override void HandleContextForReceivedRequest(ServiceContext context) {
+        public override void HandleContextForReceivedRequest(ServiceContext context,
+                                                             GiopConnectionDesc conDesc) {
             if (context == null) { 
                 return; 
             }
@@ -124,9 +126,8 @@ namespace Ch.Elca.Iiop.Services {
             CheckCodeSetCompatible(charSet, wcharSet);
 
             // TODO: implement code set establishment-alg
-            GiopConnectionContext conContext = IiopConnectionManager.GetCurrentConnectionContext();
-            conContext.CharSet = charSet;
-            conContext.WCharSet = wcharSet;
+            conDesc.CharSet = charSet;
+            conDesc.WCharSet = wcharSet;
         }
         
         private uint ChooseCharSet(CodeSetComponent codeSetComponent) {
@@ -179,13 +180,13 @@ namespace Ch.Elca.Iiop.Services {
             throw new CODESET_INCOMPATIBLE(9502, CompletionStatus.Completed_No);
         }
 
-        public override ServiceContext InsertContextForReplyToSend() {
+        public override ServiceContext InsertContextForReplyToSend(GiopConnectionDesc conDesc) {
             // nothing to do ?
             return null;
         }
 
         public override ServiceContext InsertContextForRequestToSend(IMethodCallMessage msg, Ior targetIor,
-                                                                     GiopConnectionContext conContext) {
+                                                                     GiopConnectionDesc conDesc) {
             uint charSet = DEFAULT_CHAR_SET;
             uint wcharSet = DEFAULT_WCHAR_SET;
             
@@ -195,8 +196,9 @@ namespace Ch.Elca.Iiop.Services {
                 wcharSet = ChooseWCharSet(codeSetComponent);
             }
             
-            conContext.CharSet = charSet;
-            conContext.WCharSet = wcharSet;
+            // TODO: check for already established
+            conDesc.CharSet = charSet;
+            conDesc.WCharSet = wcharSet;
             return new CodeSetServiceContext(charSet, wcharSet);
         }
 

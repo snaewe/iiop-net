@@ -149,7 +149,7 @@ namespace Ch.Elca.Iiop.MessageHandling {
     /// This class is reponsible for serialising/deserialising message bodys of Giop Messages for
     /// the different message types
     /// </summary>
-    public class GiopMessageBodySerialiser {
+    internal class GiopMessageBodySerialiser {
 
         #region SFields
 
@@ -213,20 +213,18 @@ namespace Ch.Elca.Iiop.MessageHandling {
         /// set the codesets for the stream after codeset service descision
         /// </summary>
         /// <param name="cdrStream"></param>
-        private void SetCodeSet(CdrInputStream cdrStream) {
-            GiopConnectionContext context = IiopConnectionManager.GetCurrentConnectionContext();
-            cdrStream.CharSet = context.CharSet;
-            cdrStream.WCharSet = context.WCharSet;
+        private void SetCodeSet(CdrInputStream cdrStream, GiopConnectionDesc conDesc) {
+            cdrStream.CharSet = conDesc.CharSet;
+            cdrStream.WCharSet = conDesc.WCharSet;
         }
 
         /// <summary>
         /// set the codesets for the stream after codeset service descision
         /// </summary>
         /// <param name="cdrStream"></param>
-        private void SetCodeSet(CdrOutputStream cdrStream) {
-            GiopConnectionContext context = IiopConnectionManager.GetCurrentConnectionContext();
-            cdrStream.CharSet = context.CharSet;
-            cdrStream.WCharSet = context.WCharSet;
+        private void SetCodeSet(CdrOutputStream cdrStream, GiopConnectionDesc conDesc) {            
+            cdrStream.CharSet = conDesc.CharSet;
+            cdrStream.WCharSet = conDesc.WCharSet;
         }
 
         /// <summary>read the target for the request</summary>
@@ -369,19 +367,20 @@ namespace Ch.Elca.Iiop.MessageHandling {
         /// <param name="targetStream"></param>
         /// <param name="version">the Giop version to use</param>
         /// <param name="reqId">the request-id to use</param>
-        public void SerialiseRequest(IMethodCallMessage methodCall,
+        internal void SerialiseRequest(IMethodCallMessage methodCall,
                                      CdrOutputStream targetStream, 
-                                     Ior targetIor, uint reqId) {                         
+                                     Ior targetIor, uint reqId,
+                                     GiopConnectionDesc conDesc) {
             Debug.WriteLine("serializing request for id: " + reqId);
             Debug.WriteLine("uri: " + methodCall.Uri);
             GiopVersion version = targetIor.Version;
 
             ServiceContextCollection cntxColl = CosServices.GetSingleton().
                                                     InformInterceptorsRequestToSend(methodCall, targetIor, 
-                                                                                    IiopConnectionManager.GetCurrentConnectionContext());
+                                                                                    conDesc);
 
             // set code-set for the stream
-            SetCodeSet(targetStream);
+            SetCodeSet(targetStream, conDesc);
                         
             if ((version.Major == 1) && (version.Minor <= 1)) { // for GIOP 1.0 / 1.1
                 SerialiseContext(targetStream, cntxColl); // service context                
@@ -448,13 +447,14 @@ namespace Ch.Elca.Iiop.MessageHandling {
         /// <param name="cdrStream"></param>
         /// <param name="version"></param>
         /// <returns></returns>
-        public IMessage DeserialiseRequest(CdrInputStream cdrStream, GiopVersion version) {
+        internal IMessage DeserialiseRequest(CdrInputStream cdrStream, GiopVersion version,
+                                           GiopConnectionDesc conDesc) {
             SimpleGiopMsg msg = new SimpleGiopMsg();
             msg.Properties.Add(SimpleGiopMsg.GIOP_VERSION_KEY, version);
             try {
                 if ((version.Major == 1) && (version.Minor <= 1)) { // GIOP 1.0 / 1.1
                     ServiceContextCollection coll = DeserialiseContext(cdrStream); // Service context deser
-                    CosServices.GetSingleton().InformInterceptorsReceivedRequest(coll);
+                    CosServices.GetSingleton().InformInterceptorsReceivedRequest(coll, conDesc);
                 }
                 
                 // read the request-ID and set it as a message property
@@ -476,10 +476,10 @@ namespace Ch.Elca.Iiop.MessageHandling {
                     cdrStream.ReadOpaque((int)principalLength);
                 } else {
                     ServiceContextCollection coll = DeserialiseContext(cdrStream); // Service context deser
-                    CosServices.GetSingleton().InformInterceptorsReceivedRequest(coll);
+                    CosServices.GetSingleton().InformInterceptorsReceivedRequest(coll, conDesc);
                 }
                 // set codeset for stream
-                SetCodeSet(cdrStream);
+                SetCodeSet(cdrStream, conDesc);
                 // request header deserialised
 
                 string calledUri = objectUri; // store received object-uri
@@ -553,14 +553,15 @@ namespace Ch.Elca.Iiop.MessageHandling {
 
         /// <summary>serialize the GIOP message body of a repsonse message</summary>
         /// <param name="requestId">the requestId of the request, this response belongs to</param>
-        public void SerialiseReply(ReturnMessage msg, CdrOutputStream targetStream, 
-                                   GiopVersion version, uint requestId) {
+        internal void SerialiseReply(ReturnMessage msg, CdrOutputStream targetStream, 
+                                   GiopVersion version, uint requestId,
+                                   GiopConnectionDesc conDesc) {
             Trace.WriteLine("serializing response for method: " + msg.MethodName);
             
             ServiceContextCollection cntxColl = CosServices.GetSingleton().
-                                                    InformInterceptorsReplyToSend();
+                                                    InformInterceptorsReplyToSend(conDesc);
             // set codeset for stream
-            SetCodeSet(targetStream);
+            SetCodeSet(targetStream, conDesc);
 
             if ((version.Major == 1) && (version.Minor <= 1)) { // for GIOP 1.0 / 1.1
                 SerialiseContext(targetStream, cntxColl); // serialize the context
@@ -653,23 +654,24 @@ namespace Ch.Elca.Iiop.MessageHandling {
         }
 
 
-        public IMessage DeserialiseReply(CdrInputStream cdrStream, 
-                                         GiopVersion version, IMethodCallMessage methodCall) {
+        internal IMessage DeserialiseReply(CdrInputStream cdrStream, 
+                                         GiopVersion version, IMethodCallMessage methodCall,
+                                         GiopConnectionDesc conDesc) {
 
             if ((version.Major == 1) && (version.Minor <= 1)) { // for GIOP 1.0 / 1.1, the service context is placed here
                 ServiceContextCollection coll = DeserialiseContext(cdrStream); // deserialize the service contexts
-                CosServices.GetSingleton().InformInterceptorsReceivedReply(coll);
+                CosServices.GetSingleton().InformInterceptorsReceivedReply(coll, conDesc);
             }
             
             uint forRequestId = cdrStream.ReadULong();
             uint responseStatus = cdrStream.ReadULong();
             if (!((version.Major == 1) && (version.Minor <= 1))) { // for GIOP 1.2 and later, service context is here
                 ServiceContextCollection coll = DeserialiseContext(cdrStream); // deserialize the service contexts
-                CosServices.GetSingleton().InformInterceptorsReceivedReply(coll);
+                CosServices.GetSingleton().InformInterceptorsReceivedReply(coll, conDesc);
             }
             
             // set codeset for stream
-            SetCodeSet(cdrStream);
+            SetCodeSet(cdrStream, conDesc);
             
             IMessage response = null;
             try {

@@ -188,25 +188,27 @@ namespace Ch.Elca.Iiop.Services {
         /// <summary>
         /// This method is called when a request is received
         /// </summary>
-        public abstract void HandleContextForReceivedRequest(ServiceContext context);
+        public abstract void HandleContextForReceivedRequest(ServiceContext context,
+                                                             GiopConnectionDesc conDesc);
         
         /// <summary>
         /// This method is called when a reply is received
         /// </summary>
-        public abstract void HandleContextForReceivedReply(ServiceContext context);
+        public abstract void HandleContextForReceivedReply(ServiceContext context, 
+                                                           GiopConnectionDesc conDesc);
         
         /// <summary>
         /// This method is called when a request is sent
         /// </summary>
         /// <returns>The ServiceContext to include or null</returns>
         public abstract ServiceContext InsertContextForRequestToSend(IMethodCallMessage msg, Ior targetIor,
-                                                                     GiopConnectionContext conContext);
+                                                                     GiopConnectionDesc conDesc);
 
         /// <summary>
         /// This method is called, when a reply is sent
         /// </summary>
         /// <returns>The ServiceContext to include or null</returns>
-        public abstract ServiceContext InsertContextForReplyToSend();
+        public abstract ServiceContext InsertContextForReplyToSend(GiopConnectionDesc conDesc);
 
 
         #endregion IMethods
@@ -241,21 +243,23 @@ namespace Ch.Elca.Iiop.Services {
             return cntx;
         }
 
-        public override void HandleContextForReceivedRequest(ServiceContext context) {
+        public override void HandleContextForReceivedRequest(ServiceContext context,
+                                                             GiopConnectionDesc conDesc) {
             // nothing to do
         }
         
-        public override void HandleContextForReceivedReply(ServiceContext context) {
+        public override void HandleContextForReceivedReply(ServiceContext context,
+                                                           GiopConnectionDesc conDesc) {
             // nothing to do
         }
         
         public override ServiceContext InsertContextForRequestToSend(IMethodCallMessage msg, Ior targetIor,
-                                                                     GiopConnectionContext conContext) {
+                                                                     GiopConnectionDesc conDesc) {
             // nothing to do
             return null;
         }
 
-        public override ServiceContext InsertContextForReplyToSend() {
+        public override ServiceContext InsertContextForReplyToSend(GiopConnectionDesc conDesc) {
             // nothing to do
             return null;
         }
@@ -340,13 +344,14 @@ namespace Ch.Elca.Iiop.Services {
         /// <summary>
         /// Inform the registered interceptors: a request was received
         /// </summary>
-        internal void InformInterceptorsReceivedRequest(ServiceContextCollection contexts) {
+        internal void InformInterceptorsReceivedRequest(ServiceContextCollection contexts, 
+                                                        GiopConnectionDesc conDesc) {
             lock (m_services.SyncRoot) {
                 IEnumerator enumerator = m_services.Values.GetEnumerator();
                 while (enumerator.MoveNext()) {
                     CorbaService service = (CorbaService) enumerator.Current;
                     ServiceContext cntx = contexts.GetContext(service.GetServiceId());
-                    service.HandleContextForReceivedRequest(cntx);
+                    service.HandleContextForReceivedRequest(cntx, conDesc);
                 }
             }
         }
@@ -354,13 +359,14 @@ namespace Ch.Elca.Iiop.Services {
         /// <summary>
         /// Inform the registered interceptors: a reply was received
         /// </summary>
-        internal void InformInterceptorsReceivedReply(ServiceContextCollection contexts) {
+        internal void InformInterceptorsReceivedReply(ServiceContextCollection contexts,
+                                                      GiopConnectionDesc conDesc) {
             lock (m_services.SyncRoot) {
                 IEnumerator enumerator = m_services.Values.GetEnumerator();
                 while (enumerator.MoveNext()) {
                     CorbaService service = (CorbaService) enumerator.Current;
                     ServiceContext cntx = contexts.GetContext(service.GetServiceId());
-                    service.HandleContextForReceivedReply(cntx);
+                    service.HandleContextForReceivedReply(cntx, conDesc);
                 }
             }
         }
@@ -370,13 +376,13 @@ namespace Ch.Elca.Iiop.Services {
         /// </summary>
         /// <returns>The collected contexts</returns>
         internal ServiceContextCollection InformInterceptorsRequestToSend(IMethodCallMessage msg, Ior targetIor,
-                                                                          GiopConnectionContext conContext) {
+                                                                          GiopConnectionDesc conDesc) {
             ServiceContextCollection cntxColl = new ServiceContextCollection();
             lock (m_services.SyncRoot) {
                 IEnumerator enumerator = m_services.Values.GetEnumerator();
                 while (enumerator.MoveNext()) {
                     CorbaService service = (CorbaService) enumerator.Current;
-                    ServiceContext cntx = service.InsertContextForRequestToSend(msg, targetIor, conContext);
+                    ServiceContext cntx = service.InsertContextForRequestToSend(msg, targetIor, conDesc);
                     if (cntx != null) {
                         cntxColl.AddServiceContext(cntx);
                     }
@@ -389,13 +395,13 @@ namespace Ch.Elca.Iiop.Services {
         /// Inform the registered interceptors: a reply will be sent
         /// </summary>
         /// <returns>The collected contexts</returns>
-        internal ServiceContextCollection InformInterceptorsReplyToSend() {
+        internal ServiceContextCollection InformInterceptorsReplyToSend(GiopConnectionDesc conDesc) {
             ServiceContextCollection cntxColl = new ServiceContextCollection();
             lock (m_services.SyncRoot) {
                 IEnumerator enumerator = m_services.Values.GetEnumerator();
                 while (enumerator.MoveNext()) {
                     CorbaService service = (CorbaService) enumerator.Current;
-                    ServiceContext cntx = service.InsertContextForReplyToSend();
+                    ServiceContext cntx = service.InsertContextForReplyToSend(conDesc);
                     if (cntx != null) {
                         cntxColl.AddServiceContext(cntx);
                     }
