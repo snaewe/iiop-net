@@ -72,6 +72,30 @@ namespace Ch.Elca.Iiop.Marshalling {
         public abstract object Deserialise(Type formal, AttributeExtCollection attributes,
                                            CdrInputStream sourceStream);
 
+        /// <summary>
+        /// serialises a field of a value-type
+        /// </summary>
+        /// <param name="fieldToSer"></param>
+        protected void SerialiseField(FieldInfo fieldToSer, object actual, CdrOutputStream targetStream) {
+            Marshaller marshaller = Marshaller.GetSingleton();
+            marshaller.Marshal(fieldToSer.FieldType, 
+                               AttributeExtCollection.ConvertToAttributeCollection(fieldToSer.GetCustomAttributes(true)), 
+                               fieldToSer.GetValue(actual), targetStream);
+        }
+
+        /// <summary>
+        /// deserialises a field of a value-type and sets the value
+        /// </summary>
+        /// <returns>the deserialised value</returns>
+        protected object DeserialiseField(FieldInfo fieldToDeser, object actual, CdrInputStream sourceStream) {
+            Marshaller marshaller = Marshaller.GetSingleton();
+            object fieldVal = marshaller.Unmarshal(fieldToDeser.FieldType, 
+                                                   AttributeExtCollection.ConvertToAttributeCollection(fieldToDeser.GetCustomAttributes(true)), 
+                                                   sourceStream);
+            fieldToDeser.SetValue(actual, fieldVal);
+            return fieldVal;
+        }
+
         #endregion IMethods
 
     }
@@ -559,6 +583,90 @@ namespace Ch.Elca.Iiop.Marshalling {
 
     }
 
+    public class IdlUnionSerializer : Serialiser {
+
+        #region Constants
+
+        private const string GET_FIELD_FOR_DISCR_METHOD_NAME = "GetFieldForDiscriminator";
+
+        private const string DISCR_FIELD_NAME = "m_discriminator";
+
+        private const string INITALIZED_FIELD_NAME = "m_initalized";
+
+        #endregion Constants
+
+        #region IMethods
+
+        private FieldInfo GetDiscriminatorField(Type formal) {
+            FieldInfo discrValField = formal.GetField(DISCR_FIELD_NAME, 
+                                                      BindingFlags.Instance | BindingFlags.NonPublic);
+            if (discrValField == null) {
+                throw new INTERNAL(898, CompletionStatus.Completed_MayBe);
+            }            
+            return discrValField;
+        }
+        
+        private FieldInfo GetValFieldForDiscriminator(Type formal, object discrValue) {
+            MethodInfo getCurrentField = formal.GetMethod(GET_FIELD_FOR_DISCR_METHOD_NAME, 
+                                                          BindingFlags.Static | BindingFlags.NonPublic);
+            if (getCurrentField == null) {
+                throw new INTERNAL(898, CompletionStatus.Completed_MayBe);
+            }
+            return (FieldInfo)getCurrentField.Invoke(null, new object[] { discrValue });
+        }
+
+        private FieldInfo GetInitalizedField(Type formal) {
+            FieldInfo initalizedField = formal.GetField(INITALIZED_FIELD_NAME, 
+                                                        BindingFlags.Instance | BindingFlags.NonPublic);
+            if (initalizedField == null) {
+                throw new INTERNAL(898, CompletionStatus.Completed_MayBe);
+            }            
+            return initalizedField;
+        }
+
+        public override object Deserialise(System.Type formal, AttributeExtCollection attributes,
+                                           CdrInputStream sourceStream) {            
+            // instantiate the resulting union
+            object result = Activator.CreateInstance(formal);
+            // deserialise discriminator value
+            FieldInfo discrField = GetDiscriminatorField(formal);
+            object discrVal = DeserialiseField(discrField, result, sourceStream);
+            
+            // determine value to deser
+            FieldInfo curField = GetValFieldForDiscriminator(formal, discrVal);
+            if (curField != null) {
+                // deserialise value
+                DeserialiseField(curField, result, sourceStream);
+            }
+            FieldInfo initalizedField = GetInitalizedField(formal);
+            initalizedField.SetValue(result, true);
+            return result;
+        }
+
+        public override void Serialise(System.Type formal, object actual, AttributeExtCollection attributes,
+                                       CdrOutputStream targetStream) {            
+            FieldInfo initalizedField = GetInitalizedField(formal);
+            bool isInit = (bool)initalizedField.GetValue(actual);
+            if (isInit == false) {
+                throw new BAD_OPERATION(34, CompletionStatus.Completed_MayBe);
+            }
+            // determine value of the discriminator
+            FieldInfo discrValField = GetDiscriminatorField(formal);
+            object discrVal = discrValField.GetValue(actual);
+            // get the field matching the current discriminator
+            FieldInfo curField = GetValFieldForDiscriminator(formal, discrVal);
+            
+            SerialiseField(discrValField, actual, targetStream);
+            if (curField != null) {
+                // seraialise value
+                SerialiseField(curField, actual, targetStream);
+            } 
+            // else:  case outside covered discr range, do not serialise value, only discriminator
+        }
+
+        #endregion IMethods
+    }
+
     /// <summary>serailizes an instances as IDL abstract-value</summary>
     public class AbstractValueSerializer : Serialiser {
 
@@ -797,7 +905,8 @@ namespace Ch.Elca.Iiop.Marshalling {
                                            CdrInputStream sourceStream) {
             omg.org.CORBA.TypeCode typeCode = (omg.org.CORBA.TypeCode)m_typeCodeSer.Deserialise(formal, 
                                                                                                 attributes, sourceStream);
-            if (!(typeCode is NullTC)) {
+            // when returning 0 in a mico-server for any, the typecode used is VoidTC
+            if ((!(typeCode is NullTC)) && (!(typeCode is VoidTC))) {
                 Type dotNetType = Repository.GetTypeForTypeCode(typeCode);
                 Marshaller marshaller = Marshaller.GetSingleton();
                 object result = marshaller.Unmarshal(dotNetType, new AttributeExtCollection(new Attribute[0]), sourceStream);

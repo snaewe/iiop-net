@@ -245,6 +245,7 @@ namespace Ch.Elca.Iiop.Marshalling {
         private Serialiser m_enumSer = new EnumSerializer();
         private Serialiser m_seqSer = new IdlSequenceSerializer();
         private Serialiser m_structSer = new IdlStructSerializer();
+        private Serialiser m_unionSer = new IdlUnionSerializer();
         private Serialiser m_exceptSer = new ExceptionSerializer();
 
         /// <summary>stores the mapping for base types</summary>
@@ -279,6 +280,9 @@ namespace Ch.Elca.Iiop.Marshalling {
         #region Implementation of MappingAction
         public object MapToIdlStruct(System.Type clsType) {
             return m_structSer;
+        }
+        public object MapToIdlUnion(System.Type clsType) {
+            return m_unionSer;
         }
         public object MapToIdlAbstractInterface(System.Type clsType) {
             return m_abstrInterfaceSer;

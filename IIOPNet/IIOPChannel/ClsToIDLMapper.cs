@@ -48,6 +48,10 @@ namespace Ch.Elca.Iiop.Idl {
         /// <returns>an optional result of the mapping, null may be possible</returns>
         object MapToIdlStruct(Type clsType);
 
+        /// <summary>the CLS-type is mapped to an IDL union</summary>
+        /// <returns>an optional result of the mapping, null may be possible</returns>
+        object MapToIdlUnion(Type clsType);
+
         /// <summary>the CLS-type is mapped to an IDL abstract interface</summary>
         /// <returns>an optional result of the mapping, null may be possible</returns>
         object MapToIdlAbstractInterface(Type clsType);
@@ -102,7 +106,7 @@ namespace Ch.Elca.Iiop.Idl {
         /// <summary>map to the special type CORBA::TypeCode, which is defined for mapping CORBA::TypeCodeImpl</summary>
         object MapToTypeCode(Type clsType);
 
-        #region base types
+        #region basetypes
         /// <returns>an optional result of the mapping, null may be possible</returns>        
         object MapToIdlBoolean(Type clsType);
         
@@ -136,7 +140,7 @@ namespace Ch.Elca.Iiop.Idl {
         /// <returns>an optional result of the mapping, null may be possible</returns>
         object MapToIdlString(Type clsType);
 
-        #endregion base types
+        #endregion basetypes
 
         #endregion IMethods
 
@@ -176,6 +180,7 @@ namespace Ch.Elca.Iiop.Idl {
         private static Type s_boxedValBaseType = typeof(BoxedValueBase);
 
         private static Type s_idlStructAttrType = typeof(IdlStructAttribute);
+        private static Type s_idlUnionAttrType = typeof(IdlUnionAttribute);
         private static Type s_idlSequenceAttrType = typeof(IdlSequenceAttribute);
         private static Type s_boxedValAttrType = typeof(BoxedValueAttribute);
         private static Type s_widecharAttrType = typeof(WideCharAttribute);
@@ -284,6 +289,18 @@ namespace Ch.Elca.Iiop.Idl {
                 return false;
             }
         }
+
+        /// <summary>determines, if the CLS-type is mapped to an IDL-union</summary>
+        public static bool IsMarshalledAsUnion(Type clsType) {
+            AttributeExtCollection attrs = AttributeExtCollection.ConvertToAttributeCollection(
+                clsType.GetCustomAttributes(true));
+            if (attrs.IsInCollection(s_idlUnionAttrType)) {
+                return true;
+            } else {
+                return false;
+            }
+        }
+
         
         /// <summary>determines, if a CLS Type is mapped to an IDL abstract value type</summary>
         public static bool IsMappedToAbstractValueType(Type clsType, AttributeExtCollection attributes) {
@@ -362,6 +379,8 @@ namespace Ch.Elca.Iiop.Idl {
                 return action.MapToTypeCode(clsType);
             } else if (IsMarshalledAsStruct(clsType)) {
                  return action.MapToIdlStruct(clsType);
+            } else if (IsMarshalledAsUnion(clsType)) {
+                return action.MapToIdlUnion(clsType);
             } else if (IsDefaultMarshalByVal(clsType)) {
                 return action.MapToIdlConcreateValueType(clsType);
             } else if (!UnmappableType(clsType)) {
@@ -526,7 +545,10 @@ namespace Ch.Elca.Iiop.Idl {
     internal class CheckMappedToAbstractVlaue : MappingAction {
         
         #region IMethods
-        #region Implementation of MappingAction
+
+        public object MapToIdlUnion(System.Type clsType) {
+            return false;
+        }
         public object MapToIdlStruct(System.Type clsType) {
             return false;
         }
@@ -623,8 +645,7 @@ namespace Ch.Elca.Iiop.Idl {
         public object MapToIdlString(System.Type clsType) {
             return false;
         }
-    
-        #endregion
+            
         #endregion IMethods
 
     }
@@ -643,7 +664,7 @@ namespace Ch.Elca.Iiop.Tests {
     using omg.org.CORBA;
     
     public enum MappingToResult {
-        IdlStruct, IdlAbstractIf, IdlConcreteIf, IdlLocalIf, IdlConcreteValue, IdlAbstractValue, 
+        IdlStruct, IdlUnion, IdlAbstractIf, IdlConcreteIf, IdlLocalIf, IdlConcreteValue, IdlAbstractValue, 
         IdlBoxedValue, IdlSequence, IdlAny, IdlAbstractBase, IdlValueBase,
         IdlException, IdlEnum, IdlWstringValue, IdlStringValue, IdlTypeCode,
         IdlTypeDesc, IdlBool, IdlFloat, IdlDouble, IdlShort, IdlUShort, IdlLong, IdlULong,
@@ -660,6 +681,9 @@ namespace Ch.Elca.Iiop.Tests {
     public class TestMappingAction : MappingAction {
         
         #region IMethods
+        public object MapToIdlUnion(System.Type clsType) {
+            return MappingToResult.IdlUnion;
+        }
         public object MapToIdlStruct(System.Type clsType) {
             return MappingToResult.IdlStruct;
         }
@@ -756,13 +780,63 @@ namespace Ch.Elca.Iiop.Tests {
         public object MapToIdlWString(System.Type clsType) {
             return MappingToResult.IdlWString;
         }            
-        #endregion IMethods
+        #endregion
 
     }    
     
+    [IdlUnion]   
+    [Serializable]
+    public struct TestIdlUnion : IIdlEntity {
+        private System.Int32 m_discriminator;
+        private System.Int16 m_val0;
+        private System.Int32 m_val1;
+        private System.Boolean m_val2;
+
+        public System.Int32 Discriminator {
+            get {
+                return m_discriminator;
+            }
+        }
+
+        public System.Int16 Getval0() {
+            // ...
+            return m_val0;
+        }
+
+        public System.Int32 Getval1() {
+            // ...
+            return m_val1;
+        }
+
+        public System.Boolean Getval2() {
+            // ...
+            return m_val2;
+        }
+
+        public void Setval0(System.Int16 val) {
+            // ...
+            m_discriminator = 0;
+            m_val0 = val;
+        }
+
+        public void Setval1(System.Int32 val, System.Int32 discrVal) {
+            // ...
+            m_discriminator = discrVal;
+            m_val1 = val;
+        }
+
+        public void Setval2(System.Boolean val, System.Int32 discrVal) {
+            // ...
+            m_discriminator = discrVal;
+            m_val2 = val;
+        }
+
+        // other parts: left out
+    }
+
     [IdlStruct]
     [Serializable]
-    public struct TestIdlStruct {
+    public struct TestIdlStruct : IIdlEntity {
     }
     
     [Serializable]
@@ -831,10 +905,14 @@ namespace Ch.Elca.Iiop.Tests {
         
         private static TestMappingAction s_testAction = new TestMappingAction();
         
-        #endregion SFields
+        #endregion
+        #region IConstructors
         
         public ClsToIdlMapperTest() {
         }
+
+        #endregion
+        #region IMethods
 
         public void TestMapToIdlVoid() {
             ClsToIdlMapper mapper = ClsToIdlMapper.GetSingleton();
@@ -1026,6 +1104,14 @@ namespace Ch.Elca.Iiop.Tests {
                                                                            s_testAction);
             Assertion.AssertEquals(MappingToResult.IdlStruct, mapResult);
         }
+
+        public void TestMapToIdlUnion() {
+            ClsToIdlMapper mapper = ClsToIdlMapper.GetSingleton();
+            MappingToResult mapResult = (MappingToResult)mapper.MapClsType(typeof(TestIdlUnion), 
+                                                                           new AttributeExtCollection(),
+                                                                           s_testAction);
+            Assertion.AssertEquals(MappingToResult.IdlUnion, mapResult);
+        }
         
         public void TestMapToIdlConcreteValueType() {
             ClsToIdlMapper mapper = ClsToIdlMapper.GetSingleton();
@@ -1142,6 +1228,8 @@ namespace Ch.Elca.Iiop.Tests {
                                                            s_testAction);
             Assertion.AssertEquals(MappingToResult.IdlTypeCode, mapResult);            
         }
+        
+        #endregion
         
     }
 

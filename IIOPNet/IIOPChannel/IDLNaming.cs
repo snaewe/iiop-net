@@ -645,6 +645,9 @@ namespace Ch.Elca.Iiop.Idl {
         public object MapToIdlStruct(System.Type dotNetType) {
             return IdlNaming.MapFullTypeNameToIdlScoped(dotNetType);
         }
+        public object MapToIdlUnion(System.Type dotNetType) {
+            return IdlNaming.MapFullTypeNameToIdlScoped(dotNetType);
+        }
         public object MapToIdlAbstractValueType(System.Type dotNetType) {
             return IdlNaming.MapFullTypeNameToIdlScoped(dotNetType);
         }

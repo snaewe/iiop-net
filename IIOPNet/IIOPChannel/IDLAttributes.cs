@@ -242,6 +242,26 @@ namespace Ch.Elca.Iiop.Idl {
     }
     
     /// <summary>
+    /// this attribute is used to specify, that a struct is mapped from the IDL-union type
+    /// </summary>
+    [AttributeUsage(AttributeTargets.Struct, AllowMultiple = false)]
+    public sealed class IdlUnionAttribute : Attribute, IIdlAttribute {
+        
+        #region IMethods
+
+        /// <summary>creates an attribute builder for this custom attribute</summary>
+        public CustomAttributeBuilder CreateAttributeBuilder() {
+            Type attrType = this.GetType();
+            ConstructorInfo attrConstr = attrType.GetConstructor(Type.EmptyTypes);
+            CustomAttributeBuilder result = new CustomAttributeBuilder(attrConstr, new Object[0]);
+            return result;
+        }
+
+        #endregion IMethods
+
+    }
+    
+    /// <summary>
     /// this attribute is used to indicate a mapping from an IDL boxed value type
     /// </summary>
     [AttributeUsage(AttributeTargets.Parameter | AttributeTargets.ReturnValue | AttributeTargets.Field | AttributeTargets.Property, 

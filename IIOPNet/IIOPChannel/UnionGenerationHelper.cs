@@ -1,0 +1,708 @@
+/* UnionGenerationHelper.cs
+ * 
+ * Project: IIOP.NET
+ * IIOPChannel
+ * 
+ * WHEN      RESPONSIBLE
+ * 01.10.03  Dominic Ullmann (DUL), dominic.ullmann -at- elca.ch
+ * 
+ * Copyright 2003 Dominic Ullmann
+ *
+ * Copyright 2003 ELCA Informatique SA
+ * Av. de la Harpe 22-24, 1000 Lausanne 13, Switzerland
+ * www.elca.ch
+ * 
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ */
+
+using System;
+using System.Collections;
+using System.Reflection;
+using System.Reflection.Emit;
+using omg.org.CORBA;
+
+namespace Ch.Elca.Iiop.Idl {
+
+    public class InvalidUnionDiscriminatorValue : Exception {
+        public InvalidUnionDiscriminatorValue(object incompatibleValue, Type expectedType) :
+            base("invalid discriminator value: " + incompatibleValue + " for type: " + expectedType) {            
+        }
+    } 
+    
+    public class UnionGenerationHelper {
+
+        #region Types
+
+        private class SwitchCase {
+            #region IFields
+            
+            private object[] m_discriminatorValues;
+            private TypeContainer m_elemType;
+            private string m_elemName;           
+            private FieldBuilder m_elemField = null;
+
+            private Label m_ilLabel;
+
+            #endregion IFields
+            #region IConstrutors
+
+            public SwitchCase(TypeContainer elemType, string elemName, object[] discriminatorValues, 
+                              FieldBuilder elemField) {
+                m_elemType = elemType;
+                m_elemName = elemName;
+                m_elemField = elemField;
+                m_discriminatorValues = discriminatorValues;
+            }
+
+            #endregion IConstructors
+            #region IProperties
+
+            public TypeContainer ElemType {
+                get {
+                    return m_elemType;
+                }
+            }
+
+            public FieldBuilder ElemField {
+                get {
+                    return m_elemField;
+                }
+            }
+
+            public string ElemName {
+                get {
+                    return m_elemName;
+                }
+            }
+
+            public object[] DiscriminatorValues {
+                get {
+                    return m_discriminatorValues;
+                }
+            }
+
+            public Label IlLabelAssigned {
+                get {
+                    return m_ilLabel;
+                }
+            }
+
+            #endregion IProperties
+            #region IMethods
+
+            public bool IsDefaultCase() {
+                return IsDefaultCase(m_discriminatorValues);
+            }            
+
+            public static bool IsDefaultCase(object[] discrimValues) {
+                return ((discrimValues.Length == 1) &&
+                    (discrimValues[0].Equals(s_defaultCaseDiscriminator)));
+            }
+
+            public bool HasMoreThanOneDiscrValue() {
+                return IsDefaultCase() || (m_discriminatorValues.Length > 1);
+            }
+
+            /// <summary>
+            /// creates an IL label for this case
+            /// </summary>
+            /// <remarks>is not called for a default case.</remarks>
+            public void AssignIlLabel(ILGenerator gen) {
+                m_ilLabel = gen.DefineLabel();
+            }
+
+            #endregion IMethods
+        }
+
+        #endregion Types        
+        #region Constants
+
+        internal const string GET_FIELD_FOR_DISCR_METHOD = "GetFieldForDiscriminator";
+        internal const string GET_COVERED_DISCR_VALUES = "GetCoveredDiscrValues";
+        internal const string GET_DEFAULT_FIELD = "GetDefaultField";
+        internal const string DISCR_FIELD_NAME = "m_discriminator";
+        private const string INIT_FIELD_NAME = "m_initalized";
+
+        #endregion Constants
+        #region SFields
+
+        private static object s_defaultCaseDiscriminator = new object();
+
+        private static ConstructorInfo s_BadParamConstr;
+        private static ConstructorInfo s_BadOperationConstr;
+
+        #endregion SFields
+        #region IFields
+
+        private TypeBuilder m_builder;
+
+        private FieldBuilder m_discrField;
+        private TypeContainer m_discrType;
+
+        private FieldBuilder m_initalizedField;
+        private FieldBuilder m_unionTypeCache;
+        
+        private ArrayList m_switchCases = new ArrayList();
+
+        private ArrayList m_coveredDiscrs = new ArrayList();
+
+        private IlEmitHelper m_ilEmitHelper = IlEmitHelper.GetSingleton();
+
+        #endregion IFields
+        #region SConstructor
+
+        static UnionGenerationHelper() {
+            Type badParamType = typeof(BAD_PARAM);
+            Type badOperationType = typeof(BAD_OPERATION);
+            s_BadParamConstr = badParamType.GetConstructor(new Type[] { typeof(int), typeof(CompletionStatus) });
+            s_BadOperationConstr = badOperationType.GetConstructor(new Type[] { typeof(int), typeof(CompletionStatus) });            
+        }
+
+        #endregion SConstructor
+        #region IConstructors
+
+        /// <summary>
+        /// creates the union in the module represented by modBuilder.
+        /// </summary>
+        /// <param name="visibility">specifies the visiblity of resulting type</param>
+        public UnionGenerationHelper(ModuleBuilder modBuilder, string fullName, 
+                                     TypeAttributes visibility) {
+            TypeAttributes typeAttrs = TypeAttributes.Class | TypeAttributes.Serializable | 
+                                       TypeAttributes.BeforeFieldInit | TypeAttributes.SequentialLayout |
+                                       TypeAttributes.Sealed | visibility;
+
+            m_builder = modBuilder.DefineType(fullName, typeAttrs, typeof(System.ValueType),
+                                              new System.Type[] { typeof(IIdlEntity) });            
+            BeginType();
+        }
+
+        
+        /// <summary>
+        /// creates the union as a nested type in outertype
+        /// </summary>
+        /// <param name="visibility">specifies the visiblity of resulting type</param>
+        public UnionGenerationHelper(TypeBuilder outerType, string fullName, 
+                                     TypeAttributes visibility) {
+            TypeAttributes typeAttrs = TypeAttributes.Class | TypeAttributes.Serializable | 
+                                       TypeAttributes.BeforeFieldInit | TypeAttributes.SequentialLayout |
+                                       TypeAttributes.Sealed | visibility;
+
+            m_builder = outerType.DefineNestedType(fullName, typeAttrs, typeof(System.ValueType),
+                                                   new System.Type[] { typeof(IIdlEntity) });
+            BeginType();
+        }
+
+        #endregion IConstructors
+        #region IProperties
+
+        /// <summary>
+        /// should only be called by UnionBuildInfo constructor.
+        /// </summary>
+        public TypeBuilder Builder {
+            get {
+                return m_builder;
+            }
+        }
+
+        public TypeContainer DiscriminatorType {
+            get {
+                return m_discrType;
+            }
+        }
+
+        public static object DefaultCaseDiscriminator {
+            get {
+                return s_defaultCaseDiscriminator;
+            }
+        }
+
+        #endregion IProperties
+        #region IMethods
+        
+        public void AddDiscriminatorFieldAndProperty(TypeContainer discrType, ArrayList coveredDiscrRange) {
+            if ((m_discrType != null) || (m_coveredDiscrs == null)) {
+                throw new INTERNAL(899, CompletionStatus.Completed_MayBe);
+            }
+            m_discrType = discrType;
+            m_coveredDiscrs = coveredDiscrRange;
+            m_discrField = m_ilEmitHelper.AddFieldWithCustomAttrs(m_builder, DISCR_FIELD_NAME, m_discrType, 
+                                                                  FieldAttributes.Private);
+            // Property for discriminiator
+            String propName = "Discriminator";
+            // set the methods for the property
+            MethodBuilder getAccessor = m_ilEmitHelper.AddPropertyGetter(m_builder, propName, m_discrType,
+                                                                         MethodAttributes.Public);
+            ILGenerator gen = getAccessor.GetILGenerator();
+            gen.Emit(OpCodes.Ldarg_0);
+            gen.Emit(OpCodes.Ldfld, m_discrField);
+            gen.Emit(OpCodes.Ret);
+            MethodBuilder setAccessor = null;
+            m_ilEmitHelper.AddProperty(m_builder, propName, m_discrType, getAccessor, setAccessor);
+            // add a method, which returns an array of covered discriminators
+            AddCoveredDiscrsGetter();
+        }
+
+        private void AddInitalizedField() {
+            // used to detect uninitalized unions, field is automatically initalized to false
+            m_initalizedField = m_ilEmitHelper.AddFieldWithCustomAttrs(m_builder, INIT_FIELD_NAME, 
+                                                                       new TypeContainer(typeof(System.Boolean)), 
+                                                                       FieldAttributes.Private);
+        }
+
+        /// <summary>
+        /// this field caches typeof(union-type)
+        /// </summary>
+        private void AddTypeField() {
+            m_unionTypeCache = m_ilEmitHelper.AddFieldWithCustomAttrs(m_builder, "s_type", 
+                                                                      new TypeContainer(typeof(Type)), 
+                                                                      FieldAttributes.Public | FieldAttributes.Static);
+        }
+
+        /// <summary>
+        /// add instance and static constructor
+        /// </summary>
+        private void AddConstructor() {
+            // static constructor
+            ConstructorBuilder staticConstr = m_builder.DefineConstructor(MethodAttributes.Private | MethodAttributes.Static | MethodAttributes.HideBySig,
+                                                                          CallingConventions.Standard,
+                                                                          Type.EmptyTypes);
+            ILGenerator staticConstrIl = staticConstr.GetILGenerator();
+            staticConstrIl.Emit(OpCodes.Ldtoken, m_builder);
+            MethodInfo getTypeFromH = typeof(Type).GetMethod("GetTypeFromHandle", BindingFlags.Public | BindingFlags.Static);
+            staticConstrIl.Emit(OpCodes.Call, getTypeFromH);
+            // store Type in cache field
+            staticConstrIl.Emit(OpCodes.Stsfld, m_unionTypeCache);
+            staticConstrIl.Emit(OpCodes.Ret);
+        }
+
+        private void BeginType() {                        
+            // add IdlUnion attribute
+            m_builder.SetCustomAttribute(new IdlUnionAttribute().CreateAttributeBuilder());
+            
+            AddTypeField();
+            AddInitalizedField();
+            AddConstructor(); // add the static constructor
+        }
+
+        public Type FinalizeType() {
+            AddOwnDefaultCaseIfNeeded();
+            GenerateSerialisationHelpers();
+            return m_builder.CreateType();
+        }
+
+        public void GenerateSwitchCase(TypeContainer elemType, string elemDeclIdent, object[] discriminatorValues) {
+            
+            // generate val-field for this switch-case
+            FieldBuilder elemField = m_ilEmitHelper.AddFieldWithCustomAttrs(m_builder, "m_" + elemDeclIdent,
+                                                                            elemType, FieldAttributes.Private);
+            SwitchCase switchCase = new SwitchCase(elemType, elemDeclIdent, discriminatorValues,
+                                                   elemField);            
+            // AMELIORATION possiblity: check range conflict with existing cases, before adding case
+            m_switchCases.Add(switchCase);
+            // generate accessor and modifier methods
+            GenerateAccessorMethod(switchCase);
+            GenerateModifierMethod(switchCase);
+        }
+
+        private void GenerateIsInitalized(ILGenerator gen, Label jumpOnOk) {
+            gen.Emit(OpCodes.Ldarg_0);
+            gen.Emit(OpCodes.Ldfld, m_initalizedField); // fieldvalue
+            gen.Emit(OpCodes.Ldc_I4_1); // true
+            gen.Emit(OpCodes.Beq, jumpOnOk);
+            
+            gen.Emit(OpCodes.Ldc_I4, 34);
+            gen.Emit(OpCodes.Ldc_I4, (int)CompletionStatus.Completed_MayBe);
+            gen.Emit(OpCodes.Newobj, s_BadOperationConstr);
+            gen.Emit(OpCodes.Throw);
+        }
+
+        private void GenerateDiscrValueOkTest(ILGenerator gen, SwitchCase switchCase, Label jumpOnOk,
+                                              ConstructorInfo exceptionToThrowConstr, int exceptionMinorCode) {
+            // check if discr value ok, special for default case
+            if (!(SwitchCase.IsDefaultCase(switchCase.DiscriminatorValues))) {
+                for (int i = 0; i < switchCase.DiscriminatorValues.Length; i++) {
+                    // generate compare + branch on ok to jumpOnOk
+                    gen.Emit(OpCodes.Ldarg_0);
+                    gen.Emit(OpCodes.Ldfld, m_discrField); // fieldvalue of discriminator field                
+                    PushDiscriminatorValueToStack(gen, switchCase.DiscriminatorValues[i]);
+                    gen.Emit(OpCodes.Beq, jumpOnOk);
+                }
+            } else {                
+                Label exceptionLabel = gen.DefineLabel();
+                // compare current discr val with all covered discr val, if matching -> not ok
+                foreach (object discrVal in m_coveredDiscrs) {
+                    gen.Emit(OpCodes.Ldarg_0);
+                    gen.Emit(OpCodes.Ldfld, m_discrField); // fieldvalue of discriminator field                
+                    PushDiscriminatorValueToStack(gen, discrVal);
+                    gen.Emit(OpCodes.Beq, exceptionLabel);
+                }
+                // after all tests, no forbidden value for default case used -> jump to ok
+                gen.Emit(OpCodes.Br_S, jumpOnOk);
+                gen.MarkLabel(exceptionLabel);
+            }
+            
+            // exception thrown if not ok
+            gen.Emit(OpCodes.Ldc_I4, exceptionMinorCode);
+            gen.Emit(OpCodes.Ldc_I4, (int)CompletionStatus.Completed_MayBe);
+            gen.Emit(OpCodes.Newobj, exceptionToThrowConstr);
+            gen.Emit(OpCodes.Throw);
+        }
+
+        private void GenerateAccessorMethod(SwitchCase switchCase) {
+            MethodBuilder accessor = m_ilEmitHelper.AddMethod(m_builder, "Get" + switchCase.ElemName, 
+                                                              new ParameterSpec[0], switchCase.ElemType, 
+                                                              MethodAttributes.Public | MethodAttributes.HideBySig);
+            ILGenerator gen = accessor.GetILGenerator();
+            Label checkInitOk = gen.DefineLabel();
+            Label checkDiscrValOk = gen.DefineLabel();
+            // check if initalized
+            GenerateIsInitalized(gen, checkInitOk);
+            gen.MarkLabel(checkInitOk);
+            GenerateDiscrValueOkTest(gen, switchCase, checkDiscrValOk, s_BadOperationConstr, 34);
+            gen.MarkLabel(checkDiscrValOk);
+         
+            // load value and return
+            gen.Emit(OpCodes.Ldarg_0); // load union this reference
+            gen.Emit(OpCodes.Ldfld, switchCase.ElemField); //load the value of the union for this switch-case
+            gen.Emit(OpCodes.Ret);
+        }
+
+        private void GenerateModifierMethod(SwitchCase switchCase) {
+            ParameterSpec[] parameters;
+            ParameterSpec valArg = new ParameterSpec("val", switchCase.ElemType, 
+                                                     ParameterSpec.ParameterDirection.s_in);
+            if (switchCase.HasMoreThanOneDiscrValue()) {
+                // need an additional parameter
+                ParameterSpec discrArg = new ParameterSpec("discrVal", DiscriminatorType, 
+                                                           ParameterSpec.ParameterDirection.s_in);
+                parameters = new ParameterSpec[] {  valArg, discrArg};
+            } else {
+                // don't need an additional parameter
+                parameters = new ParameterSpec[] {  valArg };
+            }
+            
+            MethodBuilder modifier = m_ilEmitHelper.AddMethod(m_builder, "Set" + switchCase.ElemName, 
+                                                              parameters, new TypeContainer(typeof(void)), 
+                                                              MethodAttributes.Public | MethodAttributes.HideBySig);
+
+            ILGenerator gen = modifier.GetILGenerator();
+            
+            gen.Emit(OpCodes.Ldarg_0);
+            gen.Emit(OpCodes.Ldc_I4_1);
+            gen.Emit(OpCodes.Stfld, m_initalizedField); // store initalizedfield
+            
+            gen.Emit(OpCodes.Ldarg_0);
+            gen.Emit(OpCodes.Ldarg_1);
+            gen.Emit(OpCodes.Stfld, switchCase.ElemField); // store value field
+
+            gen.Emit(OpCodes.Ldarg_0);
+            if (switchCase.HasMoreThanOneDiscrValue()) {
+                gen.Emit(OpCodes.Ldarg_2);
+            } else {
+                PushDiscriminatorValueToStack(gen, switchCase.DiscriminatorValues[0]);
+            }
+            gen.Emit(OpCodes.Stfld, m_discrField); // store discriminator field
+            
+            if (switchCase.HasMoreThanOneDiscrValue()) {            
+                // check, if discrvalue assigned is ok
+                Label endMethodLabel = gen.DefineLabel();
+                GenerateDiscrValueOkTest(gen, switchCase, endMethodLabel, s_BadParamConstr, 34);            
+                gen.MarkLabel(endMethodLabel);            
+            }
+            gen.Emit(OpCodes.Ret);
+        }
+
+        /// <summary>
+        /// generates the serialisation helper methods
+        /// </summary>
+        private void GenerateSerialisationHelpers() {
+            GenerateGetFieldInfoForDiscriminator();
+            AddGetSpecifiedDefaultCaseFieldGetter();
+        }
+
+        private void GenerateGetFieldInfoForDiscriminator() {
+            MethodBuilder getElemMethod = m_ilEmitHelper.AddMethod(m_builder, GET_FIELD_FOR_DISCR_METHOD,
+                                                                   new ParameterSpec[] { 
+                                                                        new ParameterSpec("discrVal", 
+                                                                                          m_discrType, 
+                                                                                          ParameterSpec.ParameterDirection.s_in) 
+                                                                   },
+                                                                   new TypeContainer(typeof(FieldInfo)), 
+                                                                   MethodAttributes.Private | MethodAttributes.HideBySig | MethodAttributes.Static);
+            ILGenerator gen = getElemMethod.GetILGenerator();            
+            // process all switch cases stored ...
+
+            // generate the following structure:
+            //        ldarg.0 // start case-1 test
+            //        push first discr constant for switch case considered
+            //        beq case1
+            //        ldarg.0
+            //        push next (if present) discr constant for switch case considered
+            //        beq case1
+            //                    
+            //        ldarg.0 // start case-2 test
+            //        push first discr constant for switch case considered
+            //        beq case2
+            //          ...
+            //        br.s default
+            // case1 :
+            //          ...
+            //          br.s end
+            // case2 :
+            //          ...
+            //          br.s end
+            // default:
+            //          ...
+            
+            Label endOfMethod = gen.DefineLabel();
+            Label defaultCaseLabel = gen.DefineLabel(); // make sure to have default case, even if no default is specified in IDL
+            
+            // part1: compare and jump            
+            foreach (SwitchCase switchCase in m_switchCases) {
+                if (switchCase.IsDefaultCase()) {
+                    // generate the default case at the end, no comparison needed for default case
+                    continue;
+                }
+                // generate and assign label to the current case
+                switchCase.AssignIlLabel(gen);
+                
+                for (int j = 0; j < switchCase.DiscriminatorValues.Length; j++) {
+                    // generate tests
+                    gen.Emit(OpCodes.Ldarg_0); // static method -> no this pointer in arg0, instead method argument
+                    PushDiscriminatorValueToStack(gen, switchCase.DiscriminatorValues[j]);
+                    gen.Emit(OpCodes.Beq, switchCase.IlLabelAssigned);
+                }
+            }
+            // if nothing found, jump to default case
+            gen.Emit(OpCodes.Br_S, defaultCaseLabel);
+
+            // part2: code for cases (jump-targets)
+            SwitchCase defaultCaseFound = null;
+            foreach (SwitchCase switchCase in m_switchCases) {
+                if (switchCase.IsDefaultCase()) {
+                    // make sure to generate the default case at the end, not in between
+                    defaultCaseFound = switchCase;
+                    continue;
+                }
+                // set position for the case label
+                gen.MarkLabel(switchCase.IlLabelAssigned);
+                // the field to return
+                GenerateGetFieldOfUnionType(gen, switchCase.ElemField);
+                gen.Emit(OpCodes.Br_S, endOfMethod); // jump to exit point
+            }
+
+            // the default case
+            gen.MarkLabel(defaultCaseLabel);
+            if (defaultCaseFound != null) {
+                // a default case present
+                GenerateGetFieldOfUnionType(gen, defaultCaseFound.ElemField);
+            } else {
+                gen.Emit(OpCodes.Ldnull);
+            }
+            gen.Emit(OpCodes.Br_S, endOfMethod); // jump to exit point            
+            
+            // method end                               
+            gen.MarkLabel(endOfMethod);            
+            gen.Emit(OpCodes.Ret);
+        }
+
+        /// <summary>
+        /// generates a call to get a field of the union-type via reflection
+        /// </summary>
+        private void GenerateGetFieldOfUnionType(ILGenerator gen, FieldInfo elemField) {
+            gen.Emit(OpCodes.Ldsfld, m_unionTypeCache); // load the typecachefield
+            gen.Emit(OpCodes.Ldstr, elemField.Name);
+            gen.Emit(OpCodes.Ldc_I4, Convert.ToInt32(BindingFlags.NonPublic | BindingFlags.Instance));
+            MethodInfo getField = typeof(Type).GetMethod("GetField", 
+                                                         BindingFlags.Public | BindingFlags.Instance, 
+                                                         null, new Type[] { typeof(string), typeof(BindingFlags) }, null);
+            gen.Emit(OpCodes.Callvirt, getField); // call getField to retrieve the fieldInfo: pushed result on stack
+        }
+
+        
+        /// <summary>
+        /// checks, if a default case is present
+        /// </summary>
+        /// <returns></returns>
+        private bool IsDefaultCasePresent() {
+            foreach (SwitchCase switchCase in m_switchCases) {                
+                if (switchCase.IsDefaultCase()) {
+                    return true;
+                }
+            }
+            return false;
+        }
+        
+        private void AddOwnDefaultCaseDiscriminatorSetter() {
+            
+            // discr val paramter
+            ParameterSpec discrArg = new ParameterSpec("discrVal", DiscriminatorType, 
+                                                       ParameterSpec.ParameterDirection.s_in);
+            ParameterSpec[] parameters = new ParameterSpec[] { discrArg };
+            
+            MethodBuilder modifier = m_ilEmitHelper.AddMethod(m_builder, "SetDefault", 
+                                                              parameters, new TypeContainer(typeof(void)), 
+                                                              MethodAttributes.Public | MethodAttributes.HideBySig);
+
+            ILGenerator gen = modifier.GetILGenerator();
+            
+            gen.Emit(OpCodes.Ldarg_0);
+            gen.Emit(OpCodes.Ldc_I4_1);
+            gen.Emit(OpCodes.Stfld, m_initalizedField); // store initalizedfield
+            
+            gen.Emit(OpCodes.Ldarg_0);
+            gen.Emit(OpCodes.Ldarg_1);
+            gen.Emit(OpCodes.Stfld, m_discrField); // store discriminator field
+            
+            // check, if discrvalue assigned is ok
+            Label endMethodLabel = gen.DefineLabel();
+            SwitchCase ownDefault = new SwitchCase(null, null, new object[] { s_defaultCaseDiscriminator }, 
+                                                   null);
+            GenerateDiscrValueOkTest(gen, ownDefault, endMethodLabel, s_BadParamConstr, 34);            
+            gen.MarkLabel(endMethodLabel);            
+            gen.Emit(OpCodes.Ret);            
+        }
+
+        /// <summary>
+        /// checks if a default case is present and adds an own special default case, if not.        
+        /// </summary>
+        private void AddOwnDefaultCaseIfNeeded() {
+            if (IsDefaultCasePresent()) {
+                // not needed
+                return;
+            }
+            AddOwnDefaultCaseDiscriminatorSetter();
+        }
+
+        /// <summary>
+        /// adds a method, which returns the field for the default case, or null if no default case 
+        /// was specified in IDL.
+        /// This method is used for TypeCodeCreation from the Type.
+        /// </summary>
+        private void AddGetSpecifiedDefaultCaseFieldGetter() {
+            MethodBuilder getDefaultCase = m_ilEmitHelper.AddMethod(m_builder, GET_DEFAULT_FIELD,
+                                                                    new ParameterSpec[0],
+                                                                    new TypeContainer(typeof(FieldInfo)), 
+                                                                    MethodAttributes.Private | MethodAttributes.HideBySig | MethodAttributes.Static);
+            ILGenerator gen = getDefaultCase.GetILGenerator();
+            foreach (SwitchCase switchCase in m_switchCases) {
+                if (switchCase.IsDefaultCase()) {
+                    GenerateGetFieldOfUnionType(gen, switchCase.ElemField);
+                    gen.Emit(OpCodes.Ret);
+                    return;
+                }
+            }
+            // none found
+            gen.Emit(OpCodes.Ldnull);
+            gen.Emit(OpCodes.Ret);
+        }
+
+        /// <summary>
+        /// adds a static method, which returns all used discriminator values.
+        /// </summary>
+        private void AddCoveredDiscrsGetter() {
+            Type discrTypeCls = m_discrType.GetCompactClsType();
+            MethodBuilder methodToBuild = m_ilEmitHelper.AddMethod(m_builder, GET_COVERED_DISCR_VALUES,
+                                                                   new ParameterSpec[0],
+                                                                   new TypeContainer(typeof(object[])),
+                                                                   MethodAttributes.Private | MethodAttributes.HideBySig | MethodAttributes.Static);
+            ILGenerator gen = methodToBuild.GetILGenerator();
+            LocalBuilder resultRef = gen.DeclareLocal(typeof(object[]));
+
+            gen.Emit(OpCodes.Ldc_I4, m_coveredDiscrs.Count);
+            gen.Emit(OpCodes.Newarr, typeof(object));
+            gen.Emit(OpCodes.Stloc_0);
+            
+            for (int i = 0; i < m_coveredDiscrs.Count; i++) {                
+                gen.Emit(OpCodes.Ldloc_0);
+                gen.Emit(OpCodes.Ldc_I4, i); // element nr
+                PushDiscriminatorValueToStack(gen, m_coveredDiscrs[i]);
+                gen.Emit(OpCodes.Box, discrTypeCls);
+                gen.Emit(OpCodes.Stelem_Ref);
+            }            
+            gen.Emit(OpCodes.Ldloc_0);
+            gen.Emit(OpCodes.Ret);
+        }
+
+
+
+        /// <summary>pushes the constant value for the discriminator to the stack</summary>
+        /// <remarks>discriminator must be already generated</remarks>
+        private void PushDiscriminatorValueToStack(ILGenerator gen, object discVal) {
+            if (m_discrType == null) {
+                throw new INTERNAL(899, CompletionStatus.Completed_MayBe);
+            }
+            // make sure discVal literal is Int64 for integer types; makes checks easier
+            if ((discVal is System.Int16) || (discVal is System.Int32)) {
+                discVal = Convert.ToInt64(discVal);
+            }
+            
+            Type discrTypeCls = m_discrType.GetCompactClsType(); // for discriminator do not split boxed value types, because only the listed unseparable types usable
+            if (discrTypeCls.Equals(typeof(System.Boolean))) {
+                if (!(discVal is System.Boolean)) {
+                    throw new InvalidUnionDiscriminatorValue(discVal, discrTypeCls);
+                }
+                gen.Emit(OpCodes.Ldc_I4, Convert.ToInt32(discVal));
+            } else if (discrTypeCls.Equals(typeof(System.Int16))) {
+                if ((!(discVal is System.Int64)) || 
+                    ((System.Int64)discVal < System.Int16.MinValue) ||
+                    ((System.Int64)discVal > System.Int16.MaxValue)) {
+                    throw new InvalidUnionDiscriminatorValue(discVal, discrTypeCls);
+                }
+                gen.Emit(OpCodes.Ldc_I4, Convert.ToInt32(discVal));
+            } else if (discrTypeCls.Equals(typeof(System.Int32))) {
+                if ((!(discVal is System.Int64)) ||
+                    ((System.Int64)discVal < System.Int32.MinValue) ||
+                    ((System.Int64)discVal > System.Int32.MaxValue)) {
+                    throw new InvalidUnionDiscriminatorValue(discVal, discrTypeCls);
+                }
+                gen.Emit(OpCodes.Ldc_I4, Convert.ToInt32(discVal));
+            } else if (discrTypeCls.Equals(typeof(System.Int64))) {
+                if (!(discVal is System.Int64)) {
+                    throw new InvalidUnionDiscriminatorValue(discVal, discrTypeCls);
+                }
+                gen.Emit(OpCodes.Ldc_I4, (System.Int64)discVal);
+            } else if (discrTypeCls.Equals(typeof(System.Char))) {
+                if (!(discVal is System.Char)) {
+                    throw new InvalidUnionDiscriminatorValue(discVal, discrTypeCls);
+                }
+                gen.Emit(OpCodes.Ldc_I4, Convert.ToInt32(discVal));
+            } else if (discrTypeCls.IsEnum) {
+                if (!discVal.GetType().IsEnum) {
+                    throw new InvalidUnionDiscriminatorValue(discVal, discrTypeCls);
+                }
+                // get the int value for the idl enum
+                gen.Emit(OpCodes.Ldc_I4, (System.Int32)discVal);
+            } else {
+                throw new INTERNAL(899, CompletionStatus.Completed_MayBe);
+            }
+        }
+
+        /// <summary>generates il to cast/unbox a reference to the targetType
+        private void GenerateCastObjectToType(ILGenerator gen, Type targetType) {
+            if (targetType.IsValueType) {
+                gen.Emit(OpCodes.Unbox, targetType); // get addr of value
+                // for ints and floats: ldind may be used too as shortcut for ldobj, but for simplicity don't use it
+                gen.Emit(OpCodes.Ldobj, targetType); // load value onto stack
+            } else {
+                gen.Emit(OpCodes.Castclass, targetType); // cast the reference to the correct return value
+            }
+        }
+
+        #endregion IMethods
+
+    }
+
+}
