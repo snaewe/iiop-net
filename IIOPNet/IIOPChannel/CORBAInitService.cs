@@ -40,7 +40,7 @@ namespace Ch.Elca.Iiop.Services {
     /// specifies the operation on the INIT-object
     /// </summary>
     [InterfaceTypeAttribute(IdlTypeInterface.ConcreteInterface)]
-    public interface CORBAInitService : IIdlEntity {
+    internal interface CORBAInitService : IIdlEntity {
 
         #region IMethods
 
@@ -85,7 +85,7 @@ namespace Ch.Elca.Iiop.Services {
         #endregion IConstructors
         #region SMethods
         
-        public static void Publish() {
+        internal static void Publish() {
             lock(s_lockObject) {
                 if (s_corbaInitService == null) {
 
