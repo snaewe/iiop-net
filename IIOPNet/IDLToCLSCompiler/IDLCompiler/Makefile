@@ -45,4 +45,4 @@ test: build-tests
 
 clean:
 	if exist $(Dest)* del /s /q $(Dest)*
-	if exist $(Dest) rmdir $(Dest)
+	if exist $(Dest) rmdir /s /q $(Dest)
