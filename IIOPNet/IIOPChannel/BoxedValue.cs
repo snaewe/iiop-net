@@ -156,7 +156,7 @@ namespace omg.org.CORBA {
     }
     
     /// <summary>predefined CORBA::StringValue boxed value type</summary>
-    [RepositoryIDAttribute("IDL:omg.org/CORBA/WStringValue:1.0")]
+    [RepositoryIDAttribute("IDL:omg.org/CORBA/StringValue:1.0")]
     [Serializable]
     public class StringValue : BoxedValueBase, IIdlEntity {
         
