@@ -154,7 +154,7 @@ public class IDLToCLS {
     }
     
     public void MapIdl() throws Exception {
-        MetaDataGenerator generator = new MetaDataGenerator(m_asmPrefix);
+        MetaDataGenerator generator = new MetaDataGenerator(m_asmPrefix, m_destination);
         for (int i = 0; i < m_inputFileNames.length; i++) {
             System.out.println("processing file: " + m_inputFileNames[i]);
             Trace.WriteLine("");

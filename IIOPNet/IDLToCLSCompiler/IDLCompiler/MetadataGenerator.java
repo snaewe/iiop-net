@@ -121,6 +121,7 @@ import System.Reflection.*;
 import System.Reflection.Emit.*;
 import System.Type;
 import System.Diagnostics.*;
+import System.IO.Directory;
 
 import Ch.Elca.Iiop.Idl.*;
 import Ch.Elca.Iiop.Marshalling.ICustomMarshalled;
@@ -235,13 +236,13 @@ public class MetaDataGenerator implements IDLParserVisitor {
     #endregion IFields
     #region IConstructors
 
-    public MetaDataGenerator(String targetAssemblyName) {
+    public MetaDataGenerator(String targetAssemblyName, String targetDir) {
         m_targetAsmName = targetAssemblyName;
         AssemblyName asmname = new AssemblyName();
         asmname.set_Name(targetAssemblyName);
         // define a persistent assembly
         m_asmBuilder = System.Threading.Thread.GetDomain().
-            DefineDynamicAssembly(asmname, AssemblyBuilderAccess.RunAndSave);
+            DefineDynamicAssembly(asmname, AssemblyBuilderAccess.RunAndSave, targetDir);
         // manager for persistent modules
         m_modBuilderManager = new ModuleBuilderManager(m_asmBuilder, targetAssemblyName);
         Type paramBuildType = ParameterBuilder.class.ToType();
