@@ -766,8 +766,43 @@ namespace Ch.Elca.Iiop.IdlCompiler.Tests {
             
             writer.Close();            
         }
-
         
+        /// <summary>
+        /// regression test for bug #1042055
+        /// </summary>
+        [Test]
+        public void TestIdDBugNr1042055() {
+            MemoryStream testSource = new MemoryStream();
+            StreamWriter writer = new StreamWriter(testSource, s_latin1);
+            
+            // idl:
+            writer.WriteLine("module testmod {");
+            writer.WriteLine("    struct Test {");
+            writer.WriteLine("        long d;");
+            writer.WriteLine("        long D;");
+            writer.WriteLine("    };");
+            writer.WriteLine("};");
+            
+            writer.Flush();
+            testSource.Seek(0, SeekOrigin.Begin);
+            Assembly result = CreateIdl(testSource);
+                       
+            // check if struct is correctly created
+            Type structType = result.GetType("testmod.Test", true);
+            // must be a struct
+            Assertion.Assert("is a struct", structType.IsValueType);
+            CheckIdlStructAttributePresent(structType);
+            CheckSerializableAttributePresent(structType);
+            
+            CheckFieldPresent(structType, "d", typeof(System.Int32), 
+                              BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly);            
+            CheckFieldPresent(structType, "D", typeof(System.Int32), 
+                              BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly);
+            CheckNumberOfFields(structType, BindingFlags.Public | BindingFlags.NonPublic |
+                                            BindingFlags.Instance | BindingFlags.DeclaredOnly,
+                                2);
+            writer.Close();
+        }        
         
         [Test]
         [ExpectedException(typeof(InvalidIdlException))]
