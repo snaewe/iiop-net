@@ -45,7 +45,7 @@ namespace Ch.Elca.Iiop.IntegrationTests {
             string objectURI = "test";
             RemotingServices.Marshal(test, objectURI);
 
-            Console.WriteLine("server running");
+            Console.WriteLine("Server running. Press any key to stop....");
             Console.ReadLine();
         }
 
