@@ -303,6 +303,5 @@ For each callback, ensure that the following points are fullfilled:
 The most common errors are:
 <ul>
 <li>the required type was not mapped with the IDLToCLSCompiler
-<li>the assembly containing the mapped type was not found by IIOP.NET (it must be in the same directory or in the GAC)
-<li>the mapped type is a value type and you didn't provide an implementation for it
+<li>the assembly containing the mapped type was not found by IIOP.NET (it must be in the same directory or in the application domain's search path)
 </ul>
