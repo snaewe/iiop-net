@@ -1,0 +1,8 @@
+This integration test checks the functionality of IIOP.NET when using multiple threads
+concurrently.
+
+The remote test object provides methods to test serialisation and 
+deserialisation of different types.
+
+
+
