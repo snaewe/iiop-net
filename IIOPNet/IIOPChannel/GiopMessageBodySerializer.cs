@@ -209,16 +209,6 @@ namespace Ch.Elca.Iiop.MessageHandling {
             } // force an align on 8 for GIOP-version >= 1.2
         }
 
-        /// <summary>checks if this it's a one way message</summary>
-        protected bool IsOneWayCall(IMethodCallMessage msg) {
-            Util.AttributeExtCollection attrs = Util.AttributeExtCollection.ConvertToAttributeCollection(msg.MethodBase.GetCustomAttributes(true));
-            if (attrs.IsInCollection(typeof(OneWayAttribute))) { 
-                return true; 
-            } else { 
-                return false; 
-            }
-        }
-
         /// <summary>
         /// set the codesets for the stream after codeset service descision
         /// </summary>
@@ -405,7 +395,7 @@ namespace Ch.Elca.Iiop.MessageHandling {
                 // reply-expected, no DII-call --> must be 0x03, no reply --> must be 0x00
                 responseFlags = 3;
             }
-            if (IsOneWayCall(methodCall)) { 
+            if (GiopMessageHandler.IsOneWayCall(methodCall)) { 
                 responseFlags = 0; 
             } // check if one-way
             // write response-flags

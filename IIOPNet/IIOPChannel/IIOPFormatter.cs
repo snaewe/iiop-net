@@ -158,10 +158,21 @@ namespace Ch.Elca.Iiop {
                 clientSinkStack.Push(this, msg); // push the formatter onto the sink stack, to get the chance to handle the incoming reply stream
                 // forward the message to the next sink
                 m_nextSink.AsyncProcessRequest(clientSinkStack, msg, requestHeaders, requestStream);
+
+                // for oneway messages, release the connections for future use
+                if ((msg is IMethodCallMessage) && GiopMessageHandler.IsOneWayCall((IMethodCallMessage)msg)) {
+                    IiopClientConnectionManager conManager = IiopClientConnectionManager.GetManager();
+                    conManager.ReleaseConnection(msg); // release the connection, because this interaction is complete
+                }
             } catch (Exception e) {
-                IMessage retMsg = new ReturnMessage(e, (IMethodCallMessage) msg);
-                if (replySink != null) {
-                    replySink.SyncProcessMessage(msg); // process the return message in the reply sink chain
+                // formulate an exception reply for an non-oneway call
+                if ( ((msg is IMethodCallMessage) && (!GiopMessageHandler.IsOneWayCall((IMethodCallMessage)msg))) ||
+                     (!(msg is IMethodCallMessage))) {
+                
+                    IMessage retMsg = new ReturnMessage(e, (IMethodCallMessage) msg);
+                    if (replySink != null) {
+                        replySink.SyncProcessMessage(msg); // process the return message in the reply sink chain
+                    }
                 }
             }
             return null;  // TODO, it would be possible to return a possiblity to cancel a message ...

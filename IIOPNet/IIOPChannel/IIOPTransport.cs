@@ -191,7 +191,6 @@ namespace Ch.Elca.Iiop {
                                          
         }
 
-
         #region Implementation of IClientChannelSink
         public void AsyncProcessRequest(IClientChannelSinkStack sinkStack, IMessage msg, 
                                         ITransportHeaders headers, Stream requestStream) {
@@ -199,10 +198,15 @@ namespace Ch.Elca.Iiop {
             TcpClient client = GetSocket(msg);
             NetworkStream networkStream = client.GetStream();
             ProcessRequest(networkStream, requestStream); // send the request
-            // now initate asynchronous response listener
-            AsyncResponseWaiter waiter = new AsyncResponseWaiter(sinkStack, networkStream, 
-                                                                 new DataAvailableCallBack(this.AsyncResponseArrived));
-            waiter.StartWait(); // this call is non-blocking
+            
+            // wait only for response, if not oneway!
+            if (!GiopMessageHandler.IsOneWayCall((IMethodCallMessage)msg)) {
+            
+                // now initate asynchronous response listener
+                AsyncResponseWaiter waiter = new AsyncResponseWaiter(sinkStack, networkStream, 
+                                                                     new DataAvailableCallBack(this.AsyncResponseArrived));
+                waiter.StartWait(); // this call is non-blocking
+            }
         }
 
         public void ProcessMessage(IMessage msg, ITransportHeaders requestHeaders, Stream requestStream,
