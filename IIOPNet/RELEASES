@@ -1,0 +1,18 @@
+Version 1.0
+-----------
+
+- first version of the IIOP.NET Channel
+
+Version 1.1
+-----------
+
+- improved version of the IIOP.NET Channel
+- non-trivial example
+- CLS to IDL generator
+
+
+Version 1.2
+-----------
+
+- IDL to CLS compiler
+- examples showing how to use the tools
