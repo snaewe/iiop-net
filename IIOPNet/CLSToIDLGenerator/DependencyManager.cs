@@ -520,6 +520,9 @@ namespace Ch.Elca.Iiop.Idl {
         public object MapToIdlStruct(System.Type clsType) {
             return clsType;
         }
+        public object MapToIdlUnion(System.Type clsType) {
+            return clsType;
+        }
         public object MapToIdlOctet(System.Type clsType) {
             return clsType;
         }

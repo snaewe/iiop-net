@@ -587,6 +587,15 @@ namespace Ch.Elca.Iiop.Idl {
             throw new NotSupportedException("only Types procuced from IDL to CLS mapping are mapped to an IDL-struct, therefore Generator doesn't map this type");
         }
 
+        public object MapToIdlUnion(Type clsType) {
+            if (m_depManager.CheckMapped(clsType)) { 
+                return null; 
+            }
+            // normally, nothing has to be done here, therefore throw a NotSupportedException
+            throw new NotSupportedException("only Types procuced from IDL to CLS mapping are mapped to an IDL-union, therefore Generator doesn't map this type");
+        }
+
+
         public object MapToIdlConcreateValueType(Type clsType) {
             if (m_depManager.CheckMapped(clsType)) { 
                 return null; 
@@ -1018,6 +1027,10 @@ namespace Ch.Elca.Iiop.Idl {
         }
 
         public object MapToIdlStruct(System.Type dotNetType) {
+            throw new NotSupportedException("no fwd declaration possible for this IDL-type");
+        }
+
+        public object MapToIdlUnion(System.Type dotNetType) {
             throw new NotSupportedException("no fwd declaration possible for this IDL-type");
         }
 
