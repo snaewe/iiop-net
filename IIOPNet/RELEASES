@@ -1,3 +1,31 @@
+Version 1.4.1 (22 Septembre 2003)
+---------------------------------
+
+new features:
+
+- initial support for IDL local interfaces
+- IDLPreprocessor: now supports #ifdef, #else.
+
+
+new demos:
+
+- Callback demo: between a IIOP.NET client and an IIOP.NET server.
+
+
+bugs fixed:
+- IIOPChannel: paramter attributes of overriden methods not considered on serialising / deserialising; bug #803645
+- IIOPChannel: oneway calls: IIOP.NET clients waits for answers (in a separate Thread, but mustn't); bug #802992
+- IDL to CLS compiler: IndexOutOfBoundExceptions fixed (see Discussion in forum: http://sourceforge.net/forum/forum.php?thread_id=922161&forum_id=274081)
+- IDL to CLS compiler: some scoped IDL names couldn't be resolved by compiler; bug #800911
+- IDLPreprocessor: sematic of "" and <> for include directives corrected
+
+
+changes:
+
+- automated jboss / WAS5 integration test
+- workaround for IDL bounded sequences: now mapped to unbounded + warning on compilation
+
+
 Version 1.4.0 (26 August 2003)
 ------------------------------
 
