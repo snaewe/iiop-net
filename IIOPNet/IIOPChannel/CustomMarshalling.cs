@@ -170,6 +170,7 @@ namespace Corba {
         void read_wchar_array([IdlSequenceAttribute] [WideCharAttribute(true)] ref char[]seq,
                               int offset, int length);
         void read_octet_array([IdlSequenceAttribute] ref byte[] seq, int offset, int length);
+        byte[] read_octet_array();
         void read_short_array([IdlSequenceAttribute] ref short[] seq, int offset, int length);
         void read_ushort_array([IdlSequenceAttribute] ref short[] seq, int offset, int length);
         void read_long_array([IdlSequenceAttribute] ref int[] seq, int offset, int length);
@@ -666,12 +667,18 @@ namespace Corba {
         }
 
         public void read_octet_array([IdlSequenceAttribute] ref byte[] seq, int offset, int length) {
-            byte[] res = (byte[])m_marshaller.Unmarshal(seq.GetType(),
+            byte[] res = read_octet_array();
+            Array.Copy((Array)res, 0, (Array)seq, offset, length);
+        }
+
+        public byte[] read_octet_array() {
+            byte[] res = (byte[])m_marshaller.Unmarshal(typeof(byte[]),
                                                         new AttributeExtCollection(new Attribute[] { 
                                                                 new IdlSequenceAttribute() } ),
                                                         m_cdrIn);
-            Array.Copy((Array)res, 0, (Array)seq, offset, length);
+            return res;
         }
+
 
         public void read_short_array([IdlSequenceAttribute] ref short[] seq, int offset, int length) {
             short[] res = (short[])m_marshaller.Unmarshal(seq.GetType(), 
