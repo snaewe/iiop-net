@@ -220,7 +220,7 @@ void definition() :
 void module() :
 { String ident = ""; }
 {
-  "module" ident = identifier() { m_symbolTable.openScope(ident); } "{" ( definition() )+ "}" 
+  "module" ident = identifier() { m_symbolTable.openScope(ident, false); } "{" ( definition() )+ "}" 
   { 
   	jjtThis.setIdent(ident);
 	// close scope for this module after parsing
@@ -253,7 +253,7 @@ void interface_dcl() :
   	SimpleNodeWithIdent header = (SimpleNodeWithIdent) jjtree.peekNode();
   	Scope currentScope = m_symbolTable.getCurrentScope();
   	currentScope.addSymbol(header.getIdent());
-	m_symbolTable.openScope(header.getIdent()); // open a scope for type declaration inside the interface
+	m_symbolTable.openScope(header.getIdent(), true); // open a scope for type declaration inside the interface
   }
   
   "{" interface_body() "}"
@@ -425,12 +425,17 @@ void value_box_decl() :
 void value_abs_decl() :
 { String ident = ""; }
 {
-	"abstract" "valuetype" ident = identifier() [ value_base_inheritance_spec() ] [ value_support_inheritance_spec() ] "{" ( export() )* "}" ";"
+	"abstract" "valuetype" ident = identifier() [ value_base_inheritance_spec() ] [ value_support_inheritance_spec() ] "{" 
 	{ 
 	jjtThis.setIdent(ident); 
-      Scope currentScope = m_symbolTable.getCurrentScope();
-      currentScope.addSymbol(ident);
+        Scope currentScope = m_symbolTable.getCurrentScope();
+        currentScope.addSymbol(ident);
+        m_symbolTable.openScope(ident, true); // open a scope for type declaration inside this abstract value type
 	}
+        ( export() )* "}" ";"
+        {
+ 	    m_symbolTable.closeScope();
+        }
 }
 
 /* Production 17, chapter 3.4, CORBA 2.3.1 */
@@ -445,7 +450,7 @@ void value_decl() :
 	    // add the symbol for this value type to the symbol table
 	    Scope currentScope = m_symbolTable.getCurrentScope();
             currentScope.addSymbol(header.getIdent());
-            m_symbolTable.openScope(header.getIdent()); // open a scope for type declaration inside this concrete value type
+            m_symbolTable.openScope(header.getIdent(), true); // open a scope for type declaration inside this concrete value type
 	}
 	
 	"{" ( value_element() ) * "}" ";"
@@ -542,7 +547,10 @@ void init_param_attribute() :
 void const_dcl() :
 { String ident = ""; }
 {
-  "const" const_type() ident = identifier() "=" const_exp() { 
+  "const" const_type() ( 
+                           ident = identifier() | 
+                           ( "NaN" { ident = "NotANumber"; } ) 
+  ) "=" const_exp() { 
 	jjtThis.setIdent(ident);
 	Scope currentScope = m_symbolTable.getCurrentScope();
 	currentScope.addSymbolValue(ident);
@@ -635,20 +643,23 @@ void mult_expr() :
 /* Production 36 */
 
 void unary_expr() :
-{ int unary_op = ASTunary_expr.UNARY_NONE; }
+{ UnaryOps unary_op = UnaryOps.UnaryNone; }
 {
-  [ unary_op = unary_operator() ] primary_expr()
+  [ unary_op = unary_operator() ] primary_expr() 
+  {
+      jjtThis.SetUnaryOperation(unary_op);
+  }
 }
 
 /* Production 37 chapter 3.4 corba 2.3.1 */
-int unary_operator() #void :
+UnaryOps unary_operator() #void :
 {}
 {
-  "-" { return ASTunary_expr.UNARY_MINUS; }
+  "-" { return UnaryOps.UnaryMinus; }
 |
-  "+" { return ASTunary_expr.UNARY_PLUS; }
+  "+" { return UnaryOps.UnaryPlus; }
 |
-  "~" { return ASTunary_expr.UNARY_NEGATE; }
+  "~" { return UnaryOps.UnaryNegate; }
 }
 
 /* Production 38 chapter 3.4 corba 2.3.1 */
@@ -669,24 +680,24 @@ void literal() :
 { Object litVal; }
 {
 (
-  litVal = integer_literal()
+  litVal = integer_literal() { jjtThis.setLitVal(new IntegerLiteral((Int64)litVal)); }
 |
-  litVal = string_literal()
-|
-  LOOKAHEAD(2)
-  litVal = wide_string_literal() 
-|
-  litVal = character_literal()
+  litVal = string_literal() { jjtThis.setLitVal(new StringLiteral((String)litVal)); }
 |
   LOOKAHEAD(2)
-  litVal = wide_character_literal()
+  litVal = wide_string_literal() { jjtThis.setLitVal(new StringLiteral((String)litVal)); }
 |
-  litVal = fixed_pt_literal() 
+  litVal = character_literal() { jjtThis.setLitVal(new CharLiteral((Char)litVal)); }
 |
-  litVal = floating_pt_literal()
+  LOOKAHEAD(2)
+  litVal = wide_character_literal() { jjtThis.setLitVal(new CharLiteral((Char)litVal)); }
 |
-  litVal = boolean_literal()
-) { jjtThis.setLitVal(litVal); }
+  litVal = fixed_pt_literal() { throw new NotSupportedException("fixed point literal not yet supported"); }
+|
+  litVal = floating_pt_literal() { jjtThis.setLitVal(new FloatLiteral((Double)litVal)); }
+|
+  litVal = boolean_literal() { jjtThis.setLitVal(new BooleanLiteral((Boolean)litVal)); }
+) 
 }
 
 /* Production 40, chapter 3.4 corba 2.3.1 */
@@ -1406,7 +1417,7 @@ char wide_character_literal() #void :
 System.Double floating_pt_literal() #void :
 { Token floatLiteral; }
 {
-  (
+( (
 	     floatLiteral = <FLOATONE> 
 	 |
     	 floatLiteral = <FLOATTWO>
@@ -1417,6 +1428,18 @@ System.Double floating_pt_literal() #void :
       }
       return Double.Parse(floatVal);
     }
+)
+|
+         "NaN" 
+{
+      return Double.NaN;
+}
+         |
+         "Infinity"
+{
+      return Double.PositiveInfinity;
+}
+
 }
 
 System.Decimal fixed_pt_literal() #void :
