@@ -13,6 +13,10 @@ A client accesses this adder object to add two doubles.
 The SimpleAdder\DotNetServerJavaClient directory contains a tutorial showing how to access a
 .NET MarshalByRefObject using a java client.
 
+The SimpleAdder\DotNetServerDotNetClient directory contains a tutorial showing how to access a
+.NET MarshalByRefObject using a .net client (via iiop).
+
+
 The SimpleAdder\JavaServerDotNetClient directory contains a tutorial showing how to access a
 java RMI object using a .NET client.
 
@@ -38,6 +42,25 @@ The JavaServerDotNetClient Tutorial can be run using
 	cd net
 	runClient
 		
+The DotNetServerDotNetClient Tutorial can be run using
+	cd DotNetServerDotNetClient
+	cd server
+	startServer
+
+	cd ..
+	cd directClient
+	runClient
+
+or
+
+	cd ..
+	cd idlClient
+	runClient
+
+The DirectClient uses directly a common dll to retrieve the adder interfrace from.
+The IDLClient uses idl to generate the adder interface from.
+
+
 
 
 

@@ -1,0 +1,1 @@
+bin\NClient.exe localhost 8087 
