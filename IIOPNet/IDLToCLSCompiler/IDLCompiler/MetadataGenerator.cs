@@ -2045,7 +2045,7 @@ public class MetaDataGenerator : IDLParserVisitor {
         if (elemType == null) {
             throw new InvalidIdlException(
                 String.Format("sequence element type not defined for {0}",
-                              elemTypeNode.GetIdentification()));
+                              node.GetIdentification()));
         }
         elemType = ReplaceByCustomMappedIfNeeded(elemType);
         // use here the fusioned type as element type; potential unboxing of element type 
