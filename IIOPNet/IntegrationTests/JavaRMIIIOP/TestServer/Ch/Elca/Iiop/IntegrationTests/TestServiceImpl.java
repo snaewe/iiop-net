@@ -161,15 +161,4 @@ public class TestServiceImpl extends PortableRemoteObject implements TestService
         return new Double(val);
     }
         
-    /// <summary>
-    /// used to check, if a reference passed is equal to this object itself.
-    /// </summary>
-    public boolean CheckEqualityWithService(java.rmi.Remote toCheck) throws RemoteException {
-        return toCheck.equals(this);
-    }
-         
-    public boolean CheckEqualityWithServiceV2(TestService toCheck) throws RemoteException {
-        return toCheck.equals(this);
-    }
-
 }

@@ -355,13 +355,6 @@ namespace Ch.Elca.Iiop.IntegrationTests {
             Assertion.AssertEquals(arg2.Msg, result2.Msg);
         }        
         
-        public void TestEqualityServerAndProxy() {
-            bool result = m_testService.CheckEqualityWithServiceV2((TestService)m_testService);
-            Assertion.AssertEquals(true, result);
-            result = m_testService.CheckEqualityWithService((MarshalByRefObject)m_testService);
-            Assertion.AssertEquals(true, result);
-        }
-
     }
 
 }

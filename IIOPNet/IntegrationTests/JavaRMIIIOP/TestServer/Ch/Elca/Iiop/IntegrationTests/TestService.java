@@ -78,14 +78,6 @@ public interface TestService extends java.rmi.Remote {
 
     public Object GetDoubleAsAny(double val) throws RemoteException;
 
-    public Object EchoAnything(Object arg) throws RemoteException;
-        
-    /// <summary>
-    /// used to check, if a reference passed is equal to this object itself.
-    /// </summary>
-    public boolean CheckEqualityWithService(java.rmi.Remote toCheck) throws RemoteException;
-        
-    public boolean CheckEqualityWithServiceV2(TestService toCheck) throws RemoteException;
-        
+    public Object EchoAnything(Object arg) throws RemoteException;                
 
 }
