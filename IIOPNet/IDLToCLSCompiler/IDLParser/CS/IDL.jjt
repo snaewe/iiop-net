@@ -20,6 +20,7 @@ namespace parser {
 
 using symboltable;
 using System.Collections;
+using System.Globalization;
 
 public class IDLParser {
 
@@ -45,6 +46,33 @@ public class IDLParser {
 	private ASTmodule m_modForPrefix = null;
 	// stores reference to definition for the module node inserted for a pragma prefix (if any)
 	private ASTdefinition m_defForPrefix = null;
+
+
+        private Char ParseCharLiteral(String charLiteral) {
+            if (!charLiteral.StartsWith("\\")) {
+                return charLiteral[0];
+            } else if (charLiteral.StartsWith("\\0x")) {
+                Int32 charValHex = Int32.Parse(charLiteral.Substring(3), NumberStyles.AllowHexSpecifier);
+                return Convert.ToChar(charValHex);            
+            } else if (charLiteral.Equals("\\0")) {
+                return Convert.ToChar(0);
+            } else if (!charLiteral.StartsWith("\\0")) {
+                Int32 charValDec = Int32.Parse(charLiteral.Substring(1));
+                return Convert.ToChar(charValDec);
+            } else {
+                throw new NotSupportedException("unsupported escape in character literal: " + charLiteral);
+            }
+        }
+
+        private Char ParseWideCharLiteral(String wideCharLiteral) {
+            if (!wideCharLiteral.StartsWith("\\u")) {
+                return ParseCharLiteral(wideCharLiteral);
+            } else {
+                Int32 charVal = Int32.Parse(wideCharLiteral.Substring(2), NumberStyles.AllowHexSpecifier);
+                return Convert.ToChar(charVal);
+            }
+        }
+
 
 }
 
@@ -700,15 +728,15 @@ void literal() :
 (
   litVal = integer_literal() { jjtThis.setLitVal(new IntegerLiteral((Int64)litVal)); }
 |
-  litVal = string_literal() { jjtThis.setLitVal(new StringLiteral((String)litVal)); }
+  litVal = string_literal() { jjtThis.setLitVal(new StringLiteral((String)litVal, false)); }
 |
   LOOKAHEAD(2)
-  litVal = wide_string_literal() { jjtThis.setLitVal(new StringLiteral((String)litVal)); }
+  litVal = wide_string_literal() { jjtThis.setLitVal(new StringLiteral((String)litVal, true)); }
 |
-  litVal = character_literal() { jjtThis.setLitVal(new CharLiteral((Char)litVal)); }
+  litVal = character_literal() { jjtThis.setLitVal(new CharLiteral((Char)litVal, false)); }
 |
   LOOKAHEAD(2)
-  litVal = wide_character_literal() { jjtThis.setLitVal(new CharLiteral((Char)litVal)); }
+  litVal = wide_character_literal() { jjtThis.setLitVal(new CharLiteral((Char)litVal, true)); }
 |
   litVal = fixed_pt_literal() { throw new NotSupportedException("fixed point literal not yet supported"); }
 |
@@ -1415,14 +1443,9 @@ char character_literal() #void :
 { Token charToken; }
 {
   charToken = <CHARACTER> { 
-  								// TBD: not correct: escaped chars
-                                                                if (charToken.image.IndexOf("\\") >= 0) {
-                                                                    throw new NotSupportedException("\\ not yet supported in char literals");
-                                                                }
-                                                                // char token is of form: 'x'
-  								char val = charToken.image[1]; 
-  								return val;
-  						  }
+          // char is enclosed by ''
+          return ParseCharLiteral(charToken.image.Substring(1, charToken.image.Length - 2));
+  }
   								
 }
 
@@ -1430,14 +1453,9 @@ char wide_character_literal() #void :
 { Token charToken; }
 {
   charToken = <WIDECHARACTER> {
-                                                                // wide char is prepended by a L
-								// TBD: not correct: escaped chars
-                                                                if (charToken.image.IndexOf("\\") >= 0) {
-                                                                    throw new NotSupportedException("\\ not yet supported in char literals");
-                                                                }               
-  								 char val = charToken.image[2];
-  								 return val;
-  							  }
+          // wide char is prepended by a L and enclosed by ''
+          return ParseWideCharLiteral(charToken.image.Substring(2, charToken.image.Length - 3));
+  }
 }
 
 System.Double floating_pt_literal() #void :
@@ -1523,7 +1541,7 @@ TOKEN :
             |
              ("0x" | "0X") (["0"-"9","a"-"f","A"-"F"])+
             | 
-             "u" (["0"-"9","a"-"f","A"-"F"])+
+             "u" (["0"-"9","a"-"f","A"-"F"])+ 
            )
      )
    )
