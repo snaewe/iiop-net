@@ -1,0 +1,24 @@
+Prerequisites
+-------------
+
+For running this integration test, you need JUnit.
+
+Building the test
+-----------------
+
+- set JUNIT_HOME to your JUnit home directory, e.g. C:\Programme\JUnit
+- use nmake to build the testserver and the integration test.
+
+Running the test
+----------------
+
+- before starting the test, start the server:
+  change to directory TestServer\bin
+  launch start TestServer.exe
+- The test can be run using the JUnit GUI or the JUnit Console runner
+  Running the test with gui launcher:
+  - change to directory TestClient\
+  - launch testGui.bat
+  Running the test with console launcher:
+  - change to directory TestClient\
+  - launch testCommandLine.bat

@@ -1,0 +1,6 @@
+This integration test tests the mapping plugin mechanism for a .NET server and a java client.
+
+
+
+
+
