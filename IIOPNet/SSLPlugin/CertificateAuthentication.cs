@@ -177,7 +177,7 @@ namespace Ch.Elca.Iiop.Security.Ssl {
     /// <summary>
     /// loads a client side certificate from the windows keystore, checks server certificate against keystore
     /// </summary>
-    public class ClientAuthenticationLoadFromPersonalStore : DefaultClientAuthenticationImpl {
+    public class ClientMutualAuthenticationSpecificFromStore : DefaultClientAuthenticationImpl {
         
         /// <summary>
         /// store name for store containing personal certificates (including private keys)
@@ -237,6 +237,110 @@ namespace Ch.Elca.Iiop.Security.Ssl {
         public override Certificate GetClientCertificate(DistinguishedNameList acceptable) {
             return m_clientCertificate;
         }                
+        
+    }
+
+    
+    /// <summary>
+    /// loads a suitable client side certificate from the windows keystore, checks server certificate against keystore.
+    /// A suitable certificate is chosen using the list of known root certificate sent by the server.
+    /// </summary>
+    public class ClientMutualAuthenticationSuitableFromStore : DefaultClientAuthenticationImpl {
+        
+        /// <summary>
+        /// store name for store containing personal certificates (including private keys)
+        /// </summary>
+        private const string MY_STORE_NAME = "MY";                
+        
+        
+        /// <summary>
+        /// the location of the store, from which the client certificate should be choosen from
+        /// (one of CurrentService, CurrentUser, CurrentUserGroupPolicy, LocalMachine,
+        /// LocalMachineEnterprise, LocalMachineGroupPolicy, Services, Unknown, Users
+        /// The default is Unknown
+        /// </summary>
+        public const string STORE_LOCATION = "StoreLocationKey";                        
+        
+        private StoreLocation m_storeLocation = StoreLocation.Unknown;
+
+        /// <summary>
+        /// see <see cref="Ch.Elca.Iiop.Security.Ssl.IClientSideAuthentication.SetupClientOptions"/>
+        /// </summary>        
+        public override void SetupClientOptions(IDictionary options) {
+            base.SetupClientOptions(options);                        
+            
+            foreach (DictionaryEntry entry in options) {
+                switch ((string)entry.Key) {
+                    case STORE_LOCATION:
+                        if (!Enum.IsDefined(typeof(StoreLocation), (string)entry.Value)) {
+                            throw new ArgumentException("invalid store location: " + entry.Value);
+                        }
+                        m_storeLocation = (StoreLocation)Enum.Parse(typeof(StoreLocation), (string)entry.Value);
+                        break;
+                    default:
+                        // ignore
+                        break;
+                }
+            }            
+        }
+                        
+        /// <summary>
+        /// see <see cref="Ch.Elca.Iiop.Security.Ssl.IClientSideAuthentication.GetClientCertificate"/>
+        /// </summary>
+        public override Certificate GetClientCertificate(DistinguishedNameList acceptable) {            
+            CertificateStore store = new CertificateStore(m_storeLocation, MY_STORE_NAME);
+            Certificate toCheck = store.FindCertificate();
+            while(toCheck != null) {                
+                if ((toCheck.IsCurrent) && IsClientCertificate(toCheck)) {
+                    // check, if the root certificate in the chain is known by the server, if yes 
+                    // -> server will be able to verify the certificate chain
+                    Certificate[] chain = toCheck.GetCertificateChain().GetCertificates();                    
+                    if (chain.Length >= 1) {
+                        // last certificate in the chain is the root certificate
+                        if (IsDistinguishedNameInList(chain[chain.Length - 1].GetDistinguishedName(),
+                                                      acceptable)) {
+                            return toCheck;
+                        }
+                    }
+                }
+                toCheck = store.FindCertificate(toCheck);
+            }
+            return null;            
+        }    
+        
+        private bool IsClientCertificate(Certificate toCheck) {
+            string[] usages = Certificate.GetValidUsages(new Certificate[] { toCheck });
+            if (usages != null) {
+                foreach (string usage in usages) {
+                    // usage: client authentication
+                    if (usage.Equals("1.3.6.1.5.5.7.3.2")) {
+                        return true;
+                    }
+                }
+            }            
+            return false;
+        }
+        
+        private bool IsDistinguishedNameInList(DistinguishedName searchFor, DistinguishedNameList acceptable) {
+            foreach (DistinguishedName acceptableName in acceptable) {
+                if (IsNamePartOfOtherName(searchFor, acceptableName)) {
+                    return true;                   
+                }                
+            }
+            return false;
+        }
+        
+        /// <summary>
+        /// returns true, if all nameattributes of name are part fo otherName
+        /// </summary>
+        private bool IsNamePartOfOtherName(DistinguishedName name, DistinguishedName otherName) {
+            for (int i = 0; i < name.Count; i++) {
+                if (!otherName.Contains(name[i])) {
+                    return false;
+                }                
+            }
+            return true;
+        }
         
     }
 
