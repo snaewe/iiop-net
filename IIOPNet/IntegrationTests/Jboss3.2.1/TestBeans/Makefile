@@ -39,7 +39,7 @@ build-idl: $(IDL)
 
 
 deploy-bean:
-	copy bin\jboss3-2-1-integration_ejb.jar %JBOSS_HOME%\server\all\deploy
+	@copy bin\jboss3-2-1-integration_ejb.jar %JBOSS_HOME%\server\all\deploy\
 
 undeploy-bean:
 	@if exist %JBOSS_HOME%\server\all\deploy\jboss3-2-1-integration_ejb.jar del /q %JBOSS_HOME%\server\all\deploy\jboss3-2-1-integration_ejb.jar
