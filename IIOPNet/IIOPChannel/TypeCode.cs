@@ -76,7 +76,7 @@ namespace omg.org.CORBA {
         tk_value_box = 30,
         tk_native = 31,
         tk_abstract_interface = 32,
-        tk_local_interface = 33
+        tk_local_interface = 33        
     }
 
     
@@ -197,16 +197,9 @@ namespace omg.org.CORBA {
 
         #endregion IFields
         #region IConstructors
-
-
-        protected TypeCodeImpl(TCKind kind) {
+        
+        public TypeCodeImpl(TCKind kind) {
             m_kind = kind;
-        }
-
-        /// <summary>create a TypeCode-Impl from a CDRStream</summary>
-        public TypeCodeImpl(CdrInputStream cdrStream, TCKind kind) {
-            m_kind = kind;
-            ReadFromStream(cdrStream);
         }
 
         #endregion IConstructors
@@ -221,7 +214,11 @@ namespace omg.org.CORBA {
 
         /// <summary>reads the type-code content from the stream, without the TCKind at the beginning</summary>
         /// <remarks>helper which is used by the constructor with arg CdrInputStream</remarks>
-        protected virtual void ReadFromStream(CdrInputStream cdrStream) { }
+        internal virtual void ReadFromStream(CdrInputStream cdrStream) { }
+        
+        protected string ReadRepositoryId(CdrInputStreamImpl cdrStream) {
+            return cdrStream.ReadString();
+        }
 
         internal abstract Type GetClsForTypeCode();
         
@@ -328,9 +325,10 @@ namespace omg.org.CORBA {
 
         #endregion IFields
         #region IConstructors
-        
-        public InterfaceTC(CdrInputStream cdrStream, TCKind kind) : base(cdrStream, kind) {
-        }     
+               
+        /// <summary>constructor used during deserialisation; call ReadFromStream afterwards</summary>
+        internal InterfaceTC(TCKind kind) : base(kind) {
+        }
         
         public InterfaceTC(string repositoryId, string name, TCKind kind) : base(kind) {
             m_id = repositoryId;
@@ -349,9 +347,9 @@ namespace omg.org.CORBA {
             return m_name;
         }
 
-        protected override void ReadFromStream(CdrInputStream cdrStream) {
+        internal override void ReadFromStream(CdrInputStream cdrStream) {
             CdrEncapsulationInputStream encap = cdrStream.ReadEncapsulation();    
-            m_id = encap.ReadString();
+            m_id = ReadRepositoryId(encap);
             m_name = encap.ReadString();
         }
 
@@ -380,8 +378,11 @@ namespace omg.org.CORBA {
     internal class ObjRefTC : InterfaceTC {
         
         #region IConstructors
-
-        public ObjRefTC(CdrInputStream cdrStream) : base(cdrStream, TCKind.tk_objref) { }
+        
+        /// <summary>constructor used during deserialisation; call ReadFromStream afterwards</summary>
+        internal ObjRefTC() : base(TCKind.tk_objref) {
+        }     
+        
         public ObjRefTC(string repositoryID, string name) : base(repositoryID, name, TCKind.tk_objref) { }
 
         #endregion IConstructors
@@ -390,18 +391,24 @@ namespace omg.org.CORBA {
     internal class AbstractIfTC : InterfaceTC {
         
         #region IConstructors
-
-        public AbstractIfTC(CdrInputStream cdrStream) : base(cdrStream, TCKind.tk_abstract_interface) { }
-        public AbstractIfTC(string repositoryID, string name) : base(repositoryID, name, TCKind.tk_abstract_interface) { }
+       
+        /// <summary>constructor used during deserialisation; call ReadFromStream afterwards</summary>
+        internal AbstractIfTC() : base(TCKind.tk_abstract_interface) {
+        }     
+        
+        public AbstractIfTC(string repositoryID, string name) : base(repositoryID, name, TCKind.tk_abstract_interface) { }        
 
         #endregion IConstructors
     }
 
     internal class LocalIfTC : InterfaceTC {
         
-        #region IConstructors
-
-        public LocalIfTC(CdrInputStream cdrStream) : base(cdrStream, TCKind.tk_local_interface) { }
+        #region IConstructors        
+        
+        /// <summary>constructor used during deserialisation; call ReadFromStream afterwards</summary>
+        internal LocalIfTC() : base(TCKind.tk_local_interface) {
+        }     
+        
         public LocalIfTC(string repositoryID, string name) : base(repositoryID, name, TCKind.tk_local_interface) { }
 
         #endregion IConstructors
@@ -662,12 +669,15 @@ namespace omg.org.CORBA {
         
         #region IFields
 
-        private int m_length;
+        private int m_length = 0;
 
         #endregion IFields
         #region IConstructors
 
-        public StringTC(CdrInputStream cdrStream) : base(cdrStream, TCKind.tk_string) { }
+        /// <summary>constructor used during deserialisation; call ReadFromStream afterwards</summary>
+        internal StringTC() : base(TCKind.tk_string) {
+        }     
+
         public StringTC(int length) : base(TCKind.tk_string) {
             m_length = length;
         }
@@ -679,7 +689,7 @@ namespace omg.org.CORBA {
             return m_length;
         }
         
-        protected override void ReadFromStream(CdrInputStream cdrStream) {
+        internal override void ReadFromStream(CdrInputStream cdrStream) {
             m_length = (int)cdrStream.ReadULong();
         }
 
@@ -711,12 +721,15 @@ namespace omg.org.CORBA {
         
         #region IFields
         
-        private int m_length;
+        private int m_length = 0;
 
         #endregion IFields
         #region IConstructors
         
-        public WStringTC(CdrInputStream cdrStream) : base(cdrStream, TCKind.tk_wstring) { }
+        /// <summary>constructor used during deserialisation; call ReadFromStream afterwards</summary>
+        internal WStringTC() : base(TCKind.tk_wstring) {
+        }     
+        
         public WStringTC(int length) : base(TCKind.tk_wstring) {
             m_length = length;
         }
@@ -728,7 +741,7 @@ namespace omg.org.CORBA {
             return m_length;
         }
         
-        protected override void ReadFromStream(CdrInputStream cdrStream) {
+        internal override void ReadFromStream(CdrInputStream cdrStream) {
             m_length = (int)cdrStream.ReadULong();
         }
 
@@ -801,8 +814,9 @@ namespace omg.org.CORBA {
 
         #endregion IFields
         #region IConstructors
-        
-        public EnumTC(CdrInputStream cdrStream) : base(cdrStream, TCKind.tk_enum) {
+               
+        /// <summary>constructor used during deserialisation; call ReadFromStream afterwards</summary>
+        internal EnumTC() : base(TCKind.tk_enum) {
         }
 
         public EnumTC(string repositoryID, string name, string[] members) : base(TCKind.tk_enum) {
@@ -833,9 +847,9 @@ namespace omg.org.CORBA {
             return m_members[index];
         }
 
-        protected override void ReadFromStream(CdrInputStream cdrStream) {
+        internal override void ReadFromStream(CdrInputStream cdrStream) {
             CdrEncapsulationInputStream encap = cdrStream.ReadEncapsulation();    
-            m_id = encap.ReadString();
+            m_id = ReadRepositoryId(encap);
             m_name = encap.ReadString();
             uint length = encap.ReadULong();
             m_members = new string[length];
@@ -902,10 +916,10 @@ namespace omg.org.CORBA {
 
         #endregion IFields
         #region IConstructors
-        
-        
-        public ValueBoxTC(CdrInputStream cdrStream) : base(cdrStream, TCKind.tk_value_box) {
-        }
+                       
+        /// <summary>constructor used during deserialisation; call ReadFromStream afterwards</summary>
+        internal ValueBoxTC() : base(TCKind.tk_value_box) {
+        }     
 
         public ValueBoxTC(string repositoryID, string name, TypeCode boxed) : base(TCKind.tk_value_box) {
             m_id = repositoryID;
@@ -930,9 +944,9 @@ namespace omg.org.CORBA {
             return m_boxed;
         }
 
-        protected override void ReadFromStream(CdrInputStream cdrStream) {
+        internal override void ReadFromStream(CdrInputStream cdrStream) {
             CdrEncapsulationInputStream encap = cdrStream.ReadEncapsulation();    
-            m_id = encap.ReadString();
+            m_id = ReadRepositoryId(encap);
             m_name = encap.ReadString();
             TypeCodeSerializer ser = new TypeCodeSerializer();
             m_boxed = (TypeCode) ser.Deserialise(typeof(TypeCode), new AttributeExtCollection(new Attribute[0]), encap);
@@ -981,9 +995,11 @@ namespace omg.org.CORBA {
 
         #endregion IFields
         #region IConstructors
+        
+        /// <summary>constructor used during deserialisation; call ReadFromStream afterwards</summary>
+        internal SequenceTC() : base(TCKind.tk_sequence) {
+        }     
 
-        public SequenceTC(CdrInputStream cdrStream) : base(cdrStream, TCKind.tk_sequence) {
-        }
 
         public SequenceTC(TypeCode seqType, int length) : base(TCKind.tk_sequence) {
             m_seqType = seqType;    
@@ -1001,7 +1017,7 @@ namespace omg.org.CORBA {
             return m_seqType;
         }
 
-        protected override void ReadFromStream(CdrInputStream cdrStream) {
+        internal override void ReadFromStream(CdrInputStream cdrStream) {
             CdrEncapsulationInputStream encap = cdrStream.ReadEncapsulation();    
             TypeCodeSerializer ser = new TypeCodeSerializer();
             m_seqType = (TypeCode) ser.Deserialise(typeof(TypeCode), new AttributeExtCollection(new Attribute[0]), encap);
@@ -1055,9 +1071,10 @@ namespace omg.org.CORBA {
 
         #endregion IFields
         #region IConstructors
-        
-        public BaseStructTC(CdrInputStream cdrStream, TCKind kind) : base(cdrStream, kind) {
-        }
+               
+        /// <summary>constructor used during deserialisation; call ReadFromStream afterwards</summary>
+        internal BaseStructTC(TCKind kind) : base(kind) {
+        }     
 
         public BaseStructTC(string repositoryID, string name, StructMember[] members, TCKind kind) : base(kind) {
             m_id = repositoryID;
@@ -1090,9 +1107,9 @@ namespace omg.org.CORBA {
             return m_members[index].m_type;            
         }
 
-        protected override void ReadFromStream(CdrInputStream cdrStream) {
+        internal override void ReadFromStream(CdrInputStream cdrStream) {
             CdrEncapsulationInputStream encap = cdrStream.ReadEncapsulation();    
-            m_id = encap.ReadString();
+            m_id = ReadRepositoryId(encap);
             m_name = encap.ReadString();
             uint length = encap.ReadULong();
             m_members = new StructMember[length];
@@ -1138,8 +1155,11 @@ namespace omg.org.CORBA {
         
         #region IConstructors
         
-        public StructTC(CdrInputStream cdrStream) : base(cdrStream, TCKind.tk_struct) { }
-        public StructTC(string repositoryID, string name, StructMember[] members) : base(repositoryID, name, members, TCKind.tk_struct) { }
+        /// <summary>constructor used during deserialisation; call ReadFromStream afterwards</summary>
+        internal StructTC() : base(TCKind.tk_struct) {
+        }     
+
+        public StructTC(string repositoryID, string name, StructMember[] members) : base(repositoryID, name, members, TCKind.tk_struct) { }        
         
         #endregion IConstructors
 
@@ -1194,9 +1214,10 @@ namespace omg.org.CORBA {
 
         #endregion IFields
         #region IConstructors
-        
-        public UnionTC(CdrInputStream cdrStream) : base(cdrStream, TCKind.tk_union) {
-        }
+                
+        /// <summary>constructor used during deserialisation; call ReadFromStream afterwards</summary>
+        internal UnionTC() : base(TCKind.tk_union) {
+        }     
 
         public UnionTC(string repositoryID, string name, 
                        omg.org.CORBA.TypeCode discriminatorType, int defaultCase,
@@ -1245,9 +1266,9 @@ namespace omg.org.CORBA {
             return m_members[index].ElementType;
         }
 
-        protected override void ReadFromStream(CdrInputStream cdrStream) {
+        internal override void ReadFromStream(CdrInputStream cdrStream) {
             CdrEncapsulationInputStream encap = cdrStream.ReadEncapsulation();
-            m_id = encap.ReadString();
+            m_id = ReadRepositoryId(encap);
             m_name = encap.ReadString();
             Marshaller marshaller = Marshaller.GetSingleton();
             TypeCodeSerializer ser = new TypeCodeSerializer();
@@ -1381,8 +1402,11 @@ namespace omg.org.CORBA {
     internal class ExceptTC : BaseStructTC {
 
         #region IConstructors
-
-        public ExceptTC(CdrInputStream cdrStream) : base(cdrStream, TCKind.tk_except) { }
+        
+        /// <summary>constructor used during deserialisation; call ReadFromStream afterwards</summary>
+        internal ExceptTC() : base(TCKind.tk_except) {
+        }
+        
         public ExceptTC(string repositoryID, string name, StructMember[] members) : base(repositoryID, name, members, TCKind.tk_except) { }
 
         #endregion IConstrutors
@@ -1402,9 +1426,10 @@ namespace omg.org.CORBA {
 
         #endregion IFields
         #region IConstructors
-        
-        public ValueTypeTC(CdrInputStream cdrStream) : base(cdrStream, TCKind.tk_value) {
-        }
+               
+        /// <summary>constructor used during deserialisation; call ReadFromStream afterwards</summary>
+        internal ValueTypeTC() : base(TCKind.tk_value) {
+        }     
 
         public ValueTypeTC(string repositoryID, string name, ValueTypeMember[] members, TypeCode baseClass, short typeMod) : base(TCKind.tk_value) {
             m_id = repositoryID;
@@ -1450,9 +1475,9 @@ namespace omg.org.CORBA {
         }
 
 
-        protected override void ReadFromStream(CdrInputStream cdrStream) {
+        internal override void ReadFromStream(CdrInputStream cdrStream) {
             CdrEncapsulationInputStream encap = cdrStream.ReadEncapsulation();    
-            m_id = encap.ReadString();
+            m_id = ReadRepositoryId(encap);
             m_name = encap.ReadString();
             m_typeMod = encap.ReadShort();
             TypeCodeSerializer ser = new TypeCodeSerializer();
@@ -1539,82 +1564,132 @@ namespace Ch.Elca.Iiop.Marshalling {
         #region IMethods
 
         public override object Deserialise(System.Type formal, AttributeExtCollection attributes, CdrInputStream sourceStream) {
-            int kindVal = (int)sourceStream.ReadULong();
-            omg.org.CORBA.TCKind kind = (omg.org.CORBA.TCKind)Enum.ToObject(typeof(omg.org.CORBA.TCKind),
-                                                                            kindVal);
-            switch(kind) {
-                case omg.org.CORBA.TCKind.tk_abstract_interface :
-                    return new omg.org.CORBA.AbstractIfTC(sourceStream);
-                case omg.org.CORBA.TCKind.tk_alias:
-                    throw new NotImplementedException("alias not implemented");
-                case omg.org.CORBA.TCKind.tk_any:
-                    return new omg.org.CORBA.AnyTC();
-                case omg.org.CORBA.TCKind.tk_array:
-                    throw new NotImplementedException("array not implemented");
-                case omg.org.CORBA.TCKind.tk_boolean:
-                    return new omg.org.CORBA.BooleanTC();
-                case omg.org.CORBA.TCKind.tk_char:
-                    return new omg.org.CORBA.CharTC();
-                case omg.org.CORBA.TCKind.tk_double:
-                    return new omg.org.CORBA.DoubleTC();
-                case omg.org.CORBA.TCKind.tk_enum:
-                    return new omg.org.CORBA.EnumTC(sourceStream);
-                case omg.org.CORBA.TCKind.tk_except:
-                    return new omg.org.CORBA.ExceptTC(sourceStream);
-                case omg.org.CORBA.TCKind.tk_fixed:
-                    throw new NotImplementedException("fixed not implemented");
-                case omg.org.CORBA.TCKind.tk_float:
-                    return new omg.org.CORBA.FloatTC();
-                case omg.org.CORBA.TCKind.tk_local_interface :
-                    return new omg.org.CORBA.LocalIfTC(sourceStream);
-                case omg.org.CORBA.TCKind.tk_long:
-                    return new omg.org.CORBA.LongTC();
-                case omg.org.CORBA.TCKind.tk_longdouble:
-                    throw new NotImplementedException("long double not implemented");
-                case omg.org.CORBA.TCKind.tk_longlong:
-                    return new omg.org.CORBA.LongLongTC();
-                case omg.org.CORBA.TCKind.tk_native:
-                    throw new NotSupportedException("native not supported");
-                case omg.org.CORBA.TCKind.tk_null:
-                    return new omg.org.CORBA.NullTC();
-                case omg.org.CORBA.TCKind.tk_objref:
-                    return new omg.org.CORBA.ObjRefTC(sourceStream);
-                case omg.org.CORBA.TCKind.tk_octet:
-                    return new omg.org.CORBA.OctetTC();
-                case omg.org.CORBA.TCKind.tk_Principal:
-                    throw new NotImplementedException("Principal not implemented");
-                case omg.org.CORBA.TCKind.tk_sequence:
-                    return new omg.org.CORBA.SequenceTC(sourceStream);
-                case omg.org.CORBA.TCKind.tk_short:
-                    return new omg.org.CORBA.ShortTC();
-                case omg.org.CORBA.TCKind.tk_string:
-                    return new omg.org.CORBA.StringTC(sourceStream);
-                case omg.org.CORBA.TCKind.tk_struct:
-                    return new omg.org.CORBA.StructTC(sourceStream);
-                case omg.org.CORBA.TCKind.tk_TypeCode:
-                    return new omg.org.CORBA.TypeCodeTC();
-                case omg.org.CORBA.TCKind.tk_ulong:
-                    return new omg.org.CORBA.ULongTC();
-                case omg.org.CORBA.TCKind.tk_ulonglong:
-                    return new omg.org.CORBA.ULongLongTC();
-                case omg.org.CORBA.TCKind.tk_union:
-                    return new omg.org.CORBA.UnionTC(sourceStream);
-                case omg.org.CORBA.TCKind.tk_ushort:
-                    return new omg.org.CORBA.UShortTC();
-                case omg.org.CORBA.TCKind.tk_value:
-                    return new omg.org.CORBA.ValueTypeTC(sourceStream);
-                case omg.org.CORBA.TCKind.tk_value_box:
-                    return new omg.org.CORBA.ValueBoxTC(sourceStream);
-                case omg.org.CORBA.TCKind.tk_void:
-                    return new omg.org.CORBA.VoidTC();
-                case omg.org.CORBA.TCKind.tk_wchar:
-                    return new omg.org.CORBA.WCharTC();
-                case omg.org.CORBA.TCKind.tk_wstring:
-                    return new omg.org.CORBA.WStringTC(sourceStream);
-                default:
-                    // unknown typecode: kind
-                    throw new omg.org.CORBA.BAD_PARAM(1504, 
-                                                      omg.org.CORBA.CompletionStatus.Completed_MayBe);
+            // indirPos will contain the next aligned position in the base stream, after next read-op is performed
+            StreamPosition indirPos = new StreamPosition((CdrInputStreamImpl)sourceStream);
+            
+            uint kindVal = (uint)sourceStream.ReadULong();
+            if (kindVal != CdrStreamHelper.INDIRECTION_TAG) {
+            
+                omg.org.CORBA.TCKind kind = (omg.org.CORBA.TCKind)Enum.ToObject(typeof(omg.org.CORBA.TCKind),
+                                                                                (int)kindVal);
+                omg.org.CORBA.TypeCodeImpl result;
+                switch(kind) {
+                    case omg.org.CORBA.TCKind.tk_abstract_interface :
+                        result = new omg.org.CORBA.AbstractIfTC();
+                        break;
+                    case omg.org.CORBA.TCKind.tk_alias:
+                        throw new NotImplementedException("alias not implemented");
+                    case omg.org.CORBA.TCKind.tk_any:
+                        result = new omg.org.CORBA.AnyTC();
+                        break;
+                    case omg.org.CORBA.TCKind.tk_array:
+                        throw new NotImplementedException("array not implemented");
+                    case omg.org.CORBA.TCKind.tk_boolean:
+                        result = new omg.org.CORBA.BooleanTC();
+                        break;
+                    case omg.org.CORBA.TCKind.tk_char:
+                        result = new omg.org.CORBA.CharTC();
+                        break;
+                    case omg.org.CORBA.TCKind.tk_double:
+                        result = new omg.org.CORBA.DoubleTC();
+                        break;
+                    case omg.org.CORBA.TCKind.tk_enum:
+                        result = new omg.org.CORBA.EnumTC();
+                        break;
+                    case omg.org.CORBA.TCKind.tk_except:
+                        result = new omg.org.CORBA.ExceptTC();
+                        break;
+                    case omg.org.CORBA.TCKind.tk_fixed:
+                        throw new NotImplementedException("fixed not implemented");
+                    case omg.org.CORBA.TCKind.tk_float:
+                        result = new omg.org.CORBA.FloatTC();
+                        break;
+                    case omg.org.CORBA.TCKind.tk_local_interface :
+                        result = new omg.org.CORBA.LocalIfTC();
+                        break;
+                    case omg.org.CORBA.TCKind.tk_long:
+                        result = new omg.org.CORBA.LongTC();
+                        break;
+                    case omg.org.CORBA.TCKind.tk_longdouble:
+                        throw new NotImplementedException("long double not implemented");
+                    case omg.org.CORBA.TCKind.tk_longlong:
+                        result = new omg.org.CORBA.LongLongTC();
+                        break;
+                    case omg.org.CORBA.TCKind.tk_native:
+                        throw new NotSupportedException("native not supported");
+                    case omg.org.CORBA.TCKind.tk_null:
+                        result = new omg.org.CORBA.NullTC();
+                        break;
+                    case omg.org.CORBA.TCKind.tk_objref:
+                        result = new omg.org.CORBA.ObjRefTC();
+                        break;
+                    case omg.org.CORBA.TCKind.tk_octet:
+                        result = new omg.org.CORBA.OctetTC();
+                        break;
+                    case omg.org.CORBA.TCKind.tk_Principal:
+                        throw new NotImplementedException("Principal not implemented");
+                    case omg.org.CORBA.TCKind.tk_sequence:
+                        result = new omg.org.CORBA.SequenceTC();
+                        break;
+                    case omg.org.CORBA.TCKind.tk_short:
+                        result = new omg.org.CORBA.ShortTC();
+                        break;
+                    case omg.org.CORBA.TCKind.tk_string:
+                        result = new omg.org.CORBA.StringTC();
+                        break;
+                    case omg.org.CORBA.TCKind.tk_struct:
+                        result = new omg.org.CORBA.StructTC();
+                        break;
+                    case omg.org.CORBA.TCKind.tk_TypeCode:
+                        result = new omg.org.CORBA.TypeCodeTC();
+                        break;
+                    case omg.org.CORBA.TCKind.tk_ulong:
+                        result = new omg.org.CORBA.ULongTC();
+                        break;
+                    case omg.org.CORBA.TCKind.tk_ulonglong:
+                        result = new omg.org.CORBA.ULongLongTC();
+                        break;
+                    case omg.org.CORBA.TCKind.tk_union:
+                        result = new omg.org.CORBA.UnionTC();
+                        break;
+                    case omg.org.CORBA.TCKind.tk_ushort:
+                        result = new omg.org.CORBA.UShortTC();
+                        break;
+                    case omg.org.CORBA.TCKind.tk_value:
+                        result = new omg.org.CORBA.ValueTypeTC();
+                        break;
+                    case omg.org.CORBA.TCKind.tk_value_box:
+                        result = new omg.org.CORBA.ValueBoxTC();
+                        break;
+                    case omg.org.CORBA.TCKind.tk_void:
+                        result = new omg.org.CORBA.VoidTC();
+                        break;
+                    case omg.org.CORBA.TCKind.tk_wchar:
+                        result = new omg.org.CORBA.WCharTC();
+                        break;
+                    case omg.org.CORBA.TCKind.tk_wstring:
+                        result = new omg.org.CORBA.WStringTC();                                    
+                        break;
+                    default:
+                        // unknown typecode: kind
+                        throw new omg.org.CORBA.BAD_PARAM(1504, 
+                                                          omg.org.CORBA.CompletionStatus.Completed_MayBe);
+                }
+                // store indirection
+                IndirectionInfo indirInfo = new IndirectionInfo(indirPos.Position, 
+                                                                IndirectionType.TypeCode,
+                                                                IndirectionUsage.TypeCode);
+                sourceStream.StoreIndirection(indirInfo, result);
+                // read additional parts of typecode, if present
+                result.ReadFromStream(sourceStream);                                
+                return result;
+            } else {
+                // resolve indirection:
+                long indirectionOffset = sourceStream.ReadLong();
+                sourceStream.CheckIndirectionResolvable(indirectionOffset, IndirectionType.TypeCode,
+                                                        IndirectionUsage.TypeCode);
+                return sourceStream.GetObjectForIndir(indirectionOffset, IndirectionType.TypeCode,
+                                                      IndirectionUsage.TypeCode);
             }
         }
 
