@@ -49,7 +49,59 @@ namespace Ch.Elca.Iiop.IdlCompiler {
 /// the main compiler class
 /// </summary>
 public class IDLToCLS {
+    
+    #region Types
+    
+        private class CustomAssemblyResolver {
 
+            private IList m_candidateDirectories;
+
+            public CustomAssemblyResolver(IList candidateDirectories) {
+                m_candidateDirectories = candidateDirectories;
+            }
+
+            public Assembly AssemblyResolve(object sender, ResolveEventArgs args) {
+                Debug.WriteLine("custom resolve");
+                Debug.WriteLine("assembly: " + args.Name);
+                
+                Assembly found = LoadByRelativePath(args.Name + ".dll");
+                if (found != null) {
+                    return found;
+                }
+                found = LoadByRelativePath(args.Name + ".exe");
+                if (found != null) {
+                    return found;
+                }
+                found = LoadByRelativePath(args.Name + Path.PathSeparator + args.Name + ".dll");
+                if (found != null) {
+                    return found;
+                }
+                found = LoadByRelativePath(args.Name + Path.PathSeparator + args.Name + ".exe");
+                if (found != null) {
+                    return found;
+                }
+                // nothing found
+                Debug.WriteLine("assembly not found: " + args.Name);
+                return null;
+            }
+
+            private Assembly LoadByRelativePath(string asmFileName) {
+                Assembly result = null;
+                foreach (string candidateDir in m_candidateDirectories) {
+                    string candidate = Path.Combine(candidateDir, asmFileName);
+                    try {
+                        result = Assembly.LoadFrom(candidate);
+                    } catch (Exception) { }
+                    if (result != null) {
+                        break;
+                    }
+                }
+                return result;
+            }
+        }
+
+    
+    #endregion Types
     #region Constants    
     #endregion Constants
     #region IFields
@@ -129,6 +181,7 @@ public class IDLToCLS {
     
     private void ParseArgs(String[] args) {
         int i = 0;
+        ArrayList customMappingFiles = new ArrayList();
 
         while ((i < args.Length) && (args[i].StartsWith("-"))) {
             if (args[i].Equals("-h")) {
@@ -149,10 +202,12 @@ public class IDLToCLS {
                 }                
             } else if (args[i].Equals("-c")) {
                 i++;
-                System.IO.FileInfo configFile = new System.IO.FileInfo(args[i++]);
-                // add custom mappings from file
-                CompilerMappingPlugin plugin = CompilerMappingPlugin.GetSingleton();
-                plugin.AddMappingsFromFile(configFile);
+                FileInfo customMappingFile = new System.IO.FileInfo(args[i++]);
+                if (!customMappingFiles.Contains(customMappingFile)) {
+                    customMappingFiles.Add(customMappingFile);
+                } else {
+                    Error("tried to add a custom mapping file multiple times: " + customMappingFile.FullName);
+                }
             } else if (args[i].Equals("-d")) {
                 i++;
                 IDLPreprocessor.AddDefine(args[i++].Trim());
@@ -206,6 +261,37 @@ public class IDLToCLS {
         m_inputFileNames = new String[args.Length - i];
         Array.Copy(args, i, m_inputFileNames, 0, m_inputFileNames.Length);                
         
+        SetupAssemblyResolver();
+        AddCustomMappings(customMappingFiles);
+        
+    }
+    
+    /// <summary>setup assembly resolution: consider all directories of /r files 
+    /// and current directory as assembly containing directories</summary>
+    private void SetupAssemblyResolver() {
+        ArrayList searchDirectoryList = new ArrayList();
+        searchDirectoryList.Add(new DirectoryInfo(".").FullName);
+        foreach (Assembly refAsm in m_refAssemblies) {
+            string asmDir = new FileInfo(refAsm.Location).Directory.FullName;
+            if (!searchDirectoryList.Contains(asmDir)) {
+                searchDirectoryList.Add(asmDir);
+            }
+        }
+        
+        AppDomain curDomain = AppDomain.CurrentDomain;
+        curDomain.AppendPrivatePath(curDomain.BaseDirectory);
+        
+        CustomAssemblyResolver resolver = new CustomAssemblyResolver(searchDirectoryList);
+        ResolveEventHandler hndlr = new ResolveEventHandler(resolver.AssemblyResolve);
+        curDomain.AssemblyResolve += hndlr;
+    }
+    
+    private void AddCustomMappings(IList /*<FileInfo>*/ mappingFiles) {    
+        // add custom mappings from files
+        CompilerMappingPlugin plugin = CompilerMappingPlugin.GetSingleton();
+        foreach (FileInfo mappingFile in mappingFiles) {            
+            plugin.AddMappingsFromFile(mappingFile);
+        }
     }
     
     private MemoryStream Preprocess(String fileName) {
