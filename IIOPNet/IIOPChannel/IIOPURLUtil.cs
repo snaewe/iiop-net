@@ -29,6 +29,7 @@
 
 
 using System;
+using System.Text;
 using omg.org.CORBA;
 using Ch.Elca.Iiop.CorbaObjRef;
 
@@ -55,6 +56,7 @@ namespace Ch.Elca.Iiop.Util {
         #region SFields
 
         private static byte[] s_nonStringifyTag = new byte[] { 44, 115, 116, 114, 61, 102 };
+        private static UnicodeEncoding s_cachedEncoder = new UnicodeEncoding(true, false);
 
         #endregion SFields
         #region IConstructors
@@ -188,9 +190,9 @@ namespace Ch.Elca.Iiop.Util {
                     (objectId.LastIndexOf("/") + 1 < objectId.Length)) {
                     objectId = objectId.Substring(objectId.LastIndexOf("/") + 1);
                 }
-                return IorStringifyUtil.Destringify(objectId);
+                return StringConversions.Destringify(objectId);
             } else {
-                byte[] result = StringUtil.GetByteArrRepForString(objectId);
+                byte[] result = s_cachedEncoder.GetBytes(objectId);
                 return AppendNonStringifyTag(result); // append a tag to indicate that this object key should not be stringified
             }
         }
@@ -237,13 +239,10 @@ namespace Ch.Elca.Iiop.Util {
             if (CheckNonStringifyTag(objectKey)) {
                 // an URI pointing to a native .NET remoting framework object, therefore the .NET URI must be
                 // reproduced from which this objectKey was created
-                byte[] objectId = new byte[objectKey.Length-6];
-                Array.Copy((Array)objectKey, 0, (Array)objectId, 0, 
-                           objectId.Length);
-                return StringUtil.GetStringFromWideChar(objectId);
+                return s_cachedEncoder.GetString(objectKey, 0, objectKey.Length-6);
             } else {
                 // stringify it
-                string result = IorStringifyUtil.Stringify(objectKey);
+                string result = StringConversions.Stringify(objectKey);
                 if (giopVersion != null) {
                     result += "," + GIOP_ID + "=" + ((GiopVersion)giopVersion).Major + "." +
                               ((GiopVersion)giopVersion).Minor;

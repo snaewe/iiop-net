@@ -86,22 +86,16 @@ namespace Ch.Elca.Iiop.CorbaObjRef {
         /// </summary>
         public Ior(string iorAsString) {
             // iorAsString contains only characters 0-9, A-F and IOR --> all of this are short characters
-            byte[] data;
-            if (iorAsString == null) {
-                data = new byte[0];
+            if (iorAsString.StartsWith("IOR:")) {
+                string tmp = iorAsString.Substring(4);
+                MemoryStream memStream = new MemoryStream(StringConversions.Destringify(tmp));
+                CdrInputStreamImpl cdrStream = new CdrInputStreamImpl(memStream);
+                byte flags = cdrStream.ReadOctet();
+                cdrStream.ConfigStream(flags, new GiopVersion(1,2)); // giop dep operation are not used for IORs
+                ParseIOR(cdrStream);
             } else {
-                ASCIIEncoding ae = new ASCIIEncoding();
-                data = ae.GetBytes(iorAsString);
+                throw new INV_OBJREF(9420, CompletionStatus.Completed_No);
             }
-            MemoryStream memStream = new MemoryStream(data);
-            IorStream iorStream = new IorStream(memStream);
-
-            ParseIOR(iorStream);
-        }
-
-        /// <summary>creates an IOR from an IORStream</summary>
-        public Ior(IorStream iorStream) {
-            ParseIOR(iorStream);
         }
 
         /// <summary>
@@ -213,14 +207,6 @@ namespace Ch.Elca.Iiop.CorbaObjRef {
             return (m_typId.Equals("") && (m_profiles.Length == 0));
         }
 
-        /// <summary>get the IOR data out of a stream containing a stringified IOR.</summary>
-        private void ParseIOR(IorStream iorStream) {
-            CdrInputStreamImpl cdrStream = new CdrInputStreamImpl(iorStream);
-            byte flags = cdrStream.ReadOctet();
-            cdrStream.ConfigStream(flags, new GiopVersion(1,2)); // giop dep operation are not used for IORs
-            ParseIOR(cdrStream);
-        }
-
         private void ParseIOR(CdrInputStream cdrStream) {
             m_typId = cdrStream.ReadString();
             ulong nrOfProfiles = cdrStream.ReadULong();
@@ -259,13 +245,11 @@ namespace Ch.Elca.Iiop.CorbaObjRef {
             CdrOutputStream stream = new CdrOutputStreamImpl(content, flags);
             stream.WriteOctet(flags); // writing the flags before the IOR
             WriteToStream(stream);
+
             // write content to the IORStream
-            MemoryStream encodedStream = new MemoryStream();
-            IorStream iorStream = new IorStream(encodedStream);
-            byte[] data = content.ToArray();
-            iorStream.Write(data, 0, data.Length);
-            // now create a string from the IOR-Data, IORData consist of short characters
-            string result = StringUtil.GetStringFromShortChar(encodedStream.ToArray());
+            content.Close();
+            string result = "IOR:" + StringConversions.Stringify(content.GetBuffer());
+
             return result;
         }
 

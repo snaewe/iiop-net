@@ -29,81 +29,58 @@
 
 
 using System;
+using System.Text;
 
 namespace Ch.Elca.Iiop.Util {
 
-     
+
     /// <summary>
-    /// Provides some string to byte[] and byte[] to string conversion methods
+    /// Summary description for Conversions.
     /// </summary>
-    // used by UrlUtil, Ior
-    public class StringUtil {
+    public class StringConversions {
 
-        #region IConstructors
+        #region SFields
 
-        private StringUtil() {
-        }
+        private static Char[] s_hexMap = new Char[]{'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F'};
 
-        #endregion IConstructors
+        #endregion SFields
         #region SMethods
 
         /// <summary>
-        /// creates a byte arr representation for a string, without loosing information:
-        /// one char is encoded as two bytes
+        /// Convert a byte array to its literal string representation
+        /// ByteArrayToHexString({12,34,5A,BC}) => "12345ABC"
         /// </summary>
-        /// <param name="data"></param>
-        /// <returns></returns>
-        public static byte[] GetByteArrRepForString(string data) {
-            if (data == null) { 
-                return new byte[0]; 
+        /// <param name="array">the array to be converted</param>
+        /// <returns>the result</returns>
+        public static String Stringify(byte[] array) {
+            Char[] res = new Char[array.Length*2];
+
+            for (int i = 0; i < array.Length; i++) {
+                int val = array[i];
+                res[i*2] = s_hexMap[val >> 4];
+                res[i*2+1] = s_hexMap[val % 16];
             }
-            byte[] result = new byte[data.Length * 2];
-            for (int i = 0; i < data.Length; i++) {
-                result[2*i] = (byte)((data[i] & 0xFF00) >> 8);
-                result[2*i+1] = (byte)(data[i] & 0x00FF);
-            }
-            return result;
+            return new String(res);
         }
 
         /// <summary>
-        /// creates a string from an array of short characters
+        /// Convert a string containing a byte array in literal form to a byte array
         /// </summary>
-        /// <param name="data"></param>
+        /// <param name="s">String to be parsed</param>
         /// <returns></returns>
-        public static string GetStringFromShortChar(byte[] data) {
-            if (data == null) { 
-                return ""; 
+        public static byte[] Destringify(String s) {
+            if (s.Length % 2 == 1) {
+                throw new ArgumentException("String length must be even");
             }
-            
-            string result = "";
-            for (int i = 0; i < data.Length; i++) {
-                result += (char)data[i];
-            }            
-            return result;
+            byte[] res = new byte[s.Length >> 1];
+
+            for (int i = 0; i < res.Length; i++) {
+                String sub = s.Substring(i*2, 2);
+                res[i] = byte.Parse(sub, System.Globalization.NumberStyles.HexNumber);
+            }
+            return res;
         }
 
-        /// <summary>
-        /// creates a string from a byte array containing 2 byte characters
-        /// </summary>
-        /// <param name="data"></param>
-        /// <returns></returns>
-        public static string GetStringFromWideChar(byte[] data) {
-            if (data == null) { 
-            	return ""; 
-            }
-            if ((data.Length % 2) != 0) { 
-                throw new ArgumentException("data length must contain 2 byte characters"); 
-            }
-            string result = "";
-            for (int i = 0; i < (data.Length / 2); i++) {
-                char resChar = (char)((data[2*i] << 8) | (data[2*i + 1]));
-                result += resChar;
-            }
-            return result;
-        }
-        
         #endregion SMethods
-
-    }
-    
+    }    
 }
