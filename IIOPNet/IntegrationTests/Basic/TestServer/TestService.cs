@@ -30,6 +30,24 @@ using System;
 using Ch.Elca.Iiop.Idl;
 using omg.org.CORBA;
 
+namespace CCE {
+
+    public interface Assembly {
+    }
+
+    [SupportedInterface(typeof(Assembly))]
+    public class AssemblyImpl : MarshalByRefObject, Assembly {
+    }
+
+    public interface _Assembly {
+    }
+
+    [SupportedInterface(typeof(_Assembly))]
+    public class _AssemblyImpl : MarshalByRefObject, _Assembly {
+    }
+
+}
+
 namespace Ch.Elca.Iiop.IntegrationTests {
 
     public enum TestEnum {
@@ -566,6 +584,14 @@ namespace Ch.Elca.Iiop.IntegrationTests {
                }
                arg = result;
             }
+        }
+
+        public CCE.Assembly CreateAsm() {
+            return new CCE.AssemblyImpl();
+        }
+
+        public CCE._Assembly Create_Asm() {
+            return new CCE._AssemblyImpl();
         }
         
         public override object InitializeLifetimeService() {
