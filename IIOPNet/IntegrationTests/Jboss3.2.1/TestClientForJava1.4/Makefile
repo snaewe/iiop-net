@@ -28,6 +28,10 @@ compile-idl:
 	..\..\..\..\IDLToCLSCompiler\IDLCompiler\bin\IDLToCLSCompiler.exe -o ..\bin client $(BEANPATH)Test.idl $(BEANPATH)TestHome.idl $(BEANPATH)IntAdder.idl $(BEANPATH)IntAdderHome.idl
 	cd ..
 
+start-client:
+        @echo "JBoss IntegrationTest"
+        %NUNITV2_HOME%\bin\nunit-console.exe /assembly:bin\ClientTest.dll
+
 clean:
 	if exist IDL del /s /q IDL
 	if exist bin del /s /q bin

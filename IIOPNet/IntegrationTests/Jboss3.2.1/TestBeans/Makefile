@@ -3,6 +3,9 @@ BIN=bin\
 IDL=IDL\ 
 TestPackage=ch.elca.iiop.integrationTests.
 JBOSS_CLP=%JBOSS_HOME%\server\all\lib\jboss-j2ee.jar;.
+LAUNCH = ..\..\Utils\launch.exe
+DELAY = ..\..\Utils\delay.exe
+KILL = ..\..\Utils\kill.exe
 
 
 build: copy-meta-data build-classes build-jar build-idl
@@ -33,6 +36,26 @@ build-idl: $(IDL)
         rmic -idl -classpath %JBOSS_HOME%\server\all\lib\jboss-j2ee.jar;. -d ..\$(IDL) $(TestPackage)IntAdderHome
         rmic -idl -classpath %JBOSS_HOME%\server\all\lib\jboss-j2ee.jar;. -d ..\$(IDL) $(TestPackage)IntAdder 
         cd ..
+
+
+deploy-bean:
+	copy bin\jboss3-2-1-integration_ejb.jar %JBOSS_HOME%\server\all\deploy
+
+undeploy-bean:
+	@if exist %JBOSS_HOME%\server\all\deploy\jboss3-2-1-integration_ejb.jar del /q %JBOSS_HOME%\server\all\deploy\jboss3-2-1-integration_ejb.jar
+
+start-server: deploy-bean
+        @echo Starting JBoss in configuration all
+        @$(LAUNCH) -d $(JBOSS_HOME)\bin run.bat -c All >> pid
+
+stop-server: stop undeploy-bean
+
+stop:
+	@echo stopping JBoss
+        @$(LAUNCH) -d $(JBOSS_HOME)\bin shutdown.bat -S >> pid
+        @$(DELAY) 30
+	@for /F %%p in (pid) do @$(KILL) %%p
+
 
 clean:
         if exist bin del /s /q bin
