@@ -948,6 +948,24 @@ namespace Ch.Elca.Iiop.Tests {
                                    recreated2.ToLower());                        
         }
         
+        public void TestWithSslComponent() {
+            string iorString = "IOR:000000000000003749444C3A43682F456C63612F49696F702F5475746F7269616C2F47657474696E67537461727465642F4164646572496D706C3A312E30000000000001000000000000005C000102000000000D3139322E3136382E312E33370000000000000005616464657200000000000002000000010000001C0000000000010001000000010001002000010109000000010001010000000014000000080000006000601F97";
+            Ior ior = new Ior(iorString);
+            Assertion.AssertEquals("wrong hostname", "192.168.1.37", ior.HostName); 
+            Assertion.AssertEquals("wrong major", 1, ior.Version.Major);
+            Assertion.AssertEquals("wrong minor", 2, ior.Version.Minor);
+            Assertion.AssertEquals("wrong number of profiles", 1, ior.Profiles.Length);
+            Assertion.AssertEquals("wrong number of components in profile", 2, ior.Profiles[0].TaggedComponents.Count);
+            bool sslComponentFound = false;
+            foreach (ITaggedComponent comp in ior.Profiles[0].TaggedComponents) {
+                if (comp.Id == TaggedComponentIds.TAG_SSL_SEC_TRANS) {
+                    sslComponentFound = true;
+                    break;
+                }
+            }
+            Assertion.Assert("no ssl tagged component found", sslComponentFound);
+        }
+        
     }
 
 }

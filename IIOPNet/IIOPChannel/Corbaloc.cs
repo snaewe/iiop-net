@@ -29,8 +29,10 @@
 
 
 using System;
+using System.Collections;
 using omg.org.CORBA;
 using Ch.Elca.Iiop.Util;
+using Ch.Elca.Iiop.Security.Ssl;
 
 namespace Ch.Elca.Iiop.CorbaObjRef {
 
@@ -112,30 +114,34 @@ namespace Ch.Elca.Iiop.CorbaObjRef {
             // at least one!
             m_objAddrs = new CorbaLocObjAddr[parts.Length];
 	    	for (int i = 0; i < parts.Length; i++) {
-	    		if (parts[i].StartsWith(":") || parts[i].StartsWith("iiop:")) {
+	    	    if (CorbaLocIiopAddr.IsResponsibleForProtocol(parts[i])) {
 	    			m_objAddrs[i] = new CorbaLocIiopAddr(parts[i]);
-	    		} else if (parts[i].StartsWith("rir:")) {
-	    			ParseRirAddr(parts[i]);
+	    		} else if (CorbaLocIiopSslAddr.IsResponsibleForProtocol(parts[i])) {
+	    		    m_objAddrs[i] = new CorbaLocIiopSslAddr(parts[i]);
 	    		} else {
 	    			throw new BAD_PARAM(8, CompletionStatus.Completed_No);
 	    		}
 	    	}	    	
 	    }
-	    	    
-	    /// <summary>parse rir protocol addr</summary>
-	    private void ParseRirAddr(string rirAddr) {
-	    	// not supported yet
-	    	throw new BAD_PARAM(11, CompletionStatus.Completed_No);
+
+	    public IorProfile[] GetProfiles() {
+	        ArrayList resultList = new ArrayList();
+	        foreach (CorbaLocObjAddr addr in m_objAddrs) {
+	            resultList.AddRange(addr.GetProfilesForAddr(GetKeyAsByteArray()));        
+	        }
+	        IorProfile[] result = (IorProfile[])resultList.ToArray(ReflectionHelper.IorProfileType);
+            if (result.Length == 0) {
+                throw new INV_OBJREF(8421, CompletionStatus.Completed_MayBe);
+            }
+            return result;
 	    }
 	    
-	    /// <summary>gets the first iiop-addr from obj-addrs or null if not present</summary>
-	    public CorbaLocIiopAddr GetIiopAddr() {
-	    	foreach (CorbaLocObjAddr addr in m_objAddrs) {
-	    		if (addr is CorbaLocIiopAddr) {
-	    			return (CorbaLocIiopAddr)addr;
-	    		}
-	    	}
-	    	return null;
+	    public Uri ParseUrl(out string objectUri, out GiopVersion version) {
+            if (m_objAddrs.Length == 0) {
+                throw new INTERNAL(8540, CompletionStatus.Completed_MayBe);
+            }
+	        objectUri = ObjectUri;
+	        return m_objAddrs[0].ParseUrl(objectUri, out version);
 	    }
 	    
 	    private void CalculateKeyBytesFromKeyString() {
@@ -154,12 +160,23 @@ namespace Ch.Elca.Iiop.CorbaObjRef {
 	}
 	
 	/// <summary>marker interface to mark a corbaloc obj addr</summary>
-	internal interface CorbaLocObjAddr {		
-	}
-	
-	/// <summary>represents an iiop obj_addr in a corbaloc</summary>
-	internal class CorbaLocIiopAddr : CorbaLocObjAddr {
-		
+	internal interface CorbaLocObjAddr {
+        /// <summary>
+        /// converts the address to IorProfiles
+        /// </summary>
+        IorProfile[] GetProfilesForAddr(byte[] objectKey);
+        
+        /// <summary>
+        /// parses the address into a .NET usable form
+        /// </summary>
+        Uri ParseUrl(string objectUri, out GiopVersion version);
+    }
+    
+    /// <summary>
+    /// base class for iiop-addresses
+    /// </summary>
+    internal abstract class CorbaLocIiopAddrBase : CorbaLocObjAddr {
+
 		#region IFields
 		
 		private GiopVersion m_version;
@@ -171,26 +188,26 @@ namespace Ch.Elca.Iiop.CorbaObjRef {
 		#endregion IFields
 		#region IConstructors
 		
-		public CorbaLocIiopAddr(string addr) {
-			ParseIiopAddr(addr);	
+		public CorbaLocIiopAddrBase(string addr) {
+			ParseIiopAddr(addr);
 		}
 		
 		#endregion IConstructors
 		#region IProperties
 		
-		public GiopVersion Version {
+		internal GiopVersion Version {
 			get {
 				return m_version;
 			}
 		}
 		
-		public string Host {
+		internal string Host {
 			get {
 				return m_host;
 			}
 		}
 		
-		public int Port {
+		internal int Port {
 			get {
 				return m_port;
 			}
@@ -199,15 +216,15 @@ namespace Ch.Elca.Iiop.CorbaObjRef {
 		#endregion IProperties
 		#region IMethods
 		
+		/// <summary>
+		/// returns the length of the protocol prefix, e.g. 5 for iiop:
+		/// </summary>
+		protected abstract int ProtocolPrefixLength(string addr);
+		
 		/// <summary>parses an iiop-addr string</summary>
 		private void ParseIiopAddr(string iiopAddr) {
-	    	string specificPart;
-	    	if (iiopAddr.StartsWith(":")) {
-	    		specificPart = iiopAddr.Substring(1);
-	    	} else {
-	    		// cut off iiop
-	    		specificPart = iiopAddr.Substring(5);
-	    	}
+	    	// cut off protocol part
+	    	string specificPart = iiopAddr.Substring(ProtocolPrefixLength(iiopAddr));
 	    	// version part
 	    	if (specificPart.IndexOf("@") >= 0) {
 	    		// version spec
@@ -244,10 +261,112 @@ namespace Ch.Elca.Iiop.CorbaObjRef {
 	    	
 	    }
 	    
+	    public abstract IorProfile[] GetProfilesForAddr(byte[] objectKey);
+	    
+	    public abstract Uri ParseUrl(string objectUri, out GiopVersion version);
+
+	    
 	    #endregion IMethods
 
-		
-	}		
+	}
+	
+    /// <summary>represents an iiop obj_addr in a corbaloc</summary>
+    internal class CorbaLocIiopAddr : CorbaLocIiopAddrBase {
+        
+        #region IConstructors
+
+        public CorbaLocIiopAddr(string addr) : base(addr) {
+        }
+        
+        #endregion IConstructors
+        #region IMethods
+    
+        protected override int ProtocolPrefixLength(string addr) {
+            if (addr.StartsWith(":")) {
+                return 1;
+            } else {
+                // cut off iiop:
+                return 5;
+            }
+        }
+
+        public override IorProfile[] GetProfilesForAddr(byte[] objectKey) {	        
+            InternetIiopProfile result = new InternetIiopProfile(Version, Host, (short)Port, objectKey);
+            return new IorProfile[] { result };
+        }
+
+        public override Uri ParseUrl(string objectUri, out GiopVersion version) {
+            version = Version;
+            return new Uri("iiop" +
+                           version.Major + "." + version.Minor + 
+                           Uri.SchemeDelimiter + Host + ":" + Port);
+        }
+    
+        #endregion IMethods
+        #region SMethods
+
+        /// <summary>
+        /// returns true, if this class can handle the specified protocol in the address
+        /// </summary>	    	    
+        public static bool IsResponsibleForProtocol(string addrString) {
+            return (addrString.StartsWith(":") || addrString.StartsWith("iiop:"));
+        }
+
+        #endregion SMethods
+
+
+    }
+
+
+    /// <summary>represents an iiop ssl obj_addr in a corbaloc</summary>
+    internal class CorbaLocIiopSslAddr : CorbaLocIiopAddrBase {
+
+        #region IConstructors
+
+        public CorbaLocIiopSslAddr(string addr) : base(addr) {
+        }
+
+        #endregion IConstructors
+        #region IMethods
+    
+        protected override int ProtocolPrefixLength(string addr) {
+            // cut off iiop-ssl:
+            return 9;
+        }
+        
+        public override IorProfile[] GetProfilesForAddr(byte[] objectKey) {
+            InternetIiopProfile result = new InternetIiopProfile(Version, Host, 0, objectKey);
+            result.AddTaggedComponents(new ITaggedComponent[] { new TaggedComponent(TaggedComponentIds.TAG_SSL_SEC_TRANS,
+                                                                                    new SSLComponentData(SecurityAssociationOptions.EstablishTrustInClient,
+                                                                                                         SecurityAssociationOptions.EstablishTrustInTarget,
+                                                                                                         (short)Port)) });
+            return new IorProfile[] { result };
+        }        
+    
+        public override Uri ParseUrl(string objectUri, out GiopVersion version) {
+            version = Version;
+            return new Uri("iiop-ssl" +
+                           version.Major + "." + version.Minor + 
+                           Uri.SchemeDelimiter + Host + ":" + Port);
+    
+        }
+
+        #endregion IMethods    
+        #region SMethods
+
+        /// <summary>
+        /// returns true, if this class can handle the specified protocol in the address
+        /// </summary>
+        public static bool IsResponsibleForProtocol(string addrString) {
+            return addrString.StartsWith("iiop-ssl:");
+        }
+
+        #endregion SMethods
+
+
+
+    }
+
 
 }
 
@@ -316,7 +435,7 @@ namespace Ch.Elca.Iiop.Tests {
         	Assertion.AssertEquals("test", parsed.KeyString);
         	Assertion.AssertEquals(1, parsed.ObjAddrs.Length);
         	Assertion.AssertEquals(typeof(CorbaLocIiopAddr), parsed.ObjAddrs[0].GetType());
-        	CorbaLocIiopAddr addr = (CorbaLocIiopAddr)(parsed.ObjAddrs[0]);
+        	CorbaLocIiopAddrBase addr = (CorbaLocIiopAddr)(parsed.ObjAddrs[0]);
         	Assertion.AssertEquals(1, addr.Version.Major);
         	Assertion.AssertEquals(0, addr.Version.Minor);
         	Assertion.AssertEquals("localhost", addr.Host);
@@ -354,6 +473,18 @@ namespace Ch.Elca.Iiop.Tests {
         	Assertion.AssertEquals(0, addr.Version.Minor);
         	Assertion.AssertEquals("elca.ch", addr.Host);
         	Assertion.AssertEquals(1234, addr.Port);
+            
+        	testCorbaLoc = "corbaloc:iiop-ssl:elca.ch:1234/test";
+        	parsed = new Corbaloc(testCorbaLoc);
+        	Assertion.AssertEquals("test", parsed.KeyString);
+        	Assertion.AssertEquals(1, parsed.ObjAddrs.Length);
+        	Assertion.AssertEquals(typeof(CorbaLocIiopSslAddr), parsed.ObjAddrs[0].GetType());
+        	addr = (CorbaLocIiopSslAddr)(parsed.ObjAddrs[0]);
+        	Assertion.AssertEquals(1, addr.Version.Major);
+        	Assertion.AssertEquals(0, addr.Version.Minor);
+        	Assertion.AssertEquals("elca.ch", addr.Host);
+        	Assertion.AssertEquals(1234, addr.Port);
+            
         }
         
     }

@@ -45,6 +45,7 @@ namespace Ch.Elca.Iiop.Util {
         private static Type s_corbaTypeCodeType = typeof(omg.org.CORBA.TypeCode);
         private static Type s_boxedValueBaseType = typeof(BoxedValueBase);
         private static Type s_iobjectType = typeof(omg.org.CORBA.IObject);
+        private static Type s_IorProfileType = typeof(Ch.Elca.Iiop.CorbaObjRef.IorProfile);
         
         private static Type s_idlEnumAttributeType = typeof(IdlEnumAttribute);
         private static Type s_implClassAttributeType = typeof(ImplClassAttribute);
@@ -111,6 +112,13 @@ namespace Ch.Elca.Iiop.Util {
         public static Type IObjectType {
             get {
                 return s_iobjectType;
+            }
+        }
+        
+        /// <summary>caches typeof(Ch.Elca.Iiop.CorbaObjRef.IorProfile)</summary>
+        public static Type IorProfileType {
+            get {
+                return s_IorProfileType;
             }
         }
 

@@ -80,27 +80,16 @@ namespace Ch.Elca.Iiop.Util {
         public static Ior CreateIorForUrl(string url, string repositoryId) {
             Ior ior = null;
             if (url.StartsWith("IOR")) {
-                ior = new Ior(url);                    
+                ior = new Ior(url);
             } else if (url.StartsWith("iiop")) {
                 // iiop1.0, iiop1.1, iiop1.2 (=iiop); extract version in protocol tag
-
                 IiopLoc iiopLoc = new IiopLoc(url);                                
                 // now create an IOR with the above information
-                InternetIiopProfile profile = new InternetIiopProfile(iiopLoc.Version, 
-                                                                      iiopLoc.ChannelUri.Host,                                                                      
-                                                                      (short)iiopLoc.ChannelUri.Port, 
-                                                                      iiopLoc.GetKeyAsByteArray());
-                ior = new Ior(repositoryId, new IorProfile[] { profile });
+                ior = new Ior(repositoryId, iiopLoc.GetProfiles());
             } else if (url.StartsWith("corbaloc")) {
                 Corbaloc loc = new Corbaloc(url);
-                CorbaLocIiopAddr addr = loc.GetIiopAddr();
-                if (addr == null) {
-                    throw new INV_OBJREF(8421, CompletionStatus.Completed_MayBe);
-                }
-                byte[] objectKey = loc.GetKeyAsByteArray();
-                InternetIiopProfile profile = new InternetIiopProfile(addr.Version, addr.Host,
-                                                                      (short)addr.Port, objectKey);                
-                ior = new Ior(repositoryId, new IorProfile[] { profile });
+                IorProfile[] profiles = loc.GetProfiles();
+                ior = new Ior(repositoryId, profiles);
             } else {
                 throw new INV_OBJREF(1963, CompletionStatus.Completed_MayBe);
             }
@@ -119,9 +108,7 @@ namespace Ch.Elca.Iiop.Util {
             Uri uri = null;
             if (url.StartsWith("iiop")) {
                 IiopLoc iiopLoc = new IiopLoc(url);
-                uri = iiopLoc.ChannelUri;
-                objectUri = iiopLoc.ObjectUri;
-                version = iiopLoc.Version;
+                uri = iiopLoc.ParseUrl(out objectUri, out version);
             } else if (url.StartsWith("IOR")) {
                 Ior ior = new Ior(url);
                 uri = new Uri("iiop" + ior.Version.Major + "." + ior.Version.Minor + 
@@ -130,16 +117,7 @@ namespace Ch.Elca.Iiop.Util {
                 version = ior.Version;
             } else if (url.StartsWith("corbaloc")) {
                 Corbaloc loc = new Corbaloc(url);
-                CorbaLocIiopAddr addr = loc.GetIiopAddr();                
-                if (addr == null) {
-                    throw new INTERNAL(8540, CompletionStatus.Completed_MayBe);
-                }
-                objectUri = loc.ObjectUri;
-                version = addr.Version;
-                uri = new Uri("iiop" + 
-                              addr.Version.Major + "." + addr.Version.Minor + 
-                              Uri.SchemeDelimiter + addr.Host + ":" + addr.Port);
-
+                uri = loc.ParseUrl(out objectUri, out version);
             } else {
                 // not possible
                 uri = null;
@@ -375,115 +353,5 @@ namespace Ch.Elca.Iiop.Util {
     }
         
  
-    /// <summary>
-    /// handles addresses of the form iiop://host:port/objectKey
-    /// </summary>
-    internal class IiopLoc {
-        
-        #region IFields
-        
-        private string m_objectUri;
-        private Uri m_channelUri;
-        private GiopVersion m_version = new GiopVersion(1,2); // default for iiop
-        private byte[] m_keyBytes;
-        private string m_iiopUrl;
-        
-        #endregion IFields        
-        #region SFields
-        
-        private static ASCIIEncoding s_asciiEncoder = new ASCIIEncoding();
-        
-        #endregion SFields
-        #region IConstructors
-        
-        /// <summary>creates the corbaloc from a corbaloc url string</summary>
-        public IiopLoc(string iiopUrl) {
-            m_iiopUrl = iiopUrl;
-            Parse(iiopUrl);
-        }
-
-        #endregion IConstructors
-        #region IProperties
-        
-        /// <summary>
-        /// gets the url, which is represented by this instance.
-        /// </summary>
-        public string Url {
-            get {
-                return m_iiopUrl;
-            }
-        }
-        
-        /// <summary>
-        /// the string representation of the object uri
-        /// </summary>
-        public string ObjectUri {
-            get {
-                return m_objectUri;
-            }
-        }
-        
-        /// <summary>
-        /// the channel uri: connection information (host, port)
-        /// </summary>
-        public Uri ChannelUri {
-            get {                
-                return m_channelUri;
-            }
-        }
-
-        /// <summary>
-        /// the giop protocol version
-        /// </summary>
-        public GiopVersion Version {
-            get {
-                return m_version;
-            }
-        }
-        
-        #endregion IProperties
-        #region IMethods
-        
-        private void Parse(string iiopUrl) {
-            Uri uri = new Uri(iiopUrl);
-            string iiopSchema = uri.Scheme;
-            if (!iiopSchema.StartsWith("iiop")) {
-                throw new INTERNAL(145, CompletionStatus.Completed_MayBe);
-            }
-            try {
-                if (iiopSchema.Length > 4) {
-                    // a giop-version is specified in the schema
-                    string versionString = iiopSchema.Substring(4);
-
-                    byte major = Byte.Parse(versionString[0].ToString());
-                    byte minor = Byte.Parse(versionString[2].ToString());
-                    m_version = new GiopVersion(major, minor);                    
-                } 
-                m_channelUri = new Uri(uri.Scheme + Uri.SchemeDelimiter + 
-                                       uri.Host + ":" + uri.Port);
-                m_objectUri = uri.PathAndQuery;
-                if ((m_objectUri != null) && (m_objectUri.StartsWith("/"))) {
-                    m_objectUri = m_objectUri.Substring(1);
-                    string escaped = IiopUrlUtil.EscapeNonAscii(m_objectUri);
-                    m_keyBytes = IiopUrlUtil.GetKeyBytesForId(escaped);
-                }                
-            } catch (Exception) {
-                throw new INV_OBJREF(146, CompletionStatus.Completed_MayBe);
-            }
-        }               
-        
-        /// <summary>
-        /// get the byte representation of the corba object key.
-        /// </summary>
-        /// <returns></returns>
-        public byte[] GetKeyAsByteArray() {
-            return m_keyBytes;
-        }        
-
-        #endregion IMethods
-
-
-    }
-    
-    
+     
 }
