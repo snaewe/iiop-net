@@ -11,5 +11,5 @@ clean:
 	$(MAKE) clean
 	cd ..
         cd JavaServerDotNetClient
-        $(MAKE) build
+        $(MAKE) clean
         cd ..

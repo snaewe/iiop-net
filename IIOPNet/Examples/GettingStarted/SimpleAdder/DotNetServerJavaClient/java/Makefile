@@ -20,7 +20,6 @@ build-java: $(Adder)*.java *.java
 clean:
 	if exist Ch\Elca\Iiop\*.java del /q Ch\Elca\Iiop\*.java
 	if exist Ch\Elca\Iiop\*.class del /q Ch\Elca\Iiop\*.class
-	move $(EntryImpl) tmp.java
 	if exist $(Adder)*.java del /q $(Adder)*.java
 	if exist $(Adder)*.class del /q $(Adder)*.class
 	if exist IDL\nul rmdir /q /s IDL
