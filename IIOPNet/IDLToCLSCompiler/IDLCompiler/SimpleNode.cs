@@ -91,8 +91,23 @@ public class SimpleNode : Node {
   /// </summary>
   /// <remarks>
   /// This method is needed for construction of error messages.
+  /// To prevent endless loops (Stack overflow), do not call GetIdentification
+  /// on the parent(s) of this node.
   /// </remarks>
   public virtual string GetIdentification() {
+      return "";
+  }
+  
+  /// <summary>
+  /// provides a description of the node usable by direct children to
+  /// describe the scope they are defined in.
+  /// </summary>
+  /// <remarks>
+  /// This method is needed for construction of error messages.
+  /// To prevent endless loops (Stack overflow), do not call error reporting
+  /// methods (GetIdentification / GetEmbedderDesc) on children of this node.
+  /// </remarks>
+  public virtual string GetEmbedderDesc() {
       return "";
   }
 }
