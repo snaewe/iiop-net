@@ -117,7 +117,6 @@ namespace omg.org.CORBA {
                 throw new BAD_PARAM(265, CompletionStatus.Completed_Yes);
             }
 		}
-		
 
 		
 		/// <summary>takes an IOR or a corbaloc and returns a proxy</summary>
@@ -136,17 +135,24 @@ namespace omg.org.CORBA {
 		
 		/// <summary>takes a proxy and returns the IOR / corbaloc / ...</summary>
 		public string object_to_string(object obj) {
-			MarshalByRefObject mbrProxy = obj as MarshalByRefObject;
-            CheckIsProxy(mbrProxy);
+            MarshalByRefObject mbr = obj as MarshalByRefObject;
+            if (mbr == null) {
+                throw new BAD_PARAM(265, CompletionStatus.Completed_Yes);
+            }
+            if (RemotingServices.IsTransparentProxy(mbr)) {
             
-            string uri = RemotingServices.GetObjectUri(mbrProxy);
-            CheckIsValidUri(uri);
-            if (IiopUrlUtil.IsIorString(uri)) {
-                return uri;
+                string uri = RemotingServices.GetObjectUri(mbr);
+                CheckIsValidUri(uri);
+                if (IiopUrlUtil.IsIorString(uri)) {
+                    return uri;
+                } else {
+                    // create an IOR assuming type is CORBA::Object
+                    return IiopUrlUtil.CreateIorForUrl(uri, "").ToString();
+                }
             } else {
-                // create an IOR assuming type is CORBA::Object
-                return IiopUrlUtil.CreateIorForUrl(uri, "").ToString();
-            }									
+                // local object
+                return IiopUrlUtil.CreateIorForObjectFromThisDomain(mbr).ToString();
+            }
 		}
 		
 		#region Typecode creation operations

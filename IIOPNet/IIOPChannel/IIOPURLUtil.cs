@@ -35,6 +35,7 @@ using System.Diagnostics;
 using System.Globalization;
 using omg.org.CORBA;
 using Ch.Elca.Iiop.CorbaObjRef;
+using Ch.Elca.Iiop.Idl;
 
 namespace Ch.Elca.Iiop.Util {
 
@@ -309,6 +310,65 @@ namespace Ch.Elca.Iiop.Util {
             }
             return true;
         }
+
+        #region ServerSide
+        
+        /// <summary>
+        /// creates an IOR for an object hosted in the local appdomain.
+        /// </summary>
+        /// <param name="obj"></param>
+        /// <returns></returns>
+        internal static Ior CreateIorForObjectFromThisDomain(MarshalByRefObject obj) {
+            ObjRef objRef = RemotingServices.Marshal(obj); // make sure, the object is marshalled and get obj-ref
+            byte[] objectKey = IiopUrlUtil.GetObjectKeyForObj(obj);
+            IiopChannelData serverData = GetIiopChannelData(objRef);
+            if (serverData != null) {
+                string host = serverData.HostName;
+                int port = serverData.Port;
+                if ((objectKey == null) || (host == null)) { 
+                    // the objRef: " + refToTarget + ", uri: " +
+                    // refToTarget.URI + is not serialisable, because connection data is missing 
+                    // hostName=host, objectKey=objectKey
+                    throw new INV_OBJREF(1961, CompletionStatus.Completed_MayBe);
+                }
+                string repositoryID = Repository.GetRepositoryID(obj.GetType());
+                if (obj.GetType().Equals(ReflectionHelper.MarshalByRefObjectType)) {
+                    repositoryID = "";
+                }
+                // this server support GIOP 1.2 --> create an GIOP 1.2 profile
+                InternetIiopProfile profile = new InternetIiopProfile(new GiopVersion(1, 2), host,
+                                                                      (ushort)port, objectKey);
+                // add additional tagged components according to the channel options, e.g. for SSL
+                profile.AddTaggedComponents(serverData.AdditionalTaggedComponents);
+                
+                Ior ior = new Ior(repositoryID, new IorProfile[] { profile });
+                return ior;                
+            } else {
+                Debug.WriteLine("ERROR: no server-channel information found!");
+                Debug.WriteLine("Please make sure, that an IIOPChannel has been created with specifying a listen port number (0 for automatic)!");
+                Debug.WriteLine("e.g. IIOPChannel chan = new IIOPChannel(0);");
+                throw new INTERNAL(1960, CompletionStatus.Completed_MayBe);
+            }
+        }
+        
+        /// <summary>gets the IIOPchannel-data from an ObjRef.</summary>
+        private static IiopChannelData GetIiopChannelData(ObjRef objRef) {
+            IChannelInfo info = objRef.ChannelInfo;
+            if ((info == null) || (info.ChannelData == null)) { 
+                return null; 
+            }
+            
+            foreach (object chanData in info.ChannelData) {
+                if (chanData is IiopChannelData) {
+                    Debug.WriteLine("chan-data for IIOP-channel found: " + chanData);
+                    return (IiopChannelData)chanData; // the IIOP-channel data
+                }
+            }
+            // no IIOPChannelData found
+            return null; 
+        }
+        
+        #endregion ServerSide
 
         #endregion SMethods
 

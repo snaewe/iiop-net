@@ -382,7 +382,7 @@ namespace Ch.Elca.Iiop.Marshalling {
                 ior = IiopUrlUtil.CreateIorForUrl(url, repositoryID);
             } else {
                 // server object
-                ior = CreateIorForObjectFromThisDomain(target);
+                ior = IiopUrlUtil.CreateIorForObjectFromThisDomain(target);
             }
 
             Debug.WriteLine("connection information for objRef, host: " + ior.HostName + ", port: " +
@@ -397,55 +397,7 @@ namespace Ch.Elca.Iiop.Marshalling {
             ior.WriteToStream(targetStream); // write the null reference to the stream
         }
                 
-        private Ior CreateIorForObjectFromThisDomain(MarshalByRefObject obj) {                        
-            ObjRef objRef = RemotingServices.Marshal(obj); // make sure, the object is marshalled and get obj-ref
-            byte[] objectKey = IiopUrlUtil.GetObjectKeyForObj(obj);
-            IiopChannelData serverData = GetIiopChannelData(objRef);
-            if (serverData != null) {
-                string host = serverData.HostName;
-                int port = serverData.Port;
-                if ((objectKey == null) || (host == null)) { 
-                    // the objRef: " + refToTarget + ", uri: " +
-                    // refToTarget.URI + is not serialisable, because connection data is missing 
-                    // hostName=host, objectKey=objectKey
-                    throw new INV_OBJREF(1961, CompletionStatus.Completed_MayBe);
-                }
-                string repositoryID = Repository.GetRepositoryID(obj.GetType());
-                if (obj.GetType().Equals(ReflectionHelper.MarshalByRefObjectType)) {
-                    repositoryID = "";
-                }
-                // this server support GIOP 1.2 --> create an GIOP 1.2 profile
-                InternetIiopProfile profile = new InternetIiopProfile(new GiopVersion(1, 2), host,
-                                                                      (ushort)port, objectKey);
-                // add additional tagged components according to the channel options, e.g. for SSL
-                profile.AddTaggedComponents(serverData.AdditionalTaggedComponents);
-                
-                Ior ior = new Ior(repositoryID, new IorProfile[] { profile });
-                return ior;                
-            } else {
-                Debug.WriteLine("ERROR: no server-channel information found!");
-                Debug.WriteLine("Please make sure, that an IIOPChannel has been created with specifying a listen port number (0 for automatic)!");
-                Debug.WriteLine("e.g. IIOPChannel chan = new IIOPChannel(0);");
-                throw new INTERNAL(1960, CompletionStatus.Completed_MayBe);
-            }
-        }
-        
-        /// <summary>gets the IIOPchannel-data from an ObjRef.</summary>
-        private IiopChannelData GetIiopChannelData(ObjRef objRef) {
-            IChannelInfo info = objRef.ChannelInfo;
-            if ((info == null) || (info.ChannelData == null)) { 
-                return null; 
-            }
-            
-            foreach (object chanData in info.ChannelData) {
-                if (chanData is IiopChannelData) {
-                    Debug.WriteLine("chan-data for IIOP-channel found: " + chanData);
-                    return (IiopChannelData)chanData; // the IIOP-channel data
-                }
-            }
-            // no IIOPChannelData found
-            return null; 
-        }
+
 
         public override object Deserialise(Type formal, AttributeExtCollection attributes,
                                            CdrInputStream sourceStream) {
