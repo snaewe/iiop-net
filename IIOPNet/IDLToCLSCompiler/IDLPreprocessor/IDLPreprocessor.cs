@@ -213,13 +213,25 @@ namespace Ch.Elca.Iiop.IdlPreprocessor {
             }
         }
 
+        /// <summary>reads one line of text, handling backslash as continuation mark</summary>
+        private string ReadInputLine() {
+            string result = m_fileStream.ReadLine();
+            if (result != null) {
+                result = result.Trim();
+                while (result.EndsWith("\\")) { // continuation
+                    result = result.Substring(0, result.Length - 1); // remove trailing \
+                    string nextLine = m_fileStream.ReadLine();
+                    result = result + (nextLine != null ? " " + nextLine.Trim() : String.Empty);
+                }
+            }
+            return result;
+        }
 
         /// <summary>preprocess the file</summary>        
         public void Process() {
-            String currentLine = m_fileStream.ReadLine();
-            while (currentLine != null) {
-                currentLine = currentLine.Trim();
-                if (currentLine.StartsWith("#include"))    {
+            String currentLine = ReadInputLine();
+            while (currentLine != null) {                
+                if (currentLine.StartsWith("#include")) {
                     ProcessInclude(currentLine);
                 } else if (currentLine.StartsWith("#define")) {
                     ProcessDefine(currentLine);
@@ -246,7 +258,7 @@ namespace Ch.Elca.Iiop.IdlPreprocessor {
                     // write the current line to the output stream
                     m_outputStream.WriteLine(currentLine);
                 }                                       
-                currentLine = m_fileStream.ReadLine();
+                currentLine = ReadInputLine();
             }
             m_fileStream.Close();
             m_outputStream.WriteLine(""); // add a newline at the end, because parser needs at least one line
@@ -439,12 +451,18 @@ namespace Ch.Elca.Iiop.IdlPreprocessor {
                 }            
                 if (moreIfs > 0) { 
                     // no matching end directive yet
-                    currentLine = m_fileStream.ReadLine().Trim();
+                    currentLine = ReadInputLine();
                 }
             }
-            if (currentLine.StartsWith("#endif")) {
+            if ((currentLine != null) && currentLine.StartsWith("#endif")) {
                 // close an if-block
                 ProcessEndIf(currentLine);
+            } 
+            
+            if ((currentLine == null) && (moreIfs > 0)) {
+                // not enough closing endif-blocks
+                throw new PreprocessingException(
+                    String.Format("{0} missing #endif(s)", moreIfs));
             }
         }    
     
@@ -462,11 +480,17 @@ namespace Ch.Elca.Iiop.IdlPreprocessor {
                     moreIfs--; 
                 }            
                 if (moreIfs > 0) { 
-                    currentLine = m_fileStream.ReadLine().Trim(); 
+                    currentLine = ReadInputLine(); 
                 }
             }
-               // close an if-block
-               ProcessEndIf(currentLine);
+            
+            if (moreIfs == 0) {
+                // close an if-block
+                ProcessEndIf(currentLine);
+            } else {
+                throw new PreprocessingException(
+                    String.Format("{0} missing #endifs", moreIfs));
+            }
         }
 
         #endregion implementation of the preprocessing actions
