@@ -134,6 +134,10 @@ namespace Ch.Elca.Iiop {
         	}
         }
         
+        public override string ToString() {
+            return "Name: " + m_name + "\r\nMessage: " + m_message + "\r\n----------------------\r\n\r\n" + base.ToString ();
+        }
+
         #endregion IMethods
 
     }
