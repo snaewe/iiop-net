@@ -366,23 +366,23 @@ public class IDLToCLS {
                                                         m_vtSkelOverwrite);
         }
         string currentDir = Directory.GetCurrentDirectory();
-        for (int i = 0; i < m_inputFileNames.Length; i++)
-        {
+        for (int i = 0; i < m_inputFileNames.Length; i++) {
             Debug.WriteLine("checking file: " + m_inputFileNames[i] );
 
-
-            string[] expandedFiles = Directory.GetFileSystemEntries( currentDir, m_inputFileNames[i] );
-            if ( 0 == expandedFiles.Length )
-            {
-                // If not expanded / not valid treat as normal file
-                processFile( generator, m_inputFileNames[i] );
+            string rootedPath = m_inputFileNames[i];
+            if (!Path.IsPathRooted(m_inputFileNames[i])) {
+                rootedPath = Path.Combine(currentDir, m_inputFileNames[i]);
             }
-            else
-            {
-                foreach ( string file in expandedFiles )
-                {
-                    processFile( generator, file );
+            string searchDirectory = Path.GetDirectoryName(rootedPath);
+            string fileName = Path.GetFileName(rootedPath);
+
+            string[] expandedFiles = Directory.GetFileSystemEntries(searchDirectory, fileName);
+            if (expandedFiles.Length > 0) {
+                foreach (string file in expandedFiles) {
+                    processFile(generator, file);
                 }
+            } else {
+                Error("file(s) not found: " + m_inputFileNames[i]);                
             }
         }
         // save the result to disk
