@@ -40,7 +40,7 @@ public class PragmaScope : Scope {
 
     #region IConstructors
 
-    public PragmaScope(String name, Scope parentScope) : base(name, parentScope) {
+    public PragmaScope(String name, Scope parentScope) : base(name, parentScope, false) {
     }
 
     #endregion IConstructors
