@@ -33,6 +33,8 @@ using System.Diagnostics;
 using System.Collections;
 using System.Reflection;
 using System.Text;
+using System.Threading;
+using System.Globalization;
 using System.CodeDom;
 using System.CodeDom.Compiler;
 using Microsoft.CSharp;
@@ -83,6 +85,7 @@ public class IDLToCLS {
         // Trace.Indent();
         
         try {
+            Thread.CurrentThread.CurrentCulture = new CultureInfo("en-US");
             IDLToCLS mapper = new IDLToCLS(args);
             mapper.MapIdl();
         } catch (System.Exception e) {
