@@ -1,4 +1,4 @@
-/* MappingPlugin.cs
+/* MappingPlugin.java
  * 
  * Project: IIOP.NET
  * IIOPChannel
