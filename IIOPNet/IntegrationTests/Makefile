@@ -1,6 +1,8 @@
 
-
 build: nunit-var
+	cd Utils
+	$(MAKE) build
+	cd ..
 	cd Basic
 	$(MAKE) build
 	cd ..
@@ -16,6 +18,9 @@ nunit-var:
 	@if not defined NUNITV2_HOME exit 2
 
 clean:
+	cd Utils
+	$(MAKE) clean
+	cd ..
 	cd Basic
 	$(MAKE) clean
 	cd ..

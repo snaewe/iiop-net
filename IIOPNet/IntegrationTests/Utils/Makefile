@@ -1,14 +1,12 @@
 
-build: launch.exe kill.exe delay.exe
+Utils = launch.exe kill.exe delay.exe
 
-launch.exe: launch.cs
-	csc launch.cs
+.SUFFIXES : .exe .cs
 
-kill.exe: kill.cs
-	csc kill.cs
+build: $(Utils)
 
-delay.exe: delay.cs
-	csc delay.cs
+.cs.exe:
+	csc $<
 
 clean:
 	if exist kill.exe del kill.exe

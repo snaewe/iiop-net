@@ -29,6 +29,10 @@ compile-idl:
 	..\..\..\..\IDLToCLSCompiler\IDLCompiler\bin\IDLToCLSCompiler.exe -o ..\bin client Ch\Elca\Iiop\IntegrationTests\TestService.idl
 	cd ..
 
+
+start-client:
+	%NUNITV2_HOME%\bin\nunit-console.exe /assembly:bin\ClientTest.dll
+
 clean:
 	if exist IDL del /s /q IDL
 	if exist bin del /s /q bin
