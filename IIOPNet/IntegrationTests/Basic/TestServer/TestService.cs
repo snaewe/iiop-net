@@ -354,6 +354,17 @@ namespace Ch.Elca.Iiop.IntegrationTests {
             return arrayAsAny;
         }
 
+        public object RetrieveIdlInt3DimArray2x2x3AsAny([IdlArray(0, 2)][IdlArrayDimension(0, 1, 2)][IdlArrayDimension(0, 2, 3)] System.Int32[,,] arg) {
+            // test with explicit typecode-creation
+            IOrbServices orbServices = OrbServices.GetSingleton();
+            omg.org.CORBA.TypeCode arrayTC = 
+                orbServices.create_array_tc(3, orbServices.create_tc_for_type(typeof(int)));
+            arrayTC = orbServices.create_array_tc(2, arrayTC);
+            arrayTC = orbServices.create_array_tc(2, arrayTC);
+            Any arrayAsAny = new Any(arg, arrayTC);
+            return arrayAsAny;
+        }
+
         public Adder RetrieveAdder() {
             return new Adder();
         }

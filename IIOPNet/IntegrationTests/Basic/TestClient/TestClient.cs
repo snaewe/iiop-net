@@ -503,6 +503,31 @@ namespace Ch.Elca.Iiop.IntegrationTests {
                     Assertion.AssertEquals(arg2Dim[i,j], result2Dim[i,j]);
                 }                
             }            
+
+            int[,,] arg3Dim = new int[2,2,3];
+            arg3Dim[0,0,0] = 1;
+            arg3Dim[0,0,1] = 2;
+            arg3Dim[0,0,2] = 3;
+            arg3Dim[0,1,0] = 4;
+            arg3Dim[0,1,1] = 5;
+            arg3Dim[0,1,2] = 6;
+            arg3Dim[1,0,0] = 7;
+            arg3Dim[1,0,1] = 8;
+            arg3Dim[1,0,2] = 9;
+            arg3Dim[1,1,0] = 10;
+            arg3Dim[1,1,1] = 11;
+            arg3Dim[1,1,2] = 12;
+            int[,,] result3Dim = (int[,,])m_testService.RetrieveIdlInt3DimArray2x2x3AsAny(arg3Dim);
+            Assertion.AssertEquals(arg3Dim.GetLength(0), result3Dim.GetLength(0));
+            Assertion.AssertEquals(arg3Dim.GetLength(1), result3Dim.GetLength(1));
+            Assertion.AssertEquals(arg3Dim.GetLength(2), result3Dim.GetLength(2));
+            for (int i = 0; i < arg3Dim.GetLength(0); i++) {
+                for (int j = 0; j < arg3Dim.GetLength(1); j++) {
+                    for (int k = 0; k < arg3Dim.GetLength(2); k++) {
+                        Assertion.AssertEquals(arg3Dim[i,j,k], result3Dim[i,j,k]);
+                    }
+                }                
+            }            
         }
 
 
