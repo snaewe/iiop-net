@@ -10,7 +10,7 @@ build: build-idl
 
 build-server: $(bin)TestServer.exe
 
-build-idl: IDL\Ch\Elca\Iiop\IntegrationTests\TestService.idl
+build-idl: IDL\Ch\Elca\Iiop\IntegrationTests\TestService.idl IDL\Ch\Elca\Iiop\IntegrationTests\TestWellKnownService.idl
 
 
 $(bin)IIOPChannel.dll: $(IIOPCHANNEL)
@@ -28,6 +28,9 @@ $(bin)testExceptionService.dll: TestExceptionService.idl
 IDL\Ch\Elca\Iiop\IntegrationTests\TestService.idl: $(bin)TestServer.exe
 	..\..\..\CLSToIDLGenerator\bin\CLSIDLGenerator.exe -o IDL Ch.Elca.Iiop.IntegrationTests.TestService $(bin)TestServer.exe
 	copy TestExceptionService.idl IDL\Ch\Elca\Iiop\IntegrationTests\
+
+IDL\Ch\Elca\Iiop\IntegrationTests\TestWellKnownService.idl: $(bin)TestServer.exe
+	..\..\..\CLSToIDLGenerator\bin\CLSIDLGenerator.exe -o IDL Ch.Elca.Iiop.IntegrationTests.TestWellKnownService $(bin)TestServer.exe
 
 
 start-server:

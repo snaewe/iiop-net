@@ -49,6 +49,16 @@ namespace Ch.Elca.Iiop.IntegrationTests {
             TestExceptionServiceImpl testExService = new TestExceptionServiceImpl();
             RemotingServices.Marshal(testExService, "testExService");
 
+            RemotingConfiguration.RegisterWellKnownServiceType(typeof(TestWellKnownService),
+                                                               "testSingleCall",
+                                                               WellKnownObjectMode.SingleCall 
+                                                              );
+
+            RemotingConfiguration.RegisterWellKnownServiceType(typeof(TestWellKnownService),
+                                                               "testSingletonCall",
+                                                               WellKnownObjectMode.Singleton 
+                                                              );
+
             Console.WriteLine("server running");
             Thread.Sleep(Timeout.Infinite);
         }

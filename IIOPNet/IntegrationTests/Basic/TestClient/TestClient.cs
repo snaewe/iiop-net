@@ -47,6 +47,8 @@ namespace Ch.Elca.Iiop.IntegrationTests {
 
         private TestService m_testService;
         private TestExceptionService m_testExService;
+        private TestWellKnownService m_svcSingleCall;
+        private TestWellKnownService m_svcSingletonCall;
 
 
         #endregion IFields
@@ -68,6 +70,11 @@ namespace Ch.Elca.Iiop.IntegrationTests {
             // get the reference to the test-service
             m_testService = (TestService)RemotingServices.Connect(typeof(TestService), "corbaloc:iiop:1.2@localhost:8087/test");
             m_testExService = (TestExceptionService)RemotingServices.Connect(typeof(TestExceptionService), "corbaloc:iiop:1.2@localhost:8087/testExService");
+
+            m_svcSingleCall = 
+                (TestWellKnownService)RemotingServices.Connect(typeof(TestWellKnownService), "corbaloc:iiop:1.2@localhost:8087/testSingleCall");
+            m_svcSingletonCall = 
+                (TestWellKnownService)RemotingServices.Connect(typeof(TestWellKnownService), "corbaloc:iiop:1.2@localhost:8087/testSingletonCall");
         }
 
         [TearDown]
@@ -925,6 +932,32 @@ namespace Ch.Elca.Iiop.IntegrationTests {
                                        compare.Sensibilites[i]);
             }
         }
+
+        [Test]
+        public void TestWellKnownServiceType() {
+            CheckWellKnownService(m_svcSingletonCall, true);
+            CheckWellKnownService(m_svcSingleCall, false);
+        }
+
+        private void CheckWellKnownService(TestWellKnownService svcToCheck, bool stateShouldBeKept) {
+            Int32 arg1 = 1;
+            Int32 arg2 = 2;
+            Assertion.AssertEquals(arg1 + arg2, svcToCheck.Add(arg1, arg2));
+
+            Int32 stateSet = 8;
+            Int32 stateSet2 = 10;
+            svcToCheck.TestValue = stateSet;
+            if (stateShouldBeKept) {
+                Assertion.AssertEquals("set 1 failed", stateSet, svcToCheck.TestValue);
+                svcToCheck.TestValue = stateSet2;
+                Assertion.AssertEquals("set 2 failed", stateSet2, svcToCheck.TestValue);
+            } else {
+                Assertion.AssertEquals("set 1 failed", svcToCheck.InitialValue, svcToCheck.TestValue);
+                svcToCheck.TestValue = stateSet2;
+                Assertion.AssertEquals("set 2 failed", svcToCheck.InitialValue, svcToCheck.TestValue);
+            }
+        }
+
 
         #endregion IMethods
 
