@@ -27,6 +27,7 @@
 
 
 using System;
+using System.Runtime.Remoting;
 using System.Runtime.Remoting.Channels;
 using NUnit.Framework;
 using Ch.Elca.Iiop;
@@ -279,6 +280,36 @@ namespace Ch.Elca.Iiop.IntegrationTests {
             Assertion.AssertEquals(result.val1.Msg, result.val2.Msg);
         }
 
+        /// <summary>
+        /// Checks if a ByRef actual value for a formal parameter interface is passed correctly
+        /// </summary>
+        public void TestInterfacePassingByRef() {
+            TestEchoInterface result = m_testService.RetrieveEchoInterfaceImplementor();
+            // result is a proxy
+            Assertion.AssertEquals(true, RemotingServices.IsTransparentProxy(result));
+            System.Int32 arg = 23;
+            System.Int32 echo = result.EchoInt(arg);
+            Assertion.AssertEquals(arg, echo);
+        }
+
+        /// <summary>
+        /// Checks if a ByVal actual value for a formal parameter interface is passed correctly
+        /// </summary>        
+        public void TestInterfacePassingByVal() {
+            System.String initialMsg = "initial";
+            TestInterfaceA result = m_testService.RetrieveTestInterfaceAImplementor(initialMsg);
+            Assertion.AssertEquals(initialMsg, result.Msg);
+
+            System.String passedBack = m_testService.ExtractMsgFromInterfaceAImplmentor(result);
+            Assertion.AssertEquals(initialMsg, passedBack);
+        }
+
+        public void TestInheritanceFromInterfaceForValueType() {
+            System.String initialMsg = "initial";
+            TestAbstrInterfaceImplByMarshalByVal impl = m_testService.RetriveTestInterfaceAImplemtorTheImpl(initialMsg);            
+            Assertion.Assert("cast to Interface TestInterfaceA failed", (impl as TestInterfaceA) != null);
+            Assertion.AssertEquals(initialMsg, impl.Msg);
+        }
 
 
 

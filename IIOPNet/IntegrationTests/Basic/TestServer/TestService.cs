@@ -27,6 +27,7 @@
 
 
 using System;
+using Ch.Elca.Iiop.Idl;
 
 namespace Ch.Elca.Iiop.IntegrationTests {
 
@@ -75,6 +76,43 @@ namespace Ch.Elca.Iiop.IntegrationTests {
         public System.Int32 Add(System.Int32 sum1, System.Int32 sum2) {
             return sum1 + sum2;
         }
+    }
+
+    public interface TestEchoInterface {
+        System.Int32 EchoInt(System.Int32 arg);
+    }
+
+    [SupportedInterfaceAttribute(typeof(TestEchoInterface))]
+    public class TestAbstrInterfaceImplByMarshalByRef : MarshalByRefObject, TestEchoInterface {
+        public System.Int32 EchoInt(System.Int32 arg) {
+            return arg;
+        }
+    }
+
+    public interface TestInterfaceA {
+        System.String Msg {
+            get;
+        }
+    }
+
+    [Serializable]
+    public class TestAbstrInterfaceImplByMarshalByVal : TestInterfaceA {
+        
+        private System.String m_msg = "standard";
+
+        private TestAbstrInterfaceImplByMarshalByVal() {
+        }
+
+        public TestAbstrInterfaceImplByMarshalByVal(System.String msg) {
+            m_msg = msg;
+        }
+
+        public System.String Msg {
+            get {
+                return m_msg;
+            }
+        }
+
     }
 
     public class TestService : MarshalByRefObject {
@@ -175,6 +213,22 @@ namespace Ch.Elca.Iiop.IntegrationTests {
         public TestSerializableClassD TestChangeSerilizableD(TestSerializableClassD arg, System.String newMessage) {
             arg.val1.Msg = newMessage;
             return arg;
+        }
+
+        public TestEchoInterface RetrieveEchoInterfaceImplementor() {
+            return new TestAbstrInterfaceImplByMarshalByRef();
+        }
+
+        public TestInterfaceA RetrieveTestInterfaceAImplementor(System.String initialMsg) {
+            return new TestAbstrInterfaceImplByMarshalByVal(initialMsg);
+        }
+
+        public System.String ExtractMsgFromInterfaceAImplmentor(TestInterfaceA arg) {
+            return arg.Msg;
+        }
+
+        public TestAbstrInterfaceImplByMarshalByVal RetriveTestInterfaceAImplemtorTheImpl(System.String initialMsg) {
+            return new TestAbstrInterfaceImplByMarshalByVal(initialMsg);
         }
 
         public override object InitializeLifetimeService() {

@@ -57,4 +57,15 @@ namespace Ch.Elca.Iiop.IntegrationTests {
     
     }
 
+    /* [Serializable]
+    public class TestAbstrInterfaceImplByMarshalByValImpl : TestAbstrInterfaceImplByMarshalByVal {
+    
+        public override System.String Msg {
+            get {
+                return m_msg;
+            }
+        }
+
+    } */
+
 }
