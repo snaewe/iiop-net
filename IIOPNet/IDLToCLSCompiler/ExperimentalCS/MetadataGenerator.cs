@@ -177,11 +177,7 @@ public class MetaDataGenerator : IDLParserVisitor {
                                                                         typeof(String) }, 
                                                            null);
         // channel assembly contains predef types, which shouldn't be regenerated.
-        FileInfo compilerPath = new FileInfo(this.GetType().Assembly.Location);
-        refAssemblies.Add(Assembly.LoadFrom(compilerPath.DirectoryName + 
-                                            Path.DirectorySeparatorChar + "IIOPChannel.dll")); 
-        m_typesInRefAsms = new TypesInAssemblyManager(refAssemblies);
-        
+        InitalizeRefAssemblies(refAssemblies);        
     }
 
     #endregion IConstructors
@@ -202,6 +198,14 @@ public class MetaDataGenerator : IDLParserVisitor {
         m_modBuilder = m_asmBuilder.DefineDynamicModule(modName, modName);        
     }
     
+    /// <summary>initalizes the assemblies, which contains type to use
+    /// instead of generating them</summary>
+    private void InitalizeRefAssemblies(ArrayList refAssemblies) {
+        // add the IIOPChannel dll; IIdlAttribute is in channel assembly
+        Type typeInChannel = typeof(IIdlAttribute);
+        refAssemblies.Add(typeInChannel.Assembly);
+        m_typesInRefAsms = new TypesInAssemblyManager(refAssemblies);
+    }    
 
     /** ends the build process, after this is called, the Generator is not able to process more files */
     public void SaveAssembly() {
@@ -210,6 +214,14 @@ public class MetaDataGenerator : IDLParserVisitor {
         // print a remark to remember implementing the valuetypes:
         PrintNeededValueImplList();
     }
+    
+    #if UnitTest
+    
+    public Assembly GetResultAssembly() {
+        return m_asmBuilder;
+    }
+    
+    #endif
 
     /** prints a list of value types for which an implementation must be provided. */
     private void PrintNeededValueImplList() {
