@@ -296,14 +296,14 @@ namespace Ch.Elca.Iiop.Idl {
         /// <param name="action">the action to take for the determined mapping</param>
         /// <param name="attributes">the attributes on the param, field, return value</param>
         public object MapClsType(Type clsType, AttributeExtCollection attributes, MappingAction action) {
-            return MapClsType(ref clsType, attributes, action);
+            return MapClsTypeWithTransform(ref clsType, attributes, action);
         }
         
         /// <summary>uses MappingAction action while mapping a CLS-type to an IDL-type</summary>
         /// <param name="clsType">the type to map. The mapper can decide to transform the type during the mapping, the result of the transformation is returned. Transformation occurs, for example because of attributes</param>
         /// <param name="action">the action to take for the determined mapping</param>
         /// <param name="attributes">the attributes on the param, field, return value</param>
-        public object MapClsType(ref Type clsType, AttributeExtCollection attributes, MappingAction action) {
+        public object MapClsTypeWithTransform(ref Type clsType, AttributeExtCollection attributes, MappingAction action) {
             // handle out, ref types correctly: no other action needs to be taken than for in-types
             if (clsType.IsByRef) { 
                 clsType = clsType.GetElementType(); 

@@ -88,7 +88,7 @@ namespace Ch.Elca.Iiop.Marshalling {
         /// <param name="attributes"></param>
         /// <param name="actual"></param>
         /// <param name="targetStream"></param>
-        public void Marshal(Type formal, AttributeExtCollection attributes, object actual,
+        internal void Marshal(Type formal, AttributeExtCollection attributes, object actual,
                             CdrOutputStream targetStream) {
             Debug.WriteLine("marshal, formal: " + formal);
             // determine the serialiser
@@ -125,7 +125,7 @@ namespace Ch.Elca.Iiop.Marshalling {
         /// <param name="attributes">the parameter/field attributes</param>
         /// <returns></returns>
         protected Serialiser DetermineSerialiser(ref Type formal, AttributeExtCollection attributes) {
-            Serialiser serialiser = (Serialiser)s_mapper.MapClsType(ref formal, attributes, s_serDetermination); // formal can be transformed
+            Serialiser serialiser = (Serialiser)s_mapper.MapClsTypeWithTransform(ref formal, attributes, s_serDetermination); // formal can be transformed
             if (serialiser == null) {
                 // no serializer present for Type: formal
                 Trace.WriteLine("no serialiser for Type: " + formal);
@@ -148,7 +148,7 @@ namespace Ch.Elca.Iiop.Marshalling {
         /// <param name="attributes"></param>
         /// <param name="sourceStream"></param>
         /// <returns></returns>
-        public object Unmarshal(Type formal, AttributeExtCollection attributes, CdrInputStream sourceStream) {
+        internal object Unmarshal(Type formal, AttributeExtCollection attributes, CdrInputStream sourceStream) {
             Debug.WriteLine("unmarshal, formal: " + formal);
             Type formalNew = formal;
             // determine the serialiser
@@ -216,13 +216,13 @@ namespace Ch.Elca.Iiop.Marshalling {
         #endregion IConstructors
         #region IMethods
 
-        public void Marshal(object actual, CdrOutputStream targetStream) {
+        internal void Marshal(object actual, CdrOutputStream targetStream) {
             base.Marshal(m_formalToSer, 
                          (AttributeExtCollection)m_attributes.Clone(),
                          m_ser, actual, targetStream);
         }
 
-        public object Unmarshal(CdrInputStream sourceStream) {
+        internal object Unmarshal(CdrInputStream sourceStream) {
             return base.Unmarshal(m_formalToSer, m_formal, 
                                   (AttributeExtCollection)m_attributes.Clone(),
                                   m_ser, sourceStream);
