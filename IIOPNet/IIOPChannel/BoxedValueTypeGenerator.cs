@@ -299,6 +299,7 @@ namespace Ch.Elca.Iiop.Idl {
             if ((!boxedType.IsArray) && (boxedType.IsSubclassOf(typeof(BoxedValueBase)))) {
                 // The boxed value type boxes another boxed value type --> need a transform constructor,
                 // which takes an unboxed value and boxes it, before assigning it to the field
+                // TODO: implement this
                 throw new NO_IMPLEMENT(12345, CompletionStatus.Completed_MayBe);
             }
 
