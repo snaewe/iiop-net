@@ -1,0 +1,85 @@
+<H2 class="contentPart">Project status</H2>
+
+<p/>
+
+<b>Current release</b>
+
+<p/>
+IIOP.NET allows a seamless interoperation between .NET, CORBA and J2EE distributed objects. Components on each platform can act
+either in client or server role.
+
+<p/>
+<b>CORBA version</b>
+<p/>
+
+IIOP.NET is based on CORBA 2.3.1.<BR>
+Only the parts of the specification related to interoperability are implemented. 
+
+<p/>
+<b>GIOP Protocol</b>
+<p/>
+IIOP.NET supports the following protocols:<BR>
+IIOP/GIOP 1.0, 1.1, 1.2
+<p/>
+The following protocol parts are not supported:
+<UL>
+<LI>Message types other than request, reply, fragment</LI>
+<LI>Bidirectional GIOP</LI>
+</UL>
+<p/>
+<b>Supported types</b>
+<p/>
+<b>CLS</b>
+<BR> <BR>
+Most of the CLS types are supported.
+<p/>
+The following types are not supported:
+<UL>
+<LI>some kinds of enums, including flags</LI>
+<LI>Delegates</LI>
+<LI>Events</LI>
+<LI>System.IntPtr</LI>
+<LI>System.Decimal</LI>
+</UL>
+<p/>
+<b>IDL</b>
+<p/>
+Most of the IDL types are supported, including CORBA value types.
+<p>
+The following types are not supported:
+<UL>
+<LI>Union</LI>
+<LI>Array</LI>
+<LI>Long double and fixed</LI>
+</UL>
+<p>
+More information can be found in the <a href="documentation.html">IDL <-> CLS specification</a>.
+
+<p/>
+<b>ORB Compatibility</b>
+<BR> <BR>
+Interoperation with the follwoing ORBs has been tested:
+<UL>
+<LI>SUN JDK 1.4 (RMI/IIOP)</LI>
+</UL>
+
+<p/>
+Interoperation with J2EE applications is tested for the following application servers:
+<UL>
+<LI>BEA Weblogic 6.1</LI>
+</UL>
+
+
+<H2 class="contentPart">Next steps</H2>
+<p/>
+In the near future the following two tools will be released:
+<UL>
+<LI>CLS to IDL generator</LI>
+<LI>IDL to CLS compiler</LI>
+</UL>
+
+<p/>
+Other activities
+<UL>
+<LI>Test more ORBs</LI>
+</UL>
