@@ -1,1 +1,1 @@
-copy bin\chatroom_ejb.jar %JBOSS_HOME%\server\%1\deploy
+copy bin\chatroom_ejb.jar %JBOSS_HOME%\server\all\deploy
