@@ -83,6 +83,8 @@ namespace Ch.Elca.Iiop.Idl {
             m_defaultMappedTypes.Add(typeof(omg.org.CORBA.TypeCode));
             m_defaultMappedTypes.Add(typeof(GenericUserException));
             m_defaultMappedTypes.Add(typeof(MarshalByRefObject));
+            m_defaultMappedTypes.Add(typeof(omg.org.CORBA.WStringValue));
+            m_defaultMappedTypes.Add(typeof(omg.org.CORBA.StringValue));
         }
         
         /// <summary>
@@ -360,7 +362,7 @@ namespace Ch.Elca.Iiop.Idl {
             if ((ClsToIdlMapper.IsDefaultMarshalByVal(forType) || 
                  ClsToIdlMapper.IsMarshalByRef(forType)) &&
                 (!(forType.IsSubclassOf(typeof(BoxedValueBase))))) {
-                // boxed value types are excluded here, because the do not have inheritance dependencies
+                // boxed value types are excluded here, because they do not have inheritance dependencies
                 Type baseType = forType.BaseType;
                 if (!((baseType.Equals(typeof(System.Object))) || (baseType.Equals(typeof(System.ValueType))) ||
                      (baseType.Equals(typeof(System.ComponentModel.MarshalByValueComponent))) ||
@@ -389,9 +391,10 @@ namespace Ch.Elca.Iiop.Idl {
         public ArrayList DetermineContentDependencies(Type forType) {
             ArrayList result = new ArrayList();
 
-            // for the following types implemented interfaces, the base class, methods and properties must be considered
+            // for the following types methods and properties must be considered
             if (ClsToIdlMapper.IsDefaultMarshalByVal(forType) ||
-                ClsToIdlMapper.IsMarshalByRef(forType)) {
+                ClsToIdlMapper.IsMarshalByRef(forType) ||
+                ClsToIdlMapper.IsInterface(forType)) {
                 // check the methods
                 AddTypesFromMethods(forType, result, BindingFlags.Instance | BindingFlags.DeclaredOnly | BindingFlags.Public);
                 // check the properties
