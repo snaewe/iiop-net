@@ -404,6 +404,8 @@ namespace Ch.Elca.Iiop.MessageHandling {
         private void SerialiseRequestBody(CdrOutputStream targetStream, object[] callArgs,
                                           MethodInfo methodToCall, GiopVersion version) {
             // body of request msg: serialize arguments
+            // clarification from CORBA 2.6, chapter 15.4.1: no padding, when no arguments are serialised  -->
+            // for backward compatibility, do it nevertheless
             AlignBodyIfNeeded(targetStream, version);
             ParameterMarshaller marshaller = ParameterMarshaller.GetSingleton();
             marshaller.SerialiseRequestArgs(methodToCall, callArgs, targetStream);
@@ -486,9 +488,16 @@ namespace Ch.Elca.Iiop.MessageHandling {
         private object[] DeserialiseRequestBody(CdrInputStream cdrStream, MethodInfo calledMethodInfo,
                                                 bool isStandardOp, string calledUri, GiopVersion version) {
             // unmarshall parameters
-            AlignBodyIfNeeded(cdrStream, version);
             ParameterMarshaller paramMarshaller = ParameterMarshaller.GetSingleton();
-            object[] args = paramMarshaller.DeserialiseRequestArgs(calledMethodInfo, cdrStream);
+            object[] args;
+            // clarification from CORBA 2.6, chapter 15.4.1: no padding, when no arguments are serialised            
+            if (paramMarshaller.HasRequestArgs(calledMethodInfo)) {
+                AlignBodyIfNeeded(cdrStream, version);
+                args = paramMarshaller.DeserialiseRequestArgs(calledMethodInfo, cdrStream);
+            } else {
+                args = new object[0];
+                cdrStream.SkipRest(); // ignore paddings, if included
+            }            
 
             // for standard corba ops, adapt args:
             if (isStandardOp) {
@@ -543,6 +552,8 @@ namespace Ch.Elca.Iiop.MessageHandling {
         private void SerialiseResponseOk(CdrOutputStream targetStream, ReturnMessage msg,
                                          GiopVersion version) {
             // reply body
+            // clarification form CORBA 2.6, chapter 15.4.2: no padding, when no arguments are serialised  -->
+            // for backward compatibility, do it nevertheless
             AlignBodyIfNeeded(targetStream, version);
             // marshal the parameters
             ParameterMarshaller marshaller = ParameterMarshaller.GetSingleton();
@@ -649,13 +660,19 @@ namespace Ch.Elca.Iiop.MessageHandling {
         private IMessage DeserialiseNormal(CdrInputStream cdrStream, GiopVersion version, 
                                            IMethodCallMessage methodCall) {
             MethodInfo targetMethod = (MethodInfo)methodCall.MethodBase;
-            
-            // body
-            AlignBodyIfNeeded(cdrStream, version);
-            // read the parameters
-            ParameterMarshaller marshaller = ParameterMarshaller.GetSingleton();
+            ParameterMarshaller paramMarshaller = ParameterMarshaller.GetSingleton();
             object[] outArgs;
-            object retVal = marshaller.DeserialiseResponseArgs(targetMethod, cdrStream, out outArgs);
+            object retVal = null;
+            // body
+            // clarification from CORBA 2.6, chapter 15.4.2: no padding, when no arguments are serialised
+            if (paramMarshaller.HasResponseArgs(targetMethod)) {
+                AlignBodyIfNeeded(cdrStream, version);
+                // read the parameters                            
+                retVal = paramMarshaller.DeserialiseResponseArgs(targetMethod, cdrStream, out outArgs);
+            } else {
+                outArgs = new object[0];
+                cdrStream.SkipRest(); // skip padding, if present
+            }
             ReturnMessage response = new ReturnMessage(retVal, outArgs, outArgs.Length, null, methodCall);
             LogicalCallContext dnCntx = response.LogicalCallContext;
             // TODO: fill in .NET context ...

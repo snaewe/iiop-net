@@ -45,6 +45,8 @@ namespace Ch.Elca.Iiop.Marshalling {
 
         private static ParameterMarshaller s_singletonMarshaller = new ParameterMarshaller();
 
+        private static Type s_voidType = typeof(void);
+
         #endregion SFields
         #region IConstructors
         
@@ -168,8 +170,25 @@ namespace Ch.Elca.Iiop.Marshalling {
             }
             // prepare the result
             object[] result = demarshalled.ToArray();
-            if (result == null) { result = new object[0]; }
+            if (result == null) { 
+                result = new object[0]; 
+            }
             return result;
+        }
+
+        /// <summary>
+        /// checks, if the method has request args, i.e. in or ref arguments
+        /// </summary>
+        /// <param name="method">the method to check</param>
+        /// <returns>returns true, if such arguments are found, otherwise false</returns>
+        public bool HasRequestArgs(MethodInfo method) {
+            ParameterInfo[] parameters = method.GetParameters();
+            foreach (ParameterInfo paramInfo in parameters) {    
+                if (IsInParam(paramInfo) || IsRefParam(paramInfo)) {
+                    return true;
+                }
+            }
+            return false;
         }
 
         /// <summary>
@@ -181,7 +200,7 @@ namespace Ch.Elca.Iiop.Marshalling {
                                           CdrOutputStream targetStream) {
             ParameterInfo[] parameters = method.GetParameters();
             // first serialise the return value, 
-            if (method.ReturnType != typeof(void)) {
+            if (!method.ReturnType.Equals(s_voidType)) {
                 AttributeExtCollection returnAttr = AttributeExtCollection.ConvertToAttributeCollection(
                                                         method.ReturnTypeCustomAttributes.GetCustomAttributes(true));
                 Marshal(method.ReturnType, returnAttr, retValue, targetStream);
@@ -195,8 +214,29 @@ namespace Ch.Elca.Iiop.Marshalling {
                     outParamNr++;
                 }
             }
+        }        
+        
+        /// <summary>
+        /// Checks, if the method has response args
+        /// </summary>
+        /// <param name="method">the method to check</param>
+        /// <returns>true, if response args are present, otherwise returns false</returns>
+        public bool HasResponseArgs(MethodInfo method) {
+            if (!method.ReturnType.Equals(s_voidType)) {
+                return true;
+            }
+            
+            ParameterInfo[] parameters = method.GetParameters();
+            foreach (ParameterInfo paramInfo in parameters) {
+                if (IsOutParam(paramInfo) || IsRefParam(paramInfo)) {
+                    return true; // an out or ref parameter found
+                }
+            }
+            
+            return false;            
         }
-
+        
+        
         /// <summary>
         /// deserialises the parameters while receiving a response.
         /// </summary>
@@ -208,7 +248,7 @@ namespace Ch.Elca.Iiop.Marshalling {
             ParameterInfo[] parameters = method.GetParameters();
             // demarshal first the return value, 
             object retValue = null;
-            if (method.ReturnType != typeof(void)) {
+            if (!method.ReturnType.Equals(s_voidType)) {
                 AttributeExtCollection returnAttr = AttributeExtCollection.ConvertToAttributeCollection(
                                                         method.ReturnTypeCustomAttributes.GetCustomAttributes(true));
                 retValue = Unmarshal(method.ReturnType, returnAttr, sourceStream);
@@ -216,8 +256,7 @@ namespace Ch.Elca.Iiop.Marshalling {
             
             // ... then the outargs
             ArrayList demarshalledOutArgs = new ArrayList();
-            foreach (ParameterInfo paramInfo in parameters) 
-            {
+            foreach (ParameterInfo paramInfo in parameters) {
                 if (IsOutParam(paramInfo) || IsRefParam(paramInfo)) {
                     object unmarshalledParam = Unmarshal(paramInfo, sourceStream);
                     demarshalledOutArgs.Add(unmarshalledParam);
