@@ -32,6 +32,7 @@ using Ch.Elca.Iiop.Idl;
 using Ch.Elca.Iiop.Marshalling;
 using Ch.Elca.Iiop.Cdr;
 using Ch.Elca.Iiop.Util;
+using omg.org.CORBA;
 
 namespace Ch.Elca.Iiop.Marshalling {
 
@@ -138,6 +139,22 @@ namespace Corba {
         object read_Abstract();
         [return:ObjectIdlTypeAttribute(IdlTypeObject.ValueBase)]
         object read_Value();
+        /// <summary>
+        /// reads a value type, which is of the given formal type
+        /// </summary>
+        /// <param name="formal"></param>
+        /// <returns></returns>
+        object read_ValueOfType(Type formal);
+        /// <summary>
+        /// reads a corba wstring value
+        /// </summary>
+        /// <returns>the unboxed string</returns>
+        object read_WStringValue();
+        /// <summary>
+        /// reads a corba string value
+        /// </summary>
+        /// <returns>the unboxed string</returns>
+        object read_StringValue();
         /// <summary>boxed values are not handable with read-value</summary>
         /// <param name="boxedType">the boxed type, which is not itself a boxed type</param>
         object read_boxed(BoxedValueAttribute attr, Type boxedType, AttributeExtCollection boxedTypeAttrs);
@@ -421,6 +438,9 @@ namespace Corba {
         private static Type s_stringType = typeof(string);
         private static Type s_mByRefType = typeof(MarshalByRefObject);
 
+        private static Type s_wstringValueType = typeof(WStringValue);
+        private static Type s_stringValueType = typeof(StringValue);
+
         #endregion SFields
         #region IFields
 
@@ -539,6 +559,39 @@ namespace Corba {
                                           new AttributeExtCollection(new Attribute[] { 
                                                   new ObjectIdlTypeAttribute(IdlTypeObject.ValueBase) } ),
                                           m_cdrIn);
+        }
+
+        /// <summary>
+        /// reads a value type, which is of the given formal type
+        /// </summary>
+        /// <param name="formal"></param>
+        /// <returns></returns>
+        public object read_ValueOfType(Type formal) {
+            return m_marshaller.Unmarshal(formal, 
+                                          new AttributeExtCollection(),
+                                          m_cdrIn);
+        }
+
+        /// <summary>
+        /// reads a corba wstring value
+        /// </summary>
+        /// <returns>the unboxed string</returns>
+        public object read_WStringValue() {
+            WStringValue result = (WStringValue)m_marshaller.Unmarshal(s_wstringValueType, 
+                                                                       new AttributeExtCollection(),
+                                                                       m_cdrIn);
+            return result.Unbox();
+        }
+
+        /// <summary>
+        /// reads a corba string value
+        /// </summary>
+        /// <returns>the unboxed string</returns>
+        public object read_StringValue() {
+            StringValue result = (StringValue)m_marshaller.Unmarshal(s_stringValueType, 
+                                                                     new AttributeExtCollection(),
+                                                                     m_cdrIn);
+            return result.Unbox();
         }
 
         public object read_boxed(BoxedValueAttribute attr, Type boxedType, AttributeExtCollection boxedTypeAttrs) {
