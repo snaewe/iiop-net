@@ -43,31 +43,32 @@ using omg.org.CORBA;
 namespace Ch.Elca.Iiop {
 
 
-        /// <summary>used to store relevant data for async response processing</summary>
-        internal class AsyncProcessingData {
+    /// <summary>used to store relevant data for async response processing</summary>
+    internal class AsyncProcessingData {
             
-            private GiopConnectionDesc m_conDesc;
-            private IMessage m_reqMsg;
+        private GiopConnectionDesc m_conDesc;
+        private IMessage m_reqMsg;
             
-            internal AsyncProcessingData(IMessage reqMsg,
-                                        GiopConnectionDesc conDesc) {
-                m_reqMsg = reqMsg;
-                m_conDesc = conDesc;
-            }
-            
-            internal IMessage RequestMsg {
-                get {
-                    return m_reqMsg;
-                }
-            }
-            
-            internal GiopConnectionDesc ConDesc {
-                get {
-                    return m_conDesc;
-                }
-            }
-            
+        internal AsyncProcessingData(IMessage reqMsg,
+                                     GiopConnectionDesc conDesc) {
+            m_reqMsg = reqMsg;                
+            m_conDesc = conDesc;
         }
+            
+        internal IMessage RequestMsg {
+            get {
+                return m_reqMsg;
+            }
+        }
+            
+        internal GiopConnectionDesc ConDesc {
+            get {
+                return m_conDesc;
+            }
+        }
+                        
+    }
+    
         
     /// <summary>
     /// this class is a client side formatter for IIOP-messages in the IIOP-channel
@@ -348,10 +349,12 @@ namespace Ch.Elca.Iiop {
         /// <summary>serialises the .NET msg to a GIOP-message</summary>
         private void SerialiseResponse(IServerResponseChannelSinkStack sinkStack, IMessage requestMsg,
                                        GiopConnectionDesc conDesc, IMessage msg, 
-                                       out ITransportHeaders headers, out Stream stream) {
+                                       ref ITransportHeaders headers, out Stream stream) {
             uint requestId = Convert.ToUInt32(requestMsg.Properties[SimpleGiopMsg.REQUEST_ID_KEY]);
             GiopVersion version = (GiopVersion)requestMsg.Properties[SimpleGiopMsg.GIOP_VERSION_KEY];
-            headers = new TransportHeaders();
+            if (headers == null) {
+                headers = new TransportHeaders();
+            }
             headers[GiopConnectionDesc.SERVER_TR_HEADER_KEY] = conDesc;
             // get the stream into which the message should be serialied from a stream handling
             // sink in the stream handling chain
@@ -368,7 +371,7 @@ namespace Ch.Elca.Iiop {
         private void SerialiseExceptionResponse(Exception e, IMessage requestMsg,
                                                 GiopConnectionDesc conDesc,
                                                 out IMessage responseMsg,
-                                                out ITransportHeaders headers, out Stream stream) {
+                                                ref ITransportHeaders headers, out Stream stream) {
             uint requestId = Convert.ToUInt32(requestMsg.Properties[SimpleGiopMsg.REQUEST_ID_KEY]);
             GiopVersion version = (GiopVersion)requestMsg.Properties[SimpleGiopMsg.GIOP_VERSION_KEY];
             // serialise an exception response
@@ -406,7 +409,8 @@ namespace Ch.Elca.Iiop {
                 // deserialise the request
                 deserReqMsg = DeserialiseRequest(requestStream, requestHeaders, conDesc);
                 // processing may be done asynchronous, therefore push this sink on the stack to process a response async
-                AsyncProcessingData asyncData = new AsyncProcessingData(deserReqMsg, conDesc);
+                AsyncProcessingData asyncData = 
+                    new AsyncProcessingData(deserReqMsg, conDesc);
                 sinkStack.Push(this, asyncData);
                 
                 // forward the call to the next message handling sink
@@ -417,8 +421,8 @@ namespace Ch.Elca.Iiop {
                     case ServerProcessing.Complete:
                         sinkStack.Pop(this); // not async
                         // send the response
-                        SerialiseResponse(sinkStack, deserReqMsg, conDesc, responseMsg, 
-                                          out responseHeaders, out responseStream);                        
+                        SerialiseResponse(sinkStack, deserReqMsg, conDesc, responseMsg,
+                                          ref responseHeaders, out responseStream);                        
                         break;
                     case ServerProcessing.Async:
                         sinkStack.Store(this, asyncData); // this sink want's to process async response
@@ -439,7 +443,7 @@ namespace Ch.Elca.Iiop {
                 // an exception was thrown during deserialization
                 SerialiseExceptionResponse(deserEx.Reason, deserEx.RequestMessage, conDesc,
                                            out responseMsg,
-                                           out responseHeaders, out responseStream);
+                                           ref responseHeaders, out responseStream);
                 return ServerProcessing.Complete;
             } catch (Exception e) {
                 try { 
@@ -448,7 +452,7 @@ namespace Ch.Elca.Iiop {
                 // serialise an exception response
                 if (deserReqMsg != null) {
                     SerialiseExceptionResponse(e, deserReqMsg, conDesc,
-                                               out responseMsg, out responseHeaders,
+                                               out responseMsg, ref responseHeaders,
                                                out responseStream);
                 } else {
                     throw e;
@@ -464,12 +468,12 @@ namespace Ch.Elca.Iiop {
             try {                
                 IMessage requestMsg = asyncData.RequestMsg;
                 SerialiseResponse(sinkStack, requestMsg, asyncData.ConDesc, msg, 
-                                  out headers, out stream);
+                                  ref headers, out stream);
             } 
             catch (Exception e) {
                 // serialise the exception
                 SerialiseExceptionResponse(e, (IMessage)state, asyncData.ConDesc,
-                                           out msg, out headers, out stream);
+                                           out msg, ref headers, out stream);
             }
             sinkStack.AsyncProcessResponse(msg, headers, stream); // pass further on to the stream handling sinks
         }
