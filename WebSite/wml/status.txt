@@ -21,6 +21,9 @@
 	<restore version>
 </define-tag>
 
+<define-tag monobug>
+	<a href="http://bugzilla.ximian.com/show_bug.cgi?id=%0">%0</a>
+</define-tag>
 
 <p>
 Interoperation with the following ORBs has been reported:
@@ -58,8 +61,20 @@ Interoperation with J2EE applications is reported for the following application 
 </software>
 <software name="BEA Weblogic">
 	<report version="6.1">array mapping problems</report>
+	<report version="7">in progress</report>
 	<report version="8.1">ok</report>
 </software>
 </reports>
 
-
+<p/>
+IIOP.NET on Mono:
+<reports>
+<software name="Mono 0.31">
+	<report version="IntegrationTests/Basic">
+		doesn't compile (reason unknown)
+	</report>
+	<report version="IntegrationTests/Direct">
+		Unions not working due to Mono bugs <monobug 56005> and <monobug 56013>
+	</report>
+</software>
+</reports>
