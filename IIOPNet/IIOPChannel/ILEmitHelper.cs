@@ -385,8 +385,17 @@ namespace Ch.Elca.Iiop.Idl {
         /// </summary>
         /// <remarks>should be on MethodBuilder, but not possible to change MethodBuilder-class</remarks>
         private ParameterBuilder CreateParamBuilderForRetParam(MethodBuilder forMethod) {
-            return (ParameterBuilder) s_paramBuildConstr.Invoke(new Object[] { forMethod, (System.Int32) 0,
-                                                                               ParameterAttributes.None, null } );
+            ParameterBuilder result = null;
+            try {
+                // mono allows to create the ParameterBuilder on return parameter by calling DefineParameter on MethodBuilder
+                result = forMethod.DefineParameter(0, ParameterAttributes.None, null);
+            } catch (ArgumentOutOfRangeException) {
+                // workaround for .NET: create a new ParameterBuilder unsing reflection:
+                // constructor is non-public
+                result = (ParameterBuilder) s_paramBuildConstr.Invoke(new Object[] { forMethod, (System.Int32) 0,
+                                                                                     ParameterAttributes.None, null } );
+            }
+            return result;
         }
 
         #endregion IMethods
