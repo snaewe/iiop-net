@@ -61,5 +61,7 @@ using System.Runtime.CompilerServices;
 // .NET Framework documentation for more information about signing.
 // This is not required, if you don't want signing let these attributes like they're.
 [assembly: AssemblyDelaySign(false)]
+#if (!DISABLE_STRONG_NAME)
 [assembly: AssemblyKeyFile(@"..\Key.snk")]
+#endif
 [assembly: AssemblyKeyName("")]

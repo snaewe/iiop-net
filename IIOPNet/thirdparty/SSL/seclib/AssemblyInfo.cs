@@ -98,5 +98,7 @@ using System.Runtime.CompilerServices;
 //
 [assembly: AssemblyDelaySign(false)]
 //[assembly: AssemblyKeyFile(@"\\Mentalis\pieter\cabackup\slkey.snk")]
+#if (!DISABLE_STRONG_NAME)
 [assembly: AssemblyKeyFile(@"..\..\..\Key.snk")]
+#endif
 [assembly: AssemblyKeyName("")]
