@@ -92,6 +92,7 @@ namespace Ch.Elca.Iiop.MessageHandling {
     /// This exception stores
     /// all the information needed to construct an exception reply.
     /// </summary>
+    [Serializable]
     internal class RequestDeserializationException : Exception {
         
         #region IFields

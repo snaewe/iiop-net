@@ -38,12 +38,8 @@ using Ch.Elca.Iiop.Services;
 
 namespace Ch.Elca.Iiop.MessageHandling {
 
-    /// <summary>gives information to caller how to proceed after message receiving</summary>
-    public enum IncomingHandlingStatus {
-        normal, fragment, close
-    }
 
-    /// <summary>
+	/// <summary>
     /// This class handles Giop-Messages
     /// </summary>
     /// <remarks>

@@ -80,7 +80,7 @@ namespace Ch.Elca.Iiop {
 	
 		// GIOP 1.1 doen't support req-id in fragments -> use instead this key to retrieve
 		// msg from Hashtable
-		private object GIOP_1_1_KEY = new object();
+		private object m_giop11Key = new object();
 	
 		#endregion Constants
 		#region IFields
@@ -148,7 +148,7 @@ namespace Ch.Elca.Iiop {
 				int contentLength = (int) header.ContentMsgLength;
 			
 				if ((header.Version.Major == 1) && (header.Version.Minor == 1)) {
-					descKey = GIOP_1_1_KEY;
+					descKey = m_giop11Key;
 				} else if (!((header.Version.Major == 1) && (header.Version.Minor == 0))) {
 					// GIOP 1.2 or newer
 					uint reqId = source.ReadULong();
@@ -173,7 +173,7 @@ namespace Ch.Elca.Iiop {
 		internal void AddFragment(CdrInputStream source, 
 		                          GiopHeader header) {
 			if ((header.Version.Major == 1) && (header.Version.Minor == 1)) {
-				AddFragmentInternal(GIOP_1_1_KEY, source, 
+				AddFragmentInternal(m_giop11Key, source, 
 				                    header.ContentMsgLength);
 			} else if (!((header.Version.Major == 1) && (header.Version.Minor == 0))) {
 				// GIOP 1.2 or newer: read request id from fragment msg header
@@ -189,7 +189,7 @@ namespace Ch.Elca.Iiop {
 		                                    GiopHeader header) {
 			Stream result;
 			if ((header.Version.Major == 1) && (header.Version.Minor == 1)) {
-				result = FinishFragmentedMsgInternal(GIOP_1_1_KEY, source,
+				result = FinishFragmentedMsgInternal(m_giop11Key, source,
 				                                     header.ContentMsgLength);
 			} else if (!((header.Version.Major == 1) && (header.Version.Minor == 0))) {
 				// GIOP 1.2 or newer: read request id from fragment msg header
