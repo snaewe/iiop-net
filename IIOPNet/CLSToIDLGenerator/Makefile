@@ -9,7 +9,7 @@ $(Dest)IIOPChannel.dll: $(IIOPChannel)
 	copy $(IIOPChannel) $@
 
 $(Dest)CLSIDLGenerator.exe: $(Dest)IIOPChannel.dll *.cs
-	if not exist $@nul mkdir $@
+	if not exist $(Dest)nul mkdir $(Dest)
 	csc $(CSFLAGS) /r:$(Dest)IIOPChannel.dll /t:exe /out:$@ *.cs 
 
 
