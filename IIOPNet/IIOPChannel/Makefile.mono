@@ -11,11 +11,11 @@ $(Dest)IIOPChannel.dll: *.cs
 
 build-unit-tests: build nunit-var
 	[ -f $(UnitTestDest)nul ] || mkdir $(UnitTestDest)
-	mcs /nowarn:0618 $(CSFLAGS) /d:UnitTest /r:$(NUNITV2_HOME)/bin/nunit.framework.dll /t:library /out:$(UnitTestDest)IIOPChannel.dll *.cs
+	mcs /nowarn:0618 $(CSFLAGS) /d:UnitTest /r:${MONO_SRCDIR}/runtime/NUnit.Framework.dll /t:library /out:$(UnitTestDest)IIOPChannel.dll *.cs
 
 nunit-var:
-	[ -z NUNITV2_HOME ] && echo "Define NUNITV2_HOME as the home directory of your NUNIT installation"
-	[ -z NUNITV2_HOME ] && exit 2
+	[ ! -z $(MONO_SRCDIR) ] || echo "Define MONO_SRCDIR as the root directory of your Mono sources tree"
+	[ ! -z $(MONO_SRCDIR) ] || exit 2
 
 clean:
 	rm -fr $(Dest) 

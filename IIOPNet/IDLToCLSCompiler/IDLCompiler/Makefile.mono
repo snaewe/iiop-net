@@ -1,9 +1,7 @@
-
 IIOPChannel = ../../IIOPChannel/bin/IIOPChannel.dll
 IDLPreprocessor = ../IDLPreprocessor/bin/IDLPreprocessor.dll
 Dest = bin/
 TestDest = TestBin/
-
 
 build: build-exe
 
@@ -32,7 +30,7 @@ $(TestDest)IDLPreprocessor.dll: $(IDLPreprocessor)
 	cp $(IDLPreprocessor) $(TestDest)IDLPreprocessor.dll
 
 $(TestDest)IDLToCLSCompiler.exe: $(TestDest)IIOPChannel.dll $(TestDest)IDLPreprocessor.dll *.cs
-	mcs $(CSFLAGS) /d:UnitTest /res:MappingPluginSchema.xsd /r:NUnit.Framework.dll /r:$(TestDest)IIOPChannel.dll /r:$(TestDest)IDLPreprocessor.dll /t:exe /out:$(TestDest)IDLToCLSCompiler.exe *.cs
+	mcs $(CSFLAGS) /d:UnitTest /res:MappingPluginSchema.xsd /r:${MONO_SRCDIR}/runtime/NUnit.Framework.dll /r:$(TestDest)IIOPChannel.dll /r:$(TestDest)IDLPreprocessor.dll /t:exe /out:$(TestDest)IDLToCLSCompiler.exe *.cs
 
 clean:
 	rm -fr $(Dest) 
