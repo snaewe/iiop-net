@@ -16,33 +16,54 @@
 
 <define-tag report endtag=required>
 	<preserve version>
+	<preserve color>
 	<set-var %attributes>
-	<tr><td><get-var name></td><td><get-var version></td><td>%body</td></tr>
+	<ifeq "<get-var color>" "green" <set-var color="#99FF99">>
+	<ifeq "<get-var color>" "red" <set-var color="#FF3333">>
+	<ifeq "<get-var color>" "orange" <set-var color="#FF9966">>
+	<ifeq "<get-var color>" "yellow" <set-var color="#FFFF99">>
+	<tr><td width="10px" bgcolor="<get-var color>"></td><td><get-var name></td><td><get-var version></td><td>%body</td></tr>
+	<restore color>
 	<restore version>
+</define-tag>
+
+<define-tag iiopbug>
+	<a href="http://sourceforge.net/tracker/index.php?func=detail&aid=%0&group_id=80227&atid=559114">%0</a>
+</define-tag>
+
+<define-tag iiopfeature>
+	<a href="http://sourceforge.net/tracker/index.php?func=detail&aid=%0&group_id=80227&atid=559117">%0</a>
 </define-tag>
 
 <define-tag monobug>
 	<a href="http://bugzilla.ximian.com/show_bug.cgi?id=%0">%0</a>
 </define-tag>
 
+
 <p>
 Interoperation with the following ORBs has been reported:
 <reports>
+<software name="all">
+	<report version="">
+	any partially supported (bug <iiopbug 857050>)<br>
+	wide-char not supported (request <iiopfeature 778878>)
+	</report>
+</software>
 <software name="SUN JDK">
-	<report version="1.4">OK</report>
+	<report version="1.4" color="green">OK</report>
 </software>
 
 <software name="MICO">
-	<report version="2.3.10">OK</report>
+	<report version="2.3.10" color="green">OK</report>
 </software>
 
 <software name="TAO">
-	<report version"N.A.">in progress</report>
+	<report version="N.A." color="green">ok</report>
 </software>
 
 <software name="OmniORB">
-	<report version="4.0.2">wide-char not supported</report>
-	<report version="4.0.3">wide-char not supported</report>
+	<report version="4.0.2" color="green">ok</report>
+	<report version="4.0.3" color="green">ok</report>
 </software>
 </reports>
 
@@ -50,19 +71,19 @@ Interoperation with the following ORBs has been reported:
 Interoperation with J2EE applications is reported for the following application servers:
 <reports>
 <software name="IBM Websphere">
-	<report version="4.0">ok</report>
-	<report version="5.0">ok</report>
+	<report version="4.0" color="green">ok</report>
+	<report version="5.0" color="green">ok</report>
 </software>
 <software name="JBoss">
-	<report version="3.0.6">in progress</report>
-	<report version="3.2.1">ok</report>
-	<report version="3.2.2">no (JBoss bug #<a href="http://sourceforge.net/tracker/index.php?func=detail&aid=829734&group_id=22866&atid=376685">829734</a>)</report>
-	<report version="3.2.3">ok</report>
+	<report version="3.0.6" color="yellow">in progress</report>
+	<report version="3.2.1" color="green">ok</report>
+	<report version="3.2.2" color="red">no (JBoss bug #<a href="http://sourceforge.net/tracker/index.php?func=detail&aid=829734&group_id=22866&atid=376685">829734</a>)</report>
+	<report version="3.2.3" color="green">ok</report>
 </software>
 <software name="BEA Weblogic">
-	<report version="6.1">array mapping problems</report>
-	<report version="7">in progress</report>
-	<report version="8.1">ok</report>
+	<report version="6.1" color="yellow">array mapping problems</report>
+	<report version="7" color="orange">in progress</report>
+	<report version="8.1" color="green">ok</report>
 </software>
 </reports>
 
@@ -70,10 +91,10 @@ Interoperation with J2EE applications is reported for the following application 
 IIOP.NET on Mono:
 <reports>
 <software name="Mono 0.31">
-	<report version="IntegrationTests/Basic">
+	<report version="IntegrationTests/Basic" color="orange">
 		doesn't compile (reason unknown)
 	</report>
-	<report version="IntegrationTests/Direct">
+	<report version="IntegrationTests/Direct" color="orange">
 		Unions not working due to Mono bugs <monobug 56005> and <monobug 56013>
 	</report>
 </software>
