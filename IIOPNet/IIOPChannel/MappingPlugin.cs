@@ -29,7 +29,9 @@
 
 using System;
 using System.Collections;
+using System.Reflection;
 using System.Xml;
+using System.Xml.Schema;
 using System.IO;
 
 
@@ -66,17 +68,24 @@ namespace Ch.Elca.Iiop.Idl {
     /// defined and it is used to retrieve the information needed to perform this mapping.
     /// </summary>
     public class CustomMapperRegistry {
-           
+
+        #region Constants
+
+        private const string XSD_RESOURCE_NAME = "MappingPluginSchema.xsd";
+
+        #endregion Constants
         #region SFields
 
         private static CustomMapperRegistry s_registry;
 
         #endregion SFields
         #region IFields
-
+        
         private Hashtable m_mappingsCls = new Hashtable();
 
         private Hashtable m_mappingsIdl = new Hashtable();
+
+        private XmlSchema m_mappingPluginSchema;
 
         #endregion IFields
         #region SConstructor
@@ -89,6 +98,13 @@ namespace Ch.Elca.Iiop.Idl {
         #region IConstructors
 
         private CustomMapperRegistry() {
+            // load xsd schema from channel assembly
+            Assembly asm = GetType().Assembly;
+            Stream xsdStream = asm.GetManifestResourceStream(XSD_RESOURCE_NAME);
+            if (xsdStream != null) {
+                m_mappingPluginSchema = XmlSchema.Read(xsdStream, new ValidationEventHandler(this.OnValidationEvent));
+                xsdStream.Close();
+            }
         }
 
         #endregion IConstructors
@@ -100,6 +116,13 @@ namespace Ch.Elca.Iiop.Idl {
 
         #endregion SMethods
         #region IMethods
+
+        /// <summary>
+        /// is called on errors in schema
+        /// </summary>
+        /// <remarks>should not be called, because schema is ok</remarks>
+        private void OnValidationEvent(object sender, ValidationEventArgs e) {
+        }
 
         /// <summary>
         /// checks, if a special mapping for the native clsType clsType exists.
@@ -144,31 +167,41 @@ namespace Ch.Elca.Iiop.Idl {
         /// adds special mappings from a config file
         /// </summary>
         public void AddMappingsFromFile(FileInfo configFile) {
-             // load the xml-file
-             XmlDocument doc = new XmlDocument();
-             FileStream stream = new FileStream(configFile.FullName, FileMode.Open);
-             doc.Load(stream);
-             stream.Close();
-             // process the file
-             XmlNodeList elemList = doc.GetElementsByTagName("mapping");
-             foreach (XmlNode elem in elemList) {                 
-                 XmlElement idlTypeName = elem["idlTypeName"];
-                 XmlElement idlTypeAsm = elem["idlTypeAssembly"];
-                 XmlElement clsTypeAsqName = elem["clsType"];
-                 XmlElement customMapperElem = elem["customMapper"];
-                 // idlType:
-                 String asmQualIdlName = idlTypeName.InnerText + "," + idlTypeAsm.InnerText;
-                 Type idlType = Type.GetType(asmQualIdlName, true);
-                 // clsType:
-                 Type clsType = Type.GetType(clsTypeAsqName.InnerText, true);
-                 // custom Mapper:
-                 ICustomMapper customMapper = null;
-                 if (customMapperElem != null) {
-                     Type customMapperType = Type.GetType(customMapperElem.InnerText, true);
-                     customMapper = (ICustomMapper)Activator.CreateInstance(customMapperType);                     
-                 }
-                 AddMapping(clsType, idlType, customMapper);
-             }
+            // check schema ok
+            if (m_mappingPluginSchema == null) {
+                throw new Exception("schema loading problem");
+            }
+            // load the xml-file
+            XmlDocument doc = new XmlDocument();
+            FileStream stream = new FileStream(configFile.FullName, FileMode.Open);
+            XmlTextReader textReader = new XmlTextReader(stream);            
+            XmlValidatingReader validatingReader = new XmlValidatingReader(textReader);
+            try {
+                validatingReader.Schemas.Add(m_mappingPluginSchema);
+                doc.Load(validatingReader);
+                // process the file
+                XmlNodeList elemList = doc.GetElementsByTagName("mapping");
+                foreach (XmlNode elem in elemList) {                 
+                    XmlElement idlTypeName = elem["idlTypeName"];
+                    XmlElement idlTypeAsm = elem["idlTypeAssembly"];
+                    XmlElement clsTypeAsqName = elem["clsType"];
+                    XmlElement customMapperElem = elem["customMapper"];
+                    // idlType:
+                    String asmQualIdlName = idlTypeName.InnerText + "," + idlTypeAsm.InnerText;
+                    Type idlType = Type.GetType(asmQualIdlName, true);
+                    // clsType:
+                    Type clsType = Type.GetType(clsTypeAsqName.InnerText, true);
+                    // custom Mapper:
+                    ICustomMapper customMapper = null;
+                    if (customMapperElem != null) {
+                        Type customMapperType = Type.GetType(customMapperElem.InnerText, true);
+                        customMapper = (ICustomMapper)Activator.CreateInstance(customMapperType);                     
+                    }
+                    AddMapping(clsType, idlType, customMapper);
+                }
+            } finally {
+                validatingReader.Close();
+            }
         }
 
         /// <summary>

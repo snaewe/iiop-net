@@ -8,7 +8,7 @@ build-dll: $(Dest)IIOPChannel.dll
 	
 $(Dest)IIOPChannel.dll: *.cs
 	if not exist $(Dest)nul mkdir $(Dest)
-	csc $(CSFLAGS) /t:library /out:$@ *.cs
+	csc $(CSFLAGS) /res:MappingPluginSchema.xsd /t:library /out:$@ *.cs
 	
 
 build-unit-tests: build nunit-var

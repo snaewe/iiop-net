@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+
+<xsd:annotation>
+    <xsd:documentation xml:lang="en">
+    schema for an xml-document specifying custom mappings
+    </xsd:documentation>
+</xsd:annotation>
+
+
+<xsd:complexType name="mappingType">
+    <xsd:sequence>
+        <xsd:element name="idlTypeName" type="xsd:string"/>
+        <xsd:element name="idlTypeAssembly" type="xsd:string"/>
+        <xsd:element name="clsType" type="xsd:string"/>
+        <xsd:element name="customMapper" type="xsd:string" minOccurs="0" maxOccurs="1"/>
+    </xsd:sequence>
+
+</xsd:complexType>
+
+
+<xsd:element name="mappings">
+    <xsd:complexType>
+    <xsd:sequence>
+        <xsd:element name="mapping" type="mappingType" minOccurs="1" maxOccurs="unbounded"></xsd:element>
+    </xsd:sequence>
+    </xsd:complexType>        
+</xsd:element>
+
+</xsd:schema>    
