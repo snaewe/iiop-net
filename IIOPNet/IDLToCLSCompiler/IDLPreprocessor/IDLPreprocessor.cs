@@ -109,7 +109,7 @@ namespace Ch.Elca.Iiop.IdlPreprocessor {
         /// <summary>
         /// the path to the IDL files: a List of DirectoryInfo entries
         /// </summary>
-	private static IList s_idlPath;
+        private static IList s_idlPath;
         
         private static Regex s_tokenSplitEx = new Regex(@"\s+");
         
@@ -135,13 +135,13 @@ namespace Ch.Elca.Iiop.IdlPreprocessor {
         static IDLPreprocessor() {
             FileInfo locOfPreprocAsm = new FileInfo(typeof(IDLPreprocessor).Assembly.Location);
             string asmDirectory = locOfPreprocAsm.Directory.FullName;
-	    s_idlPath = new ArrayList();
-	    // IDL: first look in current directory
-	    //      then in the %IIOPNet%/IDL directory
-	    //      (assume that IDLtoCLS is in %IIOPNet%/IDLtoCLSCompiler/IDLCompiler/bin)
-	    s_idlPath.Add(new DirectoryInfo("."));
+            s_idlPath = new ArrayList();
+            // IDL: first look in current directory
+            //      then in the %IIOPNet%/IDL directory
+            //      (assume that IDLtoCLS is in %IIOPNet%/IDLtoCLSCompiler/IDLCompiler/bin)
+            s_idlPath.Add(new DirectoryInfo("."));
             s_idlPath.Add(new DirectoryInfo(Path.Combine(asmDirectory, 
-            	                                       ".." + Path.DirectorySeparatorChar + ".." + Path.DirectorySeparatorChar + "IDL")));
+                                                       ".." + Path.DirectorySeparatorChar + ".." + Path.DirectorySeparatorChar + "IDL")));
         }
         
         #endregion SConstructor
@@ -187,10 +187,10 @@ namespace Ch.Elca.Iiop.IdlPreprocessor {
         /// <exception cref="System.IO.IOException">Problem with IO, e.g file not found</exception>
         private void Init(FileInfo toProcess) {
             // for IDL files, latin 1 is used            
-	    if (!toProcess.Exists) {
-		    Console.WriteLine("File not found error: " + toProcess.Name);
-		    Environment.Exit(2);
-	    }
+            if (!toProcess.Exists) {
+                Console.WriteLine("File not found error: " + toProcess.Name);
+                Environment.Exit(2);
+            }
             m_fileStream = new StreamReader(new FileStream(toProcess.FullName,
                                                            FileMode.Open,
                                                            FileAccess.Read, 
@@ -245,21 +245,21 @@ namespace Ch.Elca.Iiop.IdlPreprocessor {
         }
 
         #region implementation of the preprocessing actions
-	
-	/// <summary>find a file using the s_idlPath list as base directory</summary>
-	private FileInfo GetFile(String name) {
+    
+        /// <summary>find a file using the s_idlPath list as base directory</summary>
+        private FileInfo GetFile(String name) {
             FileInfo fi = null;
 
             foreach (DirectoryInfo di in s_idlPath) {
                 fi = new FileInfo(Path.Combine(di.FullName, name));
                 if (fi.Exists) {
                     return fi;
-                }		
+                }        
             }
             // Return last value (error handling will extract the file name
             // from the FileInfo)
             return fi;
-	}
+        }
 
         /// <summary>processes an include directive</summary>
         /// <exception cref="Ch.Elca.Iiop.IdlPreprocessor.IllegalPreprocDirectiveException">
@@ -276,20 +276,20 @@ namespace Ch.Elca.Iiop.IdlPreprocessor {
             // fileToInclude enclosed in quotation mark: search in current directory for file
             // fileToInclude enclosed in <>: search in compiler include dir!
             String fileToInclude = tokens[1];
-	    FileInfo toInclude = null;
-	    char ch0 = fileToInclude[0];
-	    char ch1 = fileToInclude[fileToInclude.Length-1];
-	    fileToInclude = fileToInclude.Substring(1, fileToInclude.Length - 2);
+            FileInfo toInclude = null;
+            char ch0 = fileToInclude[0];
+            char ch1 = fileToInclude[fileToInclude.Length-1];
+            fileToInclude = fileToInclude.Substring(1, fileToInclude.Length - 2);
 
-	    if ((ch0 == '"') && (ch1 == '"')) {
-	        toInclude = new FileInfo(fileToInclude);
-	    } else if ((ch0 != '<') || (ch1 != '>')) {
+            if ((ch0 == '"') && (ch1 == '"')) {
+                toInclude = new FileInfo(fileToInclude);
+            } else if ((ch0 != '<') || (ch1 != '>')) {
                 throw new IllegalPreprocDirectiveException(currentLine);
-	    }
-	    if ((toInclude == null) || (!toInclude.Exists)) {
+            }
+            if ((toInclude == null) || (!toInclude.Exists)) {
                 toInclude = GetFile(fileToInclude);
-	    }
-			    
+            }
+                
             IDLPreprocessor includePreproc = new IDLPreprocessor(toInclude, 
                                                                  m_defined);
             includePreproc.Process();
@@ -338,122 +338,122 @@ namespace Ch.Elca.Iiop.IdlPreprocessor {
             Debug.WriteLine("defined symbol in preproc: " + define);
         }    
     
-    private void ProcessIfNDef(String currentLine) {        
-        currentLine = currentLine.Trim();
-        // split by whitespaces
-        String[] tokens = s_tokenSplitEx.Split(currentLine);
-        if (tokens.Length <= 1) { 
-            throw new IllegalPreprocDirectiveException(currentLine,
-                                              "ifndef missing argument");            
-        }
-        if (tokens.Length > 2) {
-            throw new IllegalPreprocDirectiveException(currentLine,
-                                              "too much tokens in ifndef directive");            
-        }
-        String define = tokens[1];
-        if (m_defined.ContainsKey(define)) { // throw everything in block away
-            m_ifBlockStack.Push(new IfBlock(false)); // ifndef condition is false
-            ReadToEndifOrElse(); // throw away up to endif / else
-        } else {
-            m_ifBlockStack.Push(new IfBlock(true)); // ifndef condition is true
-        }
-    }
-    
-    private void ProcessIfDef(String currentLine) {
-        currentLine = currentLine.Trim();
-        // split by spaces
-        String[] tokens = s_tokenSplitEx.Split(currentLine);
-        if (tokens.Length <= 1) { 
-            throw new IllegalPreprocDirectiveException(currentLine,
-                                              "ifdef missing argument");            
-        }
-        if (tokens.Length > 2) {
-            throw new IllegalPreprocDirectiveException(currentLine,
-                                              "too much tokens in ifdef directive");            
-        }
-        String define = tokens[1];
-        if (!m_defined.ContainsKey(define)) { // throw everything in block away
-            m_ifBlockStack.Push(new IfBlock(false)); // ifdef condition is false
-            ReadToEndifOrElse(); // throw away up to endif / else
-        } else {
-            m_ifBlockStack.Push(new IfBlock(true)); // ifdef condition is true
-        }
-    }
-
-
-    private void ProcessElse(String currentLine) {
-        if (m_ifBlockStack.Count > 0) {
-            IfBlock block = (IfBlock) m_ifBlockStack.Peek();            
-            if (block.IsConditionTrue) {
-                // if true -> skip else block
-                ReadToEndif();
+        private void ProcessIfNDef(String currentLine) {        
+            currentLine = currentLine.Trim();
+            // split by whitespaces
+            String[] tokens = s_tokenSplitEx.Split(currentLine);
+            if (tokens.Length <= 1) { 
+                throw new IllegalPreprocDirectiveException(currentLine,
+                                                  "ifndef missing argument");            
             }
-        } else {
-            throw new PreprocessingException("else without if encountered"); 
+            if (tokens.Length > 2) {
+                throw new IllegalPreprocDirectiveException(currentLine,
+                                                  "too much tokens in ifndef directive");            
+            }
+            String define = tokens[1];
+            if (m_defined.ContainsKey(define)) { // throw everything in block away
+                m_ifBlockStack.Push(new IfBlock(false)); // ifndef condition is false
+                ReadToEndifOrElse(); // throw away up to endif / else
+            } else {
+                m_ifBlockStack.Push(new IfBlock(true)); // ifndef condition is true
+            }
         }
-    }    
     
-    private void ProcessEndIf(String currentLine) {
-        if (m_ifBlockStack.Count > 0) {
-            IfBlock block = (IfBlock) m_ifBlockStack.Pop();        
-        } else {
-            throw new PreprocessingException("too much endif's encountered"); 
-        }                
-    }
+        private void ProcessIfDef(String currentLine) {
+            currentLine = currentLine.Trim();
+            // split by spaces
+            String[] tokens = s_tokenSplitEx.Split(currentLine);
+            if (tokens.Length <= 1) { 
+                throw new IllegalPreprocDirectiveException(currentLine,
+                                                  "ifdef missing argument");            
+            }
+            if (tokens.Length > 2) {
+                throw new IllegalPreprocDirectiveException(currentLine,
+                                                  "too much tokens in ifdef directive");            
+            }
+            String define = tokens[1];
+            if (!m_defined.ContainsKey(define)) { // throw everything in block away
+                m_ifBlockStack.Push(new IfBlock(false)); // ifdef condition is false
+                ReadToEndifOrElse(); // throw away up to endif / else
+            } else {
+                m_ifBlockStack.Push(new IfBlock(true)); // ifdef condition is true
+            }
+        }
 
-    /// <summary>
-    /// search for a matching end-if or else directive, 
-    /// throwing away everything in between.
-    /// checks if's / endif's in between
-    /// </summary> 
-    private void ReadToEndifOrElse() {
-        int moreIfs = 1; // more if's encountered than endif / else
-        String currentLine = "";
-        while ((moreIfs > 0) && (currentLine != null)) {
-            if (currentLine.StartsWith("#if")) {
-                moreIfs++; // an inner if; must be closed by an endif
+
+        private void ProcessElse(String currentLine) {
+            if (m_ifBlockStack.Count > 0) {
+                IfBlock block = (IfBlock) m_ifBlockStack.Peek();            
+                if (block.IsConditionTrue) {
+                    // if true -> skip else block
+                    ReadToEndif();
+                }
+            } else {
+                throw new PreprocessingException("else without if encountered"); 
+            }
+        }    
+    
+        private void ProcessEndIf(String currentLine) {
+            if (m_ifBlockStack.Count > 0) {
+                IfBlock block = (IfBlock) m_ifBlockStack.Pop();        
+            } else {
+                throw new PreprocessingException("too much endif's encountered"); 
+            }                
+        }
+
+        /// <summary>
+        /// search for a matching end-if or else directive, 
+        /// throwing away everything in between.
+        /// checks if's / endif's in between
+        /// </summary> 
+        private void ReadToEndifOrElse() {
+            int moreIfs = 1; // more if's encountered than endif / else
+            String currentLine = "";
+            while ((moreIfs > 0) && (currentLine != null)) {
+                if (currentLine.StartsWith("#if")) {
+                    moreIfs++; // an inner if; must be closed by an endif
+                }
+                if (currentLine.StartsWith("#endif")) {
+                    moreIfs--; // an inner or a matching endif found; is matching if moreIfs was 1
+                }
+                if ((moreIfs == 1) && currentLine.StartsWith("#else")) {
+                    moreIfs--; // matching else found
+                }            
+                if (moreIfs > 0) { 
+                    // no matching end directive yet
+                    currentLine = m_fileStream.ReadLine().Trim();
+                }
             }
             if (currentLine.StartsWith("#endif")) {
-                moreIfs--; // an inner or a matching endif found; is matching if moreIfs was 1
+                // close an if-block
+                ProcessEndIf(currentLine);
             }
-            if ((moreIfs == 1) && currentLine.StartsWith("#else")) {
-                moreIfs--; // matching else found
-            }            
-            if (moreIfs > 0) { 
-                // no matching end directive yet
-                currentLine = m_fileStream.ReadLine().Trim();
-            }
-        }
-        if (currentLine.StartsWith("#endif")) {
-            // close an if-block
-            ProcessEndIf(currentLine);
-        }
-    }    
+        }    
     
-    /// search for a matching end-if directive,
-    /// throwing away everything in between.
-    /// checks if's / endif's in between
-    private void ReadToEndif() {
-        int moreIfs = 1; // more if's encountered than endif / else
-        String currentLine = "";
-        while ((moreIfs > 0) && (currentLine != null)) {
-            if (currentLine.StartsWith("#if")) {
-                moreIfs++; 
+        /// search for a matching end-if directive,
+        /// throwing away everything in between.
+        /// checks if's / endif's in between
+        private void ReadToEndif() {
+            int moreIfs = 1; // more if's encountered than endif / else
+            String currentLine = "";
+            while ((moreIfs > 0) && (currentLine != null)) {
+                if (currentLine.StartsWith("#if")) {
+                    moreIfs++; 
+                }
+                if (currentLine.StartsWith("#endif")) { 
+                    moreIfs--; 
+                }            
+                if (moreIfs > 0) { 
+                    currentLine = m_fileStream.ReadLine().Trim(); 
+                }
             }
-            if (currentLine.StartsWith("#endif")) { 
-                moreIfs--; 
-            }            
-            if (moreIfs > 0) { 
-                currentLine = m_fileStream.ReadLine().Trim(); 
-            }
+               // close an if-block
+               ProcessEndIf(currentLine);
         }
-           // close an if-block
-           ProcessEndIf(currentLine);
-    }
 
-    #endregion implementation of the preprocessing actions
+        #endregion implementation of the preprocessing actions
 
-    #endregion IMethods
+        #endregion IMethods
         
         
         
