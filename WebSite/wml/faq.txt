@@ -13,14 +13,8 @@ Yes, it does. This is in fact the platform it was developed on.
 
 <FAQ question="Does IIOP.NET support Visual Studio's Intellisense?">
 
-<p>There is an implementation limitation in Intellisense for C#: it cannot
-extract type information from multimodule assemblies, thus you won't be able to 
-see the interfaces and proxies generated with the IDLToCLSCompiler using Intellisense
-while writing C# code.
+<p>Visual Studio's Intellisense is fully supported since release 1.6.0; previous releases did only work with VB.NET.
 
-<p>This limitation is not present in Intellisense for Visual Basic. Another workaround
-is to merge the multimodule assemblies into a single assembly; we know of a commercial tool
-for this purpose called "Salamander.NET linker".
 </FAQ>
 
 <FAQ question="Does IIOP.NET work with mono?">
@@ -449,6 +443,14 @@ Currently, IIOP.NET does only support a limited set of codesets:
 </ul>
 
 If possible, you sould use UTF8, Latin1 or UTF16.
+
+</FAQ>
+
+<FAQ question="'Unknown Host' executing nameService.resolve">
+
+<p>Please check the address you gave in your configuration. You can check whether the machine is alive using the command-line command 'ping <i>address</i>'. If you use callbacks, make also sure that the machine you want to connect to can reach you local machine (this may be a problem with firewalls and intranets that use private addresses).
+
+<p>A user reported that even when connecting to '127.0.0.1' or 'localhost', the .NET Framework tries to acquire the host name with a DNS query: if your machine is not registered to the DNS server, this causes the query to fail and the exception 'Unknown Host'.
 
 </FAQ>
 </FAQ-SECTION>
