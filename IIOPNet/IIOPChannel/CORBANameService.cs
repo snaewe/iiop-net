@@ -121,6 +121,16 @@ namespace omg.org.CosNaming {
     [RepositoryIDAttribute("IDL:omg.org/CosNaming/NamingContextExt:1.0")]
     [InterfaceTypeAttribute(IdlTypeInterface.ConcreteInterface)]
     public interface NamingContextExt : NamingContext {
+    	
+        MarshalByRefObject resolve_str([StringValue][WideChar(false)] string name);
+    	
+        [return: StringValue]
+        [return: WideChar(false)]
+        string  to_string([IdlSequence]NameComponent[] name);
+        
+        [return: IdlSequence]
+        NameComponent[] to_name([StringValue][WideChar(false)] string name);
+    	
     }
     
     
