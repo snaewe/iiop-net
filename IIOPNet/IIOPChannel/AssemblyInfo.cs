@@ -30,6 +30,7 @@
 using System;
 using System.Reflection;
 using System.Runtime.CompilerServices;
+using System.Security.Permissions;
 
 //
 // General Information about an assembly is controlled through the following 
@@ -86,3 +87,6 @@ using System.Runtime.CompilerServices;
 //
 [assembly: AssemblyDelaySign(false)]
 [assembly: AssemblyKeyName("")]
+
+// needed CAS for IIOP.NET
+[assembly:ReflectionPermissionAttribute(SecurityAction.RequestMinimum, Unrestricted=true)]
