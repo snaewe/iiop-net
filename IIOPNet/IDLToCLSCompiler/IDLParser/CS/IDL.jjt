@@ -90,11 +90,29 @@ SKIP :
   < ~[] >
 }
 
+String repIdVal() #void :
+{ Token repIdValToken; String result; }
+{
+  repIdValToken = <STRING> { 
+                               result = repIdValToken.image; 
+                               // remove "" around the literal
+                               return result.Substring(1, result.Length - 2);
+                           }
+|
+
+  repIdValToken = <REPIDVAL_STRING> { 
+                               result = repIdValToken.image; 
+                               // remove "" around the literal
+                               return result.Substring(1, result.Length - 2);
+                           }
+}
+
+
 /* handling of pragma id outside of a type definition */
 void pragmaID() #void :
 { String ident = ""; String val = ""; }
 {
-	"#pragma" "ID" ident = identifier() val = string_literal() 
+	"#pragma" "ID" ident = identifier() val = repIdVal()
 	{
 		Scope currentScope = m_symbolTable.getCurrentScope();
 		if (!m_lastPrefix.Equals("")) {
@@ -111,7 +129,7 @@ void pragmaID() #void :
 void pragmaIDInside() #void :
 { String ident = ""; String val = ""; }
 {
-	"#pragma" "ID" ident = identifier() val = string_literal() 
+	"#pragma" "ID" ident = identifier() val = repIdVal()
 	{
 		Scope currentScope = m_symbolTable.getCurrentScope();
 		currentScope = currentScope.getParentScope(); // get the scope this type is defined in, the id must be added to this scope
@@ -1386,10 +1404,10 @@ String string_literal() #void :
 String wide_string_literal() #void :
 { Token stringToken; }
 {
-   "L" stringToken = <STRING> { 
+   stringToken = <WIDESTRING> { 
    									String result = stringToken.image; 
-  									// remove "" around the literal
-   									return result.Substring(1, result.Length - 2);
+  									// remove L prefix and remove "" around the literal
+   									return result.Substring(2, result.Length - 3);
    							  }
 }
 
@@ -1398,7 +1416,11 @@ char character_literal() #void :
 {
   charToken = <CHARACTER> { 
   								// TBD: not correct: escaped chars
-  								char val = charToken.image[0]; 
+                                                                if (charToken.image.IndexOf("\\") >= 0) {
+                                                                    throw new NotSupportedException("\\ not yet supported in char literals");
+                                                                }
+                                                                // char token is of form: 'x'
+  								char val = charToken.image[1]; 
   								return val;
   						  }
   								
@@ -1409,7 +1431,10 @@ char wide_character_literal() #void :
 {
   "L" charToken = <CHARACTER> {
 								 // TBD: not correct: escaped chars
-  								 char val = charToken.image[0];
+                                                                if (charToken.image.IndexOf("\\") >= 0) {
+                                                                    throw new NotSupportedException("\\ not yet supported in char literals");
+                                                                }
+  								 char val = charToken.image[1];
   								 return val;
   							  }
 }
@@ -1498,6 +1523,30 @@ TOKEN :
              ("0x" | "0X") (["0"-"9","a"-"f","A"-"F"])+
            )
      )
+   )*
+   "\"" >
+| <  WIDESTRING : "\""
+   "L" ( ( ~["\"","\\","\n","\r"])
+   | ("\\" (
+             ["n","t","v","b","r","f","a","\\","?","'","\""]
+            |
+             "0" (["0"-"7"])*
+            |
+             ["1"-"9"] (["0"-"9"])*
+            |
+             ("0x" | "0X") (["0"-"9","a"-"f","A"-"F"])+
+            |
+             // unicode
+             "u" (["0"-"9","a"-"f","A"-"F"])+
+           )
+     )
+   )*
+   "\"" >
+| <  REPIDVAL_STRING : "\""
+   // a rep-id string allows the use \ as normal character, e.g. \U0024
+   // REPIDVAL_STRING is a superset of STRING; 
+   // because REPIDVAL_STRING is defined after STRING in grammer file, normally STRING is matched; REPIDVAL_STRING is only matched, if not in STRING subset
+   ( ( ~["\"","\n","\r"])
    )*
    "\"" >
 |
