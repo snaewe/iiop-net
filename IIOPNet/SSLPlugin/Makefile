@@ -11,7 +11,9 @@ $(BIN)IIOPChannel.dll: $(IIOPCHANNEL)
 $(BIN)Org.Mentalis.Security.dll:
     @if not exist $(BIN)nul mkdir $(BIN)
     @if not defined MENTALISSECURITYLIB copy /y $(SSLLibrary).dll $(BIN)Org.Mentalis.Security.dll 
-    @if not defined MENTALISSECURITYLIB copy /y $(SSLLibrary).pdb $(BIN)Org.Mentalis.Security.pdb 
+    @if not defined MENTALISSECURITYLIB (
+        @if exist $(SSLLibrary).pdb copy /y $(SSLLibrary).pdb $(BIN)Org.Mentalis.Security.pdb 
+    )
     @if defined MENTALISSECURITYLIB copy /y $(MENTALISSECURITYLIB) $(BIN)Org.Mentalis.Security.dll
     
 
