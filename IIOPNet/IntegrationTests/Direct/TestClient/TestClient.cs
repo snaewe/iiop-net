@@ -692,8 +692,30 @@ namespace Ch.Elca.Iiop.IntegrationTests {
             Assertion.AssertEquals("wrong constant value", 1, constValB);
         }
 
+
         [Test]
         public void TestCharacterConstant() {
+            Char constValNonEscapeCharConst = NonEscapeCharConst.ConstVal;
+            Assertion.AssertEquals("wrong constant value", 'a', constValNonEscapeCharConst);
+
+            Char constValUnicodeEscapeCharConst1 = UnicodeEscapeCharConst1.ConstVal;
+            Assertion.AssertEquals("wrong constant value", '\u0062', constValUnicodeEscapeCharConst1);
+
+            Char constValUnicodeEscapeCharConst2 = UnicodeEscapeCharConst2.ConstVal;
+            Assertion.AssertEquals("wrong constant value", '\uFFFF', constValUnicodeEscapeCharConst2);
+
+            Char constValHexEscapeCharConst = HexEscapeCharConst.ConstVal;
+            Assertion.AssertEquals("wrong constant value", '\u0062', constValHexEscapeCharConst);
+
+            Char constValDecEscapeCharConst1 = DecEscapeCharConst1.ConstVal;
+            Assertion.AssertEquals("wrong constant value", 'a', constValDecEscapeCharConst1);
+
+            Char constValDecEscapeCharConst2 = DecEscapeCharConst2.ConstVal;
+            Assertion.AssertEquals("wrong constant value", '\u0000', constValDecEscapeCharConst2);
+        }
+
+        [Test]
+        public void TestCharacterConstantBugReport841774() {
             Char constValStandAlone = STAND_ALONE_TEST.ConstVal;
             Assertion.AssertEquals("wrong constant value", '1', constValStandAlone);
             Char constValNetWork = NETWORK_TEST.ConstVal;

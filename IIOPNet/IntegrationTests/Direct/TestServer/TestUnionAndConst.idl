@@ -24,8 +24,15 @@ module IntegrationTests {
     };
 
     
+    // testing different constants and Constant-expressions
     const long MyConstant = 11;
 
+    const char NonEscapeCharConst = 'a';
+    const wchar UnicodeEscapeCharConst1 = L'\u62';
+    const wchar UnicodeEscapeCharConst2 = L'\uFFFF';
+    const char HexEscapeCharConst = '\0x62';
+    const char DecEscapeCharConst1 = '\97';
+    const char DecEscapeCharConst2 = '\0';
     
 
     // IDLToCLSCompiler regression test:
