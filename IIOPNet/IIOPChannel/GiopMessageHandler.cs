@@ -415,10 +415,10 @@ namespace Ch.Elca.Iiop.Tests {
             cdrIn.ReadPadding(3); // reserved
             // target
             Assertion.AssertEquals(0, cdrIn.ReadUShort());
-            // target must be testuri encoded as wide-characters followed by nonStringifyTag ( 44, 115, 116, 114, 61, 102 );
-            Assertion.AssertEquals(20 , cdrIn.ReadULong());
+            // target must be testuri encoded as ascii-characters
+            Assertion.AssertEquals(7 , cdrIn.ReadULong());
             AssertBytesFollowing(
-                new byte[] { 116, 0, 101, 0, 115, 0, 116, 0, 117, 0, 114, 0, 105, 0, 44, 115, 116, 114, 61, 102 }, 
+                new byte[] { 116, 101, 115, 116, 117, 114, 105 }, 
                 cdrIn);
             // now the target method follows: Add (string is terminated by a zero)
             Assertion.AssertEquals(4, cdrIn.ReadULong());
@@ -514,8 +514,8 @@ namespace Ch.Elca.Iiop.Tests {
             cdrOut.WritePadding(3);
             // target: key type
             cdrOut.WriteULong(0);
-            cdrOut.WriteULong(26); // key length
-            cdrOut.WriteOpaque(new byte[] { 116, 0, 101, 0, 115, 0, 116, 0, 111, 0, 98, 0, 106, 0, 101, 0, 99, 0, 116, 0, 44, 115, 116, 114, 61, 102 }); // testobject,str=f
+            cdrOut.WriteULong(10); // key length
+            cdrOut.WriteOpaque(new byte[] { 116, 101, 115, 116, 111, 98, 106, 101, 99, 116 }); // testobject
             // method name
             cdrOut.WriteString(methodName);
             // no service contexts
@@ -620,7 +620,7 @@ namespace Ch.Elca.Iiop.Tests {
             GiopClientConnectionDesc conDesc = new GiopClientConnectionDesc();
             
             try {
-                Stream locFwdStream = PrepareLocationFwdStream(fwdTargetUri, "localhost", 8090,
+                Stream locFwdStream = PrepareLocationFwdStream("localhost", 8090,
                                                                target);
                 GiopMessageHandler handler = GiopMessageHandler.GetSingleton();
                 ReturnMessage result = 
@@ -635,7 +635,7 @@ namespace Ch.Elca.Iiop.Tests {
             }
         }
         
-        private Stream PrepareLocationFwdStream(string locFwdTargetUri, string host, short port,
+        private Stream PrepareLocationFwdStream(string host, short port,
                                                 MarshalByRefObject target) {
             // create the location fwd reply
             MemoryStream sourceStream = new MemoryStream();
@@ -665,7 +665,7 @@ namespace Ch.Elca.Iiop.Tests {
             // body: 8 aligned
             cdrOut.ForceWriteAlign(Aligns.Align8);
             // loc fwd ior
-            byte[] objectKey = IiopUrlUtil.GetObjectKeyForObjUri(locFwdTargetUri);
+            byte[] objectKey = IiopUrlUtil.GetObjectKeyForObj(target);
             string repositoryID = Repository.GetRepositoryID(target.GetType());
             // this server support GIOP 1.2 --> create an GIOP 1.2 profile
             InternetIiopProfile profile = new InternetIiopProfile(new GiopVersion(1, 2), host,

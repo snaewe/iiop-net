@@ -30,6 +30,8 @@
 
 using System;
 using System.Text;
+using System.Runtime.Remoting;
+using System.Diagnostics;
 using omg.org.CORBA;
 using Ch.Elca.Iiop.CorbaObjRef;
 
@@ -46,17 +48,12 @@ namespace Ch.Elca.Iiop.Util {
 
         #region Constants
 
-        private const byte DEFAULT_GIOP_MAJOR = 1;
-        private const byte DEFAULT_GIOP_MINOR = 2;
-
-        private const string STRINGIFIED_ID = "str";
-        private const string GIOP_ID = "GIOP";
-
         #endregion Constants
         #region SFields
 
-        private static byte[] s_nonStringifyTag = new byte[] { 44, 115, 116, 114, 61, 102 };
-        private static UnicodeEncoding s_cachedEncoder = new UnicodeEncoding(false, false);
+        private static ASCIIEncoding s_asciiEncoder = new ASCIIEncoding();
+        
+        private static SystemIDGenerator s_sysIdGenerator = new SystemIDGenerator();
 
         #endregion SFields
         #region IConstructors
@@ -85,14 +82,14 @@ namespace Ch.Elca.Iiop.Util {
             if (url.StartsWith("IOR")) {
                 ior = new Ior(url);                    
             } else if (url.StartsWith("iiop")) {
-                string objectURI;
-                GiopVersion version;
+                // iiop1.0, iiop1.1, iiop1.2 (=iiop); extract version in protocol tag
 
-                Uri chanUri = IiopUrlUtil.ParseUrl(url, out objectURI);
-                byte[] objectKey = IiopUrlUtil.GetObjectInfoForObjUri(objectURI, out version);
+                IiopLoc iiopLoc = new IiopLoc(url);                                
                 // now create an IOR with the above information
-                InternetIiopProfile profile = new InternetIiopProfile(version, chanUri.Host,
-                                                                     (ushort)chanUri.Port, objectKey);
+                InternetIiopProfile profile = new InternetIiopProfile(iiopLoc.Version, 
+                                                                      iiopLoc.ChannelUri.Host,                                                                      
+                                                                     (ushort)iiopLoc.ChannelUri.Port, 
+                                                                     iiopLoc.GetKeyAsByteArray());
                 ior = new Ior(repositoryId, new IorProfile[] { profile });
             } else if (url.StartsWith("corbaloc")) {
             	Corbaloc loc = new Corbaloc(url);
@@ -117,32 +114,37 @@ namespace Ch.Elca.Iiop.Util {
         /// <param name="url">the url to parse</param>
         /// <param name="objectURI">the objectURI</param>
         /// <returns>the channel-Uri</returns>
-        public static Uri ParseUrl(string url, out string objectUri) {
+        internal static Uri ParseUrl(string url, out string objectUri, 
+                                     out GiopVersion version) {
             Uri uri = null;
-            if (url.StartsWith("iiop:")) {
-                // skip
-                uri = new Uri(url);
-                objectUri = uri.PathAndQuery;
-                if ((objectUri != null) && (objectUri.StartsWith("/"))) {
-                    objectUri = objectUri.Substring(1);
-                }
-            } else if (url.StartsWith("IOR:")) {
+            if (url.StartsWith("iiop")) {
+                IiopLoc iiopLoc = new IiopLoc(url);
+                uri = iiopLoc.ChannelUri;
+                objectUri = iiopLoc.ObjectUri;
+                version = iiopLoc.Version;
+            } else if (url.StartsWith("IOR")) {
                 Ior ior = new Ior(url);
-                uri = new Uri("iiop://"+ior.HostName+":"+ior.Port);
-                objectUri = GetObjUriForObjectInfo(ior.ObjectKey, ior.Version);
-            } else if (url.StartsWith("corbaloc:")) {
+                uri = new Uri("iiop" + ior.Version.Major + "." + ior.Version.Minor + 
+                              Uri.SchemeDelimiter + ior.HostName+":"+ior.Port);
+                objectUri = GetObjectUriForObjectKey(ior.ObjectKey);
+                version = ior.Version;
+            } else if (url.StartsWith("corbaloc")) {
             	Corbaloc loc = new Corbaloc(url);
             	CorbaLocIiopAddr addr = loc.GetIiopAddr();            	
             	if (addr == null) {
             		throw new INTERNAL(8540, CompletionStatus.Completed_MayBe);
             	}
-            	uri = new Uri("iiop://" + addr.Host + ":" + addr.Port);
-            	byte[] objectKey = loc.GetKeyAsByteArray();
-            	objectUri = GetObjUriForObjectInfo(objectKey, addr.Version);
-            }else {
+                objectUri = loc.ObjectUri;
+                version = addr.Version;
+                uri = new Uri("iiop" + 
+                              addr.Version.Major + "." + addr.Version.Minor + 
+                              Uri.SchemeDelimiter + addr.Host + ":" + addr.Port);
+
+            } else {
                 // not possible
                 uri = null;
                 objectUri = null;
+                version = new GiopVersion(1,0);
             }
             return uri;
         }
@@ -150,133 +152,304 @@ namespace Ch.Elca.Iiop.Util {
         /// <summary>
         /// creates an URL from host, port and objectURI
         /// </summary>
-        public static string GetUrl(string host, int port, string objectUri) {
-            return "iiop://" + host + ":" + port + "/" + objectUri;
-        }
-
-        /// <summary>takes an objectURI and extracts the information needed
-        /// for CORBA call out of it
-        /// </summary>
-        /// <returns>the CORBA object key</returns>
-        public static byte[] GetObjectInfoForObjUri(string objectUri,
-                                                    out GiopVersion version) {
-            version = new GiopVersion(DEFAULT_GIOP_MAJOR, DEFAULT_GIOP_MINOR);
-            if (objectUri == null) { 
-                return null; 
-            }
-            bool stringified = false;
-            string objectId = objectUri;
-            
-            if (objectUri.IndexOf(",") > 0) { 
-                objectId = objectUri.Substring(0, objectUri.IndexOf(",")); 
-            }
-            if (objectUri.IndexOf(STRINGIFIED_ID) > 0) {
-                string isStr = objectUri.Substring(objectUri.IndexOf(STRINGIFIED_ID) +
-                                                   STRINGIFIED_ID.Length, 2);
-                if (isStr.StartsWith("=t")) { 
-                    stringified = true; 
-                }
-            }
-            if (objectUri.IndexOf(GIOP_ID) > 0) {
-                string versionStr = objectUri.Substring(objectUri.IndexOf(GIOP_ID) +
-                                                        GIOP_ID.Length, 4);
-                if (!(versionStr.StartsWith("="))) { 
-                    // uri contains malfromed giop-version-info: versionStr
-                    throw new INV_OBJREF(9401, CompletionStatus.Completed_No);
-                }
-                byte giopMajor = Convert.ToByte(versionStr.Substring(1, 1));
-                byte giopMinor = Convert.ToByte(versionStr.Substring(3, 1));
-                version = new GiopVersion(giopMajor, giopMinor);
-            }
-
-            if (stringified) {
-                // check for leading appdomain-id in objectId and remove it (e.g. for initial nameing context, this is the case)
-                if ((objectId.IndexOf("/") >= 0) && 
-                    (objectId.LastIndexOf("/") + 1 < objectId.Length)) {
-                    objectId = objectId.Substring(objectId.LastIndexOf("/") + 1);
-                }
-                return StringConversions.Destringify(objectId);
-            } else {
-                byte[] result = s_cachedEncoder.GetBytes(objectId);
-                return AppendNonStringifyTag(result); // append a tag to indicate that this object key should not be stringified
-            }
-        }
-
-        public static byte[] GetObjectKeyForObjUri(string objectUri) {
-            GiopVersion version;
-            return GetObjectInfoForObjUri(objectUri, out version);
-        }
-
-        private static byte[] AppendNonStringifyTag(byte[] objKey) {
-            byte[] extObjKey = new byte[objKey.Length + 6];
-            Array.Copy((Array)objKey, 0, (Array)extObjKey, 0, objKey.Length);
-            Array.Copy((Array)s_nonStringifyTag, 0, (Array)extObjKey,
-                       extObjKey.Length-6, s_nonStringifyTag.Length);
-            return extObjKey;
+        internal static string GetUrl(string host, int port, string objectUri) {
+            return "iiop" + Uri.SchemeDelimiter + host + ":" + port + "/" + objectUri;
         }
 
         /// <summary>
-        /// checks if the non-stringify tag is set in the object key
+        /// takes a marshalled object and calculate the corba object key to send from it
         /// </summary>
-        /// <remarks>
-        /// if this tag is set, the objectURI is created without stringify the object-key,
-        /// it's interpreted as 2 byte characters array
-        /// </remarks>
-        private static bool CheckNonStringifyTag(byte[] objectKey) {
-            if (objectKey.Length < 6) { return false; }
-            for (int i = 0; i < 6; i++) {
-                if (objectKey[objectKey.Length-6+i] != s_nonStringifyTag[i]) { 
+        /// <param name="objectUri"></param>
+        /// <returns></returns>
+        internal static byte[] GetObjectKeyForObj(MarshalByRefObject mbr) {
+            string objectUri = RemotingServices.GetObjectUri(mbr);
+            if (objectUri == null) { 
+                throw new INTERNAL(57, CompletionStatus.Completed_MayBe);
+            }
+            
+            if (!s_sysIdGenerator.IsSystemId(objectUri)) {
+                // remove appdomain-id in front of uri which is automatically appended 
+                // (see comment for RemotingServices.SetObjectUriForMarshal);
+                // to support user-id policy, this appdomain-guid must be removed!
+                if (objectUri.StartsWith("/")) {
+                    objectUri = objectUri.Substring(1);
+            }
+                int appdomainGuidEndIndex = objectUri.IndexOf("/");
+                if (appdomainGuidEndIndex >= 0) {
+                    // remove appdomain-guid part
+                    objectUri = objectUri.Substring(appdomainGuidEndIndex + 1);
+                } else {
+                    Debug.WriteLine("warning, appdomain guid not found in object-uri: " +
+                                    objectUri);
+                }
+            }
+            // For System-id policy, don't remove the appdomain id, because after
+            // a restart of the application, appdomain id-guid prevents the 
+            // generation of the same ids
+            
+            // use ASCII-encoder + unicode escaped to encode uri string
+            objectUri = EscapeNonAscii(objectUri);
+            return s_asciiEncoder.GetBytes(objectUri);
+                }
+        
+        /// <summary>
+        /// generates an IIOP.NET CORBA System-ID
+        /// </summary>
+        internal static string GenerateSystemId() {
+            return s_sysIdGenerator.GenerateId();
+            }
+
+        /// <summary>
+        /// get the key-bytes for the id; doesn't any more transformations
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        internal static byte[] GetKeyBytesForId(string id) {
+            return s_asciiEncoder.GetBytes(id);
+                }
+        
+        /// <summary>
+        /// escape characters, which are not part of the ASCII set
+        /// </summary>
+        /// <param name="uri"></param>
+        /// <returns></returns>
+        internal static string EscapeNonAscii(string uri) {
+            StringBuilder result = new StringBuilder();
+            string escaped = uri.Replace(@"\u", @"\\u");  // escape \u            
+            for (int i = 0; i < escaped.Length; i++) {
+                // replace non-ascii char by \u****
+                if (escaped[i] <= 0x7f) {
+                    result.Append(escaped[i]);    
+            } else {
+                    result.Append(@"\u" + 
+                                  String.Format("{0:X4}", 
+                                                Convert.ToInt32(escaped[i])));
+                }                
+            }
+            return result.ToString();
+        }
+
+        internal static string GetObjectUriForObjectKey(byte[] objectKey) {
+            string result = s_asciiEncoder.GetString(objectKey);
+            return UnescapeNonAscii(result);
+        }
+
+        /// <summary>
+        /// reverse the effect of EscapeNonAscii
+        /// </summary>
+        private static string UnescapeNonAscii(string uri) {
+            StringBuilder result = new StringBuilder();
+            StringBuilder potentialEscapeChar = new StringBuilder();            
+            for (int i = 0; i < uri.Length; i++) {
+                
+                if ((uri[i] != '\\') && (potentialEscapeChar.Length == 0)) {
+                    result.Append(uri[i]);    
+                } else {
+                    // either new escape sequence starting with \ or continue of a sequence
+                    potentialEscapeChar.Append(uri[i]);
+                    if (!IsPotentiallyEscapedCharacterRepresentation(potentialEscapeChar.ToString())) {
+                        // no escape sequence, add string directly to result
+                        result.Append(potentialEscapeChar.ToString());
+                        potentialEscapeChar.Remove(0, potentialEscapeChar.Length);
+                    } else if (potentialEscapeChar.Length == 6) {
+                        // it's an escape char in form \uQRST
+                        char unescaped = Convert.ToChar(potentialEscapeChar.ToString().Substring(2));
+                        result.Append(unescaped);
+                    }
+                }                
+            }
+            // undo \u transformation for non-ascii
+            result = result.Replace(@"\\u", @"\u");
+            return result.ToString();
+        }
+
+        /// <summary>
+        /// checks, if a given candidate sequence may represent an escaped character
+        /// </summary>
+        /// <returns>true, if possible, otherwise false</returns>
+        private static bool IsPotentiallyEscapedCharacterRepresentation(string candidate) {
+            // look for \uQRST
+            if (candidate.Length > 6) {
+                return false;
+            }
+            if (!candidate.StartsWith(@"\")) {
                     return false; 
+                }
+            if ((candidate.Length > 1) && (candidate[1] != 'u')) {
+                return false;
+            }                
+            if (candidate.Length > 2) {
+                for (int i = 2; i < candidate.Length; i++) {
+                    if (!Char.IsDigit(candidate[i])) {
+                        return false;
+                    }
                 }
             }
             return true;
         }
 
-        
-        /// <summary>
-        /// take a CORBA object Key and the GIOP-Version
-        /// and create a .NET obj-URI out of it
-        /// If giopVersion is null -> do not include version info into uri.
-        /// </summary>
-        /// <param name="objectKey"></param>
-        /// <returns></returns>
-        private static string GetObjUriForObjectKeyAndOptInfo(byte[] objectKey, object giopVersion) {
-            if (CheckNonStringifyTag(objectKey)) {
-                // an URI pointing to a native .NET remoting framework object, therefore the .NET URI must be
-                // reproduced from which this objectKey was created
-                return s_cachedEncoder.GetString(objectKey, 0, objectKey.Length-6);
-            } else {
-                // stringify it
-                string result = StringConversions.Stringify(objectKey);
-                if (giopVersion != null) {
-                    result += "," + GIOP_ID + "=" + ((GiopVersion)giopVersion).Major + "." +
-                              ((GiopVersion)giopVersion).Minor;
-                }                
-                return  result + "," + STRINGIFIED_ID + "=t";
-            }            
-        }
-
-        /// <summary>
-        /// take a CORBA object Key and the GIOP-Version
-        /// and create a .NET obj-URI out of it
-        /// </summary>
-        /// <param name="objectKey"></param>
-        /// <returns></returns>
-        public static string GetObjUriForObjectInfo(byte[] objectKey, 
-                                                    GiopVersion version) {
-            return GetObjUriForObjectKeyAndOptInfo(objectKey, version);
-        }
-
-        /// <summary>
-        /// take a CORBA object Key and create a .NET obj-URI out of it
-        /// </summary>
-        /// <param name="objectKey"></param>
-        /// <returns></returns>
-        public static string GetObjUriForObjectKey(byte[] objectKey) {
-            return GetObjUriForObjectKeyAndOptInfo(objectKey, null);
-        }        
-
         #endregion SMethods
 
     }
+        
+        /// <summary>
+    /// helper class, which supports generation of system id's
+        /// </summary>
+    internal class SystemIDGenerator {
+
+        #region Constants
+
+        private const string SYSTEM_ID_MARKER = "IIOPNET_SYSTEM_ID/";
+        private const int RND_PART_LENGTH = 16;
+        
+        #endregion Constants
+        #region IFields
+        
+        private long m_seqNr;        
+        
+        private System.Security.Cryptography.RandomNumberGenerator m_rndGen;
+        
+        #endregion IFields
+        #region IConstructors
+        
+        internal SystemIDGenerator() {            
+            m_seqNr = 0;
+            m_rndGen = new System.Security.Cryptography.RNGCryptoServiceProvider();            
+        }
+        
+        #endregion IConstructors
+        #region IMethods
+        
+        private long GetNextSeqNr() {            
+            return System.Threading.Interlocked.Increment(ref m_seqNr);
+                }                
+        
+        public string GenerateId() {            
+            byte[] rndPart = new byte[RND_PART_LENGTH];
+            m_rndGen.GetNonZeroBytes(rndPart);
+            string rndString = Convert.ToBase64String(rndPart);
+            rndString.Replace('/', '_');
+            return SYSTEM_ID_MARKER + rndString + "_" + GetNextSeqNr();
+            }            
+        
+        public bool IsSystemId(string id) {
+            return (id.IndexOf(SYSTEM_ID_MARKER) >= 0);
+        }
+
+        #endregion IMethods
+        
+    }
+    
+    
+        /// <summary>
+    /// handles addresses of the form iiop://host:port/objectKey
+        /// </summary>
+    internal class IiopLoc {
+        
+        #region IFields
+        
+        private string m_objectUri;
+        private Uri m_channelUri;
+        private GiopVersion m_version = new GiopVersion(1,2); // default for iiop
+        private byte[] m_keyBytes;
+        private string m_iiopUrl;
+        
+        #endregion IFields        
+        #region SFields
+        
+        private static ASCIIEncoding s_asciiEncoder = new ASCIIEncoding();
+        
+        #endregion SFields
+        #region IConstructors
+        
+        /// <summary>creates the corbaloc from a corbaloc url string</summary>
+        public IiopLoc(string iiopUrl) {
+            m_iiopUrl = iiopUrl;
+            Parse(iiopUrl);
+        }
+
+        #endregion IConstructors
+        #region IProperties
+        
+        /// <summary>
+        /// gets the url, which is represented by this instance.
+        /// </summary>
+        public string Url {
+            get {
+                return m_iiopUrl;
+            }
+        }
+        
+        /// <summary>
+        /// the string representation of the object uri
+        /// </summary>
+        public string ObjectUri {
+            get {
+                return m_objectUri;
+            }
+        }
+        
+        /// <summary>
+        /// the channel uri: connection information (host, port)
+        /// </summary>
+        public Uri ChannelUri {
+            get {                
+                return m_channelUri;
+            }
+        }
+
+        /// <summary>
+        /// the giop protocol version
+        /// </summary>
+        public GiopVersion Version {
+            get {
+                return m_version;
+            }
+        }
+        
+        #endregion IProperties
+        #region IMethods
+        
+        private void Parse(string iiopUrl) {
+            Uri uri = new Uri(iiopUrl);
+            string iiopSchema = uri.Scheme;
+            if (!iiopSchema.StartsWith("iiop")) {
+                throw new INTERNAL(145, CompletionStatus.Completed_MayBe);
+            }
+            try {
+                if (iiopSchema.Length > 4) {
+                    // a giop-version is specified in the schema
+                    string versionString = iiopSchema.Substring(4);
+
+                    byte major = Byte.Parse(versionString[0].ToString());
+                    byte minor = Byte.Parse(versionString[2].ToString());
+                    m_version = new GiopVersion(major, minor);                    
+                } 
+                m_channelUri = new Uri(uri.Scheme + Uri.SchemeDelimiter + 
+                                       uri.Host + ":" + uri.Port);
+                m_objectUri = uri.PathAndQuery;
+                if ((m_objectUri != null) && (m_objectUri.StartsWith("/"))) {
+                    m_objectUri = m_objectUri.Substring(1);
+                    string escaped = IiopUrlUtil.EscapeNonAscii(m_objectUri);
+                    m_keyBytes = IiopUrlUtil.GetKeyBytesForId(escaped);
+                }                
+            } catch (Exception) {
+                throw new INV_OBJREF(146, CompletionStatus.Completed_MayBe);
+            }
+        }               
+        
+        /// <summary>
+        /// get the byte representation of the corba object key.
+        /// </summary>
+        /// <returns></returns>
+        public byte[] GetKeyAsByteArray() {
+            return m_keyBytes;
+        }        
+
+        #endregion IMethods
+
+
+    }
+    
+    
 }

@@ -78,11 +78,13 @@ namespace Ch.Elca.Iiop.Services {
             lock(m_initalServices.SyncRoot) {
                 NamingContext result = null;
                 if (!m_initalServices.ContainsKey(nsKey)) {
+                    string corbaLoc = String.Format("corbaloc:iiop:{0}.{1}@{2}:{3}/{4}",
+                                                    version.Major, version.Minor, 
+                                                    host, port, 
+                                                    InitialCOSNamingContextImpl.INITIAL_NAMING_OBJ_NAME);
                 
-                    string objectURI = IiopUrlUtil.GetObjUriForObjectInfo(InitialCOSNamingContextImpl.s_initalnamingObjKey,
-                                                                  version);
-                    string url = IiopUrlUtil.GetUrl(host, port, objectURI);
-                    result = (NamingContext)RemotingServices.Connect(typeof(NamingContext), url);
+                    result = (NamingContext)RemotingServices.Connect(typeof(NamingContext), 
+                                                                     corbaLoc);
                     m_initalServices.Add(nsKey, result);
                 } else {
                     result = (NamingContext)m_initalServices[nsKey];
@@ -146,9 +148,14 @@ namespace Ch.Elca.Iiop.Services {
                 CORBAInitService initService = null;
                 string key = host + ":" + port;
                 if (!m_initalServices.ContainsKey(key)) {
-                    string objectURI = GetInitServiceUri();
-                    string url = IiopUrlUtil.GetUrl(host, port, objectURI);
-                    initService = (CORBAInitService)RemotingServices.Connect(typeof(CORBAInitService), url);
+                    string corbaLoc = String.Format("corbaloc:iiop:{0}.{1}@{2}:{3}/{4}",
+                                                    1, 0, 
+                                                    host, port, 
+                                                    CORBAInitServiceImpl.INITSERVICE_NAME);
+
+                    
+                    initService = (CORBAInitService)RemotingServices.Connect(typeof(CORBAInitService), 
+                                                                             corbaLoc);
                     m_initalServices.Add(key, initService);
                 } else {
                     initService = (CORBAInitService) m_initalServices[key];
@@ -159,15 +166,6 @@ namespace Ch.Elca.Iiop.Services {
         
         #endregion IMethods
         #region SMethods
-
-        /// <summary>
-        /// get the obj-uri for the CORBA init service
-        /// </summary>
-        /// <returns></returns>
-        public static string GetInitServiceUri() {
-            return IiopUrlUtil.GetObjUriForObjectInfo(CORBAInitServiceImpl.s_corbaObjKey,
-                                                      new GiopVersion(1, 0));
-        }
         
         /// <summary>
         /// creates a name, which should be passed to resolve method on naming context,

@@ -341,9 +341,12 @@ namespace Ch.Elca.Iiop {
         /// </summary>
         public IMessageSink CreateMessageSink(string url, object remoteChannelData, out string objectURI) {
             objectURI = null;
+            if (!IiopUrlUtil.IsUrl(url)) {
+                return null;
+            }
+            GiopVersion version = new GiopVersion(1, 0);
             if (url != null) {
-                Uri chanURI = IiopUrlUtil.ParseUrl(url, out objectURI);
-                if (chanURI == null) { return null; }
+                IiopUrlUtil.ParseUrl(url, out objectURI, out version);
             } else {
                 // check remoteChannelData
                 Console.WriteLine("url null, remote channel data: " + remoteChannelData);
@@ -360,12 +363,14 @@ namespace Ch.Elca.Iiop {
         #endregion Implementation of IChannelSender
         #region Implementation of IChannel
         public string Parse(string url, out string objectURI) {
+            GiopVersion version;
             objectURI = null;
-            return IiopUrlUtil.ParseUrl(url, out objectURI).ToString();
+            return IiopUrlUtil.ParseUrl(url, out objectURI, out version).ToString();
         }
 
         #endregion Implementation of IChannel
         #endregion IMethods
+                
     }
     
 
@@ -586,7 +591,8 @@ namespace Ch.Elca.Iiop {
             
         public string Parse(string url, out string objectURI) {
             objectURI = null;
-            return IiopUrlUtil.ParseUrl(url, out objectURI).ToString();
+            GiopVersion version;
+            return IiopUrlUtil.ParseUrl(url, out objectURI, out version).ToString();
         }
 
         #endregion Implementation of IChannel

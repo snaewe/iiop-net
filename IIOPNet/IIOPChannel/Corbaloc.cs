@@ -30,6 +30,7 @@
 
 using System;
 using omg.org.CORBA;
+using Ch.Elca.Iiop.Util;
 
 namespace Ch.Elca.Iiop.CorbaObjRef {
 
@@ -39,6 +40,7 @@ namespace Ch.Elca.Iiop.CorbaObjRef {
     		
 		/// <summary>the key string as string</summary>
 		private string m_keyString;
+	    private byte[] m_keyBytes;
 		
 		private CorbaLocObjAddr[] m_objAddrs;
     	
@@ -60,12 +62,24 @@ namespace Ch.Elca.Iiop.CorbaObjRef {
     		}
     	}
     	
+    	/// <summary>
+    	/// contains an ASCII representation of the object key; valid characters in
+    	/// this string are member of the ASCII charset ->
+    	///  can represent octet values 0 - 127
+    	/// </summary>
     	public string KeyString {
     		get {
     			return m_keyString;
     		}
     	}
     	
+    	public string ObjectUri {
+    	    get {
+    	        // TODO: resolve %HexHex%
+    	        return m_keyString;
+    	    }
+    	}
+
     	#endregion IProperties
     	#region IMethods
     
@@ -85,6 +99,8 @@ namespace Ch.Elca.Iiop.CorbaObjRef {
     		    throw new BAD_PARAM(10, CompletionStatus.Completed_No);
     		}
     		ParseAddrList(addrPart);    		
+    	    // create key bytes from keystring
+    	    CalculateKeyBytesFromKeyString();
 	    }
 	    
 	    /// <summary>parses the addr list</summary>
@@ -122,11 +138,15 @@ namespace Ch.Elca.Iiop.CorbaObjRef {
 	    	return null;
 	    }
 	    
+	    private void CalculateKeyBytesFromKeyString() {
+	        string id = KeyString;	        
+            // TODO: not really correct: need to resolve %HexHex escape sequences
+            m_keyBytes = IiopUrlUtil.GetKeyBytesForId(id);
+	    }
+	    
 	    /// <summary>converts the key string to a byte array, resolving escape sequences</summary>
 	    public byte[] GetKeyAsByteArray() {
-	    	System.Text.ASCIIEncoding enc = new System.Text.ASCIIEncoding();
-            // TODO: not really correct: need to resolve %HexHex escape sequences
-            return enc.GetBytes(KeyString);	
+            return m_keyBytes;    
 	    }
     
     	#endregion IMethods

@@ -287,7 +287,7 @@ namespace Ch.Elca.Iiop.MessageHandling {
             byte[] objectKey = cdrStream.ReadOpaque((int)length);
                     
             // get the object-URI of the responsible object
-            return IiopUrlUtil.GetObjUriForObjectKey(objectKey);
+            return IiopUrlUtil.GetObjectUriForObjectKey(objectKey);
         }
 
         #endregion Common

@@ -348,12 +348,14 @@ namespace omg.org.CosNaming {
     [RepositoryIDAttribute("IDL:omg.org/CosNaming/NamingContext:1.0")]
     public class InitialCOSNamingContextImpl : COSNamingContextImpl {
 
-        #region SFields
+        #region Constants
         
-        internal static byte[] s_initalnamingObjKey = 
-            new byte[] { 0x4E, 0x61, 0x6D, 0x65, 0x53, 0x65, 0x72, 0x76, 0x69, 0x63, 0x65 };
+        /// <summary>
+        /// the object key string representaton (e.g. used in corbalocs) for the name-service
+        /// </summary>
+        internal const string INITIAL_NAMING_OBJ_NAME = "NameService";
 
-        #endregion SFields
+        #endregion Constants
         #region IMethods
         
         public override Object InitializeLifetimeService() {

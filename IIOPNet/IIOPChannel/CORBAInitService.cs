@@ -61,12 +61,11 @@ namespace Ch.Elca.Iiop.Services {
         #region Constants
 
         internal const string NAMESERVICE_NAME = "NameService";
+        internal const string INITSERVICE_NAME = "INIT";
 
         #endregion Constants
         #region SFields
         
-        internal static byte[] s_corbaObjKey = new byte[] { 0x49, 0x4E, 0x49, 0x54 };
-
         private static CORBAInitServiceImpl s_corbaInitService;
 
         private static object s_lockObject = new Object();
@@ -93,7 +92,7 @@ namespace Ch.Elca.Iiop.Services {
                     // create the init service, which provides access to other service (for JDK orbs)
                     s_corbaInitService = new CORBAInitServiceImpl();
                     RemotingServices.Marshal(s_corbaInitService, 
-                                             IiopUrlUtil.GetObjUriForObjectKey(s_corbaObjKey));
+                                             INITSERVICE_NAME);
                 }
             }
         }
@@ -105,7 +104,7 @@ namespace Ch.Elca.Iiop.Services {
             // create root naming context and publish it
             m_initalContext = new InitialCOSNamingContextImpl();
             RemotingServices.Marshal(m_initalContext,
-                                     IiopUrlUtil.GetObjUriForObjectKey(InitialCOSNamingContextImpl.s_initalnamingObjKey));
+                                     InitialCOSNamingContextImpl.INITIAL_NAMING_OBJ_NAME);
         }
 
         public MarshalByRefObject _get([WideCharAttribute(false)][StringValueAttribute] string serviceName) {

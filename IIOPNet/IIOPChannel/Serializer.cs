@@ -354,17 +354,16 @@ namespace Ch.Elca.Iiop.Marshalling {
                 return;
             }
             MarshalByRefObject target = (MarshalByRefObject) actual; // this could be a proxy or the server object
-            // get or create the objRef for the target
-            ObjRef refToTarget =  RemotingServices.Marshal(target);
-            Debug.WriteLine("marshal object reference : " + refToTarget + 
-                            ", with URI: " + refToTarget.URI);
+            
             // create the IOR for this URI, possibilities:
             // is a server object -> create ior from key and channel-data
             // is a proxy --> create IOR from url
-            //                url possibilities: IOR:--hex-- ; iiop://addr/key ; later: corbaloc::addr:key ; ...
+            //                url possibilities: IOR:--hex-- ; iiop://addr/key ; corbaloc::addr:key ; ...
             Ior ior = null;
             if (RemotingServices.IsTransparentProxy(target)) {
                 // proxy
+                string url = RemotingServices.GetObjectUri(target);
+                Debug.WriteLine("marshal object reference (from a proxy) with url " + url);
                 Type actualType = actual.GetType();
                 if (actualType.Equals(ReflectionHelper.MarshalByRefObjectType) &&
                     formal.IsInterface && formal.IsInstanceOfType(actual)) {
@@ -378,10 +377,10 @@ namespace Ch.Elca.Iiop.Marshalling {
                 if (actualType.Equals(ReflectionHelper.MarshalByRefObjectType)) { 
                     repositoryID = ""; 
                 } // CORBA::Object has "" repository id
-                ior = IiopUrlUtil.CreateIorForUrl(refToTarget.URI, repositoryID);
+                ior = IiopUrlUtil.CreateIorForUrl(url, repositoryID);
             } else {
                 // server object
-                ior = CreateIorForObjectFromThisDomain(refToTarget, target);
+                ior = CreateIorForObjectFromThisDomain(target);
             }
 
             Debug.WriteLine("connection information for objRef, host: " + ior.HostName + ", port: " +
@@ -396,12 +395,36 @@ namespace Ch.Elca.Iiop.Marshalling {
             ior.WriteToStream(targetStream); // write the null reference to the stream
         }
         
-        private Ior CreateIorForObjectFromThisDomain(ObjRef objRef, MarshalByRefObject obj) {
+        private ObjRef MarshalWithSystemId(MarshalByRefObject obj) {            
+            int nrOfRetries = 3;
+            ObjRef result = null;
+            while (nrOfRetries > 0) {
+                try {
+                    string systemID = IiopUrlUtil.GenerateSystemId();
+                    result = RemotingServices.Marshal(obj, systemID);
+                    return result;
+                } catch (RemotingException) {
+                    // it's extremely unlikely, that two times the same systemID is generated,
+                    // but if it happens, try again!
+                }
+                nrOfRetries++;
+            }
+            throw new INTERNAL(189, CompletionStatus.Completed_MayBe);
+        }
+        
+        private Ior CreateIorForObjectFromThisDomain(MarshalByRefObject obj) {                        
+            ObjRef objRef;
+            if (RemotingServices.GetObjectUri(obj) == null) {
+                // assign a SYSTEM-ID
+                objRef = MarshalWithSystemId(obj);
+            } else {
+                objRef = RemotingServices.Marshal(obj); // make sure, the object is marshalled and get obj-ref
+            }
+            byte[] objectKey = IiopUrlUtil.GetObjectKeyForObj(obj);
             IiopChannelData serverData = GetIiopChannelData(objRef);
             if (serverData != null) {
                 string host = serverData.HostName;
                 int port = serverData.Port;
-                byte[] objectKey = IiopUrlUtil.GetObjectKeyForObjUri(objRef.URI);
                 if ((objectKey == null) || (host == null)) { 
                     // the objRef: " + refToTarget + ", uri: " +
                     // refToTarget.URI + is not serialisable, because connection data is missing 
