@@ -801,8 +801,9 @@ namespace Ch.Elca.Iiop.Cdr {
         }
 
         private bool CheckIndirectionResolvable(long indirectionOffset, IndirectionType indirType) {
-            IndirectionInfo info = new IndirectionInfo((ulong)((long)m_baseStream.GetPosition()
-                                                               - indirectionOffset),
+            // indirection-offset is negative --> therefore add to stream-position; -4, because indirectionoffset itself doesn't count --> stream-pos too high
+            IndirectionInfo info = new IndirectionInfo((ulong)((long)m_baseStream.GetPosition() +
+                                                               indirectionOffset - 4),
                                                        indirType);
             if (!m_indirectionTable.ContainsKey(info)) { 
                 // indirection not resolvable!
