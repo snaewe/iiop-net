@@ -430,8 +430,42 @@ namespace Ch.Elca.Iiop.Tests {
 //        public void TestRequestDeserialisation() {
 //        }
         
-//        public void TestReplyDeserialisation() {
-//        }
+        public void TestReplyDeserialisation() {
+            // request msg the reply is for
+            MethodInfo methodToCall = typeof(TestService).GetMethod("Add");
+            object[] args = new object[] { ((Int32) 1), ((Int32) 2) };
+            string uri = "iiop://localhost:8087/testuri"; // Giop 1.2 will be used because no version spec in uri
+            TestMessage requestMsg = new TestMessage(methodToCall, args, uri);
+            // create the reply
+            MemoryStream sourceStream = new MemoryStream();
+            CdrOutputStreamImpl cdrOut = new CdrOutputStreamImpl(sourceStream, 0, new GiopVersion(1, 2));
+            cdrOut.WriteOpaque(m_giopMagic);
+            // version
+            cdrOut.WriteOctet(1);
+            cdrOut.WriteOctet(2);
+            // flags
+            cdrOut.WriteOctet(0);
+            // msg-type: reply
+            cdrOut.WriteOctet(1);
+            // msg-length
+            cdrOut.WriteULong(100);
+            // request-id
+            cdrOut.WriteULong(5);
+            // reply-status: no-exception
+            cdrOut.WriteULong(0);
+            // no service contexts
+            cdrOut.WriteULong(0);
+            // body: 8 aligned
+            cdrOut.ForceWriteAlign(Aligns.Align8); 
+            // result
+            cdrOut.WriteLong(3);
+            // check deser of msg:
+            sourceStream.Seek(0, SeekOrigin.Begin);
+            GiopMessageHandler handler = GiopMessageHandler.GetSingleton();
+            ReturnMessage result = (ReturnMessage) handler.ParseIncomingReplyMessage(sourceStream, requestMsg);
+            Assertion.AssertEquals(3, result.ReturnValue);
+            Assertion.AssertEquals(0, result.OutArgCount);
+        }
     
     }
 
