@@ -778,13 +778,18 @@ namespace Ch.Elca.Iiop.Idl {
             omg.org.CORBA.TypeCode elementTC = CreateOrGetTypeCodeForType(clsType.GetElementType(),
                                                    elemTypeAttributes);
             return new SequenceTC(elementTC, bound);
-        }
+        }        
         public object MapToIdlArray(Type clsType, int[] dimensions, AttributeExtCollection allAttributes, AttributeExtCollection elemTypeAttributes) {
-/*            // array should not contain itself! -> do not register typecode
+            // array should not contain itself! -> do not register typecode            
+            // get the typecode for the array element type
             omg.org.CORBA.TypeCode elementTC = CreateOrGetTypeCodeForType(clsType.GetElementType(),
                                                    elemTypeAttributes);
-            return new ArrayTC(elementTC, bound); */
-            throw new NotImplementedException();
+            // for multidim arrays, nest array tcs
+            ArrayTC arrayTC = new ArrayTC(elementTC, dimensions[dimensions.Length - 1]); // the innermost array tc for the rightmost dimension
+            for (int i = dimensions.Length - 2; i >= 0; i--) {
+                arrayTC = new ArrayTC(arrayTC, dimensions[i]);    
+            }
+            return arrayTC;
         }
         public object MapToIdlAny(Type clsType) {
             return new AnyTC();

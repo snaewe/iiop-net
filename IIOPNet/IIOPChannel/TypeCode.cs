@@ -1239,41 +1239,71 @@ namespace omg.org.CORBA {
         }
 
         internal override Type GetClsForTypeCode() {
-/*            Type elemType = ((TypeCodeImpl)m_seqType).GetClsForTypeCode();
+            Type elemType = ((TypeCodeImpl)m_innerDimension).GetClsForTypeCode();
             Type arrayType;
             // handle types in creation correctly (use module and not assembly to get type)
             Module declModule = elemType.Module;
-            arrayType = declModule.GetType(elemType.FullName + "[]"); // not nice, better solution ?                                    
-            return arrayType; */
-            throw new NotImplementedException();
+            string arrayTypeName = elemType.FullName;
+            // not nice, better solution ?
+            if ((m_innerDimension is ArrayTC) && (elemType.FullName.EndsWith("]"))) {
+                // inner dimension is a ArrayTC means, we need to add another dimension to the array
+                arrayTypeName = arrayTypeName.Insert(arrayTypeName.Length - 1, ","); // insert a , for next dimension
+            } else {
+                arrayTypeName = arrayTypeName + "[]"; // first dimension
+            }
+            arrayType = declModule.GetType(arrayTypeName); 
+            return arrayType;
+        }
+
+        private int[] ExtractCombinedDimensions(ref AttributeExtCollection attrColl, IdlArrayAttribute innerAttribute) {
+            attrColl = attrColl.RemoveAttribute(innerAttribute);
+            IList dimensionAttributes;
+            attrColl = attrColl.RemoveAssociatedAttributes(innerAttribute.OrderNr, out dimensionAttributes);                
+            int[] dimensions = new int[1 + dimensionAttributes.Count];
+            dimensions[0] = m_length;
+            for (int i = 0; i < dimensionAttributes.Count; i++) {
+                dimensions[i+1] = 
+                    ((IdlArrayDimensionAttribute)dimensionAttributes[i]).DimensionSize;
+            }
+            return dimensions;
         }
         
-        private IdlArrayAttribute CreateArrayAttribute() {
-/*            AttributeExtCollection attrColl = ((TypeCodeImpl)m_seqType).GetClsAttributesForTypeCode();
-            long orderNr = IdlSequenceAttribute.DetermineSequenceAttributeOrderNr(attrColl);
-            if (m_length == 0) {
-                return new IdlSequenceAttribute(orderNr);
+        private AttributeExtCollection GetAttributesForDimension() {
+            AttributeExtCollection attrColl = ((TypeCodeImpl)m_innerDimension).GetClsAttributesForTypeCode();
+            IdlArrayAttribute potentialOldArrayAttribute = attrColl.GetHighestOrderAttribute() as IdlArrayAttribute;
+            int[] dimensions;
+            long orderNr;
+            if (potentialOldArrayAttribute != null) {           
+                dimensions = ExtractCombinedDimensions(ref attrColl, potentialOldArrayAttribute);
+                orderNr = potentialOldArrayAttribute.OrderNr;
             } else {
-                return new IdlSequenceAttribute(orderNr, m_length);
-            } */
-            throw new NotImplementedException();
+                dimensions = new int[] { m_length };
+                orderNr = IdlArrayAttribute.DetermineArrayAttributeOrderNr(attrColl);
+            }
+            // now add attributes for dimensions
+            IdlArrayAttribute newAttribute = new IdlArrayAttribute(orderNr, dimensions[0]);
+            attrColl = attrColl.MergeAttribute(newAttribute);
+            for (int i = 1; i < dimensions.Length; i++) {
+                attrColl = attrColl.MergeAttribute(new IdlArrayDimensionAttribute(orderNr, i, dimensions[i]));
+            }
+            return attrColl;
         }
         
         internal override AttributeExtCollection GetClsAttributesForTypeCode() {
-/*            AttributeExtCollection resultColl =
-                new AttributeExtCollection(new Attribute[] { CreateSequenceAttribute() } );
-            resultColl = resultColl.MergeAttributeCollections(((TypeCodeImpl)m_seqType).GetClsAttributesForTypeCode());
-            return resultColl; */
-           throw new NotImplementedException();
+            return GetAttributesForDimension();
         }
 
-        internal override CustomAttributeBuilder[] GetAttributes() {            
-/*            CustomAttributeBuilder[] elemAttrBuilders = ((TypeCodeImpl)m_seqType).GetAttributes();
-            CustomAttributeBuilder[] result = new CustomAttributeBuilder[elemAttrBuilders.Length + 1];
-            result[0] = CreateSequenceAttribute().CreateAttributeBuilder();
-            elemAttrBuilders.CopyTo((Array)result, 1);
-            return result; */
-            throw new NotImplementedException();
+        internal override CustomAttributeBuilder[] GetAttributes() {
+            AttributeExtCollection allAttributes = GetAttributesForDimension();
+            CustomAttributeBuilder[] result = new CustomAttributeBuilder[allAttributes.Count];
+            for (int i = 0; i < allAttributes.Count; i++) {
+                if (!(allAttributes[i] is IIdlAttribute)) {
+                    // should not occur
+                    throw new INTERNAL(6571, CompletionStatus.Completed_MayBe);
+                }
+                result[i] = ((IIdlAttribute)allAttributes[i]).CreateAttributeBuilder();
+            }
+            return result;
         }
 
         #endregion IMethods

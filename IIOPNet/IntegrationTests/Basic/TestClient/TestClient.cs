@@ -447,6 +447,50 @@ namespace Ch.Elca.Iiop.IntegrationTests {
         }
 
         [Test]
+        public void TestIdlArrayInsideStruct() {
+            IdlArrayContainer container = new IdlArrayContainer();
+            container.OneDimIntArray5 = new int[] { 1, 2, 3, 4, 5 };
+            container.TwoDimIntArray2x2 = new int[,] { { 1, 2 }, { 3, 4 } };
+            IdlArrayContainer result = m_testService.EchoIdlArrayContainer(container);
+            Assertion.AssertEquals(container.OneDimIntArray5.Length, result.OneDimIntArray5.Length);
+            Assertion.AssertEquals(container.TwoDimIntArray2x2.GetLength(0), result.TwoDimIntArray2x2.GetLength(0));
+            Assertion.AssertEquals(container.TwoDimIntArray2x2.GetLength(1), result.TwoDimIntArray2x2.GetLength(1));
+
+            for (int i = 0; i < container.OneDimIntArray5.Length; i++) {
+                Assertion.AssertEquals(container.OneDimIntArray5[i], result.OneDimIntArray5[i]);
+            }
+
+            for (int i = 0; i < container.TwoDimIntArray2x2.GetLength(0); i++) {
+                for (int j = 0; j < container.TwoDimIntArray2x2.GetLength(1); j++) {
+                    Assertion.AssertEquals(container.TwoDimIntArray2x2[i,j], result.TwoDimIntArray2x2[i,j]);
+                }                
+            }            
+        }
+
+        [Test]
+        public void TestIdlArraysAsAny() {
+            IdlArrayContainer container = new IdlArrayContainer();
+            container.OneDimIntArray5 = new int[] { 1, 2, 3, 4, 5 };
+            container.TwoDimIntArray2x2 = new int[,] { { 1, 2 }, { 3, 4 } };
+            IdlArrayContainer result = 
+                (IdlArrayContainer)m_testService.EchoAnything(container);
+            Assertion.AssertEquals(container.OneDimIntArray5.Length, result.OneDimIntArray5.Length);
+            Assertion.AssertEquals(container.TwoDimIntArray2x2.GetLength(0), result.TwoDimIntArray2x2.GetLength(0));
+            Assertion.AssertEquals(container.TwoDimIntArray2x2.GetLength(1), result.TwoDimIntArray2x2.GetLength(1));
+
+            for (int i = 0; i < container.OneDimIntArray5.Length; i++) {
+                Assertion.AssertEquals(container.OneDimIntArray5[i], result.OneDimIntArray5[i]);
+            }
+
+            for (int i = 0; i < container.TwoDimIntArray2x2.GetLength(0); i++) {
+                for (int j = 0; j < container.TwoDimIntArray2x2.GetLength(1); j++) {
+                    Assertion.AssertEquals(container.TwoDimIntArray2x2[i,j], result.TwoDimIntArray2x2[i,j]);
+                }                
+            }            
+        }
+
+
+        [Test]
         public void TestRemoteObjects() {
             Adder adder = m_testService.RetrieveAdder();
             System.Int32 arg1 = 1;

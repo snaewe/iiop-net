@@ -99,7 +99,13 @@ namespace Ch.Elca.Iiop.Util {
                 return m_attributes.SyncRoot; 
             }
         }
-        
+
+        public object this[int index] {
+            get {
+                return m_attributes[index];
+            }
+        }        
+
         #endregion IProperties
         #region SMethods
         

@@ -85,6 +85,14 @@ namespace Ch.Elca.Iiop.IntegrationTests {
     }
 
 
+    [IdlStruct]
+    public struct IdlArrayContainer {
+        [IdlArray(0, 5)]
+        public int[] OneDimIntArray5;
+
+        [IdlArray(0, 2)][IdlArrayDimension(0, 1, 2)] 
+        public int[,] TwoDimIntArray2x2;
+    }
 
     public class Adder : MarshalByRefObject {
         public System.Int32 Add(System.Int32 sum1, System.Int32 sum2) {
@@ -319,6 +327,10 @@ namespace Ch.Elca.Iiop.IntegrationTests {
         [return: IdlArrayDimension(0, 1, 3)]
         public System.Int32[,] EchoIdlLongArray5times3([IdlArray(0, 5)][IdlArrayDimension(0, 1, 3)] System.Int32[,] arg) {
             return arg;
+        }
+
+        public IdlArrayContainer EchoIdlArrayContainer(IdlArrayContainer arrayContainer) {
+            return arrayContainer;            
         }
 
         public Adder RetrieveAdder() {

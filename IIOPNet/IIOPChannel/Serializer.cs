@@ -1373,7 +1373,8 @@ namespace Ch.Elca.Iiop.Marshalling {
                         result = new omg.org.CORBA.AnyTC();
                         break;
                     case omg.org.CORBA.TCKind.tk_array:
-                        throw new NotImplementedException("array not implemented");
+                        result = new omg.org.CORBA.ArrayTC();
+                        break;
                     case omg.org.CORBA.TCKind.tk_boolean:
                         result = new omg.org.CORBA.BooleanTC();
                         break;
