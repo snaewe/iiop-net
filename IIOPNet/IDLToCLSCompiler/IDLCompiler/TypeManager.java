@@ -58,7 +58,7 @@ public class TypeManager {
             throw new RuntimeException("register error for type: " + type.get_FullName() + ", symbol may not be null"); 
         }
         if (IsTypeDeclarded(forSymbol)) {
-            throw new RuntimeException("a type with the name " + getKnownType(forSymbol).getCLSType().get_FullName() + " is already declared for symbol: " + forSymbol);
+            throw new RuntimeException("a type with the name " + GetKnownType(forSymbol).getCLSType().get_FullName() + " is already declared for symbol: " + forSymbol);
         }
         TypeContainer container = new TypeContainer(type, new CustomAttributeBuilder[0]);
         m_typesInCreation.put(forSymbol, container);
@@ -66,7 +66,7 @@ public class TypeManager {
 
     /** is at least a forward declaration for the type represented by the symbol present */
     public boolean IsTypeDeclarded(Symbol forSymbol) {
-        TypeContainer type = getKnownType(forSymbol);
+        TypeContainer type = GetKnownType(forSymbol);
         if (type == null) { 
             return false; 
         } else {
@@ -133,7 +133,7 @@ public class TypeManager {
     #endregion
 
     /** are there any types not defined left */
-    public boolean allTypesDefined() {
+    public boolean AllTypesDefined() {
         if (m_typesInCreation.size() > 0) {
             java.util.Enumeration enum = m_typesInCreation.elements();
             while (enum.hasMoreElements()) {
@@ -147,7 +147,7 @@ public class TypeManager {
 
     /** get the full defined Type or the fwd decl
      */
-    public TypeContainer getKnownType(Symbol forSymbol) {
+    public TypeContainer GetKnownType(Symbol forSymbol) {
         TypeContainer result = (TypeContainer)m_typeTable.get(forSymbol);
         if (result == null) {
             result = (TypeContainer)m_typesInCreation.get(forSymbol);

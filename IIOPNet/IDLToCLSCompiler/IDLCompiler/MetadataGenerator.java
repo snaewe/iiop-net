@@ -312,12 +312,14 @@ public class MetaDataGenerator implements IDLParserVisitor {
      * @param data unused
      */
     public Object visit(ASTspecification node, Object data) {
-        if (!m_initalized) { throw new RuntimeException("initalize not called"); }
+        if (!m_initalized) { 
+            throw new RuntimeException("initalize not called"); 
+        }
         Scope topScope = m_symbolTable.getTopScope();
         BuildInfo info = new BuildInfo(topScope, null);
         node.childrenAccept(this, info);
         m_initalized = false; // this file is finished
-        if (!m_typeManager.allTypesDefined()) {
+        if (!m_typeManager.AllTypesDefined()) {
             throw new RuntimeException("not all types fully defined");
         }
         return null;
@@ -387,7 +389,7 @@ public class MetaDataGenerator implements IDLParserVisitor {
         } else {
             // get incomplete type
             Trace.WriteLine("complete interface: " + fullyQualName);
-            interfaceToBuild = (TypeBuilder)(m_typeManager.getKnownType(forSymbol).getCLSType());
+            interfaceToBuild = (TypeBuilder)(m_typeManager.GetKnownType(forSymbol).getCLSType());
             // add inheritance relationship:
             for (int i = 0; i < interfaces.length; i++) {
                 interfaceToBuild.AddInterfaceImplementation(interfaces[i]);
@@ -499,7 +501,7 @@ public class MetaDataGenerator implements IDLParserVisitor {
             // get symbol
             Symbol sym = (Symbol)(node.jjtGetChild(i).jjtAccept(this, data)); // accept interface_name
             // get Type
-            TypeContainer resultType = m_typeManager.getKnownType(sym);
+            TypeContainer resultType = m_typeManager.GetKnownType(sym);
             if (resultType == null) {
                 // this is an error: type must be created before it is inherited from
                 throw new RuntimeException("type not seen before in inheritance spec");
@@ -609,7 +611,7 @@ public class MetaDataGenerator implements IDLParserVisitor {
         } else {
             // get incomplete type
             Trace.WriteLine("complete valuetype: " + fullyQualName);
-            valueToBuild = (TypeBuilder)m_typeManager.getKnownType(forSymbol).getCLSType();
+            valueToBuild = (TypeBuilder)m_typeManager.GetKnownType(forSymbol).getCLSType();
             // add inheritance relationship:
             for (int i = 0; i < interfaces.length; i++) {
                 valueToBuild.AddInterfaceImplementation(interfaces[i]);
@@ -1130,7 +1132,7 @@ public class MetaDataGenerator implements IDLParserVisitor {
         TypeContainer resultingType = null;
         if (result instanceof Symbol) { // case <scoped_name>
             // get type for symbol
-            resultingType = m_typeManager.getKnownType((Symbol)result);
+            resultingType = m_typeManager.GetKnownType((Symbol)result);
         } else { // other cases
             resultingType = (TypeContainer) result;
         }

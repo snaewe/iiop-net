@@ -48,6 +48,8 @@ import System.Diagnostics.*;
  */
 public class IDLToCLS {
 
+    #region SMethods
+
     public static void main(String[] args) {
         // enable trace
         // Trace.get_Listeners().Add(new TextWriterTraceListener(System.Console.get_Out()));
@@ -55,13 +57,13 @@ public class IDLToCLS {
         // Trace.Indent();
         
         try {
-            String asmPrefix = getAsmPrefix(args);
+            String asmPrefix = GetAsmPrefix(args);
             MetaDataGenerator generator = new MetaDataGenerator(asmPrefix);
-            String[] inputFileNames = getFileArgs(args);
+            String[] inputFileNames = GetFileArgs(args);
             for (int i = 0; i < inputFileNames.length; i++) {
                 System.out.println("processing file: " + inputFileNames[i]);
                 Trace.WriteLine("");
-                InputStream source = preprocess(inputFileNames[i]); // preprocess the file
+                InputStream source = Preprocess(inputFileNames[i]); // preprocess the file
                 IDLParser parser = new IDLParser(source);
                 Trace.WriteLine("parsing file: " + inputFileNames[i]);
                 ASTspecification spec = parser.specification();
@@ -80,17 +82,17 @@ public class IDLToCLS {
         
     }
     
-    private static String getAsmPrefix(String[] args) throws Exception {
+    private static String GetAsmPrefix(String[] args) throws Exception {
         if ((args.length < 1) || (args[0].endsWith(".idl"))) {
-            printUsage();
+            PrintUsage();
             throw new Exception("target assembly name missing"); 
         }
         return args[0];
     }
 
-    private static String[] getFileArgs(String[] args) throws Exception {
+    private static String[] GetFileArgs(String[] args) throws Exception {
         if (args.length < 2) {
-            printUsage();
+            PrintUsage();
             throw new Exception("file argument missing"); 
         }
         String[] result = new String[args.length-1];
@@ -98,7 +100,7 @@ public class IDLToCLS {
         return result;
     }
 
-    private static InputStream preprocess(String fileName) throws Exception {
+    private static InputStream Preprocess(String fileName) throws Exception {
         File file = new File(fileName);
         // all Preprocessor instances share the same symbol definitions
         IDLPreprocessor.IDLPreprocessor preproc = new IDLPreprocessor.IDLPreprocessor(file);
@@ -114,9 +116,11 @@ public class IDLToCLS {
         return result;
     }
     
-    private static void printUsage() {
+    private static void PrintUsage() {
         System.out.println("first argument: target assembly name");
         System.out.println("other arguments: idl-files");
     }
+
+    #endregion SMethods
 
 }
