@@ -50,6 +50,7 @@ namespace Ch.Elca.Iiop.Cdr {
 
         private CdrInputStream m_stream;
         private GiopVersion m_version;
+        private byte[] m_buf = new byte[8];
 
         #endregion IFields
         #region IConstructors
@@ -63,97 +64,52 @@ namespace Ch.Elca.Iiop.Cdr {
         #region IMethods
         
         #region read methods depenant on byte ordering
+
+        private void Read(int size, Aligns align) {
+            m_stream.ForceReadAlign(align);
+            m_stream.ReadBytes(m_buf, 0, size);
+            Array.Reverse(m_buf, 0, size);
+        }
+
         public short ReadShort() {
-            // in stream: two-complement representation
-            ushort numberTwoCRepr = ReadUShort();
-
-            byte msbit = (byte)((numberTwoCRepr & 0x8000) >> 15);
-
-            short result;
-            if (msbit == 1) {
-                // a negative number
-                ushort invtwoCNumber = (ushort)(numberTwoCRepr ^ 0xFFFF);
-                result = (short)((invtwoCNumber + 1) * -1);
-            } else {
-                // a positive number
-                result = (short)(numberTwoCRepr);
-            }
-            return result;
+            Read(2, Aligns.Align2);
+            return BitConverter.ToInt16(m_buf, 0);
         }
 
         public ushort ReadUShort() {
-            m_stream.ForceReadAlign(Aligns.Align2);
-            return (ushort) ((m_stream.ReadOctet() << 8) | m_stream.ReadOctet());
+            Read(2, Aligns.Align2);
+            return BitConverter.ToUInt16(m_buf, 0);
         }
 
         public int ReadLong() {
-            // in stream: two-complement representation
-            uint numberTwoCRepr = ReadULong();
-
-            byte msbit = (byte)((numberTwoCRepr & 0x80000000) >> 31);
-
-            int result;
-            if (msbit == 1) {
-                // a negative number
-                uint invtwoCNumber = (uint)(numberTwoCRepr ^ 0xFFFFFFFF);
-                result = (int)((invtwoCNumber + 1) * -1);
-            } else {
-                // a positive number
-                result = (int)(numberTwoCRepr);
-            }
-            return result;
+            Read(4, Aligns.Align4);
+            return BitConverter.ToInt32(m_buf, 0);
         }
 
         public uint ReadULong() {
-            m_stream.ForceReadAlign(Aligns.Align4);
-            return (
-                (((uint)m_stream.ReadOctet()) << 24) | (((uint)m_stream.ReadOctet()) << 16) | 
-                (((uint)m_stream.ReadOctet()) << 8) | ((uint)m_stream.ReadOctet())
-            );
+            Read(4, Aligns.Align4);
+            return BitConverter.ToUInt32(m_buf, 0);
         }
 
         public long ReadLongLong() {
-            // in stream: two-complement representation
-            ulong numberTwoCRepr = ReadULongLong();
-
-            byte msbit = (byte)((numberTwoCRepr & 0x8000000000000000) >> 63);
-            long result;
-            if (msbit == 1) {
-                // a negative number
-                ulong invtwoCNumber = (ulong)(numberTwoCRepr ^ 0xFFFFFFFFFFFFFFFF);
-                result = (long)(0 - (invtwoCNumber + 1));
-            } else {
-                // a positive number
-                result = (long)(numberTwoCRepr);
-            }
-            return result;
+            Read(8, Aligns.Align8);
+            return BitConverter.ToInt64(m_buf, 0);
         }
 
         public ulong ReadULongLong() {
-            m_stream.ForceReadAlign(Aligns.Align8);
-            return (ulong)(
-                (((ulong)m_stream.ReadOctet()) << 56) | (((ulong)m_stream.ReadOctet()) << 48)  | 
-                (((ulong)m_stream.ReadOctet()) << 40) | (((ulong)m_stream.ReadOctet()) << 32) |                 
-                (((ulong)m_stream.ReadOctet()) << 24) | (((ulong)m_stream.ReadOctet()) << 16) | 
-                (((ulong)m_stream.ReadOctet()) << 8) | ((ulong)m_stream.ReadOctet()) 
-            );
-
+            Read(8, Aligns.Align8);
+            return BitConverter.ToUInt64(m_buf, 0);
         }
 
         public float ReadFloat() {
-            m_stream.ForceReadAlign(Aligns.Align4);
-            byte[] data = m_stream.ReadOpaque(4);
-            Array.Reverse((Array)data); // BitConverter wants little endian
-            float result = BitConverter.ToSingle(data, 0);
+            Read(4, Aligns.Align4);
+            float result = BitConverter.ToSingle(m_buf, 0);
             return result;
         }
 
         public double ReadDouble() {
-            m_stream.ForceReadAlign(Aligns.Align8);
-            byte[] data = m_stream.ReadOpaque(8);
-            // BitConverter takes an 8 byte array, containing the litte endian representation of the double
-            Array.Reverse((Array)data);
-            double result = BitConverter.ToDouble(data, 0);
+            Read(8, Aligns.Align8);
+            double result = BitConverter.ToDouble(m_buf, 0);
             return result;
         }
         
@@ -366,6 +322,7 @@ namespace Ch.Elca.Iiop.Cdr {
 
         private CdrInputStream m_stream;
         private GiopVersion m_version;
+        private byte[] m_buf = new byte[8];
 
         #endregion IFields
         #region IConstructors
@@ -379,96 +336,51 @@ namespace Ch.Elca.Iiop.Cdr {
         #region IMethods
         
         #region read methods depenant on byte ordering
+
+        private void Read(int size, Aligns align) {
+            m_stream.ForceReadAlign(align);
+            m_stream.ReadBytes(m_buf, 0, size);
+        }
+
         public short ReadShort() {
-            // in stream: two-complement representation
-            ushort numberTwoCRepr = ReadUShort();
-
-            byte msbit = (byte)((numberTwoCRepr & 0x8000) >> 15);
-
-            short result;
-            if (msbit == 1) {
-                // a negative number
-                ushort invtwoCNumber = (ushort)(numberTwoCRepr ^ 0xFFFF);
-                result = (short)((invtwoCNumber + 1) * -1);
-            } else {
-                // a positive number
-                result = (short)(numberTwoCRepr);
-            }
-            return result;
+            Read(2, Aligns.Align2);
+            return BitConverter.ToInt16(m_buf, 0);
         }
 
         public ushort ReadUShort() {
-            m_stream.ForceReadAlign(Aligns.Align2);
-            return (ushort) (m_stream.ReadOctet() | (m_stream.ReadOctet() << 8));
+            Read(2, Aligns.Align2);
+            return BitConverter.ToUInt16(m_buf, 0);
         }
 
         public int ReadLong() {
-            // in stream: two-complement representation
-            uint numberTwoCRepr = ReadULong();
-
-            byte msbit = (byte)((numberTwoCRepr & 0x80000000) >> 31);
-
-            int result;
-            if (msbit == 1) {
-                // a negative number
-                uint invtwoCNumber = (uint)(numberTwoCRepr ^ 0xFFFFFFFF);
-                result = (int)((invtwoCNumber + 1) * -1);
-            } else {
-                // a positive number
-                result = (int)(numberTwoCRepr);
-            }
-            return result;
+            Read(4, Aligns.Align4);
+            return BitConverter.ToInt32(m_buf, 0);
         }
 
         public uint ReadULong() {
-            m_stream.ForceReadAlign(Aligns.Align4);
-            return (
-                ((uint)m_stream.ReadOctet()) | (((uint)m_stream.ReadOctet()) << 8) | 
-                (((uint)m_stream.ReadOctet()) << 16) | (((uint)m_stream.ReadOctet()) << 24)
-            );
+            Read(4, Aligns.Align4);
+            return BitConverter.ToUInt32(m_buf, 0);
         }
 
         public long ReadLongLong() {
-            // in stream: two-complement representation
-            ulong numberTwoCRepr = ReadULongLong();
-
-            byte msbit = (byte)((numberTwoCRepr & 0x8000000000000000) >> 63);
-            long result;
-            if (msbit == 1) {
-                // a negative number
-                ulong invtwoCNumber = (ulong)(numberTwoCRepr ^ 0xFFFFFFFFFFFFFFFF);
-                result = (long)(0 - (invtwoCNumber + 1));
-            } else {
-                // a positive number
-                result = (long)(numberTwoCRepr);
-            }
-            return result;
+            Read(8, Aligns.Align8);
+            return BitConverter.ToInt64(m_buf, 0);
         }
 
         public ulong ReadULongLong() {
-            m_stream.ForceReadAlign(Aligns.Align8);
-            return (ulong)(
-                ((ulong)m_stream.ReadOctet()) | (((ulong)m_stream.ReadOctet()) << 8)  | 
-                (((ulong)m_stream.ReadOctet()) << 16) | (((ulong)m_stream.ReadOctet()) << 24) |                 
-                (((ulong)m_stream.ReadOctet()) << 32) | (((ulong)m_stream.ReadOctet()) << 40) | 
-                (((ulong)m_stream.ReadOctet()) << 48) | (((ulong)m_stream.ReadOctet()) << 56)
-            );
-
+            Read(8, Aligns.Align8);
+            return BitConverter.ToUInt64(m_buf, 0);
         }
 
         public float ReadFloat() {
-            m_stream.ForceReadAlign(Aligns.Align4);
-            byte[] data = m_stream.ReadOpaque(4);
-            // BitConverter wants little endian
-            float result = BitConverter.ToSingle(data, 0);
+            Read(4, Aligns.Align4);
+            float result = BitConverter.ToSingle(m_buf, 0);
             return result;
         }
 
         public double ReadDouble() {
-            m_stream.ForceReadAlign(Aligns.Align8);
-            byte[] data = m_stream.ReadOpaque(8);
-            // BitConverter takes an 8 byte array, containing the litte endian representation of the double            
-            double result = BitConverter.ToDouble(data, 0);
+            Read(8, Aligns.Align8);
+            double result = BitConverter.ToDouble(m_buf, 0);
             return result;
         }
         

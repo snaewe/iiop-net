@@ -387,6 +387,11 @@ namespace Ch.Elca.Iiop.Cdr {
             return result;
         }
 
+        public void ReadBytes(byte[] buf, int offset, int count) {
+            m_baseStream.ReadBytes(buf, offset, count);
+            CheckPosition();
+        }
+
         public void ReadPadding(ulong nrOfBytes) {
             m_baseStream.ReadPadding(nrOfBytes);
             CheckPosition();

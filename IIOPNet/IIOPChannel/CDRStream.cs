@@ -119,6 +119,8 @@ namespace Ch.Elca.Iiop.Cdr {
         /// <summary>reads nrOfBytes from the stream</summary>
         byte[] ReadOpaque(int nrOfBytes);
 
+        void ReadBytes(byte[] buf, int offset, int count);
+
         void ReadPadding(ulong nrOfBytes);
 
         /// <summary>
@@ -702,6 +704,12 @@ namespace Ch.Elca.Iiop.Cdr {
             BaseStream.Read(data, 0, nrOfBytes);
             IncrementPosition((ulong)nrOfBytes);
             return data;
+        }
+
+        public void ReadBytes(byte[] buf, int offset, int count) {
+            CheckEndOfStream((ulong)count);
+            BaseStream.Read(buf, offset, count);
+            IncrementPosition((ulong)count);
         }
 
         public void ForceReadAlign(Aligns align) {
