@@ -229,6 +229,30 @@ namespace Ch.Elca.Iiop.IntegrationTests {
             Assertion.AssertNotNull(result2[2]);
             Assertion.AssertEquals(arg2[0][0][0], result2[0][0][0]);
         }
+
+        [Test]
+        public void TestJaggedArraysWithNullElems() {
+	    System.Int32[][] arg1 = null;
+            System.Int32[][] result1 = m_testService.EchoJaggedIntArray(arg1);
+            Assertion.AssertEquals(arg1, result1);
+
+            System.Int32[][] arg2 = new System.Int32[2][];
+            System.Int32[][] result2 = m_testService.EchoJaggedIntArray(arg2);
+            Assertion.AssertNotNull(result2);
+
+            System.String[][] arg3 = null;
+            System.String[][] result3 = m_testService.EchoJaggedStringArray(arg3);
+            Assertion.AssertEquals(arg3, result3);
+
+            System.String[][] arg4 = new System.String[][] { null, new System.String[] { "abc", "def" } };
+            System.String[][] result4 = m_testService.EchoJaggedStringArray(arg4);
+            Assertion.AssertNotNull(result4);
+            Assertion.AssertNull(result4[0]);
+            Assertion.AssertNotNull(result4[1]);
+            Assertion.AssertEquals(result4[1][0], arg4[1][0]);
+            Assertion.AssertEquals(result4[1][1], arg4[1][1]);
+        }
+
         
         [Test]
         public void TestJaggedStringArrays() {
