@@ -756,6 +756,10 @@ public class MetaDataGenerator : IDLParserVisitor {
                 if (methods[j].IsSpecialName) {
                     continue; // do not add methods with special name, e.g. property accessor methods
                 }
+                if (ReflectionHelper.IsMethodDefinedOnType(methods[j], classBuilder.BaseType,
+                                                           BindingFlags.Instance | BindingFlags.Public)) {
+                    continue; // method is already defined on a baseclass -> do not re-add
+                }
                 // normal parameters
                 ParameterInfo[] parameters = methods[j].GetParameters();
                 ParameterSpec[] paramSpecs = new ParameterSpec[parameters.Length];
@@ -772,6 +776,12 @@ public class MetaDataGenerator : IDLParserVisitor {
             // properties
             PropertyInfo[] properties = ifType.GetProperties(BindingFlags.Instance | BindingFlags.Public);
             for (int j = 0; j < properties.Length; j++) {
+                
+                if (ReflectionHelper.IsPropertyDefinedOnType(properties[j], classBuilder.BaseType,
+                                                             BindingFlags.Instance | BindingFlags.Public)) {
+                    continue; // property is already defined on a baseclass -> do not re-add
+                }
+                
                 TypeContainer propType = new TypeContainer(properties[j].PropertyType,
                                                            properties[j].GetCustomAttributes(true));
                 MethodBuilder getAccessor = 

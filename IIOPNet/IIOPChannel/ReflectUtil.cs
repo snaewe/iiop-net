@@ -133,6 +133,22 @@ namespace Ch.Elca.Iiop.Util {
             }
             return result;
         }
+        
+        /// <summary>checks, if a method matching the MethodInfo method is defined on the type</summary>
+        public static bool IsMethodDefinedOnType(MethodInfo method, Type type,
+                                                 BindingFlags flags) {        	
+        	MethodInfo foundMethod = type.GetMethod(method.Name, flags, null, ExtractMethodTypes(method),
+        	                                        null);
+            return (foundMethod != null);            
+        }
+        
+        public static bool IsPropertyDefinedOnType(PropertyInfo property, Type type,
+                                                   BindingFlags flags) {
+            PropertyInfo foundProperty = type.GetProperty(property.Name, flags,
+                                                          null, property.PropertyType,
+                                                          Type.EmptyTypes, null);
+            return (foundProperty != null);
+        }
 
     }
 
