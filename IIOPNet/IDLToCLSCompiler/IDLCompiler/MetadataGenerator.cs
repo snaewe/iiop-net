@@ -1143,6 +1143,31 @@ public class MetaDataGenerator : IDLParserVisitor {
     }
 
     #region const-dcl
+
+    /// <summary>
+    /// returns true, if the Type type can be used as type for a constant field; otherwise false.
+    /// </summary>
+    private bool CanSetConstantValue(Type type) {
+        // ok for the following types:
+        // Boolean, SByte, Int16, Int32, Int64, Byte, UInt16, UInt32, UInt64,
+        // Single, Double, DateTime, Char, String und Enum        
+        return (type.Equals(ReflectionHelper.BooleanType) ||
+                type.Equals(ReflectionHelper.SByteType) ||
+                type.Equals(ReflectionHelper.Int16Type) ||
+                type.Equals(ReflectionHelper.Int32Type) ||
+                type.Equals(ReflectionHelper.Int64Type) ||
+                type.Equals(ReflectionHelper.ByteType) ||
+                type.Equals(ReflectionHelper.UInt16Type) ||
+                type.Equals(ReflectionHelper.UInt32Type) ||
+                type.Equals(ReflectionHelper.UInt64Type) ||
+                type.Equals(ReflectionHelper.SingleType) ||
+                type.Equals(ReflectionHelper.DoubleType) ||
+                type.Equals(ReflectionHelper.DateTimeType) ||
+                type.Equals(ReflectionHelper.CharType) ||
+                type.Equals(ReflectionHelper.StringType) ||
+                type.IsEnum);
+    }
+
     /**
      * @see parser.IDLParserVisitor#visit(ASTconst_dcl, Object)
      * @param data expects a BuildInfo instance
@@ -1176,19 +1201,29 @@ public class MetaDataGenerator : IDLParserVisitor {
         TypeBuilder constContainer = m_typeManager.StartTypeDefinition(constSymbol,
                                                                        TypeAttributes.Class | TypeAttributes.Sealed | TypeAttributes.Public, 
                                                                        typeof(System.Object), new System.Type[] { typeof(IIdlEntity) }, false);
-                
-        FieldBuilder constField = m_ilEmitHelper.AddFieldWithCustomAttrs(constContainer, "ConstVal", constType, 
-                                                                         FieldAttributes.Static | FieldAttributes.InitOnly | FieldAttributes.Public);
-        
+        string constFieldName = "ConstVal";
+        FieldBuilder constField;
+        if (CanSetConstantValue(constType.GetSeparatedClsType())) {
+            // possible as constant field
+            constField = m_ilEmitHelper.AddFieldWithCustomAttrs(constContainer, constFieldName, constType,
+                                                                FieldAttributes.Static | FieldAttributes.Literal | FieldAttributes.Public);
+            constField.SetConstant(val.GetValueToAssign(constType.GetSeparatedClsType(),
+                                                        constType.GetAssignableFromType()));
+        } else {
+            // not possible as constant -> use a readonly static field instead of a constant
+            constField = m_ilEmitHelper.AddFieldWithCustomAttrs(constContainer, constFieldName, constType,
+                                                                FieldAttributes.Static | FieldAttributes.InitOnly | FieldAttributes.Public);
+            // add static initalizer to assign value
+            ConstructorBuilder staticInit = constContainer.DefineConstructor(MethodAttributes.Private | MethodAttributes.Static,
+                                                                            CallingConventions.Standard, Type.EmptyTypes);
+            ILGenerator constrIl = staticInit.GetILGenerator();
+            val.EmitLoadValue(constrIl, constType.GetSeparatedClsType(), constType.GetAssignableFromType());
+            constrIl.Emit(OpCodes.Stsfld, constField);
+            constrIl.Emit(OpCodes.Ret);
+        }
+
         // add private default constructor
         constContainer.DefineDefaultConstructor(MethodAttributes.Private);
-        // add static initalizer
-        ConstructorBuilder staticInit = constContainer.DefineConstructor(MethodAttributes.Private | MethodAttributes.Static, 
-                                                                        CallingConventions.Standard, Type.EmptyTypes);        
-        ILGenerator constrIl = staticInit.GetILGenerator();
-        val.EmitLoadValue(constrIl, constType.GetSeparatedClsType(), constType.GetAssignableFromType());
-        constrIl.Emit(OpCodes.Stsfld, constField);
-        constrIl.Emit(OpCodes.Ret);
 
         // create the type
         m_typeManager.EndTypeDefinition(constSymbol);

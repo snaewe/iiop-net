@@ -115,6 +115,65 @@ module IntegrationTests {
 	const unsigned long long ULongLong_BiggerThanLongLong =  0x8000000000000000;
 	
 	
+        // tests for all const-types in corba 2.x grammar
+        // <const_type> ::= <integer_type>
+
+        const short A_SHORT_CONST = -29;
+        const short VAL_OF_A_SHORT_CONST = A_SHORT_CONST;
+        const long A_LONG_CONST = 30;
+        const long long A_LONG_LONG_CONST = -31;
+
+        const unsigned short A_UNSIGNED_SHORT_CONST = 81;
+        const unsigned long A_UNSIGNED_LONG_CONST = 101;
+        const unsigned long long A_UNSIGNED_LONG_LONG_CONST = 102;
+
+        // | <char_type>
+
+        const char A_CHAR_CONST = 'C';
+        const char VAL_OF_A_CHAR_CONST = A_CHAR_CONST;
+
+        // | <wide_char_type>
+
+        const wchar A_WCHAR_CONST = L'D';
+
+        // | <boolean_type>
+
+        const boolean A_BOOLEAN_CONST_TRUE = TRUE;
+        const boolean A_BOOLEAN_CONST_FALSE = FALSE;
+
+        // | <floating_pt_type>
+
+        const float A_FLOAT_CONST = 1.1f;
+        const double A_DOUBLE_CONST = 6.7e8f;
+        // const long double ... not supported yet
+
+        // | <string_type>
+
+        const string A_STRING_CONST = "test";
+        const string <10> A_STRING_CONST_BOUNDED = "test-b";
+
+        // | <wide_string_type>
+
+        const wstring A_WSTRING_CONST = L"w-test";
+        const wstring <10> A_WSTRING_CONST_BOUNDED = L"w-test-b";
+
+        // | <fixed_pt_const_type>
+
+        // const fixed ... not supported yet        
+
+        // | <scoped_name>
+
+        typedef long LONG_TYPEDEF;
+        const LONG_TYPEDEF SCOPED_NAME_CONST_LONGTD = 10;
+
+        enum A_ENUM_FOR_CONST { CV1, CV2, CV3 };
+        const A_ENUM_FOR_CONST SCOPED_NAME_CONST_ENUM = CV1;
+
+
+        // | <octet_type>
+
+        const octet A_OCTET_CONST = 8;
+        
 	
 };
 };

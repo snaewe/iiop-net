@@ -65,11 +65,16 @@ namespace Ch.Elca.Iiop.Util {
         private static Type s_int16Type = typeof(System.Int16);
         private static Type s_int32Type = typeof(System.Int32);
         private static Type s_int64Type = typeof(System.Int64);
+        private static Type s_uInt16Type = typeof(System.UInt16);
+        private static Type s_uInt32Type = typeof(System.UInt32);
+        private static Type s_uInt64Type = typeof(System.UInt64);
         private static Type s_booleanType = typeof(System.Boolean);
         private static Type s_byteType = typeof(System.Byte);
+        private static Type s_sByteType = typeof(System.SByte);
         private static Type s_singleType = typeof(System.Single);
         private static Type s_doubleType = typeof(System.Double);
-        
+        private static Type s_dateTimeType = typeof(System.DateTime);
+
         private static Type s_objectType = typeof(System.Object);
         private static Type s_objectArrayType = typeof(System.Object[]);
         private static Type s_valueTypeType = typeof(System.ValueType);
@@ -239,15 +244,43 @@ namespace Ch.Elca.Iiop.Util {
             get {
                 return s_int64Type;
             }
-        }        
-        
+        }
+
+        /// <summary>caches typeof(UInt16)</summary>
+        public static Type UInt16Type {
+            get {
+                return s_uInt16Type;
+            }
+        }
+
+        /// <summary>caches typeof(UInt32)</summary>
+        public static Type UInt32Type {
+            get {
+                return s_uInt32Type;
+            }
+        }
+
+        /// <summary>caches typeof(UInt64)</summary>
+        public static Type UInt64Type {
+            get {
+                return s_uInt64Type;
+            }
+        }
+
         /// <summary>caches typeof(Byte)</summary>
         public static Type ByteType {
             get {
                 return s_byteType;
             }
         }
-        
+
+        /// <summary>caches typeof(SByte)</summary>
+        public static Type SByteType {
+            get {
+                return s_sByteType;
+            }
+        }
+
         /// <summary>caches typeof(Boolean)</summary>
         public static Type BooleanType {
             get {
@@ -301,6 +334,13 @@ namespace Ch.Elca.Iiop.Util {
         public static Type TypeType {
             get {
                 return s_typeType;
+            }
+        }
+
+        /// <summary>caches typeof(DateTime)</summary>
+        public static Type DateTimeType {
+            get {
+                return s_dateTimeType;
             }
         }
         

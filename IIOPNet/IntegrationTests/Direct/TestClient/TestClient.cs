@@ -692,7 +692,7 @@ namespace Ch.Elca.Iiop.IntegrationTests {
         }
 
         [Test]
-        public void TestConstant() {
+        public void TestConstantRegression() {
             Int32 constVal = MyConstant.ConstVal;
             Assertion.AssertEquals("wrong constant value", 11, constVal);
             
@@ -738,6 +738,47 @@ namespace Ch.Elca.Iiop.IntegrationTests {
             UInt64 expectedValULongLong = 0x8000000000000000;
             Assertion.AssertEquals("wrong constant value", (Int64)expectedValULongLong, ULongLong_BiggerThanLongLong.ConstVal);
             
+        }
+
+        [Test]
+        public void TestConstantAllKinds() {
+            Assertion.AssertEquals("wrong const val short", -29, A_SHORT_CONST.ConstVal);
+            Assertion.AssertEquals("wrong const val short other const", 
+                                   A_SHORT_CONST.ConstVal, VAL_OF_A_SHORT_CONST.ConstVal);
+            Assertion.AssertEquals("wrong const val long", 30, A_LONG_CONST.ConstVal);
+            Assertion.AssertEquals("wrong const val long long", -31, A_LONG_LONG_CONST.ConstVal);
+
+            Assertion.AssertEquals("wrong const val ushort", 81, A_UNSIGNED_SHORT_CONST.ConstVal);
+            Assertion.AssertEquals("wrong const val ulong", 101, A_UNSIGNED_LONG_CONST.ConstVal);
+            Assertion.AssertEquals("wrong const val ulong long", 102, A_UNSIGNED_LONG_LONG_CONST.ConstVal);
+
+            Assertion.AssertEquals("wrong const val char", 'C', A_CHAR_CONST.ConstVal);
+            Assertion.AssertEquals("wrong const val char other const", 
+                                   A_CHAR_CONST.ConstVal, VAL_OF_A_CHAR_CONST.ConstVal);
+
+            Assertion.AssertEquals("wrong const val wchar", 'D', A_WCHAR_CONST.ConstVal);
+
+            Assertion.AssertEquals("wrong const val boolean true", true, A_BOOLEAN_CONST_TRUE.ConstVal);
+            Assertion.AssertEquals("wrong const val boolean false", false, A_BOOLEAN_CONST_FALSE.ConstVal);
+
+            Assertion.AssertEquals("wrong const val float", (Single)1.1, A_FLOAT_CONST.ConstVal);
+            Assertion.AssertEquals("wrong const val double", (Double)6.7E8, A_DOUBLE_CONST.ConstVal);
+
+            Assertion.AssertEquals("wrong const val string", "test", A_STRING_CONST.ConstVal);
+            Assertion.AssertEquals("wrong const val string bounded", 
+                                   "test-b", A_STRING_CONST_BOUNDED.ConstVal);
+
+            Assertion.AssertEquals("wrong const val wstring", "w-test", A_WSTRING_CONST.ConstVal);
+            Assertion.AssertEquals("wrong const val wstring bounded", 
+                                   "w-test-b", A_WSTRING_CONST_BOUNDED.ConstVal);
+
+            Assertion.AssertEquals("wrong const val typedef long", 10, 
+                                   SCOPED_NAME_CONST_LONGTD.ConstVal);
+
+            Assertion.AssertEquals("wrong const val enum", A_ENUM_FOR_CONST.CV1, 
+                                   SCOPED_NAME_CONST_ENUM.ConstVal);
+
+            Assertion.AssertEquals("wrong const val octet", 8, A_OCTET_CONST.ConstVal);
         }
 
         [Test]

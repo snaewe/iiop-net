@@ -93,7 +93,16 @@ namespace parser {
         /// <param name="assignFromType">the type, the literal should be of; if not equal to targetType, the
         /// value should be casted from assignFromType to targetType, before loading</param>
         void EmitLoadValue(ILGenerator gen, Type targetType, Type assignFromType);
-        
+
+        /// <summary>
+        /// gets the value usable to assign to targetType.
+        /// </summary>
+        /// <param name="targetType">the type, the literal value should be assigned to</param>
+        /// <param name="assignFromType">the type, the literal should be of; if not equal to targetType, the
+        /// value should be casted from assignFromType to targetType, before loading</param>
+        /// <returns>the value of the suitable type</returns>
+        object GetValueToAssign(Type targetType, Type assignFromType);
+
         /// <summary>
         /// checks, if this literal can be assigned to the given type.
         /// </summary>
@@ -158,7 +167,17 @@ namespace parser {
                 throw new LiteralTypeMismatchException("floating point", targetType);
             }            
         }
-        
+
+        public object GetValueToAssign(Type targetType, Type assignFromType) {
+            if (targetType.Equals(ReflectionHelper.SingleType)) {
+                return Convert.ToSingle(m_value);
+            } else if (targetType.Equals(ReflectionHelper.DoubleType)) {
+                return m_value;
+            } else {
+                throw new LiteralTypeMismatchException("floating point", targetType);
+            }
+        }
+
         public bool IsAssignableTo(TypeContainer type) {
             return type.GetCompactClsType().Equals(ReflectionHelper.SingleType) ||
                    type.GetCompactClsType().Equals(ReflectionHelper.DoubleType);
@@ -222,9 +241,9 @@ namespace parser {
         public Boolean GetBooleanValue() {
             throw new InvalidOperandInExpressionException("require a boolean operand, but found an integer operand: " + m_value);
         }
-        
-        private void EmitLoadInt16(ILGenerator gen, Type targetType, Type assignFromType) {
-            System.Int32 val;
+
+        private object ConvertToInt16(Type targetType, Type assignFromType) {
+            Int16 val;
             if (assignFromType.Equals(typeof(System.UInt16))) {
                 // handling to uint -> int conversion of the mapping
                 if ((m_value < UInt16.MinValue) || (m_value > UInt16.MaxValue)) {
@@ -235,19 +254,19 @@ namespace parser {
             } else {
                 if ((m_value < Int16.MinValue) || (m_value > Int16.MaxValue)) {
                     throw new LiteralTypeMismatchException("integer literal need more than 16bit, not assignable to short");
-                }    
-                val = Convert.ToInt32(m_value);
-            }                        
-            gen.Emit(OpCodes.Ldc_I4, val);
+                }
+                val = Convert.ToInt16(m_value);
+            }
+            return val;
         }
-        
-        private void EmitLoadInt32(ILGenerator gen, Type targetType, Type assignFromType) {
+
+        private object ConvertToInt32(Type targetType, Type assignFromType) {
             System.Int32 val;
             if (assignFromType.Equals(typeof(System.UInt32))) {
                 // handling to uint -> int conversion of the mapping
                 if ((m_value < UInt32.MinValue) || (m_value > UInt32.MaxValue)) {
                     throw new LiteralTypeMismatchException("integer literal need more than 16bit, not assignable to short");
-                }    
+                }
                 UInt32 asUint32 = Convert.ToUInt32(m_value);
                 val = (System.Int32)asUint32; // cast to int32
             } else {
@@ -256,37 +275,59 @@ namespace parser {
                 }
                 val = Convert.ToInt32(m_value);
             }
+            return val;
+        }
+
+        private object ConvertToInt64(Type targetType, Type assignFromType) {
+            Int64 val;
+            if (assignFromType.Equals(typeof(System.UInt64))) {
+                if ((m_value < UInt64.MinValue) || (m_value > UInt64.MaxValue)) {
+                    throw new LiteralTypeMismatchException("integer literal need more than 64bit, not assignable to ulong long");
+                }
+                UInt64 asUint64 = Convert.ToUInt64(m_value);
+                val = (Int64)asUint64;
+            } else {
+                if ((m_value < Int64.MinValue) || (m_value > Int64.MaxValue)) {
+                    throw new LiteralTypeMismatchException("integer literal need more than 64bit, not assignable to long long");
+                }
+                val = Convert.ToInt64(m_value);
+            }
+            return val;
+        }
+
+        private object ConvertToByte(Type targetType, Type assignFromType) {
+            Byte val;
+            if ((m_value < 0) && (m_value >= SByte.MinValue)) {
+                Console.WriteLine("illegal const value found for octet " + m_value + "; please change");
+                // compensate illegal java idl generated for some octet vals
+                SByte asSByte = Convert.ToSByte(m_value);
+                val = (Byte)asSByte;
+            } else if ((m_value < Byte.MinValue) || (m_value > Byte.MaxValue)) {
+                throw new LiteralTypeMismatchException("integer literal need more than 8bit, not assignable to octet");
+            } else {
+                val = (Byte)m_value;
+            }
+            return val;
+        }
+
+        private void EmitLoadInt16(ILGenerator gen, Type targetType, Type assignFromType) {
+            System.Int32 val = Convert.ToInt32(ConvertToInt16(targetType, assignFromType));
+            gen.Emit(OpCodes.Ldc_I4, val);
+        }
+        
+        private void EmitLoadInt32(ILGenerator gen, Type targetType, Type assignFromType) {
+            System.Int32 val = Convert.ToInt32(ConvertToInt32(targetType, assignFromType));
             gen.Emit(OpCodes.Ldc_I4, val);            
         }
         
         private void EmitLoadInt64(ILGenerator gen, Type targetType, Type assignFromType) {
-            if (assignFromType.Equals(typeof(System.UInt64))) {
-                if ((m_value < UInt64.MinValue) || (m_value > UInt64.MaxValue)) {
-                    throw new LiteralTypeMismatchException("integer literal need more than 64bit, not assignable to ulong long");
-                }                
-                UInt64 asUint64 = Convert.ToUInt64(m_value);
-                gen.Emit(OpCodes.Ldc_I8, (Int64)asUint64);
-            } else {
-                if ((m_value < Int64.MinValue) || (m_value > Int64.MaxValue)) {
-                    throw new LiteralTypeMismatchException("integer literal need more than 64bit, not assignable to long long");
-                }                
-                gen.Emit(OpCodes.Ldc_I8, Convert.ToInt64(m_value));
-            }
+            Int64 val = Convert.ToInt64(ConvertToInt64(targetType, assignFromType));            
+            gen.Emit(OpCodes.Ldc_I8, val);
         }
         
         private void EmitLoadByte(ILGenerator gen, Type targetType, Type assignFromType) {
-            Int32 val;
-            if ((m_value < 0) && (m_value >= SByte.MinValue)) {                    
-                Console.WriteLine("illegal const value found for octet " + m_value + "; please change");
-                // compensate illegal java idl generated for some octet vals
-                SByte asSByte = Convert.ToSByte(m_value);
-                val = Convert.ToInt32(((Byte)asSByte));
-            } else if ((m_value < Byte.MinValue) || (m_value > Byte.MaxValue)) {                    
-                throw new LiteralTypeMismatchException("integer literal need more than 8bit, not assignable to octet");
-            } else {
-                val = Convert.ToInt32(m_value);
-            }
-            gen.Emit(OpCodes.Ldc_I4, val);            
+            Int32 val = Convert.ToInt32(ConvertToByte(targetType, assignFromType));
+            gen.Emit(OpCodes.Ldc_I4, val);
         }
 
         public void EmitLoadValue(ILGenerator gen, Type targetType, Type assignFromType) {
@@ -302,7 +343,21 @@ namespace parser {
                 throw new LiteralTypeMismatchException("integer", targetType);
             }
         }
-        
+
+        public object GetValueToAssign(Type targetType, Type assignFromType) {
+            if (targetType.Equals(typeof(Int16))) {
+                return ConvertToInt16(targetType, assignFromType);
+            } else if (targetType.Equals(typeof(Int32))) {
+                return ConvertToInt32(targetType, assignFromType);
+            } else if (targetType.Equals(typeof(Int64))) {
+                return ConvertToInt64(targetType, assignFromType);
+            } else if (targetType.Equals(typeof(Byte))) {
+                return ConvertToByte(targetType, assignFromType);
+            } else {
+                throw new LiteralTypeMismatchException("integer", targetType);
+            }
+        }
+
         public bool IsAssignableTo(TypeContainer type) {
             if (type.GetCompactClsType().Equals(ReflectionHelper.ByteType)) {
                 return m_value >= SByte.MinValue && m_value <= Byte.MaxValue;    
@@ -380,11 +435,15 @@ namespace parser {
             throw new InvalidOperandInExpressionException("require a boolean operand, but found a char operand: " + m_value);
         }
 
-        public void EmitLoadValue(ILGenerator gen, Type targetType, Type assignFromType) {
+        public object GetValueToAssign(Type targetType, Type assignFromType) {
             if (!targetType.Equals(ReflectionHelper.CharType)) {
                 throw new LiteralTypeMismatchException("char", targetType);
             }
-            Int32 asInt32 = Convert.ToInt32(m_value);
+            return m_value;
+        }
+
+        public void EmitLoadValue(ILGenerator gen, Type targetType, Type assignFromType) {
+            Int32 asInt32 = Convert.ToInt32(GetValueToAssign(targetType, assignFromType));
             gen.Emit(OpCodes.Ldc_I4, asInt32);
         }
         
@@ -443,11 +502,15 @@ namespace parser {
             throw new InvalidOperandInExpressionException("require a boolean operand, but found a string operand: " + m_value);
         }
 
-        public void EmitLoadValue(ILGenerator gen, Type targetType, Type assignFromType) {
+        public object GetValueToAssign(Type targetType, Type assignFromType) {
             if (!targetType.Equals(ReflectionHelper.StringType)) {
                 throw new LiteralTypeMismatchException("string", targetType);
             }
-            gen.Emit(OpCodes.Ldstr, m_value);
+            return m_value;
+        }
+
+        public void EmitLoadValue(ILGenerator gen, Type targetType, Type assignFromType) {
+            gen.Emit(OpCodes.Ldstr, Convert.ToString(GetValueToAssign(targetType, assignFromType)));
         }
         
         public bool IsAssignableTo(TypeContainer type) {
@@ -498,6 +561,13 @@ namespace parser {
             throw new InvalidOperandInExpressionException("require a string operand, but found a boolean operand: " + m_value);
         }
         public Boolean GetBooleanValue() {
+            return m_value;
+        }
+
+        public object GetValueToAssign(Type targetType, Type assignFromType) {
+            if (!targetType.Equals(ReflectionHelper.BooleanType)) {
+                throw new LiteralTypeMismatchException("boolean", targetType);
+            }
             return m_value;
         }
 
@@ -566,12 +636,16 @@ namespace parser {
             throw new InvalidOperandInExpressionException("require a boolean operand, but found an enum operand: " + m_value);
         }
 
-        public void EmitLoadValue(ILGenerator gen, Type targetType, Type assignFromType) {
+        public object GetValueToAssign(Type targetType, Type assignFromType) {
             if (!targetType.IsEnum) {
                 throw new LiteralTypeMismatchException("enum", targetType);
             }
+            return m_value;
+        }
+
+        public void EmitLoadValue(ILGenerator gen, Type targetType, Type assignFromType) {
             // get the int value for the idl enum
-            gen.Emit(OpCodes.Ldc_I4, (System.Int32)m_value);
+            gen.Emit(OpCodes.Ldc_I4, (System.Int32)GetValueToAssign(targetType, assignFromType));
         }
         
         public bool IsAssignableTo(TypeContainer type) {
