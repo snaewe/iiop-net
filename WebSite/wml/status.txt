@@ -22,7 +22,7 @@
 	<ifeq "<get-var color>" "red" <set-var color="#FF3333">>
 	<ifeq "<get-var color>" "orange" <set-var color="#FF9966">>
 	<ifeq "<get-var color>" "yellow" <set-var color="#FFFF99">>
-	<tr><td width="10px" bgcolor="<get-var color>"></td><td><get-var name></td><td><get-var version></td><td>%body</td></tr>
+	<tr><td width="10px" bgcolor="<get-var color>"></td><td><get-var name></td><td align="left"><get-var version></td><td>%body</td></tr>
 	<restore color>
 	<restore version>
 </define-tag>
@@ -58,7 +58,7 @@ Interoperation with the following ORBs has been reported:
 </software>
 
 <software name="TAO">
-	<report version="N.A." color="green">ok</report>
+	<report version="1.4" color="green">ok</report>
 </software>
 
 <software name="OmniORB">
