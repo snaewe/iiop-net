@@ -168,10 +168,17 @@ Add the following configuration lines in the files <code>%NUnit2%\bin\nunit-cons
   
   options are
   -h               help
+  -o directory     output directory (default is `-o .`)
   -r assembly      assemblies to check for types in, instead of generating them
   -c xmlfile       specifies custom mappings
   -d define        defines a preprocessor symbol
   -idir directory  directory containing idl files (multiple -idir allowed)
+  -vtSkel          enable creation of value type implementation skeletons
+  -vtSkelProv      the fully qualified name of the codedomprovider to use for value type skeleton generation
+  -vtSkelTd        the targetDirectory for generated valuetype impl skeletons
+  -vtSkelO         overwrite already present valuetype skeleton implementations
+  -snk             sign key file (used for generating strong named assemblies)
+  -delaySign       delay signing of assembly (snk file contains only a pk)
 </pre>
 
 <p><strong>Examples:</strong>
