@@ -118,15 +118,14 @@ namespace Ch.Elca.Iiop.IDLCompiler.Tests {
                                     idlEntityIf);
         }
         
-        
-        [Test]
-        public void TestConcreteInterfaces() {
+        private void CheckInterfaceDefinitions(string ifModifier, 
+                                               IdlTypeInterface ifAttrVal) {
             MemoryStream testSource = new MemoryStream();
             StreamWriter writer = new StreamWriter(testSource, s_latin1);
             
             // idl:
             writer.WriteLine("module testmod {");
-            writer.WriteLine("    interface Test {");
+            writer.WriteLine("    " + ifModifier + " interface Test {");
             writer.WriteLine("        octet EchoOctet(in octet arg);");
             writer.WriteLine("    };");
             writer.WriteLine("    #pragma ID Test \"IDL:testmod/Test:1.0\"");
@@ -141,12 +140,28 @@ namespace Ch.Elca.Iiop.IDLCompiler.Tests {
             CheckMethodPresent(ifType, "EchoOctet", 
                                typeof(System.Byte), new Type[] { typeof(System.Byte) });
             CheckRepId(ifType, "IDL:testmod/Test:1.0");
-            CheckInterfaceAttr(ifType, IdlTypeInterface.ConcreteInterface);
+            CheckInterfaceAttr(ifType, ifAttrVal);
             CheckIIdlEntityInheritance(ifType);            
             
             writer.Close();
         }
-                
+        
+        
+        [Test]
+        public void TestConcreteInterfaces() {
+            CheckInterfaceDefinitions("", IdlTypeInterface.ConcreteInterface);
+        }
+        
+        [Test]
+        public void TestAbstractInterfaces() {
+            CheckInterfaceDefinitions("abstract", IdlTypeInterface.AbstractInterface);
+        }
+        
+        [Test]
+        public void TestLocalInterfaces() {
+            CheckInterfaceDefinitions("local", IdlTypeInterface.LocalInterface);
+        }        
+        
         #endregion IMethods
     
         
