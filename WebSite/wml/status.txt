@@ -45,7 +45,6 @@ Interoperation with the following ORBs has been reported:
 <reports>
 <software name="all">
 	<report version="">
-	any partially supported (bug <iiopbug 857050>)<br>
 	wide-char not supported (request <iiopfeature 778878>)
 	</report>
 </software>
@@ -97,9 +96,6 @@ IIOP.NET on Mono:
 <software name="Mono 0.31">
 	<report version="IntegrationTests/Basic" color="orange">
 		doesn't compile (reason unknown)
-	</report>
-	<report version="IntegrationTests/Direct" color="orange">
-		Unions not working due to Mono bugs <monobug 56005> and <monobug 56013>
 	</report>
 </software>
 </reports>

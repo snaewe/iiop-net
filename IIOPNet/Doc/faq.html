@@ -500,10 +500,10 @@ int PerformAddition(int val1, int val2) {
   <H2 class="contentPart">6. Accessing .NET Objects from CORBA with IIOP.NET</H2>
 	<table width="100%" style="border: 1px solid #999966;" summary=""><tr><td>
   <strong><a name="faq6_1">6.1 How do I implement the CORBA USER_ID and SYSTEM_ID policies?</a></strong>
-<p>By default, .NET uses the SYSTEM_ID policy, i.e. it assigns some random name to the object (a windows GUID I guess).
-You can override this behaviour and implement the USER_ID policy by registering the servant with RemotingServices.Marshal and the name as URI.
-Beware that using RemotingServices.Marshal without explicit URI corresponds to the SYSTEM_ID policy.
-<p>When remoting an object that has not been explicitely registered, .NET automatically registers it with RemotingServices.Marshall and assigns it a random name (SYSTEM_ID policy).
+<p>To implement the USER_ID policy (i.e. always publishing an object under the same name), register the object with <code>RemotingServices.Marshal(obj, uri)</code>. IIOP.NET generates a key by transforming all ASCII characters to their corresponding byte value; as an exception, "\u" is escaped to "\\u"; other unicode charaters are each transformed to their corresponding "\uhhhh" representation, whereas hhhh is the hex value of the character.
+<p>Example 1: <code>RemotingServices.Marshal(obj, "test")</code> publishes an object as <code>corbaloc::localhost:8087/test</code> (assuming that the channel is listening to port 8087).
+<p>Example 2: <code>RemotingServices.Marshal(obj, "uri&acirc;&eacute;")</code> is published as <code>corbaloc::localhost:8087/uri\u0083\u0082</code>.
+<p>By default, .NET uses the SYSTEM_ID policy: it assigns to the object some random URI with format "[app-domain-id (GUID)]/[random bytes]_[seq-nr].rem". This is also explicitely achieved with the call <code>RemotingServices.Marshal(obj)</code>.
 	</td></tr></table>
 	<br><br>
 	<table width="100%" style="border: 1px solid #999966;" summary=""><tr><td>
