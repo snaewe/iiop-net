@@ -81,6 +81,10 @@ public class ASTscoped_name : SimpleNode {
         return m_scopedName;
     }
     
+    public override string GetIdentification() {
+      return m_scopedName;
+    }
+    
     #endregion IMethods
 
 }

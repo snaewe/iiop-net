@@ -468,6 +468,31 @@ namespace Ch.Elca.Iiop.IDLCompiler.Tests {
                                 1);            
         }
 
+        [Test]
+        public void TestRecStruct() {
+            MemoryStream testSource = new MemoryStream();
+            StreamWriter writer = new StreamWriter(testSource, s_latin1);
+            
+            // idl:
+            writer.WriteLine("module testmod {");
+            writer.WriteLine("    struct RecStruct {");
+            writer.WriteLine("        sequence<RecStruct> seq;");
+            writer.WriteLine("    };");
+            writer.WriteLine("};");
+            writer.Flush();
+            testSource.Seek(0, SeekOrigin.Begin);
+            Assembly result = CreateIdl(testSource);
+                       
+            // check if classes for constants were created correctly
+            Type recStructType = result.GetType("testmod.RecStruct", true);
+
+            CheckFieldPresent(recStructType, "seq", recStructType.Assembly.GetType("testmod.RecStruct[]", true), 
+                              BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly);
+            CheckNumberOfFields(recStructType, BindingFlags.Public | BindingFlags.NonPublic |
+                                            BindingFlags.Instance | BindingFlags.Static | BindingFlags.DeclaredOnly,
+                                1);            
+        }
+
         #endregion
         
     }

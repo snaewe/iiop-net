@@ -44,15 +44,33 @@ namespace Ch.Elca.Iiop.IdlCompiler.Action {
     /// manages fully created and only partly created types
     /// </summary>
     public class TypeManager {
-
+        
+        #region Types
+        
+        private class TypeSymbolPair {
+            
+            public TypeSymbolPair(Symbol symbolPart, TypeContainer typePart) {
+                SymbolPart = symbolPart;
+                TypePart = typePart;
+            }
+            
+            public Symbol SymbolPart;
+            public TypeContainer TypePart;
+        }
+        
+        #endregion Types
         #region IFields
 
         private Hashtable m_typesInCreation = new Hashtable();
         private Hashtable m_typeTable = new Hashtable();
         private Hashtable m_typedefTable = new Hashtable();
+        /// <summary>
+        /// for structs, union: only recursion allowed is through an idl sequence -> handle special
+        /// </summary>
+        private TypeSymbolPair m_sequenceRecursionAllowedType = null;        
         private ModuleBuilder m_modBuilder;
 
-        private TypesInAssemblyManager m_refAsmTypes;
+        private TypesInAssemblyManager m_refAsmTypes;        
 
         #endregion IFields
         #region IConstructors
@@ -227,6 +245,10 @@ namespace Ch.Elca.Iiop.IdlCompiler.Action {
                     result = new TypeContainer(fromAsm, new CustomAttributeBuilder[0]);
                 }
             }
+            if ((result == null) && (m_sequenceRecursionAllowedType != null) &&
+                m_sequenceRecursionAllowedType.SymbolPart.Equals(forSymbol)) {
+                result = m_sequenceRecursionAllowedType.TypePart;                
+            }
             return result;
         }
         
@@ -260,6 +282,25 @@ namespace Ch.Elca.Iiop.IdlCompiler.Action {
 
         public void RegisterTypeDef(TypeContainer fullDecl, Symbol forSymbol) {
             AddTypeDefinition(fullDecl, forSymbol);
+        }
+        
+        /// <summary>
+        /// allows sequence recursion for unions/struct. Don't forget to call
+        /// UnpublishTypeForSequenceRecursion after sequence elem type is identified
+        /// </summary>
+        public void PublishTypeForSequenceRecursion(Symbol typeSym, TypeBuilder type) {
+            if (!IsTypeDeclarded(typeSym)) {
+                TypeContainer container =
+                    new CompileTimeTypeContainer(this, type, new CustomAttributeBuilder[0]);
+                m_sequenceRecursionAllowedType = new TypeSymbolPair(typeSym, container);
+            }            
+        }
+        
+        /// <summary>
+        /// called after sequence element type has been identified
+        /// </summary>
+        public void UnpublishTypeForSequenceRecursion() {
+            m_sequenceRecursionAllowedType = null;
         }
                
         /// <summary>

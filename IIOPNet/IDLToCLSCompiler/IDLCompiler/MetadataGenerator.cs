@@ -59,14 +59,17 @@ public class MetaDataGenerator : IDLParserVisitor {
         #region IFields
 
         private TypeBuilder m_containerType;
-        private Scope m_buildScope;
+        private Symbol m_containerSymbol;
+        private Scope m_buildScope;        
         
         #endregion IFields
         #region IConstructors
         
-        public BuildInfo(Scope buildScope, TypeBuilder containerType) {
+        public BuildInfo(Scope buildScope, TypeBuilder containerType, 
+                         Symbol containerSymbol) {
             m_buildScope = buildScope;
             m_containerType = containerType;
+            m_containerSymbol = containerSymbol;
         }
 
         #endregion IConstructors
@@ -75,9 +78,12 @@ public class MetaDataGenerator : IDLParserVisitor {
         public TypeBuilder GetContainterType() {
             return m_containerType;
         }
+        public Symbol GetContainerSymbol() {
+            return m_containerSymbol;
+        }
         public Scope GetBuildScope() {
             return m_buildScope;
-        }
+        }        
 
         #endregion IMethods
     }
@@ -93,7 +99,9 @@ public class MetaDataGenerator : IDLParserVisitor {
         #endregion IFields
         #region IConstructors
 
-        public UnionBuildInfo(Scope buildScope, UnionGenerationHelper helper) : base(buildScope, helper.Builder) {
+        public UnionBuildInfo(Scope buildScope, UnionGenerationHelper helper,
+                              Symbol containerSymbol) : 
+                              base(buildScope, helper.Builder, containerSymbol) {
             m_helper = helper;
         }
 
@@ -298,7 +306,7 @@ public class MetaDataGenerator : IDLParserVisitor {
             throw new InternalCompilerException("initalize not called"); 
         }
         Scope topScope = m_symbolTable.getTopScope();
-        BuildInfo info = new BuildInfo(topScope, null);
+        BuildInfo info = new BuildInfo(topScope, null, null);
         node.childrenAccept(this, info);
         m_initalized = false; // this file is finished
         m_typeManager.AssertAllTypesDefined(); // check if all types are completely defined. if not ok, assembly can't be saved to file.
@@ -326,7 +334,8 @@ public class MetaDataGenerator : IDLParserVisitor {
         // info contains the scope this module is defined in
         Scope enclosingScope = info.GetBuildScope();
         Scope moduleScope = enclosingScope.getChildScope(node.getIdent());
-        BuildInfo modInfo = new BuildInfo(moduleScope, info.GetContainterType());
+        BuildInfo modInfo = new BuildInfo(moduleScope, info.GetContainterType(),
+                                          info.GetContainerSymbol());
         node.childrenAccept(this, modInfo);
         Trace.WriteLine("module with ident sucessfully accepted: " + node.getIdent());
         return null;
@@ -414,7 +423,8 @@ public class MetaDataGenerator : IDLParserVisitor {
 
         // generate body
         ASTinterface_body body = (ASTinterface_body)node.jjtGetChild(1);
-        BuildInfo buildInfo = new BuildInfo(enclosingScope.getChildScope(forSymbol.getSymbolName()), interfaceToBuild);
+        BuildInfo buildInfo = new BuildInfo(enclosingScope.getChildScope(forSymbol.getSymbolName()),
+                                            interfaceToBuild, forSymbol);
         body.jjtAccept(this, buildInfo);
     
         // create the type
@@ -780,7 +790,7 @@ public class MetaDataGenerator : IDLParserVisitor {
 
         // generate elements
         BuildInfo buildInfo = new BuildInfo(enclosingScope.getChildScope(forSymbol.getSymbolName()), 
-                                            valueToBuild);
+                                            valueToBuild, forSymbol);
         for (int i = 1; i < node.jjtGetNumChildren(); i++) { // for all value_element children
             ASTvalue_element elem = (ASTvalue_element)node.jjtGetChild(i);
             elem.jjtAccept(this, buildInfo);    
@@ -829,7 +839,7 @@ public class MetaDataGenerator : IDLParserVisitor {
 
         // generate elements
         BuildInfo buildInfo = new BuildInfo(enclosingScope.getChildScope(forSymbol.getSymbolName()), 
-                                            valueToBuild);
+                                            valueToBuild, forSymbol);
         for (int i = bodyNodeIndex; i < node.jjtGetNumChildren(); i++) { // for all export children
             Node child = node.jjtGetChild(i);
             child.jjtAccept(this, buildInfo);    
@@ -1630,7 +1640,8 @@ public class MetaDataGenerator : IDLParserVisitor {
             String fullyQualName = buildInfo.GetBuildScope().getFullyQualifiedNameForSymbol(forSymbol.getSymbolName());
             structToCreate = m_modBuilder.DefineType(fullyQualName, typeAttrs, typeof(System.ValueType),
                                                      new System.Type[] { typeof(IIdlEntity) });
-            thisTypeInfo = new BuildInfo(buildInfo.GetBuildScope(), structToCreate);
+            thisTypeInfo = new BuildInfo(buildInfo.GetBuildScope(), structToCreate,
+                                         forSymbol);
         } else {
             // nested dcl
             if (buildInfo.GetContainterType().IsClass) {
@@ -1645,7 +1656,8 @@ public class MetaDataGenerator : IDLParserVisitor {
                 structToCreate = m_modBuilder.DefineType(fullyQualName, typeAttrs, typeof(System.ValueType),
                                                          new System.Type[] { typeof(IIdlEntity) });
             }
-            thisTypeInfo = new BuildInfo(buildInfo.GetBuildScope(), structToCreate);
+            thisTypeInfo = new BuildInfo(buildInfo.GetBuildScope(), structToCreate,
+                                         forSymbol);
         }
 
         // add fileds
@@ -1811,7 +1823,8 @@ public class MetaDataGenerator : IDLParserVisitor {
                                                       TypeAttributes.Public);
             }            
         }
-        UnionBuildInfo thisInfo = new UnionBuildInfo(buildInfo.GetBuildScope(), genHelper);                        
+        UnionBuildInfo thisInfo = new UnionBuildInfo(buildInfo.GetBuildScope(), genHelper,
+                                                     forSymbol);
 
         Node switchBody = node.jjtGetChild(1);
         TypeContainer discrType = (TypeContainer)node.jjtGetChild(0).jjtAccept(this, thisInfo);
@@ -1986,16 +1999,27 @@ public class MetaDataGenerator : IDLParserVisitor {
      * @return the type container for the IDLSequence type
      */
     public Object visit(ASTsequence_type node, Object data) {
-        CheckParameterForBuildInfo(data, node);
+        CheckParameterForBuildInfo(data, node);        
+        BuildInfo containerInfo = (BuildInfo) data;
         if (node.jjtGetNumChildren() > 1) { 
             // throw new NotSupportedException("sequence with a bound not supported by this compiler"); 
             Console.WriteLine("WARNING: sequence with a bound not supported by this compiler; map to unbounded");
         }
-        Node elemTypeNode = node.jjtGetChild(0);
+        SimpleNode elemTypeNode = (SimpleNode)node.jjtGetChild(0);
+        if (containerInfo.GetContainterType() != null) {
+            // inform the type-manager of structs/unions in creation, because
+            // recursion using seuqneces is the only allowed recursion for structs/unions
+            m_typeManager.PublishTypeForSequenceRecursion(containerInfo.GetContainerSymbol(),
+                                                          containerInfo.GetContainterType());
+        }
         Debug.WriteLine("determine element type of IDLSequence");
         TypeContainer elemType = (TypeContainer)elemTypeNode.jjtAccept(this, data);
+        // disallow further recursive use of union/struct (before next seq recursion)
+        m_typeManager.UnpublishTypeForSequenceRecursion();
         if (elemType == null) {
-            throw new InvalidIdlException(String.Format("sequence type not defined for sequence"));
+            throw new InvalidIdlException(
+                String.Format("sequence element type {0} not defined for sequence",
+                              elemTypeNode.GetIdentification()));
         }
         elemType = ReplaceByCustomMappedIfNeeded(elemType);
         // use here the fusioned type as element type; potential unboxing of element type 
@@ -2123,7 +2147,8 @@ public class MetaDataGenerator : IDLParserVisitor {
             exceptToCreate = m_modBuilder.DefineType(fullyQualName, 
                                                      TypeAttributes.Class | TypeAttributes.Public, 
                                                      typeof(AbstractUserException));
-            thisTypeInfo = new BuildInfo(buildInfo.GetBuildScope(), exceptToCreate);
+            thisTypeInfo = new BuildInfo(buildInfo.GetBuildScope(), exceptToCreate,
+                                         forSymbol);
         } else {
             // nested dcl
             if (buildInfo.GetContainterType().IsClass) {
@@ -2139,7 +2164,8 @@ public class MetaDataGenerator : IDLParserVisitor {
                                                          TypeAttributes.Class | TypeAttributes.Public,
                                                          typeof(AbstractUserException));                
             }
-            thisTypeInfo = new BuildInfo(buildInfo.GetBuildScope(), exceptToCreate);
+            thisTypeInfo = new BuildInfo(buildInfo.GetBuildScope(), exceptToCreate,
+                                         forSymbol);
         }
         String repId = GetRepIdForException(forSymbol);
         AddRepIdAttribute(exceptToCreate, repId);
