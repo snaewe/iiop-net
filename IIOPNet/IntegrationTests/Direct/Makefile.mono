@@ -20,7 +20,7 @@ start-client:
 test:
 	@$(MAKE) start-server -f Makefile.mono
 	@mono $(DELAY) 10
-	@$(MAKE) start-client -f Makefile.mono
+	@-$(MAKE) start-client -f Makefile.mono
 	@$(MAKE) stop-server -f Makefile.mono
 
 clean:

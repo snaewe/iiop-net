@@ -27,10 +27,10 @@ IDL/Ch/Elca/Iiop/IntegrationTests/TestService.idl: $(bin)TestServer.exe
 	cp TestExceptionService.idl IDL/Ch/Elca/Iiop/IntegrationTests/ 
 
 start-server:
-	@mono $(LAUNCH) bin/TestServer.exe >> pid
+	@mono $(LAUNCH) mono bin/TestServer.exe >> pid
 
 stop-server:
-	@for p in `cat pid`; do mono $(KILL) $p; done
+	@-for p in `cat pid`; do mono $(KILL) $$p; done
 	@rm -f pid
 
 clean:

@@ -24,10 +24,10 @@ $(bin)TestServer.exe: $(bin)IIOPChannel.dll $(bin)TestServiceCommon.dll $(bin)Te
 	mcs $(CSFLAGS) /t:exe /r:$(bin)IIOPChannel.dll /r:$(bin)TestUnion.dll /r:$(bin)TestUnionNotForClient.dll /r:$(bin)TestServiceCommon.dll /out:$(bin)TestServer.exe TestServer.cs TestService.cs
 
 start-server:
-	@mono $(LAUNCH) bin/TestServer.exe >> pid
+	@mono $(LAUNCH) mono bin/TestServer.exe >> pid
 
 stop-server:
-	@for p in $(cat pid); do mono $(KILL) $p; done
+	@-for p in `cat pid`; do mono $(KILL) $$p; done
 	@rm pid
 
 clean:
