@@ -44,6 +44,9 @@ namespace Ch.Elca.Iiop.IntegrationTests {
             TestService test = new TestService();
             string objectURI = "test";
             RemotingServices.Marshal(test, objectURI);
+            
+            TestExceptionServiceImpl testExService = new TestExceptionServiceImpl();
+            RemotingServices.Marshal(testExService, "testExService");
 
             Console.WriteLine("Server running. Press any key to stop....");
             Console.ReadLine();

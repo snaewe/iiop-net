@@ -15,11 +15,16 @@ $(bin)IIOPChannel.dll: $(IIOPCHANNEL)
 	[ -d $(bin) ] || mkdir $(bin)
 	cp $(IIOPCHANNEL) $(bin)
 
-$(bin)TestServer.exe: $(bin)IIOPChannel.dll *.cs
-	mcs $(CSFLAGS) /t:exe /r:$(bin)IIOPChannel.dll /out:$(bin)TestServer.exe *.cs
+$(bin)TestServer.exe: $(bin)IIOPChannel.dll $(bin)testExceptionService.dll *.cs
+	mcs $(CSFLAGS) /t:exe /r:$(bin)IIOPChannel.dll /r:$(bin)testExceptionService.dll /out:$(bin)TestServer.exe *.cs
+    
+$(bin)testExceptionService.dll: TestExceptionService.idl
+	mono ../../../IDLToCLSCompiler/IDLCompiler/bin/IDLToCLSCompiler.exe -o $(bin) testExceptionService TestExceptionService.idl
+
 
 IDL/Ch/Elca/Iiop/IntegrationTests/TestService.idl: $(bin)TestServer.exe
 	mono ../../../CLSToIDLGenerator/bin/CLSIDLGenerator.exe -o IDL Ch.Elca.Iiop.IntegrationTests.TestService $(bin)TestServer.exe
+	cp TestExceptionService.idl IDL/Ch/Elca/Iiop/IntegrationTests/ 
 
 start-server:
 	@$(LAUNCH) bin/TestServer.exe >> pid

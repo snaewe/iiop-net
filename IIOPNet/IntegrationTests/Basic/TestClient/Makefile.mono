@@ -13,8 +13,8 @@ IDL/Ch/Elca/Iiop/IntegrationTests/TestService.idl: ../TestServer/IDL/Ch/Elca/Iio
 	cp -f ../../../IDLToCLSCompiler/IDL/*.idl IDL
 	cp -r ../TestServer/IDL/* IDL
 
-$(bin)Client.dll: IDL/Ch/Elca/Iiop/IntegrationTests/TestService.idl
-	cd IDL; mono ../../../../IDLToCLSCompiler/IDLCompiler/bin/IDLToCLSCompiler.exe -o ../bin Client Ch/Elca/Iiop/IntegrationTests/TestService.idl
+$(bin)Client.dll: IDL/Ch/Elca/Iiop/IntegrationTests/TestService.idl IDL/Ch/Elca/Iiop/IntegrationTests/TestExceptionService.idl
+	cd IDL; mono ../../../../IDLToCLSCompiler/IDLCompiler/bin/IDLToCLSCompiler.exe -o ../bin Client Ch/Elca/Iiop/IntegrationTests/TestService.idl Ch/Elca/Iiop/IntegrationTests/TestExceptionService.idl
 
 $(bin)IIOPChannel.dll: $(IIOPCHANNEL)
 	[ -d $(bin) ] || mkdir $(bin)

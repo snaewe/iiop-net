@@ -18,16 +18,21 @@ $(bin)IIOPChannel.dll: $(IIOPCHANNEL)
         copy /y $(IIOPCHANNEL) $(bin)IIOPChannel.dll
 	if exist $(IIOPCHANNELPDB) copy /y $(IIOPCHANNELPDB) $(bin)IIOPChannel.pdb
 
-$(bin)TestServer.exe: $(bin)IIOPChannel.dll *.cs
-    csc $(CSFLAGS) /t:exe /r:$(bin)IIOPChannel.dll /out:$(bin)TestServer.exe *.cs
+$(bin)TestServer.exe: $(bin)IIOPChannel.dll $(bin)testExceptionService.dll *.cs
+	csc $(CSFLAGS) /t:exe /r:$(bin)IIOPChannel.dll /r:$(bin)testExceptionService.dll /out:$(bin)TestServer.exe *.cs
 
+$(bin)testExceptionService.dll: TestExceptionService.idl
+	..\..\..\IDLToCLSCompiler\IDLCompiler\bin\IDLToCLSCompiler.exe -o $(bin) testExceptionService TestExceptionService.idl
+
+    
 IDL\Ch\Elca\Iiop\IntegrationTests\TestService.idl: $(bin)TestServer.exe
-    ..\..\..\CLSToIDLGenerator\bin\CLSIDLGenerator.exe -o IDL Ch.Elca.Iiop.IntegrationTests.TestService $(bin)TestServer.exe
+	..\..\..\CLSToIDLGenerator\bin\CLSIDLGenerator.exe -o IDL Ch.Elca.Iiop.IntegrationTests.TestService $(bin)TestServer.exe
+	copy TestExceptionService.idl IDL\Ch\Elca\Iiop\IntegrationTests\
 
 
 start-server:
 	@$(LAUNCH) bin\TestServer.exe >> pid
-#	for /F "usebackq" %%r in (`..\..\Utils\launch.exe bin\TestServer.exe`) do set pid=%%r
+
 
 stop-server:
 	@for /F %%p in (pid) do @$(KILL) %%p

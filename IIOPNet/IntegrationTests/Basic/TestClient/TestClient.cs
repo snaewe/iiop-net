@@ -45,6 +45,7 @@ namespace Ch.Elca.Iiop.IntegrationTests {
         private IiopClientChannel m_channel;
 
         private TestService m_testService;
+        private TestExceptionService m_testExService;
 
 
         #endregion IFields
@@ -61,6 +62,8 @@ namespace Ch.Elca.Iiop.IntegrationTests {
             NameComponent[] name = new NameComponent[] { new NameComponent("test", "") };
             // get the reference to the test-service
             m_testService = (TestService)nameService.resolve(name);
+            m_testExService = (TestExceptionService)nameService.resolve(new NameComponent[] {
+                                                                           new NameComponent("testExService") });
         }
 
         [TearDown]
@@ -232,7 +235,7 @@ namespace Ch.Elca.Iiop.IntegrationTests {
 
         [Test]
         public void TestJaggedArraysWithNullElems() {
-	    System.Int32[][] arg1 = null;
+        System.Int32[][] arg1 = null;
             System.Int32[][] result1 = m_testService.EchoJaggedIntArray(arg1);
             Assertion.AssertEquals(arg1, result1);
 
@@ -395,6 +398,21 @@ namespace Ch.Elca.Iiop.IntegrationTests {
             Assertion.AssertEquals(result.val1, result.val2);
             Assertion.AssertEquals(result.val1.Msg, result.val2.Msg);
         }
+        
+//        /// <summary>
+//        /// checks, if recursive values are serialised using an indirection
+//        /// </summary>
+//        [Test]
+//        public void TestRecursiveValueType() {            
+//            TestSerializableClassE arg = new TestSerializableClassEImpl();
+//            arg.RecArrEntry = new TestSerializableClassE[1];
+//            arg.RecArrEntry[0] = arg;
+//            TestSerializableClassE result = m_testService.TestEchoSerializableE(arg);
+//            Assertion.AssertNotNull(result);
+//            Assertion.AssertNotNull(result.RecArrEntry);
+//            Assertion.AssertEquals(arg.RecArrEntry.Length, result.RecArrEntry.Length);
+//            Assertion.Assert("invalid entry in recArrEntry", (result == result.RecArrEntry[0]));            
+//        }
 
         /// <summary>
         /// Checks if a ByRef actual value for a formal parameter interface is passed correctly
@@ -590,11 +608,11 @@ namespace Ch.Elca.Iiop.IntegrationTests {
         /// if other checks don't work</summary>
         [Test]
         public void TestInterfaceCompMbrDeser() {
-	    TestSimpleInterface1 proxy1 = (TestSimpleInterface1)m_testService.GetSimpleService1();
+        TestSimpleInterface1 proxy1 = (TestSimpleInterface1)m_testService.GetSimpleService1();
             Assertion.AssertNotNull("testSimpleService1 ref not received", proxy1);
             Assertion.AssertEquals(true, proxy1.ReturnTrue());
 
-	    TestSimpleInterface2 proxy2 = (TestSimpleInterface2)m_testService.GetSimpleService2();
+        TestSimpleInterface2 proxy2 = (TestSimpleInterface2)m_testService.GetSimpleService2();
             Assertion.AssertNotNull("testSimpleService2 ref not received", proxy2);
             Assertion.AssertEquals(false, proxy2.ReturnFalse());
 
@@ -606,7 +624,7 @@ namespace Ch.Elca.Iiop.IntegrationTests {
 
         [Test]
         public void TestIsACall() {
-	    omg.org.CORBA.IObject proxy1 = (omg.org.CORBA.IObject)m_testService.GetSimpleService1();
+        omg.org.CORBA.IObject proxy1 = (omg.org.CORBA.IObject)m_testService.GetSimpleService1();
             Assertion.AssertNotNull("testSimpleService1 ref not received", proxy1);            
             Assertion.AssertEquals(true, proxy1._is_a("IDL:Ch/Elca/Iiop/IntegrationTests/TestSimpleInterface1:1.0"));
             
@@ -614,6 +632,56 @@ namespace Ch.Elca.Iiop.IntegrationTests {
             Assertion.AssertNotNull("testSimpleService2 ref not received", proxy2);
             Assertion.AssertEquals(true, proxy2._is_a("IDL:Ch/Elca/Iiop/IntegrationTests/TestSimpleInterface2:1.0"));
         }
+
+/*        [Test]
+        public void TestNonExistent() {
+            // access COS nameing service
+            CorbaInit init = CorbaInit.GetInit();
+
+            NamingContext nameService = init.GetNameService("localhost", 8087);
+            NameComponent[] name = new NameComponent[] { new NameComponent("testXYZ", "") };
+            // get the reference to non-existent service
+            m_testService = (TestService)nameService.resolve(name);            
+        }
+*/
+
+        [Test]
+        public void TestRaisesClauseUserException() {
+            try {
+                m_testExService.ThrowTestException();
+            } catch (TestException) {
+                // ok, expected this exception
+            } catch (Exception ex) {
+                Assertion.Fail("wrong exception type: " + ex.GetType());
+            }
+        }
+        
+        [Test]
+        public void TestRaisesClauseSystemException() {
+            try {
+                m_testExService.ThrowSystemException();
+            } catch (omg.org.CORBA.NO_IMPLEMENT nex) {
+                // ok, expected this exception
+                Assertion.AssertEquals("wrong minor code", 9, nex.Minor);
+                Assertion.AssertEquals("wrong status", omg.org.CORBA.CompletionStatus.Completed_Yes, nex.Status);                
+            } catch (Exception ex) {
+                Assertion.Fail("wrong exception type: " + ex.GetType());
+            }
+        }
+        
+        [Test]
+        public void TestRaisesClauseNotIncludedUserException() {
+            try {
+                m_testExService.ThrowDotNetException();
+            } catch (omg.org.CORBA.UNKNOWN uex) {
+                // ok, expected this exception
+                Assertion.AssertEquals("wrong minor code", 189, uex.Minor);
+                Assertion.AssertEquals("wrong status", omg.org.CORBA.CompletionStatus.Completed_Yes, uex.Status);
+            } catch (Exception ex) {
+                Assertion.Fail("wrong exception type: " + ex.GetType());
+            }
+        }
+
 
     }
 

@@ -17,9 +17,9 @@ IDL\Ch\Elca\Iiop\IntegrationTests\TestService.idl: ..\TestServer\IDL\Ch\Elca\Iio
     xcopy /s /q /y ..\..\TestServer\IDL .
     cd ..
 
-$(bin)Client.dll: IDL\Ch\Elca\Iiop\IntegrationTests\TestService.idl
+$(bin)Client.dll: IDL\Ch\Elca\Iiop\IntegrationTests\TestService.idl IDL\Ch\Elca\Iiop\IntegrationTests\TestExceptionService.idl
 	cd IDL 
-	..\..\..\..\IDLToCLSCompiler\IDLCompiler\bin\IDLToCLSCompiler.exe -o ..\bin client Ch\Elca\Iiop\IntegrationTests\TestService.idl
+	..\..\..\..\IDLToCLSCompiler\IDLCompiler\bin\IDLToCLSCompiler.exe -o ..\bin client Ch\Elca\Iiop\IntegrationTests\TestService.idl Ch\Elca\Iiop\IntegrationTests\TestExceptionService.idl
 	cd ..
 
 

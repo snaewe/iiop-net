@@ -70,6 +70,11 @@ namespace Ch.Elca.Iiop.IntegrationTests {
         public TestSerializableClassB1 val1;
         public TestSerializableClassB1 val2;
     }
+    
+    [Serializable]
+    public class TestSerializableClassE {
+        public TestSerializableClassE[] RecArrEntry;
+    }
 
 
     public class Adder : MarshalByRefObject {
@@ -232,7 +237,7 @@ namespace Ch.Elca.Iiop.IntegrationTests {
         }
         
         public System.String[,] EchoMultiDimStringArray(System.String[,] arg) {
-        	return arg;
+            return arg;
         }
 
         public Adder RetrieveAdder() {
@@ -255,6 +260,11 @@ namespace Ch.Elca.Iiop.IntegrationTests {
         public TestSerializableClassC TestEchoSerializableC(TestSerializableClassC arg) {
             return arg;
         }
+        
+//        public TestSerializableClassE TestEchoSerializableE(TestSerializableClassE arg) {
+//            return arg;
+//        }
+        
         
         public TestNonSerializableBaseClass TestAbstractValueTypeEcho(TestNonSerializableBaseClass arg) {
             return arg;
@@ -341,11 +351,11 @@ namespace Ch.Elca.Iiop.IntegrationTests {
         /// used to check, if a reference passed is equal to this object itself.
         /// </summary>
         public bool CheckEqualityWithService(MarshalByRefObject toCheck) {
-        	return toCheck.Equals(this);
+            return toCheck.Equals(this);
         }
         
         public bool CheckEqualityWithServiceV2(TestService toCheck) {
-        	return toCheck.Equals(this);
+            return toCheck.Equals(this);
         }
 
         public TestSimpleInterface1 GetSimpleService1() {
@@ -365,7 +375,7 @@ namespace Ch.Elca.Iiop.IntegrationTests {
             // live forever
             return null;
         }
-
+        
     }
 
     /// <summary>Simple interface used to check obj-ref deserialisation, if compatibility is not
@@ -406,5 +416,29 @@ namespace Ch.Elca.Iiop.IntegrationTests {
 
     }
 
+    [SupportedInterface(typeof(TestExceptionService))]
+    public class TestExceptionServiceImpl : MarshalByRefObject, TestExceptionService {
+        
+        public bool ThrowTestException() {
+            TestException result = new TestException();
+            result.Msg = "test-msg";
+            throw result;
+        }
+        
+        public bool ThrowDotNetException() {
+            throw new Exception("dot-net-exception");
+        }
+        
+        public bool ThrowSystemException() {
+            throw new omg.org.CORBA.NO_IMPLEMENT(9, 
+                                                 omg.org.CORBA.CompletionStatus.Completed_Yes);
+        }        
+        
+        public override object InitializeLifetimeService() {
+            // live forever
+            return null;
+        }
+        
+    }
 
 }
