@@ -15,6 +15,14 @@ build:
 	$(MAKE) build
 	cd ..
 
+build-tests: build
+	cd IIOPChannel
+	$(MAKE) build-unit-tests
+	cd ..
+        cd IntegrationTests
+        $(MAKE) build
+        cd ..
+
 clean:
 	cd IIOPChannel
 	$(MAKE) clean
