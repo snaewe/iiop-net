@@ -4,7 +4,7 @@ IIOPCHANNELPDB = ..\..\..\IIOPChannel\bin\IIOPChannel.pdb
 MAPPINGPLUGINDIR=..\..\..\MappingPlugin\java\ 
 bin         = bin\ 
 
-build: copy-idl compile-idl build-client
+build: build-plugin copy-idl compile-idl build-client
 
 $(bin):
         if not exist $@nul mkdir $@
@@ -39,6 +39,12 @@ compile-idl: $(bin)javaCollections.dll $(bin)customMapping.xml
 	cd IDL 
 	..\..\..\..\IDLToCLSCompiler\IDLCompiler\bin\IDLToCLSCompiler.exe -c ..\bin\customMapping.xml -o ..\bin -r ..\bin\javaCollections.dll client Ch\Elca\Iiop\IntegrationTests\MappingPlugin\TestService.idl Ch\Elca\Iiop\IntegrationTests\MappingPlugin\TestSerializableClassB1.idl
 	cd ..
+
+
+build-plugin:
+	cd $(MAPPINGPLUGINDIR)
+	$(MAKE) build
+	cd ..\..\IntegrationTests\MappingPluginJava\TestClient
 
 clean:
 	if exist IDL del /s /q IDL
