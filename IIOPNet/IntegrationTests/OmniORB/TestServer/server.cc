@@ -4,9 +4,8 @@
 
 #include "service.hh"
 #include "unknownByClient.hh"
-#include <iostream>
+#include <stdio.h>
 
-using namespace std;
 
 /*
  * TestService implementation inherits the POA skeleton class
@@ -123,7 +122,7 @@ main (int argc, char *argv[])
     CosNaming::NamingContext::_narrow (nsobj);
 
   if (CORBA::is_nil (nc)) {
-    cerr << "oops, I cannot access the Naming Service!" << endl;
+    fprintf(stderr, "oops, I cannot access the Naming Service!\n");
     return 1;
   }
 
@@ -141,16 +140,15 @@ main (int argc, char *argv[])
    * Store a reference in the Naming Service. 
    */
 
-  cout << "Binding TestService in the Naming Service ... " << flush;
+  printf("Binding TestService in the Naming Service ... \n");
   nc->rebind (name, ref);
-  cout << "done." << endl;
-
+  printf("done.\n");
 
   /*
    * Activate the POA and start serving requests
    */
 
-  cout << "Running." << endl;
+  printf("Running.\n");
 
   mgr->activate ();
   orb->run();
@@ -162,7 +160,7 @@ main (int argc, char *argv[])
   poa->destroy (TRUE, TRUE);
   delete test;
   } catch(...) {
-    cerr << "Caught unknown exception." << endl;
+    fprintf(stderr, "Caught unknown exception.\n");
   }
 
   return 0;
