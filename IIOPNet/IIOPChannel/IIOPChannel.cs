@@ -94,6 +94,11 @@ namespace Ch.Elca.Iiop {
         public IiopChannel(int port) : this() {
             m_serverChannel = new IiopServerChannel(port);
         }
+        
+        public IiopChannel(IDictionary properties) : this(properties, 
+                                                          new IiopClientFormatterSinkProvider(),
+                                                          new IiopServerFormatterSinkProvider()) {
+        }
 
         /// <summary>this constructor is used by configuration</summary>
         public IiopChannel(IDictionary properties, 
