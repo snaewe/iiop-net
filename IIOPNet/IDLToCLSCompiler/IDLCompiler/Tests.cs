@@ -72,11 +72,17 @@ namespace Ch.Elca.Iiop.IDLCompiler.Tests {
         
         }
         
+        private AssemblyName GetAssemblyName() {
+            AssemblyName result = new AssemblyName();
+            result.Name = "testAsm";            
+            return result;
+        }
+        
         public Assembly CreateIdl(Stream source) {            
             IDLParser parser = new IDLParser(source);
             ASTspecification spec = parser.specification();
             // now parsed representation can be visited with the visitors
-            MetaDataGenerator generator = new MetaDataGenerator("testAsm", ".", 
+            MetaDataGenerator generator = new MetaDataGenerator(GetAssemblyName(), ".", 
                                                                 new ArrayList());
             generator.InitalizeForSource(parser.getSymbolTable());
             spec.jjtAccept(generator, null);

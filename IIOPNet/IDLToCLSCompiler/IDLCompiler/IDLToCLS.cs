@@ -62,6 +62,8 @@ public class IDLToCLS {
     private DirectoryInfo m_vtSkelTd = new DirectoryInfo(".");
     private bool m_vtSkelOverwrite = false;
     private bool m_vtSkelEnable = false;
+	
+	private StrongNameKeyPair m_keyPair;
     
     #endregion IFields
     #region IConstructors
@@ -107,6 +109,7 @@ public class IDLToCLS {
         Console.WriteLine("-vtSkelProv     The fully qualified name of the codedomprovider to use for value type skeleton generation");
         Console.WriteLine("-vtSkelTd       The targetDirectory for generated valuetype impl skeletons");
         Console.WriteLine("-vtSkelO        Overwrite already present valuetype skeleton implementations");
+    	Console.WriteLine("-snk            sign key file (used for generating strong named assemblies)");
     }
     
     public static void Error(String message) {
@@ -173,6 +176,11 @@ public class IDLToCLS {
             } else if (args[i].Equals("-vtSkelO")) {
                 i++;
                 m_vtSkelOverwrite = true;
+            } else if (args[i].Equals("-snk")) {
+            	i++;
+            	m_keyPair = new StrongNameKeyPair(File.Open(args[i++], 
+            	                                            FileMode.Open, 
+            	                                            FileAccess.Read));
             } else {
                 Error(String.Format("Error: invalid option {0}", args[i]));
             }
@@ -218,9 +226,21 @@ public class IDLToCLS {
         resultProc.Seek(0, SeekOrigin.Begin);
         return resultProc;
     }
+    
+    
+    private AssemblyName GetAssemblyName() {
+        AssemblyName result = new AssemblyName();
+        result.Name = m_asmPrefix;
+        if (m_keyPair != null) {
+            result.KeyPair = m_keyPair;
+        }
+        return result;
+    }
+    
 
     public void MapIdl() {
-        MetaDataGenerator generator = new MetaDataGenerator(m_asmPrefix, m_destination, 
+        MetaDataGenerator generator = new MetaDataGenerator(GetAssemblyName(), 
+                                                            m_destination,
                                                             m_refAssemblies);
         if (m_vtSkelEnable) {
             generator.EnableValueTypeSkeletonGeneration(m_vtSkelcodeDomProvider,

@@ -166,7 +166,7 @@ public class MetaDataGenerator : IDLParserVisitor {
 
     private TypeManager m_typeManager;
 
-    private String m_targetAsmName;
+    private AssemblyName m_targetAsmName;
 
     private TypesInAssemblyManager m_typesInRefAsms;
 
@@ -190,9 +190,10 @@ public class MetaDataGenerator : IDLParserVisitor {
     /// allready generated types for idl types
     /// PRE: must be != null
     /// </param>
-    public MetaDataGenerator(String targetAssemblyName, String targetDir,
+    /// <param name="signKey">the key to use to sign the generated assembly; pass null to not sign the assembly</param>
+    public MetaDataGenerator(AssemblyName targetAssemblyName, String targetDir,
                              ArrayList refAssemblies) {
-        m_targetAsmName = targetAssemblyName;
+        m_targetAsmName = targetAssemblyName;        
         // define a persistent assembly
         CreateResultAssembly(targetDir);
         // channel assembly contains predef types, which shouldn't be regenerated.
@@ -205,7 +206,7 @@ public class MetaDataGenerator : IDLParserVisitor {
     #region IMethods
     
     private string GetDllName() {
-        return m_targetAsmName + ".dll";
+        return m_targetAsmName.Name + ".dll";
     }
     
     /// <summary>
@@ -213,13 +214,12 @@ public class MetaDataGenerator : IDLParserVisitor {
     /// resulting CLS
     /// </summary>
     private void CreateResultAssembly(string targetDir) {
-        AssemblyName asmname = new AssemblyName();
-        asmname.Name = m_targetAsmName;
+
         m_asmBuilder = System.Threading.Thread.GetDomain().
-            DefineDynamicAssembly(asmname, AssemblyBuilderAccess.RunAndSave,
+            DefineDynamicAssembly(m_targetAsmName, AssemblyBuilderAccess.RunAndSave,
                                   targetDir);
         // define one module containing the resulting CLS
-        string modName = "_" + m_targetAsmName + ".netmodule";
+        string modName = "_" + m_targetAsmName.Name + ".netmodule";
         m_modBuilder = m_asmBuilder.DefineDynamicModule(modName, GetDllName());
     }
     
