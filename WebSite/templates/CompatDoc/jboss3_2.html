@@ -1,0 +1,45 @@
+<H2 class="contentPart">JBoss 3.2 compatibility howto</H2>
+
+<p/>
+This howto contains information for IIOP.NET 1.2.3 or newer.
+
+<p/>
+<b>Accessing the name service</b> <BR> <BR>
+
+The JBoss nameservice can be accessed from a .NET client with the following code:
+
+<pre>
+    NamingContext nameService = (NamingContext)RemotingServices.Connect(typeof(NamingContext), nameserviceIOR);
+</pre> <p/>
+
+The nameserviceIOR is the IOR printed by JBoss at startup in a line [CorbaNamingService] Naming: [IOR: -- a hex string --].
+The IOR consists of IOR: and the long hex string. <BR>
+We will try to find a better way for accessing the nameservice in the near future.
+<BR> <BR>
+Hint: <BR>
+The RemotingServices class can be found in System.Runtime.Remoting.
+
+<p/>
+<b>Using an EJB</b> <BR> <BR>
+
+The ejb home interface is accessed using the name service in the following way:
+
+
+<pre>
+    NameComponent[] name = new NameComponent[] { new NameComponent("MyHome", "") };
+    // get the reference to the adder-home
+    MyEjbHome myHomeIf = (MyEjbHome)nameService.resolve(name);
+</pre> <p/>
+
+The ejb can now be created using this home interface (standard ejb pattern):
+
+<pre>
+    MyEjb myBean = myHomeIf.create();
+</pre> <p/>
+
+<p/>
+<b>Known problems</b> <BR> <BR>
+<UL>
+<LI>The jndi-name (see jboss.xml) for the ejb may not contain more than one component at the moment, i.e. can't contain a /.
+This problem will be investigated in future.</LI>
+</UL>
