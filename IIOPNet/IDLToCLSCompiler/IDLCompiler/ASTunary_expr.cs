@@ -27,20 +27,18 @@ using System;
 
 namespace parser {
 
+public enum UnaryOps {
+    UnaryNone, UnaryMinus, UnaryPlus, UnaryNegate
+}
+
+
 public class ASTunary_expr : SimpleNode {
 
-    #region Constants
+    #region IFields
     
-    /** operator constant for no unary operator specified */
-    public const int UNARY_NONE = 0;
-    /** operator constant for unary minus */
-    public const int UNARY_MINUS = 1;
-    /** operator constant for unary plus */
-    public const int UNARY_PLUS = 2;
-    /** operator constant for unary negate */
-    public const int UNARY_NEGATE = 3;
+    private UnaryOps m_operation = UnaryOps.UnaryNone;
     
-    #endregion Constants
+    #endregion IFields
     #region IConstructors
 
     public ASTunary_expr(int id) : base(id) {
@@ -55,6 +53,14 @@ public class ASTunary_expr : SimpleNode {
     /** Accept the visitor. **/
     public override Object jjtAccept(IDLParserVisitor visitor, Object data) {
         return visitor.visit(this, data);
+    }
+    
+    public void SetUnaryOperation(UnaryOps operation) {
+        m_operation = operation;
+    }
+    
+    public UnaryOps GetUnaryOperation() {
+        return m_operation;
     }
     
     #endregion IMethods
