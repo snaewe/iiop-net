@@ -1196,7 +1196,7 @@ public class MetaDataGenerator : IDLParserVisitor {
         ConstructorBuilder staticInit = constContainer.DefineConstructor(MethodAttributes.Private | MethodAttributes.Static, 
                                                                         CallingConventions.Standard, Type.EmptyTypes);        
         ILGenerator constrIl = staticInit.GetILGenerator();
-        val.EmitLoadValue(constrIl, constType.GetSeparatedClsType());
+        val.EmitLoadValue(constrIl, constType.GetSeparatedClsType(), constType.GetAssignableFromType());
         constrIl.Emit(OpCodes.Stsfld, constField);
         constrIl.Emit(OpCodes.Ret);
 
@@ -1353,7 +1353,7 @@ public class MetaDataGenerator : IDLParserVisitor {
         if (!(result is IntegerLiteral)) {
             throw new InvalidIdlException("invalid positive int const found: " + result.GetValue());
         }
-        long intConst = (long)result.GetValue();
+        long intConst = result.GetIntValue();
         if (intConst < 0) {
             throw new InvalidIdlException("negative int found where positive int constant was required: " + 
                 result.GetValue());
@@ -1606,7 +1606,7 @@ public class MetaDataGenerator : IDLParserVisitor {
      * @return a TypeContainer for the short type
      */
     public Object visit(ASTunsigned_short_int node, Object data) {
-        return new TypeContainer(typeof(System.Int16));
+        return new TypeContainer(typeof(System.Int16), typeof(System.UInt16));
     }
 
     /**
@@ -1615,7 +1615,7 @@ public class MetaDataGenerator : IDLParserVisitor {
      * @return a TypeContainer for the long type
      */
     public Object visit(ASTunsigned_long_int node, Object data) {
-        return new TypeContainer(typeof(System.Int32));
+        return new TypeContainer(typeof(System.Int32), typeof(System.UInt32));
     }
 
     /**
@@ -1624,7 +1624,7 @@ public class MetaDataGenerator : IDLParserVisitor {
      * @return a TypeContainer for the long long type
      */
     public Object visit(ASTunsigned_longlong_int node, Object data) {
-        return new TypeContainer(typeof(System.Int64));
+        return new TypeContainer(typeof(System.Int64), typeof(System.UInt64));
     }
 
     /**
@@ -1776,50 +1776,20 @@ public class MetaDataGenerator : IDLParserVisitor {
         return null;
     }
 
-    private void CheckDiscrValAssignableToDiscrType(object discrVal, TypeContainer discrType) {
+    private void CheckDiscrValAssignableToDiscrType(Literal discrVal, TypeContainer discrType) {
         Type clsDiscrType = discrType.GetCompactClsType();
-        if (clsDiscrType.IsEnum) {
-            if (!clsDiscrType.Equals(discrVal.GetType())) {
-                throw new InvalidIdlException(
-                    String.Format("discr val {0} not assignable to type: {1}",
-                                  discrVal, clsDiscrType));
-            }
-        } else if (clsDiscrType.Equals(typeof(System.Int16))) {
-            if ((!(discrVal is System.Int64)) || 
-                ((System.Int64)discrVal < System.Int16.MinValue) ||
-                ((System.Int64)discrVal > System.Int16.MaxValue)) {
-                throw new InvalidIdlException(
-                    String.Format("discr val {0} not assignable to type: {1}",
-                                  discrVal, clsDiscrType));
-            }
-        } else if (clsDiscrType.Equals(typeof(System.Int32))) {
-            if ((!(discrVal is System.Int64)) ||
-                ((System.Int64)discrVal < System.Int32.MinValue) ||
-                ((System.Int64)discrVal > System.Int32.MaxValue)) {
-                throw new InvalidIdlException(
-                    String.Format("discr val {0} not assignable to type: {1}",
-                                  discrVal, clsDiscrType));
-            }
-        } else if (clsDiscrType.Equals(typeof(System.Int64))) {
-            if (!clsDiscrType.Equals(discrVal.GetType())) {
-                throw new InvalidIdlException(
-                    String.Format("discr val {0} not assignable to type: {1}",
-                                  discrVal, clsDiscrType));
-            }
-        } else if (clsDiscrType.Equals(typeof(System.Char))) {
-            if (!clsDiscrType.Equals(discrVal.GetType())) {
-                throw new InvalidIdlException(
-                    String.Format("discr val {0} not assignable to type: {1}",
-                                  discrVal, clsDiscrType));
-            }
-        } else if (clsDiscrType.Equals(typeof(System.Boolean))) {
-            if (!clsDiscrType.Equals(discrVal.GetType())) {
-                throw new InvalidIdlException(
-                    String.Format("discr val {0} not assignable to type: {1}",
-                                  discrVal, clsDiscrType));
-            }
-        } else {
+        if (!(clsDiscrType.IsEnum ||
+              clsDiscrType.Equals(typeof(System.Int16)) ||
+              clsDiscrType.Equals(typeof(System.Int32)) ||
+              clsDiscrType.Equals(typeof(System.Int64)) ||
+              clsDiscrType.Equals(typeof(System.Char)) ||
+              clsDiscrType.Equals(typeof(System.Boolean)))) {
             throw new InternalCompilerException("precond violation: discr type");
+        }
+        if (!discrVal.IsAssignableTo(discrType)) {
+            throw new InvalidIdlException(
+                    String.Format("discr val {0} not assignable to type: {1}",
+                                  discrVal, clsDiscrType));    
         }
     }
 
@@ -1834,11 +1804,10 @@ public class MetaDataGenerator : IDLParserVisitor {
                     throw new InvalidIdlException(
                         String.Format("invalid {0}, discrimitator value for case not retrievable",
                                       node.GetIdentification()));
-                }
-                object discVal = litVal.GetValue();
+                }                
                 // check if val ok ...
-                CheckDiscrValAssignableToDiscrType(discVal, discrType);
-                result[i] = discVal;
+                CheckDiscrValAssignableToDiscrType(litVal, discrType);
+                result[i] = litVal.GetValue();
             } else {
                 // default case
                 result[i] = UnionGenerationHelper.DefaultCaseDiscriminator;

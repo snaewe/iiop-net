@@ -16,6 +16,12 @@ module IntegrationTests {
         default: boolean val2;
     };
 
+    union TestUnionULong switch(unsigned long) {
+        case 0: short val0;
+        case 0x80000000: long val1;
+        default: boolean val2;
+    };
+
 
     union TestUnionE switch(TestEnumForU) {
         case A: short valE0;
@@ -103,6 +109,10 @@ module IntegrationTests {
 	const float Plus_Inf = Infinity;
 	const float Minus_Inf = -Infinity;
 	
+
+	const unsigned short UShort_BiggerThanShort =                        0x8000;
+	const unsigned long ULong_BiggerThanLong =                       0x80000000;
+	const unsigned long long ULongLong_BiggerThanLongLong =  0x8000000000000000;
 	
 	
 	

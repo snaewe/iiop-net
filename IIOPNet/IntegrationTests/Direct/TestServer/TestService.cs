@@ -265,7 +265,11 @@ namespace Ch.Elca.Iiop.IntegrationTests {
 
         public TestUnion EchoUnion(TestUnion arg) {
             return arg;
-        } 
+        }
+
+        public TestUnionULong EchoUnionULong(TestUnionULong arg) {
+            return arg;
+        }
 
         public TestUnionE EchoUnionE(TestUnionE arg) {
             return arg;
@@ -322,7 +326,8 @@ namespace Ch.Elca.Iiop.IntegrationTests {
             return orbServices.object_to_string(this);
         }
 
-        
+        public void GetAllUsagerType() {
+        }
 
     }
 

@@ -47,7 +47,8 @@ namespace Ch.Elca.Iiop.Idl {
         private readonly Type m_clsType;
         private readonly CustomAttributeBuilder[] m_compactTypeAttrsBuilder;
         private readonly AttributeExtCollection m_compactTypeAttrInstances;
-        private Type m_separatedClsType;
+        private readonly Type m_assignableFromType;
+        private Type m_separatedClsType;        
         private CustomAttributeBuilder[] m_separatedAttrsBuilder;
         private AttributeExtCollection m_separatedAttrInstances;
 
@@ -57,14 +58,35 @@ namespace Ch.Elca.Iiop.Idl {
         public TypeContainer(Type clsType) : this(clsType, new AttributeExtCollection()){
         }
         
-        /// <summary>takes the type and the attributes in compact form</summary>
-        public TypeContainer(Type clsType, AttributeExtCollection attrs) : this(clsType, attrs, false) {
-        }
+        /// <param name="clsType">the type in this container</param>
+        /// <param name="assignableFromType">can be used to specify the type of values assignable to clsType;
+        /// useful e.g for uints, which are casted to ints</param>
+        public TypeContainer(Type clsType, Type assignableFromType) :
+            this(clsType, AttributeExtCollection.EmptyCollection, assignableFromType, false){
+        }        
         
+        /// <summary>takes the type and the attributes in compact form</summary>
+        public TypeContainer(Type clsType, AttributeExtCollection attrs) : this(clsType, attrs, clsType, false) {
+        }
+
         /// <summary>
         /// takes the type and the attributes either in compact or separated form (use alreadySeparated to specify).
         /// </summary>
         public TypeContainer(Type clsType, AttributeExtCollection attrs,
+                             bool alreadySeparated) : this(clsType, attrs, clsType, alreadySeparated) {
+                                 
+        }
+
+        
+        /// <summary>
+        /// takes the type and the attributes either in compact or separated form (use alreadySeparated to specify).
+        /// </summary>
+        /// <param name="clsType">the type in this container</param>        
+        /// <param name="attrs">the cls type attributes</param>
+        /// <param name="assignableFromType">can be used to specify the type of values assignable to clsType;
+        /// useful e.g for uints, which are casted to ints</param>        
+        /// <param name="alreadySeparated">is clsType in separated form or not</param>
+        public TypeContainer(Type clsType, AttributeExtCollection attrs, Type assignableFromType,
                              bool alreadySeparated) {
             if (attrs == null) {
                 throw new ArgumentException("TypeContainer; attrs must be != null"); 
@@ -86,6 +108,7 @@ namespace Ch.Elca.Iiop.Idl {
             m_clsType = clsType;
             m_compactTypeAttrsBuilder = custAttrBuilderArray;
             m_compactTypeAttrInstances = attrs;                       
+            m_assignableFromType = assignableFromType;
             if (alreadySeparated) {   
                 m_separatedClsType = clsType;
                 m_separatedAttrsBuilder = custAttrBuilderArray;
@@ -94,7 +117,7 @@ namespace Ch.Elca.Iiop.Idl {
                 m_separatedClsType = null;
                 m_separatedAttrsBuilder = null;
                 m_separatedAttrInstances = null;
-            }
+            }            
         }                
         
         #endregion IConstructors
@@ -219,6 +242,13 @@ namespace Ch.Elca.Iiop.Idl {
                 m_separatedAttrInstances = 
                     AttributeExtCollection.ConvertToAttributeCollection(separatedAttrInstances);
             }
+        }
+        
+        /// <summary>
+        /// the the type of values assignable to the contained type; useable e.g in case of uint -> int conversion.
+        /// </summary>        
+        public Type GetAssignableFromType() {
+            return m_assignableFromType;
         }
 
         #endregion IMethods

@@ -478,6 +478,52 @@ namespace Ch.Elca.Iiop.Util {
             return (foundProperty != null);
         }
         
+        /// <summary>checks, if the cls method is overloaded seen from type inType</summary>
+        public static bool IsMethodOverloaded(MethodInfo method, Type inType) {
+            MethodInfo[] methods = inType.GetMethods(BindingFlags.Instance | BindingFlags.Public);
+            int nrOfOverloads = 0;
+            foreach (MethodInfo methodFound in methods) {
+                if (methodFound.Name.Equals(method.Name)) {
+                    nrOfOverloads++;
+                }
+            }
+            return (nrOfOverloads > 1);
+        }        
+        
+        /// <summary>
+        /// checks, if the mehtod is already defined in a base class or an interface.
+        /// </summary>
+        /// <returns>true, if contained in a base class or interface, else returns false</returns>
+        public static bool CheckIsMethodInInterfaceOrBase(Type type, MethodInfo method, BindingFlags flags) {
+            bool result = false;
+            Type baseType = type.BaseType;
+            if (baseType != null) {
+                result = IsMethodDefinedOnType(method, baseType, flags);
+            }
+            Type[] interfaces = type.GetInterfaces();
+            for (int i = 0; i < interfaces.Length; i++) {
+                result = result || IsMethodDefinedOnType(method, interfaces[i], flags);
+            }
+            return result;
+        }
+
+        /// <summary>
+        /// checks, if the property is already defined in a base class or an interface. If so, don't map it again
+        /// </summary>
+        /// <returns>true, if contained in a base class or interface, else returns false</returns>
+        public static bool CheckIsPropertyInInterfaceOrBase(Type typeToMap, PropertyInfo prop, BindingFlags flags) {
+            bool result = false;
+            Type baseType = typeToMap.BaseType;
+            if (baseType != null) {
+                result = IsPropertyDefinedOnType(prop, baseType, flags);
+            }
+            Type[] interfaces = typeToMap.GetInterfaces();
+            for (int i = 0; i < interfaces.Length; i++) {
+                result = result || IsPropertyDefinedOnType(prop, interfaces[i], flags);
+            }
+            return result;
+        }
+        
         #endregion SMethods
 
     }

@@ -230,6 +230,8 @@ namespace Ch.Elca.Iiop.IntegrationTests {
 
         TestUnion EchoUnion(TestUnion arg);
 
+        TestUnionULong EchoUnionULong(TestUnionULong arg);
+
         /// <summary>
         /// echos a union, which has an enumeration discriminator
         /// </summary>
@@ -254,6 +256,9 @@ namespace Ch.Elca.Iiop.IntegrationTests {
 
         /// <summary>returns the IOR for the instance of MBR implementing this interface</summary>
         string GetIorStringForThisObject();
+
+        /// <summary>BAD_OPERATION ERROR REPORT</summary>
+        void GetAllUsagerType();
         
     }
 

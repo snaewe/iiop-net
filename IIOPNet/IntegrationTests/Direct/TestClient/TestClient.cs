@@ -621,19 +621,27 @@ namespace Ch.Elca.Iiop.IntegrationTests {
             Assertion.AssertEquals(case0Val, result.Getval0());
             Assertion.AssertEquals(0, result.Discriminator);
 
-        TestUnion arg2 = new TestUnion();
+            TestUnion arg2 = new TestUnion();
             int case1Val = 12;
             arg2.Setval1(case1Val, 2);
             TestUnion result2 = m_testService.EchoUnion(arg2);
             Assertion.AssertEquals(case1Val, result2.Getval1());
             Assertion.AssertEquals(2, result2.Discriminator);
 
-        TestUnion arg3 = new TestUnion();
+            TestUnion arg3 = new TestUnion();
             bool case2Val = true;
             arg3.Setval2(case2Val, 7);
             TestUnion result3 = m_testService.EchoUnion(arg3);
             Assertion.AssertEquals(case2Val, result3.Getval2());
             Assertion.AssertEquals(7, result3.Discriminator);            
+
+            TestUnionULong arg4 = new TestUnionULong();
+            int case1Val2 = 13;
+            arg4.Setval1(case1Val2);
+            TestUnionULong result4 = m_testService.EchoUnionULong(arg4);
+            Assertion.AssertEquals(case1Val2, result4.Getval1());
+            uint case1DiscrVal = 0x80000000;
+            Assertion.AssertEquals((int)case1DiscrVal, result4.Discriminator);            
 
         }
 
@@ -722,7 +730,13 @@ namespace Ch.Elca.Iiop.IntegrationTests {
             Assertion.AssertEquals("wrong constant value", Single.PositiveInfinity, plus_inf);
             Single minus_inf = Minus_Inf.ConstVal;
             Assertion.AssertEquals("wrong constant value", Single.NegativeInfinity, minus_inf);
-            
+
+            UInt16 expectedValUShort = 0x8000;
+            Assertion.AssertEquals("wrong constant value", (Int16)expectedValUShort, UShort_BiggerThanShort.ConstVal);
+            UInt32 expectedValULong = 0x80000000;
+            Assertion.AssertEquals("wrong constant value", (Int32)expectedValULong, ULong_BiggerThanLong.ConstVal);
+            UInt64 expectedValULongLong = 0x8000000000000000;
+            Assertion.AssertEquals("wrong constant value", (Int64)expectedValULongLong, ULongLong_BiggerThanLongLong.ConstVal);
             
         }
 
@@ -942,6 +956,10 @@ namespace Ch.Elca.Iiop.IntegrationTests {
             int arg1 = 1;
             int arg2 = 2;
             Assertion.AssertEquals("wrong adder result", arg1 + arg2, adder.Add(arg1, arg2));
+        }
+
+        public void TestErrorReportBadOperation() {
+            m_testService.GetAllUsagerType();
         }
         
 

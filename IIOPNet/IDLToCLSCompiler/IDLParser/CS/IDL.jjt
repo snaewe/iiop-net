@@ -736,7 +736,7 @@ void literal() :
 {
 (
   LOOKAHEAD(2)
-  litVal = integer_literal() { jjtThis.setLitVal(new IntegerLiteral((Int64)litVal)); }
+  litVal = integer_literal() { jjtThis.setLitVal(new IntegerLiteral((Decimal)litVal)); }
 |
   litVal = string_literal() { jjtThis.setLitVal(new StringLiteral((String)litVal, false)); }
 |
@@ -1399,7 +1399,7 @@ String identifier() #void :
   idToken = <ID> { return idToken.image; }
 }
 
-System.Int64 integer_literal() #void :
+System.Decimal integer_literal() #void :
 { Token intToken; string unaryOp = ""; }
 {
 [ "+" | "-" { unaryOp = "-"; } ]

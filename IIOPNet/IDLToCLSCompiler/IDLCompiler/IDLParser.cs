@@ -2049,7 +2049,7 @@ public class IDLParser{/*@bgen(jjtree)*/
         litVal = integer_literal();
                                jjtree.closeNodeScope(jjtn000, true);
                                jjtc000 = false;
-                               jjtn000.setLitVal(new IntegerLiteral((Int64)litVal));
+                               jjtn000.setLitVal(new IntegerLiteral((Decimal)litVal));
       } else {
         switch ((jj_ntk==-1)?jj_ntk_calc():jj_ntk) {
         case IDLParserConstants.STRING:
@@ -4150,7 +4150,7 @@ public class IDLParser{/*@bgen(jjtree)*/
     throw new Error("Missing return statement in function");
   }
 
-  public System.Int64 integer_literal() {
+  public System.Decimal integer_literal() {
   Token intToken; string unaryOp = "";
     switch ((jj_ntk==-1)?jj_ntk_calc():jj_ntk) {
     case 40:

@@ -53,7 +53,7 @@ namespace parser {
         /// <summary>
         /// convert the string representation of a number to the corresponding Int64.
         /// </summary>
-        public static Int64 Parse(string val, int basis) {
+        public static Decimal Parse(string val, int basis) {
             string valueToParse = val;
             if ((basis < SUPPORTED_MIN_BASIS) ||
                 (basis > SUPPORTED_MAX_BASIS)) {
@@ -71,8 +71,8 @@ namespace parser {
                 }
             }
             
-            Int64 result = 0;
-            Int64 currentDigitBaseVal = 1;
+            Decimal result = 0;
+            Decimal currentDigitBaseVal = 1;
             for (int i = valueToParse.Length - 1; i >= 0; i--) {
                 // check here, because for large numbers, an overflow of currentDigitBaseVal 
                 // may be possible at parse end, without a problem for parsed number itself

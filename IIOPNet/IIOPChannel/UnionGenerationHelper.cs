@@ -626,7 +626,66 @@ namespace Ch.Elca.Iiop.Idl {
             gen.Emit(OpCodes.Ret);
         }
 
-
+        private void PushBooleanDiscriminatorValueToStack(ILGenerator gen, object discVal) {
+            if (!(discVal is System.Boolean)) {
+                throw new InvalidUnionDiscriminatorValue(discVal, m_discrType.GetCompactClsType());
+            }
+            gen.Emit(OpCodes.Ldc_I4, Convert.ToInt32(discVal));            
+        }
+        
+        private void PushInt16DiscriminatorValueToStack(ILGenerator gen, object discVal) {
+            Int32 val;
+            decimal discValAsDecimal = Convert.ToDecimal(discVal);
+            if (m_discrType.GetAssignableFromType().Equals(typeof(System.UInt16))) {
+                // handling to uint -> int conversion of the mapping
+                if ((discValAsDecimal < UInt16.MinValue) || (discValAsDecimal > UInt16.MaxValue)) {
+                    throw new InvalidUnionDiscriminatorValue(discVal, m_discrType.GetCompactClsType());
+                }
+                System.UInt16 asUint16 = Convert.ToUInt16(discVal);
+                val = (System.Int16)asUint16; // cast to int16
+            } else {
+                if ((discValAsDecimal < Int16.MinValue) || (discValAsDecimal > Int16.MaxValue)) {
+                    throw new InvalidUnionDiscriminatorValue(discVal, m_discrType.GetCompactClsType());
+                }    
+                val = Convert.ToInt32(discVal);
+            }                        
+            gen.Emit(OpCodes.Ldc_I4, val);            
+        }
+        
+        private void PushInt32DiscriminatorValueToStack(ILGenerator gen, object discVal) {
+            System.Int32 val;
+            decimal discValAsDecimal = Convert.ToDecimal(discVal);
+            if (m_discrType.GetAssignableFromType().Equals(typeof(System.UInt32))) {
+                // handling to uint -> int conversion of the mapping
+                if ((discValAsDecimal < UInt32.MinValue) || (discValAsDecimal > UInt32.MaxValue)) {
+                    throw new InvalidUnionDiscriminatorValue(discVal, m_discrType.GetCompactClsType());
+                }    
+                UInt32 asUint32 = Convert.ToUInt32(discVal);
+                val = (System.Int32)asUint32; // cast to int32
+            } else {
+                if ((discValAsDecimal < Int32.MinValue) || (discValAsDecimal > Int32.MaxValue)) {
+                    throw new InvalidUnionDiscriminatorValue(discVal, m_discrType.GetCompactClsType());
+                }
+                val = Convert.ToInt32(discVal);
+            }
+            gen.Emit(OpCodes.Ldc_I4, val);
+        }
+        
+        private void PushInt64DiscriminatorValueToStack(ILGenerator gen, object discVal) {
+            decimal discValAsDecimal = Convert.ToDecimal(discVal);
+            if (m_discrType.GetAssignableFromType().Equals(typeof(System.UInt64))) {
+                if ((discValAsDecimal < UInt64.MinValue) || (discValAsDecimal > UInt64.MaxValue)) {
+                    throw new InvalidUnionDiscriminatorValue(discVal, m_discrType.GetCompactClsType());
+                }                
+                UInt64 asUint64 = Convert.ToUInt64(discVal);
+                gen.Emit(OpCodes.Ldc_I8, (Int64)asUint64);
+            } else {
+                if ((discValAsDecimal < Int64.MinValue) || (discValAsDecimal > Int64.MaxValue)) {
+                    throw new InvalidUnionDiscriminatorValue(discVal, m_discrType.GetCompactClsType());
+                }                
+                gen.Emit(OpCodes.Ldc_I8, Convert.ToInt64(discVal));
+            }
+        }
 
         /// <summary>pushes the constant value for the discriminator to the stack</summary>
         /// <remarks>discriminator must be already generated</remarks>
@@ -634,36 +693,16 @@ namespace Ch.Elca.Iiop.Idl {
             if (m_discrType == null) {
                 throw new INTERNAL(899, CompletionStatus.Completed_MayBe);
             }
-            // make sure discVal literal is Int64 for integer types; makes checks easier
-            if ((discVal is System.Int16) || (discVal is System.Int32)) {
-                discVal = Convert.ToInt64(discVal);
-            }
             
             Type discrTypeCls = m_discrType.GetCompactClsType(); // for discriminator do not split boxed value types, because only the listed unseparable types usable
             if (discrTypeCls.Equals(ReflectionHelper.BooleanType)) {
-                if (!(discVal is System.Boolean)) {
-                    throw new InvalidUnionDiscriminatorValue(discVal, discrTypeCls);
-                }
-                gen.Emit(OpCodes.Ldc_I4, Convert.ToInt32(discVal));
+                PushBooleanDiscriminatorValueToStack(gen, discVal);
             } else if (discrTypeCls.Equals(ReflectionHelper.Int16Type)) {
-                if ((!(discVal is System.Int64)) || 
-                    ((System.Int64)discVal < System.Int16.MinValue) ||
-                    ((System.Int64)discVal > System.Int16.MaxValue)) {
-                    throw new InvalidUnionDiscriminatorValue(discVal, discrTypeCls);
-                }
-                gen.Emit(OpCodes.Ldc_I4, Convert.ToInt32(discVal));
+                PushInt16DiscriminatorValueToStack(gen, discVal);
             } else if (discrTypeCls.Equals(ReflectionHelper.Int32Type)) {
-                if ((!(discVal is System.Int64)) ||
-                    ((System.Int64)discVal < System.Int32.MinValue) ||
-                    ((System.Int64)discVal > System.Int32.MaxValue)) {
-                    throw new InvalidUnionDiscriminatorValue(discVal, discrTypeCls);
-                }
-                gen.Emit(OpCodes.Ldc_I4, Convert.ToInt32(discVal));
+                PushInt32DiscriminatorValueToStack(gen, discVal);
             } else if (discrTypeCls.Equals(ReflectionHelper.Int64Type)) {
-                if (!(discVal is System.Int64)) {
-                    throw new InvalidUnionDiscriminatorValue(discVal, discrTypeCls);
-                }
-                gen.Emit(OpCodes.Ldc_I4, (System.Int64)discVal);
+                PushInt64DiscriminatorValueToStack(gen, discVal);
             } else if (discrTypeCls.Equals(ReflectionHelper.CharType)) {
                 if (!(discVal is System.Char)) {
                     throw new InvalidUnionDiscriminatorValue(discVal, discrTypeCls);
