@@ -31,6 +31,7 @@ using System;
 using System.Collections;
 using System.Text;
 using Ch.Elca.Iiop.Services;
+using omg.org.CORBA;
 
 namespace Ch.Elca.Iiop.CodeSet {
 
@@ -127,7 +128,8 @@ namespace Ch.Elca.Iiop.CodeSet {
         public override int GetBytes(char[] chars, int charIndex, int charCount,
                                      byte[] bytes, int byteIndex) {
             if ((bytes.Length - byteIndex) < charCount) { 
-                throw new ArgumentException("bytes array is too small"); 
+                // bytes array is too small
+                throw new INTERNAL(9965, CompletionStatus.Completed_MayBe);
             }
             
             // mapping for latin-1: latin-1 value = unicode-value, for unicode values 0 - 0xFF, other values: exception, non latin-1
@@ -135,8 +137,9 @@ namespace Ch.Elca.Iiop.CodeSet {
                 byte lowbits = (byte)(chars[i] & 0x00FF);
                 byte highbits = (byte) ((chars[i] & 0xFF00) >> 8);
                 if (highbits != 0) { 
-                    throw new ArgumentException("character : " + chars[i] + 
-                                                " can't be encoded, because it's a non-latin1 character"); 
+                    // character : chars[i]
+                    // can't be encoded, because it's a non-latin1 character
+                    throw new BAD_PARAM(1919, CompletionStatus.Completed_MayBe);
                 }
                 bytes[byteIndex + (i - charIndex)] = lowbits;
             }
@@ -150,7 +153,8 @@ namespace Ch.Elca.Iiop.CodeSet {
 
         public override int GetChars(byte[] bytes, int byteIndex, int byteCount, char[] chars, int charIndex) {
             if ((chars.Length - charIndex) < byteCount) { 
-                throw new ArgumentException("chars array is too small"); 
+                // chars array is too small
+                throw new INTERNAL(9965, CompletionStatus.Completed_MayBe);
             }
             // mapping for latin-1: unicode-value = latin-1 value
             for (int i = byteIndex; i < byteIndex + byteCount; i++) {
@@ -256,11 +260,13 @@ namespace Ch.Elca.Iiop.CodeSet {
                 if (m_bigEndian) {
                     return base.GetCharCount(bytes, index+2, count-2);
                 } else {
-                    throw new Exception("little endian not supported, if big endian specified");
+                    // little endian not supported, if big endian specified
+                    throw new BAD_PARAM(9923, CompletionStatus.Completed_MayBe);
                 }
             } else if (bytes[index] == 255 && (bytes[index+1] == 254)) {
                 if (m_bigEndian) {
-                    throw new Exception("big endian not supported, if little endian specified");
+                    // big endian not supported, if little endian specified
+                    throw new BAD_PARAM(9924, CompletionStatus.Completed_MayBe);
                 } else {
                     return base.GetCharCount(bytes, index+2, count-2);
                 }
@@ -281,11 +287,13 @@ namespace Ch.Elca.Iiop.CodeSet {
                     return base.GetChars(bytes, byteIndex+2, byteCount-2,
                                          chars, charIndex);
                 } else {
-                    throw new Exception("little endian not supported, if big endian specified");
+                    // little endian not supported, if big endian specified
+                   throw new BAD_PARAM(9923, CompletionStatus.Completed_MayBe);
                 }
             } else if (bytes[byteIndex] == 255 && (bytes[byteIndex+1] == 254)) {
                 if (m_bigEndian) {
-                    throw new Exception("big endian not supported, if little endian specified");
+                    // big endian not supported, if little endian specified
+                    throw new BAD_PARAM(9924, CompletionStatus.Completed_MayBe);
                 } else {
                     return base.GetChars(bytes, byteIndex+2, byteCount-2,
                                          chars, charIndex);

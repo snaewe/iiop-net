@@ -34,6 +34,7 @@ using System.IO;
 using System.Collections;
 using Ch.Elca.Iiop.Cdr;
 using Ch.Elca.Iiop.Util;
+using omg.org.CORBA;
 
 namespace Ch.Elca.Iiop.CorbaObjRef {
 
@@ -114,7 +115,9 @@ namespace Ch.Elca.Iiop.CorbaObjRef {
             if (profiles.Length > 0) { // if profiles are present, an InternetIIOPProfile is required
                 IorProfile profile = SearchInternetIIOPProfile(profiles);
                 if (profile == null) { 
-                    throw new ArgumentException("no InternetIIOPProfile found in the IORProfiles; other profiles are not usable with this implementation"); 
+                    // no InternetIIOPProfile found in the IORProfiles; 
+                	// other profiles are not usable with this implementation
+                	throw new INV_OBJREF(9402, CompletionStatus.Completed_No);
                 }
                 AssignDefaultFromProfile(profile);
             }
@@ -232,7 +235,8 @@ namespace Ch.Elca.Iiop.CorbaObjRef {
                     AssignDefaultFromProfile(result);
                     return result;
                 default: 
-                    throw new Exception("unparsable profile: " + profileType);
+                    // unparsable profile: profileType
+                    throw new INV_OBJREF(9403, CompletionStatus.Completed_MayBe);
             }
         }
 

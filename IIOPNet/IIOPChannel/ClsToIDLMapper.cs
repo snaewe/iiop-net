@@ -356,7 +356,8 @@ namespace Ch.Elca.Iiop.Idl {
                 // other types are mapped to an abstract value type
                 return action.MapToIdlAbstractValueType(clsType);
             } else {
-                throw new Exception("not mappable: " + clsType);
+                // not mappable: clsType
+                throw new BAD_PARAM(18800, CompletionStatus.Completed_MayBe);
             }
         }
 
@@ -390,7 +391,8 @@ namespace Ch.Elca.Iiop.Idl {
             } else if (clsType.Equals(s_voidType)) {
                 return action.MapToIdlVoid(clsType);
             } else {
-                throw new Exception("not mappable as primitive type: " + clsType);
+                // not mappable as primitive type: clsType
+                throw new INTERNAL(18801, CompletionStatus.Completed_MayBe);
             }
         }
 
@@ -455,7 +457,8 @@ namespace Ch.Elca.Iiop.Idl {
                 case IdlTypeObject.ValueBase:
                     return action.MapToValueBase(clsType);
                 default: 
-                    throw new Exception("unknown object attribute value: " + oType);
+                    // unknown object attribute value: oType
+                    throw new MARSHAL(18807, CompletionStatus.Completed_MayBe);
             }
         }
         
@@ -478,7 +481,8 @@ namespace Ch.Elca.Iiop.Idl {
             // distinguish the different cases here
             object[] attrs = clsType.GetCustomAttributes(s_interfaceTypeAttrType, true);
             if (attrs.Length > 1) { 
-                throw new Exception("only one InterfaceTypeAttribute for an interface allowed"); 
+                // only one InterfaceTypeAttribute for an interface allowed
+                throw new INTERNAL(18811, CompletionStatus.Completed_MayBe);
             }
         
             InterfaceTypeAttribute interfaceAttr = null;
@@ -492,7 +496,8 @@ namespace Ch.Elca.Iiop.Idl {
             } else if (interfaceAttr.IdlType.Equals(IdlTypeInterface.AbstractValueType)) {
                 return action.MapToIdlAbstractValueType(clsType);
             } else  {
-                throw new ArgumentException("Attributte IntrerfaceTypeAttribute had an unknown value for IDLType: " + interfaceAttr.IdlType);
+                // ttributte IntrerfaceTypeAttribute had an unknown value for IDLType: interfaceAttr.IdlType
+                throw new MARSHAL(18809, CompletionStatus.Completed_MayBe);
             }
         }
 

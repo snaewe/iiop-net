@@ -325,9 +325,10 @@ namespace Ch.Elca.Iiop.Marshalling {
             byte[] objectKey = ExtractDataFromObjRef(refToTarget, out host, out port,
                                                      out version);
             if ((objectKey == null) || (host == null)) { 
-                throw new ArgumentException("the objRef: " + refToTarget + ", uri: " +
-                                            refToTarget.URI + "is not serializable, because connection data is missing (hostName=" +
-                                            host + ", objectKey=" + objectKey + ")"); 
+                // the objRef: " + refToTarget + ", uri: " +
+                // refToTarget.URI + is not serializable, because connection data is missing 
+                // hostName=host, objectKey=objectKey
+                throw new INV_OBJREF(1961, CompletionStatus.Completed_MayBe);
             }
             Debug.WriteLine("connection information for objRef, host: " + host + ", port: " +
                             port + ", objKey-length: " + objectKey.Length); 
@@ -404,14 +405,15 @@ namespace Ch.Elca.Iiop.Marshalling {
                 interfaceType = typeof(MarshalByRefObject);
             }
             if (interfaceType == null) { 
-                throw new Exception("unknown repository id encountered: " + ior.TypID); 
+                // unknown repository id encountered:  ior.TypID
+                throw new INTF_REPOS(1414, CompletionStatus.Completed_MayBe);
             }
 
             if ((!(formal.Equals(typeof(MarshalByRefObject)))) && !(formal.IsAssignableFrom(interfaceType))) {
                 // for formal-parameter MarshalByRefObject everything is possible, the other formal types must be checked    
                 Trace.WriteLine("received obj-reference is not compatible with the required formal parameter, formal: " +
                                 formal + ", received: " + interfaceType);
-                throw new MARSHAL(20010, CompletionStatus.Completed_MayBe);
+                throw new BAD_PARAM(20010, CompletionStatus.Completed_MayBe);
             }
             
             // create a proxy
@@ -502,7 +504,7 @@ namespace Ch.Elca.Iiop.Marshalling {
             object result = null;
             if (boxedResult != null) {
                 // perform an unboxing
-                result = boxedResult.unbox();
+                result = boxedResult.Unbox();
             }
             Debug.WriteLine("unboxed result of boxedvalue-ser: " + result);
             return result;
@@ -749,7 +751,8 @@ namespace Ch.Elca.Iiop.Marshalling {
 
         public override object Deserialise(Type formal, AttributeExtCollection attributes,
                                            CdrInputStream sourceStream) {
-            Corba.TypeCode typeCode = (Corba.TypeCode)m_typeCodeSer.Deserialise(formal, attributes, sourceStream);
+            omg.org.CORBA.TypeCode typeCode = (omg.org.CORBA.TypeCode)m_typeCodeSer.Deserialise(formal, 
+                                                                                                attributes, sourceStream);
             if (!(typeCode is NullTC)) {
                 Type dotNetType = Repository.GetTypeForTypeCode(typeCode);
                 Marshaller marshaller = Marshaller.GetSingleton();
@@ -819,10 +822,10 @@ namespace Ch.Elca.Iiop.Marshalling {
             Type exceptionType = Repository.GetTypeForId(repId);
             if (exceptionType == null) {
                 throw new UnknownUserException("user exception not found for id: " + repId);
-            } else if (exceptionType.IsSubclassOf(typeof(omg.org.CORBA.AbstractCORBASystemException))) {
+            } else if (exceptionType.IsSubclassOf(typeof(AbstractCORBASystemException))) {
                 // system exceptions are deserialized specially, because no inheritance is possible for exceptions, see implementation of the system exceptions
                 uint minor = sourceStream.ReadULong();
-                omg.org.CORBA.CompletionStatus completion = (omg.org.CORBA.CompletionStatus)((int) sourceStream.ReadULong());
+                CompletionStatus completion = (CompletionStatus)((int) sourceStream.ReadULong());
                 return (Exception)Activator.CreateInstance(exceptionType, new object[] { (int)minor, completion } );
             } else {
                 Exception exception = (Exception)Activator.CreateInstance(exceptionType);
@@ -830,7 +833,9 @@ namespace Ch.Elca.Iiop.Marshalling {
                 FieldInfo[] fields = exceptionType.GetFields(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.DeclaredOnly);
                 Marshaller marshaller = Marshaller.GetSingleton();
                 foreach (FieldInfo field in fields) {
-                    object fieldVal = marshaller.Unmarshal(field.FieldType, Util.AttributeExtCollection.ConvertToAttributeCollection(field.GetCustomAttributes(true)), sourceStream);
+                    object fieldVal = marshaller.Unmarshal(field.FieldType, 
+                                                           Util.AttributeExtCollection.ConvertToAttributeCollection(field.GetCustomAttributes(true)), 
+                                                           sourceStream);
                     field.SetValue(exception, fieldVal);
                 }                
                 return exception;
@@ -842,17 +847,20 @@ namespace Ch.Elca.Iiop.Marshalling {
             string repId = Repository.GetRepositoryID(formal);
             targetStream.WriteString(repId);
 
-            if (formal.IsSubclassOf(typeof(omg.org.CORBA.AbstractCORBASystemException))) {
+            if (formal.IsSubclassOf(typeof(AbstractCORBASystemException))) {
                 // system exceptions are serialized specially, because no inheritance is possible for exceptions, see implementation of the system exceptions
-                omg.org.CORBA.AbstractCORBASystemException sysEx = (omg.org.CORBA.AbstractCORBASystemException) actual;
+                AbstractCORBASystemException sysEx = (AbstractCORBASystemException) actual;
                 targetStream.WriteULong((uint)sysEx.Minor);
                 targetStream.WriteULong((uint)sysEx.Status);
             } else {
-                FieldInfo[] fields = formal.GetFields(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.DeclaredOnly);
+                FieldInfo[] fields = formal.GetFields(BindingFlags.Public | BindingFlags.NonPublic | 
+                                                      BindingFlags.Instance | BindingFlags.DeclaredOnly);
                 Marshaller marshaller = Marshaller.GetSingleton();
                 foreach (FieldInfo field in fields) {
                     object fieldVal = field.GetValue(actual);
-                    marshaller.Marshal(field.FieldType, Util.AttributeExtCollection.ConvertToAttributeCollection(field.GetCustomAttributes(true)), fieldVal, targetStream);
+                    marshaller.Marshal(field.FieldType, 
+                                       Util.AttributeExtCollection.ConvertToAttributeCollection(field.GetCustomAttributes(true)), 
+                                       fieldVal, targetStream);
                 }
             }
         }

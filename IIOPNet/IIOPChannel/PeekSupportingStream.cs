@@ -105,7 +105,7 @@ namespace Ch.Elca.Iiop.Util {
             lock(this) {
                 int read = count;
                 if (offset + count > buffer.Length) { 
-                    throw new InvalidOperationException("buffer is not large enough"); 
+                    throw new ArgumentException("buffer is not large enough"); 
                 }
                 for (int i = 0; i < count; i++) {
                     int result = ReadByte();

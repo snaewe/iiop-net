@@ -293,7 +293,8 @@ namespace Ch.Elca.Iiop.MessageHandling {
             string resultMethodName = StandardCorbaOps.MapMethodName(methodName);
             calledMethodInfo = serverType.GetMethod(methodName); // for parameter unmarshalling, use info of the signature method
             if (calledMethodInfo == null) { 
-                throw new Exception("unexpected exception: can't load method of type StandardCorbaOps"); 
+                // unexpected exception: can't load method of type StandardCorbaOps
+                throw new INTERNAL(2801, CompletionStatus.Completed_MayBe);
             }
             return resultMethodName;
         }
@@ -583,7 +584,9 @@ namespace Ch.Elca.Iiop.MessageHandling {
                     case 2 : 
                         throw DeserialiseSystemError(cdrStream, version); // the error .NET message for this exception is created in the formatter
                     default : 
-                        throw new Exception("deseralization of reply error, unknown reply status: " + responseStatus); // the error .NET message for this exception is created in the formatter
+                        // deseralization of reply error, unknown reply status: responseStatus
+                        // the error .NET message for this exception is created in the formatter
+                        throw new MARSHAL(2401, CompletionStatus.Completed_MayBe);
                 }
             } catch (Exception e) {
                 // do not corrupt stream --> skip

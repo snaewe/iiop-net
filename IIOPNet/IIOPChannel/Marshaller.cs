@@ -34,6 +34,7 @@ using System.Diagnostics;
 using Ch.Elca.Iiop.Cdr;
 using Ch.Elca.Iiop.Idl;
 using Ch.Elca.Iiop.Util;
+using omg.org.CORBA;
 
 namespace Ch.Elca.Iiop.Marshalling {
     
@@ -113,7 +114,9 @@ namespace Ch.Elca.Iiop.Marshalling {
         protected Serialiser DetermineSerialiser(ref Type formal, AttributeExtCollection attributes) {
             Serialiser serialiser = (Serialiser)s_mapper.MapClsType(ref formal, attributes, s_serDetermination); // formal can be transformed
             if (serialiser == null) {
-                throw new ArgumentException("no serializer present for Type: " + formal);
+                // no serializer present for Type: formal
+                Trace.WriteLine("no serialiser for Type: " + formal);
+                throw new BAD_PARAM(9001, CompletionStatus.Completed_MayBe);
             }
             Debug.WriteLine("serialize formal type " + formal + " with : " + serialiser);
             return serialiser;
@@ -150,7 +153,7 @@ namespace Ch.Elca.Iiop.Marshalling {
             object result = serialiser.Deserialise(formalSer, attributes, sourceStream);
             if ((formalSig.IsArray) && (formalSig.GetArrayRank() > 1)) { // a true .NET moredimensional array
                 if ((result != null) && (!result.GetType().IsArray)) {
-                    throw new omg.org.CORBA.MARSHAL(0, omg.org.CORBA.CompletionStatus.Completed_No);
+                    throw new BAD_PARAM(9004, CompletionStatus.Completed_MayBe);
                 }
                 result = BoxedArrayHelper.ConvertNestedOneDimToMoreDim((Array)result);
             }
@@ -314,25 +317,29 @@ namespace Ch.Elca.Iiop.Marshalling {
             return m_baseTypeSerializer[clsType];
         }
         public object MapToIdlUShort(System.Type clsType) {
-            throw new NotSupportedException("no CLS type is mapped to UShort");
+            // no CLS type is mapped to UShort
+            throw new INTERNAL(8702, CompletionStatus.Completed_MayBe);
         }
         public object MapToIdlLong(System.Type clsType) {
             return m_baseTypeSerializer[clsType];
         }
         public object MapToIdlULong(System.Type clsType) {
-            throw new NotSupportedException("no CLS type is mapped to ULong");
+            // no CLS type is mapped to ULong
+            throw new INTERNAL(8703, CompletionStatus.Completed_MayBe);
         }
         public object MapToIdlLongLong(System.Type clsType) {
             return m_baseTypeSerializer[clsType];
         }
         public object MapToIdlULongLong(System.Type clsType) {
-            throw new NotSupportedException("no CLS type is mapped to ULongLong");
+            // no CLS type is mapped to ULongLong
+            throw new INTERNAL(8703, CompletionStatus.Completed_MayBe);
         }
         public object MapToIdlOctet(System.Type clsType) {
             return m_baseTypeSerializer[clsType];
         }
         public object MapToIdlVoid(System.Type clsType) {
-            throw new NotSupportedException("void is not serializable");
+            // void is not serializable
+            throw new INTERNAL(8704, CompletionStatus.Completed_MayBe);
         }
         public object MapToIdlWChar(System.Type clsType) {
             return m_baseTypeSerializer[clsType];

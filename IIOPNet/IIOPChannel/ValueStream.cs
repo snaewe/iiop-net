@@ -476,7 +476,8 @@ namespace Ch.Elca.Iiop.Cdr {
             }
             ChunkInfo chunkInfo = (ChunkInfo)m_chunkStack.Peek();
             if (chunkInfo.IsBorderCrossed()) {
-                throw new InvalidCdrDataException("invlaid serialized value-type, try to read over the chunk border");
+                // invlaid serialized value-type, try to read over the chunk border
+                throw new MARSHAL(901, CompletionStatus.Completed_MayBe);
             }
         }
             
@@ -495,12 +496,12 @@ namespace Ch.Elca.Iiop.Cdr {
                 (CheckForIndirection(out indirectionOffset))) { 
                 // load the value for the indirection
                 result = GetObjectForIndir(indirectionOffset, IndirectionType.IndirValue);
-                // here a problem is possible: in the indirection table, the boxed from is present for boxed values, but for setting the field, the unboxed version may be needed
+                // here a problem is possible: in the indirection table, the boxed from is present for boxed values, 
+                // but for setting the field, the unboxed version may be needed
                 if ((result is BoxedValueBase) && (!field.FieldType.IsSubclassOf(typeof(BoxedValueBase)))) {
-                    result = ((BoxedValueBase)result).unbox();
+                    result = ((BoxedValueBase)result).Unbox();
                 }
                 
-
             } else {
                 result = marshaller.Unmarshal(field.FieldType, attrColl, this);
                 // indirection table update not needed here: if a marshalled value type was read, it's already in the indirection table, primitive types / object references are not inserted into the indirection table (15.3.4.3 in CORBA 2.3.1 99-10-07)
@@ -541,7 +542,9 @@ namespace Ch.Elca.Iiop.Cdr {
             // create the instance of this value-type
             object instance = CreateInstance(actualType);
             if (!(formal.IsInstanceOfType(instance))) { 
-                throw new Exception("invalid implementation class of value type: " + instance.GetType() + " is incompatible with: " + formal); 
+                // invalid implementation class of value type: 
+                // instance.GetType() is incompatible with: formal
+                throw new BAD_PARAM(903, CompletionStatus.Completed_MayBe);
             }
             
             // add the instance, which is created at the moment to the indirection table
@@ -557,7 +560,8 @@ namespace Ch.Elca.Iiop.Cdr {
                     ReadFieldsForType(instance, demarshalType, chunked);
                 } else { // custom marshalled
                     if (!(instance is ICustomMarshalled)) { 
-                        throw new Exception("can't deserialise custom value type, because ICustomMarshalled not implented"); 
+                        // can't deserialise custom value type, because ICustomMarshalled not implented
+                        throw new INTERNAL(909, CompletionStatus.Completed_MayBe);
                     }
                     HandleChunks(null, chunked);
                     ((ICustomMarshalled) instance).Deserialise(new DataInputStreamImpl(this));
@@ -570,7 +574,8 @@ namespace Ch.Elca.Iiop.Cdr {
                 if (chunkLevel == 1) {
                     // outermost value: no chunks must be on the stack
                     if (m_chunkStack.Count > 0) { 
-                        throw new InvalidCdrDataException("not all chunks closed at the ending of the value-type"); 
+                        // not all chunks closed at the ending of the value-type
+                        throw new MARSHAL(911, CompletionStatus.Completed_MayBe);
                     }
                 }
             }
@@ -606,7 +611,8 @@ namespace Ch.Elca.Iiop.Cdr {
                 chunk.IsContinuationExpected = false;
             } else {
                 if (chunk.IsDataAvailable()) { 
-                    throw new InvalidCdrDataException("chunk can't end here, data is present in chunk"); 
+                    // chunk can't end here, data is present in chunk
+                    throw new MARSHAL(912, CompletionStatus.Completed_MayBe);
                 }
                 chunk.IsContinuationExpected = true;
             }
@@ -638,10 +644,14 @@ namespace Ch.Elca.Iiop.Cdr {
             int endTag = ReadLong();
 
             if (endTag >= 0) { 
-                throw new InvalidCdrDataException("end-tag for a chunk must be < 0"); 
+                // end-tag for a chunk must be < 0
+                throw new MARSHAL(914, CompletionStatus.Completed_MayBe);
             }
             int levelsToEnd = m_chunkStack.Count + 2 + endTag; // already removed topmost element --> add 2 here
-            if (levelsToEnd <= 0) { throw new InvalidCdrDataException("invalid end-chunk tag"); }
+            if (levelsToEnd <= 0) { 
+                // invalid end-chunk tag
+                throw new MARSHAL(915, CompletionStatus.Completed_MayBe);
+            }
             // set for the chunks, that are not removed here the IsFinished property to true!
             IEnumerator enumerator = m_chunkStack.GetEnumerator();
             for (int i = 1; i < levelsToEnd; i++) {
@@ -654,7 +664,8 @@ namespace Ch.Elca.Iiop.Cdr {
         /// <summary>checks, if a chunk can end at the specified position</summary>
         private void CheckChunkInfoAtEnd(ChunkInfo chunkInfo) {
             if (chunkInfo.IsDataAvailable()) {
-                throw new InvalidCdrDataException("a chunk containing unread data couldn't be eneded here");
+                // a chunk containing unread data couldn't be eneded here
+                throw new MARSHAL(917, CompletionStatus.Completed_MayBe);
             }
         }
 
@@ -672,7 +683,8 @@ namespace Ch.Elca.Iiop.Cdr {
             object[] implAttr = actualType.GetCustomAttributes(typeof(ImplClassAttribute), false);
             if ((implAttr != null) && (implAttr.Length > 0)) {
                 if (implAttr.Length > 1) { 
-                    throw new Exception("invalid type: " + actualType + ", only on ImplClassAttribute allowed"); 
+                    // invalid type: actualType, only one ImplClassAttribute allowed
+                    throw new INTERNAL(923, CompletionStatus.Completed_MayBe);
                 }
                 ImplClassAttribute implCl = (ImplClassAttribute) implAttr[0];
                 // get the type
@@ -685,7 +697,8 @@ namespace Ch.Elca.Iiop.Cdr {
             }
             // type must not be abstract for beeing instantiable
             if (actualType.IsAbstract) { 
-                throw new Exception("value-type couln't be instantiated: " + actualType); 
+                // value-type couln't be instantiated: actualType
+                throw new NO_IMPLEMENT(931, CompletionStatus.Completed_MayBe);
             }
             // instantiate            
             object instance = Activator.CreateInstance(actualType);
@@ -718,14 +731,16 @@ namespace Ch.Elca.Iiop.Cdr {
                     }
                     actualType = Repository.GetTypeForId(repId);
                     if (actualType == null) { 
-                        throw new InvalidCdrDataException("repository id used is unknown: " + repId); 
+                        // repository id used is unknown: repId
+                        throw new NO_IMPLEMENT(941, CompletionStatus.Completed_MayBe);
                     }
                     break;
                 case 6:
                     // a list of repository-id's
                     int nrOfIds = ReadLong();
                     if (nrOfIds == 0) { 
-                        throw new InvalidCdrDataException("a list of repository-id's for type-information must contain at least one element"); 
+                        // a list of repository-id's for type-information must contain at least one element
+                        throw new MARSHAL(935, CompletionStatus.Completed_MayBe);
                     }
                     string mostDerived = ReadString(); // use only the most derived type, no truncation allowed
                     for (int i = 1; i < nrOfIds; i++) { 
@@ -734,10 +749,12 @@ namespace Ch.Elca.Iiop.Cdr {
                     actualType = Repository.GetTypeForId(mostDerived);
                     break;
                 default:
-                    throw new InvalidCdrDataException("invalid value-tag found: " + valueTag);
+                    // invalid value-tag found: " + valueTag
+                    throw new MARSHAL(937, CompletionStatus.Completed_MayBe);
             }
             if (ClsToIdlMapper.IsInterface(actualType)) { 
-                throw new InvalidCdrDataException("can't instantiate value-type of type: " + actualType); 
+                // can't instantiate value-type of type: actualType
+                throw new NO_IMPLEMENT(945, CompletionStatus.Completed_MayBe);
             }
             return actualType;
         }
@@ -751,7 +768,8 @@ namespace Ch.Elca.Iiop.Cdr {
                 ReadPadding(4); // read indir tag
                 indirectionOffset = ReadLong();
                 if (indirectionOffset >= -4) { 
-                    throw new InvalidCdrDataException("indirection-offset is not ok: " + indirectionOffset); 
+                    // indirection-offset is not ok: indirectionOffset
+                    throw new MARSHAL(949, CompletionStatus.Completed_MayBe);
                 }
                 return true;
             } else {
@@ -776,7 +794,8 @@ namespace Ch.Elca.Iiop.Cdr {
                                     infoEntry.IndirType);
                     Debug.WriteLine("value for key: " + m_indirectionTable[infoEntry]);
                 }
-                throw new InvalidCdrDataException("indirection not resolvable!"); 
+                // indirection not resolvable!
+                throw new MARSHAL(951, CompletionStatus.Completed_MayBe);
             }
             return m_indirectionTable[info];
         }
@@ -786,7 +805,8 @@ namespace Ch.Elca.Iiop.Cdr {
                                                                - indirectionOffset),
                                                        indirType);
             if (!m_indirectionTable.ContainsKey(info)) { 
-                throw new InvalidCdrDataException("indirection not resolvable!"); 
+                // indirection not resolvable!
+                throw new MARSHAL(951, CompletionStatus.Completed_MayBe);
             }
             return true;
         }
@@ -993,7 +1013,8 @@ namespace Ch.Elca.Iiop.Cdr {
                     WriteFieldsForType(instance, marshalType);    
                 } else { // custom marshalled
                     if (!(instance is ICustomMarshalled)) {
-                        throw new Exception("can't serialise custom value type, because ICustomMarshalled not implemented"); 
+                        // can't serialise custom value type, because ICustomMarshalled not implemented
+                        throw new INTERNAL(909, CompletionStatus.Completed_MayBe);
                     }
                     ((ICustomMarshalled) instance).Serialize(new DataOutputStreamImpl(this));
                 }

@@ -227,24 +227,7 @@ namespace Ch.Elca.Iiop.Cdr {
 
         #endregion IMethods
     }
-
-
-    /// <summary>
-    /// exception for indicating invalid data in CDR-stream
-    /// </summary>
-    public class InvalidCdrDataException : Exception {
-        
-        #region IConstructors
-        public InvalidCdrDataException() : base() {
-        }
-
-        public InvalidCdrDataException(string reason) : base(reason) {
-        }
-        #endregion IConstructors
-
-    }
-
-    
+       
     /// <summary>
     /// this class represents a stream for writing a message to an underlaying stream
     /// </summary>
@@ -528,7 +511,8 @@ namespace Ch.Elca.Iiop.Cdr {
         /// </remarks>
         private void SetGiopVersion(GiopVersion version) {
             if (m_version != null) { 
-                throw new InvalidOperationException("giop version already set before"); 
+                // giop version already set before
+                throw new INTERNAL(1201, CompletionStatus.Completed_MayBe);
             }
             m_version = version;
         }
@@ -542,7 +526,8 @@ namespace Ch.Elca.Iiop.Cdr {
         /// <param name="endianFlag"></param>
         private void SetEndian(byte endianFlag) {
             if (m_endianOp != null) {
-                throw new InvalidOperationException("endian flag was already set before");
+                // endian flag was already set before
+                throw new INTERNAL(1202, CompletionStatus.Completed_MayBe);
             }
             m_flags = endianFlag;
             if (ParseEndianFlag(endianFlag)) {
@@ -595,7 +580,8 @@ namespace Ch.Elca.Iiop.Cdr {
             if (m_bytesToFollowSet) {
                 return m_indexForBytesToF + m_bytesToFollow - GetPosition();
             } else {
-                throw new Exception("bytes to follow not set");
+                // bytes to follow not set
+                throw new INTERNAL(1203, CompletionStatus.Completed_MayBe);
             }
         }
                 
@@ -603,7 +589,8 @@ namespace Ch.Elca.Iiop.Cdr {
             if (m_bytesToFollowSet) {
                 if (GetPosition() + bytesToRead > m_indexForBytesToF + m_bytesToFollow) {
                     // no more bytes readable in this message
-                     throw new InvalidOperationException("eof reached, read not possible");
+                    // eof reached, read not possible
+                    throw new MARSHAL(1207, CompletionStatus.Completed_MayBe);
                 }
             }
         }
@@ -611,7 +598,8 @@ namespace Ch.Elca.Iiop.Cdr {
         /// <summary>checks, if endian operation are already possible</summary>
         private void CheckEndianOp() {
             if (m_endianOp == null) {
-                throw new InvalidOperationException("endian flag was not set, operation not available");
+                // endian flag was not set, operation not available
+                throw new INTERNAL(919, CompletionStatus.Completed_MayBe);
             }
         }
         
@@ -740,7 +728,8 @@ namespace Ch.Elca.Iiop.Cdr {
 
         public void SkipRest() {
             if (!m_bytesToFollowSet) { 
-                throw new InvalidOperationException("only possible to call skipRest, if nrOfBytes set"); 
+                // only possible to call skipRest, if nrOfBytes set
+                throw new INTERNAL(976, CompletionStatus.Completed_MayBe);
             }
             ReadPadding(GetBytesToFollow());
         }
@@ -901,7 +890,7 @@ namespace Ch.Elca.Iiop.Cdr {
         
         public void WriteOpaque(byte[] data) {
             if (data == null) { 
-            	return; 
+                return; 
             }
             BaseStream.Write(data, 0, data.Length);
             IncrementPosition((ulong)data.Length);

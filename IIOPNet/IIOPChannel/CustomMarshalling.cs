@@ -83,7 +83,7 @@ namespace Corba {
         void write_Value([ObjectIdlType(IdlTypeObject.ValueBase)] object val);
         /// <summary>writes boxed values</summary>
         void write_boxed(object val, BoxedValueAttribute attr);
-        void write_TypeCode(Corba.TypeCode val);
+        void write_TypeCode(omg.org.CORBA.TypeCode val);
         void write_any_array([IdlSequenceAttribute][ObjectIdlType(IdlTypeObject.Any)] object[] seq,
                              int offset, int length);
         void write_boolean_array([IdlSequenceAttribute] bool[] seq, int offset, int length);
@@ -141,7 +141,7 @@ namespace Corba {
         /// <summary>boxed values are not handable with read-value</summary>
         /// <param name="boxedType">the boxed type, which is not itself a boxed type</param>
         object read_boxed(BoxedValueAttribute attr, Type boxedType, AttributeExtCollection boxedTypeAttrs);
-        Corba.TypeCode read_TypeCode();
+        omg.org.CORBA.TypeCode read_TypeCode();
 
         void read_any_array([IdlSequenceAttribute][ObjectIdlTypeAttribute(IdlTypeObject.Any)] ref object[] seq,
                             int offset, int length);
@@ -304,8 +304,9 @@ namespace Corba {
         }
 
 
-        public void write_TypeCode(Corba.TypeCode val) {
-            m_marshaller.Marshal(typeof(Corba.TypeCode), new AttributeExtCollection(),
+        public void write_TypeCode(omg.org.CORBA.TypeCode val) {
+            m_marshaller.Marshal(typeof(omg.org.CORBA.TypeCode),
+                                 new AttributeExtCollection(),
                                  val, m_cdrOut);
         }
 
@@ -546,7 +547,7 @@ namespace Corba {
             return m_marshaller.Unmarshal(boxedType, boxedTypeAttrs, m_cdrIn);
         }
 
-        public Corba.TypeCode read_TypeCode() {
+        public omg.org.CORBA.TypeCode read_TypeCode() {
             return null;
         }
 

@@ -31,6 +31,7 @@
 using System;
 using Ch.Elca.Iiop.CorbaObjRef;
 using Ch.Elca.Iiop.Util;
+using omg.org.CORBA;
 
 namespace Ch.Elca.Iiop {
 
@@ -165,8 +166,8 @@ namespace Ch.Elca.Iiop {
                 string versionStr = objectUri.Substring(objectUri.IndexOf(GIOP_ID) +
                                                         GIOP_ID.Length, 4);
                 if (!(versionStr.StartsWith("="))) { 
-                    throw new ArgumentException("uri contains malfromed giop-version-info: " +
-                                                versionStr);
+                    // uri contains malfromed giop-version-info: versionStr
+                    throw new INV_OBJREF(9401, CompletionStatus.Completed_No);
                 }
                 byte giopMajor = Convert.ToByte(versionStr.Substring(1, 1));
                 byte giopMinor = Convert.ToByte(versionStr.Substring(3, 1));

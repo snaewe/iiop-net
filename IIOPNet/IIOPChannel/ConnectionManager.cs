@@ -33,6 +33,7 @@ using System.Net.Sockets;
 using System.Collections;
 using System.Threading;
 using System.Runtime.Remoting.Messaging;
+using omg.org.CORBA;
 
 using Ch.Elca.Iiop.Services;
 
@@ -273,8 +274,8 @@ namespace Ch.Elca.Iiop {
     			    (IiopClientConnection)m_allocatedConnections[forMessage];
     			
     			if (connection == null) {
-    				throw new omg.org.CORBA.INTERNAL(11111, 
-    				                                 omg.org.CORBA.CompletionStatus.Completed_MayBe);
+    				throw new INTERNAL(11111, 
+    				                   CompletionStatus.Completed_MayBe);
     			}
     			// remove from allocated connections
     			m_allocatedConnections.Remove(forMessage);

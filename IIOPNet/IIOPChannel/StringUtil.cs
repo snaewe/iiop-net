@@ -105,7 +105,9 @@ namespace Ch.Elca.Iiop.Util {
         /// <param name="data"></param>
         /// <returns></returns>
         public static string GetStringFromWideChar(byte[] data) {
-            if (data == null) { return ""; }
+            if (data == null) { 
+            	return ""; 
+            }
             if ((data.Length % 2) != 0) { 
                 throw new ArgumentException("data length must contain 2 byte characters"); 
             }

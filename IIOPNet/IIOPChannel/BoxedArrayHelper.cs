@@ -121,11 +121,14 @@ namespace Ch.Elca.Iiop.Idl {
             if (toConv == null) { 
                 return null; 
             } else if (toConv.Rank > 1) {
-                 throw new ArgumentException("more-dimensional array not allowed");
+                 // more-dimensional array not allowed
+                 throw new INTERNAL(10039, CompletionStatus.Completed_MayBe);
             }
             // need to convert
             int nestLevel = DetermineNestLevel(toConv);
-            if (nestLevel == 1) { return toConv; } // nothing to do
+            if (nestLevel == 1) { 
+            	return toConv; 
+            } // nothing to do
             
             // create an array of the length of the dimensions smaller than the biggest one
             int[] newLength = new int[nestLevel - 1];
@@ -233,13 +236,17 @@ namespace Ch.Elca.Iiop.Idl {
 
         
         private static int[] DetermineDimensionLengthOfArrayElems(Array arrOfArr) {
-            if (arrOfArr.Length == 0) { return new int[arrOfArr.GetType().GetElementType().GetArrayRank()]; }
+            if (arrOfArr.Length == 0) { 
+            	return new int[arrOfArr.GetType().GetElementType().GetArrayRank()]; 
+            }
             int[] result = FillLengthArray(((Array)arrOfArr.GetValue(0)));
             for (int i = 1; i < arrOfArr.Length; i++) {
                 // check if other elements are of the same dimensions
                 int[] thisElemDim = FillLengthArray((Array)arrOfArr.GetValue(i));
                 for (int j = 0; j < thisElemDim.Length; j++) {
-                    if (thisElemDim[j] != result[j]) { throw new omg.org.CORBA.MARSHAL(0, omg.org.CORBA.CompletionStatus.Completed_No); }
+                    if (thisElemDim[j] != result[j]) { 
+                    	throw new MARSHAL(10037, CompletionStatus.Completed_MayBe); 
+                    }
                 }
             }
             return result;
@@ -248,7 +255,9 @@ namespace Ch.Elca.Iiop.Idl {
         /// <summary>creates an array of the length of the dimensions aof the Array arrayElem</summary>
         private static int[] FillLengthArray(Array arrayElem) {
             // a null element is not allowed here, because in a matrix, no part should be missing
-            if (arrayElem == null) { throw new omg.org.CORBA.MARSHAL(0, omg.org.CORBA.CompletionStatus.Completed_No); }
+            if (arrayElem == null) { 
+            	throw new MARSHAL(10038, CompletionStatus.Completed_MayBe); 
+            }
             int rank = arrayElem.GetType().GetArrayRank();
             int[] result = new int[rank];
             for (int i = 0; i < rank; i++) {

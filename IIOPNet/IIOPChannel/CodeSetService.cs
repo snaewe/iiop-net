@@ -30,6 +30,7 @@
 
 using System;
 using Ch.Elca.Iiop.Cdr;
+using omg.org.CORBA;
 
 namespace Ch.Elca.Iiop.Services {
 
@@ -82,10 +83,10 @@ namespace Ch.Elca.Iiop.Services {
 
             // check if acceptable: at the moment, the code-set establishment algorithm is not implemented
             if ((charSet != LATIN1_SET) && (charSet != ISO646IEC_SINGLE)) { 
-                throw new omg.org.CORBA.CODESET_INCOMPATIBLE(0, omg.org.CORBA.CompletionStatus.Completed_No); 
+                throw new CODESET_INCOMPATIBLE(9501, CompletionStatus.Completed_No); 
             }
             if ((wcharSet != UTF16_SET) && (wcharSet != ISO646IEC_MULTI)) { 
-                throw new omg.org.CORBA.CODESET_INCOMPATIBLE(0, omg.org.CORBA.CompletionStatus.Completed_No); 
+                throw new CODESET_INCOMPATIBLE(9502, CompletionStatus.Completed_No); 
             }
             // TODO: implement code set establishment-alg
             GiopConnectionContext conContext = IiopConnectionManager.GetCurrentConnectionContext();

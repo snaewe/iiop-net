@@ -30,6 +30,7 @@
 
 using System;
 using System.IO;
+using omg.org.CORBA;
 
 namespace Ch.Elca.Iiop.CorbaObjRef {
 
@@ -54,9 +55,12 @@ namespace Ch.Elca.Iiop.CorbaObjRef {
 
         /// <summary>unstringify the stringified data in the string.</summary>
         public static byte[] Destringify(string data) {
-            if (data == null) { return new byte[0]; }
+            if (data == null) { 
+            	return new byte[0]; 
+            }
             if ((data.Length % 2) != 0) { 
-                throw new ArgumentException("data is not a valid stringified representation"); 
+                // data is not a valid stringified representation
+                throw new INV_OBJREF(9405, CompletionStatus.Completed_No);
             }
             byte[] result = new byte[data.Length / 2];
             for (int i = 0; i < (data.Length / 2); i++) {
@@ -80,8 +84,9 @@ namespace Ch.Elca.Iiop.CorbaObjRef {
         /// <summary>destringify the byte in stringified representation</summary>
         internal static byte ConvertFromHexRep(byte highChar, byte lowChar) {
             if ((!CheckData(highChar)) || (!CheckData(lowChar))) {
-                throw new ArgumentException("invalid data to destringify from: " + 
-                                            "highChar: " +highChar + ", lowChar: " + lowChar);
+                // invalid data to destringify from: + 
+                // highChar: highChar lowChar: lowChar
+                throw new INV_OBJREF(9407, CompletionStatus.Completed_No);
             }
 
             string hexByte = Convert.ToChar(highChar).ToString(); // the high four bits of the byte encoded as hex digit
@@ -147,7 +152,8 @@ namespace Ch.Elca.Iiop.CorbaObjRef {
                 case 15:
                     return 0x46;
                 default:
-                    throw new ArgumentException("toHexChar: data must be between 0 and 15");
+                    // toHexChar: data must be between 0 and 15
+                    throw new INV_OBJREF(9413, CompletionStatus.Completed_No);
             }
         }
 
@@ -229,7 +235,10 @@ namespace Ch.Elca.Iiop.CorbaObjRef {
             int highByte = m_stream.ReadByte();
             if (highByte == -1) { return -1; }
             int lowByte = m_stream.ReadByte();
-            if (lowByte == -1) { throw new InvalidOperationException("IORStream.ReadByte: the stream read from ended inside a hexdigit"); }
+            if (lowByte == -1) { 
+            	// IORStream.ReadByte: the stream read from ended inside a hexdigit
+            	throw new INV_OBJREF(9416, CompletionStatus.Completed_No);
+            }
             
             return IorStringifyUtil.ConvertFromHexRep((byte)highByte, (byte)lowByte);
         }
@@ -258,7 +267,8 @@ namespace Ch.Elca.Iiop.CorbaObjRef {
             if (!m_prefixRead) {
                 for (int i = 0; i < m_iorMagic.Length; i++) {
                     if (m_stream.ReadByte() != m_iorMagic[i]) {
-                        throw new ArgumentException("invalid ior-stream, must start with IOR:");
+                        // invalid ior-stream, must start with IOR
+                        throw new INV_OBJREF(9420, CompletionStatus.Completed_No);
                     }
                 }
                 m_prefixRead = true;
@@ -295,7 +305,9 @@ namespace Ch.Elca.Iiop.CorbaObjRef {
         }
 
         public override long Length {
-            get { throw new NotSupportedException(); }
+            get { 
+            	throw new NotSupportedException(); 
+            }
         }
 
         public override void SetLength(long length) {

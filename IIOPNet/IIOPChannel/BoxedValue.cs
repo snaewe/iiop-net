@@ -31,6 +31,7 @@
 using System;
 using System.Reflection;
 using Ch.Elca.Iiop.Idl;
+using omg.org.CORBA;
 
 namespace Ch.Elca.Iiop.Idl {
     
@@ -57,7 +58,7 @@ namespace Ch.Elca.Iiop.Idl {
         protected abstract object GetValue();
         
         /// <summary>unbox this boxed value</summary>
-        public object unbox() {
+        public object Unbox() {
             object val = GetValue();
             if (!val.GetType().IsArray) {
                 return val;
@@ -75,15 +76,16 @@ namespace Ch.Elca.Iiop.Idl {
                                                                     BindingFlags.NonPublic | BindingFlags.Static |
                                                                     BindingFlags.DeclaredOnly,
                                                                 null, null, new object[0]);
-                    } catch (Exception e) {
-                        throw new Exception("invalid type found: " + elemType +
-                                            ", static method missing or not callable: " +
-                                             GET_FIRST_NONBOXED_TYPE_METHODNAME, e);
+                    } catch (Exception) {
+                        // invalid type found: elemType
+                        // static method missing or not callable:
+                        // GET_FIRST_NONBOXED_TYPE_METHODNAME
+                        throw new INTERNAL(10041, CompletionStatus.Completed_MayBe);
                     }
                     
                     Array unboxed = Array.CreateInstance(boxedType, length);
                     for (int i = 0; i < length; i++) {
-                        object unboxedElem = ((BoxedValueBase)((Array)val).GetValue(i)).unbox(); // recursive unbox up to the non-boxed type
+                        object unboxedElem = ((BoxedValueBase)((Array)val).GetValue(i)).Unbox(); // recursive unbox up to the non-boxed type
                         unboxed.SetValue(unboxedElem, i);
                     }
                     return unboxed;

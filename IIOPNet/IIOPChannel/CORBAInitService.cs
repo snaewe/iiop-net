@@ -31,6 +31,7 @@ using System;
 using System.Runtime.Remoting;
 using Ch.Elca.Iiop.Idl;
 using omg.org.CosNaming;
+using omg.org.CORBA;
 
 namespace Ch.Elca.Iiop.Services {
 
@@ -96,7 +97,8 @@ namespace Ch.Elca.Iiop.Services {
                 COSNamingContextImpl nameingContext = new COSNamingContextImpl();
                 return nameingContext;
             }
-            throw new ArgumentException("unknown serivce: " + serviceName);
+            // unknown serivce: serviceName
+            throw new OBJECT_NOT_EXIST(9700, CompletionStatus.Completed_MayBe);
         }
 
         public override Object InitializeLifetimeService() {

@@ -35,6 +35,7 @@ using Ch.Elca.Iiop.Idl;
 using Ch.Elca.Iiop;
 using System.Reflection;
 using System.Diagnostics;
+using omg.org.CORBA;
 
 namespace omg.org.CosNaming {
 
@@ -166,41 +167,41 @@ namespace omg.org.CosNaming {
             Debug.WriteLine("get registeredObject: " + uri);
             Assembly remotingAssembly = Assembly.LoadWithPartialName("mscorlib");
             if (remotingAssembly == null) { 
-                throw new omg.org.CORBA.INTERNAL(0, omg.org.CORBA.CompletionStatus.Completed_No); 
+                throw new INTERNAL(16001, CompletionStatus.Completed_MayBe); 
             }
             Type identityHolderType = remotingAssembly.GetType("System.Runtime.Remoting.IdentityHolder");
             if (identityHolderType == null) { 
-                throw new omg.org.CORBA.INTERNAL(0, omg.org.CORBA.CompletionStatus.Completed_No); 
+                throw new INTERNAL(16002, CompletionStatus.Completed_MayBe); 
             }
             // identityHolder class, manages the published remote objects
             // get the resolveUri-method to get the Identity for the URI
             MethodInfo resolveIdMethod = identityHolderType.GetMethod("ResolveIdentity", 
                                                                       BindingFlags.Static | BindingFlags.NonPublic);
             if (resolveIdMethod == null) { 
-                throw new omg.org.CORBA.INTERNAL(0, omg.org.CORBA.CompletionStatus.Completed_No); 
+                throw new INTERNAL(16003, CompletionStatus.Completed_MayBe); 
             }
             
             // now call resolve-method:
             object identity = resolveIdMethod.Invoke(null, new object[] { uri } );
             if (identity == null) { 
-                throw new omg.org.CosNaming.NamingContext_package.NotFound(NamingContext_package.NotFoundReason.missing_node, nameComponents); 
+                throw new NamingContext_package.NotFound(NamingContext_package.NotFoundReason.missing_node, nameComponents); 
             }
 
             // now get the object from the identity
             Type identityType = remotingAssembly.GetType("System.Runtime.Remoting.Identity");
             if (identityType == null) { 
-                throw new omg.org.CORBA.INTERNAL(0, omg.org.CORBA.CompletionStatus.Completed_No); 
+                throw new INTERNAL(16004, CompletionStatus.Completed_MayBe); 
             }
             
             // property TPOrObject holds the object, therefor access this property
             PropertyInfo tpOrObjProp = identityType.GetProperty("TPOrObject", 
                                                                 BindingFlags.Instance | BindingFlags.NonPublic);
             if (tpOrObjProp == null) { 
-                throw new omg.org.CORBA.INTERNAL(0, omg.org.CORBA.CompletionStatus.Completed_No); 
+                throw new INTERNAL(16005, CompletionStatus.Completed_MayBe); 
             }
             MarshalByRefObject result = (MarshalByRefObject)tpOrObjProp.GetValue(identity, null);
             if (result == null) { 
-                throw new omg.org.CORBA.INTERNAL(0, omg.org.CORBA.CompletionStatus.Completed_No); 
+                throw new INTERNAL(16006, CompletionStatus.Completed_MayBe); 
             }
             return result;
         }
@@ -248,23 +249,23 @@ namespace omg.org.CosNaming {
         }
 
         public void destroy() {
-            throw new omg.org.CORBA.NO_IMPLEMENT(0, omg.org.CORBA.CompletionStatus.Completed_No);
+            throw new NO_IMPLEMENT(0, CompletionStatus.Completed_MayBe);
         }
 
         public NamingContext new_context() {
-            throw new omg.org.CORBA.NO_IMPLEMENT(0, omg.org.CORBA.CompletionStatus.Completed_No);
+            throw new NO_IMPLEMENT(0, CompletionStatus.Completed_MayBe);
         }
 
         public void rebind_context([IdlSequenceAttribute] NameComponent[] nameComponents, NamingContext nameCtx) {
-            throw new omg.org.CORBA.NO_IMPLEMENT(0, omg.org.CORBA.CompletionStatus.Completed_No);
+            throw new NO_IMPLEMENT(0, CompletionStatus.Completed_MayBe);
         }
 
         public void bind_context([IdlSequenceAttribute] NameComponent[] nameComponents, NamingContext nameCtx) {
-            throw new omg.org.CORBA.NO_IMPLEMENT(0, omg.org.CORBA.CompletionStatus.Completed_No);
+            throw new NO_IMPLEMENT(0, omg.org.CORBA.CompletionStatus.Completed_MayBe);
         }
 
         public NamingContext bind_new_context([IdlSequenceAttribute] NameComponent[] nameComponents) {
-            throw new omg.org.CORBA.NO_IMPLEMENT(0, omg.org.CORBA.CompletionStatus.Completed_No);
+            throw new NO_IMPLEMENT(0, CompletionStatus.Completed_MayBe);
         }
 
         #endregion IMethods

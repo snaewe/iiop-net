@@ -34,7 +34,7 @@ using Ch.Elca.Iiop.Marshalling;
 using Ch.Elca.Iiop.Cdr;
 using Ch.Elca.Iiop.Util;
 
-namespace Corba {
+namespace omg.org.CORBA {
 
     /// <summary>the type code enumeration</summary>
     [IdlEnumAttribute]
@@ -202,17 +202,17 @@ namespace Corba {
         internal abstract Type GetClsForTypeCode();
 
         #region Implementation of TypeCode
-        public bool equal(Corba.TypeCode tc) {
+        public bool equal(omg.org.CORBA.TypeCode tc) {
             if (tc.kind() != kind()) {
                 return false;
             }
             return true;
         }
-        public bool equivalent(Corba.TypeCode tc) {
+        public bool equivalent(omg.org.CORBA.TypeCode tc) {
             return true;
         }
 
-        public virtual Corba.TypeCode get_compact_typecode() {
+        public virtual omg.org.CORBA.TypeCode get_compact_typecode() {
             return this;
         }
         public TCKind kind() {
@@ -220,36 +220,36 @@ namespace Corba {
         }
         [return:StringValueAttribute()]
         public virtual string id() {
-            throw new omg.org.CORBA.BAD_OPERATION(0, omg.org.CORBA.CompletionStatus.Completed_No);
+            throw new BAD_OPERATION(0, CompletionStatus.Completed_No);
         }
         [return:StringValueAttribute()]
         public virtual string name() {
-            throw new omg.org.CORBA.BAD_OPERATION(0, omg.org.CORBA.CompletionStatus.Completed_No);
+            throw new BAD_OPERATION(0, CompletionStatus.Completed_No);
         }
         public virtual int member_count() {
-            throw new omg.org.CORBA.BAD_OPERATION(0, omg.org.CORBA.CompletionStatus.Completed_No);
+            throw new BAD_OPERATION(0, CompletionStatus.Completed_No);
         }
         [return:StringValueAttribute()]
         public virtual string member_name(int index) {
-            throw new omg.org.CORBA.BAD_OPERATION(0, omg.org.CORBA.CompletionStatus.Completed_No);
+            throw new BAD_OPERATION(0, CompletionStatus.Completed_No);
         }
-        public virtual Corba.TypeCode member_type(int index)     {
-            throw new omg.org.CORBA.BAD_OPERATION(0, omg.org.CORBA.CompletionStatus.Completed_No);
+        public virtual omg.org.CORBA.TypeCode member_type(int index)     {
+            throw new BAD_OPERATION(0, CompletionStatus.Completed_No);
         }
         public virtual int length() {
-            throw new omg.org.CORBA.BAD_OPERATION(0, omg.org.CORBA.CompletionStatus.Completed_No);
+            throw new BAD_OPERATION(0, CompletionStatus.Completed_No);
         }
-        public virtual Corba.TypeCode content_type() {
-            throw new omg.org.CORBA.BAD_OPERATION(0, omg.org.CORBA.CompletionStatus.Completed_No);
+        public virtual omg.org.CORBA.TypeCode content_type() {
+            throw new BAD_OPERATION(0, CompletionStatus.Completed_No);
         }
         public virtual short member_visibility(int index) {
-            throw new omg.org.CORBA.BAD_OPERATION(0, omg.org.CORBA.CompletionStatus.Completed_No);
+            throw new BAD_OPERATION(0, CompletionStatus.Completed_No);
         }
         public virtual short type_modifier() {
-            throw new omg.org.CORBA.BAD_OPERATION(0, omg.org.CORBA.CompletionStatus.Completed_No);
+            throw new BAD_OPERATION(0, CompletionStatus.Completed_No);
         }
-        public virtual Corba.TypeCode concrete_base_type() {
-            throw new omg.org.CORBA.BAD_OPERATION(0, omg.org.CORBA.CompletionStatus.Completed_No);
+        public virtual omg.org.CORBA.TypeCode concrete_base_type() {
+            throw new BAD_OPERATION(0, CompletionStatus.Completed_No);
         }
     
         #endregion Implementation of TypeCode
@@ -543,7 +543,7 @@ namespace Corba {
         #region IMethods
 
         internal override Type GetClsForTypeCode() {
-            return typeof(Corba.TypeCode);
+            return typeof(omg.org.CORBA.TypeCode);
         }
 
         #endregion IMethods
@@ -1013,7 +1013,7 @@ namespace Corba {
         public override short type_modifier() {
             return m_typeMod;
         }
-        public override Corba.TypeCode concrete_base_type() {
+        public override omg.org.CORBA.TypeCode concrete_base_type() {
             return m_baseClass;
         }
 
@@ -1076,84 +1076,88 @@ namespace Ch.Elca.Iiop.Marshalling {
 
         public override object Deserialise(System.Type formal, AttributeExtCollection attributes, CdrInputStream sourceStream) {
             long kindVal = (long)sourceStream.ReadULong();
-            Corba.TCKind kind = (Corba.TCKind)Enum.ToObject(typeof(Corba.TCKind), kindVal);
+            omg.org.CORBA.TCKind kind = (omg.org.CORBA.TCKind)Enum.ToObject(typeof(omg.org.CORBA.TCKind),
+                                                                            kindVal);
             switch(kind) {
-                case Corba.TCKind.tk_abstract_interface :
-                    return new Corba.AbstractIfTC(sourceStream);
-                case Corba.TCKind.tk_alias:
+                case omg.org.CORBA.TCKind.tk_abstract_interface :
+                    return new omg.org.CORBA.AbstractIfTC(sourceStream);
+                case omg.org.CORBA.TCKind.tk_alias:
                     throw new NotImplementedException("alias not implemented");
-                case Corba.TCKind.tk_any:
-                    return new Corba.AnyTC();
-                case Corba.TCKind.tk_array:
+                case omg.org.CORBA.TCKind.tk_any:
+                    return new omg.org.CORBA.AnyTC();
+                case omg.org.CORBA.TCKind.tk_array:
                     throw new NotImplementedException("array not implemented");
-                case Corba.TCKind.tk_boolean:
-                    return new Corba.BooleanTC();
-                case Corba.TCKind.tk_char:
-                    return new Corba.CharTC();
-                case Corba.TCKind.tk_double:
-                    return new Corba.DoubleTC();
-                case Corba.TCKind.tk_enum:
-                    return new Corba.EnumTC(sourceStream);
-                case Corba.TCKind.tk_except:
-                    return new Corba.ExceptTC(sourceStream);
-                case Corba.TCKind.tk_fixed:
+                case omg.org.CORBA.TCKind.tk_boolean:
+                    return new omg.org.CORBA.BooleanTC();
+                case omg.org.CORBA.TCKind.tk_char:
+                    return new omg.org.CORBA.CharTC();
+                case omg.org.CORBA.TCKind.tk_double:
+                    return new omg.org.CORBA.DoubleTC();
+                case omg.org.CORBA.TCKind.tk_enum:
+                    return new omg.org.CORBA.EnumTC(sourceStream);
+                case omg.org.CORBA.TCKind.tk_except:
+                    return new omg.org.CORBA.ExceptTC(sourceStream);
+                case omg.org.CORBA.TCKind.tk_fixed:
                     throw new NotImplementedException("fixed not implemented");
-                case Corba.TCKind.tk_float:
-                    return new Corba.FloatTC();
-                case Corba.TCKind.tk_long:
-                    return new Corba.LongTC();
-                case Corba.TCKind.tk_longdouble:
+                case omg.org.CORBA.TCKind.tk_float:
+                    return new omg.org.CORBA.FloatTC();
+                case omg.org.CORBA.TCKind.tk_long:
+                    return new omg.org.CORBA.LongTC();
+                case omg.org.CORBA.TCKind.tk_longdouble:
                     throw new NotImplementedException("long double not implemented");
-                case Corba.TCKind.tk_longlong:
-                    return new Corba.LongLongTC();
-                case Corba.TCKind.tk_native:
+                case omg.org.CORBA.TCKind.tk_longlong:
+                    return new omg.org.CORBA.LongLongTC();
+                case omg.org.CORBA.TCKind.tk_native:
                     throw new NotSupportedException("native not supported");
-                case Corba.TCKind.tk_null:
-                    return new Corba.NullTC();
-                case Corba.TCKind.tk_objref:
-                    return new Corba.ObjRefTC(sourceStream);
-                case Corba.TCKind.tk_octet:
-                    return new Corba.OctetTC();
-                case Corba.TCKind.tk_Principal:
+                case omg.org.CORBA.TCKind.tk_null:
+                    return new omg.org.CORBA.NullTC();
+                case omg.org.CORBA.TCKind.tk_objref:
+                    return new omg.org.CORBA.ObjRefTC(sourceStream);
+                case omg.org.CORBA.TCKind.tk_octet:
+                    return new omg.org.CORBA.OctetTC();
+                case omg.org.CORBA.TCKind.tk_Principal:
                     throw new NotImplementedException("Principal not implemented");
-                case Corba.TCKind.tk_sequence:
-                    return new Corba.SequenceTC(sourceStream);
-                case Corba.TCKind.tk_short:
-                    return new Corba.ShortTC();
-                case Corba.TCKind.tk_string:
-                    return new Corba.StringTC(sourceStream);
-                case Corba.TCKind.tk_struct:
-                    return new Corba.StructTC(sourceStream);
-                case Corba.TCKind.tk_TypeCode:
-                    return new Corba.TypeCodeTC();
-                case Corba.TCKind.tk_ulong:
-                    return new Corba.ULongTC();
-                case Corba.TCKind.tk_ulonglong:
-                    return new Corba.ULongLongTC();
-                case Corba.TCKind.tk_union:
+                case omg.org.CORBA.TCKind.tk_sequence:
+                    return new omg.org.CORBA.SequenceTC(sourceStream);
+                case omg.org.CORBA.TCKind.tk_short:
+                    return new omg.org.CORBA.ShortTC();
+                case omg.org.CORBA.TCKind.tk_string:
+                    return new omg.org.CORBA.StringTC(sourceStream);
+                case omg.org.CORBA.TCKind.tk_struct:
+                    return new omg.org.CORBA.StructTC(sourceStream);
+                case omg.org.CORBA.TCKind.tk_TypeCode:
+                    return new omg.org.CORBA.TypeCodeTC();
+                case omg.org.CORBA.TCKind.tk_ulong:
+                    return new omg.org.CORBA.ULongTC();
+                case omg.org.CORBA.TCKind.tk_ulonglong:
+                    return new omg.org.CORBA.ULongLongTC();
+                case omg.org.CORBA.TCKind.tk_union:
                     throw new NotSupportedException("Union not supported");
-                case Corba.TCKind.tk_ushort:
-                    return new Corba.UShortTC();
-                case Corba.TCKind.tk_value:
-                    return new Corba.ValueTypeTC(sourceStream);
-                case Corba.TCKind.tk_value_box:
-                    return new Corba.ValueBoxTC(sourceStream);
-                case Corba.TCKind.tk_void:
-                    return new Corba.VoidTC();
-                case Corba.TCKind.tk_wchar:
-                    return new Corba.WCharTC();
-                case Corba.TCKind.tk_wstring:
-                    return new Corba.WStringTC(sourceStream);
+                case omg.org.CORBA.TCKind.tk_ushort:
+                    return new omg.org.CORBA.UShortTC();
+                case omg.org.CORBA.TCKind.tk_value:
+                    return new omg.org.CORBA.ValueTypeTC(sourceStream);
+                case omg.org.CORBA.TCKind.tk_value_box:
+                    return new omg.org.CORBA.ValueBoxTC(sourceStream);
+                case omg.org.CORBA.TCKind.tk_void:
+                    return new omg.org.CORBA.VoidTC();
+                case omg.org.CORBA.TCKind.tk_wchar:
+                    return new omg.org.CORBA.WCharTC();
+                case omg.org.CORBA.TCKind.tk_wstring:
+                    return new omg.org.CORBA.WStringTC(sourceStream);
                 default:
-                    throw new ArgumentException("unknown typecode: " + kind);
+                    // unknown typecode: kind
+                    throw new omg.org.CORBA.BAD_PARAM(1504, 
+                                                      omg.org.CORBA.CompletionStatus.Completed_MayBe);
             }
         }
 
         public override void Serialise(System.Type formal, object actual, AttributeExtCollection attributes, CdrOutputStream targetStream) {
-            if (!(actual is Corba.TypeCodeImpl)) { 
-                throw new Exception("typecode not serializable"); 
+            if (!(actual is omg.org.CORBA.TypeCodeImpl)) { 
+                // typecode not serializable
+                throw new omg.org.CORBA.INTERNAL(1654, omg.org.CORBA.CompletionStatus.Completed_MayBe);
             }
-            Corba.TypeCodeImpl tcImpl = actual as Corba.TypeCodeImpl;
+            omg.org.CORBA.TypeCodeImpl tcImpl = actual as omg.org.CORBA.TypeCodeImpl;
             tcImpl.WriteToStream(targetStream);
         }
 

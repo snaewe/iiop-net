@@ -31,6 +31,7 @@ using System;
 using System.Collections;
 using System.Reflection;
 using System.Reflection.Emit;
+using omg.org.CORBA;
 
 
 namespace Ch.Elca.Iiop.Idl {
@@ -87,7 +88,9 @@ namespace Ch.Elca.Iiop.Idl {
         /// <summary>get or create the boxed value type(s) for a .NET arrayType</summary>
         internal Type GetOrCreateBoxedTypeForArray(Type arrayType) {
             if (!arrayType.IsArray) { 
-                throw new ArgumentException("an array-type is required for calling getOrCreateBoxedTypeForArray"); 
+                // an array-type is required for calling GetOrCreateBoxedTypeForArray
+                throw new INTERNAL(10050, CompletionStatus.Completed_MayBe);
+                
             }
             if (m_createdTypes.Contains(arrayType)) {
                 return (Type)m_createdTypes[arrayType];
@@ -233,8 +236,9 @@ namespace Ch.Elca.Iiop.Idl {
                         null, null, new object[0]);
                     Array dummyArray = Array.CreateInstance(unboxedElemType, 0);
                     fullUnboxed = dummyArray.GetType();
-                } catch (Exception e) {
-                    throw new Exception("invalid type found in boxed value creation: " + fullUnboxed, e);
+                } catch (Exception) {
+                    // invalid type found in boxed value creation: " + fullUnboxed
+                    throw new INTERNAL(10045, CompletionStatus.Completed_MayBe);
                 }
                 
             } else if (fullUnboxed.IsSubclassOf(typeof(BoxedValueBase))) {
@@ -245,10 +249,11 @@ namespace Ch.Elca.Iiop.Idl {
                         BindingFlags.InvokeMethod | BindingFlags.Public | BindingFlags.NonPublic |
                         BindingFlags.Static | BindingFlags.DeclaredOnly, 
                         null, null, new object[0]);
-                } catch (Exception e) {
-                    throw new Exception("invalid type found: " + fullUnboxed + 
-                                        ", static method missing or not callable: " +
-                                        BoxedValueBase.GET_FIRST_NONBOXED_TYPE_METHODNAME, e);
+                } catch (Exception) {
+                    // invalid type found: fullUnboxed,
+                    // static method missing or not callable:
+                    // BoxedValueBase.GET_FIRST_NONBOXED_TYPE_METHODNAME
+                    throw new INTERNAL(10044, CompletionStatus.Completed_MayBe);
                 }
             }
 
@@ -293,7 +298,8 @@ namespace Ch.Elca.Iiop.Idl {
             Type fieldType = boxedType; 
             if (boxedType.IsArray) {
                 if (boxedType.GetElementType().IsArray) {
-                    throw new NotSupportedException("boxed Type not supported: " + boxedType + ", because it's a nested array");                    
+                    // boxed Type not supported:  boxedType, because it's a nested array
+                    throw new INTERNAL(10052, CompletionStatus.Completed_MayBe);
                 }
             }
             // create the field for the boxed value

@@ -108,13 +108,13 @@ namespace Ch.Elca.Iiop {
             if (!((readBuffer[0] == m_giop_magic[0]) && (readBuffer[1] == m_giop_magic[1]) && 
                 (readBuffer[2] == m_giop_magic[2]) && (readBuffer[3] == m_giop_magic[3]))) {
                 // no GIOP
-                throw new InvalidCdrDataException("no GIOP-Message");
+                throw new IOException("no GIOP-Message");
             } else {
                 Trace.WriteLine("GIOP-message starting");
                 m_version = new GiopVersion(stream.ReadOctet(), stream.ReadOctet());
                 Debug.WriteLine("Version: " + m_version);
                 if (m_version.Major != 1) {
-                    throw new InvalidCdrDataException("unknown GIOP Verision: " + m_version);
+                    throw new IOException("unknown GIOP Verision: " + m_version);
                 }
             }
 
