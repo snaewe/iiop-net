@@ -163,18 +163,20 @@ namespace Ch.Elca.Iiop.Idl {
         public static string GetRequestMethodName(MethodInfo method, bool isOverloaded) {
             Type targetType = method.DeclaringType;
             string methodName = method.Name;
-            // for a pseudo-object operation, do not remove the leading underscore
-            if (!StandardCorbaOps.CheckIfStandardOp(methodName)) {
-                methodName = IdlNaming.ReverseIdlToClsNameMapping(method.Name);
-            }
-            // check for IIdlEntity, if not -> map first CLS  method name to IDL method name
-            if (!ReflectionHelper.IIdlEntityType.IsAssignableFrom(targetType)) {
+            
+            AttributeExtCollection methodAttributes = 
+                ReflectionHelper.GetCustomAttriutesForMember(method, true);
+            if (methodAttributes.IsInCollection(ReflectionHelper.FromIdlNameAttributeType)) {
+                FromIdlNameAttribute idlNameAttr = 
+                    (FromIdlNameAttribute)methodAttributes.GetAttributeForType(ReflectionHelper.FromIdlNameAttributeType);
+                methodName = idlNameAttr.IdlName;
+            } else {
                 // do a CLS to IDL mapping, because .NET server expect this for every client, also for a
                 // native .NET client, which uses not CLS -> IDL -> CLS mapping                
                 methodName = IdlNaming.MapClsMethodNameToIdlName(method, 
                                                                  isOverloaded);
-            }
-			return methodName;
+            }            
+            return methodName;
         }
         
         /// <summary>

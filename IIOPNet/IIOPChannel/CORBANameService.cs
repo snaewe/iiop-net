@@ -110,8 +110,11 @@ namespace omg.org.CosNaming {
     [RepositoryIDAttribute("IDL:omg.org/CosNaming/BindingIterator:1.0")]
     [InterfaceTypeAttribute(IdlTypeInterface.ConcreteInterface)]
     public interface BindingIterator : IIdlEntity {
+        [FromIdlName("next_one")]
         bool next_one(out Binding b);
+        [FromIdlName("next_n")]
         bool next_n(int how_many, [IdlSequenceAttribute()] out Binding[] bl);
+        [FromIdlName("destroy")]
         void destroy();
     }
 
@@ -126,24 +129,34 @@ namespace omg.org.CosNaming {
         #region IMethods
 
         /// <summary>resolve a bound object</summary>
+        [FromIdlName("resolve")]
         MarshalByRefObject resolve([IdlSequenceAttribute] NameComponent[] nameComponents);
         /// <summary>bind an object for the name</summary>
+        [FromIdlName("bind")]
         void bind([IdlSequenceAttribute] NameComponent[] nameComponents, MarshalByRefObject obj);
 
+        [FromIdlName("rebind")]
         void rebind([IdlSequenceAttribute] NameComponent[] nameComponents, MarshalByRefObject obj);
     
+        [FromIdlName("bind_context")]
         void  bind_context([IdlSequenceAttribute] NameComponent[] nameComponents, NamingContext toBind);
     
+        [FromIdlName("rebind_context")]
         void  rebind_context([IdlSequenceAttribute] NameComponent[] nameComponents, NamingContext toRebind);
     
+        [FromIdlName("unbind")]
         void  unbind([IdlSequenceAttribute] NameComponent[] nameComponents);
     
+        [FromIdlName("new_context")]
         NamingContext new_context();
     
+        [FromIdlName("bind_new_context")]
         NamingContext bind_new_context([IdlSequenceAttribute] NameComponent[] nameComponents);
         
+        [FromIdlName("destroy")]
         void destroy();
         
+        [FromIdlName("list")]
         void list (int how_many, [IdlSequenceAttribute()] out Binding[] bl, out BindingIterator bi);
 
         #endregion IMethods
@@ -158,13 +171,16 @@ namespace omg.org.CosNaming {
     [InterfaceTypeAttribute(IdlTypeInterface.ConcreteInterface)]
     public interface NamingContextExt : NamingContext {
 
+        [FromIdlName("resolve_str")]
         MarshalByRefObject resolve_str([StringValue][WideChar(false)] string name);
 
         [return: StringValue]
         [return: WideChar(false)]
+        [FromIdlName("to_string")]
         string  to_string([IdlSequence]NameComponent[] name);
         
         [return: IdlSequence]
+        [FromIdlName("to_name")]
         NameComponent[] to_name([StringValue][WideChar(false)] string name);
 
     }

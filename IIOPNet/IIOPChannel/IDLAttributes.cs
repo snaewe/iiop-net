@@ -543,4 +543,51 @@ namespace Ch.Elca.Iiop.Idl {
         #endregion IMethods
     }
 
+    
+    /// <summary>
+    /// this attribute specifies the name of the idl entity mapped to the idl entity;
+    /// this is used currently for properties/methods
+    /// </summary>
+    [AttributeUsage(AttributeTargets.Method | AttributeTargets.Property, 
+                    AllowMultiple = false)]
+    public sealed class FromIdlNameAttribute : Attribute, IIdlAttribute {
+        
+        #region IFields
+        
+        private string m_idlName;
+
+        #endregion
+        #region IConstructors
+
+        public FromIdlNameAttribute(string idlName) {
+            m_idlName = idlName;
+        }
+
+        #endregion IConstructors
+        #region IProperties
+
+        /// <summary>
+        /// the name of the idl entity, the cls entity is mapped from
+        /// </summary>
+        public string IdlName {
+            get { 
+            	return m_idlName; 
+            }
+        }
+
+        #endregion IProperties
+        #region IMethods
+
+        /// <summary>creates an attribute builder for this custom attribute</summary>
+        public CustomAttributeBuilder CreateAttributeBuilder() {
+            Type attrType = this.GetType();
+            ConstructorInfo attrConstr = attrType.GetConstructor(new Type[] { ReflectionHelper.StringType } );
+            CustomAttributeBuilder result = new CustomAttributeBuilder(attrConstr, new Object[] { m_idlName });
+            return result;
+        }
+
+        #endregion IMethods
+
+    }
+
 }

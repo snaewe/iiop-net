@@ -183,10 +183,12 @@ namespace omg.org.CORBA {
     [InterfaceType(IdlTypeInterface.ConcreteInterface)]
     public interface IObject : IIdlEntity {
         
-        bool _is_a([WideCharAttribute(false)][StringValueAttribute]string 
+        [FromIdlName("_is_a")]
+        bool _is_a([WideCharAttribute(false)][StringValueAttribute]string
                    repositoryId);
-    	
-    	bool _non_existent();
+        
+        [FromIdlName("_non_existent")]
+        bool _non_existent();
         
     }
 

@@ -44,7 +44,8 @@ namespace Ch.Elca.Iiop.Util {
         
         private static Type s_idlEnumAttributeType = typeof(IdlEnumAttribute);
         private static Type s_implClassAttributeType = typeof(ImplClassAttribute);
-    	private static Type s_idlSequenceAttributeType = typeof(IdlSequenceAttribute);
+        private static Type s_idlSequenceAttributeType = typeof(IdlSequenceAttribute);
+        private static Type s_fromIdlNameAttributeType = typeof(FromIdlNameAttribute);
                 
         private static Type s_stringType = typeof(string);
         private static Type s_int16Type = typeof(System.Int16);
@@ -77,11 +78,17 @@ namespace Ch.Elca.Iiop.Util {
         
         /// <summary>caches typeof(IdlSequenceAttribute)</summary>        
         public static Type IdlSequenceAttributeType {
-        	get {
-        		return s_idlSequenceAttributeType;
-        	}
+            get {
+                return s_idlSequenceAttributeType;
+            }
         }
-
+        
+        /// <summary>caches typeof(FromIdlNameAttribute)</summary>        
+        public static Type FromIdlNameAttributeType {
+            get {
+                return s_fromIdlNameAttributeType;
+            }
+        }
                 
         /// <summary>caches typeof(string)</summary>
         public static Type StringType {
@@ -148,6 +155,11 @@ namespace Ch.Elca.Iiop.Util {
         public static AttributeExtCollection GetCustomAttributesForType(Type type, bool inherit) {
             object[] attributes = type.GetCustomAttributes(inherit);
             return AttributeExtCollection.ConvertToAttributeCollection(attributes);
+        }
+        
+        public static AttributeExtCollection GetCustomAttriutesForMember(MemberInfo member, bool inherit) {
+            object[] attributes = member.GetCustomAttributes(inherit);
+            return AttributeExtCollection.ConvertToAttributeCollection(attributes);    
         }
 
         /// <summary>

@@ -225,6 +225,17 @@ namespace Ch.Elca.Iiop.Idl {
     
         #endregion SMethods
         #region IMethods
+        
+        private void AddFromIdlNameAttribute(MethodBuilder methodBuild, string forIdlMethodName) {
+            methodBuild.SetCustomAttribute(
+                new FromIdlNameAttribute(forIdlMethodName).CreateAttributeBuilder());
+        }        
+        
+        private void AddFromIdlNameAttribute(PropertyBuilder propBuild, string forIdlAttributeName) {
+            propBuild.SetCustomAttribute(
+                new FromIdlNameAttribute(forIdlAttributeName).CreateAttributeBuilder());
+        }        
+
 
         /// <summary>adds a method to a type, setting the attributes on the parameters</summary>
         /// <remarks>forgeign method: should be better on TypeBuilder, but not possible</remarks>
@@ -249,6 +260,20 @@ namespace Ch.Elca.Iiop.Idl {
             for (int i = 0; i < returnType.GetSeparatedAttrs().Length; i++) {
                 paramBuild.SetCustomAttribute(returnType.GetSeparatedAttrs()[i]);
             }
+            return methodBuild;
+        }
+        
+        /// <summary>
+        /// Like <see cref="Ch.Elca.Iiop.Idl.IlEmitHelper.AddMethod(TypeBuilder, string, ParameterSpec[], TypeContainer, MethodAttributes)"/>,
+        /// but adds additionally a FromIdlName attribute to the method
+        /// </summary>
+        public MethodBuilder AddMethod(TypeBuilder builder, string clsMethodName,
+                                       string forIdlMethodName,
+                                       ParameterSpec[] parameters,
+                                       TypeContainer returnType, MethodAttributes attrs) {
+            MethodBuilder methodBuild = AddMethod(builder, clsMethodName, parameters,
+                                                  returnType, attrs);
+            AddFromIdlNameAttribute(methodBuild, forIdlMethodName);
             return methodBuild;
         }
         
@@ -305,8 +330,32 @@ namespace Ch.Elca.Iiop.Idl {
         /// <param name="attrs">MethodAttributes, automatically adds HideBySig and SpecialName</param>
         public MethodBuilder AddPropertySetter(TypeBuilder builder, string propertyName,
                                                TypeContainer propertyType, MethodAttributes attrs) {
+            return AddPropertySetterInternal(builder, propertyName, null, propertyType, attrs);
+        }
+        
+        /// <summary>
+        /// adds a property setter method with a FromIdlName attribute 
+        /// (based on the name of the property, this setter is defined for)
+        /// </summary>
+        /// <param name="attrs">MethodAttributes, automatically adds HideBySig and SpecialName</param>
+        public MethodBuilder AddPropertySetter(TypeBuilder builder, string propertyName, 
+                                               string forIdlAttributeName,
+                                               TypeContainer propertyType, MethodAttributes attrs) {
+            return AddPropertySetterInternal(builder, propertyName, forIdlAttributeName, 
+                                             propertyType, attrs);
+        }        
+        
+        /// <summary>
+        /// adds a property setter method; optinally adds a FromIdlNameAttribute,
+        /// if forIdlAttributeName is != null.
+        /// </summary>
+        private MethodBuilder AddPropertySetterInternal(TypeBuilder builder,
+                                                        string propertyName,
+                                                        string forIdlAttributeName, 
+                                                        TypeContainer propertyType, 
+                                                        MethodAttributes attrs) {
             Type propTypeCls = propertyType.GetSeparatedClsType();
-            MethodBuilder setAccessor = builder.DefineMethod("__set_" + propertyName, 
+            MethodBuilder setAccessor = builder.DefineMethod("set_" + propertyName, 
                                                              attrs | MethodAttributes.HideBySig | MethodAttributes.SpecialName, 
                                                              null, new System.Type[] { propTypeCls });
             
@@ -315,7 +364,11 @@ namespace Ch.Elca.Iiop.Idl {
             for (int j = 0; j < propertyType.GetSeparatedAttrs().Length; j++) {
                 valParam.SetCustomAttribute(propertyType.GetSeparatedAttrs()[j]);
             }
-            return setAccessor;
+            
+            if (forIdlAttributeName != null) {
+                AddFromIdlNameAttribute(setAccessor, "_set_" + forIdlAttributeName);    
+            }            
+            return setAccessor;                                                                                                                                    
         }
 
         /// <summary>
@@ -324,8 +377,27 @@ namespace Ch.Elca.Iiop.Idl {
         /// <param name="attrs">MethodAttributes, automatically adds HideBySig and SpecialName</param>
         public MethodBuilder AddPropertyGetter(TypeBuilder builder, string propertyName,
                                                TypeContainer propertyType, MethodAttributes attrs) {
+            return AddPropertyGetterInternal(builder, propertyName, null, propertyType, attrs);
+        }
+       
+        /// <summary>
+        /// adds a property getter method with a FromIdlName attribute 
+        /// (based on the name of the property, this setter is defined for)
+        /// </summary>
+        /// <param name="attrs">MethodAttributes, automatically adds HideBySig and SpecialName</param>
+        public MethodBuilder AddPropertyGetter(TypeBuilder builder, string propertyName,
+                                               string forIdlAttributeName,
+                                               TypeContainer propertyType, MethodAttributes attrs) {
+            return AddPropertyGetterInternal(builder, propertyName, forIdlAttributeName, 
+                                             propertyType, attrs);
+        }
+
+        
+        public MethodBuilder AddPropertyGetterInternal(TypeBuilder builder, string propertyName,
+                                                       string forIdlAttributeName, 
+                                                       TypeContainer propertyType, MethodAttributes attrs) {
             Type propTypeCls = propertyType.GetSeparatedClsType();
-            MethodBuilder getAccessor = builder.DefineMethod("__get_" + propertyName, 
+            MethodBuilder getAccessor = builder.DefineMethod("get_" + propertyName, 
                                                              attrs | MethodAttributes.HideBySig | MethodAttributes.SpecialName, 
                                                              propTypeCls, System.Type.EmptyTypes);
             
@@ -334,7 +406,10 @@ namespace Ch.Elca.Iiop.Idl {
             for (int j = 0; j < propertyType.GetSeparatedAttrs().Length; j++) {                
                 retParamGet.SetCustomAttribute(propertyType.GetSeparatedAttrs()[j]);
             }
-            return getAccessor;
+            if (forIdlAttributeName != null) {
+                AddFromIdlNameAttribute(getAccessor, "_get_" + forIdlAttributeName);    
+            }
+            return getAccessor;                                                           
         }
 
         /// <summary>
@@ -357,6 +432,21 @@ namespace Ch.Elca.Iiop.Idl {
             for (int j = 0; j < propertyType.GetSeparatedAttrs().Length; j++) {
                 propBuild.SetCustomAttribute(propertyType.GetSeparatedAttrs()[j]);                
             }
+            return propBuild;
+        }
+        
+        /// <summary>
+        /// Like <see cref="Ch.Elca.Iiop.Idl.IlEmitHelper.AddProperty(TypeBuilder, string, TypeContainer, MethodBuilder, MethodBuilder)"/>,
+        /// but adds additionally a FromIdlName attribute to the property
+        /// </summary>
+        public PropertyBuilder AddProperty(TypeBuilder builder, string clsPropertyName,
+                                           string forIdlAttributeName,                                       
+                                           TypeContainer propertyType, 
+                                           MethodBuilder getAccessor, MethodBuilder setAccessor) {
+            PropertyBuilder propBuild = AddProperty(builder, clsPropertyName,
+                                                    propertyType, 
+                                                    getAccessor, setAccessor);
+            AddFromIdlNameAttribute(propBuild, forIdlAttributeName);
             return propBuild;
         }
 

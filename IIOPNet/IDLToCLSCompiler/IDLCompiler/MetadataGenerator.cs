@@ -2251,14 +2251,19 @@ public class MetaDataGenerator : IDLParserVisitor {
             ASTsimple_declarator simpleDecl = (ASTsimple_declarator) node.jjtGetChild(i);
             String propName = IdlNaming.MapIdlNameToClsName(simpleDecl.getIdent());
             // set the methods for the property
-            MethodBuilder getAccessor = m_ilEmitHelper.AddPropertyGetter(builder, propName, propType,
+            MethodBuilder getAccessor = m_ilEmitHelper.AddPropertyGetter(builder, 
+                                                                         propName, simpleDecl.getIdent(),
+                                                                         propType,
                                                                          MethodAttributes.Virtual | MethodAttributes.Abstract | MethodAttributes.Public);
             MethodBuilder setAccessor = null;
             if (!(node.isReadOnly())) {
-                setAccessor = m_ilEmitHelper.AddPropertySetter(builder, propName, propType, 
+                setAccessor = m_ilEmitHelper.AddPropertySetter(builder, 
+                                                               propName, simpleDecl.getIdent(),
+                                                               propType,
                                                                MethodAttributes.Virtual | MethodAttributes.Abstract | MethodAttributes.Public);
             }            
-            m_ilEmitHelper.AddProperty(builder, propName, propType, getAccessor, setAccessor);
+            m_ilEmitHelper.AddProperty(builder, propName, simpleDecl.getIdent(),
+                                       propType, getAccessor, setAccessor);
         }
         
         return null;
@@ -2345,7 +2350,8 @@ public class MetaDataGenerator : IDLParserVisitor {
         String methodName = IdlNaming.MapIdlNameToClsName(node.getIdent());
         // ready to create method
         TypeBuilder typeAtBuild = buildInfo.GetContainterType();
-        m_ilEmitHelper.AddMethod(typeAtBuild, methodName, parameters, returnType, 
+        m_ilEmitHelper.AddMethod(typeAtBuild, methodName, node.getIdent(),
+                                 parameters, returnType,
                                  MethodAttributes.Virtual | MethodAttributes.Abstract | MethodAttributes.Public | MethodAttributes.HideBySig);
         return null;
     }
