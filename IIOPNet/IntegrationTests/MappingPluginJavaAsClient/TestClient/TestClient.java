@@ -5,6 +5,7 @@ import javax.rmi.PortableRemoteObject;
 import Ch.Elca.Iiop.IntegrationTests.MappingPlugin.*;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Date;
 
 /**
  * Integration test for IIOP.NET.
@@ -207,6 +208,12 @@ public class TestClient extends TestCase {
         }
     }
 
+
+    public void testDate() throws Exception {
+        Date arg = new Date();
+        Date result = m_testService.EchoDateTime(arg);
+        assertEquals(arg, result);
+    }
 
 
 }

@@ -358,7 +358,19 @@ namespace Ch.Elca.Iiop.IntegrationTests.MappingPlugin {
             CheckHashtableElems(result2, val, nrOfElems + 1);
         }
 
-
+        [Test]
+        public void TestDateTime() {
+            DateTime arg = DateTime.Now;
+            DateTime result = m_testService.echoDate(arg);
+            // check date equality up to the milliseconds
+            Assertion.AssertEquals("current date (year) not echoed correctly", arg.Year, result.Year);
+            Assertion.AssertEquals("current date (month) not echoed correctly", arg.Month, result.Month);
+            Assertion.AssertEquals("current date (day) not echoed correctly", arg.Day, result.Day);
+            Assertion.AssertEquals("current date (hour) not echoed correctly", arg.Hour, result.Hour);
+            Assertion.AssertEquals("current date (minutes) not echoed correctly", arg.Minute, result.Minute);
+            Assertion.AssertEquals("current date (seconds) not echoed correctly", arg.Second, result.Second);
+            Assertion.AssertEquals("current date (milliseconds) not echoed correctly", arg.Millisecond, result.Millisecond);            
+        }
 
         
     }

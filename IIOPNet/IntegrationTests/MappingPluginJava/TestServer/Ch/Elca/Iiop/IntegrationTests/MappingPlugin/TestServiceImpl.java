@@ -31,6 +31,7 @@ import java.rmi.RemoteException;
 import javax.rmi.PortableRemoteObject;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Date;
     
 
 public class TestServiceImpl extends PortableRemoteObject implements TestService {
@@ -40,85 +41,85 @@ public class TestServiceImpl extends PortableRemoteObject implements TestService
     }
 
     public ArrayList createShortList(short val, int nrOfElems) throws RemoteException {
-    	ArrayList result = new ArrayList();
-    	for (int i = 0; i < nrOfElems; i++) {
-    	    result.add(new Short(val));
-    	}
-    	return result;
+        ArrayList result = new ArrayList();
+        for (int i = 0; i < nrOfElems; i++) {
+            result.add(new Short(val));
+        }
+        return result;
     }
 
     public ArrayList createIntList(int val, int nrOfElems) throws RemoteException {
-    	ArrayList result = new ArrayList();
-    	for (int i = 0; i < nrOfElems; i++) {
-    	    result.add(new Integer(val));
-    	}
-    	return result;
+        ArrayList result = new ArrayList();
+        for (int i = 0; i < nrOfElems; i++) {
+            result.add(new Integer(val));
+        }
+        return result;
     }
     
     public ArrayList createLongList(long val, int nrOfElems) throws RemoteException {
-    	ArrayList result = new ArrayList();
-    	for (int i = 0; i < nrOfElems; i++) {
-    	    result.add(new Long(val));
-    	}
-    	return result;
+        ArrayList result = new ArrayList();
+        for (int i = 0; i < nrOfElems; i++) {
+            result.add(new Long(val));
+        }
+        return result;
     }
 
     public ArrayList createByteList(byte val, int nrOfElems) throws RemoteException {
-    	ArrayList result = new ArrayList();
-    	for (int i = 0; i < nrOfElems; i++) {
-    	    result.add(new Byte(val));
-    	}
-    	return result;
+        ArrayList result = new ArrayList();
+        for (int i = 0; i < nrOfElems; i++) {
+            result.add(new Byte(val));
+        }
+        return result;
     }
 
     public ArrayList createCharList(char val, int nrOfElems) throws RemoteException {
-    	ArrayList result = new ArrayList();
-    	for (int i = 0; i < nrOfElems; i++) {
-    	    result.add(new Character(val));
-    	}
-    	return result;
+        ArrayList result = new ArrayList();
+        for (int i = 0; i < nrOfElems; i++) {
+            result.add(new Character(val));
+        }
+        return result;
     }
 
     public ArrayList createBooleanList(boolean val, int nrOfElems) throws RemoteException {
-    	ArrayList result = new ArrayList();
-    	for (int i = 0; i < nrOfElems; i++) {
-    	    result.add(new Boolean(val));
-    	}
-    	return result;
+        ArrayList result = new ArrayList();
+        for (int i = 0; i < nrOfElems; i++) {
+            result.add(new Boolean(val));
+        }
+        return result;
     }
 
     public ArrayList createFloatList(float val, int nrOfElems) throws RemoteException {
-      	ArrayList result = new ArrayList();
-    	for (int i = 0; i < nrOfElems; i++) {
-    	    result.add(new Float(val));
-    	}
-    	return result;
+        ArrayList result = new ArrayList();
+        for (int i = 0; i < nrOfElems; i++) {
+            result.add(new Float(val));
+        }
+        return result;
     }
 
     public ArrayList createDoubleList(double val, int nrOfElems) throws RemoteException {
-    	ArrayList result = new ArrayList();
-    	for (int i = 0; i < nrOfElems; i++) {
-    	    result.add(new Double(val));
-    	}
-    	return result;
+        ArrayList result = new ArrayList();
+        for (int i = 0; i < nrOfElems; i++) {
+            result.add(new Double(val));
+        }
+        return result;
     }
     
     public ArrayList createValTypeList(String msg, int nrOfElems) throws RemoteException {
         ArrayList result = new ArrayList();
-    	for (int i = 0; i < nrOfElems; i++) {
-    		TestSerializableClassB1 entry = new TestSerializableClassB1();
-    		entry.Msg = msg;
-    	    result.add(entry);
-    	}
-    	return result;
+        for (int i = 0; i < nrOfElems; i++) {
+            TestSerializableClassB1 entry = new TestSerializableClassB1();
+            entry.Msg = msg;
+            result.add(entry);
+        }
+        return result;
     }
     
     public ArrayList createByRefTypeList(int nrOfElems) throws RemoteException {
-       	ArrayList result = new ArrayList();
-    	for (int i = 0; i < nrOfElems; i++) {
-    	    result.add(new TestServiceImpl());
-    	}
-    	return result;
+        ArrayList result = new ArrayList();
+        for (int i = 0; i < nrOfElems; i++) {
+            result.add(new TestServiceImpl());
+        }
+        return result;
     }
 
     public ArrayList echoList(ArrayList arg) throws RemoteException {
@@ -208,6 +209,11 @@ public class TestServiceImpl extends PortableRemoteObject implements TestService
     }
 
     public HashMap echoHashMap(HashMap arg) throws RemoteException {
+        return arg;
+    }
+    
+        
+    public Date echoDate(Date arg) throws RemoteException {
         return arg;
     }
 

@@ -55,7 +55,7 @@ namespace Ch.Elca.Iiop.IntegrationTests.MappingPlugin {
             ArrayList result = new ArrayList();
             for (int i = 0; i < nrOfElems; i++) {
                 result.Add(val);
-    	    }
+            }
             return result;
         }
         
@@ -63,66 +63,66 @@ namespace Ch.Elca.Iiop.IntegrationTests.MappingPlugin {
             ArrayList result = new ArrayList();
             for (int i = 0; i < nrOfElems; i++) {
                 result.Add(val);
-    	    }
+            }
             return result;
         }
 
         public ArrayList CreateByteList(byte val, int nrOfElems) {
             ArrayList result = new ArrayList();
             for (int i = 0; i < nrOfElems; i++) {
-    	        result.Add(val);
-    	    }
-    	    return result;
+                result.Add(val);
+            }
+            return result;
         }
 
         public ArrayList CreateCharList(char val, int nrOfElems) {
             ArrayList result = new ArrayList();
-    	    for (int i = 0; i < nrOfElems; i++) {
-    	        result.Add(val);
-    	    }
-    	    return result;
+            for (int i = 0; i < nrOfElems; i++) {
+                result.Add(val);
+            }
+            return result;
         }
 
         public ArrayList CreateBooleanList(bool val, int nrOfElems) {
-    	    ArrayList result = new ArrayList();
-    	    for (int i = 0; i < nrOfElems; i++) {
-    	        result.Add(val);
-    	    }
-    	    return result;
+            ArrayList result = new ArrayList();
+            for (int i = 0; i < nrOfElems; i++) {
+                result.Add(val);
+            }
+            return result;
         }
 
         public ArrayList CreateFloatList(float val, int nrOfElems) {
             ArrayList result = new ArrayList();
-    	    for (int i = 0; i < nrOfElems; i++) {
-    	        result.Add(val);
-    	    }
-    	    return result;
+            for (int i = 0; i < nrOfElems; i++) {
+                result.Add(val);
+            }
+            return result;
         }
 
         public ArrayList CreateDoubleList(double val, int nrOfElems) {
             ArrayList result = new ArrayList();
-    	    for (int i = 0; i < nrOfElems; i++) {
-    	        result.Add(val);
-    	    }
-    	    return result;
+            for (int i = 0; i < nrOfElems; i++) {
+                result.Add(val);
+            }
+            return result;
         }
     
         public ArrayList CreateValTypeList(String msg, int nrOfElems) {
             ArrayList result = new ArrayList();
-    	    for (int i = 0; i < nrOfElems; i++) {
-    	        TestSerializableClassB1 entry = new TestSerializableClassB1();
-    	        entry.Msg = msg;
-    	        result.Add(entry);
-    	    }
-    	    return result;
+            for (int i = 0; i < nrOfElems; i++) {
+                TestSerializableClassB1 entry = new TestSerializableClassB1();
+                entry.Msg = msg;
+                result.Add(entry);
+            }
+            return result;
         }
     
         public ArrayList CreateByRefTypeList(int nrOfElems) {
-       	    ArrayList result = new ArrayList();
-    	    for (int i = 0; i < nrOfElems; i++) {
-    	        result.Add(new TestServiceImpl());
-    	    }
-    	    return result;
+            ArrayList result = new ArrayList();
+            for (int i = 0; i < nrOfElems; i++) {
+                result.Add(new TestServiceImpl());
+            }
+            return result;
         }
 
         public ArrayList EchoList(ArrayList arg) {
@@ -145,8 +145,8 @@ namespace Ch.Elca.Iiop.IntegrationTests.MappingPlugin {
         public Hashtable CreateHashtableWithValTypeElems(String msg, int nrOfElems) {
             Hashtable result = new Hashtable();
             for (int i = 0; i <nrOfElems; i++) {
-    	        TestSerializableClassB1 entry = new TestSerializableClassB1();
-    	        entry.Msg = msg;
+                TestSerializableClassB1 entry = new TestSerializableClassB1();
+                entry.Msg = msg;
                 result[i] = entry;
             }
             return result;
@@ -159,6 +159,10 @@ namespace Ch.Elca.Iiop.IntegrationTests.MappingPlugin {
             }
             return result;
         }
+        
+        public DateTime EchoDateTime(DateTime arg) {
+            return arg;
+        }        
         
         public override object InitializeLifetimeService() {
             // live forever
@@ -199,7 +203,9 @@ namespace Ch.Elca.Iiop.IntegrationTests.MappingPlugin {
         Hashtable CreateHashtableWithValTypeElems(String msg, int nrOfElems);
 
         Hashtable CreateHashtableWithByRefElems(int nrOfElems);
-                
+
+        DateTime  EchoDateTime(DateTime arg);
+                        
     }
 
 

@@ -30,6 +30,7 @@ package Ch.Elca.Iiop.IntegrationTests.MappingPlugin;
 import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Date;
     
 
 public interface TestService extends java.rmi.Remote {
@@ -78,6 +79,10 @@ public interface TestService extends java.rmi.Remote {
     public HashMap createHashMapWithByRefVals(int nrOfElems) throws RemoteException;
 
     public HashMap echoHashMap(HashMap arg) throws RemoteException;
+    
+    
+    
+    public Date echoDate(Date arg) throws RemoteException;
 
 
 }
