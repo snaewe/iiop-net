@@ -311,6 +311,13 @@ public class TestClient extends TestCase {
         int result = m_testService.LastTestOneWayArg();
         assertEquals(arg, result);
     }
+    
+	public void testCheckParamAttrs() throws Exception {
+		String arg = "testArg";
+		String result = m_testService.CheckParamAttrs(arg);
+		assertEquals(arg, result);
+	}
+
 
 
 }

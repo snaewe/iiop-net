@@ -285,6 +285,12 @@ namespace Ch.Elca.Iiop.IntegrationTests {
         public object EchoAnything(object arg) {
             return arg;
         }
+
+        /// <summary>checks, if inherited parameter attributes are considered correctly</summary>
+        public System.String CheckParamAttrs(System.String arg) {
+       	    return arg;
+        }
+
         
         /// <summary>
         /// used to check, if a reference passed is equal to this object itself.
@@ -377,6 +383,13 @@ namespace Ch.Elca.Iiop.IntegrationTests {
         TestAbstrInterfaceImplByMarshalByVal RetriveTestInterfaceAImplemtorTheImpl(System.String initialMsg);
 
         object EchoAnything(object arg);
+
+        /// <summary>checks, if inherited parameter attributes are considered correctly</summary>        
+        [return: StringValue]
+        [return: WideChar(false)]
+        System.String CheckParamAttrs([StringValue][WideChar(false)]System.String arg);
+
+        
                 
     }
 
