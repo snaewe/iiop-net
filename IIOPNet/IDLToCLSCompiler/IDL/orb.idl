@@ -1,0 +1,18 @@
+// predefined types for IIOP.NET
+
+#ifndef __org_omg_CORBA__
+#define __org_omg_CORBA__
+
+#pragma prefix "omg.org"
+
+module CORBA{
+    valuetype StringValue string;
+    #pragma ID StringValue "IDL:CORBA/StringValue:1.0"
+    valuetype WStringValue wstring;
+    #pragma ID WStringValue "IDL:CORBA/WStringValue:1.0"
+};
+
+#pragma prefix ""
+
+#endif
+
