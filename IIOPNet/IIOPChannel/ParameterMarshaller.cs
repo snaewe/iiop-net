@@ -119,9 +119,11 @@ namespace Ch.Elca.Iiop.Marshalling {
                     AttributeExtCollection paramAttrs = ReflectionHelper.CollectParameterAttributes(paramInfo, 
                                                                                                     method);                    
                     Marshal(paramInfo.ParameterType, paramAttrs, 
-                            actual[actualParamNr], targetStream);
-                    actualParamNr++;
+                            actual[actualParamNr], targetStream);                    
                 }
+                // move to next parameter
+                // out-args are also part of the actual array -> move to next for those whithout doing something
+                actualParamNr++;
             }
         }
 

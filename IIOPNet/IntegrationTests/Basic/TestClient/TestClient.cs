@@ -573,6 +573,28 @@ namespace Ch.Elca.Iiop.IntegrationTests {
             Assertion.AssertEquals(arg, result2);
         }
 
+
+        [Test]
+        public void TestInRefOutArgsMixed() {
+            System.Int32 inarg = 10;
+            System.Int32 inarg2 = 20;
+            System.Int32 outArg;
+            System.Int32 outArg2;
+            System.Int32 inoutArgBefore = 3;
+            System.Int32 inoutArg = inoutArgBefore;
+            System.Int32 inoutArgBefore2 = 5;
+            System.Int32 inoutArg2 = inoutArgBefore2;
+
+            System.Int32 result = m_testService.TestInOutRef(inarg, out outArg, ref inoutArg,
+                                                             inarg2, ref inoutArg2, out outArg2);
+
+            Assertion.AssertEquals(inarg + inarg2, result);
+            Assertion.AssertEquals(inarg + 1, outArg);
+            Assertion.AssertEquals(inarg2 + 1, outArg2);
+            Assertion.AssertEquals(inoutArgBefore * 2, inoutArg);
+            Assertion.AssertEquals(inoutArgBefore2 * 2, inoutArg2);
+        }
+
         [Test]
         public void TestOverloadedMethods() {
             System.Int32 arg1int = 1;

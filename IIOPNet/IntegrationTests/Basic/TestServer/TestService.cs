@@ -304,6 +304,21 @@ namespace Ch.Elca.Iiop.IntegrationTests {
             argOut = inArg;
             return inArg;
         }
+        
+        /// <param name="outArg">result is inarg + 1</param>
+        /// <param name="outArg2">result is inarg2 + 1</param>
+        /// <param name="inoutArg">result is inoutArg * 2</param>
+        /// <param name="inoutArg2">result is inoutArg2 * 2</param>
+        /// <returns>inarg + inarg2</returns>
+        public System.Int32 TestInOutRef(System.Int32 inarg, out System.Int32 outArg, ref System.Int32 inoutArg,
+                                         System.Int32 inarg2, ref System.Int32 inoutArg2, out System.Int32 outArg2) {
+            
+            outArg = inarg + 1;
+            outArg2 = inarg2 + 1;
+            inoutArg = inoutArg * 2;
+            inoutArg2 = inoutArg2 * 2;
+            return inarg + inarg2;
+        }
 
         public int AddOverloaded(int arg1, int arg2) {
             return arg1 + arg2;
