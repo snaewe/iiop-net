@@ -189,11 +189,11 @@ namespace Ch.Elca.Iiop.Cdr {
         #region IConstructors
 
         public StreamPosition(CdrInputStreamImpl inStream) {
-            inStream.markNextAlignedPosition(this);
+            inStream.MarkNextAlignedPosition(this);
         }
 
         public StreamPosition(CdrOutputStreamImpl outStream) {
-            outStream.markNextAlignedPosition(this);
+            outStream.MarkNextAlignedPosition(this);
         }
 
         #endregion IConstructors
@@ -392,7 +392,9 @@ namespace Ch.Elca.Iiop.Cdr {
         }
 
         public CdrEncapsulationInputStream ReadEncapsulation() {
-            return m_baseStream.ReadEncapsulation();
+            CdrEncapsulationInputStream result = m_baseStream.ReadEncapsulation();
+            CheckPosition();
+            return result;
         }
 
         public void SkipRest() {
