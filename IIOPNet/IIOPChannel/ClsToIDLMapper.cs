@@ -284,8 +284,7 @@ namespace Ch.Elca.Iiop.Idl {
 
         /// <summary>determines, if the CLS-type is mapped to an IDL-struct</summary>
         public static bool IsMarshalledAsStruct(Type clsType) {
-            AttributeExtCollection attrs = AttributeExtCollection.ConvertToAttributeCollection(
-                                               clsType.GetCustomAttributes(true));
+            AttributeExtCollection attrs = ReflectionHelper.GetCustomAttributesForType(clsType, true);
             if (attrs.IsInCollection(s_idlStructAttrType)) {
                 return true;
             } else {
@@ -295,8 +294,7 @@ namespace Ch.Elca.Iiop.Idl {
 
         /// <summary>determines, if the CLS-type is mapped to an IDL-union</summary>
         public static bool IsMarshalledAsUnion(Type clsType) {
-            AttributeExtCollection attrs = AttributeExtCollection.ConvertToAttributeCollection(
-                clsType.GetCustomAttributes(true));
+            AttributeExtCollection attrs = ReflectionHelper.GetCustomAttributesForType(clsType, true);
             if (attrs.IsInCollection(s_idlUnionAttrType)) {
                 return true;
             } else {

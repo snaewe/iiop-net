@@ -42,6 +42,8 @@ namespace Ch.Elca.Iiop.Util {
     	
     	private static Type s_iIdlEntityType = typeof(IIdlEntity);
     	
+    	private static Type s_idlEnumAttribute = typeof(IdlEnumAttribute);
+    	
     	#endregion SFields
     	#region SProperties
     	
@@ -78,6 +80,17 @@ namespace Ch.Elca.Iiop.Util {
     		                     BindingFlags.NonPublic | BindingFlags.DeclaredOnly;
     		return type.GetFields(flags);
     	}    	
+    	
+    	/// <summary>
+    	/// get the custom attributes for the Type type.
+    	/// </summary>
+    	/// <param name="type">the type to get the attributes for</param>
+    	/// <param name="inherit">should attributes on inherited type also be returned</param>
+    	/// <returns></returns>
+    	public static AttributeExtCollection GetCustomAttributesForType(Type type, bool inherit) {
+    		object[] attributes = type.GetCustomAttributes(inherit);
+    		return AttributeExtCollection.ConvertToAttributeCollection(attributes);
+    	}
 
         /// <summary>
         /// collects the custom attributes on the current parameter and from

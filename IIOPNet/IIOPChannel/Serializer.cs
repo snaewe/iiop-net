@@ -722,7 +722,7 @@ namespace Ch.Elca.Iiop.Marshalling {
             if (actual != null) {
                 // check if actual parameter is an IDL-struct: 
                 // this is an illegal parameter for IDL-abstract value parameters
-                AttributeExtCollection attrs = AttributeExtCollection.ConvertToAttributeCollection(actual.GetType().GetCustomAttributes(true));
+                AttributeExtCollection attrs = ReflectionHelper.GetCustomAttributesForType(actual.GetType(), true);
                 if (attrs.IsInCollection(typeof(IdlStructAttribute))) {
                     // IDL-struct illegal parameter for formal type abstract value (actual type: actual.GetType() )
                     throw new MARSHAL(20011, CompletionStatus.Completed_MayBe);
@@ -792,7 +792,7 @@ namespace Ch.Elca.Iiop.Marshalling {
         public override void Serialise(Type formal, object actual, AttributeExtCollection attributes,
                                        CdrOutputStream targetStream) {
             // check for IDL-enum mapped to a .NET enum
-            AttributeExtCollection attrs = AttributeExtCollection.ConvertToAttributeCollection(formal.GetCustomAttributes(true));
+            AttributeExtCollection attrs = ReflectionHelper.GetCustomAttributesForType(formal, true);
             if (attrs.IsInCollection(typeof(IdlEnumAttribute))) {
                 // idl enum's are mapped to .NET enums with long base-type, therefore all possible 2^32 idl-values can be represented
                 int enumVal = (int) actual;
@@ -809,7 +809,7 @@ namespace Ch.Elca.Iiop.Marshalling {
 
         public override object Deserialise(Type formal, AttributeExtCollection attributes, 
                                            CdrInputStream sourceStream) {
-            AttributeExtCollection attrs = AttributeExtCollection.ConvertToAttributeCollection(formal.GetCustomAttributes(true));
+            AttributeExtCollection attrs = ReflectionHelper.GetCustomAttributesForType(formal, true);
             if (attrs.IsInCollection(typeof(IdlEnumAttribute))) {
                 uint enumVal = sourceStream.ReadULong();
                 return Enum.ToObject(formal, enumVal);    
