@@ -287,13 +287,7 @@ namespace Ch.Elca.Iiop.MessageHandling {
         /// <param name="serverType">the type of the object called</param>
         /// <param name="calledMethodInfo">the MethodInfo of the method, which is called</param>
         /// <returns>returns the mapped methodName of the operation to call of this object specific method</returns>
-        private string DecodeObjectOperation(string objectUri, string methodName, out Type serverType,
-                                             out MethodInfo calledMethodInfo) {
-            serverType = RemotingServices.GetServerTypeForUri(objectUri);
-            if (serverType == null) { 
-                throw new OBJECT_NOT_EXIST(0, CompletionStatus.Completed_No); 
-            }
-            
+        private MethodInfo DecodeObjectOperation(string objectUri, string methodName, Type serverType) {            
             // method name mapping
             string resultMethodName;
             if (s_iIdlEntityType.IsAssignableFrom(serverType)) {
@@ -319,17 +313,15 @@ namespace Ch.Elca.Iiop.MessageHandling {
                 resultMethodName = IdlNaming.ReverseClsToIdlNameMapping(methodName);
             }
             
-            calledMethodInfo = serverType.GetMethod(resultMethodName);
+            MethodInfo calledMethodInfo = serverType.GetMethod(resultMethodName);
             if (calledMethodInfo == null) { 
-            	// possibly an overloaded method!
-            	calledMethodInfo = IdlNaming.FindClsMethodForOverloadedMethodIdlName(methodName, serverType);
+                // possibly an overloaded method!
+                calledMethodInfo = IdlNaming.FindClsMethodForOverloadedMethodIdlName(methodName, serverType);
                 if (calledMethodInfo == null) { // not found -> BAD_OPERATION
                     throw new BAD_OPERATION(0, CompletionStatus.Completed_No); 
-                } else {
-                    resultMethodName = calledMethodInfo.Name;
                 }
             }
-            return resultMethodName;
+            return calledMethodInfo;
         }
 
         /// <summary>
@@ -338,16 +330,15 @@ namespace Ch.Elca.Iiop.MessageHandling {
         /// <param name="serverType">the type of the object called</param>
         /// <param name="calledMethodInfo">the MethodInfo of the method, which is called</param>
         /// <returns>the method-name of the method implementing the operation</returns>
-        private string DecodeStandardOperation(string objectUri, string methodName, out Type serverType,
-                                               out MethodInfo calledMethodInfo) {
-            serverType = typeof(StandardCorbaOps); // generic handler
+        private MethodInfo DecodeStandardOperation(string objectUri, string methodName) {
+            Type serverType = StandardCorbaOps.s_type; // generic handler
             string resultMethodName = StandardCorbaOps.MapMethodName(methodName);
-            calledMethodInfo = serverType.GetMethod(methodName); // for parameter unmarshalling, use info of the signature method
+            MethodInfo calledMethodInfo = serverType.GetMethod(methodName); // for parameter unmarshalling, use info of the signature method
             if (calledMethodInfo == null) { 
                 // unexpected exception: can't load method of type StandardCorbaOps
                 throw new INTERNAL(2801, CompletionStatus.Completed_MayBe);
             }
-            return resultMethodName;
+            return calledMethodInfo;
         }
 
         private object[] AdaptArgsForStandardOp(object[] args, string objectUri) {
@@ -403,9 +394,10 @@ namespace Ch.Elca.Iiop.MessageHandling {
             string methodName = methodCall.MethodName;
             // check for IIdlEntity, if not -> map first CLS  method name to IDL method name            
             if (!s_iIdlEntityType.IsAssignableFrom(targetType)) {
-            	// do a CLS to IDL mapping, because .NET server expect this for every client, also for a
-            	// native .NET client, which uses not CLS -> IDL -> CLS mapping
-            	methodName = IdlNaming.MapClsMethodNameToIdlName((MethodInfo)methodCall.MethodBase);
+                // do a CLS to IDL mapping, because .NET server expect this for every client, also for a
+                // native .NET client, which uses not CLS -> IDL -> CLS mapping
+                bool isOverloaded = RemotingServices.IsMethodOverloaded(methodCall);
+                methodName = IdlNaming.MapClsMethodNameToIdlName((MethodInfo)methodCall.MethodBase, isOverloaded);
             }
             targetStream.WriteString(IdlNaming.ReverseIdlToClsNameMapping(methodName)); // write the method name
             
@@ -473,19 +465,23 @@ namespace Ch.Elca.Iiop.MessageHandling {
                 // request header deserialised
 
                 string calledUri = objectUri; // store received object-uri
-                Type serverType;
+                Type serverType = RemotingServices.GetServerTypeForUri(objectUri);
+                if (serverType == null) { 
+                    throw new OBJECT_NOT_EXIST(0, CompletionStatus.Completed_No); 
+                }
                 MethodInfo calledMethodInfo;
                 bool standardOp = false;
                 if (!StandardCorbaOps.CheckIfStandardOp(methodName)) {
                     // handle object specific-ops
-                    methodName = DecodeObjectOperation(objectUri, methodName, 
-                                                       out serverType, out calledMethodInfo);
+                    calledMethodInfo = DecodeObjectOperation(objectUri, methodName, serverType);
+                    methodName = calledMethodInfo.Name;
                 } else {
                     // handle standard corba-ops like _is_a
-                    methodName = DecodeStandardOperation(objectUri, methodName, 
-                                                         out serverType, out calledMethodInfo);
+                    calledMethodInfo = DecodeStandardOperation(objectUri, methodName);
+                    methodName = calledMethodInfo.Name;
                     objectUri = StandardCorbaOps.WELLKNOWN_URI; // change object-uri
                     standardOp = true;
+                    serverType = StandardCorbaOps.s_type;
                 }
                 msg.Properties.Add(SimpleGiopMsg.URI_KEY, objectUri);
                 msg.Properties.Add(SimpleGiopMsg.TYPENAME_KEY, serverType.FullName);
@@ -660,9 +656,9 @@ namespace Ch.Elca.Iiop.MessageHandling {
                     case 2 : 
                         throw DeserialiseSystemError(cdrStream, version); // the error .NET message for this exception is created in the formatter
                     case 3 :
-                    	// LOCATION_FORWARD:
-                    	// --> reissue request transparentely to another object
-                    	response = ReissueLocationFwd(cdrStream, methodCall); break;
+                        // LOCATION_FORWARD:
+                        // --> reissue request transparentely to another object
+                        response = ReissueLocationFwd(cdrStream, methodCall); break;
                     default : 
                         // deseralization of reply error, unknown reply status: responseStatus
                         // the error .NET message for this exception is created in the formatter
@@ -741,17 +737,17 @@ namespace Ch.Elca.Iiop.MessageHandling {
             MarshalByRefObject newProxy = marshaller.Unmarshal(request.MethodBase.DeclaringType, new AttributeExtCollection(), cdrStream)
                                               as MarshalByRefObject;
             if (newProxy == null) {
-            	throw new OBJECT_NOT_EXIST(2402, CompletionStatus.Completed_No);
+                throw new OBJECT_NOT_EXIST(2402, CompletionStatus.Completed_No);
             }
-			object[] reqArgs = new object[request.Args.Length];			 
-			request.Args.CopyTo(reqArgs, 0);
-			object retVal = request.MethodBase.Invoke(newProxy, reqArgs);
-			return CreateReturnMsgForValues(retVal, reqArgs, request);
+            object[] reqArgs = new object[request.Args.Length];             
+            request.Args.CopyTo(reqArgs, 0);
+            object retVal = request.MethodBase.Invoke(newProxy, reqArgs);
+            return CreateReturnMsgForValues(retVal, reqArgs, request);
         }
-        	
-		/// <summary>
-		/// creates a return message for a return value and possible out/ref args among the sent arguments
-		/// </summary>
+            
+        /// <summary>
+        /// creates a return message for a return value and possible out/ref args among the sent arguments
+        /// </summary>
         private ReturnMessage CreateReturnMsgForValues(object retVal, object[] reqArgs,
                                                        IMethodCallMessage request) {
             // find out args
@@ -820,7 +816,7 @@ namespace Ch.Elca.Iiop.MessageHandling {
 #if UnitTest
 
 namespace Ch.Elca.Iiop.Tests {
-	
+    
     using System.IO;
     using NUnit.Framework;
     using Ch.Elca.Iiop;
@@ -835,11 +831,11 @@ namespace Ch.Elca.Iiop.Tests {
     /// Unit-tests for testing request/reply serialisation/deserialisation
     /// </summary>
     public class ServiceContextSerTest : TestCase {
-    	
-    	public void TestSameServiceIdMultiple() {
+        
+        public void TestSameServiceIdMultiple() {
             // checks if service contexts with the same id, doesn't throw an exception
             // checks, that the first service context is considered, others are thrown away
-            GiopMessageBodySerialiser ser = GiopMessageBodySerialiser.GetSingleton();	
+            GiopMessageBodySerialiser ser = GiopMessageBodySerialiser.GetSingleton();    
             MemoryStream stream = new MemoryStream();
             CdrOutputStreamImpl cdrOut = new CdrOutputStreamImpl(stream, 0, new GiopVersion(1,2));
             cdrOut.WriteULong(2); // nr of contexts
@@ -860,8 +856,8 @@ namespace Ch.Elca.Iiop.Tests {
             ServiceContextCollection result = (ServiceContextCollection) method.Invoke(ser, new object[] { cdrIn });
             // check if context is present
             Assertion.Assert("expected context not in collection", result.ContainsContextForService(1234567) == true);
-    	}
-    	
+        }
+        
     }
     
 }

@@ -51,6 +51,8 @@ namespace Ch.Elca.Iiop {
         private static MarshalByRefObject s_standardOpsH;
         private static ArrayList s_standardOpList = new ArrayList();
         private static object s_lock = new object();
+    	
+    	internal static Type s_type = typeof(StandardCorbaOps);
 
         #endregion SFields
         #region SConstructor
