@@ -32,10 +32,9 @@ using System;
 namespace Ch.Elca.Iiop {
 
     /// <summary>
-    /// this class is able to generate unique request id for a connection
-    /// TODO: handle overflow correctly
+    /// this class is able to generate unique request id for a connection    
     /// </summary>
-    public class GiopRequestNumberGenerator {
+    internal class GiopRequestNumberGenerator {
 
         #region IFields
 
@@ -44,19 +43,29 @@ namespace Ch.Elca.Iiop {
         #endregion IFields
         #region IConstructors
         
-        public GiopRequestNumberGenerator() {
+        internal GiopRequestNumberGenerator() {
         }
 
         #endregion IConstructors
         #region IMethods
         
-        public uint GenerateRequestId() {
-            uint result;
-            lock(this) {
-                result = m_last;
+        /// <summary>generates the next request id</summary>
+        /// <remarks>this operation isn't thread safe</remarks>
+        internal uint GenerateRequestId() {
+            if (IsAbleToGenerateNext()) {
+                uint result = m_last;
                 m_last++;
+                return result;
+            } else {
+                // overflow
+                throw new InvalidOperationException("RequestNumberGen: overflow occured");
             }
-            return result;
+        }
+                
+        /// <summary>returns true, if reqNumberGen is able to generate a next request number</summary>
+        /// <remarks>this operation isn't thread safe</remarks>
+        internal bool IsAbleToGenerateNext() {
+            return m_last < UInt32.MaxValue;
         }
 
         #endregion IMethods
