@@ -120,8 +120,10 @@ namespace Ch.Elca.Iiop.Idl {
         /// <summary>creates the CLS-name for a name, which was mapped from CLS to IDL</summary>
         internal static string ReverseClsToIdlNameMapping(string mappedNameInIdl) {
             string result = mappedNameInIdl;
-            if (result.StartsWith("_")) {
-                result = result.Substring(1); // because of property accessor methods: .NET accessor have no _ before get/set
+            if (result.StartsWith("_")) { 
+                // for names conflicting with an IDL keyword
+                // and because of property accessor methods: .NET accessor have no _ before get/set
+                result = result.Substring(1); 
             } else if (result.StartsWith("N_")) {
                 result = result.Substring(1);
             }
@@ -545,6 +547,10 @@ namespace Ch.Elca.Iiop.Idl {
             s_idlKeywordList.Add("void");
             s_idlKeywordList.Add("wchar");
             s_idlKeywordList.Add("wstring");
+
+            // to fix a problem with the idlj, when using a class/interface in System namespace:
+            s_idlKeywordList.Add("System");
+
             // sort the list for binary search
             s_idlKeywordList.Sort(s_keyWordComparer);
         }

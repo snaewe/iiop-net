@@ -23,13 +23,13 @@ build-idl:
 	idlj -td .. $(TestService)TestSerializableClassC.idl
 	idlj -td .. $(TestService)TestSerializableClassD.idl
 	idlj -td .. $(TestService)TestStructA.idl
-	idlj -td .. org\omg\BoxedArray\System\seq1_long.idl
-	idlj -td .. org\omg\BoxedArray\System\seq1_octet.idl
-	idlj -td .. org\omg\BoxedArray\System\seq1_wstring.idl
-	idlj -td .. org\omg\BoxedArray\System\seq2_long.idl
-	idlj -td .. org\omg\BoxedArray\System\seq2_octet.idl
-	idlj -td .. org\omg\BoxedArray\System\seq2_wstring.idl
-	idlj -td .. org\omg\BoxedArray\System\seq3_octet.idl
+	idlj -td .. org\omg\BoxedArray\_System\seq1_long.idl
+	idlj -td .. org\omg\BoxedArray\_System\seq1_octet.idl
+	idlj -td .. org\omg\BoxedArray\_System\seq1_wstring.idl
+	idlj -td .. org\omg\BoxedArray\_System\seq2_long.idl
+	idlj -td .. org\omg\BoxedArray\_System\seq2_octet.idl
+	idlj -td .. org\omg\BoxedArray\_System\seq2_wstring.idl
+	idlj -td .. org\omg\BoxedArray\_System\seq3_octet.idl
 	idlj -td .. Predef.idl
 	cd ..
 
