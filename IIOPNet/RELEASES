@@ -24,6 +24,7 @@ changes:
 
 - automated jboss / WAS5 integration test
 - workaround for IDL bounded sequences: now mapped to unbounded + warning on compilation
+- IDLPreprocessor: now wirtten in C# instead of J#
 
 
 Version 1.4.0 (26 August 2003)
