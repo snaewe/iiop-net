@@ -1,0 +1,41 @@
+<H2 class="contentPart">Bea WebLogic 6.1 compatibility howto</H2>
+
+<p/>
+<b>Accessing the name service</b> <BR> <BR>
+
+The Weblogic nameservice can be accessed from a .NET client with the following code:
+
+<pre>
+    RmiIiopInit init = new RmiIiopInit(nameServiceHost, nameServicePort);
+    NamingContext nameService = init.GetNameService();
+</pre> <p/>
+
+Hint: The nameservice is listening normally on port 7001.
+
+<p/>
+<b>Using an EJB</b> <BR> <BR>
+
+The ejb home interface is accessed using the name service in the following way:
+
+
+<pre>
+    NameComponent[] name = new NameComponent[] { new NameComponent("MyHome", "") };
+    // get the reference to the adder-home
+    MyEjbHome myHomeIf = (MyEjbHome)nameService.resolve(name);
+</pre> <p/>
+
+The ejb can now be created using this home interface (standard ejb pattern):
+
+<pre>
+    MyEjb myBean = myHomeIf.create();
+</pre> <p/>
+
+
+<p/>
+<b>More information</b>
+
+<p/>
+More information can be found in the <A href="ejbInterop.html">EJB interoperation tutorial</A>.
+
+
+
