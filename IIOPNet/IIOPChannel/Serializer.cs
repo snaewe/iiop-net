@@ -794,8 +794,16 @@ namespace Ch.Elca.Iiop.Marshalling {
         #region IFields
 
         private ValueObjectSerializer m_valueSer = new ValueObjectSerializer();
+        private bool m_convertMultiDimArray = false;
 
         #endregion IFields
+        #region IConstructors
+        
+        public BoxedValueSerializer(bool convertMultiDimArray) {
+            m_convertMultiDimArray = convertMultiDimArray;
+        }
+
+        #endregion IConstructors
         #region IMethods
         
         internal override void Serialise(Type formal, object actual, AttributeExtCollection attributes,
@@ -805,6 +813,15 @@ namespace Ch.Elca.Iiop.Marshalling {
                 // which are subclasses of BoxedValueBase
                 throw new INTERNAL(10041, CompletionStatus.Completed_MayBe);
             }
+
+            if (m_convertMultiDimArray) {
+                // actual is a multi dimensional array, which must be first converted to a jagged array
+                if ((actual != null) && (!actual.GetType().IsArray) && (!(actual.GetType().GetArrayRank() > 1))) {
+                    throw new BAD_PARAM(9004, CompletionStatus.Completed_MayBe);
+                }
+                actual = BoxedArrayHelper.ConvertMoreDimToNestedOneDim((Array)actual);
+            }
+
             // perform a boxing
             object boxed = null;
             if (actual != null) {
@@ -828,6 +845,15 @@ namespace Ch.Elca.Iiop.Marshalling {
                 // perform an unboxing
                 result = boxedResult.Unbox();
             }
+
+            if (m_convertMultiDimArray) {
+                // result is a jagged arary, which must be converted to a true multidimensional array
+                if ((result != null) && (!result.GetType().IsArray)) {
+                    throw new BAD_PARAM(9004, CompletionStatus.Completed_MayBe);
+                }
+                result = BoxedArrayHelper.ConvertNestedOneDimToMoreDim((Array)result);
+            }
+
             Debug.WriteLine("unboxed result of boxedvalue-ser: " + result);
             return result;
         }

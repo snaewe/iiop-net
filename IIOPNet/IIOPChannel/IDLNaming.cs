@@ -799,7 +799,7 @@ namespace Ch.Elca.Iiop.Idl {
             // use a typedef for arrays, because dimension is part of the name of the thing, the type is an array
             return IdlNaming.GetFullyQualifiedIdlTypeDefAliasForArrayType(dotNetType, dimensions, elemTypeAttributes);
         }
-        public object MapToIdlBoxedValueType(System.Type dotNetType, bool isAlreadyBoxed) {
+        public object MapToIdlBoxedValueType(System.Type dotNetType, System.Type needsBoxingFrom) {
             // the dotNetType is a subclass of BoxedValueBase representing the boxed value type
             return IdlNaming.MapFullTypeNameToIdlScoped(dotNetType);
         }

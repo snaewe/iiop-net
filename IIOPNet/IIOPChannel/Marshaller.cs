@@ -112,14 +112,7 @@ namespace Ch.Elca.Iiop.Marshalling {
                 if (!formal.IsAssignableFrom(actual.GetType())) {
                     throw new BAD_PARAM(12310, CompletionStatus.Completed_MayBe);
                 }
-            }
-            
-            // check for .NET true moredimensional arrays mapped to jagged arrays: 
-            // they must be converted before serialized:
-            if ((actual != null) && (actual.GetType().IsArray) && (actual.GetType().GetArrayRank() > 1) &&
-                (serialiser is BoxedValueSerializer)) { // TODO: find a better solution
-                actual = BoxedArrayHelper.ConvertMoreDimToNestedOneDim((Array)actual);
-            }
+            }            
             serialiser.Serialise(formal, actual, attributes, targetStream);
         }
 
@@ -179,16 +172,7 @@ namespace Ch.Elca.Iiop.Marshalling {
                 if (!formalSig.IsAssignableFrom(result.GetType())) {
                     throw new BAD_PARAM(12311, CompletionStatus.Completed_MayBe);
                 }
-            }
-            
-            if ((formalSig.IsArray) && (formalSig.GetArrayRank() > 1) &&
-                (serialiser is BoxedValueSerializer)) { // a true .NET moredimensional array mapped to jagged array
-                if ((result != null) && (!result.GetType().IsArray)) {
-                    throw new BAD_PARAM(9004, CompletionStatus.Completed_MayBe);
-                }
-                result = BoxedArrayHelper.ConvertNestedOneDimToMoreDim((Array)result);
-            }
-
+            }            
             return result;            
         }
 
@@ -250,7 +234,8 @@ namespace Ch.Elca.Iiop.Marshalling {
         private AbstractValueSerializer m_abstrValueSer = new AbstractValueSerializer();
         private Serialiser m_marshalByRefSer = new ObjRefSerializer();
         private Serialiser m_marshalByValSer = new ValueObjectSerializer();
-        private Serialiser m_boxedValueSer = new BoxedValueSerializer();
+        private Serialiser m_boxedValueSer = new BoxedValueSerializer(false);
+        private Serialiser m_boxedValueSerForMultiDimArr = new BoxedValueSerializer(true);
         private Serialiser m_enumSer = new EnumSerializer();
         private Serialiser m_seqSer_unbounded = new IdlSequenceSerializer(0);
         private Serialiser m_structSer = new IdlStructSerializer();
@@ -304,10 +289,16 @@ namespace Ch.Elca.Iiop.Marshalling {
         public object MapToIdlAbstractValueType(System.Type clsType) {
             return m_abstrValueSer;
         }
-        public object MapToIdlBoxedValueType(System.Type clsType, bool isAlreadyBoxed) {
-            if (!isAlreadyBoxed) {
+        public object MapToIdlBoxedValueType(System.Type clsType, Type needsBoxingFrom) {
+            if (needsBoxingFrom != null) {
                 // need boxing / unboxing of values
-                return m_boxedValueSer;
+                if (needsBoxingFrom.IsArray && (needsBoxingFrom.GetArrayRank() > 1)) {
+                    // if mapped from a true .NET multi-dim array, needs a conversion to jagged array before serialse
+                    // and after deserialise
+                    return m_boxedValueSerForMultiDimArr;
+                } else {
+                    return m_boxedValueSer;
+                }
             } else {
                 // do serialize as value type
                 return m_marshalByValSer;

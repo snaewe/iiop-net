@@ -748,7 +748,7 @@ namespace Ch.Elca.Iiop.Idl {
             
         }
 
-        public object MapToIdlBoxedValueType(Type clsType, bool isAlreadyBoxed) {
+        public object MapToIdlBoxedValueType(Type clsType, Type needsBoxingFrom) {
             if (m_depManager.CheckMappedType(clsType)) { 
                 return null; 
             }
@@ -991,7 +991,7 @@ namespace Ch.Elca.Iiop.Idl {
             return null;
         }
 
-        public object MapToIdlBoxedValueType(System.Type dotNetType, bool isAlreadyBoxed) {
+        public object MapToIdlBoxedValueType(System.Type dotNetType, Type needsBoxingFrom) {
             throw new NotSupportedException("a value-box can't have a forward declaration");
         }
         
@@ -1178,7 +1178,7 @@ namespace Ch.Elca.Iiop.Idl {
             return null;
         }
 
-        public object MapToIdlBoxedValueType(System.Type dotNetType, bool isAlreadyBoxed) {
+        public object MapToIdlBoxedValueType(System.Type dotNetType, Type needsBoxingFrom) {
             WriteInclude(dotNetType);
             return null;
         }

@@ -721,7 +721,7 @@ namespace Ch.Elca.Iiop.Idl {
                              baseTypeCode, ABSTRACT_VALUE_MOD);
             return result;
         }
-        private object MapToIdlBoxedValueType(Type clsType, bool isAlreadyBoxed,
+        private object MapToIdlBoxedValueType(Type clsType,
                                               bool boxInAny) {
             // dotNetType is subclass of BoxedValueBase
             if (!clsType.IsSubclassOf(ReflectionHelper.BoxedValueBaseType)) {
@@ -769,8 +769,8 @@ namespace Ch.Elca.Iiop.Idl {
                 return forBoxed;                
             }                                                              
         }
-        public object MapToIdlBoxedValueType(Type clsType, bool isAlreadyBoxed) {
-            return MapToIdlBoxedValueType(clsType, isAlreadyBoxed,
+        public object MapToIdlBoxedValueType(Type clsType, Type needsBoxingFrom) {
+            return MapToIdlBoxedValueType(clsType,
                                           MappingConfiguration.Instance.UseBoxedInAny);
         }
         public object MapToIdlSequence(Type clsType, int bound, AttributeExtCollection allAttributes, AttributeExtCollection elemTypeAttributes) {
@@ -799,7 +799,7 @@ namespace Ch.Elca.Iiop.Idl {
         }
         public object MapToWStringValue(Type clsType) {
             if (MappingConfiguration.Instance.UseBoxedInAny) {
-                return MapToIdlBoxedValueType(clsType, false, true);
+                return MapToIdlBoxedValueType(clsType, true);
             } else {
                 // don't use boxed form
                 return new WStringTC(0);
@@ -807,7 +807,7 @@ namespace Ch.Elca.Iiop.Idl {
         }
         public object MapToStringValue(Type clsType) {
             if (MappingConfiguration.Instance.UseBoxedInAny) {
-                return MapToIdlBoxedValueType(clsType, false, true);
+                return MapToIdlBoxedValueType(clsType, true);
             } else {                
                 // don't use boxed form
                 return new StringTC(0);

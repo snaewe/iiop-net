@@ -73,8 +73,10 @@ namespace Ch.Elca.Iiop.Idl {
 
         /// <returns>an optional result of the mapping, null may be possible</returns>
         /// <param name="clsType">the .NET boxed value type type, inheriting from BoxedValueBase</param>
-        /// <param name="isAlreadyBoxed">tells, if the dotNetType is boxed in a boxed value type, or if a native Boxed value type is mapped</param>
-        object MapToIdlBoxedValueType(Type clsType, bool isAlreadyBoxed);
+        /// <param name="needsBoxingFrom">tells, if the dotNetType is boxed in a boxed value type, or if a native Boxed value type is mapped;
+        /// if needsBoxingFrom is != null, it's a dotnettype, which is boxed to clsType; if == null; it's a native boxed type, which needs no
+        /// boxing.</param>
+        object MapToIdlBoxedValueType(Type clsType, Type needsBoxingFrom);
 
         /// <param name="bound">for unbounded sequences: 0, else max nr of elems</param>
         /// <param name="allAttributes">the attributes including the IdlSequenceAttributes lead to calling this map action</param>
@@ -430,8 +432,9 @@ namespace Ch.Elca.Iiop.Idl {
                     Trace.WriteLine("boxed type not found for boxed value attribute"); 
                     throw new NO_IMPLEMENT(10001, CompletionStatus.Completed_MayBe);
                 }
+                Type needsBoxingFrom = clsType;
                 clsType = boxed; // transformation
-                return action.MapToIdlBoxedValueType(boxed, false);
+                return action.MapToIdlBoxedValueType(boxed, needsBoxingFrom);
             } else if (IsInterface(clsType) && !(clsType.Equals(ReflectionHelper.CorbaTypeCodeType))) {
                 return CallActionForDNInterface(ref clsType, action);
             } else if (IsMarshalByRef(clsType)) {
@@ -444,7 +447,7 @@ namespace Ch.Elca.Iiop.Idl {
                 return CallActionForDNArray(ref clsType, ref attributes, originalAttributes, action);
             } else if (clsType.IsSubclassOf(ReflectionHelper.BoxedValueBaseType)) {
                 // a boxed value type, which needs not to be boxed/unboxed but should be handled like a normal value type
-                return action.MapToIdlBoxedValueType(clsType, true);
+                return action.MapToIdlBoxedValueType(clsType, null);
             } else if (clsType.IsSubclassOf(s_exceptType) || clsType.Equals(s_exceptType)) {
                 return action.MapException(clsType);
             } else if (IsMarshalledAsStruct(clsType)) {
@@ -622,8 +625,9 @@ namespace Ch.Elca.Iiop.Idl {
                 return action.MapToIdlArray(clsType, dimensions, allAttributes, modifiedAttributes);
             } else {
                 Type boxed = Repository.GetBoxedArrayType(clsType);
+                Type needsBoxingFrom = clsType;
                 clsType = boxed; // transform
-                return action.MapToIdlBoxedValueType(boxed, false);
+                return action.MapToIdlBoxedValueType(boxed, needsBoxingFrom);
             }
         }
         
@@ -696,7 +700,7 @@ namespace Ch.Elca.Iiop.Idl {
         public object MapToIdlAbstractValueType(System.Type clsType) {
             return MappingToResult.IdlAbstractValue;
         }
-        public object MapToIdlBoxedValueType(System.Type clsType, bool isAlreadyBoxed) {
+        public object MapToIdlBoxedValueType(System.Type clsType, System.Type needsBoxingFrom) {
             return MappingToResult.IdlBoxedValue;
         }
         public object MapToIdlSequence(System.Type clsType, int bound, AttributeExtCollection allAttributes, AttributeExtCollection elemTypeAttributes) {
