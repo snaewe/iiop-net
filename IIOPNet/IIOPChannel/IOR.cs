@@ -437,6 +437,8 @@ namespace Ch.Elca.Iiop.CorbaObjRef {
                     TaggedComponentSerializer ser = TaggedComponentSerRegistry.GetSerializer(id);
                     m_taggedComponents[i] = ser.ReadFromStream(encapsulation);
                 }
+            } else {
+                m_taggedComponents = new TaggedComponent[0]; // no components
             }
             
             Debug.WriteLine("parsing Internet-IIOP-profile completed");
