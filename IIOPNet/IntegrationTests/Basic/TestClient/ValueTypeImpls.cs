@@ -25,10 +25,36 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
+using System;
+
 namespace Ch.Elca.Iiop.IntegrationTests {
 
+    [Serializable]
     public class TestStructAImpl : TestStructA {        
 
+    }
+
+    [Serializable]
+    public class TestSerializableClassB1Impl : TestSerializableClassB1 {
+    
+    }
+
+    [Serializable]
+    public class TestSerializableClassB2Impl : TestSerializableClassB2 {
+    
+    }
+
+    [Serializable]
+    public class TestSerializableClassCImpl : TestSerializableClassC {    
+    
+        public override System.String Format() {
+            return Msg;
+        }
+    }
+    
+    [Serializable]
+    public class TestSerializableClassDImpl : TestSerializableClassD {    
+    
     }
 
 }

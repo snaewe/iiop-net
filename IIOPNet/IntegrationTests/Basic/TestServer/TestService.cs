@@ -40,6 +40,37 @@ namespace Ch.Elca.Iiop.IntegrationTests {
         public System.Int32 Y;
     }
 
+    [Serializable]
+    public class TestSerializableClassB1 {
+        public System.String Msg;
+    }
+    
+    [Serializable]
+    public class TestSerializableClassB2 : TestSerializableClassB1 {
+        public System.String DetailedMsg;
+    }
+
+    public abstract class TestNonSerializableBaseClass {
+        public abstract System.String Format();
+    }
+
+    [Serializable]
+    public class TestSerializableClassC : TestNonSerializableBaseClass {
+        
+        public String Msg;
+        
+        public override System.String Format() {
+            throw new NotImplementedException();
+        }
+    }
+
+    [Serializable]
+    public class TestSerializableClassD {
+        public TestSerializableClassB1 val1;
+        public TestSerializableClassB1 val2;
+    }
+
+
     public class Adder : MarshalByRefObject {
         public System.Int32 Add(System.Int32 sum1, System.Int32 sum2) {
             return sum1 + sum2;
@@ -124,10 +155,27 @@ namespace Ch.Elca.Iiop.IntegrationTests {
             return adder.Add(sum1, sum2);
         }
 
-        public TestStructA TestEchoStruct(TestStructA test) {
-            return test;
-        }       
+        public TestStructA TestEchoStruct(TestStructA arg) {
+            return arg;
+        }
 
+        public TestSerializableClassB2 TestChangeSerializableB2(TestSerializableClassB2 arg, System.String detail) {
+            arg.DetailedMsg = detail;
+            return arg;
+        }
+
+        public TestSerializableClassC TestEchoSerializableC(TestSerializableClassC arg) {
+            return arg;
+        }
+        
+        public TestNonSerializableBaseClass TestAbstractValueTypeEcho(TestNonSerializableBaseClass arg) {
+            return arg;
+        }
+
+        public TestSerializableClassD TestChangeSerilizableD(TestSerializableClassD arg, System.String newMessage) {
+            arg.val1.Msg = newMessage;
+            return arg;
+        }
 
         public override object InitializeLifetimeService() {
             // live forever

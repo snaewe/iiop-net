@@ -197,15 +197,6 @@ namespace Ch.Elca.Iiop.IntegrationTests {
             Assertion.AssertEquals("hik", result[0]);
         }
 
-        public void TestStruct() {
-            TestStructA arg = new TestStructAImpl();
-            arg.X = 11;
-            arg.Y = -15;
-            TestStructA result = m_testService.TestEchoStruct(arg);
-            Assertion.AssertEquals(arg.X, result.X);
-            Assertion.AssertEquals(arg.Y, result.Y);
-        }
-
         public void TestRemoteObjects() {
             Adder adder = m_testService.RetrieveAdder();
             System.Int32 arg1 = 1;
@@ -221,6 +212,75 @@ namespace Ch.Elca.Iiop.IntegrationTests {
             System.Int32 result = m_testService.AddWithAdder(adder, arg1, arg2);
             Assertion.AssertEquals((System.Int32) arg1 + arg2, result);
         }
+
+        public void TestStruct() {
+            TestStructA arg = new TestStructAImpl();
+            arg.X = 11;
+            arg.Y = -15;
+            TestStructA result = m_testService.TestEchoStruct(arg);
+            Assertion.AssertEquals(arg.X, result.X);
+            Assertion.AssertEquals(arg.Y, result.Y);
+        }
+
+        /// <summary>
+        /// Checks, if the repository id of the value-type itself is used and not the rep-id 
+        /// for the implementation class
+        /// </summary>
+        public void TestTypeOfValueTypePassed() {
+            TestSerializableClassB2Impl arg = new TestSerializableClassB2Impl();
+            arg.Msg = "msg";            
+            TestSerializableClassB2 result = m_testService.TestChangeSerializableB2(arg, arg.DetailedMsg);
+            Assertion.AssertEquals(result.Msg, arg.Msg);
+        }
+        
+        /// <summary>
+        /// Checks, if the fields of a super-type are serilised too
+        /// </summary>
+        public void TestValueTypeInheritance() {
+            TestSerializableClassB2 arg = new TestSerializableClassB2Impl();
+            arg.Msg = "msg";
+            System.String newDetail = "new detail";
+            TestSerializableClassB2 result = m_testService.TestChangeSerializableB2(arg, newDetail);
+            Assertion.AssertEquals(newDetail, result.DetailedMsg);
+            Assertion.AssertEquals(arg.Msg, result.Msg);
+        }
+
+        /// <summary>
+        /// Checks, if a formal parameter type, which is not Serilizable works correctly,
+        /// if an instance of a Serializable subclass is passed.
+        /// </summary>
+        public void TestNonSerilizableFormalParam() {
+            TestNonSerializableBaseClass arg = new TestSerializableClassCImpl();
+            TestNonSerializableBaseClass result = m_testService.TestAbstractValueTypeEcho(arg);
+            Assertion.AssertEquals(typeof(TestSerializableClassCImpl), result.GetType());
+        }
+
+        public void TestBaseTypeNonSerializableParam() {
+            TestSerializableClassCImpl arg = new TestSerializableClassCImpl();
+            arg.Msg = "test";
+            TestSerializableClassC result = m_testService.TestEchoSerializableC(arg);
+            Assertion.AssertEquals(arg.Msg, result.Msg);
+            // check method implementation called
+            Assertion.AssertEquals(result.Msg, result.Format());
+        }
+
+        /// <summary>
+        /// Checks, if fields with reference semantics retain their semantic during serialisation / deserialisation
+        /// </summary>
+        public void TestReferenceSematicForValueTypeField() {
+            TestSerializableClassD arg = new TestSerializableClassDImpl();
+            arg.val1 = new TestSerializableClassB1Impl();
+            arg.val1.Msg = "test";
+            arg.val2 = arg.val1;
+            System.String newMsg = "test-new";
+            TestSerializableClassD result = m_testService.TestChangeSerilizableD(arg, newMsg);
+            Assertion.AssertEquals(newMsg, result.val1.Msg);
+            Assertion.AssertEquals(result.val1, result.val2);
+            Assertion.AssertEquals(result.val1.Msg, result.val2.Msg);
+        }
+
+
+
 
     }
 
