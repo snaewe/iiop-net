@@ -49,7 +49,7 @@ TestService_impl::EchoWChar(CORBA::WChar arg)
 CORBA::WChar* 
 TestService_impl::EchoWString(const CORBA::WChar* arg) 
 {
-    return (CORBA::WChar*)arg;
+    return CORBA::wstring_dup(arg);
 }
 
 
@@ -116,7 +116,7 @@ TestService_impl::RetrieveTypedefedSeq(CORBA::Long nrOfElems, CORBA::Long member
 TestService_impl::RetrieveWstringSeq(const CORBA::WChar * val, CORBA::Long nrOfElems) {
   CORBA::WChar** contentArr = new CORBA::WChar*[nrOfElems];
   for (int i = 0; i < nrOfElems; i++) {
-      contentArr[i] = (CORBA::WChar*)val;
+      contentArr[i] = CORBA::wstring_dup(val);
   }
   wstringSeq* result = new wstringSeq((CORBA::ULong)nrOfElems, (CORBA::ULong)nrOfElems, contentArr);
   return result;
