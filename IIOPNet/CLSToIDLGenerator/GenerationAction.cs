@@ -470,7 +470,7 @@ namespace Ch.Elca.Iiop.Idl {
             }
             m_currentOutputStream.Write(fieldTypeMapped + " ");
             // name of field
-            m_currentOutputStream.Write(fieldToMap.Name); // TBD: check if no IDL-keyword ...
+            m_currentOutputStream.Write(IdlNaming.MapClsNameToIdlName(fieldToMap.Name));
             m_currentOutputStream.WriteLine(";");
         }                    
         
@@ -485,7 +485,7 @@ namespace Ch.Elca.Iiop.Idl {
                                                                 Util.AttributeExtCollection.ConvertToAttributeCollection(propertyToMap.GetCustomAttributes(true)),
                                                                 m_refMapper);
             m_currentOutputStream.Write(propTypeMapped + " ");
-            m_currentOutputStream.Write(propertyToMap.Name);
+            m_currentOutputStream.Write(IdlNaming.MapClsNameToIdlName(propertyToMap.Name));
             m_currentOutputStream.WriteLine(";");
         }
 
