@@ -70,7 +70,10 @@ namespace Ch.Elca.Iiop {
         /// <summary><see cref="Ch.Elca.Iiop.ITranport.CloseConnection/></summary>
         public void CloseConnection() {
             try {
-                m_socket.Close(); // closes the stream too
+                m_stream.Close(); // close the stream and the socket.
+            } catch (Exception) { }
+            try {
+                m_socket.Close();
             } catch (Exception) {}
             m_socket = null;
         }
