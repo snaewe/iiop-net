@@ -329,12 +329,12 @@ namespace Ch.Elca.Iiop.IdlCompiler.Action {
                 
         private string GetFullTypeNameForSymbol(Symbol forSymbol) {
             Scope declIn = forSymbol.getDeclaredIn();
-            if (!(IsNestedType(forSymbol) && !IsNestableDirectlyInParent(forSymbol))) {
+            if (!IsNestedType(forSymbol)) {
                 String fullName = declIn.getFullyQualifiedNameForSymbol(forSymbol.getSymbolName());
                 return fullName;                
-            } else {
-                // forSymbol represents a nested type, which is not directly nestable into
-                // the outer type -> type is defined in a special namespace
+            } else {            	
+                // forSymbol represents a nested type -> type is defined in a special namespace
+                // all nested types are defined in a special namespace for nested, see IDL to CLS spec 3.14
                 return GetFullTypeNameForNestedNotInOuterType(forSymbol);
             }
         }
@@ -494,22 +494,6 @@ namespace Ch.Elca.Iiop.IdlCompiler.Action {
             return parentScope.IsTypeScope();
         }
         
-        /// <summary>Checks, if a nested type is </summary>
-        private bool IsNestableDirectlyInParent(Symbol forSymbol) {
-            Scope potentialTypeScope = forSymbol.getDeclaredIn();
-            string potentialTypeName = potentialTypeScope.getScopeName();
-            if ((potentialTypeScope.getParentScope() != null) &&
-                (potentialTypeScope.IsTypeScope())) {
-                Symbol typeSymbol = 
-                    potentialTypeScope.getParentScope().getSymbol(potentialTypeName);
-                TypeContainer type = GetKnownType(typeSymbol);
-                if (type.GetCompactClsType().IsClass) {
-                    return true;
-                }
-            }
-            return false;
-        }                
-
         #endregion IMethods                     
 
     }
