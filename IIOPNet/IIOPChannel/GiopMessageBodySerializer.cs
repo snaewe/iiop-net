@@ -100,6 +100,44 @@ namespace Ch.Elca.Iiop.MessageHandling {
         #endregion IProperties
 
     }
+    
+    /// <summary>contains the information for a location forward reply</summary>
+    internal class LocationForwardMessage : IMessage {
+        
+        #region Constants
+        
+        internal const string FWD_PROXY_KEY = "__FwdToProxy";
+        
+        #endregion Constants
+        #region IFields        
+        
+        private IDictionary m_properties = new Hashtable();
+        
+        #endregion IFields
+        #region IConstructors
+        
+        internal LocationForwardMessage(MarshalByRefObject toProxy) {
+            m_properties[FWD_PROXY_KEY] = toProxy;            
+        }
+        
+        #endregion IConstructors
+        #region IProperties
+        
+        public IDictionary Properties {
+            get {
+                return m_properties;
+            }
+        }
+        
+        internal MarshalByRefObject FwdToProxy {
+            get {
+                return (MarshalByRefObject)m_properties[FWD_PROXY_KEY];
+            }
+        }
+        
+        #endregion IProperties
+        
+    }
 
 
     /// <summary>
@@ -702,8 +740,9 @@ namespace Ch.Elca.Iiop.MessageHandling {
                         throw DeserialiseSystemError(cdrStream, version); // the error .NET message for this exception is created in the formatter
                     case 3 :
                         // LOCATION_FORWARD:
-                        // --> reissue request transparentely to another object
-                        response = ReissueLocationFwd(cdrStream, methodCall); break;
+                        // --> deserialise it and return location fwd message
+                        response = DeserialiseLocationFwd(cdrStream, version, methodCall); 
+                        break;
                     default : 
                         // deseralization of reply error, unknown reply status: responseStatus
                         // the error .NET message for this exception is created in the formatter
@@ -774,9 +813,12 @@ namespace Ch.Elca.Iiop.MessageHandling {
         }
         
         /// <summary>
-        /// reissue the request on location fwd status
+        /// deserialise the location fwd
         /// </summary>
-        private IMessage ReissueLocationFwd(CdrInputStream cdrStream, IMethodCallMessage request) {
+        private LocationForwardMessage DeserialiseLocationFwd(CdrInputStream cdrStream, 
+                                                              GiopVersion version,
+                                                              IMethodCallMessage request) {
+            AlignBodyIfNeeded(cdrStream, version);
             // read the Location fwd IOR
             Marshaller marshaller = Marshaller.GetSingleton();
             MarshalByRefObject newProxy = marshaller.Unmarshal(request.MethodBase.DeclaringType, new AttributeExtCollection(), cdrStream)
@@ -784,17 +826,14 @@ namespace Ch.Elca.Iiop.MessageHandling {
             if (newProxy == null) {
                 throw new OBJECT_NOT_EXIST(2402, CompletionStatus.Completed_No);
             }
-            object[] reqArgs = new object[request.Args.Length];             
-            request.Args.CopyTo(reqArgs, 0);
-            object retVal = request.MethodBase.Invoke(newProxy, reqArgs);
-            return CreateReturnMsgForValues(retVal, reqArgs, request);
+            return new LocationForwardMessage(newProxy);            
         }
-            
+        
         /// <summary>
         /// creates a return message for a return value and possible out/ref args among the sent arguments
         /// </summary>
-        private ReturnMessage CreateReturnMsgForValues(object retVal, object[] reqArgs,
-                                                       IMethodCallMessage request) {
+        internal ReturnMessage CreateReturnMsgForValues(object retVal, object[] reqArgs,
+                                                        IMethodCallMessage request) {
             // find out args
             MethodInfo targetMethod = (MethodInfo)request.MethodBase;
             ParameterInfo[] parameters = targetMethod.GetParameters();
@@ -812,8 +851,8 @@ namespace Ch.Elca.Iiop.MessageHandling {
             }
             // create the return message
             return new ReturnMessage(retVal, outArgs, outArgs.Length, null, request); 
-        }
-
+        }        
+            
         #endregion Replys
         #region Locate
 
