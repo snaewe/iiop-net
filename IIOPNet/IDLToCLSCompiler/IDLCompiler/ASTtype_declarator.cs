@@ -16,6 +16,12 @@ public class ASTtype_declarator : SimpleNode {
   public override Object jjtAccept(IDLParserVisitor visitor, Object data) {
     return visitor.visit(this, data);
   }
+  
+  public override string GetIdentification() {
+    return "typedef for type " + 
+      ((SimpleNode)jjtGetChild(0)).GetIdentification();
+  }
+
 }
 
 

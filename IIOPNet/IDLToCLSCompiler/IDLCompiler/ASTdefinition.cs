@@ -18,9 +18,13 @@ public class ASTdefinition : SimpleNode {
   }
   
   public override string GetIdentification() {
-      return ((SimpleNode)jjtGetParent()).GetIdentification();
+    return ((SimpleNode)jjtGetChild(0)).GetIdentification();
   }
-
+  
+  public override string GetEmbedderDesc() {
+    // is called by children for the defined in part
+    return ((SimpleNode)jjtGetParent()).GetEmbedderDesc();
+  }
   
 }
 

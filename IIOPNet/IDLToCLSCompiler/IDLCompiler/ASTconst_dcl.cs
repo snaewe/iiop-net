@@ -39,6 +39,12 @@ public class ASTconst_dcl : SimpleNodeWithIdent {
   public override Object jjtAccept(IDLParserVisitor visitor, Object data) {
     return visitor.visit(this, data);
   }
+  
+  public override string GetIdentification() {
+    return "constant " + getIdent() + " defined in " + 
+      ((SimpleNode)jjtGetParent()).GetEmbedderDesc();
+  }
+
 }
 
 

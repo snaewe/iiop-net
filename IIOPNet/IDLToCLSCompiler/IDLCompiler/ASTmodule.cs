@@ -43,6 +43,14 @@ public class ASTmodule : SimpleNodeWithIdent {
   public override string GetIdentification() {
       return "module " + getIdent();
   }
+  
+  public override string GetEmbedderDesc() {
+      string embeddedIn = ((SimpleNode)jjtGetParent()).GetEmbedderDesc();
+      if (!embeddedIn.Equals("")) {
+          embeddedIn = " in " + embeddedIn;
+      }
+      return "module " + getIdent() + embeddedIn;
+  }
 
   
 }
