@@ -321,7 +321,7 @@ namespace ch.elca.iiop.demo.ejbChatroom {
         /// <summary>adds a new message to the message list</summary>
         internal void AddMessage(Message newMessage) {
             MessageImpl theMsg = (MessageImpl) newMessage;
-            string entry = "[" + theMsg.fromUser + "] " + theMsg.msg;
+            string entry = "[" + theMsg.originator + "] " + theMsg.msg;
             Console.WriteLine("received new: " + entry);
             m_messages.Items.Add(entry);
         }

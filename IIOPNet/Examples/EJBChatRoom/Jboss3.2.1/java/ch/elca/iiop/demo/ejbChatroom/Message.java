@@ -54,7 +54,7 @@ public class Message implements Serializable {
         return m_msg;
     }
     
-    public String getFromUser() {
+    public String getOriginator() {
         return m_originator;
     }    
 

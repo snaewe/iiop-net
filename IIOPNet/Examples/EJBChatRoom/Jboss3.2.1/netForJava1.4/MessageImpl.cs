@@ -16,7 +16,7 @@ namespace ch.elca.iiop.demo.ejbChatroom {
             m_msg = msg;
         }
 
-        public override string fromUser {
+        public override string Originator {
             get {
                 return m_originator;
             }
