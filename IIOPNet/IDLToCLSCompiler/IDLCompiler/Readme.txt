@@ -1,0 +1,11 @@
+This compiler creates CLS modules out of idl-files
+
+usage:
+
+arg1: target assembly name
+arg2 - argN: idl-Files to map
+
+because generated modules can't be changed after the generation, specify all important idl-files (e.g all Home/Remote-interfaces of java-beans) on the command line for one run. The dependant idl-files
+are automatically considered.
+
+The result of a compiler run is a multi module assembly, referencing the generated CLS-modules for all mapped IDL-modules.
