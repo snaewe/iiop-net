@@ -724,6 +724,14 @@ namespace Ch.Elca.Iiop.IntegrationTests {
             Assertion.AssertEquals("wrong constant value", '3', constValProduction);
         }
 
+        [Test]
+        public void TestWstringLiteralBugReport906401() {
+            String val_a = COMP_NAME_A.ConstVal;
+            Assertion.AssertEquals("wrong constant value", "test", val_a);
+            String val_b = COMP_NAME_B.ConstVal;
+            Assertion.AssertEquals("wrong constant value", "java:comp/env/ejb/Fibo", val_b);
+        }
+
         /// <summary>checks, if channel uses is_a to check interface compatiblity on IOR deser,
         /// if other checks don't work</summary>
         [Test]

@@ -53,6 +53,11 @@ module IntegrationTests {
 
     const long BVAL = AVAL;
 
+    // IDLToCLSCompiler regression test:
+    // problem with wstring constant values
+    const wstring COMP_NAME_A = L"test";
+    const wstring COMP_NAME_B = L"java:comp/env/ejb/Fibo";
+
 
 	// IDLToCLSCompiler regressino test:
 	// check that "big" unions are compiled without crashing
