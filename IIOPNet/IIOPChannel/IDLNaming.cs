@@ -48,10 +48,10 @@ namespace Ch.Elca.Iiop.Idl {
         private static ArrayList s_idlKeywordList = new ArrayList();
 
         private static IComparer s_keyWordComparer = new CaseInsensitiveComparer();
-    	
-    	/// <summary>used as helper to map type names to idl for Cls types</summary>
-    	private static GenerationActionReference s_genIdlNameforClsType = new GenerationActionReference();
-    	
+        
+        /// <summary>used as helper to map type names to idl for Cls types</summary>
+        private static GenerationActionReference s_genIdlNameforClsType = new GenerationActionReference();
+        
         #endregion SFields
         #region SConstructor
 
@@ -141,17 +141,17 @@ namespace Ch.Elca.Iiop.Idl {
             if (isOverloaded) {
                 // do the mangling                
                 ParameterInfo[] parameters = method.GetParameters();
-            	if (parameters.Length == 0) {
-            	    methodName += "__";
-            	}
+                if (parameters.Length == 0) {
+                    methodName += "__";
+                }
                 ClsToIdlMapper mapper = ClsToIdlMapper.GetSingleton();
                 foreach (ParameterInfo parameter in parameters) {
                     string mappedTypeName = (string)mapper.MapClsType(parameter.ParameterType,
                                                                       ReflectionHelper.CollectParameterAttributes(parameter, method),
                                                                       s_genIdlNameforClsType);
-                	mappedTypeName.Replace(" ", "_");
-                	mappedTypeName.Replace("::", "__");
-                	methodName = methodName + "__" + mappedTypeName;
+                    mappedTypeName.Replace(" ", "_");
+                    mappedTypeName.Replace("::", "__");
+                    methodName = methodName + "__" + mappedTypeName;
                 }                
             }
             return methodName;
@@ -191,13 +191,13 @@ namespace Ch.Elca.Iiop.Idl {
             methodName = ReverseClsToIdlNameMapping(methodName);
             MethodInfo[] methods = serverType.GetMethods(BindingFlags.Public | BindingFlags.Instance);
             foreach (MethodInfo method in methods) {
-            	if (method.Name.Equals(methodName)) {
-            		// method name is equal -> check if mangled method Name is the same
-            		string mappedName = MapClsMethodNameToIdlName(method, true);
-            		if (mappedName.Equals(idlName)) {
-            			return method;
-            		}
-            	}
+                if (method.Name.Equals(methodName)) {
+                    // method name is equal -> check if mangled method Name is the same
+                    string mappedName = MapClsMethodNameToIdlName(method, true);
+                    if (mappedName.Equals(idlName)) {
+                        return method;
+                    }
+                }
             }
             return null;
         }
@@ -286,7 +286,7 @@ namespace Ch.Elca.Iiop.Idl {
             }
             result = "::" + result;
             result += ((!isTypeMappedFromIdl) ? MapShortTypeNameToIdl(forType) :
-            	                                ReverseIdlToClsNameMapping(forType.Name));
+                                                ReverseIdlToClsNameMapping(forType.Name));
             return result;
         }        
 
@@ -319,7 +319,7 @@ namespace Ch.Elca.Iiop.Idl {
             foreach (string part in parts) {
                 result = result + separator + 
                              ((!isMappedFromIdlToCls) ? MapClsNameToIdlName(part) :
-                             	                        ReverseIdlToClsNameMapping(part));
+                                                        ReverseIdlToClsNameMapping(part));
             }
             if (result.StartsWith(separator)) {
                 result = result.Substring(separator.Length);
@@ -711,7 +711,7 @@ namespace Ch.Elca.Iiop.Idl {
         }
         
         public object MapToTypeDesc(System.Type dotNetType) {
-            return null;
+            return "::CORBA::TypeCode";
         }        
         public object MapToTypeCode(System.Type dotNetType) {
             return "::CORBA::TypeCode";

@@ -998,27 +998,26 @@ namespace Ch.Elca.Iiop.Marshalling {
 
         #region IFields
         
-        private ValueObjectSerializer m_valObjectSer = new ValueObjectSerializer();
+        private TypeCodeSerializer m_typeCodeSer = new TypeCodeSerializer();
 
         #endregion IFields
         #region IMethods
 
         internal override void Serialise(Type formal, object actual, AttributeExtCollection attributes,
                                        CdrOutputStream targetStream) {
-            string repId = "";
-            if (actual != null) {
-                repId = Repository.GetRepositoryID((Type)actual);
-            }
-            CorbaTypeDesc desc = new CorbaTypeDesc(repId);
-            m_valObjectSer.Serialise(typeof(CorbaTypeDesc), desc, attributes, targetStream);
+            omg.org.CORBA.TypeCode tc;
+            tc = Repository.CreateTypeCodeForType((Type)actual, attributes);
+            m_typeCodeSer.Serialise(ReflectionHelper.CorbaTypeCodeType, tc, attributes, targetStream);
         }
 
         internal override object Deserialise(Type formal, AttributeExtCollection attributes,
-                                           CdrInputStream sourceStream) {
-            // deserialise as IDL-value-type
-            CorbaTypeDesc descRes = (CorbaTypeDesc)m_valObjectSer.Deserialise(typeof(CorbaTypeDesc), attributes, sourceStream);
-            string repId = descRes.respositoryID;
-            Type result = Repository.GetTypeForId(repId); // get the type for the id
+                                           CdrInputStream sourceStream) {            
+            omg.org.CORBA.TypeCode tc = 
+                (omg.org.CORBA.TypeCode)m_typeCodeSer.Deserialise(ReflectionHelper.CorbaTypeCodeType, attributes, sourceStream);
+            Type result = null;
+            if (!(tc is NullTC)) {
+                result = Repository.GetTypeForTypeCode(tc);
+            }
             return result;
         }
 

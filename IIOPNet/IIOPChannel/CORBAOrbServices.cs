@@ -55,6 +55,12 @@ namespace omg.org.CORBA {
 		TypeCode create_string_tc(int bound);
 		
 		TypeCode create_wstring_tc(int bound);
+	    
+		TypeCode create_ulong_tc();
+		
+    	TypeCode create_ushort_tc();
+		
+		TypeCode create_ulonglong_tc();    
 				
 		#endregion TypeCode creation operations
 		
@@ -64,6 +70,14 @@ namespace omg.org.CORBA {
 		
 		/// <summary>takes an object an returns the typecode for it</summary>
 		TypeCode create_tc_for(object forObject);
+	    
+		/// <summary>takes a type an returns the typecode for it</summary>
+		TypeCode create_tc_for_type(Type forType);	    
+		
+		/// <summary>
+		/// retrieves a type corresponding to the given typecode.
+		/// </summary>
+		Type get_type_for_tc(TypeCode tc);
 		
 		#region Pseudo object operation helpers
 				
@@ -186,6 +200,17 @@ namespace omg.org.CORBA {
 			}
 		}
 
+		public TypeCode create_tc_for_type(Type forType) {
+		    return Repository.CreateTypeCodeForType(forType, AttributeExtCollection.EmptyCollection);
+		}
+
+        public Type get_type_for_tc(TypeCode tc) {
+            if (!(tc is NullTC)) {
+                return Repository.GetTypeForTypeCode(tc);
+            } else {
+                return null;
+            }
+        }
 				
 		#endregion TypeCode creation operations		
 		

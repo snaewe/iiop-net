@@ -115,11 +115,11 @@ namespace Ch.Elca.Iiop.Idl {
         /// gets a CLS Type for the repository-id
         /// </summary>
         public static Type GetTypeForId(string repId) {
-        	if ((repId == String.Empty) ||
-        	    (repId == "IDL:omg.org/CORBA/Object:1.0")) {
-        	    return ReflectionHelper.MarshalByRefObjectType;
-        	}        	
-        	
+            if ((repId == String.Empty) ||
+                (repId == "IDL:omg.org/CORBA/Object:1.0")) {
+                return ReflectionHelper.MarshalByRefObjectType;
+            }           
+            
             string typeName = GetTypeNameForId(repId);
             if (typeName != null) {
                 // now try to load the type:
@@ -205,12 +205,12 @@ namespace Ch.Elca.Iiop.Idl {
                     string unqualName = typeName.Substring(lastPIndex + 1);
                     if (unqualName.StartsWith("_")) {
                         // rmi mapping adds a J before a class name starting with _
-                    	typeName = elemNamespace + ".J" + unqualName;
+                        typeName = elemNamespace + ".J" + unqualName;
                     }
                 } else {
                     if (typeName.StartsWith("_")) {
                         // rmi mapping adds a J before a class name starting with _
-                    	typeName = "J" + typeName;
+                        typeName = "J" + typeName;
                     }
                 }
                 typeName = ResolveRmiInnerTypeMapping(typeName);
@@ -350,7 +350,7 @@ namespace Ch.Elca.Iiop.Idl {
 
         private static Type LoadTypeFromAssemblies(string clsTypeName) {
             Type foundType = null;
-        	Assembly[] cachedAsms = s_asmCache.CachedAssemblies;
+            Assembly[] cachedAsms = s_asmCache.CachedAssemblies;
             for (int i = 0; i < cachedAsms.Length; i++) {
                 foundType = cachedAsms[i].GetType(clsTypeName);
                 if (foundType != null) { 
@@ -886,17 +886,7 @@ namespace Ch.Elca.Iiop.Idl {
         }
         
         public object MapToTypeDesc(Type clsType) {
-            omg.org.CORBA.TypeCode baseTypeCode = new NullTC();
-            // create the TypeCodes for the member
-            ValueTypeMember[] valueMembers = new ValueTypeMember[1];
-            omg.org.CORBA.TypeCode memberType = CreateOrGetTypeCodeForType(ReflectionHelper.StringType, 
-                                                    new AttributeExtCollection(new Attribute[] { 
-                                                        new WideCharAttribute(false), new StringValueAttribute() } ));
-            short visibility = VISIBILITY_PUBLIC;
-            valueMembers[0] = new ValueTypeMember("repositoryID", memberType, visibility);
-            return new ValueTypeTC(Repository.GetRepositoryID(clsType), 
-                                   IdlNaming.ReverseIdlToClsNameMapping(clsType.Name),
-                                   valueMembers, baseTypeCode, CONCRETE_VALUE_MOD);
+            return new omg.org.CORBA.TypeCodeTC();
         }
 
         public object MapToTypeCode(Type clsType) {
