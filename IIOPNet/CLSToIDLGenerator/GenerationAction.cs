@@ -314,8 +314,10 @@ namespace Ch.Elca.Iiop.Idl {
         private void MapMethods(Type typToMap, bool shouldThrowException, BindingFlags flags) {
             MethodInfo[] methods = typToMap.GetMethods(flags);
             foreach (MethodInfo info in methods) { 
-                if ((!info.IsPrivate) && (!CheckIsMethodInInterfaceOrBase(typToMap, info, flags))) { // private methods are not exposed
-                    MapMethod(info, typToMap, shouldThrowException);    
+                // private methods are not exposed
+                // specialName-methods are not mapped, e.g. property accessor methods are such methods
+                if ((!info.IsPrivate) && (!CheckIsMethodInInterfaceOrBase(typToMap, info, flags)) && (!info.IsSpecialName)) { 
+                    MapMethod(info, typToMap, shouldThrowException);
                 }
             }
         }
@@ -440,6 +442,9 @@ namespace Ch.Elca.Iiop.Idl {
         private void MapProperty(PropertyInfo propertyToMap, Type declaringType) {
             Type propertyType = propertyToMap.PropertyType;
             if ((propertyToMap.CanWrite) && (!propertyToMap.CanRead)) { return; } // not mappable
+            if (!propertyToMap.CanWrite) { // readonly
+                m_currentOutputStream.Write("readonly ");
+            }
             m_currentOutputStream.Write("attribute ");
             string propTypeMapped = (string)m_mapper.MapClsType(propertyType, 
                                                                 Util.AttributeExtCollection.ConvertToAttributeCollection(propertyToMap.GetCustomAttributes(true)),
