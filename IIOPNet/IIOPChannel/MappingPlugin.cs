@@ -146,7 +146,9 @@ namespace Ch.Elca.Iiop.Idl {
         public void AddMappingsFromFile(FileInfo configFile) {
              // load the xml-file
              XmlDocument doc = new XmlDocument();
-             doc.Load(new FileStream(configFile.FullName, FileMode.Open));
+             FileStream stream = new FileStream(configFile.FullName, FileMode.Open);
+             doc.Load(stream);
+             stream.Close();
              // process the file
              XmlNodeList elemList = doc.GetElementsByTagName("mapping");
              foreach (XmlNode elem in elemList) {                 
