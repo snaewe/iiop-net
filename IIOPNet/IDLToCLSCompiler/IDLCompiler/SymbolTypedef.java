@@ -36,8 +36,9 @@ package symboltable;
  * 
  *
  */
-public class SymbolTypedef extends Symbol 
-{
+public class SymbolTypedef extends Symbol {
+
+    #region IConstrutors
 
     /**
      * Constructor for SymbolFwdDecl.
@@ -46,6 +47,9 @@ public class SymbolTypedef extends Symbol
     public SymbolTypedef(String symbolName, Scope declaredIn) {
         super(symbolName, declaredIn);
     }
+
+    #endregion IConstructors
+    #region IMethods
     
     /**
      * @see java.lang.Object#toString()
@@ -53,6 +57,7 @@ public class SymbolTypedef extends Symbol
     public String toString() {
         return "typedef declaration with name: " + m_symbolName;
     }
-    
+
+    #endregion IMethods    
 
 }

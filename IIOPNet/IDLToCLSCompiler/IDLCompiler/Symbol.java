@@ -38,14 +38,22 @@ package symboltable;
  */
 public abstract class Symbol {
 
+    #region IFields
+
     private Scope m_declaredIn;
+
+    protected String m_symbolName;
+
+    #endregion IFields
+    #region IConstructors
 
     public Symbol(String symbolName, Scope declaredIn) {
         m_symbolName = symbolName;
         m_declaredIn = declaredIn;
     }
     
-    protected String m_symbolName;
+    #endregion IConstructors
+    #region IMethods        
 
     public Scope getDeclaredIn() {
         return m_declaredIn;
@@ -54,5 +62,7 @@ public abstract class Symbol {
     public String getSymbolName() {
         return m_symbolName;
     }
+
+    #endregion IMethods
 
 }

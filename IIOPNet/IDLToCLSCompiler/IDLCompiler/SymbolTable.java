@@ -40,16 +40,25 @@ import java.util.Stack;
  */
 public class SymbolTable {
 
+    #region IFields
+
+    /** the currently open scope */
+    private Scope m_currentScope;
+    /** the top scope for this symboltable */
+    private Scope m_topScope;
+
+
+
+    #endregion IFields
+    #region IConstructors
 
     public SymbolTable() {
         m_currentScope = new Scope("", null);
         m_topScope = m_currentScope;
     }
 
-    /** the currently open scope */
-    private Scope m_currentScope;
-    /** the top scope for this symboltable */
-    private Scope m_topScope;
+    #endregion IConstructors
+    #region IMethods
 
     /** opens a scope in the current scope */
     public Scope openScope(String scopeName) {
@@ -139,5 +148,7 @@ public class SymbolTable {
         result += m_topScope.toString();
         return result;
     }
+
+    #endregion IMethods
 
 }

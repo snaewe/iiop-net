@@ -38,6 +38,8 @@ package symboltable;
  */
 public class SymbolDefinition extends Symbol {
 
+    #region IConstructors
+
     /**
      * Constructor for SymbolDefinition.
      * @param symbolName
@@ -45,6 +47,9 @@ public class SymbolDefinition extends Symbol {
     public SymbolDefinition(String symbolName, Scope declaredIn) {
         super(symbolName, declaredIn);
     }
+
+    #endregion IConstructors
+    #region IMethods
     
      /**
      * @see java.lang.Object#toString()
@@ -52,6 +57,7 @@ public class SymbolDefinition extends Symbol {
     public String toString() {
         return "Symbol with name: " + m_symbolName;
     }
-    
+
+    #endregion IMethods    
 
 }

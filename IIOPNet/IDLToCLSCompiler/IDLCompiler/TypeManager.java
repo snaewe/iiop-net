@@ -43,14 +43,22 @@ import symboltable.Scope;
 /** manages fully created and only partly created types */
 public class TypeManager {
 
+    #region IFields
+
     private Hashtable m_typesInCreation = new Hashtable();
     private Hashtable m_typeTable = new Hashtable();
     private Hashtable m_typedefTable = new Hashtable();
     private ModuleBuilderManager m_manager;
 
+    #endregion IFields
+    #region IConstructors
+
     public TypeManager(ModuleBuilderManager manager) {
         m_manager = manager;
     }
+
+    #endregion IConstructors
+    #region IMethods
 
     /** register a not fully created type */
     public void RegisterTypeFwdDecl(TypeBuilder type, Symbol forSymbol) {
@@ -184,10 +192,21 @@ public class TypeManager {
         addTypeDefinition(fullDecl, forSymbol);
     }
 
+    #endregion IMethods
+
 }
 
 /** helper class to contain a .NET Type and the attributes on the param, field, ... */
 class TypeContainer {
+    
+    #region IFields
+
+    private Type m_clsType;
+    private CustomAttributeBuilder[] m_attrs;
+
+    #endregion IFields
+    #region IConstructors
+    
     public TypeContainer(Type clsType, CustomAttributeBuilder[] attrs) {
         m_clsType = clsType;
         m_attrs = attrs;
@@ -197,8 +216,8 @@ class TypeContainer {
         this(clsType, new CustomAttributeBuilder[0]);
     }
 
-    private Type m_clsType;
-    private CustomAttributeBuilder[] m_attrs;
+    #endregion IConstructors
+    #region IMethods
 
     public Type getCLSType() {
         return m_clsType;
@@ -207,5 +226,8 @@ class TypeContainer {
     public CustomAttributeBuilder[] getAttrs() {
         return m_attrs;
     }
+
+    #endregion IMethods
+
 }
 

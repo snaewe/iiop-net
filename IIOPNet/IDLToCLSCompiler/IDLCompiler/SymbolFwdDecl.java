@@ -38,6 +38,8 @@ package symboltable;
  */
 public class SymbolFwdDecl extends Symbol {
 
+    #region IConstructors
+
     /**
      * Constructor for SymbolFwdDecl.
      * @param symbolName
@@ -45,6 +47,9 @@ public class SymbolFwdDecl extends Symbol {
     public SymbolFwdDecl(String symbolName, Scope declaredIn) {
         super(symbolName, declaredIn);
     }
+
+    #endregion IConstructors
+    #region IMethods
     
     /**
      * @see java.lang.Object#toString()
@@ -53,5 +58,6 @@ public class SymbolFwdDecl extends Symbol {
         return "fwd declaration with name: " + m_symbolName;
     }
     
+    #endregion IMethods
 
 }
