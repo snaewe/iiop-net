@@ -43,6 +43,12 @@ typedef sequence<wstringSeq> seqOfWStringSeq;
 
 typedef sequence<long, 3> boundedLongSeq;
 
+// test for sequence of sequence (problem report)
+typedef sequence< octet, 16 > Uuid;
+typedef sequence< Uuid > Uuids;
+
+
+
 typedef long longTD;
 
 struct StructWithTypedefMember {
@@ -74,6 +80,7 @@ interface TestService {
     seqOfWStringSeq EchoSeqOfWStringSeq(in seqOfWStringSeq arg);
 
     boundedLongSeq EchoBoundedSeq(in boundedLongSeq arg);
+    Uuids EchoUuids(in Uuids arg);
 
     InnerStruct EchoInnerStruct(in InnerStruct arg);
 

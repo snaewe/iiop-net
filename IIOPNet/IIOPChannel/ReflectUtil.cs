@@ -55,6 +55,7 @@ namespace Ch.Elca.Iiop.Util {
         private static Type s_fromIdlNameAttributeType = typeof(FromIdlNameAttribute);
         private static Type s_throwsIdlExceptionAttributeType = typeof(ThrowsIdlExceptionAttribute);
         private static Type s_oneWayAttributeType = typeof(System.Runtime.Remoting.Messaging.OneWayAttribute);
+        private static Type s_iOrderedAttributeType = typeof(IOrderedAttribute);
                 
         private static Type s_voidType = typeof(void);
         private static Type s_stringType = typeof(System.String);
@@ -172,6 +173,13 @@ namespace Ch.Elca.Iiop.Util {
         public static Type OneWayAttributeType {
             get {
                 return s_oneWayAttributeType;
+            }
+        }
+        
+        /// <summary>chaches typeof(IOrderedAttribute)</summary>
+        public static Type IOrderedAttributeType {
+            get {
+                return s_iOrderedAttributeType;
             }
         }
         

@@ -127,7 +127,9 @@ namespace Ch.Elca.Iiop.Idl {
             // custom attributes
             System.Object[] attrs = forParamInfo.GetCustomAttributes(false);
             m_paramType = new TypeContainer(forParamInfo.ParameterType,
-                                            attrs);
+                                            AttributeExtCollection.
+                                                ConvertToAttributeCollection(attrs), 
+                                            true);
         }
 
         #endregion IConstructors

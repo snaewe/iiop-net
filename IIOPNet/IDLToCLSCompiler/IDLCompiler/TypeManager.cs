@@ -97,7 +97,7 @@ namespace Ch.Elca.Iiop.IdlCompiler.Action {
             Scope declIn = forSymbol.getDeclaredIn();
             if (!(IsNestedType(forSymbol) && !IsNestableDirectlyInParent(forSymbol))) {
                 String fullName = declIn.getFullyQualifiedNameForSymbol(forSymbol.getSymbolName());
-                return fullName;        		
+                return fullName;                
             } else {
                 // forSymbol represents a nested type, which is not directly nestable into
                 // the outer type -> type is defined in a special namespace
@@ -118,7 +118,7 @@ namespace Ch.Elca.Iiop.IdlCompiler.Action {
                                     GetKnownType(forSymbol).GetCompactClsType().FullName +
                                     " is already declared for symbol: " + forSymbol);
             }
-            TypeContainer container = new CompileTimeTypeContainer(this, type, new CustomAttributeBuilder[0]);
+            TypeContainer container = new CompileTimeTypeContainer(this, type);
             m_typesInCreation[forSymbol] = container;
         }
 
@@ -164,10 +164,10 @@ namespace Ch.Elca.Iiop.IdlCompiler.Action {
         }
         
         private Type GetTypeFromRefAssemblies(Symbol forSymbol) {
-        	string fullName = GetFullTypeNameForSymbol(forSymbol);        	
-        	String repId = 
-        	    forSymbol.getDeclaredIn().getRepositoryIdFor(forSymbol.getSymbolName());
-        	return m_refAsmTypes.GetTypeFromRefAssemblies(fullName, repId);
+            string fullName = GetFullTypeNameForSymbol(forSymbol);          
+            String repId = 
+                forSymbol.getDeclaredIn().getRepositoryIdFor(forSymbol.getSymbolName());
+            return m_refAsmTypes.GetTypeFromRefAssemblies(fullName, repId);
         }
 
         #region methods for supporting generation for more than one parse result    
@@ -256,7 +256,7 @@ namespace Ch.Elca.Iiop.IdlCompiler.Action {
             if (result == null) {
                 Type fromBuildMod = GetTypeFromBuildModule(forSymbol);
                 if (fromBuildMod != null) {
-                    result = new CompileTimeTypeContainer(this, fromBuildMod, new CustomAttributeBuilder[0]);
+                    result = new CompileTimeTypeContainer(this, fromBuildMod);
                 }        
             }
             if (result == null) { 
@@ -265,7 +265,7 @@ namespace Ch.Elca.Iiop.IdlCompiler.Action {
                 Type fromAsm = GetTypeFromRefAssemblies(forSymbol);
                 if (fromAsm != null) {
                     // remark: all types in ref assemblies are fully completed -> no need for compileTimeTypeContainer
-                    result = new TypeContainer(fromAsm, new CustomAttributeBuilder[0]);
+                    result = new TypeContainer(fromAsm);
                 }
             }
             if ((result == null) && (m_sequenceRecursionAllowedType != null) &&
@@ -288,7 +288,7 @@ namespace Ch.Elca.Iiop.IdlCompiler.Action {
         
         /// <summary>register a full type definition (CreateType() already called)</summary>
         public void RegisterTypeDefinition(Type fullDecl, Symbol forSymbol) {
-            TypeContainer container = new CompileTimeTypeContainer(this, fullDecl, new CustomAttributeBuilder[0]);
+            TypeContainer container = new CompileTimeTypeContainer(this, fullDecl);
             AddTypeDefinition(container, forSymbol);
         }
 
@@ -299,7 +299,7 @@ namespace Ch.Elca.Iiop.IdlCompiler.Action {
         public void ReplaceFwdDeclWithFullDecl(Type fullDecl, Symbol forSymbol) {
             m_typesInCreation.Remove(forSymbol);
             // add to the fully created types
-            TypeContainer container = new CompileTimeTypeContainer(this, fullDecl, new CustomAttributeBuilder[0]);
+            TypeContainer container = new CompileTimeTypeContainer(this, fullDecl);
             m_typeTable[forSymbol] = container;
         }
 
@@ -314,7 +314,7 @@ namespace Ch.Elca.Iiop.IdlCompiler.Action {
         public void PublishTypeForSequenceRecursion(Symbol typeSym, TypeBuilder type) {
             if (!IsTypeDeclarded(typeSym)) {
                 TypeContainer container =
-                    new CompileTimeTypeContainer(this, type, new CustomAttributeBuilder[0]);
+                    new CompileTimeTypeContainer(this, type);
                 m_sequenceRecursionAllowedType = new TypeSymbolPair(typeSym, container);
             }            
         }
@@ -330,24 +330,24 @@ namespace Ch.Elca.Iiop.IdlCompiler.Action {
         /// is the type represented by forSymbol nested in another type?
         /// </summary>
         private bool IsNestedType(Symbol forSymbol) {
-        	Scope parentScope = forSymbol.getDeclaredIn();
-        	return parentScope.IsTypeScope();
+            Scope parentScope = forSymbol.getDeclaredIn();
+            return parentScope.IsTypeScope();
         }
         
         /// <summary>Checks, if a nested type is </summary>
         private bool IsNestableDirectlyInParent(Symbol forSymbol) {
             Scope potentialTypeScope = forSymbol.getDeclaredIn();
-        	string potentialTypeName = potentialTypeScope.getScopeName();
-        	if ((potentialTypeScope.getParentScope() != null) &&
-        	    (potentialTypeScope.IsTypeScope())) {
-        		Symbol typeSymbol = 
-        		    potentialTypeScope.getParentScope().getSymbol(potentialTypeName);
+            string potentialTypeName = potentialTypeScope.getScopeName();
+            if ((potentialTypeScope.getParentScope() != null) &&
+                (potentialTypeScope.IsTypeScope())) {
+                Symbol typeSymbol = 
+                    potentialTypeScope.getParentScope().getSymbol(potentialTypeName);
                 TypeContainer type = GetKnownType(typeSymbol);
-        	    if (type.GetCompactClsType().IsClass) {
-        	    	return true;
-        	    }
-        	}
-        	return false;
+                if (type.GetCompactClsType().IsClass) {
+                    return true;
+                }
+            }
+            return false;
         }                
 
         #endregion IMethods                     

@@ -1123,21 +1123,30 @@ namespace omg.org.CORBA {
             }                                    
             return arrayType;
         }
-
-        internal override AttributeExtCollection GetClsAttributesForTypeCode() {
+        
+        private IdlSequenceAttribute CreateSequenceAttribute() {
+            AttributeExtCollection attrColl = ((TypeCodeImpl)m_seqType).GetClsAttributesForTypeCode();
+            long orderNr = IdlSequenceAttribute.DetermineSequenceAttributeOrderNr(attrColl);
             if (m_length == 0) {
-                return new AttributeExtCollection(new Attribute[] { new IdlSequenceAttribute() });
+                return new IdlSequenceAttribute(orderNr);
             } else {
-                return new AttributeExtCollection(new Attribute[] { new IdlSequenceAttribute(m_length) });
+                return new IdlSequenceAttribute(orderNr, m_length);
             }
         }
+        
+        internal override AttributeExtCollection GetClsAttributesForTypeCode() {
+            AttributeExtCollection resultColl =
+                new AttributeExtCollection(new Attribute[] { CreateSequenceAttribute() } );
+            resultColl.InsertAttributes(((TypeCodeImpl)m_seqType).GetClsAttributesForTypeCode());
+            return resultColl;
+        }
 
-        internal override CustomAttributeBuilder[] GetAttributes() {
-            if (m_length == 0) {
-                return new CustomAttributeBuilder[] { new IdlSequenceAttribute().CreateAttributeBuilder() };
-            } else {
-                return new CustomAttributeBuilder[] { new IdlSequenceAttribute(m_length).CreateAttributeBuilder() };
-            }
+        internal override CustomAttributeBuilder[] GetAttributes() {            
+            CustomAttributeBuilder[] elemAttrBuilders = ((TypeCodeImpl)m_seqType).GetAttributes();
+            CustomAttributeBuilder[] result = new CustomAttributeBuilder[elemAttrBuilders.Length + 1];
+            result[0] = CreateSequenceAttribute().CreateAttributeBuilder();
+            elemAttrBuilders.CopyTo((Array)result, 1);
+            return result;
         }
 
         #endregion IMethods
@@ -1457,7 +1466,7 @@ namespace omg.org.CORBA {
                     }
                     ElementCase elemCase = new ElementCase(m_members[i].ElementName,
                                                            new TypeContainer(((TypeCodeImpl)m_members[i].ElementType).GetClsForTypeCode(),
-                                                                             ((TypeCodeImpl)m_members[i].ElementType).GetAttributes()));
+                                                                             ((TypeCodeImpl)m_members[i].ElementType).GetClsAttributesForTypeCode()));
                     elemCase.AddDiscriminatorValue(UnionGenerationHelper.DefaultCaseDiscriminator);
                     result[m_members[i].ElementName] = elemCase;
                 } else {
@@ -1467,7 +1476,7 @@ namespace omg.org.CORBA {
                     } else {
                         ElementCase elemCase = new ElementCase(m_members[i].ElementName,
                                                                new TypeContainer(((TypeCodeImpl)m_members[i].ElementType).GetClsForTypeCode(),
-                                                                                 ((TypeCodeImpl)m_members[i].ElementType).GetAttributes()));
+                                                                                 ((TypeCodeImpl)m_members[i].ElementType).GetClsAttributesForTypeCode()));
                         elemCase.AddDiscriminatorValue(m_members[i].DiscriminatorValue);
                         result[m_members[i].ElementName] = elemCase;
                     }
@@ -1481,7 +1490,7 @@ namespace omg.org.CORBA {
                                                                         TypeAttributes.Public);
             
             TypeContainer discrType = new TypeContainer(((TypeCodeImpl)m_discriminatorType).GetClsForTypeCode(), 
-                                                        ((TypeCodeImpl)m_discriminatorType).GetAttributes());
+                                                        ((TypeCodeImpl)m_discriminatorType).GetClsAttributesForTypeCode());
             // extract covered discr range from m_members
             ArrayList coveredDiscriminatorRange = CoveredDiscriminatorRange();             
             genHelper.AddDiscriminatorFieldAndProperty(discrType, coveredDiscriminatorRange);

@@ -118,20 +118,42 @@ namespace Ch.Elca.Iiop.Util {
         /// <summary>
         /// returns the first attribute in the collection, which is of the specified type
         /// </summary>
+        /// <remarks>
+        /// for attributes implementing IOrderedAttribute, this returns the attribute
+        /// with the highest order number
+        /// </remarks>
         public Attribute GetAttributeForType(Type attrType) {
+            Attribute result = null;
+            bool isOrdered = false;
+            if (ReflectionHelper.IOrderedAttributeType.IsAssignableFrom(attrType)) {
+                isOrdered = true;
+            }
             IEnumerator enumerator = GetEnumerator();
             while (enumerator.MoveNext()) {
                 Attribute attr = (Attribute)enumerator.Current;
                 if (attr.GetType() == attrType) { 
-                    return attr; 
+                    if (!isOrdered) {
+                        result = attr;
+                        break;
+                    } else {
+                        if ((result == null) ||
+                           (((IOrderedAttribute)result).OrderNr <
+                            ((IOrderedAttribute)attr).OrderNr)) {
+                            result = attr;        
+                        }
+                    }
                 }
             }
-            return null;
+            return result;
         }
 
         /// <summary>
         /// removes the first attribute of the given type
         /// </summary>
+        /// <remarks>
+        /// for attributes implementing IOrderedAttribute, this removes the attribute
+        /// with the highest order number
+        /// </remarks>
         /// <returns>The removed attribute, or null if not found</returns>
         public Attribute RemoveAttributeOfType(Type attrType) {
             Attribute foundAttr = GetAttributeForType(attrType);

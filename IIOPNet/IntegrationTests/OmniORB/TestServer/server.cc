@@ -32,6 +32,7 @@ public:
   ::wstringSeq* EchoWstringSeq(const ::wstringSeq& arg);
   ::seqOfWStringSeq* EchoSeqOfWStringSeq(const ::seqOfWStringSeq& arg);
   ::boundedLongSeq* EchoBoundedSeq(const ::boundedLongSeq& arg);
+  ::Uuids* EchoUuids(const ::Uuids& arg);
   TestService::InnerStruct EchoInnerStruct(const TestService::InnerStruct& arg);
   ::RecStruct* EchoRecStruct(const RecStruct& arg);
 
@@ -135,6 +136,11 @@ TestService_impl::EchoSeqOfWStringSeq(const ::seqOfWStringSeq& arg) {
 ::boundedLongSeq*
 TestService_impl::EchoBoundedSeq(const ::boundedLongSeq& arg) {
   return new ::boundedLongSeq(arg);
+}
+
+::Uuids*
+TestService_impl::EchoUuids(const ::Uuids& arg) {
+  return new ::Uuids(arg);
 }
 
 TestService::InnerStruct 

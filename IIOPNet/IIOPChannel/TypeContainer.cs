@@ -30,6 +30,7 @@
 using System;
 using System.Reflection;
 using System.Reflection.Emit;
+using System.Collections;
 using Ch.Elca.Iiop.Util;
 using omg.org.CORBA;
 
@@ -44,58 +45,67 @@ namespace Ch.Elca.Iiop.Idl {
         #region IFields
 
         private readonly Type m_clsType;
-        private readonly CustomAttributeBuilder[] m_compactTypeAttrs;
+        private readonly CustomAttributeBuilder[] m_compactTypeAttrsBuilder;
+        private readonly AttributeExtCollection m_compactTypeAttrInstances;
         private Type m_separatedClsType;
-        private CustomAttributeBuilder[] m_separatedAttrs;
+        private CustomAttributeBuilder[] m_separatedAttrsBuilder;
+        private AttributeExtCollection m_separatedAttrInstances;
 
         #endregion IFields
         #region IConstructors
     
-        public TypeContainer(Type clsType, CustomAttributeBuilder[] attrs) {
-            m_clsType = clsType;
-            m_separatedClsType = null;
-            if (attrs == null) {
-                throw new ArgumentException("TypeContainer; attrs must be != null"); 
-            }
-            m_compactTypeAttrs = attrs;
-            m_separatedAttrs = null;
-        }
-
-        public TypeContainer(Type clsType) : this(clsType, new CustomAttributeBuilder[0]){
+        public TypeContainer(Type clsType) : this(clsType, new AttributeExtCollection()){
         }
         
-        /// <summary>takes the type and the attributes as array of Attributes.
+        /// <summary>takes the type and the attributes in compact form</summary>
+        public TypeContainer(Type clsType, AttributeExtCollection attrs) : this(clsType, attrs, false) {
+        }
+        
+        /// <summary>
+        /// takes the type and the attributes either in compact or separated form (use alreadySeparated to specify).
         /// </summary>
-        /// <remarks>Use only the separated form with this constructor.</remarks>
-        public TypeContainer(Type separatedClsType, object[] attrs) {
-            m_clsType = separatedClsType;
-            m_separatedClsType = separatedClsType;
+        public TypeContainer(Type clsType, AttributeExtCollection attrs,
+                             bool alreadySeparated) {
             if (attrs == null) {
                 throw new ArgumentException("TypeContainer; attrs must be != null"); 
             }
-            CustomAttributeBuilder[] custAttrs = 
-                new CustomAttributeBuilder[attrs.Length];
-            for (int i = 0; i < attrs.Length; i++) {
-                if (attrs[i] is IIdlAttribute) {
-                    custAttrs[i] = ((IIdlAttribute) attrs[i]).CreateAttributeBuilder();
+            
+            ArrayList custAttrBuilders = new ArrayList();
+            foreach (Object attr in attrs) {
+                if (attr is IIdlAttribute) {
+                    CustomAttributeBuilder builder =
+                        ((IIdlAttribute) attr).CreateAttributeBuilder();
+                    custAttrBuilders.Add(builder);
                 }                    
             }
-            m_separatedAttrs = custAttrs;
-            m_compactTypeAttrs = custAttrs;
-
-        }
-
+            CustomAttributeBuilder[] custAttrBuilderArray = 
+                (CustomAttributeBuilder[])custAttrBuilders.ToArray(typeof(CustomAttributeBuilder));
+            
+            m_clsType = clsType;
+            m_compactTypeAttrsBuilder = custAttrBuilderArray;
+            m_compactTypeAttrInstances = attrs;                       
+            if (alreadySeparated) {   
+                m_separatedClsType = clsType;
+                m_separatedAttrsBuilder = custAttrBuilderArray;
+                m_separatedAttrInstances = attrs;
+            } else {
+                m_separatedClsType = null;
+                m_separatedAttrsBuilder = null;
+                m_separatedAttrInstances = null;
+            }
+        }                
+        
         #endregion IConstructors
         #region IMethods
-
+        
         /// <summary>
         /// check if CLS type is a fusioned form;
         /// </summary>
         private void CheckForFusionedForm() {
-        	// initalize for non-splittable:
-        	m_separatedClsType = m_clsType;
-        	m_separatedAttrs = m_compactTypeAttrs;
-        	// check for splittable
+            // initalize for non-splittable:
+            m_separatedClsType = m_clsType;
+            m_separatedAttrsBuilder = m_compactTypeAttrsBuilder;
+            // check for splittable
             if (m_clsType.IsSubclassOf(ReflectionHelper.BoxedValueBaseType)) {
                 AttributeExtCollection attrColl = AttributeExtCollection.
                     ConvertToAttributeCollection(m_clsType.GetCustomAttributes(true));
@@ -121,13 +131,18 @@ namespace Ch.Elca.Iiop.Idl {
         /// otherwise type couldn't be loaded from assembly?
         /// </remakrs>
         protected virtual void SplitBoxedForm(string boxedValueRepId) {
-            m_separatedClsType = (Type)m_clsType.InvokeMember(BoxedValueBase.GET_FIRST_NONBOXED_TYPE_METHODNAME,
+            Type separatedClsType = (Type)m_clsType.InvokeMember(BoxedValueBase.GET_FIRST_NONBOXED_TYPE_METHODNAME,
                                                               BindingFlags.InvokeMethod | BindingFlags.Public |
                                                               BindingFlags.NonPublic | BindingFlags.Static |
                                                               BindingFlags.DeclaredOnly,
                                                               null, null, new System.Object[0]);
-            m_separatedAttrs = new CustomAttributeBuilder[] { 
-                                   new BoxedValueAttribute(boxedValueRepId).CreateAttributeBuilder() };
+            
+            BoxedValueAttribute boxedValueAttr = new BoxedValueAttribute(boxedValueRepId);
+            CustomAttributeBuilder[] separatedAttrsBuilder = new CustomAttributeBuilder[] {
+                                    boxedValueAttr.CreateAttributeBuilder() };
+            SetSeparated(separatedClsType, separatedAttrsBuilder, 
+                         new object[] { boxedValueAttr } );
+            
         }
 
         /// <summary>
@@ -143,7 +158,11 @@ namespace Ch.Elca.Iiop.Idl {
         /// returns the custom attributes this TypeContainer was initalized from.        
         /// </summary>
         public CustomAttributeBuilder[] GetCompactTypeAttrs() {
-            return m_compactTypeAttrs;            
+            return m_compactTypeAttrsBuilder;            
+        }
+        
+        public AttributeExtCollection GetCompactTypeAttrInstances() {
+            return m_compactTypeAttrInstances;
         }
 
         
@@ -174,17 +193,29 @@ namespace Ch.Elca.Iiop.Idl {
         /// <returns></returns>
         public CustomAttributeBuilder[] GetSeparatedAttrs() {
             lock(this) {
-                if (m_separatedAttrs == null) {
+                if (m_separatedAttrsBuilder == null) {
                     CheckForFusionedForm();
                 }
-                return m_separatedAttrs;
+                return m_separatedAttrsBuilder;
             }
         }
         
-        protected void SetSeparated(Type separatedType, CustomAttributeBuilder[] separatedAttrs) {
+        public AttributeExtCollection GetSeparatedAttrInstances() {
+            lock(this) {
+                if (m_separatedAttrsBuilder == null) {
+                    CheckForFusionedForm();
+                }
+                return m_separatedAttrInstances;
+            }
+        }
+        
+        protected void SetSeparated(Type separatedType, CustomAttributeBuilder[] separatedAttrs,
+                                    object[] separatedAttrInstances) {
             lock(this) {
                 m_separatedClsType = separatedType;
-                m_separatedAttrs = separatedAttrs;
+                m_separatedAttrsBuilder = separatedAttrs;
+                m_separatedAttrInstances = 
+                    AttributeExtCollection.ConvertToAttributeCollection(separatedAttrInstances);
             }
         }
 

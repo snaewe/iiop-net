@@ -45,11 +45,11 @@ namespace Ch.Elca.Iiop.Services {
         #region IFields
         
         public int NativeCharSet;
-        [IdlSequence]
+        [IdlSequence(0)]
         public int[] CharConvSet;
         
         public int NativeWCharSet;
-        [IdlSequence]
+        [IdlSequence(0)]
         public int[] WCharConvSet;
         
         #endregion IFields

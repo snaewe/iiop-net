@@ -315,6 +315,10 @@ namespace Ch.Elca.Iiop.Idl {
         }
 
         
+        /// <summary>
+        /// used while generating a boxed value type for a native cls type, i.e.
+        /// no attributes other than a single IdlSequenceAttribute is needed on boxed field.
+        /// </summary>
         private FieldBuilder DefineBoxedField(TypeBuilder boxBuilder, Type boxedType,
                                               BoxedValueRuntimeTypeGenerator gen) {
             Type fieldType = boxedType; 
@@ -330,7 +334,7 @@ namespace Ch.Elca.Iiop.Idl {
             // create the field for the boxed value
             FieldBuilder fieldBuild = boxBuilder.DefineField("m_val", fieldType, FieldAttributes.Private);
             if (boxedType.IsArray) {
-                CustomAttributeBuilder attrBuilder = (new IdlSequenceAttribute()).CreateAttributeBuilder();
+                CustomAttributeBuilder attrBuilder = (new IdlSequenceAttribute(0)).CreateAttributeBuilder();
                 fieldBuild.SetCustomAttribute(attrBuilder);
             }
             return fieldBuild;

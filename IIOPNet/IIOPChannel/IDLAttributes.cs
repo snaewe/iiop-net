@@ -72,6 +72,26 @@ namespace Ch.Elca.Iiop.Idl {
         #endregion IMethods
 
     }
+    
+    /// <summary>
+    /// for attributes, which can be present multiple times on the same construct,
+    /// this number specifies, in which order the attributes should be considered
+    /// by the serialiser / deserialiser.
+    /// </summary>
+    public interface IOrderedAttribute {
+        
+        #region IProperties
+        
+        /// <summary>
+        /// the number in the ordered collection of these attributes.
+        /// </summary>
+        long OrderNr {
+            get;
+        }
+        
+        #endregion IProperties
+        
+    }
 
 
     /// <summary>
@@ -321,7 +341,7 @@ namespace Ch.Elca.Iiop.Idl {
     /// </remarks>
     [AttributeUsage(AttributeTargets.Parameter | AttributeTargets.ReturnValue | AttributeTargets.Field | AttributeTargets.Property, 
                     AllowMultiple = true)]
-    public sealed class IdlSequenceAttribute : Attribute, IIdlAttribute {
+    public sealed class IdlSequenceAttribute : Attribute, IIdlAttribute, IOrderedAttribute {
         
         #region IFields
 
@@ -329,6 +349,8 @@ namespace Ch.Elca.Iiop.Idl {
         /// for bounded sequences > 0 (max number of elements), for unbounded = 0
         /// </summary>
         private long m_bound = 0;
+        
+        private long m_orderNr;
 
         #endregion IFields
         #region IConsturctors
@@ -336,16 +358,16 @@ namespace Ch.Elca.Iiop.Idl {
         /// <summary>
         /// Constructor for unbounded sequences
         /// </summary>
-        public IdlSequenceAttribute() {
-            m_bound = 0;
+        public IdlSequenceAttribute(long orderNr) : this(orderNr, 0) {            
         }
 
         /// <summary>
         /// constructor for bounded sequences
         /// </summary>
         /// <param name="bound">max nr of elements</param>
-        public IdlSequenceAttribute(long bound) {
+        public IdlSequenceAttribute(long orderNr, long bound) {
             m_bound = bound;
+            m_orderNr = orderNr;
         }
 
         #endregion IConstructors
@@ -356,6 +378,12 @@ namespace Ch.Elca.Iiop.Idl {
                 return m_bound;
             }
         }
+        
+        public long OrderNr {
+            get {
+                return m_orderNr;
+            }
+        }
 
         #endregion IProperties
         #region IMethods
@@ -364,11 +392,12 @@ namespace Ch.Elca.Iiop.Idl {
         public CustomAttributeBuilder CreateAttributeBuilder() {
             Type attrType = this.GetType();
             if (!IsBounded()) {
-            ConstructorInfo attrConstr = attrType.GetConstructor(Type.EmptyTypes);
-                return new CustomAttributeBuilder(attrConstr, new Object[0]);
-            } else {
                 ConstructorInfo attrConstr = attrType.GetConstructor(new Type[] { ReflectionHelper.Int64Type });
-                return new CustomAttributeBuilder(attrConstr, new Object[] { m_bound } );
+                return new CustomAttributeBuilder(attrConstr, new Object[] { m_orderNr });
+            } else {
+                ConstructorInfo attrConstr = attrType.GetConstructor(new Type[] { ReflectionHelper.Int64Type, 
+                                                                                  ReflectionHelper.Int64Type });
+                return new CustomAttributeBuilder(attrConstr, new Object[] { m_orderNr, m_bound } );
             }
         }
 
@@ -381,6 +410,19 @@ namespace Ch.Elca.Iiop.Idl {
         }
 
         #endregion IMethods
+        #region SMethods
+        
+        public static long DetermineSequenceAttributeOrderNr(AttributeExtCollection elemTypeAttributes) {            
+            Attribute idlSeqAttr = elemTypeAttributes.GetAttributeForType(ReflectionHelper.IdlSequenceAttributeType);
+            if (idlSeqAttr != null) {
+                return ((IdlSequenceAttribute)idlSeqAttr).OrderNr + 1;
+            } else {
+                return 0;
+            }
+        }
+
+        
+        #endregion SMethods
 
     }
 

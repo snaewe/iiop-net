@@ -129,12 +129,16 @@ namespace Ch.Elca.Iiop.IntegrationTests {
             Assertion.AssertEquals(TestEnumForU.B, result2.Discriminator);
         }
 
-//        [Test]
-//        public void TestPassingStringAsAny() {
-//            string arg = "test";
-//            string result = (string)m_testService.EchoAny(arg);
-//            Assertion.AssertEquals(arg, result);
-//        }
+        [Test]
+        public void TestPassingStringAsAny() {
+            OrbServices orb = OrbServices.GetSingleton();
+            string arg = "test";
+            omg.org.CORBA.TypeCode wstringTC = orb.create_wstring_tc(0);
+            Any any = new Any(arg, wstringTC);
+            
+            string result = (string)m_testService.EchoAny(any);
+            Assertion.AssertEquals(arg, result);
+        }
 
         [Test]
         public void TestReceivingStringAsAny() {
@@ -249,6 +253,24 @@ namespace Ch.Elca.Iiop.IntegrationTests {
                 Assertion.AssertEquals(badParamE.Minor, 3434);
             }
 
+        }
+
+        [Test]
+        public void TestSeqOfBoundedSeq() {
+            byte[] innerSeqLengthOk = new byte[] { 1, 2, 3 };
+            byte[][] arg = new byte[20][];
+            for (int i = 0; i < arg.Length; i++) {
+                arg[i] = innerSeqLengthOk;
+            }
+            byte[][] result = m_testService.EchoUuids(arg);
+            Assertion.AssertNotNull(result);
+            Assertion.AssertEquals(arg.Length, result.Length);
+            for (int i = 0; i < result.Length; i++) {
+                Assertion.AssertEquals(arg[i].Length, result[i].Length);
+                for (int j = 0; j < result[i].Length; j++) {
+                    Assertion.AssertEquals(arg[i][j], result[i][j]);
+                }
+            }            
         }
 
         [Test]

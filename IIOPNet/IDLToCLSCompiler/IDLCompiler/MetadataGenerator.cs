@@ -737,7 +737,9 @@ public class MetaDataGenerator : IDLParserVisitor {
                 }
                 m_ilEmitHelper.AddMethod(classBuilder, methods[j].Name, paramSpecs,
                                          new TypeContainer(methods[j].ReturnType, 
-                                                           methods[j].ReturnTypeCustomAttributes.GetCustomAttributes(false)),
+                                                           AttributeExtCollection.ConvertToAttributeCollection(
+                                                               methods[j].ReturnTypeCustomAttributes.GetCustomAttributes(false)),
+                                                           true),
                                          MethodAttributes.Abstract | MethodAttributes.Public |
                                          MethodAttributes.Virtual | MethodAttributes.HideBySig);
                 
@@ -752,7 +754,8 @@ public class MetaDataGenerator : IDLParserVisitor {
                 }
                 
                 TypeContainer propType = new TypeContainer(properties[j].PropertyType,
-                                                           properties[j].GetCustomAttributes(true));
+                                                           AttributeExtCollection.ConvertToAttributeCollection(
+                                                           properties[j].GetCustomAttributes(true)), true);
                 MethodBuilder getAccessor = 
                     m_ilEmitHelper.AddPropertyGetter(classBuilder, properties[j].Name,
                                                      propType, MethodAttributes.Virtual | MethodAttributes.Abstract |
@@ -1658,7 +1661,8 @@ public class MetaDataGenerator : IDLParserVisitor {
      * @return a TypeContainer for the char type
      */
     public Object visit(ASTchar_type node, Object data) {
-        CustomAttributeBuilder[] attrs = new CustomAttributeBuilder[] { new WideCharAttribute(false).CreateAttributeBuilder()  };
+        AttributeExtCollection attrs = new AttributeExtCollection(
+            new Attribute[] { new WideCharAttribute(false) });
         TypeContainer containter = new TypeContainer(typeof(System.Char), attrs);
         return containter;
     }
@@ -1669,7 +1673,8 @@ public class MetaDataGenerator : IDLParserVisitor {
      * @return a type type container for the wchar type
      */
     public Object visit(ASTwide_char_type node, Object data) {
-        CustomAttributeBuilder[] attrs = new CustomAttributeBuilder[] { new WideCharAttribute(true).CreateAttributeBuilder() };
+        AttributeExtCollection attrs = new AttributeExtCollection(
+            new Attribute[] { new WideCharAttribute(true) });
         TypeContainer containter = new TypeContainer(typeof(System.Char), attrs);
         return containter;
     }
@@ -1700,7 +1705,8 @@ public class MetaDataGenerator : IDLParserVisitor {
      * @return a TypeContainer for the any type
      */
     public Object visit(ASTany_type node, Object data) {
-        CustomAttributeBuilder[] attrs = new CustomAttributeBuilder[] { new ObjectIdlTypeAttribute(IdlTypeObject.Any).CreateAttributeBuilder() };
+        AttributeExtCollection attrs = new AttributeExtCollection(
+            new Attribute[] { new ObjectIdlTypeAttribute(IdlTypeObject.Any) });
         TypeContainer container = new TypeContainer(typeof(System.Object), attrs);
         return container;
     }
@@ -1763,7 +1769,7 @@ public class MetaDataGenerator : IDLParserVisitor {
         Type resultType = structToCreate.CreateType();
         // type must be registered with the type-manager
         m_typeManager.RegisterTypeDefinition(resultType, forSymbol);
-        return new TypeContainer(resultType, new CustomAttributeBuilder[0]);
+        return new TypeContainer(resultType);
     }
 
     /**
@@ -1945,7 +1951,7 @@ public class MetaDataGenerator : IDLParserVisitor {
         Type resultType = genHelper.FinalizeType();
         // type must be registered with the type-manager
         m_typeManager.RegisterTypeDefinition(resultType, forSymbol);
-        return new TypeContainer(resultType, new CustomAttributeBuilder[0]);
+        return new TypeContainer(resultType);
     }
 
     /**
@@ -2082,7 +2088,7 @@ public class MetaDataGenerator : IDLParserVisitor {
 
         // type must be registered with the type-manager
         m_typeManager.RegisterTypeDefinition(resultType, forSymbol);
-        return new TypeContainer(resultType, new CustomAttributeBuilder[0]);
+        return new TypeContainer(resultType);
     }
 
     /**
@@ -2145,20 +2151,14 @@ public class MetaDataGenerator : IDLParserVisitor {
         // WideChar, StringValue
         // invariant: boxed value attribute is not among them, because elem type 
         // is in the compact form        
-        CustomAttributeBuilder[] customAttrs = 
-            new CustomAttributeBuilder[1 + elemType.GetCompactTypeAttrs().Length];
-        if (bound == 0) {
-            customAttrs[0] = new IdlSequenceAttribute().CreateAttributeBuilder();
-        } else {
-            customAttrs[0] = new IdlSequenceAttribute(bound).CreateAttributeBuilder();
-        }
-        if (elemType.GetCompactTypeAttrs().Length > 0) {
-            Array.Copy((Array)(elemType.GetCompactTypeAttrs()), 0,
-                       (Array)customAttrs, 1, 
-                       elemType.GetCompactTypeAttrs().Length );
-        }        
+        AttributeExtCollection elemAttributes = elemType.GetCompactTypeAttrInstances();
+        long seqAttrOrderNr = IdlSequenceAttribute.DetermineSequenceAttributeOrderNr(elemAttributes);
+        IdlSequenceAttribute seqAttr = new IdlSequenceAttribute(seqAttrOrderNr, bound);
+        AttributeExtCollection sequenceAttributes = new AttributeExtCollection();
+        sequenceAttributes.InsertAttributes(elemAttributes);
+        sequenceAttributes.InsertAttribute(seqAttr);
         TypeContainer result = new TypeContainer(arrayType,
-                                                 customAttrs );
+                                                 sequenceAttributes );
         return result;
     }
 
@@ -2167,7 +2167,8 @@ public class MetaDataGenerator : IDLParserVisitor {
      * @param data unsed
      */
     public Object visit(ASTstring_type node, Object data) {
-        CustomAttributeBuilder[] attrs = new CustomAttributeBuilder[] { new StringValueAttribute().CreateAttributeBuilder(), new WideCharAttribute(false).CreateAttributeBuilder() };
+        AttributeExtCollection attrs = new AttributeExtCollection(
+            new Attribute[] { new StringValueAttribute(), new WideCharAttribute(false) });
         TypeContainer containter = new TypeContainer(typeof(System.String), attrs);
         return containter;
     }
@@ -2178,7 +2179,8 @@ public class MetaDataGenerator : IDLParserVisitor {
      * @return a TypeContainer for the wideString-Type
      */
     public Object visit(ASTwide_string_type node, Object data) {
-        CustomAttributeBuilder[] attrs = new CustomAttributeBuilder[] { new StringValueAttribute().CreateAttributeBuilder(), new WideCharAttribute(true).CreateAttributeBuilder() };
+        AttributeExtCollection attrs = new AttributeExtCollection(
+            new Attribute[] { new StringValueAttribute(), new WideCharAttribute(true) });
         TypeContainer containter = new TypeContainer(typeof(System.String), attrs);
         return containter;
     }
@@ -2485,7 +2487,8 @@ public class MetaDataGenerator : IDLParserVisitor {
      * @return a Type Container for the Corba type ValueBase
      */
     public Object visit(ASTvalue_base_type node, Object data) {
-        CustomAttributeBuilder[] attrs = new CustomAttributeBuilder[] { new ObjectIdlTypeAttribute(IdlTypeObject.ValueBase).CreateAttributeBuilder() };
+        AttributeExtCollection attrs = new AttributeExtCollection(
+            new Attribute[] { new ObjectIdlTypeAttribute(IdlTypeObject.ValueBase) });
         TypeContainer container = new TypeContainer(typeof(System.Object), attrs);
         return container;
     }

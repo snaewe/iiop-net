@@ -31,6 +31,7 @@ using System;
 using System.Reflection;
 using System.Reflection.Emit;
 using Ch.Elca.Iiop.Idl;
+using Ch.Elca.Iiop.Util;
 
 namespace Ch.Elca.Iiop.IdlCompiler.Action {
     
@@ -44,13 +45,13 @@ namespace Ch.Elca.Iiop.IdlCompiler.Action {
         #endregion IFIelds
         #region IConstructors
     
-        public CompileTimeTypeContainer(TypeManager typeManager, Type clsType, CustomAttributeBuilder[] attrs) : 
+        private CompileTimeTypeContainer(TypeManager typeManager, Type clsType, AttributeExtCollection attrs) : 
             base(clsType, attrs) {
             m_typeManager = typeManager;
         }
 
         public CompileTimeTypeContainer(TypeManager typeManager, Type clsType) : 
-            this(typeManager, clsType, new CustomAttributeBuilder[0]){
+            this(typeManager, clsType, new AttributeExtCollection()){
         }
 
         #endregion IConstructors
@@ -72,14 +73,16 @@ namespace Ch.Elca.Iiop.IdlCompiler.Action {
             // check, if separatedClsTypeName is in Consturction
             Type separatedClsType = m_typeManager.GetTypeFromBuildModule(separatedClsTypeName);
             if (separatedClsType != null) {
-            	// this prevents possible TypeLoadException, when separated is not fully defined,
-            	// thrown by base implementation
-                CustomAttributeBuilder[] separatedAttrs = new CustomAttributeBuilder[] {
-                    new BoxedValueAttribute(boxedValueRepId).CreateAttributeBuilder() };
-                SetSeparated(separatedClsType, separatedAttrs);
+                // this prevents possible TypeLoadException, when separated is not fully defined,
+                // thrown by base implementation
+                BoxedValueAttribute boxAttr = new BoxedValueAttribute(boxedValueRepId);
+                CustomAttributeBuilder[] separatedAttrs = new CustomAttributeBuilder[] { 
+                    boxAttr.CreateAttributeBuilder() };
+                
+                SetSeparated(separatedClsType, separatedAttrs, new object[] { boxAttr });
             } else {
                 // not know by ModuleBuilder -> possibly in an extern assembly -> load type directly instead of byName
-            	base.SplitBoxedForm(boxedValueRepId);
+                base.SplitBoxedForm(boxedValueRepId);
             }
         }
         

@@ -1043,7 +1043,7 @@ namespace Ch.Elca.Iiop.Tests {
         public void TestMapToIdlSequence() {
             ClsToIdlMapper mapper = ClsToIdlMapper.GetSingleton();
             MappingToResult mapResult = (MappingToResult)mapper.MapClsType(typeof(int[]), 
-                                                                           new AttributeExtCollection(new Attribute[] { new IdlSequenceAttribute() } ),
+                                                                           new AttributeExtCollection(new Attribute[] { new IdlSequenceAttribute(0) } ),
                                                                            s_testAction);
             Assertion.AssertEquals(MappingToResult.IdlSequence, mapResult);
         }
