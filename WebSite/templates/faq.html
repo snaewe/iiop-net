@@ -16,6 +16,13 @@
     <li><a href="#JBoss32">Can IIOP.NET interoperate with JBoss 3.2?</a></li>
 </ol>
 
+<H3>Configuration</H3>
+
+<ol START="7">
+    <li><a href="#fileConfig">Can the IIOP.NET channel be configured with a config-file?</a></li>
+</ol>
+
+
 <a name="NET1.1"></a>
 <H3>Does IIOP.NET work with Microsoft's .NET 1.1?</H3>
 
@@ -52,5 +59,45 @@ Some hints are provided in the <a href="websphere5.html">Websphere 5 interoperat
 
 Yes, it can.
 Some hints are provided in the <a href="jboss3_2.html">JBoss 3.2 interoperation howto</a>.
+
+<a name="fileConfig"></a>
+<H3>Can the IIOP.NET channel be configured with a config-file?</H3>
+Yes, it can. <BR> <BR>
+Example:
+<BR>
+
+The following config file 
+
+<pre>
+    &lt;configuration&gt;
+      &lt;system.runtime.remoting&gt;
+        &lt;application&gt;
+          &lt;channels&gt;
+            &lt;channel type="Ch.Elca.Iiop.IiopChannel,IiopChannel" port="8087"/&gt;
+          &lt;/channels&gt;
+        &lt;/application&gt;
+      &lt;/system.runtime.remoting&gt;
+    &lt;/configuration&gt;
+</pre>
+<p/>
+
+is equivalent to the following:
+
+<pre>
+    // register the channel
+    IiopChannel chan = new IiopChannel(8087);
+    ChannelServices.RegisterChannel(chan);
+
+</pre>
+<p/>
+
+The config file is processed with: <BR>
+<pre>
+    RemotingConfiguration.Configure(configFile);
+</pre>
+
+
+
+
 
 
