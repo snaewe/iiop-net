@@ -63,10 +63,10 @@ namespace Ch.Elca.Iiop {
     }
 
     /// <summary>
-    /// this class is the base class for all user exceptions mapped from IDL
+    /// this class is the base class for all user exceptions
     /// </summary>
     [Serializable]
-    public abstract class AbstractUserException : Exception, IIdlEntity {
+    public abstract class AbstractUserException : Exception {
         
         #region IConstructors
         
@@ -82,22 +82,32 @@ namespace Ch.Elca.Iiop {
     /// all non-system-exceptions are mapped to a generic user exception, 
     /// because in .NET throws in method signature is not present
     /// </summary>
+    [RepositoryIDAttribute("IDL:Ch/Elca/Iiop/GenericUserException:1.0")]
     [Serializable]
     public class GenericUserException : AbstractUserException {
         
         #region IFields
-
+        
         /// <summary>
         /// recursively lists the name of the exceptions (i.e. includes inner exception names)
         /// </summary>
-        private string m_name;
+        /// <remarks>mapped to the name field in the CORBA exception for this class; 
+        /// is mapped as normal string and not as WStringValue to support Orbs, which don't implement value types</remarks>
+        [StringValue()]
+        private string name = "";
         /// <summary>
         /// recursively lists the exception messages (i.e. includes inner exception messages)
         /// </summary>
-        private string m_message;
+        /// <remarks>mapped to the message field in the CORBA exception for this class;
+        /// is mapped as normal string and not as WStringValue to support Orbs, which don't implement value types</remarks>
+        [StringValue()]
+        private string message = "";
         /// <summary>
         /// recursively lists the methods throwed the exceptions
-        private string m_throwingMethod;
+        /// <remarks>mapped to the throwingMethod field in the CORBA exception for this class;
+		/// is mapped as normal string and not as WStringValue to support Orbs, which don't implement value types</remarks>
+        [StringValue()]
+        private string throwingMethod = "";
 
         #endregion IFields
         #region IConstructors
@@ -122,21 +132,21 @@ namespace Ch.Elca.Iiop {
         	if (exception == null) {
         		return;
         	}
-        	m_name += exception.GetType().Name;
-        	m_message += exception.Message;
+        	name += exception.GetType().Name;
+        	message += exception.Message;
             if (exception.TargetSite != null) {
-	            m_throwingMethod += exception.TargetSite.Name;
+	            throwingMethod += exception.TargetSite.Name;
 	        }
         	if (exception.InnerException != null) {
-        		m_name += "\n";
-        		m_message += "\n";
-        		m_throwingMethod += "\n";
+        		name += "\n";
+        		message += "\n";
+        		throwingMethod += "\n";
         		AddExceptionDetails(exception.InnerException);
         	}
         }
         
         public override string ToString() {
-            return "Name: " + m_name + "\r\nMessage: " + m_message + "\r\n----------------------\r\n\r\n" + base.ToString ();
+            return "Name: " + name + "\r\nMessage: " + message + "\r\n----------------------\r\n\r\n" + base.ToString ();
         }
 
         #endregion IMethods

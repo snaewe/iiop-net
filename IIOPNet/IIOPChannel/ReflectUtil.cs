@@ -532,6 +532,24 @@ namespace Ch.Elca.Iiop.Util {
             return result;
         }
         
+        /// <summary>
+        /// checks, if thrown is part of the raises attributes (the ThrowsIdlException attributes) of thrower
+        /// </summary>        
+        public static bool IsExceptionInRaiseAttributes(Exception thrown, MethodInfo thrower) {
+        	AttributeExtCollection methodAttributes =
+        		ReflectionHelper.GetCustomAttriutesForMethod(thrower, true);
+        	foreach (Attribute attr in methodAttributes) {
+        		if (ReflectionHelper.ThrowsIdlExceptionAttributeType.
+        		    IsAssignableFrom(attr.GetType())) {
+        			if (((ThrowsIdlExceptionAttribute)attr).ExceptionType.
+        			    Equals(thrown.GetType())) {
+        				return true;
+        			}
+        		}
+        	}
+        	return false;
+        }        
+        
         #endregion SMethods
 
     }

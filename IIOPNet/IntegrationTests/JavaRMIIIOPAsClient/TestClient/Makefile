@@ -2,7 +2,6 @@ IDLSource=..\TestServer\IDL\Ch\Elca\Iiop\IntegrationTests\*.idl
 TestService=Ch\Elca\Iiop\IntegrationTests\ 
 JUNIT_JAR = $(JUNIT_HOME)\junit.jar
 
-Predef=..\TestServer\IDL\Predef.idl
 
 build: build-idl build-java
 
@@ -32,6 +31,7 @@ build-idl:
 	idlj -td .. org\omg\BoxedArray\_System\seq2_octet.idl
 	idlj -td .. org\omg\BoxedArray\_System\seq2_wstring.idl
 	idlj -td .. org\omg\BoxedArray\_System\seq3_octet.idl
+	idlj -td .. Ch\Elca\Iiop\GenericUserException.idl
 	idlj -td .. Predef.idl
 	cd ..
 

@@ -1,8 +1,6 @@
 TestService=Ch\Elca\Iiop\IntegrationTests\MappingPlugin\ 
 JUNIT_JAR = $(JUNIT_HOME)\junit.jar
 
-Predef=..\TestServer\IDL\Predef.idl
-
 build: build-idl build-java build-helperJar
 
 build-idl:
@@ -16,6 +14,7 @@ build-idl:
 	idlj -td .. $(TestService)TestService.idl 
 	idlj -td .. $(TestService)TestSerializableClassB1.idl
 	idlj -td .. Predef.idl
+	idlj -td .. Ch\Elca\Iiop\GenericUserException.idl
 	cd ..
 
 junit-jar:

@@ -639,9 +639,11 @@ namespace Ch.Elca.Iiop.Idl {
     }
     
     /// <summary>
-    /// this attribute specifies what exceptions may be thrown by a method
+    /// this attribute specifies what exceptions may be thrown by a method; 
+    /// not usable for properties, because properties are mapped to idl attributes and attributes can
+    /// only return system exceptions. (CORBA 2.6; chapter 3.13)
     /// </summary>
-    [AttributeUsage(AttributeTargets.Method | AttributeTargets.Property, 
+    [AttributeUsage(AttributeTargets.Method, 
                     AllowMultiple = true)]
     public sealed class ThrowsIdlExceptionAttribute : Attribute, IIdlAttribute {
         

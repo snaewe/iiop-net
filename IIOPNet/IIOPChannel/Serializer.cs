@@ -971,13 +971,12 @@ namespace Ch.Elca.Iiop.Marshalling {
             if (actual != null) {
                 // check if actual parameter is an IDL-struct: 
                 // this is an illegal parameter for IDL-abstract value parameters
-                AttributeExtCollection attrs = ReflectionHelper.GetCustomAttributesForType(actual.GetType(), true);
-                if (attrs.IsInCollection(ReflectionHelper.IdlStructAttributeType)) {
+                if (ClsToIdlMapper.IsMarshalledAsStruct(actual.GetType())) {
                     // IDL-struct illegal parameter for formal type abstract value (actual type: actual.GetType() )
                     throw new MARSHAL(20011, CompletionStatus.Completed_MayBe);
                 }
-                // check if it's a value-type:
-                if (!ClsToIdlMapper.IsDefaultMarshalByVal(actual.GetType())) {
+                // check if it's a concrete value-type:
+                if (!ClsToIdlMapper.IsMappedToConcreteValueType(actual.GetType())) {
                     // only a value type is possible as acutal value for a formal type abstract value / value base, actual type: actual.GetType() )
                     throw new MARSHAL(20012, CompletionStatus.Completed_MayBe);
                 }
@@ -1404,7 +1403,7 @@ namespace Ch.Elca.Iiop.Marshalling {
             if ((actual != null) && (ClsToIdlMapper.IsMarshalByRef(actual.GetType()))) {
                 targetStream.WriteBool(true); // an obj-ref is serialized
                 m_objRefSer.Serialise(formal, actual, attributes, targetStream);
-            } else if ((actual == null) || (ClsToIdlMapper.IsDefaultMarshalByVal(actual.GetType()))) {
+            } else if ((actual == null) || (ClsToIdlMapper.IsMappedToConcreteValueType(actual.GetType()))) {
                 targetStream.WriteBool(false); // a value-type is serialised
                 m_valueSer.Serialise(formal, actual, attributes, targetStream);
             } else {

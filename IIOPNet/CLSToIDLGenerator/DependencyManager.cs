@@ -77,8 +77,7 @@ namespace Ch.Elca.Iiop.Idl {
             // some default types
             m_defaultMappedTypes.Add(typeof(System.Object));
             m_defaultMappedTypes.Add(typeof(System.Type));
-            m_defaultMappedTypes.Add(typeof(omg.org.CORBA.TypeCode));
-            m_defaultMappedTypes.Add(typeof(GenericUserException));
+            m_defaultMappedTypes.Add(typeof(omg.org.CORBA.TypeCode));            
             m_defaultMappedTypes.Add(typeof(MarshalByRefObject));
             m_defaultMappedTypes.Add(typeof(omg.org.CORBA.WStringValue));
             m_defaultMappedTypes.Add(typeof(omg.org.CORBA.StringValue));
@@ -228,7 +227,7 @@ namespace Ch.Elca.Iiop.Idl {
         /// </summary>
         public bool IsForwardDeclPossible(Type forType, AttributeExtCollection attributes) {
             // boxed value types can't have forward declaration --> be sure to not include boxed value types here
-            return ((ClsToIdlMapper.IsDefaultMarshalByVal(forType) || 
+            return ((ClsToIdlMapper.IsMappedToConcreteValueType(forType) || 
                      ClsToIdlMapper.IsMappedToAbstractValueType(forType, attributes) ||
                      ClsToIdlMapper.IsMarshalByRef(forType)) && 
                     (!(forType.IsSubclassOf(ReflectionHelper.BoxedValueBaseType))) &&
@@ -335,7 +334,7 @@ namespace Ch.Elca.Iiop.Idl {
             m_dependenciesInheritance = new ArrayList();
 
             // for the following types the base classes must be mapped
-            if ((ClsToIdlMapper.IsDefaultMarshalByVal(m_forType) || 
+            if ((ClsToIdlMapper.IsMappedToConcreteValueType(m_forType) || 
                  ClsToIdlMapper.IsMarshalByRef(m_forType)) &&
                 (!(m_forType.IsSubclassOf(typeof(BoxedValueBase))))) {
                 // boxed value types are excluded here, because they do not have inheritance dependencies
@@ -356,7 +355,7 @@ namespace Ch.Elca.Iiop.Idl {
 
             // for the following types, implemented interfaces must be considered
             if ((ClsToIdlMapper.IsInterface(m_forType)) ||
-                (ClsToIdlMapper.IsDefaultMarshalByVal(m_forType) || ClsToIdlMapper.IsMarshalByRef(m_forType)) &&
+                (ClsToIdlMapper.IsMappedToConcreteValueType(m_forType) || ClsToIdlMapper.IsMarshalByRef(m_forType)) &&
                 (!(m_forType.IsSubclassOf(typeof(BoxedValueBase))))) {
                 Type[] implementedIF = m_forType.GetInterfaces();
                 for (int i = 0; i < implementedIF.Length; i++) {
@@ -371,7 +370,7 @@ namespace Ch.Elca.Iiop.Idl {
             m_dependenciesContent = new ArrayList();
 
             // for the following types methods and properties must be considered
-            if (ClsToIdlMapper.IsDefaultMarshalByVal(m_forType) ||
+            if (ClsToIdlMapper.IsMappedToConcreteValueType(m_forType) ||
                 ClsToIdlMapper.IsMarshalByRef(m_forType) ||
                 ClsToIdlMapper.IsInterface(m_forType)) {
                 // check the methods
@@ -381,7 +380,10 @@ namespace Ch.Elca.Iiop.Idl {
             }
 
             // fields must be considered only for value-types
-            if (ClsToIdlMapper.IsDefaultMarshalByVal(m_forType)) {
+            if (ClsToIdlMapper.IsMappedToConcreteValueType(m_forType) ||
+                ClsToIdlMapper.IsException(m_forType) || 
+                ClsToIdlMapper.IsMarshalledAsStruct(m_forType) ||
+                ClsToIdlMapper.IsMappedToBoxedValueType(m_forType)) {
                 DetermineContentDependenciesFromFields();
             }
             if (ClsToIdlMapper.IsArray(m_forType)) {
@@ -412,6 +414,12 @@ namespace Ch.Elca.Iiop.Idl {
                                      false);
                     }
                 }
+                
+                if ((ClsToIdlMapper.IsMappedToAbstractInterface(m_forType) || 
+                      ClsToIdlMapper.IsMappedToConcreteInterface(m_forType))) {
+                	DetermineContentDependenciesFromExceptions(info);
+                }
+                
             }
         }
 
@@ -452,6 +460,24 @@ namespace Ch.Elca.Iiop.Idl {
         			             false); // for sequence of sequence, don't use anonymous seq for element type
         		}
         	} // else: should not happen
+        }
+                			 
+        private void DetermineContentDependenciesFromExceptions(MethodInfo thrower) {
+			AttributeExtCollection methodAttributes = 
+            	ReflectionHelper.GetCustomAttriutesForMethod(thrower, true);
+			foreach (Attribute attr in methodAttributes) {
+            	if (ReflectionHelper.ThrowsIdlExceptionAttributeType.
+                	IsAssignableFrom(attr.GetType())) {
+                    Type exceptionType = ((ThrowsIdlExceptionAttribute)attr).ExceptionType;
+					AddToDepList(m_dependenciesContent,
+					             CreateMapTypeInfo(exceptionType, AttributeExtCollection.EmptyCollection),
+					             false);
+				}
+			}
+			// default exception, which can be thrown
+			AddToDepList(m_dependenciesContent,
+			             CreateMapTypeInfo(typeof(GenericUserException), AttributeExtCollection.EmptyCollection),
+			             false);
         }
         
         /// <summary>

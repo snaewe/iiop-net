@@ -14,6 +14,7 @@ build-idl:
 	idlj -td .. Ch\Elca\Iiop\Demo\StorageSystem\Manager.idl 
 	idlj -td .. Ch\Elca\Iiop\Demo\StorageSystem\Container.idl 
 	idlj -td .. Ch\Elca\Iiop\Demo\StorageSystem\Entry.idl
+	idlj -td .. Ch\Elca\Iiop\GenericUserException.idl
 	idlj -td .. Predef.idl
 	idlj -td .. org\omg\BoxedArray\Ch\Elca\Iiop\Demo\StorageSystem\seq1_Container.idl
 	idlj -td .. org\omg\BoxedArray\Ch\Elca\Iiop\Demo\StorageSystem\seq1_Entry.idl

@@ -2212,7 +2212,8 @@ public class MetaDataGenerator : IDLParserVisitor {
 
         // add fileds ...
         node.childrenAccept(this, thisTypeInfo); // let the members add themself to the typeBuilder
-        
+        // add inheritance from IIdlEntity        
+        exceptToCreate.AddInterfaceImplementation(typeof(IIdlEntity));
         // create the type
         m_typeManager.EndTypeDefinition(forSymbol);
         return null;

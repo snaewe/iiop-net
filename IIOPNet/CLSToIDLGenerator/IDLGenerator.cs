@@ -226,25 +226,6 @@ namespace Ch.Elca.Iiop.Idl {
             
             writer.WriteLine("#include \"orb.idl\"");
 
-            writer.WriteLine("#ifndef __Ch_Elca_Iiop_GenericUserException__");
-            writer.WriteLine("#define __Ch_Elca_Iiop_GenericUserException__");
-            writer.WriteLine("");
-
-            writer.WriteLine("    module Ch {");
-            writer.WriteLine("        module Elca {");
-            writer.WriteLine("            module Iiop {");
-            writer.WriteLine("");
-            writer.WriteLine("                exception GenericUserException {");
-            writer.WriteLine("                    ::CORBA::WStringValue name;");
-            writer.WriteLine("                    ::CORBA::WStringValue message;");
-            writer.WriteLine("                    ::CORBA::WStringValue throwingMethod;");
-            writer.WriteLine("                };");
-            writer.WriteLine("");    
-            writer.WriteLine("            };");
-            writer.WriteLine("        };");
-            writer.WriteLine("    };");
-            writer.WriteLine("");
-            writer.WriteLine("#endif");
             writer.Flush();
             writer.Close();
         }

@@ -161,8 +161,7 @@ namespace Ch.Elca.Iiop.Idl {
         /// the singleton instance of the CLSToIDLMapper
         /// </summary>
         private static ClsToIdlMapper s_singleton = new ClsToIdlMapper();
-        private static CheckMappedToAbstractVlaue s_abstrValueMapHelper = new CheckMappedToAbstractVlaue();
-
+        private static MappingToAction s_mappingToAction = new MappingToAction();
 
         // the following expressions are evaluated here for efficiency reasons
         private static Type s_exceptType = typeof(System.Exception);
@@ -176,6 +175,12 @@ namespace Ch.Elca.Iiop.Idl {
         private static Type s_corbaTypeCodeImplType = typeof(TypeCodeImpl);
         
         private static Type s_anyType = typeof(omg.org.CORBA.Any);
+        
+        private static Type s_intPtrType = typeof(System.IntPtr);
+        private static Type s_uint16Type = typeof(System.UInt16);
+        private static Type s_uint32Type = typeof(System.UInt32);
+        private static Type s_uint64Type = typeof(System.UInt64);
+        private static Type s_uintPtrType = typeof(System.UIntPtr);
 
         #endregion SFields
         #region IConstructors
@@ -218,23 +223,15 @@ namespace Ch.Elca.Iiop.Idl {
         public static bool IsArray(Type type) {
             return (type.IsArray);
         }
-
+        
+        public static bool IsException(Type type) {
+        	return (s_exceptType.IsAssignableFrom(type));
+        }
+        
         /// <summary>
-        /// Checks, if the CLS type is mapped to an IDL value type.
+        /// checks, if the conditions are fullfilled to map a value type to a concrete corba value type
         /// </summary>
-        public static bool IsDefaultMarshalByVal(Type type) {
-            if (type.IsPrimitive) { 
-                return false; 
-            } // for primitive types a dedicated serializer exists, if it is serializable
-            if (IsMarshalledAsStruct(type)) { 
-                return false; 
-            } // marshalled as IDL-struct, no CORBA-value type
-            if (IsEnum(type)) { 
-                return false; 
-            } // enums are handled specially
-            if (IsArray(type)) { 
-                return false; 
-            } // arrays are handled specially
+        private static bool IsValueTypeConcrete(Type type) {
             if ((!(ReflectionHelper.IIdlEntityType.IsAssignableFrom(type))) && (type.IsAbstract)) { 
                 return false; 
             } // abstract native CLS types do not belong to the defaultMarhsalByVal Types; this is no criteria for types created by the IDL to CLS compiler
@@ -278,14 +275,62 @@ namespace Ch.Elca.Iiop.Idl {
         
         /// <summary>determines, if a CLS Type is mapped to an IDL abstract value type</summary>
         public static bool IsMappedToAbstractValueType(Type clsType, AttributeExtCollection attributes) {
-            return (bool) s_singleton.MapClsType(clsType, attributes, s_abstrValueMapHelper);
+            return (MappingToResult)s_singleton.MapClsType(clsType, attributes, s_mappingToAction) ==
+            	MappingToResult.IdlAbstractValue;
         }
+        
+        /// <summary>determines, if a CLS Type is mapped to an IDL abstract value type</summary>
+        public static bool IsMappedToAbstractValueType(Type clsType) {
+        	return IsMappedToAbstractValueType(clsType, AttributeExtCollection.EmptyCollection);
+        }        
+        
+        /// <summary>
+        /// Checks, if the CLS type is mapped to an IDL concrete value type.
+        /// </summary>
+        public static bool IsMappedToConcreteValueType(Type clsType) {
+        	return IsMappedToConcreteValueType(clsType, AttributeExtCollection.EmptyCollection);
+        }
+        
+        /// <summary>
+        /// Checks, if the CLS type is mapped to an IDL concrete value type.
+        /// </summary>
+        public static bool IsMappedToConcreteValueType(Type clsType, AttributeExtCollection attributes) {
+        	return (MappingToResult) s_singleton.MapClsType(clsType, attributes, s_mappingToAction) ==
+        		MappingToResult.IdlConcreteValue;
+        }        
+
+        public static bool IsMappedToConcreteInterface(Type clsType) {
+            return IsMappedToConcreteInterface(clsType, AttributeExtCollection.EmptyCollection);
+        }        
+        
+        public static bool IsMappedToConcreteInterface(Type clsType, AttributeExtCollection attributes) {
+            return (MappingToResult) s_singleton.MapClsType(clsType, attributes, s_mappingToAction) ==
+        		MappingToResult.IdlConcreteIf;
+        }
+
+        public static bool IsMappedToAbstractInterface(Type clsType) {
+        	return IsMappedToAbstractInterface(clsType, AttributeExtCollection.EmptyCollection);
+        }        
+        
+        public static bool IsMappedToAbstractInterface(Type clsType, AttributeExtCollection attributes) {
+            return (MappingToResult) s_singleton.MapClsType(clsType, attributes, s_mappingToAction) ==
+        		MappingToResult.IdlAbstractIf;
+        }
+        
+        public static bool IsMappedToBoxedValueType(Type clsType) {
+        	return IsMappedToBoxedValueType(clsType, AttributeExtCollection.EmptyCollection);
+        }        
+        
+        public static bool IsMappedToBoxedValueType(Type clsType, AttributeExtCollection attributes) {
+            return (MappingToResult) s_singleton.MapClsType(clsType, attributes, s_mappingToAction) ==
+        		MappingToResult.IdlBoxedValue;
+        }        
 
         /// <summary>checks, if the type is unmappable</summary>
         public static bool UnmappableType(Type clsType) {
-            if (clsType.Equals(typeof(System.IntPtr)) || clsType.Equals(typeof(System.UInt16)) ||
-                clsType.Equals(typeof(System.UInt32)) || clsType.Equals(typeof(System.UInt64)) ||
-                clsType.Equals(typeof(System.UIntPtr))) {
+            if (clsType.Equals(s_intPtrType) || clsType.Equals(s_uint16Type) ||
+                clsType.Equals(s_uint32Type) || clsType.Equals(s_uint64Type) ||
+            	clsType.Equals(s_uintPtrType)) {
                 return true; 
             }
             return false;
@@ -359,11 +404,13 @@ namespace Ch.Elca.Iiop.Idl {
             } else if (clsType.Equals(s_corbaTypeCodeImplType) || clsType.IsSubclassOf(s_corbaTypeCodeImplType) ||
                        clsType.Equals(ReflectionHelper.CorbaTypeCodeType)) {
                 return action.MapToTypeCode(clsType);
-            } else if (IsDefaultMarshalByVal(clsType)) {
-                return action.MapToIdlConcreateValueType(clsType);
             } else if (!UnmappableType(clsType)) {
-                // other types are mapped to an abstract value type
-                return action.MapToIdlAbstractValueType(clsType);
+            	if (IsValueTypeConcrete(clsType)) {
+            		return action.MapToIdlConcreateValueType(clsType);
+            	} else {
+	                // other types are mapped to an abstract value type
+    	            return action.MapToIdlAbstractValueType(clsType);            		
+            	}
             } else {
                 // not mappable: clsType
                 throw new BAD_PARAM(18800, CompletionStatus.Completed_MayBe);
@@ -526,147 +573,21 @@ namespace Ch.Elca.Iiop.Idl {
 
     }
 
-
     /// <summary>
-    /// helper class to check, if a cls type is mapped to an abstract value type
+    /// used as result for MappingToAction
     /// </summary>
-    internal class CheckMappedToAbstractVlaue : MappingAction {
-        
-        #region IMethods
-
-        public object MapToIdlUnion(System.Type clsType) {
-            return false;
-        }
-        public object MapToIdlStruct(System.Type clsType) {
-            return false;
-        }
-        public object MapToIdlAbstractInterface(System.Type clsType) {
-            return false;
-        }
-        public object MapToIdlConcreteInterface(System.Type clsType) {
-            return false;
-        }
-        public object MapToIdlLocalInterface(System.Type clsType) {
-            return false;
-        }
-        public object MapToIdlConcreateValueType(System.Type clsType) {
-            return false;
-        }
-        public object MapToIdlAbstractValueType(System.Type clsType) {
-            return true;
-        }
-        public object MapToIdlBoxedValueType(System.Type clsType, bool isAlreadyBoxed) {
-            return false;
-        }
-        public object MapToIdlSequence(System.Type clsType, int bound, AttributeExtCollection allAttributes, AttributeExtCollection elemTypeAttributes) {
-            return false;
-        }
-        public object MapToIdlAny(System.Type clsType) {
-            return false;
-        }
-        public object MapToAbstractBase(System.Type clsType) {
-            return false;
-        }
-        public object MapToValueBase(System.Type clsType) {
-            return false;
-        }
-        public object MapException(System.Type clsType) {
-            return false;
-        }
-        public object MapToIdlEnum(System.Type clsType) {
-            return false;
-        }
-        public object MapToWStringValue(System.Type clsType) {
-            return false;
-        }
-        public object MapToStringValue(System.Type clsType) {
-            return false;
-        }
-        public object MapToTypeDesc(System.Type clsType) {
-            return false;
-        }
-        public object MapToTypeCode(System.Type clsType) {
-            return false;
-        }
-        public object MapToIdlBoolean(System.Type clsType) {
-            return false;
-        }
-        public object MapToIdlFloat(System.Type clsType) {
-            return false;
-        }
-        public object MapToIdlDouble(System.Type clsType) {
-            return false;
-        }
-        public object MapToIdlShort(System.Type clsType) {
-            return false;
-        }
-        public object MapToIdlUShort(System.Type clsType) {
-            return false;
-        }
-        public object MapToIdlLong(System.Type clsType) {
-            return false;
-        }
-        public object MapToIdlULong(System.Type clsType) {
-            return false;
-        }
-        public object MapToIdlLongLong(System.Type clsType) {
-            return false;
-        }
-        public object MapToIdlULongLong(System.Type clsType) {
-            return false;
-        }
-        public object MapToIdlOctet(System.Type clsType) {
-            return false;
-        }
-        public object MapToIdlVoid(System.Type clsType) {
-            return false;
-        }
-        public object MapToIdlWChar(System.Type clsType) {
-            return false;
-        }
-        public object MapToIdlWString(System.Type clsType) {
-            return false;
-        }
-        public object MapToIdlChar(System.Type clsType) {
-            return false;
-        }
-        public object MapToIdlString(System.Type clsType) {
-            return false;
-        }
-            
-        #endregion IMethods
-
-    }
-}
-
-
-
-
-#if UnitTest
-
-namespace Ch.Elca.Iiop.Tests {
-    
-    using NUnit.Framework;
-    using Ch.Elca.Iiop.Idl;
-    using Ch.Elca.Iiop.Util;
-    using omg.org.CORBA;
-    
-    public enum MappingToResult {
+    internal enum MappingToResult {
         IdlStruct, IdlUnion, IdlAbstractIf, IdlConcreteIf, IdlLocalIf, IdlConcreteValue, IdlAbstractValue, 
         IdlBoxedValue, IdlSequence, IdlAny, IdlAbstractBase, IdlValueBase,
         IdlException, IdlEnum, IdlWstringValue, IdlStringValue, IdlTypeCode,
         IdlTypeDesc, IdlBool, IdlFloat, IdlDouble, IdlShort, IdlUShort, IdlLong, IdlULong,
         IdlLongLong, IdlULongLong, IdlOctet, IdlVoid, IdlChar, IdlWChar, IdlString, IdlWString
     }
-
-    public enum TestEnum { 
-        a, b, c 
-    }
-
+    
     /// <summary>
     /// Test class for helping to test ClsToIdlMapper
     /// </summary>
-    public class TestMappingAction : MappingAction {
+    internal class MappingToAction : MappingAction {
         
         #region IMethods
         public object MapToIdlUnion(System.Type clsType) {
@@ -770,7 +691,23 @@ namespace Ch.Elca.Iiop.Tests {
         }            
         #endregion
 
-    }    
+    }
+    
+}
+
+
+#if UnitTest
+
+namespace Ch.Elca.Iiop.Tests {
+    
+    using NUnit.Framework;
+    using Ch.Elca.Iiop.Idl;
+    using Ch.Elca.Iiop.Util;
+    using omg.org.CORBA;
+    
+    public enum TestEnum { 
+        a, b, c 
+    }
     
     [IdlUnion]   
     [Serializable]
@@ -891,7 +828,7 @@ namespace Ch.Elca.Iiop.Tests {
         
         #region SFields
         
-        private static TestMappingAction s_testAction = new TestMappingAction();
+        private static MappingToAction s_testAction = new MappingToAction();
         
         #endregion
         #region IConstructors

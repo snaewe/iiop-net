@@ -12,6 +12,7 @@ build-idl:
 	cd IDL
 	idlj -td .. $(Adder)AdderImpl.idl 
 	idlj -td .. Predef.idl
+	idlj -td .. Ch\Elca\Iiop\GenericUserException.idl
 	cd ..
 
 build-java: $(Adder)*.java *.java
