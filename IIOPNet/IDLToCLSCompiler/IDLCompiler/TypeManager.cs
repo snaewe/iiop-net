@@ -113,7 +113,7 @@ namespace Ch.Elca.Iiop.IdlCompiler.Action {
         /// start a type definition for a type
         /// </summary>        
         /// <param name="isForwardDeclaration">specifies, if this type is created from an idl forward declaration</param>
-        public TypeBuilder StartTypeDefinition(Symbol typeSymbol, string fullyQualName,
+        private TypeBuilder StartTypeDefinition(Symbol typeSymbol, string fullyQualName,
                                                TypeAttributes typeAttributes, Type parent, Type[] interfaces,
                                                bool isForwardDeclaration) {                                   
                                               
@@ -146,7 +146,7 @@ namespace Ch.Elca.Iiop.IdlCompiler.Action {
                                                TypeAttributes typeAttributes, Type parent, Type[] interfaces,
                                                bool isForwardDeclaration) {
             Scope enclosingScope = typeSymbol.getDeclaredIn();
-            String fullyQualName = enclosingScope.getFullyQualifiedNameForSymbol(typeSymbol.getSymbolName());
+            String fullyQualName = enclosingScope.GetFullyQualifiedNameForSymbol(typeSymbol.getSymbolName());
             return StartTypeDefinition(typeSymbol, fullyQualName, 
                                        typeAttributes, parent, interfaces, isForwardDeclaration);
         }
@@ -177,7 +177,7 @@ namespace Ch.Elca.Iiop.IdlCompiler.Action {
             }
 
             Scope enclosingScope = typeSymbol.getDeclaredIn();
-            String fullyQualName = enclosingScope.getFullyQualifiedNameForSymbol(typeSymbol.getSymbolName());
+            String fullyQualName = enclosingScope.GetFullyQualifiedNameForSymbol(typeSymbol.getSymbolName());
                                                     
             Trace.WriteLine("generating code for boxed value type: " + fullyQualName);
             
@@ -329,14 +329,7 @@ namespace Ch.Elca.Iiop.IdlCompiler.Action {
                 
         private string GetFullTypeNameForSymbol(Symbol forSymbol) {
             Scope declIn = forSymbol.getDeclaredIn();
-            if (!IsNestedType(forSymbol)) {
-                String fullName = declIn.getFullyQualifiedNameForSymbol(forSymbol.getSymbolName());
-                return fullName;                
-            } else {            	
-                // forSymbol represents a nested type -> type is defined in a special namespace
-                // all nested types are defined in a special namespace for nested, see IDL to CLS spec 3.14
-                return GetFullTypeNameForNestedNotInOuterType(forSymbol);
-            }
+            return declIn.GetFullyQualifiedNameForSymbol(forSymbol.getSymbolName());
         }
 
         /// <summary>
@@ -476,23 +469,23 @@ namespace Ch.Elca.Iiop.IdlCompiler.Action {
         }
                
         
-        /// <summary>
-        /// creates a typename for a nested type, which is not nestable
-        /// directly in containing type.
-        /// These types are defined in a special namespace.
-        /// </summary>
-        private string GetFullTypeNameForNestedNotInOuterType(Symbol forSymbol) {
-            Scope declIn = forSymbol.getDeclaredIn();
-            return declIn.getFullyQualifiedNameForNested(forSymbol.getSymbolName());
-        }
-        
-        /// <summary>
-        /// is the type represented by forSymbol nested in another type?
-        /// </summary>
-        private bool IsNestedType(Symbol forSymbol) {
-            Scope parentScope = forSymbol.getDeclaredIn();
-            return parentScope.IsTypeScope();
-        }
+//        /// <summary>
+//        /// creates a typename for a nested type, which is not nestable
+//        /// directly in containing type.
+//        /// These types are defined in a special namespace.
+//        /// </summary>
+//        private string GetFullTypeNameForNestedNotInOuterType(Symbol forSymbol) {
+//            Scope declIn = forSymbol.getDeclaredIn();
+//            return declIn.getFullyQualifiedNameForNested(forSymbol.getSymbolName());
+//        }
+//        
+//        /// <summary>
+//        /// is the type represented by forSymbol nested in another type?
+//        /// </summary>
+//        private bool IsNestedType(Symbol forSymbol) {
+//            Scope parentScope = forSymbol.getDeclaredIn();
+//            return parentScope.IsTypeScope();
+//        }
         
         #endregion IMethods                     
 

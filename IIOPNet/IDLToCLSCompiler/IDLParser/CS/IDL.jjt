@@ -1106,8 +1106,12 @@ void struct_type() :
     // recursive definition using a sequence is permitted --> publish symbol already here
     Scope currentScope = m_symbolTable.getCurrentScope();
     currentScope.addSymbol(ident);      
+    jjtThis.setIdent(ident); 
+    m_symbolTable.openScope(ident, true); // open a scope for type declaration inside the struct
   }
-  "{" member_list() "}" { jjtThis.setIdent(ident); }
+  "{" member_list() "}" { 
+    m_symbolTable.closeScope();
+   }
 }
 
 /* Production 70, chapter 3.4, corba 2.3.1 */
@@ -1135,7 +1139,15 @@ void union_type() :
     // recursive definition using a sequence is permitted --> publish symbol already here
     Scope currentScope = m_symbolTable.getCurrentScope();
     currentScope.addSymbol(ident);      
-  } "switch" "(" switch_type_spec() ")" "{" switch_body() "}" { jjtThis.setIdent(ident); }
+    jjtThis.setIdent(ident); 
+  } "switch" "(" 
+  {
+     m_symbolTable.openScope(ident, true); // open a scope for type declaration inside the union
+  }
+  switch_type_spec() ")" "{" switch_body() "}" 
+  { 
+     m_symbolTable.closeScope();
+  }
 }
 
 /* Production 73, chapter 3.4, corba 2.3.1 */
@@ -1267,11 +1279,15 @@ void attr_dcl() :
 void except_dcl() :
 { String ident = ""; }
 {
-  "exception" ident = identifier() "{" ( member() )* "}" 
-   { 
-    jjtThis.setIdent(ident); 
+  "exception" ident = identifier() {
     Scope currentScope = m_symbolTable.getCurrentScope();
     currentScope.addSymbol(ident);
+    jjtThis.setIdent(ident); 
+    m_symbolTable.openScope(ident, true); // open a scope for type declaration inside the exception
+  }
+  "{" ( member() )* "}" 
+   { 
+    m_symbolTable.closeScope();
    }
 }
 

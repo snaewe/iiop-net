@@ -332,7 +332,7 @@ public class MetaDataGenerator : IDLParserVisitor {
         for (int i = 0; i < node.jjtGetNumChildren(); i++) {
             // get symbol
             Symbol sym = (Symbol)(node.jjtGetChild(i).jjtAccept(this, data)); // accept interface_name
-            if (sym.getDeclaredIn().getFullyQualifiedNameForSymbol(sym.getSymbolName()).Equals("java.io.Serializable")) {
+            if (sym.getDeclaredIn().GetFullyQualifiedNameForSymbol(sym.getSymbolName()).Equals("java.io.Serializable")) {
                 Console.WriteLine("ignoring inheritance from java.io.Serializable, because not allowed");                
                 continue;
             }
@@ -489,8 +489,6 @@ public class MetaDataGenerator : IDLParserVisitor {
 
         // retrieve first types for the inherited
         System.Type[] interfaces = (System.Type[])header.jjtAccept(this, data);
-        String fullyQualName = enclosingScope.getFullyQualifiedNameForSymbol(forSymbol.getSymbolName());
-
         TypeBuilder interfaceToBuild = CreateOrGetInterfaceDcl(forSymbol, interfaces, 
                                                                header.isAbstract(), header.isLocal(),
                                                                false);
@@ -518,9 +516,7 @@ public class MetaDataGenerator : IDLParserVisitor {
         // check if type is known from a previous run over a parse tree --> if so: skip
         if (m_typeManager.CheckSkip(forSymbol)) { 
             return null; 
-        }
-        
-        String fullyQualName = enclosingScope.getFullyQualifiedNameForSymbol(forSymbol.getSymbolName());
+        }        
         if (!(m_typeManager.IsTypeDeclarded(forSymbol))) { // ignore fwd-decl if type is already declared, if not generate type for fwd decl
             // it's no problem to add later on interfaces this type should implement with AddInterfaceImplementation,
             // here: specify no interface inheritance, because not known at this point
@@ -630,7 +626,7 @@ public class MetaDataGenerator : IDLParserVisitor {
                 if (parent != null) { 
                     // classes are considered as concrete value types
                     throw new InvalidIdlException("not possible for an abstract value type " +
-                                                  forSymbol.getDeclaredIn().getFullyQualifiedNameForSymbol(forSymbol.getSymbolName()) + 
+                                                  forSymbol.getDeclaredIn().GetFullyQualifiedNameForSymbol(forSymbol.getSymbolName()) + 
                                                   " to inherit from a concrete one " +
                                                   parent.FullName);
                 }
@@ -852,7 +848,6 @@ public class MetaDataGenerator : IDLParserVisitor {
             }
         }
 
-        String fullyQualName = enclosingScope.getFullyQualifiedNameForSymbol(forSymbol.getSymbolName());
         TypeBuilder valueToBuild = CreateOrGetValueDcl(forSymbol, null, interfaces,
                                                        true, false); 
 
@@ -1168,10 +1163,6 @@ public class MetaDataGenerator : IDLParserVisitor {
         // --> code generation for all nested types skipped too
         if (m_typeManager.CheckSkip(constSymbol)) {
             return null; 
-        }        
-        Scope targetScope = enclosingScope;
-        if (enclosingScope.IsTypeScope()) {
-            targetScope = buildInfo.GetBuildScope().GetScopeForNested(constSymbol);
         }
         
         TypeContainer constType = (TypeContainer)node.jjtGetChild(0).jjtAccept(this, data);
@@ -1181,9 +1172,8 @@ public class MetaDataGenerator : IDLParserVisitor {
         }
         // set the value of the constant:
         constSymbol.SetValueAsLiteral(val);
-        
-        String constContainerName = targetScope.getFullyQualifiedNameForSymbol(constSymbol.getSymbolName());
-        TypeBuilder constContainer = m_typeManager.StartTypeDefinition(constSymbol, constContainerName,
+                
+        TypeBuilder constContainer = m_typeManager.StartTypeDefinition(constSymbol,
                                                                        TypeAttributes.Class | TypeAttributes.Sealed | TypeAttributes.Public, 
                                                                        typeof(System.Object), new System.Type[] { typeof(IIdlEntity) }, false);
                 
@@ -1711,25 +1701,15 @@ public class MetaDataGenerator : IDLParserVisitor {
             return null; 
         }
         
-        String fullyQualName = null;
-        if (buildInfo.GetContainterType() == null) {
-            // independent dcl
-            fullyQualName = buildInfo.GetBuildScope().getFullyQualifiedNameForSymbol(forSymbol.getSymbolName());
-        } else {
-            // nested dcl
-            // define type in nested type namespace according to IDL to CLS spec 3.14 
-            Scope nestedScope = buildInfo.GetBuildScope().GetScopeForNested(forSymbol);
-            fullyQualName = nestedScope.getFullyQualifiedNameForSymbol(forSymbol.getSymbolName());
-        }
         // layout-sequential causes problem, if member of array type is not fully defined (TypeLoadException) -> use autolayout instead
         TypeAttributes typeAttrs = TypeAttributes.Class | TypeAttributes.Public | TypeAttributes.Serializable | TypeAttributes.BeforeFieldInit | 
                                    /* TypeAttributes.SequentialLayout | */ TypeAttributes.Sealed;
-
         
-        TypeBuilder structToCreate = m_typeManager.StartTypeDefinition(forSymbol, fullyQualName,
+        TypeBuilder structToCreate = m_typeManager.StartTypeDefinition(forSymbol,
                                                                        typeAttrs,
                                                                        typeof(System.ValueType), new System.Type[] { typeof(IIdlEntity) }, false);
-        BuildInfo thisTypeInfo = new BuildInfo(buildInfo.GetBuildScope(), structToCreate,
+        BuildInfo thisTypeInfo = new BuildInfo(buildInfo.GetBuildScope().getChildScope(forSymbol.getSymbolName()), 
+                                               structToCreate,
                                                forSymbol);
 
         // add fileds
@@ -1856,25 +1836,17 @@ public class MetaDataGenerator : IDLParserVisitor {
         }
    
         // create Helper for union generation
-        String fullyQualName = null;
-        if (buildInfo.GetContainterType() == null) {
-            // independent dcl
-            fullyQualName = buildInfo.GetBuildScope().getFullyQualifiedNameForSymbol(forSymbol.getSymbolName());
-        } else {
-            // nested dcl
-            // define type in nested type namespace according to IDL to CLS spec 3.14 
-            Scope nestedScope = buildInfo.GetBuildScope().GetScopeForNested(forSymbol);
-            fullyQualName = nestedScope.getFullyQualifiedNameForSymbol(forSymbol.getSymbolName());
-        }
-        
+        String fullyQualName = buildInfo.GetBuildScope().GetFullyQualifiedNameForSymbol(forSymbol.getSymbolName());
         UnionGenerationHelper genHelper = 
             m_typeManager.StartUnionTypeDefinition(forSymbol, fullyQualName);
         
-        UnionBuildInfo thisInfo = new UnionBuildInfo(buildInfo.GetBuildScope(), genHelper,
-                                                     forSymbol);
+        UnionBuildInfo thisInfoBuildScope = new UnionBuildInfo(buildInfo.GetBuildScope(), genHelper,
+                                                               forSymbol);
+        UnionBuildInfo thisInfoInnerScope = new UnionBuildInfo(buildInfo.GetBuildScope().getChildScope(forSymbol.getSymbolName()), genHelper,
+                                                               forSymbol);        
 
         Node switchBody = node.jjtGetChild(1);
-        TypeContainer discrType = (TypeContainer)node.jjtGetChild(0).jjtAccept(this, thisInfo);
+        TypeContainer discrType = (TypeContainer)node.jjtGetChild(0).jjtAccept(this, thisInfoBuildScope);
         if (discrType == null) {
             throw new InvalidIdlException(
                 String.Format("dicriminator type {0} not (yet) defined for union {1}",
@@ -1883,10 +1855,10 @@ public class MetaDataGenerator : IDLParserVisitor {
         }
         discrType = ReplaceByCustomMappedIfNeeded(discrType);
         ArrayList coveredDiscriminatorRange = ExtractCoveredDiscriminatorRange((ASTswitch_body)switchBody, 
-                                                                               discrType, thisInfo);
+                                                                               discrType, thisInfoInnerScope);
         
         genHelper.AddDiscriminatorFieldAndProperty(discrType, coveredDiscriminatorRange);
-        switchBody.jjtAccept(this, thisInfo);        
+        switchBody.jjtAccept(this, thisInfoInnerScope);        
         
         // create the resulting type
         Type resultType = m_typeManager.EndUnionTypeDefinition(forSymbol, genHelper);
@@ -1983,19 +1955,9 @@ public class MetaDataGenerator : IDLParserVisitor {
             return null; 
         }
                 
-        String fullyQualName = null;
-        if (buildInfo.GetContainterType() == null) {
-            // independent dcl
-            fullyQualName = buildInfo.GetBuildScope().getFullyQualifiedNameForSymbol(forSymbol.getSymbolName());
-        } else {
-            // nested dcl
-            // define type in nested type namespace according to IDL to CLS spec 3.14           
-            Scope nestedScope = buildInfo.GetBuildScope().GetScopeForNested(forSymbol);
-            fullyQualName = nestedScope.getFullyQualifiedNameForSymbol(forSymbol.getSymbolName());
-        }
         TypeAttributes typeAttrs = TypeAttributes.Class | TypeAttributes.Public | TypeAttributes.Sealed;        
         TypeBuilder enumToCreate = 
-            m_typeManager.StartTypeDefinition(forSymbol, fullyQualName, typeAttrs,
+            m_typeManager.StartTypeDefinition(forSymbol, typeAttrs,
                                               typeof(System.Enum), Type.EmptyTypes, false);                                                                                     
         
         // add value__ field, see DefineEnum method of ModuleBuilder
@@ -2188,23 +2150,14 @@ public class MetaDataGenerator : IDLParserVisitor {
             return null;
         }
        
-        String fullyQualName = null;
-        if (buildInfo.GetContainterType() == null) {
-            // independent dcl
-            fullyQualName = buildInfo.GetBuildScope().getFullyQualifiedNameForSymbol(forSymbol.getSymbolName());
-        } else {
-            // nested dcl
-            // define type in nested type namespace according to IDL to CLS spec 3.14 
-            Scope nestedScope = buildInfo.GetBuildScope().GetScopeForNested(forSymbol);
-            fullyQualName = nestedScope.getFullyQualifiedNameForSymbol(forSymbol.getSymbolName());
-        }
         TypeBuilder exceptToCreate = 
-            m_typeManager.StartTypeDefinition(forSymbol, fullyQualName,
+            m_typeManager.StartTypeDefinition(forSymbol,
                                               TypeAttributes.Class | TypeAttributes.Public,
                                               typeof(AbstractUserException), Type.EmptyTypes, 
                                               false);
                                                                                
-        BuildInfo thisTypeInfo = new BuildInfo(buildInfo.GetBuildScope(), exceptToCreate,
+        BuildInfo thisTypeInfo = new BuildInfo(buildInfo.GetBuildScope().getChildScope(forSymbol.getSymbolName()),
+                                               exceptToCreate,
                                                forSymbol);
 
         String repId = GetRepIdForException(forSymbol);

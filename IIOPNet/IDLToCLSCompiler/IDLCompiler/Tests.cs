@@ -853,6 +853,118 @@ namespace Ch.Elca.Iiop.IdlCompiler.Tests {
                 writer.Close();
             }
         }
+        
+        [Test]
+        public void TestUnionDefinedInStructBugReport() {
+        	MemoryStream testSource = new MemoryStream();
+            StreamWriter writer = new StreamWriter(testSource, s_latin1);
+            
+            // idl:           
+            writer.WriteLine("module C2 {");
+            writer.WriteLine("    enum GenericType { GBOOL, GINT, GLONG, GDOUBLE, GSTRING, GMAP, GLIST };");
+            writer.WriteLine();
+            writer.WriteLine("       struct Generic {");
+            writer.WriteLine("        string   name;");
+            writer.WriteLine("        union GAny switch (GenericType) {");
+            writer.WriteLine("          case GBOOL:");
+            writer.WriteLine("            boolean  g_bool;");
+            writer.WriteLine("          case GINT:");
+            writer.WriteLine("            short    g_int;");
+            writer.WriteLine("          case GLONG:");
+            writer.WriteLine("            long     g_long;");
+            writer.WriteLine("          case GDOUBLE:");
+            writer.WriteLine("            double   g_double;");
+            writer.WriteLine("          case GSTRING:");
+            writer.WriteLine("            string   g_string;");
+            writer.WriteLine("          case GMAP:");
+            writer.WriteLine("            sequence<Generic> g_map;");
+            writer.WriteLine("          case GLIST:");
+            writer.WriteLine("            sequence<GAny> g_list;");
+            writer.WriteLine("        }");
+            writer.WriteLine("        value;");
+            writer.WriteLine("    };");
+            writer.WriteLine();
+            writer.WriteLine("    typedef sequence<Generic> GenericMap;");
+   			writer.WriteLine("    typedef sequence<Generic::GAny> GenericList;");
+            writer.WriteLine();
+            writer.WriteLine("};");
+            
+            writer.Flush();
+            testSource.Seek(0, SeekOrigin.Begin);
+            Assembly result = CreateIdl(testSource);
+                       
+            // check if struct is correctly created
+            Type structType = result.GetType("C2.Generic", true);
+            // must be a struct
+            Assertion.Assert("is a struct", structType.IsValueType);
+            CheckIdlStructAttributePresent(structType);
+            CheckSerializableAttributePresent(structType);
+            
+            CheckFieldPresent(structType, "name", typeof(System.String), 
+                              BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly);            
+            CheckFieldPresent(structType, "value", result.GetType("C2.Generic_package.GAny", true),
+                              BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly);            
+            CheckNumberOfFields(structType, BindingFlags.Public | BindingFlags.NonPublic |
+                                            BindingFlags.Instance | BindingFlags.DeclaredOnly,
+                                2);
+            writer.Close();
+        }
+
+        [Test]
+        public void TestMultipleNestedTypes() {
+        	MemoryStream testSource = new MemoryStream();
+            StreamWriter writer = new StreamWriter(testSource, s_latin1);
+            
+            // idl:           
+            writer.WriteLine("module C2 {");
+            writer.WriteLine();
+            writer.WriteLine("  struct L1 {");
+            writer.WriteLine("      string   name;");
+            writer.WriteLine("      struct L2 {");
+            writer.WriteLine("          string name;");
+            writer.WriteLine("          struct L3 {");
+            writer.WriteLine("            string nameL3;");
+            writer.WriteLine("              struct L4 {");
+            writer.WriteLine("                string    name;");            
+            writer.WriteLine("              } valL4;");
+            writer.WriteLine("          } valL3;");
+            writer.WriteLine("      } valL2;");
+            writer.WriteLine("    };");
+            writer.WriteLine();
+   			writer.WriteLine("    typedef sequence<L1::L2> L2List;");
+   			writer.WriteLine("    typedef sequence<L1::L2::L3> L3List;");
+   			writer.WriteLine("    typedef sequence<L1::L2::L3::L4> L4List;");
+            writer.WriteLine();
+            writer.WriteLine("};");
+            
+            writer.Flush();
+            testSource.Seek(0, SeekOrigin.Begin);
+            Assembly result = CreateIdl(testSource);
+            writer.Close();
+                       
+            // check if struct is correctly created
+            Type structType = result.GetType("C2.L1", true);
+            // must be a struct
+            Assertion.Assert("is a struct", structType.IsValueType);
+            CheckIdlStructAttributePresent(structType);
+            CheckSerializableAttributePresent(structType);
+            
+            CheckFieldPresent(structType, "name", typeof(System.String), 
+                              BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly);            
+            CheckFieldPresent(structType, "valL2", result.GetType("C2.L1_package.L2", true),
+                              BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly);            
+            CheckNumberOfFields(structType, BindingFlags.Public | BindingFlags.NonPublic |
+                                            BindingFlags.Instance | BindingFlags.DeclaredOnly,
+                                2);
+            Type l3StructType = result.GetType("C2.L1_package.L2_package.L3", true);
+            CheckFieldPresent(l3StructType, "nameL3", typeof(System.String), 
+                              BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly);            
+            CheckFieldPresent(l3StructType, "valL4", result.GetType("C2.L1_package.L2_package.L3_package.L4", true),
+                              BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly);            
+            CheckNumberOfFields(l3StructType, BindingFlags.Public | BindingFlags.NonPublic |
+                                            BindingFlags.Instance | BindingFlags.DeclaredOnly,
+                                2);                        
+        }
 
 
         #endregion
