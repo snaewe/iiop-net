@@ -140,6 +140,18 @@ public class TestServiceImpl extends PortableRemoteObject implements TestService
     public byte[][][] EchoJaggedByteArray(byte[][][] arg) throws RemoteException {
         return arg;
     }
+
+    public NamedValue[] TestAppendElementToNamedValueArray(NamedValue[] arg, NamedValue toAppend) throws RemoteException {
+        NamedValue[] result;
+        if (arg != null) {
+            result = new NamedValue[arg.length + 1];
+            System.arraycopy(arg, 0, result, 0, arg.length);
+        } else {
+            result = new NamedValue[1];
+        }
+        result[result.length - 1] = toAppend;
+        return result;        
+    }
         
     public Adder RetrieveAdder() throws RemoteException {
         return new AdderImpl();

@@ -99,6 +99,56 @@ namespace Ch.Elca.Iiop.IntegrationTests {
     [Serializable]
     public class _InImpl : _In {
     
+    }    
+    
+    
+    [Serializable()]
+    public class NamedValueImplImpl : NamedValueImpl {
+        
+        public NamedValueImplImpl() {
+        }
+        
+        public NamedValueImplImpl(string arg0, int arg1) : 
+                base(arg0, arg1) {
+            m_name = arg0;
+            m_value = arg1;
+        }
+        
+        public override void setValue(int arg0) {
+            m_value = arg0;
+        }
+        
+        public override void setName(string arg0) {
+            m_name = arg0;
+        }
+        
+        public override int getValue() {
+            return m_value;
+        }
+        
+        public override string getName() {
+            return m_name;
+        }
+
+        public override bool Equals(object other) {
+            if (!(other is NamedValueImplImpl)) {
+                return false;
+            }
+            NamedValueImplImpl otherCasted = (NamedValueImplImpl)other;
+            return (m_value == otherCasted .m_value) && (m_name == otherCasted.m_name);            
+        }
+
+        public override int GetHashCode() {
+            int result = m_value.GetHashCode();
+            if (m_name != null) {
+                result = result ^ m_name.GetHashCode();
+            }
+            return result;
+        }
+
+        
     }
+
+
 
 }

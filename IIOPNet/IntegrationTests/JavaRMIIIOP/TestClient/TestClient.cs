@@ -281,6 +281,20 @@ namespace Ch.Elca.Iiop.IntegrationTests {
             Assertion.AssertEquals(arg1[1][0], result1[1][0]);
             Assertion.AssertEquals(arg1[1][1], result1[1][1]);                        
         }       
+
+        [Test]
+        public void TestInterfaceImplementingValueTypeArray() {
+            NamedValue[] arg = new NamedValue[] { 
+                new NamedValueImplImpl("name1", 1) };
+            NamedValue toAppend = new NamedValueImplImpl("name2", 2);
+            NamedValue[] result = m_testService.TestAppendElementToNamedValueArray(arg, toAppend);
+            Assertion.AssertNotNull(result);
+            Assertion.AssertEquals(arg.Length + 1, result.Length);
+            for (int i = 0; i < arg.Length; i++) {
+                Assertion.AssertEquals(arg[i], result[i]);
+            }
+            Assertion.AssertEquals(toAppend, result[arg.Length]);
+        }
         
         [Test]
         public void TestRemoteObjects() {

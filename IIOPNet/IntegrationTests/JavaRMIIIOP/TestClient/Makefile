@@ -23,16 +23,16 @@ $(bin)ClientTest.dll: $(bin)IIOPChannel.dll $(bin)Client.dll *.cs
 	csc $(CSFLAGS) /t:library /r:$(NUNIT) /r:$(bin)IIOPChannel.dll /r:$(bin)Client.dll /out:$(bin)ClientTest.dll TestClient.cs ValueTypeImpls.cs
 
 
-IDL\Ch\Elca\Iiop\IntegrationTests\TestService.idl: ..\TestServer\IDL\Ch\Elca\Iiop\IntegrationTests\TestService.idl
+IDL\Ch\Elca\Iiop\IntegrationTests\TestService.idl IDL\Ch\Elca\Iiop\IntegrationTests\NamedValueImpl.idl: ..\TestServer\IDL\Ch\Elca\Iiop\IntegrationTests\TestService.idl ..\TestServer\IDL\Ch\Elca\Iiop\IntegrationTests\NamedValueImpl.idl
     if not exist IDL\nul mkdir IDL
     cd IDL
     copy ..\..\..\..\IDLToCLSCompiler\IDL\*.idl .
     xcopy /s /q /y ..\..\TestServer\IDL .
     cd ..
 
-$(bin)Client.dll: IDL\Ch\Elca\Iiop\IntegrationTests\TestService.idl
+$(bin)Client.dll: IDL\Ch\Elca\Iiop\IntegrationTests\TestService.idl IDL\Ch\Elca\Iiop\IntegrationTests\NamedValueImpl.idl
 	cd IDL 
-	..\..\..\..\IDLToCLSCompiler\IDLCompiler\bin\IDLToCLSCompiler.exe -o ..\$(bin) Client Ch\Elca\Iiop\IntegrationTests\TestService.idl
+	..\..\..\..\IDLToCLSCompiler\IDLCompiler\bin\IDLToCLSCompiler.exe $(IDLTOCLSFLAGS) -o ..\$(bin) Client Ch\Elca\Iiop\IntegrationTests\TestService.idl Ch\Elca\Iiop\IntegrationTests\NamedValueImpl.idl
 	cd ..
 
 

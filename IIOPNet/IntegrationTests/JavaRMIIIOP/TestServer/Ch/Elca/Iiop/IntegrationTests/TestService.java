@@ -64,7 +64,9 @@ public interface TestService extends java.rmi.Remote {
         
     public String[][] EchoJaggedStringArray(String[][] arg) throws RemoteException;
         
-    public byte[][][] EchoJaggedByteArray(byte[][][] arg) throws RemoteException;      
+    public byte[][][] EchoJaggedByteArray(byte[][][] arg) throws RemoteException;   
+
+    public NamedValue[] TestAppendElementToNamedValueArray(NamedValue[] arg, NamedValue toAppend) throws RemoteException;
         
     public Adder RetrieveAdder() throws RemoteException; 
 

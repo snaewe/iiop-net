@@ -11,9 +11,9 @@ TestServiceDir = Ch\Elca\Iiop\IntegrationTests\
 build: build-server build-stubs build-idl
 
 
-build-server: $(bin)\TestServer.class $(bin)$(TestServiceDir)TestService.class $(bin)$(TestServiceDir)TestServiceImpl.class $(bin)$(TestServiceDir)Adder.class $(bin)$(TestServiceDir)AdderImpl.class
+build-server: $(bin)\TestServer.class $(bin)$(TestServiceDir)TestService.class $(bin)$(TestServiceDir)TestServiceImpl.class $(bin)$(TestServiceDir)Adder.class $(bin)$(TestServiceDir)AdderImpl.class $(bin)$(TestServiceDir)NamedValueImpl.class
 
-$(bin)\TestServer.class $(bin)$(TestServiceDir)TestService.class $(bin)$(TestServiceDir)TestServiceImpl.class $(bin)$(TestServiceDir)Adder.class $(bin)$(TestServiceDir)AdderImpl.class: TestServer.java $(TestServiceDir)TestService.java $(TestServiceDir)TestServiceImpl.java $(TestServiceDir)Adder.java $(TestServiceDir)AdderImpl.java
+$(bin)\TestServer.class $(bin)$(TestServiceDir)TestService.class $(bin)$(TestServiceDir)TestServiceImpl.class $(bin)$(TestServiceDir)Adder.class $(bin)$(TestServiceDir)AdderImpl.class $(bin)$(TestServiceDir)NamedValueImpl.class : TestServer.java $(TestServiceDir)TestService.java $(TestServiceDir)TestServiceImpl.java $(TestServiceDir)Adder.java $(TestServiceDir)AdderImpl.java $(TestServiceDir)NamedValueImpl.java
     if not exist $(bin)nul mkdir $(bin)
     javac -d bin Ch\Elca\Iiop\IntegrationTests\*.java
     javac -d bin TestServer.java    
@@ -28,14 +28,15 @@ $(bin)$(TestServiceDir)_TestServiceImpl_Tie.class $(bin)$(TestServiceDir)_TestSe
     rmic -iiop Ch.Elca.Iiop.IntegrationTests.TestSimpleIfImpl
     cd ..
 
-build-idl: $(IDL)$(TestServiceDir)TestService.idl $(IDL)$(TestServiceDir)Adder.idl $(IDL)$(TestServiceDir)TestSimpleInterface1.idl $(IDL)$(TestServiceDir)TestSimpleInterface2.idl
+build-idl: $(IDL)$(TestServiceDir)TestService.idl $(IDL)$(TestServiceDir)Adder.idl $(IDL)$(TestServiceDir)TestSimpleInterface1.idl $(IDL)$(TestServiceDir)TestSimpleInterface2.idl $(IDL)$(TestServiceDir)NamedValueImpl.idl
 
-$(IDL)$(TestServiceDir)TestService.idl $(IDL)$(TestServiceDir)Adder.idl $(IDL)$(TestServiceDir)TestSimpleInterface1.idl $(IDL)$(TestServiceDir)TestSimpleInterface2.idl: $(bin)$(TestServiceDir)TestServiceImpl.class $(bin)$(TestServiceDir)AdderImpl.class
+$(IDL)$(TestServiceDir)TestService.idl $(IDL)$(TestServiceDir)Adder.idl $(IDL)$(TestServiceDir)TestSimpleInterface1.idl $(IDL)$(TestServiceDir)TestSimpleInterface2.idl $(bin)$(TestServiceDir)NamedValueImpl.idl: $(bin)$(TestServiceDir)TestServiceImpl.class $(bin)$(TestServiceDir)AdderImpl.class $(bin)$(TestServiceDir)NamedValueImpl.class
     if not exist $(IDL) mkdir $(IDL)
     cd bin
     rmic -d ..\$(IDL) -idl Ch.Elca.Iiop.IntegrationTests.TestServiceImpl
     rmic -d ..\$(IDL) -idl Ch.Elca.Iiop.IntegrationTests.AdderImpl
     rmic -d ..\$(IDL) -idl Ch.Elca.Iiop.IntegrationTests.TestSimpleIfImpl
+    rmic -d ..\$(IDL) -idl Ch.Elca.Iiop.IntegrationTests.NamedValueImpl
     cd ..
 
 start-server:
