@@ -208,6 +208,30 @@ namespace Ch.Elca.Iiop.IntegrationTests {
             result[1] = arg2;
             return result;
         }
+        
+        public System.Int32[][] EchoJaggedIntArray(System.Int32[][] arg) {
+            return arg;
+        }
+        
+        public System.String[][] EchoJaggedStringArray(System.String[][] arg) {
+            return arg;
+        }
+        
+        public System.Byte[][][] EchoJaggedByteArray(System.Byte[][][] arg) {
+            return arg;
+        }
+        
+        public System.Int32[,] EchoMultiDimIntArray(System.Int32[,] arg) {
+            return arg;
+        }
+        
+        public System.Byte[,,] EchoMultiDimByteArray(System.Byte[,,] arg) {
+            return arg;
+        }
+        
+        public System.String[,] EchoMultiDimStringArray(System.String[,] arg) {
+        	return arg;
+        }
 
         public Adder RetrieveAdder() {
             return new Adder();
@@ -258,7 +282,18 @@ namespace Ch.Elca.Iiop.IntegrationTests {
         public object EchoAnything(object arg) {
             return arg;
         }
-
+        
+        /// <summary>
+        /// used to check, if a reference passed is equal to this object itself.
+        /// </summary>
+        public bool CheckEqualityWithService(MarshalByRefObject toCheck) {
+        	return toCheck.Equals(this);
+        }
+        
+        public bool CheckEqualityWithServiceV2(TestService toCheck) {
+        	return toCheck.Equals(this);
+        }
+        
         public override object InitializeLifetimeService() {
             // live forever
             return null;

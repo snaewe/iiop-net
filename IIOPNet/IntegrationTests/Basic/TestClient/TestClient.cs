@@ -204,6 +204,83 @@ namespace Ch.Elca.Iiop.IntegrationTests {
             Assertion.AssertEquals(1, result.Length);
             Assertion.AssertEquals("hik", result[0]);
         }
+        
+        [Test]
+        public void TestJaggedArrays() {
+            System.Int32[][] arg1 = new System.Int32[2][];
+            arg1[0] = new System.Int32[] { 1 };
+            arg1[1] = new System.Int32[] { 2, 3 };
+            System.Int32[][] result1 = m_testService.EchoJaggedIntArray(arg1);
+            Assertion.AssertEquals(2, result1.Length);
+            Assertion.AssertNotNull(result1[0]);
+            Assertion.AssertNotNull(result1[1]);
+            Assertion.AssertEquals(arg1[0][0], result1[0][0]);
+            Assertion.AssertEquals(arg1[1][0], result1[1][0]);
+            Assertion.AssertEquals(arg1[1][1], result1[1][1]);
+            
+            System.Byte[][][] arg2 = new System.Byte[3][][];
+            arg2[0] = new System.Byte[][] { new System.Byte[] { 1 } };
+            arg2[1] = new System.Byte[][] { new System.Byte[0] };
+            arg2[2] = new System.Byte[0][];
+            System.Byte[][][] result2 = m_testService.EchoJaggedByteArray(arg2);
+            Assertion.AssertEquals(3, result2.Length);
+            Assertion.AssertNotNull(result2[0]);
+            Assertion.AssertNotNull(result2[1]);
+            Assertion.AssertNotNull(result2[2]);
+            Assertion.AssertEquals(arg2[0][0][0], result2[0][0][0]);
+        }
+        
+        [Test]
+        public void TestJaggedStringArrays() {
+            System.String[][] arg1 = new System.String[2][];
+            arg1[0] = new System.String[] { "test" };
+            arg1[1] = new System.String[] { "test2", "test3" };
+            System.String[][] result1 = m_testService.EchoJaggedStringArray(arg1);
+            Assertion.AssertEquals(2, result1.Length);
+            Assertion.AssertNotNull(result1[0]);
+            Assertion.AssertNotNull(result1[1]);
+            Assertion.AssertEquals(arg1[0][0], result1[0][0]);
+            Assertion.AssertEquals(arg1[1][0], result1[1][0]);
+            Assertion.AssertEquals(arg1[1][1], result1[1][1]);                        
+        }
+        
+        [Test]
+        public void TestMultidimArrays() {
+            System.Int32[][] arg1 = new System.Int32[2][];
+            arg1[0] = new System.Int32[] { 1 };
+            arg1[1] = new System.Int32[] { 2 };
+            System.Int32[][] result1 = m_testService.EchoMultiDimIntArray(arg1);
+            Assertion.AssertEquals(2, result1.Length);
+            Assertion.AssertNotNull(result1[0]);
+            Assertion.AssertNotNull(result1[1]);
+            Assertion.AssertEquals(arg1[0][0], result1[0][0]);
+            Assertion.AssertEquals(arg1[1][0], result1[1][0]);
+            
+            System.Byte[][][] arg2 = new System.Byte[3][][];
+            arg2[0] = new System.Byte[][] { new System.Byte[] { 1 } };
+            arg2[1] = new System.Byte[][] { new System.Byte[] { 2 } };
+            arg2[2] = new System.Byte[][] { new System.Byte[] { 3 } };
+            System.Byte[][][] result2 = m_testService.EchoMultiDimByteArray(arg2);
+            Assertion.AssertEquals(3, result2.Length);
+            Assertion.AssertNotNull(result2[0]);
+            Assertion.AssertNotNull(result2[1]);
+            Assertion.AssertNotNull(result2[2]);
+            Assertion.AssertEquals(arg2[0][0][0], result2[0][0][0]);
+
+        }
+        
+        [Test]
+        public void TestMutlidimStringArrays() {
+            System.String[][] arg1 = new System.String[2][];
+            arg1[0] = new System.String[] { "test" };
+            arg1[1] = new System.String[] { "test2" };
+            System.String[][] result1 = m_testService.EchoMultiDimStringArray(arg1);
+            Assertion.AssertEquals(2, result1.Length);
+            Assertion.AssertNotNull(result1[0]);
+            Assertion.AssertNotNull(result1[1]);
+            Assertion.AssertEquals(arg1[0][0], result1[0][0]);
+            Assertion.AssertEquals(arg1[1][0], result1[1][0]);
+        }
 
         [Test]
         public void TestRemoteObjects() {
@@ -397,6 +474,14 @@ namespace Ch.Elca.Iiop.IntegrationTests {
             arg4[0] = 1;
             System.Int32[] result4 = (System.Int32[]) m_testService.EchoAnything(arg4);
             Assertion.AssertEquals(arg4[0], result4[0]);
+        }
+        
+        
+        public void TestEqualityServerAndProxy() {
+            bool result = m_testService.CheckEqualityWithServiceV2((TestService)m_testService);
+            Assertion.AssertEquals(true, result);
+            result = m_testService.CheckEqualityWithService((MarshalByRefObject)m_testService);
+            Assertion.AssertEquals(true, result);
         }
 
     }
