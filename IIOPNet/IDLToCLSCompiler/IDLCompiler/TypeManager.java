@@ -48,15 +48,15 @@ public class TypeManager {
     private Hashtable m_typesInCreation = new Hashtable();
     private Hashtable m_typeTable = new Hashtable();
     private Hashtable m_typedefTable = new Hashtable();
-    private ModuleBuilderManager m_manager;
+    private ModuleBuilder m_modBuilder;
 
     private TypesInAssemblyManager m_refAsmTypes;
 
     #endregion IFields
     #region IConstructors
 
-    public TypeManager(ModuleBuilderManager manager, TypesInAssemblyManager refAsmTypes) {
-        m_manager = manager;
+    public TypeManager(ModuleBuilder modBuilder, TypesInAssemblyManager refAsmTypes) {
+        m_modBuilder = modBuilder;
         m_refAsmTypes = refAsmTypes;
     }
 
@@ -117,15 +117,11 @@ public class TypeManager {
      *  Does only return fully defined types, others are not interesting here. 
      **/
     private Type GetTypeFromBuildModule(Symbol forSymbol) {
-        Scope declIn = null;
-        declIn = forSymbol.getDeclaredIn();
-        ModuleBuilder modBuilder = m_manager.GetModuleBuilderFor(declIn);
-        if (modBuilder != null) {
-            String fullName = declIn.getFullyQualifiedNameForSymbol(forSymbol.getSymbolName());
-            Type result = modBuilder.GetType(fullName);
-            if (!(result instanceof TypeBuilder)) {  // type is fully defined (do not return not fully defined types here)
-                return result;
-            }
+        Scope declIn = declIn = forSymbol.getDeclaredIn();
+        String fullName = declIn.getFullyQualifiedNameForSymbol(forSymbol.getSymbolName());
+        Type result = m_modBuilder.GetType(fullName);
+        if (!(result instanceof TypeBuilder)) {  // type is fully defined (do not return not fully defined types here)
+            return result;
         }
         return null;
     }
