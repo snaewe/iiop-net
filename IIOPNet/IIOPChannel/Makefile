@@ -1,6 +1,16 @@
-IIOPChannel: bin\Delivery\IIOPChannel.dll
-	
+Dest = bin\ 
 
-bin\Delivery\IIOPChannel.dll: *.cs
-	if not exist .\bin\Delivery mkdir .\bin\Delivery\;
-	csc $(CSFLAGS) /t:library /out:bin\Delivery\IIOPChannel.dll *.cs 
+
+build: build-dll
+
+$(Dest):
+	mkdir $(Dest)
+
+build-dll: $(Dest) $(Dest)IIOPChannel.dll
+	
+$(Dest)IIOPChannel.dll: *.cs
+	csc $(CSFLAGS) /t:library /out:$@ $? 
+	
+clean:
+	del /s /q $(Dest)*.dll
+	rmdir $(Dest) 

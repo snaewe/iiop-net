@@ -1,16 +1,19 @@
-All : Channel Generator
+projects = IIOPChannel CLSToIDLGenerator
 
-Channel :
-	@echo building IIOP channel
-	@cd IIOPChannel
-	@nmake -f Makefile IIOPChannel
-	@cd ..
 
-Generator :
-	@echo building CLS to IDL generator
-	@if not exist .\CLSToIDLGenerator\bin\Delivery mkdir .\CLSToIDLGenerator\bin\Delivery\ ;
-	@copy .\IIOPChannel\bin\Delivery\IIOPChannel.* .\CLSToIDLGenerator\bin\Delivery\ ;
-	@cd CLSToIDLGenerator
-	@nmake -f Makefile CLSToIDLGenerator
-	@cd ..
+build:
+	cd IIOPChannel
+	$(MAKE) build
+	cd ..
+	cd CLSToIDLGenerator
+	$(MAKE) build
+	cd ..
+
+clean:
+	cd IIOPChannel
+	$(MAKE) clean
+	cd ..
+	cd CLSToIDLGenerator
+	$(MAKE) clean
+	cd ..
 
