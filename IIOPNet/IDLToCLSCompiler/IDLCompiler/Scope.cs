@@ -175,8 +175,10 @@ public class Scope {
         
     /** adds a pragma id to this scope */
     public void addPragmaID(String id, String value) {
-        if (m_pragmas.ContainsKey(id)) { 
-            throw new ScopeException("pragma id error, id already defined: " + id); 
+        if (m_pragmas.ContainsKey(id) && (!m_pragmas[id].Equals(value))) { 
+            // according to 10.6.5.1 in CORBA 2.6, it's only illegal to reassign a different id
+            throw new ScopeException(String.Format("pragma id error, id redefined: {0}; last value : {1}, redef: {2}",
+                                                   id, m_pragmas[id], value));
         }
         m_pragmas[id] = value;
     }
