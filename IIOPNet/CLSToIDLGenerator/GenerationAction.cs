@@ -91,7 +91,7 @@ namespace Ch.Elca.Iiop.Idl {
         /// <param name="dotNetType"></param>
         /// <param name="ToIdlFile"></param>
         private void BeginType(Type dotNetType, out string[] modules, out string unqualName) {            
-        	BeginType(dotNetType, AttributeExtCollection.EmptyCollection, AttributeExtCollection.EmptyCollection, out modules, out unqualName);
+            BeginType(dotNetType, AttributeExtCollection.EmptyCollection, AttributeExtCollection.EmptyCollection, out modules, out unqualName);
         }        
         
         /// <summary>
@@ -116,8 +116,8 @@ namespace Ch.Elca.Iiop.Idl {
         private void BeginTypeWithName(Type dotNetType, AttributeExtCollection attributes, AttributeExtCollection attributesAfterMap, string[] modules, string unqualName) {
             // determine the dependencies for the type
             m_depInfo = m_depManager.GetDependencyInformation(dotNetType, attributesAfterMap);
-			m_openModules = modules;
-			
+            m_openModules = modules;
+            
             // write it
             // create output-stream
             m_toIDLFile = CreateIdlFullName(modules, unqualName);
@@ -343,17 +343,17 @@ namespace Ch.Elca.Iiop.Idl {
             if (shouldThrowException) {
                 m_currentOutputStream.Write(" raises (::Ch::Elca::Iiop::GenericUserException");
                 AttributeExtCollection methodAttributes = 
-            		ReflectionHelper.GetCustomAttriutesForMethod(methodToMap, true);
-				foreach (Attribute attr in methodAttributes) {
-            		if (ReflectionHelper.ThrowsIdlExceptionAttributeType.
-                		IsAssignableFrom(attr.GetType())) {
-                    	Type exceptionType = ((ThrowsIdlExceptionAttribute)attr).ExceptionType;
-                    	if (!exceptionType.Equals(typeof(GenericUserException))) {
-                    	    string exceptionRef = (string)m_mapper.MapClsType(exceptionType, 
+                    ReflectionHelper.GetCustomAttriutesForMethod(methodToMap, true);
+                foreach (Attribute attr in methodAttributes) {
+                    if (ReflectionHelper.ThrowsIdlExceptionAttributeType.
+                        IsAssignableFrom(attr.GetType())) {
+                        Type exceptionType = ((ThrowsIdlExceptionAttribute)attr).ExceptionType;
+                        if (!exceptionType.Equals(typeof(GenericUserException))) {
+                            string exceptionRef = (string)m_mapper.MapClsType(exceptionType, 
                                                                      AttributeExtCollection.EmptyCollection, m_refMapperNoAnonSeq);
-                    	    m_currentOutputStream.Write(", " + exceptionRef);
-                    	}
-                	}
+                            m_currentOutputStream.Write(", " + exceptionRef);
+                        }
+                    }
                 }
 
                 m_currentOutputStream.Write(")");
@@ -388,14 +388,29 @@ namespace Ch.Elca.Iiop.Idl {
         }
 
         /// <summary>map the fields of a concrete value type</summary>
-        private void MapFields(Type typeToMap, BindingFlags flags) {
+        private void MapValueTypeFields(Type typeToMap, BindingFlags flags) {
             FieldInfo[] fields = typeToMap.GetFields(flags);
             foreach (FieldInfo field in fields) {
                 if (!field.IsNotSerialized) { // do not serialize transient fields
-                    MapField(field, typeToMap);
+                    MapValueTypeField(field, typeToMap);
                 }
             }
         }            
+
+        /// <summary>map the fields of a concrete value type</summary>
+        private void MapStructFields(Type typeToMap) {
+            FieldInfo[] fields = ReflectionHelper.GetAllDeclaredInstanceFields(typeToMap);
+            foreach (FieldInfo field in fields) {
+                Type fieldType = field.FieldType;
+                string fieldTypeMapped = (string)m_mapper.MapClsType(fieldType, 
+                                                                     Util.AttributeExtCollection.ConvertToAttributeCollection(field.GetCustomAttributes(true)), 
+                                                                     m_refMapperAnonSeq);
+                m_currentOutputStream.Write(fieldTypeMapped + " ");
+                // name of field
+                m_currentOutputStream.Write(IdlNaming.MapClsNameToIdlName(field.Name));
+                m_currentOutputStream.WriteLine(";");
+            }
+        }
         
         /// <summary>map the properties of a type</summary>
         private void MapProperties(Type typeToMap, BindingFlags flags) {
@@ -407,7 +422,7 @@ namespace Ch.Elca.Iiop.Idl {
             }
         }
 
-        private void MapField(FieldInfo fieldToMap, Type declaringType) {
+        private void MapValueTypeField(FieldInfo fieldToMap, Type declaringType) {
             Type fieldType = fieldToMap.FieldType;
             string fieldTypeMapped = (string)m_mapper.MapClsType(fieldType, 
                                                                  Util.AttributeExtCollection.ConvertToAttributeCollection(fieldToMap.GetCustomAttributes(true)), 
@@ -421,7 +436,7 @@ namespace Ch.Elca.Iiop.Idl {
             // name of field
             m_currentOutputStream.Write(IdlNaming.MapClsNameToIdlName(fieldToMap.Name));
             m_currentOutputStream.WriteLine(";");
-        }                    
+        }   
         
         private void MapProperty(PropertyInfo propertyToMap, Type declaringType) {
             Type propertyType = propertyToMap.PropertyType;
@@ -458,16 +473,16 @@ namespace Ch.Elca.Iiop.Idl {
             Type[] interfaces = forType.GetInterfaces();
             bool alreadyMappedAnInterface = false;
             for (int i = 0; i < interfaces.Length; i++) {
-            	// only map, if legal
-            	if (ClsToIdlMapper.MapInheritanceFromInterfaceToIdl(interfaces[i], forType)) {
-                	if (alreadyMappedAnInterface) { 
-            			m_currentOutputStream.Write(", "); 
-            		}
-                	Type interf = interfaces[i];
-                	string ifMapped = (string)m_mapper.MapClsType(interf, AttributeExtCollection.EmptyCollection, m_refMapperNoAnonSeq);
-                	m_currentOutputStream.Write(ifMapped);
-                	alreadyMappedAnInterface = true;
-            	}
+                // only map, if legal
+                if (ClsToIdlMapper.MapInheritanceFromInterfaceToIdl(interfaces[i], forType)) {
+                    if (alreadyMappedAnInterface) { 
+                        m_currentOutputStream.Write(", "); 
+                    }
+                    Type interf = interfaces[i];
+                    string ifMapped = (string)m_mapper.MapClsType(interf, AttributeExtCollection.EmptyCollection, m_refMapperNoAnonSeq);
+                    m_currentOutputStream.Write(ifMapped);
+                    alreadyMappedAnInterface = true;
+                }
             }
         }
 
@@ -536,29 +551,29 @@ namespace Ch.Elca.Iiop.Idl {
         }
         
         public object MapToIdlSequence(Type clsType, int bound, AttributeExtCollection allAttributes, AttributeExtCollection elemTypeAttributes) {
-        	// for sequences, the attributes of the element type also influence the mapped type
-        	// therefore, use attributes also to check mapped type
-        	if (m_depManager.CheckMappedType(clsType, allAttributes)) {
-        		return null; // already mapped
-			}
-        	string namespaceName;
-        	string elemTypeMapped;
-        	string typedefName =
-        		IdlNaming.GetTypeDefAliasForSequenceType(clsType, bound, elemTypeAttributes, out namespaceName, out elemTypeMapped);
-        	        	
-        	string[] modules = IdlNaming.MapNamespaceNameToIdlModules(namespaceName);
-        	BeginTypeWithName(clsType, allAttributes, elemTypeAttributes, modules, typedefName);
-        	
+            // for sequences, the attributes of the element type also influence the mapped type
+            // therefore, use attributes also to check mapped type
+            if (m_depManager.CheckMappedType(clsType, allAttributes)) {
+                return null; // already mapped
+            }
+            string namespaceName;
+            string elemTypeMapped;
+            string typedefName =
+                IdlNaming.GetTypeDefAliasForSequenceType(clsType, bound, elemTypeAttributes, out namespaceName, out elemTypeMapped);
+                        
+            string[] modules = IdlNaming.MapNamespaceNameToIdlModules(namespaceName);
+            BeginTypeWithName(clsType, allAttributes, elemTypeAttributes, modules, typedefName);
+            
             // write type dependant information
             WriteModuleOpenings(modules);
 
             // write typedef
             if (bound == 0) {
-	            m_currentOutputStream.WriteLine("typedef sequence<{0}> {1} ;", elemTypeMapped, typedefName);
+                m_currentOutputStream.WriteLine("typedef sequence<{0}> {1} ;", elemTypeMapped, typedefName);
             } else {
-            	m_currentOutputStream.WriteLine("typedef sequence<{0}, {1}> {2} ;", elemTypeMapped, bound, typedefName);
+                m_currentOutputStream.WriteLine("typedef sequence<{0}, {1}> {2} ;", elemTypeMapped, bound, typedefName);
             }
-        	                                            
+                                                        
             m_currentOutputStream.WriteLine("");
 
             EndType();
@@ -569,8 +584,25 @@ namespace Ch.Elca.Iiop.Idl {
             if (m_depManager.CheckMappedType(clsType)) { 
                 return null; 
             }
-            // normally, nothing has to be done here, therefore throw a NotSupportedException
-            throw new NotSupportedException("only Types procuced from IDL to CLS mapping are mapped to an IDL-struct, therefore Generator doesn't map this type");
+            // do the mapping
+            string unqualName; string[] modules;
+            BeginType(clsType, out modules, out unqualName);
+            
+            // write type dependant information
+            WriteModuleOpenings(modules);
+            
+            m_currentOutputStream.Write("struct " + unqualName);
+            m_currentOutputStream.WriteLine(" {");
+            // map the members
+            MapStructFields(clsType);
+            
+            CloseOpenScopes(1); // close interface scope
+            m_currentOutputStream.WriteLine("");
+            // write the repository ID
+            WriteRepositoryID(clsType, unqualName);
+
+            EndType();
+            return null;
         }
 
         public object MapToIdlUnion(Type clsType) {
@@ -601,8 +633,8 @@ namespace Ch.Elca.Iiop.Idl {
             }
             m_currentOutputStream.WriteLine(" {");
             // map the state members
-            MapFields(clsType, BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic | 
-                          BindingFlags.DeclaredOnly);
+            MapValueTypeFields(clsType, BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic | 
+                                        BindingFlags.DeclaredOnly);
             
             // map the properties and methods
             MapMethods(clsType, false, BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.DeclaredOnly);
@@ -1087,7 +1119,7 @@ namespace Ch.Elca.Iiop.Idl {
         }        
         
         private void WriteInclude(Type forType) {
-        	WriteInclude(forType, AttributeExtCollection.EmptyCollection);
+            WriteInclude(forType, AttributeExtCollection.EmptyCollection);
         }        
         
         #region Implementation of MappingAction
