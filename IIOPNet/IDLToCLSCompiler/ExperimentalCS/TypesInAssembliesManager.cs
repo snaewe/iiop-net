@@ -37,75 +37,86 @@ using Ch.Elca.Iiop.Idl;
 namespace Ch.Elca.Iiop.IdlCompiler.Action {
 
 
-/** manages types defined in referenced assemblies */
-public class TypesInAssemblyManager {
+    /// <summary>
+    /// manages types defined in referenced assemblies
+    /// </summary> 
+    public class TypesInAssemblyManager {
 
-    #region IFiels
+        #region IFiels
 
-    private ArrayList m_refAssemblies;
+        private ArrayList m_refAssemblies;
 
-    #endregion IFields
-    #region IConstructors
+        #endregion IFields
+        #region IConstructors
 
-    public TypesInAssemblyManager(ArrayList refAssemblies) {
-        m_refAssemblies = refAssemblies;
-    }
-
-    #endregion IConstructors
-    #region IMethods
-
-    /** 
-     * checkes, if a type for the symbol forSymbol is defined in
-     * a referenced assembly
-     * @return the Type if found, otherwise null
-     */
-    public Type GetTypeFromRefAssemblies(Symbol forSymbol) {
-        Type result = null;
-        foreach (Assembly asm in m_refAssemblies){
-            Scope symScope = forSymbol.getDeclaredIn();
-            String fullName = symScope.getFullyQualifiedNameForSymbol(forSymbol.getSymbolName());
-            result = asm.GetType(fullName);
-            if (result != null) {
-                String repId = symScope.getRepositoryIdFor(forSymbol.getSymbolName());
-                if (TypeRepIdEquals(result, repId)) {
-                    break;    
-                } else {
-                    Console.WriteLine("warning: found a type in a referenced assembly, with the same fully qualified name, but a different rep-id.\n" +
-                                      " -> do not use this type, instead of regeneration. (repId: " + repId + ")");
-                }                
-            }
+        public TypesInAssemblyManager(ArrayList refAssemblies) {
+            m_refAssemblies = refAssemblies;
         }
-        return result;
-    }
 
-    /** checks, if the type toCheck has a repository Id with id repId associated.
-     * @return true if present and equal, false otherwise
-     */
-    private bool TypeRepIdEquals(Type toCheck, String repId) {
-        if (repId != null) {
-            // check that repId is present on type from asm and that it is equal
-            Object[] attrs = toCheck.GetCustomAttributes(typeof(RepositoryIDAttribute), true);
-            if (attrs.Length > 0) {
-                RepositoryIDAttribute repIdAttr = (RepositoryIDAttribute)attrs[0];
-                if (repIdAttr.Id.Equals(repId)) {
-                    return true;
+        #endregion IConstructors
+        #region IMethods
+
+        /// <summary>
+        /// checkes, if a type for the symbol forSymbol is defined in
+        /// a referenced assembly         
+        /// </summary>
+        /// <return>
+        /// return the Type if found, otherwise null
+        /// </return>
+        public Type GetTypeFromRefAssemblies(Symbol forSymbol) {
+            Type result = null;
+            foreach (Assembly asm in m_refAssemblies){
+                Scope symScope = forSymbol.getDeclaredIn();
+                String fullName = symScope.getFullyQualifiedNameForSymbol(forSymbol.getSymbolName());
+                result = asm.GetType(fullName);
+                if (result != null) {
+                    String repId = symScope.getRepositoryIdFor(forSymbol.getSymbolName());
+                    if (TypeRepIdEquals(result, repId)) {
+                        break;    
+                    } else {
+                        Console.WriteLine("warning: found a type in a referenced assembly, " + 
+                                          "with the same fully qualified name, " +
+                                          "but a different rep-id.\n" +
+                                          " -> do not use this type, instead of regeneration. (repId: {0})",
+                                          repId);
+                    }                
+                }
+            }
+            return result;
+        }
+
+        /// <summary>
+        /// checks, if the type toCheck has a repository Id with id repId associated.
+        /// </summary> 
+        /// <return>
+        /// return true if present and equal, false otherwise
+        /// </return> 
+        private bool TypeRepIdEquals(Type toCheck, String repId) {
+            if (repId != null) {
+                // check that repId is present on type from asm and that it is equal
+                Object[] attrs = toCheck.GetCustomAttributes(typeof(RepositoryIDAttribute), 
+                                                             true);
+                if (attrs.Length > 0) {
+                    RepositoryIDAttribute repIdAttr = (RepositoryIDAttribute)attrs[0];
+                    if (repIdAttr.Id.Equals(repId)) {
+                        return true;
+                    } else {
+                        // not equal
+                        return false;
+                    }
                 } else {
-                    // not equal
+                    // no rep-id attr found
                     return false;
                 }
             } else {
-                // no rep-id attr found
-                return false;
-            }
-        } else {
-            // no rep-id to check -> ok
-            return true;
-        }    
+                // no rep-id to check -> ok
+                return true;
+            }    
+        }
+
+        #endregion IMethods
+
     }
-
-    #endregion IMethods
-
-}
 
 
 }
