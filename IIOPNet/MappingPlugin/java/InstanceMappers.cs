@@ -106,19 +106,19 @@ namespace Ch.Elca.Iiop.JavaCollectionMappers {
         /// <remarks>javaInstance must be one of java primitive boxes, else throws exception</remarks>        	
     	protected object UnboxBaseType(object javaInstance) {
     	    if (s_javaBoxInteger.IsInstanceOfType(javaInstance)) {
-    	    	return ((java.lang.Integer)javaInstance).intValue();
+    	    	return ((java.lang.IntegerImpl)javaInstance).intValue();
     	    } else if (s_javaBoxShort.IsInstanceOfType(javaInstance)) {
-    	    	return ((java.lang._Short)javaInstance).shortValue();
+    	    	return ((java.lang._ShortImpl)javaInstance).shortValue();
     	    } else if (s_javaBoxByte.IsInstanceOfType(javaInstance)) {
-    	    	return ((java.lang._Byte)javaInstance).byteValue();
+    	    	return ((java.lang._ByteImpl)javaInstance).byteValue();
     	    } else if (s_javaBoxDouble.IsInstanceOfType(javaInstance)) {
-    	    	return ((java.lang._Double)javaInstance).doubleValue();
+    	    	return ((java.lang._DoubleImpl)javaInstance).doubleValue();
     	    } else if (s_javaBoxFloat.IsInstanceOfType(javaInstance)) {
-    	        return ((java.lang._Float)javaInstance).floatValue();
+    	        return ((java.lang._FloatImpl)javaInstance).floatValue();
       	    } else if (s_javaBoxBoolean.IsInstanceOfType(javaInstance)) {
-    	        return ((java.lang._Boolean)javaInstance).booleanValue();
+    	        return ((java.lang._BooleanImpl)javaInstance).booleanValue();
       	    } else if (s_javaBoxCharacter.IsInstanceOfType(javaInstance)) {
-    	        return ((java.lang.Character)javaInstance).charValue();
+    	        return ((java.lang.CharacterImpl)javaInstance).charValue();
     	    } else {
                 throw new BAD_PARAM(7456, CompletionStatus.Completed_MayBe);
     	    }

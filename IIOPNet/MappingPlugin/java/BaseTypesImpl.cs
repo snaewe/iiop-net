@@ -53,7 +53,7 @@ namespace java.lang {
 
         #region unneeded methods (for mapper)
         
-        public override bool equals(object arg) {
+/*        public override bool equals(object arg) {
             return false;
         }
         
@@ -79,13 +79,17 @@ namespace java.lang {
         
         public override System.Boolean getBoolean(string arg) {
             return false;
-        }
+        } 
+
+*/
         
         #endregion unneeded methods (for mapper)
         
-        public override System.Boolean booleanValue() {
+        public System.Boolean booleanValue() {
             return m_value;
         }
+
+
         
     }
 
@@ -100,6 +104,7 @@ namespace java.lang {
         }
 
         #region unneeded methods (for mapper)
+/*
         public override System.Int32 compareTo(object arg) {
         	return 0;
         }
@@ -163,10 +168,12 @@ namespace java.lang {
         public override System.Int64 longValue() {
             return (System.Int64)m_value;
         }
+
+*/
         
         #endregion unneeded methods (for mapper)
         
-        public override System.Byte byteValue() {
+        public System.Byte byteValue() {
             return m_value;
         }
         
@@ -183,8 +190,9 @@ namespace java.lang {
         }
 
         #region unneeded methods (for mapper)
+/*
         public override System.Int32 compareTo(object arg) {
-        	return 0;
+            return 0;
         }
         
         public override System.Int32 compareTo__java_lang_Short(java.lang._Short arg) {
@@ -245,11 +253,12 @@ namespace java.lang {
         
         public override System.Int64 longValue() {
             return (System.Int64)m_value;
-        }
-        
+        }        
+*/
+
         #endregion unneeded methods (for mapper)
         
-        public override System.Int16 shortValue() {
+        public System.Int16 shortValue() {
             return m_value;
         }
         
@@ -267,6 +276,9 @@ namespace java.lang {
         }
 
         #region unneeded methods (for mapper)
+
+/*
+
         public override System.Int32 compareTo(object arg) {
         	return 0;
         }
@@ -319,8 +331,9 @@ namespace java.lang {
             return null;
         }
         
-        public override void appendTo(System.Int32 arg0, java.lang.StringBuffer arg1) {
-        }
+	  // new in java 1.4.2?
+//        public override void appendTo(System.Int32 arg0, java.lang.StringBuffer arg1) {
+//        }
 
         public override string toString__() {
             return m_value.ToString();
@@ -361,10 +374,11 @@ namespace java.lang {
         public override System.Int64 longValue() {
             return (System.Int64)m_value;
         }
+*/
         
         #endregion unneeded methods (for mapper)
         
-        public override System.Int32 intValue() {
+        public System.Int32 intValue() {
             return m_value;
         }
 
@@ -383,6 +397,7 @@ namespace java.lang {
 
         #region unneeded properties (for mapper)
         
+/*
         public override bool infinite {
             get {
                 return false;
@@ -394,10 +409,13 @@ namespace java.lang {
                 return false;
             }
         }
+
+*/
         
         #endregion unneeded properties (for mapper)
         #region unneeded methods (for mapper)
         
+/*
         public override System.Int32 compare(System.Double arg0, System.Double arg1) {
             return 0;
         }
@@ -473,10 +491,11 @@ namespace java.lang {
         public override System.Int16 shortValue() {
             return (System.Int16)m_value;
         }
+*/
         
         #endregion unneeded methods (for mapper)
         
-        public override System.Double doubleValue() {
+        public System.Double doubleValue() {
             return m_value;
         }
         
@@ -494,6 +513,7 @@ namespace java.lang {
 
         #region unneeded properties (for mapper)
         
+/*
         public override bool infinite {
             get {
                 return false;
@@ -505,10 +525,12 @@ namespace java.lang {
                 return false;
             }
         }
+*/
         
         #endregion unneeded properties (for mapper)
         #region unneeded methods (for mapper)
         
+/*
         public override System.Int32 compare(System.Single arg0, System.Single arg1) {
             return 0;
         }
@@ -584,10 +606,11 @@ namespace java.lang {
         public override System.Int16 shortValue() {
             return (System.Int16)m_value;
         }
+*/
         
         #endregion unneeded methods (for mapper)
         
-        public override System.Single floatValue() {
+        public System.Single floatValue() {
             return m_value;
         }
         
@@ -605,6 +628,9 @@ namespace java.lang {
         }
 
         #region unneeded methods (for mapper)
+
+/*
+
         public override System.Int32 compareTo(object arg) {
         	return 0;
         }
@@ -748,10 +774,11 @@ namespace java.lang {
         public override System.Int32  _getType(char arg0) {
             return 0;
         }
+*/
         
         #endregion unneeded methods (for mapper)
         
-        public override System.Char charValue() {
+        public System.Char charValue() {
             return m_value;
         }
 

@@ -135,7 +135,7 @@ namespace java.util {
         #region not needed methods (for mapper)
         // the following methods are not used -> no useful implementation
 
-        public override void removeRange(int arg0, int arg1) {
+/*        public override void removeRange(int arg0, int arg1) {
         }
 
         public override List subList(int arg0, int arg1) {
@@ -249,6 +249,7 @@ namespace java.util {
         public override int size() {
             return m_elements.Length;
         }
+*/
         
         #endregion not needed methods (for Mapper)
 

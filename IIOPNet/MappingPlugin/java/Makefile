@@ -16,14 +16,14 @@ $(BIN) $(IDL):
 build-idl: $(IDL)
 	copy ..\..\IDLToCLSCompiler\IDL\*.idl $(IDL)
         rem create the idl for the collection classes and the boxed java base types
-        rmic -d $(IDL) -idl java.util.ArrayList
-        rmic -d $(IDL) -idl java.lang.Integer
-        rmic -d $(IDL) -idl java.lang.Short
-        rmic -d $(IDL) -idl java.lang.Double        
-        rmic -d $(IDL) -idl java.lang.Float
-        rmic -d $(IDL) -idl java.lang.Byte
-        rmic -d $(IDL) -idl java.lang.Boolean
-        rmic -d $(IDL) -idl java.lang.Character
+        rmic -d $(IDL) -idl -noValueMethods java.util.ArrayList
+        rmic -d $(IDL) -idl -noValueMethods java.lang.Integer
+        rmic -d $(IDL) -idl -noValueMethods java.lang.Short
+        rmic -d $(IDL) -idl -noValueMethods java.lang.Double        
+        rmic -d $(IDL) -idl -noValueMethods java.lang.Float
+        rmic -d $(IDL) -idl -noValueMethods java.lang.Byte
+        rmic -d $(IDL) -idl -noValueMethods java.lang.Boolean
+        rmic -d $(IDL) -idl -noValueMethods java.lang.Character
 	cd $(IDL)
 	$(IDLToCLS) -o ..\$(BIN) $(TARGETASMCOLL) java\util\ArrayList.idl java\lang\Integer.idl java\lang\Short.idl java\lang\Byte.idl java\lang\Double.idl java\lang\Float.idl java\lang\Boolean.idl java\lang\Character.idl
 	cd ..
