@@ -119,6 +119,40 @@ namespace Ch.Elca.Iiop.IntegrationTests {
             Assertion.AssertEquals((System.Int64)(arg + 1), result);
         }
 
+        [Test]
+        public void TestBoolean() {
+            System.Boolean arg = true;
+            System.Boolean result = m_testService.TestNegateBoolean(arg);
+            Assertion.AssertEquals(false, result);
+        }
+
+        [Test]
+        public void TestVoid() {
+            m_testService.TestVoid();
+        }
+        
+/*        [Test]
+        public void TestChar() {
+            System.Char arg = 'a';
+            System.Char result = m_testService.TestEchoChar(arg);
+            Assertion.AssertEquals(arg, result);
+            arg = '0';
+            result = m_testService.TestEchoChar(arg);
+            Assertion.AssertEquals(arg, result);
+        } */
+        
+        [Test]
+        public void TestString() {
+            System.String arg = "test";
+            System.String toAppend = "toAppend";
+            System.String result = m_testService.TestAppendString(arg, toAppend);
+            Assertion.AssertEquals(arg + toAppend, result);
+            arg = "test";
+            toAppend = null;
+            result = m_testService.TestAppendString(arg, toAppend);
+            Assertion.AssertEquals(arg, result);
+        }       
+
     }
 
 }

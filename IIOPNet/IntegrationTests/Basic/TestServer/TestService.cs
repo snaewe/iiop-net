@@ -56,6 +56,22 @@ namespace Ch.Elca.Iiop.IntegrationTests {
             return arg + 1;
         }
 
+        public System.Boolean TestNegateBoolean(System.Boolean arg) {
+            return ! arg;
+        }
+
+        public void TestVoid() {
+            return;
+        }
+        
+        public System.Char TestEchoChar(System.Char arg) {
+            return arg;
+        }
+
+        public System.String TestAppendString(System.String basic, System.String toAppend) {
+            return basic + toAppend;
+        }
+
         public override object InitializeLifetimeService() {
             // live forever
             return null;
