@@ -347,6 +347,14 @@ namespace ch.elca.iiop.integrationTests {
             Assertion.AssertEquals(Test_package.TEST_PROP_INIT_VAL.ConstVal, newVal);
         }
 
+        [Test]
+        public void TestStringAsAny() {
+            string arg = "TestArg";
+            string result = (string) m_test.EchoAnything(arg);
+            Assertion.AssertEquals(arg, result);
+        }
+
+
     }
 
 }

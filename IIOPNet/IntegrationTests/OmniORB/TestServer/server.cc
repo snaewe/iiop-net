@@ -30,6 +30,8 @@ public:
   CORBA::Any* RetrieveTypedefedSeq(CORBA::Long nrOfElems, CORBA::Long memberVal);  
   CORBA::ULong ExtractFromULongAny(const CORBA::Any& arg);
   CORBA::Any* RetrieveULongAsAny(CORBA::ULong arg);
+  CORBA::WChar* ExtractFromWStringAny(const CORBA::Any& arg);
+  seq_of_octect_seq* ExtractFromOctetOfOctetSeqAny(const CORBA::Any& arg);
   ::wstringSeq* RetrieveWstringSeq(const CORBA::WChar * val, CORBA::Long nrOrElems);
   ::wstringSeq* EchoWstringSeq(const ::wstringSeq& arg);
   ::seqOfWStringSeq* EchoSeqOfWStringSeq(const ::seqOfWStringSeq& arg);
@@ -100,6 +102,21 @@ TestService_impl::RetrieveULongAsAny(CORBA::ULong arg) {
     *resultAny <<= arg;
     return resultAny;    
 }
+
+CORBA::WChar* 
+TestService_impl::ExtractFromWStringAny(const CORBA::Any& arg) {
+    CORBA::WChar* result;
+    arg >>= result;
+    return CORBA::wstring_dup(result);
+}
+
+seq_of_octect_seq* 
+TestService_impl::ExtractFromOctetOfOctetSeqAny(const CORBA::Any& arg) {
+    seq_of_octect_seq* result;
+    arg >>= result;
+    return new seq_of_octect_seq(*result);
+}
+
 
 
 CORBA::Any*

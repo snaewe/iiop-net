@@ -81,4 +81,6 @@ public interface Test extends EJBObject {
 
     public static final int TEST_PROP_INIT_VAL = 11;
 
+    public Object EchoAnything(Object arg) throws RemoteException;
+
 }

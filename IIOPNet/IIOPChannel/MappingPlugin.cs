@@ -311,4 +311,62 @@ namespace Ch.Elca.Iiop.Idl {
     }
 
 
+
+    /// <summary>
+    /// configuration singleton, which allows to configure certain aspects of mapping
+    /// </summary>
+    public class MappingConfiguration {
+        
+        #region IFields
+                
+        private bool m_useBoxedInAny;
+        
+        #endregion IFields
+        #region SFields
+        
+        private static MappingConfiguration s_instance = new MappingConfiguration();
+        
+        #endregion SFields
+        #region IConstructors
+        
+        private MappingConfiguration() {
+            m_useBoxedInAny = true; // default is optimal for java rmi/iiop
+        }
+        
+        #endregion IConstructors
+        #region IProperties
+        
+        /// <summary>
+        /// use the boxed form of .NET string, .NET arrays 
+        /// when passing them in any.
+        /// Default is true. 
+        /// </summary>
+        /// <remarks>for JacORB, OmniORB, ... disable this property to simplify any usage:
+        /// No need to create any wrapper objects; e.g. with string typecode to prevent passing 
+        /// a boxed string.</remarks>
+        public bool UseBoxedInAny {
+            get {
+                return m_useBoxedInAny;
+            }
+            set {
+                m_useBoxedInAny = value;
+            }
+        }
+        
+        #endregion IProperties
+        #region SProperties
+        
+        /// <summary>
+        /// the singleton instance.
+        /// </summary>
+        public static MappingConfiguration Instance {
+            get {
+                return s_instance;
+            }
+        }
+        
+        #endregion SProperties
+        
+    }
+
 }

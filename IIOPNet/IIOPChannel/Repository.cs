@@ -421,8 +421,13 @@ namespace Ch.Elca.Iiop.Idl {
         /// <summary>used by type code creating methods</summary>
         internal static TypeCodeImpl CreateTypeCodeForTypeInternal(Type forType, AttributeExtCollection attributes,
                                                                    TypeCodeCreater typeCodeCreator) {
-            ClsToIdlMapper mapper = ClsToIdlMapper.GetSingleton();
-            return (TypeCodeImpl)mapper.MapClsType(forType, attributes, typeCodeCreator);
+            if (forType != null) {                        
+                ClsToIdlMapper mapper = ClsToIdlMapper.GetSingleton();
+                return (TypeCodeImpl)mapper.MapClsType(forType, attributes, typeCodeCreator);
+            } else {
+                // if no type info present, map to null typecode; the case can't be handled by cls to idl mapper
+                return new NullTC();
+            }
         }
 
         /// <summary>gets the CLS type for the Typecode</summary>
@@ -535,6 +540,9 @@ namespace Ch.Elca.Iiop.Idl {
             }
         }
         
+        /// <summary>
+        /// used for recursive type code creation
+        /// </summary>
         private void RegisterCreatedTypeCodeForType(Type forType,
                                                     AttributeExtCollection attributes,
                                                     TypeCodeImpl typeCode) {
@@ -713,8 +721,8 @@ namespace Ch.Elca.Iiop.Idl {
                              baseTypeCode, ABSTRACT_VALUE_MOD);
             return result;
         }
-        
-        public object MapToIdlBoxedValueType(Type clsType, AttributeExtCollection attributes, bool isAlreadyBoxed) {
+        private object MapToIdlBoxedValueType(Type clsType, AttributeExtCollection attributes, bool isAlreadyBoxed,
+                                              bool boxInAny) {
             // dotNetType is subclass of BoxedValueBase
             if (!clsType.IsSubclassOf(ReflectionHelper.BoxedValueBaseType)) {
                 // mapper error: MapToIdlBoxedValue found incorrect type
@@ -741,15 +749,29 @@ namespace Ch.Elca.Iiop.Idl {
                 // BoxedValueBase.GET_BOXED_TYPE_METHOD_NAME
                 throw new INTERNAL(1930, CompletionStatus.Completed_MayBe);
             }
+            if (boxInAny) {
+                omg.org.CORBA.TypeCode boxed = CreateOrGetTypeCodeForType(boxedType, 
+                                                                          AttributeExtCollection.ConvertToAttributeCollection(attributesOnBoxed));
             
-            omg.org.CORBA.TypeCode boxed = CreateOrGetTypeCodeForType(boxedType, 
-                                                                      AttributeExtCollection.ConvertToAttributeCollection(attributesOnBoxed));
-            
-            ValueBoxTC result = new ValueBoxTC(Repository.GetRepositoryID(clsType), 
-                                               IdlNaming.ReverseIdlToClsNameMapping(clsType.Name),
-                                               boxed);
-            RegisterCreatedTypeCodeForType(clsType, attributes, result);            
-            return result;
+                ValueBoxTC result = new ValueBoxTC(Repository.GetRepositoryID(clsType), 
+                                                   IdlNaming.ReverseIdlToClsNameMapping(clsType.Name),
+                                                   boxed);
+                RegisterCreatedTypeCodeForType(clsType, attributes, result);            
+                return result;                                
+            } else {
+                // don't use boxed form
+                // therefore create a typecode for the type boxed inside
+                // e.g. in case of a boxed sequence of int, there will be a idlsequence typecode with int as element type created.
+                // e.g. in case, where a sequence of boxed valuetype is boxed, an idl sequence will be created containing a typecode
+                // for the boxed type.
+                omg.org.CORBA.TypeCodeImpl forBoxed = CreateOrGetTypeCodeForType(boxedType, 
+                                                                                 AttributeExtCollection.ConvertToAttributeCollection(attributesOnBoxed));
+                return forBoxed;                
+            }                                                              
+        }
+        public object MapToIdlBoxedValueType(Type clsType, AttributeExtCollection attributes, bool isAlreadyBoxed) {
+            return MapToIdlBoxedValueType(clsType, attributes, isAlreadyBoxed,
+                                          MappingConfiguration.Instance.UseBoxedInAny);
         }
         public object MapToIdlSequence(Type clsType, int bound) {            
             // sequence should not contain itself! -> do not register typecode
@@ -769,10 +791,24 @@ namespace Ch.Elca.Iiop.Idl {
             throw new INTERNAL(1940, CompletionStatus.Completed_MayBe);
         }
         public object MapToWStringValue(Type clsType) {
-            return MapToIdlBoxedValueType(clsType, AttributeExtCollection.EmptyCollection, false);
+            if (MappingConfiguration.Instance.UseBoxedInAny) {
+                return MapToIdlBoxedValueType(clsType, AttributeExtCollection.EmptyCollection, 
+                                              false,
+                                              true);
+            } else {
+                // don't use boxed form
+                return new WStringTC(0);
+            }
         }
         public object MapToStringValue(Type clsType) {
-            return MapToIdlBoxedValueType(clsType, AttributeExtCollection.EmptyCollection, false);
+            if (MappingConfiguration.Instance.UseBoxedInAny) {
+                return MapToIdlBoxedValueType(clsType, AttributeExtCollection.EmptyCollection, 
+                                              false,
+                                              true);
+            } else {                
+                // don't use boxed form
+                return new StringTC(0);
+            }
         }
         public object MapException(Type clsType) {
             ExceptTC result = new ExceptTC();

@@ -32,9 +32,11 @@ using System.Runtime.Remoting;
 using System.Runtime.Remoting.Channels;
 using NUnit.Framework;
 using Ch.Elca.Iiop;
+using Ch.Elca.Iiop.Idl;
 using Ch.Elca.Iiop.Services;
 using omg.org.CosNaming;
 using omg.org.CORBA;
+
 
 namespace Ch.Elca.Iiop.IntegrationTests {
 
@@ -58,6 +60,7 @@ namespace Ch.Elca.Iiop.IntegrationTests {
 
         [SetUp]
         public void SetupEnvironment() {
+            MappingConfiguration.Instance.UseBoxedInAny = false; // disable boxing of string/arrays in any's
             // register the channel
             m_channel = new IiopClientChannel();
             ChannelServices.RegisterChannel(m_channel);
@@ -135,6 +138,7 @@ namespace Ch.Elca.Iiop.IntegrationTests {
 
         [Test]
         public void TestPassingStringAsAny() {
+            // explicit mapping
             OrbServices orb = OrbServices.GetSingleton();
             string arg = "test";
             omg.org.CORBA.TypeCode wstringTC = orb.create_wstring_tc(0);
@@ -142,6 +146,14 @@ namespace Ch.Elca.Iiop.IntegrationTests {
             
             string result = (string)m_testService.EchoAny(any);
             Assertion.AssertEquals(arg, result);
+
+            // improved implicit mapping (in case of any, don't map to boxed wstringvalue.
+            string result2 = (string)m_testService.EchoAny(arg);
+            Assertion.AssertEquals(arg, result2);
+
+            // check extraction on server side with implicit mapping
+            string result3 = m_testService.ExtractFromWStringAny(arg);
+            Assertion.AssertEquals(arg, result3);
         }
 
         [Test]
@@ -149,6 +161,29 @@ namespace Ch.Elca.Iiop.IntegrationTests {
             string arg = "test";
             string result = (string)m_testService.RetrieveWStringAsAny(arg);
             Assertion.AssertEquals(arg, result);
+        }
+
+        [Test]
+        public void TestOctetOfOctetArrayAsAny() {
+            byte[][] arg = new byte[2][];
+            arg[0] = new byte[] { 1 };
+            arg[1] = new byte[] { 2 };
+
+            byte[][] result = (byte[][])m_testService.EchoAny(arg);
+            Assertion.AssertNotNull(result);
+            Assertion.AssertEquals(arg.Length, result.Length);
+            Assertion.AssertEquals(arg[0].Length, result[0].Length);
+            Assertion.AssertEquals(arg[1].Length, result[1].Length);
+            Assertion.AssertEquals(arg[0][0], result[0][0]);
+            Assertion.AssertEquals(arg[1][0], result[1][0]);
+
+            byte[][] result2 = m_testService.ExtractFromOctetOfOctetSeqAny(arg);
+            Assertion.AssertNotNull(result2);
+            Assertion.AssertEquals(arg.Length, result2.Length);
+            Assertion.AssertEquals(arg[0].Length, result2[0].Length);
+            Assertion.AssertEquals(arg[1].Length, result2[1].Length);
+            Assertion.AssertEquals(arg[0][0], result2[0][0]);
+            Assertion.AssertEquals(arg[1][0], result2[1][0]);
         }
 
         [Test]

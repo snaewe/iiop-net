@@ -47,7 +47,8 @@ typedef sequence<long, 3> boundedLongSeq;
 typedef sequence< octet, 16 > Uuid;
 typedef sequence< Uuid > Uuids;
 
-
+typedef sequence < octet > octet_seq;
+typedef sequence < octet_seq > seq_of_octect_seq;
 
 typedef long longTD;
 
@@ -73,6 +74,9 @@ interface TestService {
 
     unsigned long ExtractFromULongAny(in any arg);
     any RetrieveULongAsAny(in unsigned long arg);
+
+    wstring ExtractFromWStringAny(in any arg);
+    seq_of_octect_seq ExtractFromOctetOfOctetSeqAny(in any arg);    
 
     wchar EchoWChar(in wchar arg);
     wstring EchoWString(in wstring arg);
