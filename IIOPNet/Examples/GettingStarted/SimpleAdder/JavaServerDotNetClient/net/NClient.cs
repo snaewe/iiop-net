@@ -32,8 +32,9 @@ using System.Runtime.Remoting.Channels;
 using Ch.Elca.Iiop;
 using Ch.Elca.Iiop.Services;
 using omg.org.CosNaming;
+using ch.elca.iiop.tutorial.gettingstarted;
 
-namespace Tutorial.GettingStarted {
+namespace Ch.Elca.Iiop.Tutorial.GettingStarted {
 
     public class NClient {
 

@@ -1,5 +1,5 @@
-IDLType	    = Tutorial.GettingStarted.AdderImpl
-IDLPath     = Tutorial\GettingStarted\ 
+IDLType	    = ch.elca.iiop.tutorial.gettingstarted.AdderImpl
+IDLPath     = ch\elca\iiop\tutorial\gettingstarted\ 
 IMPLPath    = $(IDLPath)AdderImpl
 IFPath      = $(IDLPath)Adder
 RMISTUB     = rmic

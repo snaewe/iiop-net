@@ -1,5 +1,5 @@
-IDLSource=..\java\IDL\Tutorial\GettingStarted\*.idl 
-Adder=Tutorial\GettingStarted\ 
+IDLSource=..\java\IDL\ch\elca\iiop\tutorial\gettingstarted\*.idl 
+Adder=ch\elca\iiop\tutorial\gettingstarted\ 
 IDLToCLS=..\..\..\..\..\..\IDLToCLSCompiler\IDLCompiler\bin\IDLToCLSCompiler.exe
 TARGETASM=adder
 IIOPCHANNEL = ..\..\..\..\..\IIOPChannel\bin\IIOPChannel.dll

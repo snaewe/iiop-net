@@ -30,8 +30,8 @@
 import javax.naming.InitialContext; 
 import javax.naming.Context; 
 import javax.rmi.PortableRemoteObject;
-import Tutorial.GettingStarted.Adder;
-import Tutorial.GettingStarted.AdderImpl;
+import ch.elca.iiop.tutorial.gettingstarted.Adder;
+import ch.elca.iiop.tutorial.gettingstarted.AdderImpl;
 
 
 public class AdderServer { 
