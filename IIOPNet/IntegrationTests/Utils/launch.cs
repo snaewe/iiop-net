@@ -33,11 +33,15 @@ using System.Diagnostics;
 using System.IO;
 
 public class Launch {
-	public static void Main(String[] args) {
-		ProcessStartInfo startInfo = ParseArgs(args);
-		
-		Process p = Process.Start(startInfo);
-		Console.WriteLine(p.Id.ToString());
+	public static void Main(String[] args) {        
+        try {
+            ProcessStartInfo startInfo = ParseArgs(args);
+        
+            Process p = Process.Start(startInfo);
+            Console.WriteLine(p.Id.ToString());
+        } catch (Exception e) {
+            Console.WriteLine("Exception while trying to start app: " + e);
+        }
 	}
 	
 	public static ProcessStartInfo ParseArgs(String[] args) {
