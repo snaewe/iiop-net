@@ -14,6 +14,8 @@ omniorb_home_var:
 server.exe: unknownByClient.hh unknownByClientSK.obj unknownByClientDynSK.obj service.hh serviceSK.obj server.obj serviceDynSK.obj 
 	$(LD) $(LDFLAGS) /OUT:$@ unknownByClientSK.obj unknownByClientDynSK.obj serviceSK.obj serviceDynSK.obj server.obj $(LDLIBS)
 
+server.cc : service.hh unknownByClient.hh
+
 
 service.hh serviceSK.cc serviceDynSK.cc : service.idl $(IDLGEN)
 	$(IDL) -Wba service.idl
