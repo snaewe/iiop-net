@@ -79,7 +79,7 @@ namespace Ch.Elca.Iiop.Marshalling {
         protected void SerialiseField(FieldInfo fieldToSer, object actual, CdrOutputStream targetStream) {
             Marshaller marshaller = Marshaller.GetSingleton();
             marshaller.Marshal(fieldToSer.FieldType, 
-                               AttributeExtCollection.ConvertToAttributeCollection(fieldToSer.GetCustomAttributes(true)), 
+                               ReflectionHelper.GetCustomAttriutesForMember(fieldToSer, true),
                                fieldToSer.GetValue(actual), targetStream);
         }
 
@@ -90,7 +90,7 @@ namespace Ch.Elca.Iiop.Marshalling {
         protected object DeserialiseField(FieldInfo fieldToDeser, object actual, CdrInputStream sourceStream) {
             Marshaller marshaller = Marshaller.GetSingleton();
             object fieldVal = marshaller.Unmarshal(fieldToDeser.FieldType, 
-                                                   AttributeExtCollection.ConvertToAttributeCollection(fieldToDeser.GetCustomAttributes(true)), 
+                                                   ReflectionHelper.GetCustomAttriutesForMember(fieldToDeser, true),
                                                    sourceStream);
             fieldToDeser.SetValue(actual, fieldVal);
             return fieldVal;
@@ -603,7 +603,9 @@ namespace Ch.Elca.Iiop.Marshalling {
                         
             object instance = Activator.CreateInstance(formal);
             foreach (FieldInfo info in fields) {
-                object fieldVal = marshaller.Unmarshal(info.FieldType, AttributeExtCollection.ConvertToAttributeCollection(info.GetCustomAttributes(true)), sourceStream);
+                object fieldVal = marshaller.Unmarshal(info.FieldType, 
+                                                       ReflectionHelper.GetCustomAttriutesForMember(info, true), 
+                                                       sourceStream);
                 info.SetValue(instance, fieldVal);
             }
             return instance;
@@ -614,7 +616,9 @@ namespace Ch.Elca.Iiop.Marshalling {
             FieldInfo[] fields = ReflectionHelper.GetAllDeclaredInstanceFields(formal);
             Marshaller marshaller = Marshaller.GetSingleton();
             foreach (FieldInfo info in fields) {
-                marshaller.Marshal(info.FieldType, AttributeExtCollection.ConvertToAttributeCollection(info.GetCustomAttributes(true)), info.GetValue(actual), targetStream);
+                marshaller.Marshal(info.FieldType, 
+                                   ReflectionHelper.GetCustomAttriutesForMember(info, true),
+                                   info.GetValue(actual), targetStream);
             }
         }
 
@@ -1067,7 +1071,7 @@ namespace Ch.Elca.Iiop.Marshalling {
                 Marshaller marshaller = Marshaller.GetSingleton();
                 foreach (FieldInfo field in fields) {
                     object fieldVal = marshaller.Unmarshal(field.FieldType, 
-                                                           Util.AttributeExtCollection.ConvertToAttributeCollection(field.GetCustomAttributes(true)), 
+                                                           ReflectionHelper.GetCustomAttriutesForMember(field, true),                                                           
                                                            sourceStream);
                     field.SetValue(exception, fieldVal);
                 }                
@@ -1091,7 +1095,7 @@ namespace Ch.Elca.Iiop.Marshalling {
                 foreach (FieldInfo field in fields) {
                     object fieldVal = field.GetValue(actual);
                     marshaller.Marshal(field.FieldType, 
-                                       Util.AttributeExtCollection.ConvertToAttributeCollection(field.GetCustomAttributes(true)), 
+                                       ReflectionHelper.GetCustomAttriutesForMember(field, true),
                                        fieldVal, targetStream);
                 }
             }
