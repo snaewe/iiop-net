@@ -1,0 +1,55 @@
+<H2 class="contentPart">Bea WebLogic 8.1 compatibility howto</H2>
+
+<p/>
+<b>Accessing the name service</b> <BR> <BR>
+
+The Weblogic 8.1 nameservice can be accessed from a .NET client with the following code:
+
+<pre>
+    RmiIiopInit init = new RmiIiopInit(nameServiceHost, nameServicePort);
+    NamingContext nameService = init.GetNameService();
+</pre> <p/>
+
+Because the type of the NamingContext returned is Weblogic 8.1 specific,
+the following file must be added to every IIOP.NET Weblogic 8.1 client:
+
+<pre>
+    //wls81naming.cs
+
+    using Ch.Elca.Iiop.Idl;
+    using Ch.Elca.Iiop.Services;
+
+    namespace weblogic.corba.cos.naming {
+
+        [RepositoryIDAttribute("IDL:weblogic/corba/cos/naming/NamingContextAny:1.0")]
+        [InterfaceTypeAttribute(IdlTypeInterface.ConcreteInterface)]
+        public interface NamingContextAny : omg.org.CosNaming.NamingContext {
+        }
+
+    }
+</pre>
+<p/>
+
+
+Hint: The nameservice is listening normally on port 7001.
+
+<p/>
+<b>Using an EJB</b> <BR> <BR>
+
+The ejb home interface is accessed using the name service in the following way:
+
+
+<pre>
+    NameComponent[] name = new NameComponent[] { new NameComponent("MyHome", "") };
+    // get the reference to the adder-home
+    MyEjbHome myHomeIf = (MyEjbHome)nameService.resolve(name);
+</pre> <p/>
+
+The ejb can now be created using this home interface (standard ejb pattern):
+
+<pre>
+    MyEjb myBean = myHomeIf.create();
+</pre> <p/>
+
+
+
