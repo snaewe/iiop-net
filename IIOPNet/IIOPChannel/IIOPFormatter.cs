@@ -371,7 +371,7 @@ namespace Ch.Elca.Iiop {
     /// <summary>
     /// this class is a provider for the IIOPClientFormatterSink.
     /// </summary>
-    public class IiopClientFormatterSinkProver : IClientFormatterSinkProvider {
+    public class IiopClientFormatterSinkProvider : IClientFormatterSinkProvider {
     
         #region IFields
 
@@ -381,7 +381,7 @@ namespace Ch.Elca.Iiop {
         #endregion IFields
         #region IConstructors
         
-        public IiopClientFormatterSinkProver() {
+        public IiopClientFormatterSinkProvider() {
         }
 
         #endregion IConstructors

@@ -263,7 +263,7 @@ namespace Ch.Elca.Iiop {
                 return true; 
             }
             while (prov != null) {
-                if (prov is IiopClientFormatterSinkProver) { 
+                if (prov is IiopClientFormatterSinkProvider) { 
                     return true; 
                 }
                 prov = prov.Next;
@@ -280,7 +280,7 @@ namespace Ch.Elca.Iiop {
                 prov.Next = new IiopClientTransportSinkProvider(); // append the transport provider at the end
             } else {
                 // create the default provider chain
-                IClientFormatterSinkProvider formatterProv = new IiopClientFormatterSinkProver();
+                IClientFormatterSinkProvider formatterProv = new IiopClientFormatterSinkProvider();
                 formatterProv.Next = new IiopClientTransportSinkProvider();
                 m_providerChain = formatterProv;
             }
