@@ -341,7 +341,22 @@ namespace Ch.Elca.Iiop.Idl {
             // closing bracket
             m_currentOutputStream.Write(")");
             if (shouldThrowException) {
-                m_currentOutputStream.Write(" raises (::Ch::Elca::Iiop::GenericUserException)");
+                m_currentOutputStream.Write(" raises (::Ch::Elca::Iiop::GenericUserException");
+                AttributeExtCollection methodAttributes = 
+            		ReflectionHelper.GetCustomAttriutesForMethod(methodToMap, true);
+				foreach (Attribute attr in methodAttributes) {
+            		if (ReflectionHelper.ThrowsIdlExceptionAttributeType.
+                		IsAssignableFrom(attr.GetType())) {
+                    	Type exceptionType = ((ThrowsIdlExceptionAttribute)attr).ExceptionType;
+                    	if (!exceptionType.Equals(typeof(GenericUserException))) {
+                    	    string exceptionRef = (string)m_mapper.MapClsType(exceptionType, 
+                                                                     AttributeExtCollection.EmptyCollection, m_refMapperNoAnonSeq);
+                    	    m_currentOutputStream.Write(", " + exceptionRef);
+                    	}
+                	}
+                }
+
+                m_currentOutputStream.Write(")");
             }
             m_currentOutputStream.Write(";");
 
