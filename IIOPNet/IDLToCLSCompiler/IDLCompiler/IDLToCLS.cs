@@ -162,6 +162,7 @@ public class IDLToCLS {
         Console.WriteLine("-r assembly     assemblies to check for types in, instead of generating them");
         Console.WriteLine("-c xmlfile      specifies custom mappings");
         Console.WriteLine("-d define       defines a preprocessor symbol");
+        Console.WriteLine("-basedir directory directory to change to before doing any processing.");
         Console.WriteLine("-idir directory directory containing idl files (multiple -idir allowed)");
         Console.WriteLine("-vtSkel         enable creation of value type implementation skeletons");
         Console.WriteLine("-vtSkelProv     The fully qualified name of the codedomprovider to use for value type skeleton generation");
@@ -244,6 +245,15 @@ public class IDLToCLS {
             } else if (args[i].Equals("-delaySign")) {
                 i++;
                 m_delaySign = true;
+            } else if (args[i].Equals("-basedir")) {
+                i++;
+                string base_dir = args[i++];
+                if (!Directory.Exists(base_dir))
+                {
+                    Error( String.Format("Error: base directory {0} does not exist!", base_dir ) );
+                    Environment.Exit(3);
+                }
+                Environment.CurrentDirectory = (base_dir);
             } else {
                 Error(String.Format("Error: invalid option {0}", args[i]));
             }
@@ -355,22 +365,42 @@ public class IDLToCLS {
                                                         m_vtSkelTd,
                                                         m_vtSkelOverwrite);
         }
-        
-        for (int i = 0; i < m_inputFileNames.Length; i++) {
-            Console.WriteLine("processing file: " + m_inputFileNames[i]);
-            Trace.WriteLine("");
-            MemoryStream source = Preprocess(m_inputFileNames[i]); // preprocess the file
-            IDLParser parser = new IDLParser(source);
-            Trace.WriteLine("parsing file: " + m_inputFileNames[i]);
-            ASTspecification spec = parser.specification();
-            Trace.WriteLine(parser.getSymbolTable());
-            // now parsed representation can be visited with the visitors    
-            generator.InitalizeForSource(parser.getSymbolTable());
-            spec.jjtAccept(generator, null);
-            Trace.WriteLine("");
+        string currentDir = Directory.GetCurrentDirectory();
+        for (int i = 0; i < m_inputFileNames.Length; i++)
+        {
+            Debug.WriteLine("checking file: " + m_inputFileNames[i] );
+
+
+            string[] expandedFiles = Directory.GetFileSystemEntries( currentDir, m_inputFileNames[i] );
+            if ( 0 == expandedFiles.Length )
+            {
+                // If not expanded / not valid treat as normal file
+                processFile( generator, m_inputFileNames[i] );
+            }
+            else
+            {
+                foreach ( string file in expandedFiles )
+                {
+                    processFile( generator, file );
+                }
+            }
         }
         // save the result to disk
         generator.SaveAssembly();
+    }
+        
+    private void processFile( MetaDataGenerator generator, string file ) {
+        Console.WriteLine("processing file: " + file);
+        Trace.WriteLine("");
+        MemoryStream source = Preprocess( file ); // preprocess the file
+        IDLParser parser = new IDLParser(source);
+        Trace.WriteLine("parsing file: " + file );
+        ASTspecification spec = parser.specification();
+        Trace.WriteLine(parser.getSymbolTable());
+        // now parsed representation can be visited with the visitors    
+        generator.InitalizeForSource(parser.getSymbolTable());
+        spec.jjtAccept(generator, null);
+        Trace.WriteLine("");
     }
     
     #endregion IMethods
