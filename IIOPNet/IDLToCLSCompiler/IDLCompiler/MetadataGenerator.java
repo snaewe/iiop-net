@@ -330,6 +330,28 @@ public class MetaDataGenerator implements IDLParserVisitor {
         return nestedScope;
     }
     
+    /** get the types for the scoped names specified in an inheritance relationship
+     * @param data the buildinfo of the container of the type having this inheritance relationship
+     */
+    private Type[] ParseInheritanceRelation(SimpleNode node, BuildInfo data) {
+        Type[] result = new Type[node.jjtGetNumChildren()];
+        for (int i = 0; i < node.jjtGetNumChildren(); i++) {
+            // get symbol
+            Symbol sym = (Symbol)(node.jjtGetChild(i).jjtAccept(this, data)); // accept interface_name
+            // get Type
+            TypeContainer resultType = m_typeManager.GetKnownType(sym);
+            if (resultType == null) {
+                // this is an error: type must be created before it is inherited from
+                throw new RuntimeException("type not seen before in inheritance spec");
+            } else if (m_typeManager.IsFwdDeclared(sym)) {
+                // this is an error: can't inherit from a fwd declared type
+                throw new RuntimeException("type only fwd declared, but for inheritance full definition is needed");
+            }
+            result[i] = resultType.getCLSType();
+        }
+        return result;        
+    }
+    
     private void AddRepIdAttribute(TypeBuilder typebuild, String repId) {
         if (repId != null) {
             CustomAttributeBuilder repIdAttrBuilder = new RepositoryIDAttribute(repId).CreateAttributeBuilder();
@@ -342,6 +364,14 @@ public class MetaDataGenerator implements IDLParserVisitor {
         ConstructorInfo attrConstr = attrType.GetConstructor(Type.EmptyTypes);
         CustomAttributeBuilder serAttr = new CustomAttributeBuilder(attrConstr, new Object[0]);    
         typebuild.SetCustomAttribute(serAttr);
+    }
+    
+    /** check if data is an instance of buildinfo, if not throws an exception */
+    private void CheckParameterForBuildInfo(Object data, Node visitedNode) {
+        if (!(data instanceof BuildInfo)) { 
+            throw new RuntimeException("precondition violation in visitor for node" + visitedNode.GetType() +
+                                       ", " + data.GetType() + " but expected BuildInfo"); 
+        }
     }
 
     /**
@@ -374,7 +404,7 @@ public class MetaDataGenerator implements IDLParserVisitor {
      * @param data an instance of buildinfo is expected
      */
     public Object visit(ASTdefinition node, Object data) {
-        checkParameterForBuildInfo(data, node);
+        CheckParameterForBuildInfo(data, node);
         node.childrenAccept(this, data);
         return null;
     }
@@ -384,7 +414,7 @@ public class MetaDataGenerator implements IDLParserVisitor {
      * @param data an instance of buildInfo is expected
      */
     public Object visit(ASTmodule node, Object data) {
-        checkParameterForBuildInfo(data, node);
+        CheckParameterForBuildInfo(data, node);
         Trace.WriteLine("accepting module with ident: " + node.getIdent());
         BuildInfo info = (BuildInfo) data;
         // info contains the scope this module is defined in
@@ -407,7 +437,7 @@ public class MetaDataGenerator implements IDLParserVisitor {
     /** handles the declaration for the interface definition / fwd declaration
      * @return the TypeBuilder for this interface
      */
-    private TypeBuilder createOrGetInterfaceDcl(String fullyQualName, System.Type[] interfaces, boolean isAbstract,
+    private TypeBuilder CreateOrGetInterfaceDcl(String fullyQualName, System.Type[] interfaces, boolean isAbstract,
                                                 Symbol forSymbol, String repId, ModuleBuilder modBuilder) {
         TypeBuilder interfaceToBuild;
         if (!m_typeManager.IsFwdDeclared(forSymbol)) {
@@ -445,7 +475,7 @@ public class MetaDataGenerator implements IDLParserVisitor {
      * @return the created type
      */
     public Object visit(ASTinterface_dcl node, Object data) {
-        checkParameterForBuildInfo(data, node);
+        CheckParameterForBuildInfo(data, node);
         // data contains the scope, this interface is declared in
         Scope enclosingScope = ((BuildInfo) data).GetBuildScope();
         
@@ -465,7 +495,7 @@ public class MetaDataGenerator implements IDLParserVisitor {
         String fullyQualName = enclosingScope.getFullyQualifiedNameForSymbol(forSymbol.getSymbolName());
 
         ModuleBuilder curModBuilder = m_modBuilderManager.GetOrCreateModuleBuilderFor(enclosingScope);
-        TypeBuilder interfaceToBuild = createOrGetInterfaceDcl(fullyQualName, interfaces, header.isAbstract(), 
+        TypeBuilder interfaceToBuild = CreateOrGetInterfaceDcl(fullyQualName, interfaces, header.isAbstract(), 
                                                                forSymbol, enclosingScope.getRepositoryIdFor(header.getIdent()),
                                                                curModBuilder);
 
@@ -485,7 +515,7 @@ public class MetaDataGenerator implements IDLParserVisitor {
      * @param data the buildinfo of the scope, this type should be declared in
      */
     public Object visit(ASTforward_dcl node, Object data) {
-        checkParameterForBuildInfo(data, node);
+        CheckParameterForBuildInfo(data, node);
         Scope enclosingScope = ((BuildInfo) data).GetBuildScope();
         // create only the type-builder, but don't call createType()
         Symbol forSymbol = enclosingScope.getSymbol(node.getIdent());
@@ -500,7 +530,7 @@ public class MetaDataGenerator implements IDLParserVisitor {
             ModuleBuilder curModBuilder = m_modBuilderManager.GetOrCreateModuleBuilderFor(enclosingScope);
             // it's no problem to add later on interfaces this type should implement with AddInterfaceImplementation,
             // here: specify no interface inheritance, because not known at this point
-            createOrGetInterfaceDcl(fullyQualName, Type.EmptyTypes, node.isAbstract(), 
+            CreateOrGetInterfaceDcl(fullyQualName, Type.EmptyTypes, node.isAbstract(), 
                                     forSymbol, enclosingScope.getRepositoryIdFor(node.getIdent()), 
                                     curModBuilder);
         }
@@ -542,36 +572,14 @@ public class MetaDataGenerator implements IDLParserVisitor {
         return null;
     }
     
-    /** get the types for the scoped names specified in an inheritance relationship
-     * @param data the buildinfo of the container of the type having this inheritance relationship
-     */
-    private Type[] parseInheritanceRelation(SimpleNode node, BuildInfo data) {
-        Type[] result = new Type[node.jjtGetNumChildren()];
-        for (int i = 0; i < node.jjtGetNumChildren(); i++) {
-            // get symbol
-            Symbol sym = (Symbol)(node.jjtGetChild(i).jjtAccept(this, data)); // accept interface_name
-            // get Type
-            TypeContainer resultType = m_typeManager.GetKnownType(sym);
-            if (resultType == null) {
-                // this is an error: type must be created before it is inherited from
-                throw new RuntimeException("type not seen before in inheritance spec");
-            } else if (m_typeManager.IsFwdDeclared(sym)) {
-                // this is an error: can't inherit from a fwd declared type
-                throw new RuntimeException("type only fwd declared, but for inheritance full definition is needed");
-            }
-            result[i] = resultType.getCLSType();
-        }
-        return result;        
-    }
-    
     /**
      * @see parser.IDLParserVisitor#visit(ASTinterface_inheritance_spec, Object)
      * @param data the buildinfo of the container for this interface (e.g. a module)
      * @return an Array of the types the interface inherits from
      */
     public Object visit(ASTinterface_inheritance_spec node, Object data) {
-        checkParameterForBuildInfo(data, node);
-        Type[] result = parseInheritanceRelation(node, (BuildInfo)data);
+        CheckParameterForBuildInfo(data, node);
+        Type[] result = ParseInheritanceRelation(node, (BuildInfo)data);
         return result;
     }
 
@@ -589,7 +597,7 @@ public class MetaDataGenerator implements IDLParserVisitor {
      * @return the symbol represented by this scoped name or null
      */
     public Object visit(ASTscoped_name node, Object data) {
-        checkParameterForBuildInfo(data, node);
+        CheckParameterForBuildInfo(data, node);
         LinkedList parts = node.getNameParts();
         Scope currentScope = ((BuildInfo) data).GetBuildScope();
         if (node.hasFileScope()) { currentScope = m_symbolTable.getTopScope(); }
@@ -597,7 +605,8 @@ public class MetaDataGenerator implements IDLParserVisitor {
             // resolve scopes
             currentScope = currentScope.getChildScope((String)parts.get(i));
             if (currentScope == null) { 
-                throw new RuntimeException("scope resolving error, subscope " + parts.get(i) + " not found in scope "); 
+                throw new RuntimeException("scope resolving error, subscope " + parts.get(i) + 
+                                           " not found in scope "); 
             }
         }
         // resolve symbol
@@ -605,7 +614,7 @@ public class MetaDataGenerator implements IDLParserVisitor {
         // if name is unqualified search in outer scopes
         // TBD: in inherited scopes as described in CORBA2.3 3.15.2
         if ((sym == null) && (parts.size() == 1)) {
-            sym = searchSymbolInEnclosingScopes(currentScope, (String)parts.getLast());    
+            sym = SearchSymbolInEnclosingScopes(currentScope, (String)parts.getLast());    
         }
 
         if (sym == null) { 
@@ -614,7 +623,7 @@ public class MetaDataGenerator implements IDLParserVisitor {
         return sym;
     }
 
-    private Symbol searchSymbolInEnclosingScopes(Scope startScope, String symbolName) {
+    private Symbol SearchSymbolInEnclosingScopes(Scope startScope, String symbolName) {
         Symbol result = null;
         Scope currentScope = startScope;
         while ((result == null) && (currentScope != null)) {
@@ -637,7 +646,7 @@ public class MetaDataGenerator implements IDLParserVisitor {
     /** handles the declaration for the value definition / fwd declaration
      * @return the TypeBuilder for this interface
      */
-    private TypeBuilder createOrGetValueDcl(String fullyQualName, System.Type[] interfaces, 
+    private TypeBuilder CreateOrGetValueDcl(String fullyQualName, System.Type[] interfaces, 
                                             System.Type parent, boolean isAbstract, Symbol forSymbol, 
                                             String repId, ModuleBuilder modBuilder) {
         TypeBuilder valueToBuild;
@@ -646,7 +655,9 @@ public class MetaDataGenerator implements IDLParserVisitor {
             TypeAttributes attrs = TypeAttributes.Public | TypeAttributes.Abstract;
             if (isAbstract) {
                 attrs |= TypeAttributes.Interface;
-                if (parent != null) { throw new RuntimeException("not possible for an abstract value type to inherit from a concrete one"); }
+                if (parent != null) { 
+                    throw new RuntimeException("not possible for an abstract value type to inherit from a concrete one"); 
+                }
             } else {
                 attrs |= TypeAttributes.Class;
             }
@@ -730,7 +741,7 @@ public class MetaDataGenerator implements IDLParserVisitor {
      * @param data an instance of the type buildinfo specifing the scope, this value is declared in
      */
     public Object visit(ASTvalue_decl node, Object data) {
-        checkParameterForBuildInfo(data, node);
+        CheckParameterForBuildInfo(data, node);
         // data contains the scope, this value type is declared in
         Scope enclosingScope = ((BuildInfo) data).GetBuildScope();
         // an IDL concrete value type
@@ -766,7 +777,7 @@ public class MetaDataGenerator implements IDLParserVisitor {
 
         String fullyQualName = enclosingScope.getFullyQualifiedNameForSymbol(forSymbol.getSymbolName());
         ModuleBuilder curModBuilder = m_modBuilderManager.GetOrCreateModuleBuilderFor(enclosingScope);
-        TypeBuilder valueToBuild = createOrGetValueDcl(fullyQualName, inheritFrom, baseClass, 
+        TypeBuilder valueToBuild = CreateOrGetValueDcl(fullyQualName, inheritFrom, baseClass, 
                                                        false, forSymbol, 
                                                        enclosingScope.getRepositoryIdFor(header.getIdent()), 
                                                        curModBuilder);
@@ -793,7 +804,7 @@ public class MetaDataGenerator implements IDLParserVisitor {
      * @see parser.IDLParserVisitor#visit(ASTvalue_abs_decl, Object)
      */
     public Object visit(ASTvalue_abs_decl node, Object data) {
-        checkParameterForBuildInfo(data, node);
+        CheckParameterForBuildInfo(data, node);
         // data contains the scope, this value type is declared in
         Scope enclosingScope = ((BuildInfo) data).GetBuildScope();
         // an IDL abstract value type
@@ -805,7 +816,7 @@ public class MetaDataGenerator implements IDLParserVisitor {
             return null; 
         }
 
-        Type[] interfaces = parseValueInheritSpec(node, (BuildInfo) data);
+        Type[] interfaces = ParseValueInheritSpec(node, (BuildInfo) data);
         if ((interfaces.length > 0) && (interfaces[0].get_IsClass())) { 
             throw new RuntimeException("invalid abstract value type, can only inherit from abstract value types, but not from: " + interfaces[0]); 
         }
@@ -819,7 +830,7 @@ public class MetaDataGenerator implements IDLParserVisitor {
 
         String fullyQualName = enclosingScope.getFullyQualifiedNameForSymbol(forSymbol.getSymbolName());
         ModuleBuilder curModBuilder = m_modBuilderManager.GetOrCreateModuleBuilderFor(enclosingScope);
-        TypeBuilder valueToBuild = createOrGetValueDcl(fullyQualName, interfaces, null,
+        TypeBuilder valueToBuild = CreateOrGetValueDcl(fullyQualName, interfaces, null,
                                                        true, forSymbol, 
                                                        enclosingScope.getRepositoryIdFor(node.getIdent()),
                                                        curModBuilder);
@@ -842,7 +853,7 @@ public class MetaDataGenerator implements IDLParserVisitor {
      * @param data the current buildinfo
      */
     public Object visit(ASTvalue_box_decl node, Object data) {
-        checkParameterForBuildInfo(data, node);
+        CheckParameterForBuildInfo(data, node);
         Scope enclosingScope = ((BuildInfo) data).GetBuildScope();
         Symbol forSymbol = enclosingScope.getSymbol(node.getIdent());
         // check if type is known from a previous run over a parse tree --> if so: skip
@@ -872,7 +883,7 @@ public class MetaDataGenerator implements IDLParserVisitor {
      * @param data the buildinfo of the container
      */
     public Object visit(ASTvalue_forward_decl node, Object data) {
-        checkParameterForBuildInfo(data, node);
+        CheckParameterForBuildInfo(data, node);
         // is possible to do with reflection emit, because interface and class inheritance can be specified later on with setParent() and AddInterfaceImplementation()
         Scope enclosingScope = ((BuildInfo) data).GetBuildScope();
         Symbol forSymbol = enclosingScope.getSymbol(node.getIdent());
@@ -888,7 +899,7 @@ public class MetaDataGenerator implements IDLParserVisitor {
             ModuleBuilder curModBuilder = m_modBuilderManager.GetOrCreateModuleBuilderFor(enclosingScope);
             // it's no problem to add later on interfaces this type should implement and the base class this type should inherit from with AddInterfaceImplementation / set parent
             // here: specify no inheritance, because not known at this point
-            createOrGetValueDcl(fullyQualName, Type.EmptyTypes, null, node.isAbstract(),
+            CreateOrGetValueDcl(fullyQualName, Type.EmptyTypes, null, node.isAbstract(),
                                 forSymbol, enclosingScope.getRepositoryIdFor(node.getIdent()),
                                 curModBuilder);        
         }
@@ -899,7 +910,7 @@ public class MetaDataGenerator implements IDLParserVisitor {
     /** search in a value_header_node / abs_value_node for inheritance information and parse it
      * @param parentOfPossibleInhNode the node possibly containing value inheritance nodes
      */
-    public Type[] parseValueInheritSpec(Node parentOfPossibleInhNode, BuildInfo data) {
+    public Type[] ParseValueInheritSpec(Node parentOfPossibleInhNode, BuildInfo data) {
         Type[] result = new Type[0];
         if (parentOfPossibleInhNode.jjtGetNumChildren() > 0) {
             if (parentOfPossibleInhNode.jjtGetChild(0) instanceof ASTvalue_base_inheritance_spec) {
@@ -928,8 +939,8 @@ public class MetaDataGenerator implements IDLParserVisitor {
      * @param data the buildinfo of the container for this valuetype
      */
     public Object visit(ASTvalue_header node, Object data) {
-        checkParameterForBuildInfo(data, node);
-        return parseValueInheritSpec(node, (BuildInfo) data);
+        CheckParameterForBuildInfo(data, node);
+        return ParseValueInheritSpec(node, (BuildInfo) data);
     }
 
     /**
@@ -981,7 +992,7 @@ public class MetaDataGenerator implements IDLParserVisitor {
      * @param data the buildInfo for this value-type
      */
     public Object visit(ASTstate_member node, Object data) {
-        checkParameterForBuildInfo(data, node);
+        CheckParameterForBuildInfo(data, node);
         BuildInfo info = (BuildInfo) data;
         TypeBuilder builder = info.GetContainterType();
         ASTtype_spec typeSpecNode = (ASTtype_spec)node.jjtGetChild(0);
@@ -1016,8 +1027,8 @@ public class MetaDataGenerator implements IDLParserVisitor {
      * @return an array of System.Type containing all direct supertypes
      */
     public Object visit(ASTvalue_base_inheritance_spec node, Object data) {
-        checkParameterForBuildInfo(data, node);
-        Type[] result = parseInheritanceRelation(node, (BuildInfo)data);
+        CheckParameterForBuildInfo(data, node);
+        Type[] result = ParseInheritanceRelation(node, (BuildInfo)data);
         for (int i = 0; i < result.length; i++) {
             if ((i > 0) && (result[i].get_IsClass())) {
                 throw new RuntimeException("invalid supertype: for value types, only one concrete value type parent is possible at the first position in the inheritance spec");
@@ -1039,8 +1050,8 @@ public class MetaDataGenerator implements IDLParserVisitor {
      * @return an array of System.Type containing all interfaces, this type supports directly
      */
     public Object visit(ASTvalue_support_inheritance_spec node, Object data) {
-        checkParameterForBuildInfo(data, node);
-        Type[] result = parseInheritanceRelation(node, (BuildInfo)data);
+        CheckParameterForBuildInfo(data, node);
+        Type[] result = ParseInheritanceRelation(node, (BuildInfo)data);
         for (int i = 0; i < result.length; i++) {
             if (result[i].get_IsClass()) {
                 throw new RuntimeException("invalid supertype: only abstract/concrete interfaces are allowed in support clause");            
@@ -1177,7 +1188,7 @@ public class MetaDataGenerator implements IDLParserVisitor {
      * @param data expected is an instance of BuildInfo
      */
     public Object visit(ASTtype_declarator node, Object data) {
-        checkParameterForBuildInfo(data, node);
+        CheckParameterForBuildInfo(data, node);
         Scope currentScope = ((BuildInfo) data).GetBuildScope();
         TypeContainer typeUsedInDefine = (TypeContainer) node.jjtGetChild(0).jjtAccept(this, data);
         Node declarators = node.jjtGetChild(1);    
@@ -1231,7 +1242,7 @@ public class MetaDataGenerator implements IDLParserVisitor {
      * @return a TypeContainer containing the type represented by this node
      */
     public Object visit(ASTsimple_type_spec node, Object data) {
-        checkParameterForBuildInfo(data, node);
+        CheckParameterForBuildInfo(data, node);
         SimpleNode child = (SimpleNode)node.jjtGetChild(0);
         return resovleTypeSpec(child, (BuildInfo) data);
     }
@@ -1498,7 +1509,7 @@ public class MetaDataGenerator implements IDLParserVisitor {
      * @return the TypeContainer for the constructed type
      */
     public Object visit(ASTstruct_type node, Object data) {
-        checkParameterForBuildInfo(data, node);
+        CheckParameterForBuildInfo(data, node);
         BuildInfo buildInfo = (BuildInfo) data;
         Symbol forSymbol = buildInfo.GetBuildScope().getSymbol(node.getIdent());
         // check if type is known from a previous run over a parse tree --> if so: skip
@@ -1561,7 +1572,7 @@ public class MetaDataGenerator implements IDLParserVisitor {
      * @see parser.IDLParserVisitor#visit(ASTmember, Object)
      */
     public Object visit(ASTmember node, Object data) {
-        checkParameterForBuildInfo(data, node);
+        CheckParameterForBuildInfo(data, node);
         BuildInfo info = (BuildInfo) data;
         TypeBuilder builder = info.GetContainterType();
         ASTtype_spec typeSpecNode = (ASTtype_spec)node.jjtGetChild(0);
@@ -1632,7 +1643,7 @@ public class MetaDataGenerator implements IDLParserVisitor {
      * @param data the current buildinfo instance
      */
     public Object visit(ASTenum_type node, Object data) {
-        checkParameterForBuildInfo(data, node);
+        CheckParameterForBuildInfo(data, node);
         BuildInfo buildInfo = (BuildInfo) data;
         Symbol forSymbol = buildInfo.GetBuildScope().getSymbol(node.getIdent());
         // check if type is known from a previous run over a parse tree --> if so: skip
@@ -1697,7 +1708,7 @@ public class MetaDataGenerator implements IDLParserVisitor {
      * @return the type container for the IDLSequence type
      */
     public Object visit(ASTsequence_type node, Object data) {
-        checkParameterForBuildInfo(data, node);
+        CheckParameterForBuildInfo(data, node);
         if (node.jjtGetNumChildren() > 1) { 
             throw new RuntimeException("sequence with a bound not supported by this compiler"); 
         }
@@ -1771,7 +1782,7 @@ public class MetaDataGenerator implements IDLParserVisitor {
      * @param data the buildinfo of the type, which declares this attribute
      */
     public Object visit(ASTattr_dcl node, Object data) {
-        checkParameterForBuildInfo(data, node);
+        CheckParameterForBuildInfo(data, node);
         BuildInfo info = (BuildInfo) data;
         TypeBuilder builder = info.GetContainterType();
         ASTparam_type_spec typeSpecNode = (ASTparam_type_spec)node.jjtGetChild(0);
@@ -1825,7 +1836,7 @@ public class MetaDataGenerator implements IDLParserVisitor {
      * the type delcaration is added to the Type in creation
      */
     public Object visit(ASTexcept_dcl node, Object data) {
-        checkParameterForBuildInfo(data, node);
+        CheckParameterForBuildInfo(data, node);
         BuildInfo buildInfo = (BuildInfo) data;
         Symbol forSymbol = buildInfo.GetBuildScope().getSymbol(node.getIdent());
         // check if type is known from a previous run over a parse tree --> if so: skip
@@ -1902,7 +1913,7 @@ public class MetaDataGenerator implements IDLParserVisitor {
      * @param data expected is an instance of BuildInfo, the operation is added to the type ((BuildInfo)data).getContainerType().
      */
     public Object visit(ASTop_dcl node, Object data) {
-        checkParameterForBuildInfo(data, node);
+        CheckParameterForBuildInfo(data, node);
         BuildInfo buildInfo = (BuildInfo) data;
         
         // return type
@@ -2042,7 +2053,7 @@ public class MetaDataGenerator implements IDLParserVisitor {
      * @return a TypeContainter for the Type this node represents
      */
     public Object visit(ASTparam_type_spec node, Object data) {
-        checkParameterForBuildInfo(data, node);
+        CheckParameterForBuildInfo(data, node);
         SimpleNode child = (SimpleNode)node.jjtGetChild(0); // get the node representing <base_type_spec> or <string_type> or <widestring_type> or <scoped_name>
         return resovleTypeSpec(child, (BuildInfo)data);
     }
@@ -2097,14 +2108,6 @@ public class MetaDataGenerator implements IDLParserVisitor {
         } catch (Exception e) {
             throw new RuntimeException("invalid type found: " + boxedValueType + 
                                        ", static method missing or not callable: " + BoxedValueBase.GET_FIRST_NONBOXED_TYPE_METHODNAME);
-        }
-    }
-
-
-    /** check if data is an instance of buildinfo, if not throws an exception */
-    private void checkParameterForBuildInfo(Object data, Node visitedNode) {
-        if (!(data instanceof BuildInfo)) { 
-            throw new RuntimeException("precondition violation in visitor for node" + visitedNode.GetType() + ", " + data.GetType() + " but expected BuildInfo"); 
         }
     }
 
