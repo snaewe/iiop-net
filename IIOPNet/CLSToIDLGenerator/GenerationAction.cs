@@ -312,7 +312,7 @@ namespace Ch.Elca.Iiop.Idl {
             }                
 
             string returnTypeMapped = (string)m_mapper.MapClsType(returnType, 
-                                                                  Util.AttributeExtCollection.ConvertToAttributeCollection(methodToMap.ReturnTypeCustomAttributes.GetCustomAttributes(true)),
+                                                                  Util.ReflectionHelper.CollectReturnParameterAttributes(methodToMap),
                                                                   m_refMapper);
             m_currentOutputStream.Write(returnTypeMapped + " ");
             
@@ -328,7 +328,7 @@ namespace Ch.Elca.Iiop.Idl {
                 // type of param
                 Type paramType = info.ParameterType;
                 string paramTypeMapped = (string)m_mapper.MapClsType(paramType, 
-                                                                     Util.AttributeExtCollection.ConvertToAttributeCollection(info.GetCustomAttributes(true)), 
+                                                                     Util.ReflectionHelper.CollectParameterAttributes(info, methodToMap), 
                                                                      m_refMapper);
                 m_currentOutputStream.Write(paramTypeMapped + " ");
                 // name of param

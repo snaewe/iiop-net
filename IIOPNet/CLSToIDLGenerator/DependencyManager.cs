@@ -443,14 +443,16 @@ namespace Ch.Elca.Iiop.Idl {
                 // return type
                 Type returnType = info.ReturnType;
                 if (!m_manager.IsDefaultMapped(returnType) && !returnType.Equals(forType)) {                 	
-                    AddToDepList(dependencies, new MapTypeInfo(returnType, AttributeExtCollection.ConvertToAttributeCollection(info.ReturnTypeCustomAttributes.GetCustomAttributes(true)))); 
+                    AddToDepList(dependencies, new MapTypeInfo(returnType, 
+                                                               ReflectionHelper.CollectReturnParameterAttributes(info))); 
                 }
                 
                 ParameterInfo[] methodParams = info.GetParameters();
                 foreach (ParameterInfo paramInfo in methodParams) {
                     if (!m_manager.IsDefaultMapped(paramInfo.ParameterType) && !paramInfo.ParameterType.Equals(forType)) {
                         // only add to dependencies, if not default mapped and not the same as type which is checked
-                        AddToDepList(dependencies, new MapTypeInfo(paramInfo.ParameterType, AttributeExtCollection.ConvertToAttributeCollection(paramInfo.GetCustomAttributes(true))));
+                        AddToDepList(dependencies, new MapTypeInfo(paramInfo.ParameterType, 
+                                                                   ReflectionHelper.CollectParameterAttributes(paramInfo, info)));
                     }
                 }
             }

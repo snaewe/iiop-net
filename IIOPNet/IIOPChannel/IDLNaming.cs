@@ -145,7 +145,7 @@ namespace Ch.Elca.Iiop.Idl {
                 ClsToIdlMapper mapper = ClsToIdlMapper.GetSingleton();
                 foreach (ParameterInfo parameter in parameters) {
                     string mappedTypeName = (string)mapper.MapClsType(parameter.ParameterType,
-                                                                      AttributeExtCollection.ConvertToAttributeCollection(parameter.GetCustomAttributes(true)),
+                                                                      ReflectionHelper.CollectParameterAttributes(parameter, method),
                                                                       s_genIdlNameforClsType);
                 	mappedTypeName.Replace(" ", "_");
                 	mappedTypeName.Replace("::", "__");
