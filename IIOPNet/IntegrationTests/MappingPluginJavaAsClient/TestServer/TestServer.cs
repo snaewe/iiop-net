@@ -30,6 +30,7 @@ using System;
 using System.IO;
 using System.Runtime.Remoting;
 using System.Runtime.Remoting.Channels;
+using System.Reflection;
 using Ch.Elca.Iiop.Idl;
 
 namespace Ch.Elca.Iiop.IntegrationTests.MappingPlugin {
@@ -38,14 +39,8 @@ namespace Ch.Elca.Iiop.IntegrationTests.MappingPlugin {
     public class TestServer {
 
         public static void Main(String[] args) {
-            try {
-                CustomMapperRegistry reg = CustomMapperRegistry.GetSingleton();
-                reg.AddMappingsFromFile(new FileInfo("customMapping.xml"));
-            } catch (Exception e) {
-                Console.WriteLine("custom mapper not loadable: " + e);
-                throw e;
-            }
-
+            InitCustomMapping();
+        	
             // register the channel
             int port = 8087;
             IiopChannel chan = new IiopChannel(port);
@@ -57,6 +52,27 @@ namespace Ch.Elca.Iiop.IntegrationTests.MappingPlugin {
 
             Console.WriteLine("server running");
             Console.ReadLine();
+        }
+        
+        /// <summary>
+        /// initalizes the custom mapping from assembly manifest stream
+        /// </summary>
+        private static void InitCustomMapping() {              
+            string resourceName = "customMapping.xml";
+            // load from asm
+            Assembly asm = (typeof(TestServer)).Assembly;
+            Stream configStream = asm.GetManifestResourceStream(resourceName);
+            if (configStream == null) {
+                Console.WriteLine("custom mapper not loadable, {0} not found in assembly", resourceName);
+            	Environment.Exit(2);
+            }
+            try {
+                CustomMapperRegistry reg = CustomMapperRegistry.GetSingleton();
+                reg.AddMappingFromStream(configStream);
+            } catch (Exception e) {
+            	Console.WriteLine("custom mapper not loadable, exception: {0}", e);
+            	Environment.Exit(2);				                
+            }        
         }
 
     }
