@@ -1,0 +1,7 @@
+This integration test checks the interoperation of IIOP.NET and MICO.
+
+The remote test object provides methods to test serialisation and 
+deserialisation of idl unions.
+
+
+

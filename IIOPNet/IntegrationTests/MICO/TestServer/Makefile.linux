@@ -1,0 +1,19 @@
+
+all: server
+
+include MakeVars
+
+server: service.h service.o server.o $(DEPS)
+	$(LD) $(CXXFLAGS) $(LDFLAGS) service.o server.o $(LDLIBS) $(COS_LDLIBS) -o server
+
+service.h service.cc : service.idl $(IDLGEN)
+	$(IDL) --any service.idl
+
+start-server:
+	nsd -ORBIIOPAddr inet::11456 &
+	sleep 5
+	./server -ORBInitRef NameService=corbaloc::localhost:11456/NameService -ORBIIOPAddr inet::11400
+
+
+clean:
+	rm -f service.cc service.h *.o server *~ 

@@ -1,0 +1,19 @@
+!IFDEF MICO_HOME
+!include $(MICO_HOME)\MakeVars.win32
+!ENDIF
+
+
+CXXFLAGS = -I. -I$(MICO_HOME)\include $(CXXFLAGS) $(EHFLAGS)
+CFLAGS   = -I. -I$(MICO_HOME)\include $(CFLAGS)
+LDLIBS   = $(LDMICO) $(CONFLIBS) $(MICO_HOME)\win32-bin\lib\mico$(VERSION).lib
+LDFLAGS  = /LIBPATH:$(MICO_HOME)\win32-bin\lib $(LDFLAGS)
+DEPS     = $(MICO_HOME)\orb\$(LIBMICO)
+IDLFLAGS = -B$(MICO_HOME) -I.
+
+COS_CXXFLAGS =
+COS_LDLIBS   = $(MICO_HOME)\coss\micocoss$(VERSION).lib
+COS_LDFLAGS  =
+COS_DEPS     = $(MICO_HOME)\..\..\coss\libmicocoss$(VERSION).lib
+
+
+

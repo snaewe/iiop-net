@@ -1,0 +1,21 @@
+include $(MICO_HOME)/MakeVars
+
+LD = $(CXX)
+CXXFLAGS := -I. -I$(MICO_HOME)/include $(CXXFLAGS) $(EHFLAGS)
+CFLAGS   := -I. -I$(MICO_HOME)/include $(CFLAGS)
+LDLIBS   := $(LDMICO) $(CONFLIBS)
+LDFLAGS  := -L$(MICO_HOME)/libs $(LDFLAGS)
+DEPS     := $(MICO_HOME)/orb/$(LIBMICO)
+IDLFLAGS := -B$(MICO_HOME) -I.
+
+COS_CXXFLAGS =
+COS_LDLIBS   = -lmicocoss$(VERSION)
+COS_LDFLAGS  =
+ifeq  ($(HAVE_SHARED_EXCEPTS), yes)
+COS_DEPS     = $(MICO_HOME)../../coss/libmicocoss$(VERSION).$(SOEXT)
+else
+COS_DEPS     = $(MICO_HOME)../../coss/libmicocoss$(VERSION).a
+endif
+
+
+
