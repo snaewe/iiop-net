@@ -172,6 +172,29 @@ namespace Ch.Elca.Iiop.IdlCompiler.Action {
 
         #region methods for supporting generation for more than one parse result    
         
+        /// <summary>checks if a type generation can be skipped, 
+        /// because type is already defined in a previous run over a parse tree 
+        /// or in a reference assembly
+        /// </summary>
+        /// <remarks>this method is used to support runs over more than one parse tree
+        /// </remarks>
+        public bool CheckSkip(Symbol forSymbol) {
+        
+            if (IsTypeDeclaredInRefAssemblies(forSymbol)) {
+                // skip, because already defined in a referenced assembly 
+                // -> this overrides the def from idl
+                return true;
+            }
+        
+            if (CheckInBuildModulesForType(forSymbol)) { 
+                // safe to skip, because type is already fully declared in a previous run
+                return true;
+            }
+                
+            // do not skip
+            return false;
+        }
+        
         /// <summary>
         /// checks if a type is fully declared in a module of the resulting assembly.
         /// Does only return fully defined types, others are not interesting here.
