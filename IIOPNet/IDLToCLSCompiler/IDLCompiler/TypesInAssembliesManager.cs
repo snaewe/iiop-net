@@ -57,28 +57,25 @@ namespace Ch.Elca.Iiop.IdlCompiler.Action {
         #region IMethods
 
         /// <summary>
-        /// checkes, if a type for the symbol forSymbol is defined in
+        /// checkes, if a type with name typename and repositoryID repId is defined
         /// a referenced assembly         
         /// </summary>
         /// <return>
         /// return the Type if found, otherwise null
         /// </return>
-        public Type GetTypeFromRefAssemblies(Symbol forSymbol) {
+        public Type GetTypeFromRefAssemblies(string fullName, string expectedRepId) {
             Type result = null;
             foreach (Assembly asm in m_refAssemblies){
-                Scope symScope = forSymbol.getDeclaredIn();
-                String fullName = symScope.getFullyQualifiedNameForSymbol(forSymbol.getSymbolName());
                 result = asm.GetType(fullName);
-                if (result != null) {
-                    String repId = symScope.getRepositoryIdFor(forSymbol.getSymbolName());
-                    if (TypeRepIdEquals(result, repId)) {
+                if (result != null) {                    
+                    if (TypeRepIdEquals(result, expectedRepId)) {
                         break;    
                     } else {
                         Console.WriteLine("warning: found a type in a referenced assembly, " + 
                                           "with the same fully qualified name, " +
                                           "but a different rep-id.\n" +
                                           " -> do not use this type, instead of regeneration. (repId: {0})",
-                                          repId);
+                                          expectedRepId);
                     }                
                 }
             }

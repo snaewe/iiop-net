@@ -64,6 +64,28 @@ namespace Ch.Elca.Iiop.IdlCompiler.Action {
 
         #endregion IConstructors
         #region IMethods
+        
+        /// <summary>
+        /// creates a typename for a nested type, which is not nestable
+        /// directly in containing type.
+        /// These types are defined in a special namespace.
+        /// </summary>
+        public string GetFullTypeNameForNestedNotInOuterType(Symbol forSymbol) {
+            Scope declIn = forSymbol.getDeclaredIn();
+            return declIn.getFullyQualifiedNameForNested(forSymbol.getSymbolName());
+        }
+        
+        public string GetFullTypeNameForSymbol(Symbol forSymbol) {
+            Scope declIn = forSymbol.getDeclaredIn();
+            if (!(IsNestedType(forSymbol) && !IsNestableDirectlyInParent(forSymbol))) {
+                String fullName = declIn.getFullyQualifiedNameForSymbol(forSymbol.getSymbolName());
+                return fullName;        		
+            } else {
+                // forSymbol represents a nested type, which is not directly nestable into
+                // the outer type -> type is defined in a special namespace
+                return GetFullTypeNameForNestedNotInOuterType(forSymbol);
+            }
+        }
 
         /// <summary>
         /// register a not fully created type
@@ -119,8 +141,15 @@ namespace Ch.Elca.Iiop.IdlCompiler.Action {
         /// <summary>
         /// checks, if a type is already declared in a referenced assembly
         /// </summary>
-        public bool IsTypeDeclaredInRefAssemblies(Symbol forSymbol) {
-            return m_refAsmTypes.GetTypeFromRefAssemblies(forSymbol) != null;
+        public bool IsTypeDeclaredInRefAssemblies(Symbol forSymbol) {           
+           return GetTypeFromRefAssemblies(forSymbol) != null;
+        }
+        
+        private Type GetTypeFromRefAssemblies(Symbol forSymbol) {
+        	string fullName = GetFullTypeNameForSymbol(forSymbol);        	
+        	String repId = 
+        	    forSymbol.getDeclaredIn().getRepositoryIdFor(forSymbol.getSymbolName());
+        	return m_refAsmTypes.GetTypeFromRefAssemblies(fullName, repId);
         }
 
         #region methods for supporting generation for more than one parse result    
@@ -130,9 +159,8 @@ namespace Ch.Elca.Iiop.IdlCompiler.Action {
         /// Does only return fully defined types, others are not interesting here.
         /// </summary>  
         private Type GetTypeFromBuildModule(Symbol forSymbol) {
-            Scope declIn = forSymbol.getDeclaredIn();
-            String fullName = declIn.getFullyQualifiedNameForSymbol(forSymbol.getSymbolName());
-            Type result = m_modBuilder.GetType(fullName);
+            string fullName = GetFullTypeNameForSymbol(forSymbol);
+            Type result = GetTypeFromBuildModule(fullName);
             if (!(result is TypeBuilder)) {  // type is fully defined (do not return not fully defined types here)
                 return result;
             }
@@ -192,7 +220,8 @@ namespace Ch.Elca.Iiop.IdlCompiler.Action {
             }
             if (result == null) { 
                 // check in types, which are defined in referenced assemblies
-                Type fromAsm = m_refAsmTypes.GetTypeFromRefAssemblies(forSymbol);
+
+                Type fromAsm = GetTypeFromRefAssemblies(forSymbol);
                 if (fromAsm != null) {
                     // remark: all types in ref assemblies are fully completed -> no need for compileTimeTypeContainer
                     result = new TypeContainer(fromAsm, new CustomAttributeBuilder[0]);
@@ -232,8 +261,32 @@ namespace Ch.Elca.Iiop.IdlCompiler.Action {
         public void RegisterTypeDef(TypeContainer fullDecl, Symbol forSymbol) {
             AddTypeDefinition(fullDecl, forSymbol);
         }
+               
+        /// <summary>
+        /// is the type represented by forSymbol nested in another type?
+        /// </summary>
+        private bool IsNestedType(Symbol forSymbol) {
+        	Scope parentScope = forSymbol.getDeclaredIn();
+        	return parentScope.IsTypeScope();
+        }
+        
+        /// <summary>Checks, if a nested type is </summary>
+        private bool IsNestableDirectlyInParent(Symbol forSymbol) {
+            Scope potentialTypeScope = forSymbol.getDeclaredIn();
+        	string potentialTypeName = potentialTypeScope.getScopeName();
+        	if ((potentialTypeScope.getParentScope() != null) &&
+        	    (potentialTypeScope.IsTypeScope())) {
+        		Symbol typeSymbol = 
+        		    potentialTypeScope.getParentScope().getSymbol(potentialTypeName);
+                TypeContainer type = GetKnownType(typeSymbol);
+        	    if (type.GetCompactClsType().IsClass) {
+        	    	return true;
+        	    }
+        	}
+        	return false;
+        }                
 
-        #endregion IMethods
+        #endregion IMethods                     
 
     }
 

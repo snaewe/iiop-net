@@ -199,6 +199,36 @@ public class Scope {
         fullyQualName += IdlNaming.MapIdlNameToClsName(symbolName);
         return fullyQualName;
     }
+    
+    /// <summary>returns the associated nested scope name for this Scope</summary>
+    private String getNestedScopeNameForScope() {
+        return getScopeName() + "_package";     
+    }
+    
+    /// <summary>
+    /// gets the fully qualified symbol name, if the current scope should be
+    /// considered as a nested Scope.
+    /// </summary>
+    /// <remarks>
+    /// This method does not update the symbol table, if no nested scope is
+    /// associated to the current scope (unlike getScopeForNested()).
+    /// </remarks>
+    public String getFullyQualifiedNameForNested(String symbolName) {
+         if (getSymbol(symbolName) == null) { 
+            throw new Exception("error in scope " + this + ", symbol with name: " + symbolName + " not found"); 
+        }        
+        String outerScopeName = "";
+        if (getParentScope() != null) {
+            outerScopeName = getParentScope().getFullyQualifiedScopeName();
+        }        
+        if (outerScopeName.Length > 0) {
+            outerScopeName += ".";
+        }
+        String nestedScopeName = IdlNaming.MapIdlNameToClsName(getNestedScopeNameForScope());
+        String result = outerScopeName + nestedScopeName + "." +
+                        IdlNaming.MapIdlNameToClsName(symbolName);
+        return result;
+    }
 
     /** returns the fully qualified name of this scope */
     /** @return the fully qualified scope name in CLS */
@@ -244,7 +274,7 @@ public class Scope {
     /// <param name="cratedFor">the Symbol for which the nested scope should be created / retrieved</param>
     public Scope GetScopeForNested(Symbol createdFor) {
         Scope parentOfContainer = getParentScope();
-        String nestedScopeName = getScopeName() + "_package";
+        String nestedScopeName = getNestedScopeNameForScope();
         if (!(parentOfContainer.containsChildScope(nestedScopeName))) {
             parentOfContainer.addChildScope(new Scope(nestedScopeName, parentOfContainer, false));
         }
