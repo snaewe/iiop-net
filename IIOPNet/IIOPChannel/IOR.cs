@@ -39,6 +39,7 @@ using Ch.Elca.Iiop.Util;
 using Ch.Elca.Iiop.Idl;
 using Ch.Elca.Iiop.Marshalling;
 using Ch.Elca.Iiop.Services;
+using Ch.Elca.Iiop.Security.Ssl;
 using omg.org.CORBA;
 
 namespace Ch.Elca.Iiop.CorbaObjRef {
@@ -855,8 +856,8 @@ namespace Ch.Elca.Iiop.CorbaObjRef {
                                                                          new TaggedComponentEncodingRules(false));
             AddTaggedComponentSer(new TaggedComponentSerializer(TaggedComponentIds.CODESET_COMPONENT_ID, typeof(CodeSetComponentData),
                                                                 new TaggedComponentEncodingRules(true)));
-//            AddTaggedComponentSer(new TaggedComponentSerializer(TaggedComponentIds.TAG_SSL_SEC_TRANS, typeof(SSLComponentData),
-//                                                                new TaggedComponentEncodingRules(true)));
+            AddTaggedComponentSer(new TaggedComponentSerializer(TaggedComponentIds.TAG_SSL_SEC_TRANS, typeof(SSLComponentData),
+                                                                new TaggedComponentEncodingRules(true)));
         }
 
         #endregion SConstructor

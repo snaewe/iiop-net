@@ -1,0 +1,1 @@
+This directory contains the SSL security library from http://www.mentalis.org/soft/projects/seclib/
