@@ -18,6 +18,7 @@
 <LI><A href="rmiAdderDNClient.html">Accessing a RMI/IIOP-based CORBA object with .NET remoting</A></LI>
 <LI><A href="ejbInterop.html">Accessing an EJB session bean with .NET remoting</A></LI>
 <LI><A href="usingCustomMapping.html">Using custom mapping plugin mechanism</A></LI>
+<LI><A href="javasideexceptions.html">Handling Java-side exceptions in .NET</A></LI>
 </UL>
 
 <p/>

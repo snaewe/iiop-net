@@ -1,0 +1,297 @@
+#include "layout.wml"
+
+<SUBJECT>Handling java-side exceptions in .NET howto</SUBJECT>
+
+<p/>This howto explains how to handle java exceptions thrown in the java-part of a distributed application and forwarded with IIOP.NET to the .NET part of the application.
+
+<p/>This document assumes you are using Java 1.4 or later
+
+<p/>The code for this tutorial can be found in <code>Examples/Exceptions/JavaSideExceptions</code>.
+
+<p/><b>Mapping</b>
+
+<p/>Java exception classes are extensions of <code>java.lang.Exception</code>. In IDL, each java exception class <code><em>T</em>Exception</code> is mapped to a CORBA exception <code><em>T</em>Ex</code> containing a custom-serialized valuetype <code><em>T</em>Exception</code>. The <code>IDLToCLSCompiler</code> generates a .NET exception <code><em>T</em>Ex</code> and an abstract class <code><em>T</em>Exception</code>.
+
+<p/>Because exceptions are serialized (i.e. CORBA valuetypes), their translation to .NET is not automated and requires the implementation of the methods contained in the class. Each exception class used requires the implementation of a class <code>ExceptionImpl</code>. The complexity and the number of methods to provide depends mostly on the java-side implementation of the <code>java.lang.Exception</code> class. In our example using Java JDK 1.4, this requires more than 20 methods in 3 classes (<code>java.lang.Exception</code> relies on <code>java.lang.Throwable</code> and <code>java.lang.StackTraceElement</code>).
+
+
+<p/><b>Step 1: create a custom exception or use an existing java exception class</b>
+
+<p>Custom exceptions must inherit from <code>java.lang.Exception</code> and implement <code>java.io.Serializable</code>.
+
+<p/><SOURCE>
+import java.io.Serializable;
+import java.rmi.Remote;
+import java.rmi.RemoteException;
+
+public class CustomException extends Exception implements Serializable {
+
+    public String reason;
+
+    public CustomException(String message, String reason) throws java.rmi.RemoteException {
+        super(message); 
+	this.reason = reason;
+    }
+}
+</SOURCE>
+
+<p/><b>Step 2: create IDL description</b>
+
+<p/>Create the IDL description for your java object as usual. Because the exception is mentioned in some <code>throws</code> clause, there is no need to explicitely generate the IDL for your exception.
+
+<p/><b>Step 3: create .NET stubs</b>
+
+<p/>Use the <code>IDLToCLSCompiler</code> to generate the .NET stubs. Take note of which valuetypes must be locally implemented.
+
+<p/><b>Step 4: implement valuetype classes</b>
+
+<p/>The compiler generates an abstract class <code>CustomException</code>, you must implement <code>CustomExceptionImpl</code> implementing all the abstract methods of <code>CustomException</code>. Because this class indirectly inherits from <code>java.lang.Exception</code>, the methods defined there must also be implemented here. The methods depend on the java implementation of Exception; the following example shows the code for the Sun JDK 1.4.
+
+<p/>For each custom exception, you must create an implementation class. Below, the implementation class <code>CustomExceptionImpl</code> for class <code>CustomException</code>.
+
+<p/><SOURCE>
+namespace tutorial {
+    
+    using java.lang;
+
+    public class CustomExceptionImpl: CustomException {
+
+        #region IFields
+
+        private ExceptionCommon m_data = new ExceptionCommon();
+
+        #endregion IFields
+
+        public CustomExceptionImpl() : base() {
+        }
+            
+        public override void Deserialise(Corba.DataInputStream stream) {
+            m_data.Deserialise(stream);
+            reason = stream.read_WStringValue();
+        }
+                
+        public override void Serialize(Corba.DataOutputStream stream) {
+            m_data.Serialise(stream);
+        }
+
+        public override Throwable initCause(Throwable arg) {
+            return null;
+        }
+                
+        public override string toString() {
+            return ToString();
+        }
+
+        public override Throwable fillInStackTrace() {
+            return null;
+        }
+
+        public override Throwable cause {
+            get { return m_data.Cause; }
+        }
+
+        public override string localizedMessage {
+            get { return m_data.Msg; }
+        }
+
+        public override string message {
+            get { return m_data.Msg; }
+        }
+
+        public override void printStackTrace__() {    
+        }
+
+        public override void printStackTrace__java_io_PrintStream(java.io.PrintStream arg) {
+        }
+
+        public override void printStackTrace__java_io_PrintWriter(java.io.PrintWriter arg) {
+        }
+
+        public override StackTraceElement[] stackTrace {
+            get { return m_data.Trace; }
+            set { }
+        }
+
+        public override string ToString() {
+            return base.ToString() + "; msg: " + m_data.Msg;
+        }
+
+    }
+}
+</SOURCE>
+
+<p/>The data and code for <code>java.lang.Exception</code> is factored out in an own class <code>ExceptionCommon</code> to allow code reuse when more than one exception class is used. Each exception class must deserialize the <code>java.lang.Exception</code> fields before deserializing its own fields. This code depends on the java-side implementation!
+
+<p/><SOURCE>
+namespace java.lang {
+
+/// <summary>
+/// used to Deserialise the java.lang.Exception data
+/// </summary>
+public class ExceptionCommon {
+
+    private java.lang.Throwable m_cause;
+    private string m_msg;
+    private java.lang.StackTraceElement[] m_trace;
+
+    public java.lang.Throwable Cause {
+        get { 
+            return m_cause; 
+        }
+    }
+
+    public string Msg {
+        get { 
+            return m_msg; 
+        }
+    }
+
+    public java.lang.StackTraceElement[] Trace {
+        get { 
+            return m_trace; 
+        }
+    }
+
+    public void Deserialise(Corba.DataInputStream stream) {
+        stream.read_octet(); // ignore format version: java RMI specific
+        stream.read_boolean(); // ignore default read object: java RMI specific
+            
+        m_cause = (java.lang.Throwable)stream.read_ValueOfType(typeof(java.lang.Throwable));
+        m_msg = stream.read_WStringValue();
+
+        object boxedTrace = stream.read_Value();
+        if (boxedTrace != null) {
+            m_trace = (StackTraceElement[])((BoxedValueBase) boxedTrace).Unbox();
+        }
+
+    }
+
+    public void Serialise(Corba.DataOutputStream stream) {
+        throw new omg.org.CORBA.NO_IMPLEMENT(2876, omg.org.CORBA.CompletionStatus.Completed_MayBe);
+    }
+
+}
+
+    
+public class StackTraceElementImpl : StackTraceElement {
+
+    public override int hashCode() {
+        return GetHashCode();
+    }            
+        
+    public override string toString() {
+        return "StackTraceElement:\n" + "in class: " + m_declaringClass + 
+            " (file: " + m_fileName + "); method: " + m_methodName;
+    }
+
+    public override bool equals([ObjectIdlTypeAttribute(IdlTypeObject.Any)] object arg) {
+        return this.Equals(arg);
+    }
+
+    public override string className {
+        get { return m_declaringClass; }
+    }
+
+    public override string fileName {
+        get { return m_fileName; }
+    }
+
+    public override int lineNumber {
+        get { return m_lineNumber; }
+    }
+
+    public override string methodName {
+        get { return m_methodName; }
+    }
+
+    public override bool nativeMethod {
+        get { return false; }
+    }
+        
+}
+
+[Serializable]
+public class ThrowableImpl : Throwable {
+
+    #region IFields
+
+    private ExceptionCommon m_data = new ExceptionCommon();
+
+    #endregion IFields
+
+    public ThrowableImpl() : base() {
+    }
+        
+    public override void Deserialise(Corba.DataInputStream stream) {
+        m_data.Deserialise(stream);
+    }
+            
+    public override void Serialize(Corba.DataOutputStream stream) {
+        m_data.Serialise(stream);
+    }
+
+    public override Throwable initCause(Throwable arg) {
+        return null;
+    }
+            
+    public override string toString() {
+        return ToString();
+    }
+
+    public override Throwable fillInStackTrace() {
+        return null;
+    }
+
+    public override Throwable cause {
+        get { return m_data.Cause; }
+    }
+
+    public override string localizedMessage {
+        get { return m_data.Msg; }
+    }
+
+    public override string message {
+        get { return m_data.Msg; }
+    }
+
+    public override void printStackTrace__() {    
+    }
+
+    public override void printStackTrace__java_io_PrintStream(java.io.PrintStream arg) {
+    }
+
+    public override void printStackTrace__java_io_PrintWriter(java.io.PrintWriter arg) {
+    }
+
+    public override StackTraceElement[] stackTrace {
+        get { return m_data.Trace; }
+        set { }
+    }
+
+    public override string ToString() {
+        return base.ToString() + "; msg: " + m_data.Msg;
+    }
+}
+
+
+}
+</SOURCE>
+
+
+<p/><b>Step 5: use the exception</b>
+
+<p/>To access the exception, use the wrapped class <code>CustomEx</code>, which is automatically generated by the compiler.
+
+<p/><SOURCE>
+    try {
+        ....
+        service.fail();
+	....
+    } catch (CustomEx je) {
+        // extract exception from wrapper
+        CustomException ce = je.value;
+
+        ....
+        Console.WriteLine("Java-side exception: {0}\nReason: {1}", ce.message, ce.reason);
+    }
+</SOURCE>
