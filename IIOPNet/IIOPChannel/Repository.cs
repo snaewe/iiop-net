@@ -232,6 +232,11 @@ namespace Ch.Elca.Iiop.Idl {
                         elemNamespace = elemTypeName.Substring(0, lastPIndex);
                         unqualName = elemTypeName.Substring(lastPIndex + 1);
                     }
+                    if (elemNamespace.Equals("java.lang") && (unqualName.Equals("String"))) {
+                        // special case: map to CORBA.WStringValue
+                        elemNamespace = "CORBA";
+                        unqualName = "WStringValue";
+                    }                    
                     return unqualName;
                 default:
                     // invalid element type identifier in RMI array repository id: firstChar
