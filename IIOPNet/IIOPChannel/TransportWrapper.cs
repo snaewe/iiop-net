@@ -117,7 +117,7 @@ namespace Ch.Elca.Iiop {
     
     /// <summary>implementers wait for and accept client connections on their supported transport mechanism.
     /// </summary>
-    public interface IServerConnectionListener {
+    public interface IServerConnectionListener {        
         
         #region IMethods
         
@@ -129,7 +129,11 @@ namespace Ch.Elca.Iiop {
         
         /// <summary>starts the listing for clients; calls ClientAccepted callback, when a client is accepted.</summary>
         /// <returns>the port the listener is listening on; may be different from listeningPortSuggestion</returns>
-        int StartListening(int listeningPortSuggestion);
+        /// <param name="additionalTaggedComponents">gives back the additional components to add to an IOR;
+        /// Those additional components hold the additional information needed by clients to connect to this listener.
+        /// Can contain an array with 0 elements, if default information in the IOR is enough.
+        /// </param>
+        int StartListening(int listeningPortSuggestion, out ITaggedComponent[] additionalTaggedComponents);
         
         /// <summary>is this listener active</summary>
         bool IsListening();
@@ -137,7 +141,7 @@ namespace Ch.Elca.Iiop {
         /// <summary>stops accepting client connections</summary>
         void StopListening();
         
-        #endregion IMethods
+        #endregion IMethods        
         
     }
 

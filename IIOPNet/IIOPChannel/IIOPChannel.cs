@@ -60,6 +60,8 @@ namespace Ch.Elca.Iiop {
 
         internal const string DEFAULT_CHANNEL_NAME = "IIOPChannel";
         internal const int DEFAULT_CHANNEL_PRIORITY = 0;
+                
+        internal const string TRANSPORT_FACTORY = "TransportFactory";
         
         #endregion Constants
         #region IFields
@@ -109,6 +111,12 @@ namespace Ch.Elca.Iiop {
                             break;
                         case "useIpAddress": 
                             serverProp["useIpAddress"] = Convert.ToBoolean(entry.Value); 
+                            break;
+                        case TRANSPORT_FACTORY:
+                            serverProp[IiopServerChannel.SERVER_TRANSPORT_FACTORY] =
+                                entry.Value;
+                            clientProp[IiopClientChannel.CLIENT_TRANSPORT_FACTORY] =
+                                entry.Value;
                             break;
                         default: 
                             Trace.WriteLine("unknown property found for IIOP channel: " +
@@ -201,12 +209,17 @@ namespace Ch.Elca.Iiop {
     /// </summary>
     public class IiopClientChannel : IChannelSender {
     
+        #region Constants
+        
+        internal const string CLIENT_TRANSPORT_FACTORY = "ClientTransportFactory";        
+        
+        #endregion Constants
         #region IFields
 
         private string m_channelName = IiopChannel.DEFAULT_CHANNEL_NAME;
         private int m_channelPriority = IiopChannel.DEFAULT_CHANNEL_PRIORITY;
 
-        private IClientChannelSinkProvider m_providerChain;
+        private IClientChannelSinkProvider m_providerChain;                
 
         #endregion IFields
         #region SConstructor
@@ -239,6 +252,7 @@ namespace Ch.Elca.Iiop {
                      "IIOPClientSideFormatter provider not found in chain, this channel is only usable with the IIOPFormatters"); 
             }
             m_providerChain = sinkProvider;
+            IClientTransportFactory clientTransportFactory = new TcpTransportFactory();
 
             if (properties != null) {
                 foreach (DictionaryEntry entry in properties) {
@@ -249,6 +263,11 @@ namespace Ch.Elca.Iiop {
                         case "priority": 
                             m_channelPriority = Convert.ToInt32(entry.Value);
                             break;
+                        case CLIENT_TRANSPORT_FACTORY:
+                            Type transportFactoryType = Type.GetType((string)entry.Value, true);
+                            clientTransportFactory = (IClientTransportFactory)
+                                Activator.CreateInstance(transportFactoryType);
+                            break;
                         default: 
                             Trace.WriteLine("unknown property found for IIOPClient channel: " + entry.Key);
                             break; // ignore, because unknown
@@ -256,7 +275,7 @@ namespace Ch.Elca.Iiop {
                 }
             }
 
-            InitChannel(new TcpTransportFactory());
+            InitChannel(clientTransportFactory);
         }
 
         #endregion IConstructors
@@ -355,6 +374,11 @@ namespace Ch.Elca.Iiop {
     /// </summary>
     public class IiopServerChannel : IChannelReceiver {
 
+        #region Constants
+        
+        internal const string SERVER_TRANSPORT_FACTORY = "ServerTransportFactory";
+        
+        #endregion Constants
         #region IFields
 
         private string m_channelName = IiopChannel.DEFAULT_CHANNEL_NAME;
@@ -409,6 +433,8 @@ namespace Ch.Elca.Iiop {
             }
 
             m_providerChain = sinkProvider;
+            IServerTransportFactory serverTransportFactory =
+                new TcpTransportFactory();
 
             // parse properties
             if (properties != null) {
@@ -426,13 +452,18 @@ namespace Ch.Elca.Iiop {
                         case "useIpAddress": 
                             m_useIpAddr = Convert.ToBoolean(entry.Value); 
                             break;
+                        case SERVER_TRANSPORT_FACTORY:
+                            Type transportFactoryType = Type.GetType((string)entry.Value, true);
+                            serverTransportFactory = (IServerTransportFactory)
+                                Activator.CreateInstance(transportFactoryType);
+                            break;
                         default: 
                             Trace.WriteLine("unknown property found for IIOPClient channel: " + entry.Key);
                             break; // ignore, because unknown
                     }
                 }
             }
-            InitChannel(new TcpTransportFactory());
+            InitChannel(serverTransportFactory);
         }
         
         #endregion IConstructors
@@ -519,11 +550,14 @@ namespace Ch.Elca.Iiop {
         public void StartListening(object data) {
             // start Listening
             if (!m_connectionListener.IsListening()) {
-                int listeningPort = m_connectionListener.StartListening(m_port);
+                ITaggedComponent[] additionalComponents;
+                int listeningPort = m_connectionListener.StartListening(m_port, out additionalComponents);
                 if (listeningPort != m_port) {
                     // recreate channel date for this new port
                     SetupChannelData(listeningPort);
                 }
+                // now update additional components in the channel data:
+                m_channelData.ReplaceAdditionalTaggedComponents(additionalComponents);
             }
         }
 
@@ -621,6 +655,16 @@ namespace Ch.Elca.Iiop {
         /// <summary>add passed additional tagged component to all IOR for objects hosted by this appdomain.</summary>
         public void AddAdditionalTaggedComponent(ITaggedComponent taggedComponent) {
             m_additionTaggedComponents.Add(taggedComponent);
+        }
+        
+        /// <summary>replaces the current additional tagged components by the new ones.</summary>
+        public void ReplaceAdditionalTaggedComponents(ITaggedComponent[] newTaggedComponents) {
+            // now add additional components to the channel data:            
+            m_additionTaggedComponents.Clear();
+            if (newTaggedComponents != null) {
+                m_additionTaggedComponents.AddRange(newTaggedComponents);
+            
+            }        
         }
 
         #endregion IMethods

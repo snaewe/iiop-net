@@ -238,13 +238,14 @@ namespace Ch.Elca.Iiop {
         }
         
         /// <summary><see cref="Ch.Elca.Iiop.IServerConnectionListener.StartListening"</summary>
-        public int StartListening(int listeningPortSuggestion) {
+        public int StartListening(int listeningPortSuggestion, out ITaggedComponent[] additionalTaggedComponents) {
             if (!m_isInitalized) {
                 throw CreateNotInitalizedException();
             }
             if (m_listenerActive) {
                 throw CreateAlreadyListeningException();
             }
+            additionalTaggedComponents = new ITaggedComponent[0];
             int resultPort = listeningPortSuggestion;
             
             // use IPAddress.Any and not m_myAddress, to allow connections to loopback and normal ip
