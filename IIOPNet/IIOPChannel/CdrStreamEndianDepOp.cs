@@ -334,6 +334,167 @@ namespace Ch.Elca.Iiop.Cdr {
 
 
     /// <summary>
+    /// this is a little-endian implementation for the endian dependent operation for CDRInput-streams
+    /// </summary>
+    /// <remarks>
+    /// this class is not intended for use by CDRStream users
+    /// </remarks>
+    internal class CdrStreamLittleEndianReadOP : CdrEndianDepInputStreamOp {
+        
+        #region IFields
+
+        private CdrInputStream m_stream;
+        private GiopVersion m_version;
+
+        #endregion IFields
+        #region IConstructors
+
+        public CdrStreamLittleEndianReadOP(CdrInputStream stream, GiopVersion version) {
+            m_stream = stream;
+            m_version = version;
+        }
+
+        #endregion IConstructors
+        #region IMethods
+        
+        #region read methods depenant on byte ordering
+        public short ReadShort() {
+            // in stream: two-complement representation
+            ushort numberTwoCRepr = ReadUShort();
+
+            byte msbit = (byte)((numberTwoCRepr & 0x8000) >> 15);
+
+            short result;
+            if (msbit == 1) {
+                // a negative number
+                ushort invtwoCNumber = (ushort)(numberTwoCRepr ^ 0xFFFF);
+                result = (short)((invtwoCNumber + 1) * -1);
+            } else {
+                // a positive number
+                result = (short)(numberTwoCRepr);
+            }
+            return result;
+        }
+
+        public ushort ReadUShort() {
+            m_stream.ForceReadAlign(Aligns.Align2);
+            return (ushort) (m_stream.ReadOctet() | (m_stream.ReadOctet() << 8));
+        }
+
+        public int ReadLong() {
+            // in stream: two-complement representation
+            uint numberTwoCRepr = ReadULong();
+
+            byte msbit = (byte)((numberTwoCRepr & 0x80000000) >> 31);
+
+            int result;
+            if (msbit == 1) {
+                // a negative number
+                uint invtwoCNumber = (uint)(numberTwoCRepr ^ 0xFFFFFFFF);
+                result = (int)((invtwoCNumber + 1) * -1);
+            } else {
+                // a positive number
+                result = (int)(numberTwoCRepr);
+            }
+            return result;
+        }
+
+        public uint ReadULong() {
+            m_stream.ForceReadAlign(Aligns.Align4);
+            return (
+                ((uint)m_stream.ReadOctet()) | (((uint)m_stream.ReadOctet()) << 8) | 
+                (((uint)m_stream.ReadOctet()) << 16) | (((uint)m_stream.ReadOctet()) << 24)
+            );
+        }
+
+        public long ReadLongLong() {
+            // in stream: two-complement representation
+            ulong numberTwoCRepr = ReadULongLong();
+
+            byte msbit = (byte)((numberTwoCRepr & 0x8000000000000000) >> 63);
+            long result;
+            if (msbit == 1) {
+                // a negative number
+                ulong invtwoCNumber = (ulong)(numberTwoCRepr ^ 0xFFFFFFFFFFFFFFFF);
+                result = (long)(0 - (invtwoCNumber + 1));
+            } else {
+                // a positive number
+                result = (long)(numberTwoCRepr);
+            }
+            return result;
+        }
+
+        public ulong ReadULongLong() {
+            m_stream.ForceReadAlign(Aligns.Align8);
+            return (ulong)(
+                ((ulong)m_stream.ReadOctet()) | (((ulong)m_stream.ReadOctet()) << 8)  | 
+                (((ulong)m_stream.ReadOctet()) << 16) | (((ulong)m_stream.ReadOctet()) << 24) |                 
+                (((ulong)m_stream.ReadOctet()) << 32) | (((ulong)m_stream.ReadOctet()) << 40) | 
+                (((ulong)m_stream.ReadOctet()) << 48) | (((ulong)m_stream.ReadOctet()) << 56)
+            );
+
+        }
+
+        public float ReadFloat() {
+            m_stream.ForceReadAlign(Aligns.Align4);
+            byte[] data = m_stream.ReadOpaque(4);
+            // BitConverter wants little endian
+            float result = BitConverter.ToSingle(data, 0);
+            return result;
+        }
+
+        public double ReadDouble() {
+            m_stream.ForceReadAlign(Aligns.Align8);
+            byte[] data = m_stream.ReadOpaque(8);
+            // BitConverter takes an 8 byte array, containing the litte endian representation of the double            
+            double result = BitConverter.ToDouble(data, 0);
+            return result;
+        }
+        
+        private byte[] AppendChar(byte[] oldData) {
+            byte[] newData = new byte[oldData.Length+1];
+            Array.Copy(oldData, 0, newData, 0, oldData.Length);
+            newData[oldData.Length] = m_stream.ReadOctet();
+            return newData;
+        }
+        
+        public char ReadWChar() {
+            Encoding encoding = CdrStreamHelper.GetWCharEncoding(m_stream.WCharSet, 
+                                    CodeSetConversionRegistryLittleEndian.GetRegistry());
+            byte[] data = new byte[] { m_stream.ReadOctet() };
+            while (encoding.GetCharCount(data) < 1) {
+                data = AppendChar(data);
+            }
+            char[] result = encoding.GetChars(data);            
+            return result[0];
+        }
+
+        public string ReadWString()    {
+            Encoding encoding = CdrStreamHelper.GetWCharEncoding(m_stream.WCharSet,
+                                    CodeSetConversionRegistryLittleEndian.GetRegistry());
+            uint length = ReadULong(); 
+            byte[] data;
+            if ((m_version.Major == 1) && (m_version.Minor <= 1)) { // GIOP 1.1 / 1.0
+                length = (length * 2); // only 2 bytes fixed size characters supported
+                data = m_stream.ReadOpaque((int)length - 2); // exclude trailing zero
+                m_stream.ReadOctet(); // read trailing zero: a wide character
+                m_stream.ReadOctet(); // read trailing zero: a wide character
+            } else {
+                data = m_stream.ReadOpaque((int)length);
+            }
+            char[] result = encoding.GetChars(data);
+            
+            return new string(result);
+        }
+
+        #endregion
+
+        #endregion IMethods
+
+    }
+
+
+    /// <summary>
     /// An Instance of this class is used, if the endian flag is not yet specified in a CdrStream.
     /// </summary>
     internal class CdrEndianOpNotSpecified : CdrEndianDepInputStreamOp, CdrEndianDepOutputStreamOp {

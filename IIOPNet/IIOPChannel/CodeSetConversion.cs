@@ -82,7 +82,7 @@ namespace Ch.Elca.Iiop.CodeSet {
     
     
     /// <summary>
-    /// This registry contains the known character encodings
+    /// This registry contains the known character encodings with big endian characters
     /// </summary>
     public class CodeSetConversionRegistryBigEndian : CodeSetConversionRegistry {
     
@@ -109,12 +109,39 @@ namespace Ch.Elca.Iiop.CodeSet {
         }
 
         #endregion SMethods
-
     
     }
 
-    // TODO: Little endian support
+    /// <summary>
+    /// This registry contains the known character encodings with little endian characters
+    /// </summary>
+    public class CodeSetConversionRegistryLittleEndian : CodeSetConversionRegistry {
+    
+        #region SFields
+        
+        private static CodeSetConversionRegistryLittleEndian s_registry = new CodeSetConversionRegistryLittleEndian();
 
+        #endregion SFields
+        #region IConstructors
+
+        private CodeSetConversionRegistryLittleEndian() {
+            AddEncoding(CodeSetService.UTF16_SET, 
+                        new UnicodeEncodingExt(false, false)); // use big endian encoding here, put no unicode byte order mark
+            AddEncoding(CodeSetService.ISO646IEC_MULTI,
+                        new UnicodeEncodingExt(false, false));
+        }
+
+        #endregion IConsturctors
+        #region SMethods
+
+        /// <summary>get the singleton registry</summary>
+        public static new CodeSetConversionRegistry GetRegistry() {
+            return s_registry;
+        }
+
+        #endregion SMethods
+    
+    }
 
     public class Latin1Encoding : Encoding {
         

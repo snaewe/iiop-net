@@ -534,7 +534,7 @@ namespace Ch.Elca.Iiop.Cdr {
             if (ParseEndianFlag(endianFlag)) {
                 m_endianOp = new CdrStreamBigEndianReadOP(this, (GiopVersion)m_version);
             } else {
-                throw new NotImplementedException("little endian support not yet impelmented"); // TODO
+                m_endianOp = new CdrStreamLittleEndianReadOP(this, (GiopVersion)m_version);
             }
         }
 
