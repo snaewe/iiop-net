@@ -171,7 +171,12 @@ namespace Ch.Elca.Iiop.MessageHandling {
                 CorbaService service = services.GetForServiceId(serviceId);
                 CdrEncapsulationInputStream serviceData = sourceStream.ReadEncapsulation();
                 ServiceContext cntx = service.DeserialiseContext(serviceData);
-                cntxColl.AddServiceContext(cntx);
+                // add the service context if not already present. 
+                // Important: Don't throw an exception if already present,
+                // because WAS4.0.4 includes more than one with same id.
+                if (!cntxColl.ContainsContextForService(cntx.ServiceID)) {
+                    cntxColl.AddServiceContext(cntx);
+                }
             }
             return cntxColl;
         }
@@ -700,3 +705,55 @@ namespace Ch.Elca.Iiop.MessageHandling {
     }
 
 }
+
+
+#if UnitTest
+
+namespace Ch.Elca.Iiop.Tests {
+	
+    using System.IO;
+    using NUnit.Framework;
+    using Ch.Elca.Iiop;
+    using Ch.Elca.Iiop.Idl;
+    using Ch.Elca.Iiop.Util;
+    using Ch.Elca.Iiop.MessageHandling;
+    using Ch.Elca.Iiop.Cdr;
+    using omg.org.CORBA;
+
+
+    /// <summary>
+    /// Unit-tests for testing request/reply serialisation/deserialisation
+    /// </summary>
+    public class ServiceContextSerTest : TestCase {
+    	
+    	public void TestSameServiceIdMultiple() {
+            // checks if service contexts with the same id, doesn't throw an exception
+            // checks, that the first service context is considered, others are thrown away
+            GiopMessageBodySerialiser ser = GiopMessageBodySerialiser.GetSingleton();	
+            MemoryStream stream = new MemoryStream();
+            CdrOutputStreamImpl cdrOut = new CdrOutputStreamImpl(stream, 0, new GiopVersion(1,2));
+            cdrOut.WriteULong(2); // nr of contexts
+            cdrOut.WriteULong(1234567); // id of context 1
+            CdrEncapsulationOutputStream encap = new CdrEncapsulationOutputStream(0);
+            cdrOut.WriteEncapsulation(encap);
+            cdrOut.WriteULong(1234567); // id of context 2
+            encap = new CdrEncapsulationOutputStream(0);
+            cdrOut.WriteEncapsulation(encap);
+            // reset stream
+            stream.Seek(0, SeekOrigin.Begin);
+            CdrInputStreamImpl cdrIn = new CdrInputStreamImpl(stream);
+            cdrIn.ConfigStream(0, new GiopVersion(1,2));
+            // call deser method via reflection, because of protection level
+            Type msgBodySerType = ser.GetType();
+            MethodInfo method = msgBodySerType.GetMethod("DeserialiseContext", BindingFlags.NonPublic | BindingFlags.Instance);
+            Assertion.Assert(method != null);
+            ServiceContextCollection result = (ServiceContextCollection) method.Invoke(ser, new object[] { cdrIn });
+            // check if context is present
+            Assertion.Assert("expected context not in collection", result.ContainsContextForService(1234567) == true);
+    	}
+    	
+    }
+    
+}
+
+#endif
