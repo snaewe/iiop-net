@@ -470,6 +470,7 @@ namespace Ch.Elca.Iiop.IntegrationTests {
             Assertion.AssertEquals(arg4, result4);
         }
 
+        [Test]
         public void TestPassingForFormalParamObjectComplexTypes() {
             System.String arg1 = "test";
             System.String result1 = (System.String) m_testService.EchoAnything(arg1);
@@ -488,6 +489,7 @@ namespace Ch.Elca.Iiop.IntegrationTests {
         /// Difficulty here is, that at the server, boxed type may not exist yet for array type and must be created on deserialising
         /// any!
         /// </remarks>
+        [Test]
         public void TestPassingForFormalParamObjectArrays() {
             System.Byte[] arg3 = new System.Byte[1];
             arg3[0] = 1;
@@ -499,13 +501,26 @@ namespace Ch.Elca.Iiop.IntegrationTests {
             System.Int32[] result4 = (System.Int32[]) m_testService.EchoAnything(arg4);
             Assertion.AssertEquals(arg4[0], result4[0]);
         }
-        
-        
+                
+        [Test]
         public void TestEqualityServerAndProxy() {
             bool result = m_testService.CheckEqualityWithServiceV2((TestService)m_testService);
             Assertion.AssertEquals(true, result);
             result = m_testService.CheckEqualityWithService((MarshalByRefObject)m_testService);
             Assertion.AssertEquals(true, result);
+        }
+
+        delegate System.Boolean TestNegateBooleanDelegate(System.Boolean arg);
+
+        [Test]
+        public void TestAsyncCall() {
+            System.Boolean arg = true;
+            TestNegateBooleanDelegate nbd = new TestNegateBooleanDelegate(m_testService.TestNegateBoolean);
+            // async call
+            IAsyncResult ar = nbd.BeginInvoke(arg, null, null);
+            // wait for response
+            System.Boolean result = nbd.EndInvoke(ar);
+            Assertion.AssertEquals(false, result);
         }
 
     }
