@@ -1622,40 +1622,31 @@ public class MetaDataGenerator : IDLParserVisitor {
         BuildInfo buildInfo = (BuildInfo) data;
         Symbol forSymbol = buildInfo.GetBuildScope().getSymbol(node.getIdent());
         // check if type is known from a previous run over a parse tree --> if so: skip
-        // not needed to check if struct is a nested types, because parent type should already be skipped --> code generation for all nested types skipped to
+        // not needed to check if struct is a nested types, because parent type should already be skipped 
+        // --> code generation for all nested types skipped too
         if (m_typeManager.CheckSkip(forSymbol)) { 
             return null; 
         }
         
-        TypeBuilder structToCreate = null;
-        BuildInfo thisTypeInfo = null;
+        String fullyQualName = null;
+        if (buildInfo.GetContainterType() == null) {
+            // independent dcl
+            fullyQualName = buildInfo.GetBuildScope().getFullyQualifiedNameForSymbol(forSymbol.getSymbolName());
+        } else {
+            // nested dcl
+            // define type in nested type namespace according to IDL to CLS spec 3.14 
+            Scope nestedScope = buildInfo.GetBuildScope().GetScopeForNested(forSymbol);
+            fullyQualName = nestedScope.getFullyQualifiedNameForSymbol(forSymbol.getSymbolName());
+        }
         // layout-sequential causes problem, if member of array type is not fully defined (TypeLoadException) -> use autolayout instead
         TypeAttributes typeAttrs = TypeAttributes.Class | TypeAttributes.Public | TypeAttributes.Serializable | TypeAttributes.BeforeFieldInit | 
                                    /* TypeAttributes.SequentialLayout | */ TypeAttributes.Sealed;
-        if (buildInfo.GetContainterType() == null) {
-            // independent dcl
-            String fullyQualName = buildInfo.GetBuildScope().getFullyQualifiedNameForSymbol(forSymbol.getSymbolName());
-            structToCreate = m_modBuilder.DefineType(fullyQualName, typeAttrs, typeof(System.ValueType),
-                                                     new System.Type[] { typeof(IIdlEntity) });
-            thisTypeInfo = new BuildInfo(buildInfo.GetBuildScope(), structToCreate,
-                                         forSymbol);
-        } else {
-            // nested dcl
-            if (buildInfo.GetContainterType().IsClass) {
-                String fullyQualName = buildInfo.GetBuildScope().getFullyQualifiedNameForSymbol(forSymbol.getSymbolName());
-                structToCreate = buildInfo.GetContainterType().DefineNestedType(fullyQualName, typeAttrs,
-                                                                                typeof(System.ValueType),
-                                                                                new System.Type[] { typeof(IIdlEntity) });
-            } else {
-                // only a class can contain nested types --> therefore use another solution than a nested type for container types which are not classes
-                Scope nestedScope = buildInfo.GetBuildScope().GetScopeForNested(forSymbol);
-                String fullyQualName = nestedScope.getFullyQualifiedNameForSymbol(forSymbol.getSymbolName());
-                structToCreate = m_modBuilder.DefineType(fullyQualName, typeAttrs, typeof(System.ValueType),
-                                                         new System.Type[] { typeof(IIdlEntity) });
-            }
-            thisTypeInfo = new BuildInfo(buildInfo.GetBuildScope(), structToCreate,
-                                         forSymbol);
-        }
+
+        TypeBuilder structToCreate = m_modBuilder.DefineType(fullyQualName, typeAttrs, 
+                                                             typeof(System.ValueType),
+                                                             new System.Type[] { typeof(IIdlEntity) });
+        BuildInfo thisTypeInfo = new BuildInfo(buildInfo.GetBuildScope(), structToCreate,
+                                               forSymbol);
 
         // add fileds
         node.childrenAccept(this, thisTypeInfo); // let the members add themself to the typeBuilder
@@ -1807,32 +1798,26 @@ public class MetaDataGenerator : IDLParserVisitor {
         BuildInfo buildInfo = (BuildInfo) data;
         Symbol forSymbol = buildInfo.GetBuildScope().getSymbol(node.getIdent());
         // check if type is known from a previous run over a parse tree --> if so: skip
-        // not needed to check if struct is a nested types, because parent type should already be skipped --> code generation for all nested types skipped to
+        // not needed to check if struct is a nested types, because parent type should already be skipped 
+        // --> code generation for all nested types skipped too
         if (m_typeManager.CheckSkip(forSymbol)) { 
             return null; 
         }
    
         // create Helper for union generation
-        UnionGenerationHelper genHelper = null;
+        String fullyQualName = null;
         if (buildInfo.GetContainterType() == null) {
             // independent dcl
-            String fullyQualName = buildInfo.GetBuildScope().getFullyQualifiedNameForSymbol(forSymbol.getSymbolName());
-            genHelper = new UnionGenerationHelper(m_modBuilder, fullyQualName, 
-                                                  TypeAttributes.Public);
+            fullyQualName = buildInfo.GetBuildScope().getFullyQualifiedNameForSymbol(forSymbol.getSymbolName());
         } else {
             // nested dcl
-            if (buildInfo.GetContainterType().IsClass) {
-                String fullyQualName = buildInfo.GetBuildScope().getFullyQualifiedNameForSymbol(forSymbol.getSymbolName());
-                genHelper = new UnionGenerationHelper(buildInfo.GetContainterType(), fullyQualName,
-                                                      TypeAttributes.Public);
-            } else {
-                // only a class can contain nested types --> therefore use another solution than a nested type for container types which are not classes
-                Scope nestedScope = buildInfo.GetBuildScope().GetScopeForNested(forSymbol);
-                String fullyQualName = nestedScope.getFullyQualifiedNameForSymbol(forSymbol.getSymbolName());
-                genHelper = new UnionGenerationHelper(m_modBuilder, fullyQualName, 
-                                                      TypeAttributes.Public);
-            }            
+            // define type in nested type namespace according to IDL to CLS spec 3.14 
+            Scope nestedScope = buildInfo.GetBuildScope().GetScopeForNested(forSymbol);
+            fullyQualName = nestedScope.getFullyQualifiedNameForSymbol(forSymbol.getSymbolName());
         }
+        UnionGenerationHelper genHelper = new UnionGenerationHelper(m_modBuilder, fullyQualName, 
+                                                                   TypeAttributes.Public);
+
         UnionBuildInfo thisInfo = new UnionBuildInfo(buildInfo.GetBuildScope(), genHelper,
                                                      forSymbol);
 
@@ -1947,28 +1932,22 @@ public class MetaDataGenerator : IDLParserVisitor {
         if (m_typeManager.CheckSkip(forSymbol)) { 
             return null; 
         }
-
-        TypeBuilder enumToCreate = null;
-        TypeAttributes typeAttrs = TypeAttributes.Class | TypeAttributes.Public | TypeAttributes.Sealed;
+                
+        String fullyQualName = null;
         if (buildInfo.GetContainterType() == null) {
             // independent dcl
-            String fullyQualName = buildInfo.GetBuildScope().getFullyQualifiedNameForSymbol(forSymbol.getSymbolName());
-            enumToCreate = m_modBuilder.DefineType(fullyQualName, typeAttrs, 
-                                                   typeof(System.Enum));
+            fullyQualName = buildInfo.GetBuildScope().getFullyQualifiedNameForSymbol(forSymbol.getSymbolName());
         } else {
             // nested dcl
-            if (buildInfo.GetContainterType().IsClass) {
-                String fullyQualName = buildInfo.GetBuildScope().getFullyQualifiedNameForSymbol(forSymbol.getSymbolName());
-                enumToCreate = buildInfo.GetContainterType().DefineNestedType(fullyQualName, typeAttrs,
-                                                                              typeof(System.Enum));
-            } else {
-                // only a class can contain nested types --> therefore use another solution than a nested type for container types which are not classes
-                Scope nestedScope = buildInfo.GetBuildScope().GetScopeForNested(forSymbol);
-                String fullyQualName = nestedScope.getFullyQualifiedNameForSymbol(forSymbol.getSymbolName());
-                enumToCreate = m_modBuilder.DefineType(fullyQualName, typeAttrs,
-                                                       typeof(System.Enum));
-            }
+            // define type in nested type namespace according to IDL to CLS spec 3.14           
+            Scope nestedScope = buildInfo.GetBuildScope().GetScopeForNested(forSymbol);
+            fullyQualName = nestedScope.getFullyQualifiedNameForSymbol(forSymbol.getSymbolName());
         }
+        TypeAttributes typeAttrs = TypeAttributes.Class | TypeAttributes.Public | TypeAttributes.Sealed;        
+        TypeBuilder enumToCreate = m_modBuilder.DefineType(fullyQualName, typeAttrs,
+                                                           typeof(System.Enum));
+        
+        
         // add value__ field, see DefineEnum method of ModuleBuilder
         enumToCreate.DefineField("value__", typeof(System.Int32), 
                                  FieldAttributes.Public | FieldAttributes.SpecialName | FieldAttributes.RTSpecialName);
@@ -2153,38 +2132,25 @@ public class MetaDataGenerator : IDLParserVisitor {
         Symbol forSymbol = buildInfo.GetBuildScope().getSymbol(node.getIdent());
         // check if type is known from a previous run over a parse tree --> if so: skip
         if (m_typeManager.CheckSkip(forSymbol)) { 
-            return null; 
+            return null;
         }
-
-        TypeBuilder exceptToCreate = null;
-        BuildInfo thisTypeInfo = null;
-        
+       
+        String fullyQualName = null;
         if (buildInfo.GetContainterType() == null) {
             // independent dcl
-            String fullyQualName = buildInfo.GetBuildScope().getFullyQualifiedNameForSymbol(forSymbol.getSymbolName());
-            exceptToCreate = m_modBuilder.DefineType(fullyQualName, 
-                                                     TypeAttributes.Class | TypeAttributes.Public, 
-                                                     typeof(AbstractUserException));
-            thisTypeInfo = new BuildInfo(buildInfo.GetBuildScope(), exceptToCreate,
-                                         forSymbol);
+            fullyQualName = buildInfo.GetBuildScope().getFullyQualifiedNameForSymbol(forSymbol.getSymbolName());
         } else {
             // nested dcl
-            if (buildInfo.GetContainterType().IsClass) {
-                String fullyQualName = buildInfo.GetBuildScope().getFullyQualifiedNameForSymbol(forSymbol.getSymbolName());                
-                exceptToCreate = buildInfo.GetContainterType().DefineNestedType(fullyQualName, 
-                                                                                TypeAttributes.Class | TypeAttributes.NestedPublic, 
-                                                                                typeof(AbstractUserException));
-            } else {
-                // only a class can contain nested types --> therefore use another solution than a nested type for container types which are not classes
-                Scope nestedScope = buildInfo.GetBuildScope().GetScopeForNested(forSymbol);
-                String fullyQualName = nestedScope.getFullyQualifiedNameForSymbol(forSymbol.getSymbolName());
-                exceptToCreate = m_modBuilder.DefineType(fullyQualName, 
-                                                         TypeAttributes.Class | TypeAttributes.Public,
-                                                         typeof(AbstractUserException));                
-            }
-            thisTypeInfo = new BuildInfo(buildInfo.GetBuildScope(), exceptToCreate,
-                                         forSymbol);
+            // define type in nested type namespace according to IDL to CLS spec 3.14 
+            Scope nestedScope = buildInfo.GetBuildScope().GetScopeForNested(forSymbol);
+            fullyQualName = nestedScope.getFullyQualifiedNameForSymbol(forSymbol.getSymbolName());
         }
+        TypeBuilder exceptToCreate = m_modBuilder.DefineType(fullyQualName, 
+                                                             TypeAttributes.Class | TypeAttributes.Public, 
+                                                             typeof(AbstractUserException));
+        BuildInfo thisTypeInfo = new BuildInfo(buildInfo.GetBuildScope(), exceptToCreate,
+                                               forSymbol);
+
         String repId = GetRepIdForException(forSymbol);
         AddRepIdAttribute(exceptToCreate, repId);
 

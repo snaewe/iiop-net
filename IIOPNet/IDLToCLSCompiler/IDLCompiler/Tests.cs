@@ -339,6 +339,70 @@ namespace Ch.Elca.Iiop.IDLCompiler.Tests {
         }
         
         [Test]
+        public void TestNestedStruct() {
+            MemoryStream testSource = new MemoryStream();
+            StreamWriter writer = new StreamWriter(testSource, s_latin1);
+            
+            // idl:
+            writer.WriteLine("module testmod {");
+            writer.WriteLine("    interface ContainerIf {");
+            writer.WriteLine("        struct Test {");
+            writer.WriteLine("            long a;");
+            writer.WriteLine("        };");
+            writer.WriteLine("    };");
+            writer.WriteLine("    valuetype ContainerValType {");
+            writer.WriteLine("        struct Test {");
+            writer.WriteLine("            long a;");
+            writer.WriteLine("        };");
+            writer.WriteLine("    };");                        
+            writer.WriteLine("};");
+            
+            writer.Flush();
+            testSource.Seek(0, SeekOrigin.Begin);
+            Assembly result = CreateIdl(testSource);
+                       
+            // check if container interface created
+            Type containerIfType = result.GetType("testmod.ContainerIf",
+                                                true);
+            Assertion.AssertNotNull(containerIfType);
+            
+            // check if struct in if is correctly created
+            Type structType1 = result.GetType("testmod.ContainerIf_package.Test", 
+                                             true);
+            // must be a struct
+            Assertion.Assert("is a struct", structType1.IsValueType);
+            CheckIdlStructAttributePresent(structType1);
+            CheckSerializableAttributePresent(structType1);
+            
+            CheckFieldPresent(structType1, "a", typeof(System.Int32), 
+                              BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly);            
+            CheckNumberOfFields(structType1, BindingFlags.Public | BindingFlags.NonPublic |
+                                             BindingFlags.Instance | BindingFlags.DeclaredOnly,
+                                1);
+            
+            // check if container interface created
+            Type containerValType = result.GetType("testmod.ContainerValType",
+                                                true);
+            Assertion.AssertNotNull(containerValType);
+            
+            // check if struct in if is correctly created
+            Type structType2 = result.GetType("testmod.ContainerValType_package.Test", 
+                                             true);
+            // must be a struct
+            Assertion.Assert("is a struct", structType2.IsValueType);
+            CheckIdlStructAttributePresent(structType2);
+            CheckSerializableAttributePresent(structType2);
+            
+            CheckFieldPresent(structType2, "a", typeof(System.Int32), 
+                              BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly);            
+            CheckNumberOfFields(structType2, BindingFlags.Public | BindingFlags.NonPublic |
+                                             BindingFlags.Instance | BindingFlags.DeclaredOnly,
+                                1);
+
+            writer.Close();
+        }
+                        
+        [Test]
         public void TestUnion() {
             MemoryStream testSource = new MemoryStream();
             StreamWriter writer = new StreamWriter(testSource, s_latin1);

@@ -187,23 +187,7 @@ namespace Ch.Elca.Iiop.Idl {
                                               new System.Type[] { typeof(IIdlEntity) });            
             BeginType();
         }
-
         
-        /// <summary>
-        /// creates the union as a nested type in outertype
-        /// </summary>
-        /// <param name="visibility">specifies the visiblity of resulting type</param>
-        public UnionGenerationHelper(TypeBuilder outerType, string fullName, 
-                                     TypeAttributes visibility) {
-            TypeAttributes typeAttrs = TypeAttributes.Class | TypeAttributes.Serializable | 
-                                       TypeAttributes.BeforeFieldInit | TypeAttributes.SequentialLayout |
-                                       TypeAttributes.Sealed | visibility;
-
-            m_builder = outerType.DefineNestedType(fullName, typeAttrs, typeof(System.ValueType),
-                                                   new System.Type[] { typeof(IIdlEntity) });
-            BeginType();
-        }
-
         #endregion IConstructors
         #region IProperties
 
