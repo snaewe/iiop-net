@@ -1,1 +1,1 @@
-copy bin\jboss3-2-1-integration_ejb.jar %JBOSS_HOME%\server\all\deploy
+copy bin\jboss3-2-1-integration_ejb.jar %JBOSS_HOME%\server\allSsl\deploy
