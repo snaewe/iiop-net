@@ -54,5 +54,5 @@ The ejb can now be created using this home interface (standard ejb pattern):
 <b>Known problems</b> <BR> <BR>
 <UL>
 <LI>The jndi-name (see jboss.xml) for the ejb may not contain more than four components at the moment, <BR>
-    because of a problem in JBoss (see bug nr. 746448 on <a href="www.sf.net/projects/jboss">JBoss page</a>)</LI>
+    because of a problem in JBoss (see bug nr. 746448 on <a href="http://www.sf.net/projects/jboss">JBoss page</a>)</LI>
 </UL>

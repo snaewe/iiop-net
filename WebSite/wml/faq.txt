@@ -258,10 +258,10 @@ the remote object represented by the IOR:
 <FAQ question="How can I get the stringified IOR from a proxy object?">
 
 <p>
-The following Code returns the stringified IOR of a remote object, given its local proxy:
+The following method (from Ch.Elca.Iiop in IIOPChannel.dll) returns the stringified IOR of a remote object, given its local proxy:
 
 <pre>
-    String ior = RemotingServices.GetObjectUri(proxy);
+    String ior = ProxyHelper.GetIorForProxy(proxy);
 </pre>
 
 <p>This won't obviously work, when the proxy is created manually with RemotingServices.Connect using a .NET URI or a corbaloc URI. In this case the above call will return the URI used in Connect.
@@ -319,6 +319,37 @@ For each callback, ensure that the following points are fullfilled:
 
 </FAQ>
 </FAQ-SECTION>
+
+<FAQ-SECTION name="Accessing .NET Objects from CORBA with IIOP.NET">
+
+<FAQ question="How do I implement the CORBA USER_ID and SYSTEM_ID policies?">
+
+<p>By default, .NET uses the SYSTEM_ID policy, i.e. it assigns some random name to the object (a windows GUID I guess).
+You can override this behaviour and implement the USER_ID policy by registering the servant with RemotingServices.Marshal and the name as URI.
+Beware that using RemotingServices.Marshal without explicit URI corresponds to the SYSTEM_ID policy.
+
+<p>When remoting an object that has not been explicitely registered, .NET automatically registers it with RemotingServices.Marshall and assigns it a random name (SYSTEM_ID policy).
+
+</FAQ>
+
+<FAQ question="How do I implement the CORBA PERSISTENT policy?">
+
+<p>The PERSISTENT policy assumes the USER_ID policy (the object must be accessible through the same URI).
+The persistency must be handled by the servant implementation, which should store the state whenever it changes, and restore it when the servant is created.
+</FAQ>
+
+<FAQ question="Do TRANSIENT servants have different IORs?">
+
+<p>TRANSIENT servants receive different IORs as long as you implement them using the SYSTEM_ID policy, i.e. you register them with
+<pre>
+    RemotingServices.Marshal(servant);  // register, let the system assign a random name 
+</pre>
+<p>or you do not register them at all, when returning them to the client peer, in which case .NET registers them for you with the above call.
+
+</FAQ>
+
+</FAQ-SECTION>
+
 <FAQ-SECTION name="Frequent Errors (Troubleshooting)">
 
 <FAQ question="Exception: Invalid PInvoke metadata format">
