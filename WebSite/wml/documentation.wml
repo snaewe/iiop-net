@@ -31,10 +31,18 @@
 <LI><A href="jboss3_2.html">Jboss 3.2</A></LI>
 </UL>
 
+<P/>
+<b>Presentations</b>
+<BR><BR>
+<UL>
+<LI>Introduction to IIOP.NET; joint <a href="http://www.dotmugs.ch/">DOTMUGS</a> + <a href="http://www.jugs.ch">JUGS</a> event; 20 Jan. 2004 [<A href="doc/dotmugs04/iiop_dotmugs04_talk.pdf">slides (pdf)</a>, <a href="doc/dotmugs04/iiop_dotmugs04_demo.zip">demo (zip)</a>]
+</LI>
+</UL>
 
 <P/>
-<b>Articles</b>
+<b>Articles by the IIOP.NET team</b>
 <BR><BR>
+In English:
 <UL>
 <LI>[<A href="http://www.codeproject.com">The CodeProject</A>]
 <A href="http://www.codeproject.com/csharp/dist_object_system.asp">
@@ -46,6 +54,15 @@
 </A>
 </LI>
 </UL>
+<p/>
+<b>Independent Articles</b>
+<BR><BR>
+In French:
+<ul>
+<li>[<A href="http://www.techheadbrothers.com/">Tech Head Brothers</A>] <A href="http://www.techheadbrothers.com/DesktopDefault.aspx?tabindex=1&tabid=7&AId=33">Interopérabilité entre J2EE et .Net</A> (Kader Yildirim)
+<li>[<A href="http://www.techheadbrothers.com/">Tech Head Brothers</A>] <A href="http://www.techheadbrothers.com/DesktopDefault.aspx?tabindex=1&tabid=7&AId=36">Interopérabilité entre .Net Remoting et Java</A> (Kader Yildirim)
+</ul>
+
 <p/>
 <b>Disclaimer</b>
 <BR> <BR>
