@@ -4,12 +4,12 @@ build: build-server build-client
 
 build-server:
 	cd TestServer
-	$(MAKE) build
+	$(MAKE) /C build
         cd ..
 
 build-client:
 	cd TestClient
-	$(MAKE) build	
+	$(MAKE) /C build	
 	cd ..
 
 start-server:

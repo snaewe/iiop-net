@@ -7,26 +7,25 @@ TestUnion = ..\TestServer\bin\TestUnion.dll
 TestUnionMod = ..\TestServer\bin\_TestUnion.netmodule
 bin         = bin\ 
 
-build: build-client
+build: $(bin)ClientTest.dll
 
-$(bin):
-        if not exist $@nul mkdir $@
 
-$(bin)IIOPChannel.dll: $(bin) $(IIOPCHANNEL)
-        copy /y $(IIOPCHANNEL) $(bin)IIOPChannel.dll
-        if exist $(IIOPCHANNELPDB) copy /y $(IIOPCHANNELPDB) $(bin)IIOPChannel.pdb
-
-$(bin)TestUnion.dll : $(bin)
+$(bin)TestUnion.dll : $(TestUnion)
         copy /y $(TestUnion) $(bin)
         copy /y $(TestUnionMod) $(bin)
 	
 
-$(bin)TestServiceCommon.dll: $(bin)
+$(bin)IIOPChannel.dll: $(IIOPCHANNEL)
+        if not exist $(bin)nul mkdir $(bin)
+        copy /y $(IIOPCHANNEL) $(bin)IIOPChannel.dll
+        if exist $(IIOPCHANNELPDB) copy /y $(IIOPCHANNELPDB) $(bin)IIOPChannel.pdb
+
+$(bin)TestServiceCommon.dll: $(TestService)
+        if not exist $(bin)nul mkdir $(bin)
         copy /y $(TestService) $(bin)TestServiceCommon.dll
         if exist $(TestServicePDB) copy /y $(TestServicePDB) $(bin)TestServiceCommon.pdb
 
-build-client: $(bin)IIOPChannel.dll $(bin)TestServiceCommon.dll $(bin)TestUnion.dll *.cs
-	if not exist bin\nul mkdir bin
+$(bin)ClientTest.dll: $(bin)IIOPChannel.dll $(bin)TestUnion.dll $(bin)TestServiceCommon.dll *.cs
 	csc $(CSFLAGS) /t:library /r:$(NUNIT) /r:$(bin)TestUnion.dll /r:$(bin)TestServiceCommon.dll /r:$(bin)IIOPChannel.dll /out:bin\ClientTest.dll TestClient.cs
 
 start-client:

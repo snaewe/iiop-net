@@ -6,26 +6,23 @@ DELAY = ..\..\Utils\delay.exe
 
 bin         = bin\ 
 
-build: build-union build-servicecommon build-server
+build: $(bin)TestServiceCommon.dll $(bin)TestServer.exe
 
-$(bin):
-        if not exist $@nul mkdir $@
-
-$(bin)IIOPChannel.dll: $(bin) $(IIOPCHANNEL)
+$(bin)IIOPChannel.dll: $(IIOPCHANNEL)
+        if not exist $(bin)nul mkdir $(bin)
         copy /y $(IIOPCHANNEL) $(bin)IIOPChannel.dll
 	if exist $(IIOPCHANNELPDB) copy /y $(IIOPCHANNELPDB) $(bin)IIOPChannel.pdb
 
-
-build-union: TestUnionAndConst.idl
+$(bin)testUnion.dll: TestUnionAndConst.idl
 	..\..\..\IDLToCLSCompiler\IDLCompiler\bin\IDLToCLSCompiler.exe -o $(bin) testUnion TestUnionAndConst.idl
+
+$(bin)testUnionNotForClient.dll: TestUnionNotPresentClient.idl
 	..\..\..\IDLToCLSCompiler\IDLCompiler\bin\IDLToCLSCompiler.exe -o $(bin) testUnionNotForClient TestUnionNotPresentClient.idl
 
-
-build-servicecommon: $(bin)IIOPChannel.dll TestServiceCommon.cs
+$(bin)TestServiceCommon.dll: $(bin)IIOPChannel.dll $(bin)testUnion.dll TestServiceCommon.cs
     csc $(CSFLAGS) /t:library /r:$(bin)testUnion.dll /r:$(bin)IIOPChannel.dll /out:$(bin)TestServiceCommon.dll TestServiceCommon.cs
 
-
-build-server: $(bin)IIOPChannel.dll build-servicecommon TestServer.cs TestService.cs
+$(bin)TestServer.exe: $(bin)IIOPChannel.dll $(bin)TestServiceCommon.dll $(bin)testUnion.dll $(bin)testUnionNotForClient.dll TestServer.cs TestService.cs
     csc $(CSFLAGS) /t:exe /r:$(bin)IIOPChannel.dll /r:$(bin)testUnion.dll /r:$(bin)testUnionNotForClient.dll /r:$(bin)TestServiceCommon.dll /out:$(bin)TestServer.exe TestServer.cs TestService.cs
 
 start-server:    
