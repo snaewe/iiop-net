@@ -287,12 +287,23 @@ namespace Ch.Elca.Iiop.MessageHandling {
             // method name mapping
             string resultMethodName;
             if (s_iIdlEntityType.IsAssignableFrom(serverType)) {
+                resultMethodName = methodName;
                 // an interface mapped to from Idl is implemented by server ->
                 // compensate 3.2.3.1: removal of _ for names, which clashes with CLS id's
                 if (IdlNaming.NameClashesWithClsKeyWord(methodName)) {
                     resultMethodName = "_" + methodName;
-                } else {
-                    resultMethodName = methodName;
+                } else if (methodName.StartsWith("_get_")) {
+                    // handle properties correctly
+                    PropertyInfo prop = serverType.GetProperty(methodName.Substring(4), BindingFlags.Instance | BindingFlags.Public);
+                    if (prop != null) {
+                        resultMethodName = prop.GetGetMethod().Name;
+                    }
+                } else if (methodName.StartsWith("_set_")) {
+                    // handle properties correctly
+                    PropertyInfo prop = serverType.GetProperty(methodName.Substring(4), BindingFlags.Instance | BindingFlags.Public);
+                    if (prop != null) {
+                        resultMethodName = prop.GetSetMethod().Name;
+                    }
                 }
             } else {
                 resultMethodName = IdlNaming.ReverseClsToIdlNameMapping(methodName);
