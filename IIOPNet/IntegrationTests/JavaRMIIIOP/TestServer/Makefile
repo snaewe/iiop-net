@@ -34,7 +34,7 @@ start-server:
 	@$(LAUNCH) orbd.exe -ORBInitialPort 1050 >> pid
 	@$(DELAY) 10
 	@cd bin
-	@..\$(LAUNCH) java -Djava.naming.factory.initial=com.sun.jndi.cosnaming.CNCtxFactory -Djava.naming.provider.url=iiop://localhost:1050 -cp . TestServer >> ..\pid
+	@..\$(LAUNCH) java.exe -Djava.naming.factory.initial=com.sun.jndi.cosnaming.CNCtxFactory -Djava.naming.provider.url=iiop://localhost:1050 -cp . TestServer >> ..\pid
 	@cd ..
 
 
