@@ -78,6 +78,12 @@ interface TestService {
     InnerStruct EchoInnerStruct(in InnerStruct arg);
 
     RecStruct EchoRecStruct(in RecStruct arg);
+    
+    // test escaped-identitfier rule (_ not transmitted)
+    octet _octet(in octet arg);
+    
+    // test escaped-identitfier rule (_ not transmitted)
+    attribute boundedLongSeq _sequence;
 }; 
 
 

@@ -286,7 +286,25 @@ namespace Ch.Elca.Iiop.IntegrationTests {
             string result = m_testService.EchoWString(arg);
             Assertion.AssertEquals(arg, result);
         }
-
+        
+        [Test]
+        public void TestIdlKeyWordPropertyNames() {
+            int[] argSeq = new int[] { 1, 2, 3 };
+            m_testService._sequence = argSeq;
+            int[] resultSeq = m_testService._sequence;
+            Assertion.AssertNotNull("property int seq null", resultSeq);
+            Assertion.AssertEquals(argSeq.Length, resultSeq.Length);
+            for (int i = 0; i < argSeq.Length; i++) {
+                Assertion.AssertEquals("wrong seq entry", argSeq[i], resultSeq[i]);
+            }            
+        }
+        
+        [Test]
+        public void TestIdlKeyWordMethodNames() {
+            byte arg = 39;
+            byte result = m_testService._octet(arg);
+            Assertion.AssertEquals("wrong result octet-call", arg, result);
+        }
 
     }
 

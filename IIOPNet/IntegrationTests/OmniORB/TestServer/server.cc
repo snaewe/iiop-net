@@ -15,6 +15,9 @@ class TestService_impl : virtual public POA_TestService,
                          public PortableServer::RefCountServantBase
 {
 
+private:
+  boundedLongSeq* m_intSeq;
+    
 public:
   CORBA::WChar EchoWChar(CORBA::WChar arg);
   CORBA::WChar* EchoWString(const CORBA::WChar* arg);
@@ -31,6 +34,10 @@ public:
   ::boundedLongSeq* EchoBoundedSeq(const ::boundedLongSeq& arg);
   TestService::InnerStruct EchoInnerStruct(const TestService::InnerStruct& arg);
   ::RecStruct* EchoRecStruct(const RecStruct& arg);
+
+    CORBA::Octet octet(CORBA::Octet arg);
+  boundedLongSeq* sequence();
+  void sequence(const boundedLongSeq& _v);  
 };
 
 CORBA::WChar 
@@ -139,6 +146,22 @@ TestService_impl::EchoInnerStruct(const TestService::InnerStruct& arg) {
 TestService_impl::EchoRecStruct(const RecStruct& arg) {
   return new ::RecStruct(arg);
 }
+
+CORBA::Octet 
+TestService_impl::octet(CORBA::Octet arg) {
+  return arg;
+}
+
+boundedLongSeq* 
+TestService_impl::sequence() {
+    return m_intSeq;
+}
+void
+TestService_impl::sequence(const boundedLongSeq& _v) {
+    m_intSeq = new ::boundedLongSeq(_v);
+}
+
+
 
 int
 main (int argc, char *argv[])
