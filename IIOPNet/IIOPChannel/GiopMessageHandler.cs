@@ -71,13 +71,9 @@ namespace Ch.Elca.Iiop.MessageHandling {
 
         /// <summary>checks if this it's a one way message</summary>
         internal static bool IsOneWayCall(IMethodCallMessage msg) {
-            Util.AttributeExtCollection attrs = 
-                Util.AttributeExtCollection.ConvertToAttributeCollection(msg.MethodBase.GetCustomAttributes(true));
-            if (attrs.IsInCollection(typeof(OneWayAttribute))) { 
-                return true; 
-            } else { 
-                return false; 
-            }
+            AttributeExtCollection attrs =                 
+                ReflectionHelper.GetCustomAttriutesForMember(msg.MethodBase, true);
+            return attrs.IsInCollection(ReflectionHelper.OneWayAttributeType);
         }
 
         #endregion SMethods
