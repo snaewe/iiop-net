@@ -29,6 +29,8 @@
 
 using System;
 using System.Collections;
+using System.Xml;
+using System.IO;
 
 
 namespace Ch.Elca.Iiop.Idl {
@@ -136,6 +138,35 @@ namespace Ch.Elca.Iiop.Idl {
                 CustomMappingDesc descImpl = new CustomMappingDesc(clsType, implIdlType, mapper);
                 m_mappingsIdl[implIdlType] = descImpl;
             }
+        }
+        
+        /// <summary>
+        /// adds special mappings from a config file
+        /// </summary>
+        public void AddMappingsFromFile(FileInfo configFile) {
+             // load the xml-file
+             XmlDocument doc = new XmlDocument();
+             doc.Load(new FileStream(configFile.FullName, FileMode.Open));
+             // process the file
+             XmlNodeList elemList = doc.GetElementsByTagName("mapping");
+             foreach (XmlNode elem in elemList) {                 
+                 XmlElement idlTypeName = elem["idlTypeName"];
+                 XmlElement idlTypeAsm = elem["idlTypeAssembly"];
+                 XmlElement clsTypeAsqName = elem["clsType"];
+                 XmlElement customMapperElem = elem["customMapper"];
+                 // idlType:
+                 String asmQualIdlName = idlTypeName.InnerText + "," + idlTypeAsm.InnerText;
+                 Type idlType = Type.GetType(asmQualIdlName, true);
+                 // clsType:
+                 Type clsType = Type.GetType(clsTypeAsqName.InnerText, true);
+                 // custom Mapper:
+                 ICustomMapper customMapper = null;
+                 if (customMapperElem != null) {
+                     Type customMapperType = Type.GetType(customMapperElem.InnerText, true);
+                     customMapper = (ICustomMapper)Activator.CreateInstance(customMapperType);                     
+                 }
+                 AddMapping(clsType, idlType, customMapper);
+             }
         }
 
         /// <summary>
