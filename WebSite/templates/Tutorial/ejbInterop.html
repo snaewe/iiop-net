@@ -1,0 +1,286 @@
+<H2 class="contentPart">Accessing an EJB session bean with .NET remoting</H2>
+
+<p/>
+In this tutorial a .NET client accesses an adder object hosted in a java EJB.
+This EJB adder provides a method to add two values.
+
+<p/>
+<b>Prerequisites</b>
+<BR> <BR>
+For this tutorial you need
+<UL>
+<LI>.NET</LI>
+<LI>IIOP.NET</LI>
+<LI>BEA Weblogic 6.1 with jdk 1.3 (jdk 1.4 is not supported by WebLogic 6.1)</LI>
+</UL>
+
+<p>
+This tutorial consists of the following three steps:
+<OL>
+<LI>Implementing the bean</LI>
+<LI>Implementing the client</LI>
+<LI>Running the Demo</LI>
+</OL>
+
+<p/>
+<b>Implementing the EJB</b>
+<BR><BR>
+
+In this section the EJB adder is implemented. The following source files are created:
+<UL>
+<LI>Adder.java: contains the adder interface</LI>
+<LI>AdderHome.java: contains the home interface</LI>
+<LI>AdderBean.java: contains the bean implementation</LI>
+</UL>
+
+The adder interface specifies the public face of the bean:
+
+<pre>
+    //Adder.java
+    package ch.elca.iiop.demo.ejbAdder;
+
+    import javax.ejb.*;
+    import java.rmi.RemoteException;
+
+    /**
+     * The methods in this interface are the public face of the Adder.
+     */
+    public interface Adder extends EJBObject {
+
+        public double add(double sum1, double sum2) throws RemoteException;
+ 
+    }
+
+</pre> <p/>
+
+The home interface defines only a simple parameterless create method:
+
+<pre>
+    //AdderHome.java
+    package ch.elca.iiop.demo.ejbAdder;
+
+    import java.rmi.RemoteException;
+    import javax.ejb.CreateException;
+    import javax.ejb.EJBHome;
+    /**
+     * This interface is the home interface of the AdderEJB.
+     */
+    public interface AdderHome extends EJBHome {
+
+        /**
+         * This method corresponds to the ejbCreate method in the bean
+         * "AdderBean.java".
+         * @return Adder
+         */
+        Adder create() throws CreateException, RemoteException;
+
+    }
+
+</pre> <p/>
+
+The adder session bean implements the adder funcionality:
+
+<pre>
+    // AdderBean.java
+    package ch.elca.iiop.demo.ejbAdder;
+
+    import javax.ejb.CreateException;
+    import javax.ejb.SessionBean;
+    import javax.ejb.SessionContext;
+
+
+    /**
+     * AdderBean is a stateless Session Bean. It implements the adder functionality.
+     */
+    public class AdderBean implements SessionBean {
+
+        private SessionContext m_ctx;
+
+        public void ejbActivate() {
+        }
+
+        public void ejbRemove() {
+        }
+
+        public void ejbPassivate() {
+        }
+
+        /**
+         * Sets the session context.
+         *
+         * @param ctx SessionContext Context for session
+         */
+        public void setSessionContext(SessionContext ctx) {
+            m_ctx = ctx;
+        }
+
+        /**
+         * This method corresponds to the create method in the home interface
+         * "AdderHome.java".
+         *
+         */
+        public void ejbCreate () throws CreateException {
+            // nothing special to do here
+        }
+
+
+        public double add(double sum1, double sum2) {
+            return sum1 + sum2;
+        }
+
+    }
+
+</pre> <p/>
+
+These files can be found in the IIOP.Net source distribution in the directory Examples\EJBExample\java\ch\elca\iiop\demo\ejbAdder.
+
+<p><b>Compiling / Deploying</b><BR><BR>
+First you need to execute the <code>setEnv.cmd</code> script, to prepare your environment for compiling ejbs for weblogic. <BR> <BR>
+A Makefile is provided for compiling the files and to create the deployable jar.
+<BR> <BR>
+Important is to use the iiop option of your ejb stub compiler to generate stubs suitable for interoperation with IIOP.NET.
+Furthermore you need to generate the IDL files for your EJB's using the idl option of your ejb stub compiler.
+<BR>
+Use the following commands to create the iiop stubs and the idl: <BR> <BR>
+<pre>
+    java weblogic.ejbc -iiop -compiler javac \
+        bin\adder_ejb.jar bin\adder_ejb_app.jar
+</pre>
+<p/>
+<pre>
+    java weblogic.ejbc -idl bin\adder_ejb.jar IDL
+</pre>
+
+<p/>
+The makefile produces as a result the deployable jar <code>adder_ejb_app.jar</code> in the java\bin directory.
+You need to deploy this jar with your weblogic server.
+
+
+<p/>
+<b>Implementing the .NET Remoting Client</b>
+<BR> <BR>
+As a first step, you need to generate the CLS types for the IDL. For this task the IDLtoCLSCompiler is used.
+<BR>
+After copying the orb.idl file from the directory IIOP.NET\IDLToCLSCompiler\IDL\ to your ejb idl directoy, you can use the following command in the IDL directory
+to generate the CLS: <BR> <BR>
+<pre>
+    IDLToCLSCompiler.exe -o ..\bin adderClient \
+        ch\elca\iiop\demo\ejbAdder\Adder.idl ch\elca\iiop\demo\ejbAdder\AdderHome.idl
+</pre>
+<p/>
+This command creates a .NET multi module assembly adderClient.dll in the bin directory containing the CLS for all relevant types used in the adder ejb.
+<BR> <BR>
+Remark: Important is here, that the idl of the public bean interface and the home interface are specified together in the compiler command line
+to generate only one CLS assembly for the bean.
+
+<p/>
+The java exception types are mapped to IDL using CORBA value types. For this value types you need to provide an implementation class.
+Because these valuetypes contains no methods, the implementation is trivial. As an example such an implementation is shown for the javax.ejb.CreateException
+valuetype:
+<BR>
+<pre>
+    using System;
+
+
+    namespace javax.ejb {
+
+
+        [Serializable]
+        public class CreateExceptionImpl : CreateException {
+
+            public CreateExceptionImpl() : base() {
+            }
+
+        }
+
+    }
+</pre><p/>
+The implementation of all exception value types can be found in the IIOP.Net source distribution in the file <code>Examples\EJBExample\net\ExceptionImpl.cs</code>.
+<p/>
+
+Now we are ready to implement the client application. The following listing shows the code:
+<pre>
+    using System;
+    using System.Runtime.Remoting.Channels;
+    using Ch.Elca.Iiop;
+    using Ch.Elca.Iiop.Services;
+    using omg.org.CosNaming;
+    using ch.elca.iiop.demo.ejbAdder;
+
+    namespace Ch.Elca.Iiop.Demo.EjbAdder {
+
+        public class Client {
+
+            [STAThread]
+            public static void Main(string[] args) {
+                try {
+                    string nameServiceHost = "localhost";
+                    int nameServicePort = 1050;
+                    parseArgs(ref nameServiceHost, ref nameServicePort, args);
+
+                    Console.WriteLine("input the two summands");
+                    Console.WriteLine("sum1:");
+                    double sum1 = Double.Parse(Console.ReadLine());
+                    Console.WriteLine("sum2:");
+                    double sum2 = Double.Parse(Console.ReadLine());
+
+                    // register the channel
+                    IiopClientChannel channel = new IiopClientChannel();
+                    ChannelServices.RegisterChannel(channel);
+
+                    // access COS nameing service
+                    CorbaInit init = CorbaInit.GetInit();
+                    NamingContext nameService = init.GetNameService(nameServiceHost, nameServicePort);
+                    NameComponent[] name = new NameComponent[] { new NameComponent("ch.elca.iiop.demo.ejbAdder.AdderHome", "") };
+                    // get the reference to the adder-home
+                    AdderHome adderHome = (AdderHome)nameService.resolve(name);
+                    // create Adder
+                    Adder adder = adderHome.create();
+                    // call add
+                    double result = adder.add(sum1, sum2);
+                    Console.WriteLine("result: " + result);
+                    // dispose the ejb
+                    adder.remove();
+                } catch (Exception e) {
+                    Console.WriteLine("exception: " + e);
+                }
+            }
+
+            private static void parseArgs(ref string host, ref int port, string[] args) {
+                if (args.Length > 0) {
+                    host = args[0];
+                }
+                if (args.Length > 1) {
+                    port = Int32.Parse(args[1]);
+                }
+            }
+
+        }
+    }
+</pre> <p/>
+An <code>IiopClientChannel</code> instance is registered with the ChannelServices to enable communication using the IIOP.NET channel.
+After this a reference to the CORBA name service provided by the ejb container is obtained, using the CorbaInit class.
+<BR>
+From this nameservice the client obtains a reference to the ejb home interface. Now using this home interface an adder ejb can be
+created.
+Finally we can call the add method to add the two summands.
+<p/>
+The client implementation can be found in the IIOP.Net source distribution in the file <code>Examples\EJBExample\net\Client.cs</code>.
+
+<p><b>Compiling</b><BR><BR>
+The client is compiled with the following steps:
+<UL>
+<LI>copy the IIOPChannel.dll into the bin directory</LI>
+<LI>run the following command in the .NET sources directory<BR> 
+    <code>csc /r:bin\adderClient.dll /r:bin\IIOPChannel.dll /out:bin\Client.exe Client.cs ExceptionImpl.cs</code></LI>
+</UL>
+
+<p/>
+<b>Running the Demo</b>
+<BR> <BR>
+Before starting the client, make sure that the ejb is deployed and that the weblogic server is started.
+<BR><BR>
+The demo is started with the following command line: <BR> <BR>
+<code>Client.exe localhost 7001</code>
+<BR> <BR>
+The two arguments specify the host and port of the corba name service of the EJB container.
