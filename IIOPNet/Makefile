@@ -62,3 +62,7 @@ clean: clean-base
 	$(MAKE) clean
 	cd ..
 
+rebuild-base: clean-base build-base
+
+rebuild-base-debug: clean-base build-base-debug
+
