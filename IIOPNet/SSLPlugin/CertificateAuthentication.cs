@@ -116,10 +116,14 @@ namespace Ch.Elca.Iiop.Security.Ssl {
             return result;
         }
         
-        protected Certificate LoadCertificateFromStore(StoreLocation storeLocation, string storeName, string certHashString) {
+        protected Certificate LoadCertificateFromStore(StoreLocation storeLocation, string storeName, string certHashString, string certSubject) {
             CertificateStore store = new CertificateStore(storeLocation, storeName);            
-            byte[] certHash = GetKeyHashForKeyHashString(certHashString);
-            return store.FindCertificateByHash(certHash);            
+            if (certHashString != null) {
+                byte[] certHash = GetKeyHashForKeyHashString(certHashString);
+                return store.FindCertificateByHash(certHash);
+            } else {
+                return store.FindCertificateBySubjectString(certSubject);
+            }
         }
         
     }
@@ -185,6 +189,7 @@ namespace Ch.Elca.Iiop.Security.Ssl {
         private const string MY_STORE_NAME = "MY";                
         
         public const string CLIENT_CERTIFICATE = "ClientCertificateHashKey";
+        public const string CLIENT_CERTIFICATE_SUBJECT = "ClientCertificateSubject";
         /// <summary>
         /// the location of the store, from which the client certificate should be taken from
         /// (one of CurrentService, CurrentUser, CurrentUserGroupPolicy, LocalMachine,
@@ -204,11 +209,15 @@ namespace Ch.Elca.Iiop.Security.Ssl {
             StoreLocation storeLocation = StoreLocation.Unknown;
             string storeName = MY_STORE_NAME;
             string certificateHash = null;
+            string certificateSubject = null;
             
             foreach (DictionaryEntry entry in options) {
                 switch ((string)entry.Key) {
                     case CLIENT_CERTIFICATE:
                         certificateHash = (string)entry.Value;
+                        break;
+                    case CLIENT_CERTIFICATE_SUBJECT:
+                        certificateSubject = (string)entry.Value;                        
                         break;
                     case STORE_LOCATION:
                         if (!Enum.IsDefined(typeof(StoreLocation), (string)entry.Value)) {
@@ -222,11 +231,11 @@ namespace Ch.Elca.Iiop.Security.Ssl {
                 }
             }    
             
-            if (certificateHash != null) {
+            if (certificateHash != null || certificateSubject != null) {
                 // load the certificate, if specified
-                m_clientCertificate = LoadCertificateFromStore(storeLocation, storeName, certificateHash);
+                m_clientCertificate = LoadCertificateFromStore(storeLocation, storeName, certificateHash, certificateSubject);
                 if (m_clientCertificate == null) {
-                    throw new ArgumentException("certificate not found for hash: " + certificateHash);
+                    throw new ArgumentException("certificate not found for hash: " + certificateHash + "; subject: " + certificateSubject);
                 }
             }
         }
@@ -356,6 +365,7 @@ namespace Ch.Elca.Iiop.Security.Ssl {
         private const string MY_STORE_NAME = "MY";                
         
         public const string SERVER_CERTIFICATE = "ServerCertificateHashKey";
+        public const string SERVER_CERTIFICATE_SUBJECT = "ServerCertificateSubject";
         /// <summary>
         /// the location of the store, from which the client certificate should be taken from
         /// (one of CurrentService, CurrentUser, CurrentUserGroupPolicy, LocalMachine,
@@ -371,11 +381,15 @@ namespace Ch.Elca.Iiop.Security.Ssl {
             StoreLocation storeLocation = StoreLocation.Unknown;
             string storeName = MY_STORE_NAME;
             string certificateHash = null;
+            string certificateSubject = null;
             
             foreach (DictionaryEntry entry in options) {
                 switch ((string)entry.Key) {
                     case SERVER_CERTIFICATE:
                         certificateHash = (string)entry.Value;
+                        break;
+                    case SERVER_CERTIFICATE_SUBJECT:
+                        certificateSubject = (string)entry.Value;
                         break;
                     case STORE_LOCATION:
                         if (!Enum.IsDefined(typeof(StoreLocation), (string)entry.Value)) {
@@ -389,11 +403,11 @@ namespace Ch.Elca.Iiop.Security.Ssl {
                 }
             }    
             
-            if (certificateHash != null) {
+            if (certificateHash != null || certificateSubject != null) {
                 // load the certificate, if specified
-                m_serverCertificate = LoadCertificateFromStore(storeLocation, storeName, certificateHash);
+                m_serverCertificate = LoadCertificateFromStore(storeLocation, storeName, certificateHash, certificateSubject);
                 if (m_serverCertificate == null) {
-                    throw new ArgumentException("certificate not found for hash: " + certificateHash);
+                    throw new ArgumentException("certificate not found for hash: " + certificateHash + "; subject: " + certificateSubject);
                 }
             } else {
                 throw new ArgumentException("need a server certificate; Please pass certificate hash using DefaultServerAuthenticationImpl.SERVER_CERTIFICATE option");
