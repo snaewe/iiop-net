@@ -134,6 +134,12 @@ namespace Ch.Elca.Iiop {
                         case IiopServerChannel.MACHINE_NAME_KEY:
                             serverProp[IiopServerChannel.MACHINE_NAME_KEY] = entry.Value;
                             break;
+                        case IiopClientChannel.CLIENT_RECEIVE_TIMEOUT_KEY:
+                            clientProp[IiopClientChannel.CLIENT_RECEIVE_TIMEOUT_KEY] = Convert.ToInt32(entry.Value);
+                            break;
+                        case IiopClientChannel.CLIENT_SEND_TIMEOUT_KEY:
+                            clientProp[IiopClientChannel.CLIENT_SEND_TIMEOUT_KEY] = Convert.ToInt32(entry.Value);
+                            break;
                         case TRANSPORT_FACTORY_KEY:
                             serverProp[TRANSPORT_FACTORY_KEY] =
                                 entry.Value;
@@ -236,7 +242,15 @@ namespace Ch.Elca.Iiop {
     
         #region Constants
 
-                
+        /// <summary>
+        /// the receive timeout in milliseconds
+        /// </summary>
+        public const string CLIENT_RECEIVE_TIMEOUT_KEY = "clientReceiveTimeOut";
+
+        /// <summary>
+        /// the send timeout in milliseconds
+        /// </summary>
+        public const string CLIENT_SEND_TIMEOUT_KEY = "clientSendTimeOut";
         
         #endregion Constants
         #region IFields
@@ -284,6 +298,8 @@ namespace Ch.Elca.Iiop {
             m_providerChain = sinkProvider;
             IClientTransportFactory clientTransportFactory = new TcpTransportFactory();
             IDictionary nonDefaultOptions = new Hashtable();
+            int receiveTimeOut = 0;
+            int sendTimeOut = 0;
             
             if (properties != null) {
                 foreach (DictionaryEntry entry in properties) {
@@ -299,6 +315,12 @@ namespace Ch.Elca.Iiop {
                             clientTransportFactory = (IClientTransportFactory)
                                 Activator.CreateInstance(transportFactoryType);
                             break;
+                        case IiopClientChannel.CLIENT_RECEIVE_TIMEOUT_KEY:
+                            receiveTimeOut = Convert.ToInt32(entry.Value);
+                            break;
+                        case IiopClientChannel.CLIENT_SEND_TIMEOUT_KEY:
+                            sendTimeOut = Convert.ToInt32(entry.Value);
+                            break;
                         default: 
                             Debug.WriteLine("non-default property found for IIOPClient channel: " + entry.Key);
                             nonDefaultOptions[entry.Key] = entry.Value;
@@ -307,7 +329,8 @@ namespace Ch.Elca.Iiop {
                 }
             }
             
-            // handle non-default options now by transport factory
+            // handle the options now by transport factory
+            clientTransportFactory.SetClientTimeOut(receiveTimeOut, sendTimeOut);
             clientTransportFactory.SetupClientOptions(nonDefaultOptions);
             InitChannel(clientTransportFactory);
         }

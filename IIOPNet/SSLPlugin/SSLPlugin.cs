@@ -90,6 +90,8 @@ namespace Ch.Elca.Iiop.Security.Ssl {
         private IPAddress m_targetHostIp;
         private int m_port;
         private SecurityOptions m_options;
+        private int m_receiveTimeOut = 0;
+        private int m_sendTimeOut = 0;
         
         #endregion IFields
         #region IConstructors
@@ -110,7 +112,28 @@ namespace Ch.Elca.Iiop.Security.Ssl {
         }
 
         
-        #endregion Ionstructors
+        #endregion IConstructors
+        #region IProperties
+        
+        public int ReceiveTimeOut {
+            get {
+                return m_receiveTimeOut;
+            }
+            set {
+                m_receiveTimeOut = value;
+            }
+        }
+        
+        public int SendTimeOut {
+            get {
+                return m_sendTimeOut;
+            }
+            set {
+                m_sendTimeOut = value;
+            }
+        }
+        
+        #endregion IProperties
         #region IMethods
         
         /// <summary><see cref="Ch.Elca.Iiop.IClientTranport.OpenConnection/></summary>
@@ -127,6 +150,8 @@ namespace Ch.Elca.Iiop.Security.Ssl {
                 throw new INTERNAL(547, CompletionStatus.Completed_No);
             }                        
             m_socket.NoDelay = true; // send immediately; (TODO: what is better here?)
+            m_socket.ReceiveTimeout = m_receiveTimeOut;
+            m_socket.SendTimeout = m_sendTimeOut;            
             m_stream = m_socket.GetStream();
         }
                 
@@ -202,8 +227,10 @@ namespace Ch.Elca.Iiop.Security.Ssl {
         private IClientSideAuthentication m_clientAuth = new DefaultClientAuthenticationImpl();
         private IServerSideAuthentication m_serverAuth = new DefaultServerAuthenticationImpl();
         
-        #endregion IFields
+        private int m_receiveTimeOut = 0;
+        private int m_sendTimeOut = 0;
         
+        #endregion IFields        
         
         
         /// <summary><see cref="Ch.Elca.Iiop.IClientTransportFactory.CreateTransport(Ior)"/></summary>
@@ -212,11 +239,15 @@ namespace Ch.Elca.Iiop.Security.Ssl {
             IPAddress asIpAddress = ConvertToIpAddress(target.HostName);
             int port = ((SSLComponentData)sslComponent.ComponentData).GetPort();            
             SecurityOptions options = CreateClientSecurityOptions((SSLComponentData)sslComponent.ComponentData);
-            if (asIpAddress == null) {            
-                return new SslClientTransport(target.HostName, port, options);
+            IClientTransport result;
+            if (asIpAddress == null) {
+                result = new SslClientTransport(target.HostName, port, options);
             } else {
-                return new SslClientTransport(asIpAddress, port, options);
+                result = new SslClientTransport(asIpAddress, port, options);
             }
+            result.ReceiveTimeOut = m_receiveTimeOut;
+            result.SendTimeOut = m_sendTimeOut;
+            return result;
         }
         
         private SecurityOptions CreateClientSecurityOptions(SSLComponentData sslData) {                                                            
@@ -343,6 +374,11 @@ namespace Ch.Elca.Iiop.Security.Ssl {
                         break;
                 }
             }
+        }
+        
+        public void SetClientTimeOut(int receiveTimeOut, int sendTimeOut) {
+            m_receiveTimeOut = receiveTimeOut;
+            m_sendTimeOut = sendTimeOut;
         }
                 
     }

@@ -71,6 +71,23 @@ namespace Ch.Elca.Iiop {
                 
         /// <summary>is the connection to the target open</summary>
         bool IsConnectionOpen();
+        
+        /// <summary>
+        /// the receive timeout of the client connection (in ms); 0 means infinite timeout.
+        /// </summary>
+        int ReceiveTimeOut {
+            get;
+            set;
+        }
+        
+        /// <summary>
+        /// the send timeout of the client connection (in ms); 0 means infinite timeout.
+        /// </summary>
+        int SendTimeOut {
+            get;
+            set;
+        }
+
                 
     }
     
@@ -107,7 +124,13 @@ namespace Ch.Elca.Iiop {
         /// extract options, which are specific to the transport factory
         /// </summary>        
         void SetupClientOptions(IDictionary options);
-
+        
+        /// <summary>
+        /// This timeout-options should be handled by all transport factories.
+        /// </summary>
+        /// <param name="receiveTimeOut">the receive-timeout for the connection in milliseconds; 0 means inifinite timeout</param>
+        /// <param name="sendTimeOut">the send-timeout for the connection in milliseconds; 0 means inifinite timeout</param>
+        void SetClientTimeOut(int receiveTimeOut, int sendTimeOut);
         
     }
     

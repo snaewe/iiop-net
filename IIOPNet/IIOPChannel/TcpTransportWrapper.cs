@@ -87,6 +87,8 @@ namespace Ch.Elca.Iiop {
         private string m_targetHost;
         private IPAddress m_targetHostIp;
         private int m_port;
+        private int m_receiveTimeOut = 0;
+        private int m_sendTimeOut = 0;
         
         #endregion IFields
         #region IConstructors
@@ -111,6 +113,27 @@ namespace Ch.Elca.Iiop {
         }
         
         #endregion IConstructors
+        #region IProperties
+        
+        public int ReceiveTimeOut {
+            get {
+                return m_receiveTimeOut;
+            }
+            set {
+                m_receiveTimeOut = value;
+            }
+        }
+        
+        public int SendTimeOut {
+            get {
+                return m_sendTimeOut;
+            }
+            set {
+                m_sendTimeOut = value;
+            }
+        }
+        
+        #endregion IProperties
         #region IMethods                        
         
         /// <summary><see cref="Ch.Elca.Iiop.IClientTranport.OpenConnection/></summary>
@@ -127,6 +150,8 @@ namespace Ch.Elca.Iiop {
                 throw new INTERNAL(547, CompletionStatus.Completed_No);
             }
             m_socket.NoDelay = true; // send immediately; (TODO: what is better here?)
+            m_socket.ReceiveTimeout = m_receiveTimeOut;
+            m_socket.SendTimeout = m_sendTimeOut;
             m_stream = m_socket.GetStream();
         }
                 
@@ -180,16 +205,26 @@ namespace Ch.Elca.Iiop {
     /// </summary>
     internal class TcpTransportFactory : ITransportFactory {
         
+        #region IFields
+        
+        private int m_receiveTimeOut = 0;
+        private int m_sendTimeOut = 0;
+        
+        #endregion IFields
         #region IMethods
         
         /// <summary><see cref="Ch.Elca.Iiop.IClientTransportFactory.CreateTransport(Ior)"/></summary>
         public IClientTransport CreateTransport(Ior target) {
             IPAddress asIpAddress = ConvertToIpAddress(target.HostName);
+            IClientTransport result;
             if (asIpAddress == null) {
-                return new TcpClientTransport(target.HostName, target.Port);
+                result = new TcpClientTransport(target.HostName, target.Port);
             } else {
-                return new TcpClientTransport(asIpAddress, target.Port);
+                result = new TcpClientTransport(asIpAddress, target.Port);
             }
+            result.ReceiveTimeOut = m_receiveTimeOut;
+            result.SendTimeOut = m_sendTimeOut;
+            return result;
         }
         
         /// <summary>
@@ -226,6 +261,11 @@ namespace Ch.Elca.Iiop {
         
         public void SetupClientOptions(IDictionary options) {
             // no specific options, ignore
+        }
+        
+        public void SetClientTimeOut(int receiveTimeOut, int sendTimeOut) {
+            m_receiveTimeOut = receiveTimeOut;
+            m_sendTimeOut = sendTimeOut;
         }
         
         public void SetupServerOptions(IDictionary options) {
