@@ -222,7 +222,7 @@ namespace Ch.Elca.Iiop.CorbaObjRef {
         /// <param name="cdrStream"></param>
         /// <returns></returns>
         private IorProfile ParseProfile(CdrInputStream cdrStream) {
-            ulong profileType = cdrStream.ReadULong(); 
+            uint profileType = cdrStream.ReadULong(); 
             CdrEncapsulationInputStream encapStream = cdrStream.ReadEncapsulation();
             switch (profileType) {
                 case 0: 

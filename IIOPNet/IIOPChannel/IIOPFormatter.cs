@@ -296,7 +296,10 @@ namespace Ch.Elca.Iiop {
                                                ITransportHeaders requestHeaders, Stream requestStream, 
                                                out IMessage responseMsg, out ITransportHeaders responseHeaders,
                                                out Stream responseStream) {
-			IMessage deserReqMsg = null;
+            IMessage deserReqMsg = null;
+            responseMsg = null;
+            responseHeaders = null;
+            responseStream = null;
             try {
                 // deserialise the request
                 deserReqMsg = DeserialiseRequest(requestStream, requestHeaders);
