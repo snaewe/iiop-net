@@ -257,12 +257,16 @@ namespace Ch.Elca.Iiop.IdlPreprocessor {
                     // illegal include: ending " missing
                     throw new IllegalPreprocDirectiveException(currentLine);
                 }
-        
+                // check if file exists, else search in compiler inlcude dir
+                FileInfo fileInc = new FileInfo(fileToInclude);
+                if (!fileInc.Exists) {
+                	fileToInclude = Path.Combine(s_idlPath.FullName, fileToInclude);
+                }
             } else if (fileToInclude.StartsWith("<")) {
                 fileToInclude = fileToInclude.Substring(1); 
                 if (fileToInclude.EndsWith(">")) {
                     fileToInclude = fileToInclude.Substring(0, 
-                                                            fileToInclude.Length - 1);                
+                                                            fileToInclude.Length - 1);
                 } else {
                     // illegal include: ending > missing
                     throw new IllegalPreprocDirectiveException(currentLine);
