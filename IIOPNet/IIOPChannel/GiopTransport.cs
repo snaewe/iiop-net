@@ -261,9 +261,9 @@ namespace Ch.Elca.Iiop {
         #region IConstructors
         
         /// <summary>default constructor</summary>
-        public GiopTransportServerMsgHandler(Stream transportStream, 
+        public GiopTransportServerMsgHandler(IServerTransport transport, 
                                              IServerChannelSink transportSink) {
-            m_transportStream = transportStream;
+            m_transportStream = transport.TransportStream;
             m_transportSink = transportSink;
         }                       
 

@@ -544,7 +544,9 @@ namespace Ch.Elca.Iiop {
                         // disable Nagle algorithm, to reduce delay
                         client.NoDelay = true;
                         // now process the message of this client
-                        ServerRequestHandler handler = new ServerRequestHandler(client, m_transportSink);
+                        TcpServerTransport transport = new TcpServerTransport(client);
+                        ServerRequestHandler handler =
+                            new ServerRequestHandler(transport, m_transportSink);
                         handler.StartMsgHandling();
                     } else {
                         Trace.WriteLine("acceptTcpClient hasn't worked");

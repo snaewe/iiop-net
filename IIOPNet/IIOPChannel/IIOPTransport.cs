@@ -212,8 +212,7 @@ namespace Ch.Elca.Iiop {
         /// Knows, how to process Giop-Messages.
         /// </param>
         /// <returns>true, if more messages can be read, otherwise false</returns>
-        internal bool Process(NetworkStream networkStream, 
-                              GiopTransportServerMsgHandler giopTransportMsgHandler) {
+        internal bool Process(GiopTransportServerMsgHandler giopTransportMsgHandler) {
                                                           
             // read in the message
             GiopTransportServerMsgHandler.HandlingResult result = giopTransportMsgHandler.ProcessIncomingMsg();
@@ -357,14 +356,14 @@ namespace Ch.Elca.Iiop {
 
         #region IFields
         
-        private TcpClient m_client;
+        private IServerTransport m_transport;
         private IiopServerTransportSink m_transportSink;
 
         #endregion IFields
         #region IConstructors
         
-        public ServerRequestHandler(TcpClient client, IiopServerTransportSink transportSink) {
-            m_client = client;
+        public ServerRequestHandler(IServerTransport transport, IiopServerTransportSink transportSink) {
+            m_transport = transport;
             m_transportSink = transportSink;
         }
 
@@ -380,37 +379,30 @@ namespace Ch.Elca.Iiop {
         }
 
         private void HandleRequests() {
-            bool connected = true;
-            NetworkStream inStream = m_client.GetStream();
+            bool connected = true;            
             // create a connection context for the server connection
             IiopServerConnectionManager.GetManager().RegisterActiveConnection();
             
             GiopTransportServerMsgHandler serverMsgHandler = 
-                new GiopTransportServerMsgHandler(inStream, m_transportSink);
+                new GiopTransportServerMsgHandler(m_transport, m_transportSink);
             while (connected) {
                 try {
                     bool okToReceiveMore = 
-                        m_transportSink.Process(inStream, serverMsgHandler);
+                        m_transportSink.Process(serverMsgHandler);
                     if (!okToReceiveMore) {
                         // close connection
-                        m_client.Close();
+                        m_transport.CloseConnection();
                         connected = false;
                     }                    
-                } catch (IOException ie) {
-                    if (!(typeof(SocketException).IsInstanceOfType(ie.InnerException))) {
-                        Debug.WriteLine("unexpected Exception in handle-requests: " + ie);
-                    }
-                    connected = false;
                 } catch (Exception e) {
-                    Debug.WriteLine("Exception in handle-requests: " + e);
-                    Debug.WriteLine("inner-exception: " + e.InnerException);
                     connected = false;
-                    try { 
-                        inStream.Close();    
-                    } catch (Exception) { }
-                    try { 
-                        m_client.Close();
-                    } catch (Exception) { }
+                    if (!m_transport.IsConnectionCloseException(e)) {
+                        Debug.WriteLine("unhandled exception in handle-requests: " + e);
+                        Debug.WriteLine("inner-exception: " + e.InnerException);                    
+                        try { 
+                            m_transport.CloseConnection();
+                        } catch (Exception) { }
+                    }
                 }
             }
             IiopServerConnectionManager.GetManager().UnregisterActiveConnection(); // discard connection
