@@ -149,12 +149,12 @@ namespace Corba {
         /// reads a corba wstring value
         /// </summary>
         /// <returns>the unboxed string</returns>
-        object read_WStringValue();
+        string read_WStringValue();
         /// <summary>
         /// reads a corba string value
         /// </summary>
         /// <returns>the unboxed string</returns>
-        object read_StringValue();
+        string read_StringValue();
         /// <summary>boxed values are not handable with read-value</summary>
         /// <param name="boxedType">the boxed type, which is not itself a boxed type</param>
         object read_boxed(BoxedValueAttribute attr, Type boxedType, AttributeExtCollection boxedTypeAttrs);
@@ -576,22 +576,22 @@ namespace Corba {
         /// reads a corba wstring value
         /// </summary>
         /// <returns>the unboxed string</returns>
-        public object read_WStringValue() {
+        public string read_WStringValue() {
             WStringValue result = (WStringValue)m_marshaller.Unmarshal(s_wstringValueType, 
                                                                        new AttributeExtCollection(),
                                                                        m_cdrIn);
-            return result.Unbox();
+            return (string)result.Unbox();
         }
 
         /// <summary>
         /// reads a corba string value
         /// </summary>
         /// <returns>the unboxed string</returns>
-        public object read_StringValue() {
+        public string read_StringValue() {
             StringValue result = (StringValue)m_marshaller.Unmarshal(s_stringValueType, 
                                                                      new AttributeExtCollection(),
                                                                      m_cdrIn);
-            return result.Unbox();
+            return (string)result.Unbox();
         }
 
         public object read_boxed(BoxedValueAttribute attr, Type boxedType, AttributeExtCollection boxedTypeAttrs) {
