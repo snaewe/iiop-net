@@ -40,6 +40,12 @@ namespace Ch.Elca.Iiop.IntegrationTests {
         public System.Int32 Y;
     }
 
+    public class Adder : MarshalByRefObject {
+        public System.Int32 Add(System.Int32 sum1, System.Int32 sum2) {
+            return sum1 + sum2;
+        }
+    }
+
     public class TestService : MarshalByRefObject {
 
         public System.Double TestIncDouble(System.Double arg) {
@@ -110,9 +116,17 @@ namespace Ch.Elca.Iiop.IntegrationTests {
             return result;
         }
 
+        public Adder RetrieveAdder() {
+            return new Adder();
+        }
+
+        public System.Int32 AddWithAdder(Adder adder, System.Int32 sum1, System.Int32 sum2) {
+            return adder.Add(sum1, sum2);
+        }
+
         public TestStructA TestEchoStruct(TestStructA test) {
             return test;
-        }
+        }       
 
 
         public override object InitializeLifetimeService() {

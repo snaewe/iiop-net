@@ -206,6 +206,22 @@ namespace Ch.Elca.Iiop.IntegrationTests {
             Assertion.AssertEquals(arg.Y, result.Y);
         }
 
+        public void TestRemoteObjects() {
+            Adder adder = m_testService.RetrieveAdder();
+            System.Int32 arg1 = 1;
+            System.Int32 arg2 = 2;
+            System.Int32 result = adder.Add(1, 2);
+            Assertion.AssertEquals((System.Int32) arg1 + arg2, result);            
+        }
+
+        public void TestSendRefOfAProxy() {
+            Adder adder = m_testService.RetrieveAdder();
+            System.Int32 arg1 = 1;
+            System.Int32 arg2 = 2;
+            System.Int32 result = m_testService.AddWithAdder(adder, arg1, arg2);
+            Assertion.AssertEquals((System.Int32) arg1 + arg2, result);
+        }
+
     }
 
 }
