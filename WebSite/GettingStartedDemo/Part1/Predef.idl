@@ -1,0 +1,23 @@
+// auto-generated IDL file by CLS to IDL mapper
+
+// Predef.idl
+
+#include "orb.idl"
+#ifndef __Ch_Elca_Iiop_GenericUserException__
+#define __Ch_Elca_Iiop_GenericUserException__
+
+	module Ch {
+		module Elca {
+			module Iiop {
+
+				exception GenericUserException {
+					::CORBA::WStringValue exceptionString;
+					::CORBA::WStringValue innerExceptionMsg;
+					::CORBA::WStringValue throwingMethod;
+				};
+
+			};
+		};
+	};
+
+#endif

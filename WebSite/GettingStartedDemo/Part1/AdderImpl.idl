@@ -1,0 +1,23 @@
+// auto-generated IDL file by CLS to IDL mapper
+
+// Tutorial/GettingStarted/AdderImpl.idl
+
+#include "orb.idl"
+#include "Predef.idl"
+
+#ifndef __Tutorial_GettingStarted_AdderImpl__
+#define __Tutorial_GettingStarted_AdderImpl__
+module Tutorial {
+module GettingStarted {
+
+interface AdderImpl {
+
+double add(in double arg1, in double arg2) raises (::Ch::Elca::Iiop::GenericUserException);
+};
+
+#pragma ID AdderImpl "IDL:Tutorial/GettingStarted/AdderImpl:1.0"
+
+};
+};
+#endif
+
