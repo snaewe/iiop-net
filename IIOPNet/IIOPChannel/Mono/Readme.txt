@@ -1,0 +1,1 @@
+This directory contains mono specific files for IIOP.NET channel.

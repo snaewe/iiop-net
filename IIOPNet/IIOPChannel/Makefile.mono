@@ -7,11 +7,11 @@ build-dll: $(Dest)IIOPChannel.dll
 
 $(Dest)IIOPChannel.dll: *.cs
 	[ -d $(Dest) ] || mkdir $(Dest)
-	mcs $(CSFLAGS) /t:library /out:$@ *.cs
+	mcs $(CSFLAGS) /t:library /out:$@ *.cs Mono/*.cs
 
 build-unit-tests: build nunit-var
 	[ -d $(UnitTestDest) ] || mkdir $(UnitTestDest)
-	mcs /nowarn:0618 $(CSFLAGS) /d:UnitTest /r:${NUNITV2_HOME}/bin/nunit.framework.dll /t:library /out:$(UnitTestDest)IIOPChannel.dll *.cs
+	mcs /nowarn:0618 $(CSFLAGS) /d:UnitTest /r:${NUNITV2_HOME}/bin/nunit.framework.dll /t:library /out:$(UnitTestDest)IIOPChannel.dll *.cs Mono/*.cs
 
 test: build-unit-tests
 	mono ${NUNITV2_HOME}/bin/nunit-console.exe $(UnitTestDest)IIOPChannel.dll
