@@ -66,8 +66,12 @@ namespace Ch.Elca.Iiop.Services {
             m_contexts.Add(context.ServiceID, context);
         }
 
-        public ServiceContext GetContext(ulong serviceId) {
+        public ServiceContext GetContext(uint serviceId) {
             return (ServiceContext)m_contexts[serviceId];
+        }
+        
+        public bool ContainsContextForService(uint serviceId) {
+            return (GetContext(serviceId) != null);
         }
 
         /// <summary>enumarate over the service contexts</summary>
