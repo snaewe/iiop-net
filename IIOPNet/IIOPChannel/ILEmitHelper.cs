@@ -204,7 +204,7 @@ namespace Ch.Elca.Iiop.Idl {
             Type paramBuildType = typeof(ParameterBuilder);
             s_paramBuildConstr = paramBuildType.GetConstructor(BindingFlags.NonPublic | BindingFlags.Instance, null,
                                                                new Type[] { typeof(MethodBuilder), 
-                                                                            typeof(System.Int32), 
+                                                                            ReflectionHelper.Int32Type, 
                                                                             typeof(ParameterAttributes),
                                                                             ReflectionHelper.StringType }, 
                                                                null);

@@ -367,7 +367,7 @@ namespace Ch.Elca.Iiop.Idl {
             ConstructorInfo attrConstr = attrType.GetConstructor(Type.EmptyTypes);
                 return new CustomAttributeBuilder(attrConstr, new Object[0]);
             } else {
-                ConstructorInfo attrConstr = attrType.GetConstructor(new Type[] { typeof(long) });
+                ConstructorInfo attrConstr = attrType.GetConstructor(new Type[] { ReflectionHelper.Int64Type });
                 return new CustomAttributeBuilder(attrConstr, new Object[] { m_bound } );
             }
         }
@@ -507,7 +507,7 @@ namespace Ch.Elca.Iiop.Idl {
         /// <summary>creates an attribute builder for this custom attribute</summary>
         public CustomAttributeBuilder CreateAttributeBuilder() {
             Type attrType = this.GetType();
-            ConstructorInfo attrConstr = attrType.GetConstructor(new Type[] { typeof(bool) } );
+            ConstructorInfo attrConstr = attrType.GetConstructor(new Type[] { ReflectionHelper.BooleanType } );
             CustomAttributeBuilder result = new CustomAttributeBuilder(attrConstr, new Object[] { m_isAllowed });
             return result;
         }

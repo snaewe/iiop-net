@@ -563,7 +563,7 @@ namespace omg.org.CORBA {
         #region IMethods
 
         internal override Type GetClsForTypeCode() {
-            return typeof(System.Boolean);
+            return ReflectionHelper.BooleanType;
         }
 
         #endregion IMethods
@@ -605,7 +605,7 @@ namespace omg.org.CORBA {
         #region IMethods
 
         internal override Type GetClsForTypeCode() {
-            return typeof(System.Byte);
+            return ReflectionHelper.ByteType;
         }
 
         #endregion IMethods
@@ -953,7 +953,7 @@ namespace omg.org.CORBA {
             TypeBuilder result = modBuilder.DefineType(fullTypeName, 
                                                        TypeAttributes.Class | TypeAttributes.Public | TypeAttributes.Sealed,
                                                        typeof(System.Enum));
-            result.DefineField("value__", typeof(System.Int32), 
+            result.DefineField("value__", ReflectionHelper.Int32Type, 
                                FieldAttributes.Public | FieldAttributes.SpecialName | FieldAttributes.RTSpecialName);
         
             // add enum entries

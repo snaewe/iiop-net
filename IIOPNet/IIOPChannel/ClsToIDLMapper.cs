@@ -162,8 +162,6 @@ namespace Ch.Elca.Iiop.Idl {
 
 
         // the following expressions are evaluated here for efficiency reasons
-        private static Type s_byteType = typeof(System.Byte);
-        private static Type s_booleanType = typeof(System.Boolean);
         private static Type s_voidType = typeof(void);
         private static Type s_singleType = typeof(System.Single);
         private static Type s_doubleType = typeof(System.Double);
@@ -184,8 +182,6 @@ namespace Ch.Elca.Iiop.Idl {
         private static Type s_stringValueAttrType = typeof(StringValueAttribute);
         private static Type s_objectIdlTypeAttrType = typeof(ObjectIdlTypeAttribute);
         private static Type s_interfaceTypeAttrType = typeof(InterfaceTypeAttribute);
-
-        private static Type s_idlEntityType = typeof(IIdlEntity);
 
         private static Type s_corbaTypeCodeImplType = typeof(TypeCodeImpl);
         private static Type s_corbaTypeCodeType = typeof(omg.org.CORBA.TypeCode);
@@ -250,7 +246,7 @@ namespace Ch.Elca.Iiop.Idl {
             if (IsArray(type)) { 
                 return false; 
             } // arrays are handled specially
-            if ((!(s_idlEntityType.IsAssignableFrom(type))) && (type.IsAbstract)) { 
+            if ((!(ReflectionHelper.IIdlEntityType.IsAssignableFrom(type))) && (type.IsAbstract)) { 
                 return false; 
             } // abstract native CLS types do not belong to the defaultMarhsalByVal Types; this is no criteria for types created by the IDL to CLS compiler
             return ((type.IsSerializable) || 
@@ -265,8 +261,8 @@ namespace Ch.Elca.Iiop.Idl {
             if (clsType.Equals(ReflectionHelper.Int16Type) ||
                 clsType.Equals(ReflectionHelper.Int32Type) ||
                 clsType.Equals(ReflectionHelper.Int64Type) ||
-                clsType.Equals(s_byteType) ||
-                clsType.Equals(s_booleanType) ||
+                clsType.Equals(ReflectionHelper.ByteType) ||
+                clsType.Equals(ReflectionHelper.BooleanType) ||
                 clsType.Equals(s_voidType) ||
                 clsType.Equals(s_singleType) ||
                 clsType.Equals(s_doubleType) ||
@@ -399,9 +395,9 @@ namespace Ch.Elca.Iiop.Idl {
                 return action.MapToIdlLong(clsType);
             } else if (clsType.Equals(ReflectionHelper.Int64Type)) {
                 return action.MapToIdlLongLong(clsType);
-            } else if (clsType.Equals(s_booleanType)) {
+            } else if (clsType.Equals(ReflectionHelper.BooleanType)) {
                 return action.MapToIdlBoolean(clsType);
-            } else if (clsType.Equals(s_byteType)) {
+            } else if (clsType.Equals(ReflectionHelper.ByteType)) {
                 return action.MapToIdlOctet(clsType);
             } else if (clsType.Equals(s_stringType)) {
                 // distinguish cases
@@ -925,7 +921,7 @@ namespace Ch.Elca.Iiop.Tests {
 
         public void TestMapToIdlOctet() {
             ClsToIdlMapper mapper = ClsToIdlMapper.GetSingleton();
-            MappingToResult mapResult = (MappingToResult)mapper.MapClsType(typeof(Byte), 
+            MappingToResult mapResult = (MappingToResult)mapper.MapClsType(ReflectionHelper.ByteType, 
                                                                            new AttributeExtCollection(),
                                                                            s_testAction);
 			Assertion.AssertEquals(MappingToResult.IdlOctet, mapResult);
@@ -984,7 +980,7 @@ namespace Ch.Elca.Iiop.Tests {
                         
         public void TestMapToIdlBoolean() {
             ClsToIdlMapper mapper = ClsToIdlMapper.GetSingleton();
-            MappingToResult mapResult = (MappingToResult)mapper.MapClsType(typeof(Boolean), 
+            MappingToResult mapResult = (MappingToResult)mapper.MapClsType(ReflectionHelper.BooleanType, 
                                                                            new AttributeExtCollection(),
                                                                            s_testAction);
 			Assertion.AssertEquals(MappingToResult.IdlBool, mapResult);

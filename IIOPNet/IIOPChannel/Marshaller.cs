@@ -270,8 +270,8 @@ namespace Ch.Elca.Iiop.Marshalling {
         /// </summary>
         private void CreateBaseTypeSerializer() {
             // for primitive types
-            m_baseTypeSerializer.Add(typeof(System.Byte), new ByteSerialiser());
-            m_baseTypeSerializer.Add(typeof(System.Boolean), new BooleanSerialiser());
+            m_baseTypeSerializer.Add(ReflectionHelper.ByteType, new ByteSerialiser());
+            m_baseTypeSerializer.Add(ReflectionHelper.BooleanType, new BooleanSerialiser());
             m_baseTypeSerializer.Add(ReflectionHelper.Int16Type, new Int16Serialiser());
             m_baseTypeSerializer.Add(ReflectionHelper.Int32Type, new Int32Serialiser());
             m_baseTypeSerializer.Add(ReflectionHelper.Int64Type, new Int64Serialiser());

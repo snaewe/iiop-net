@@ -167,8 +167,8 @@ namespace Ch.Elca.Iiop.Idl {
         static UnionGenerationHelper() {
             Type badParamType = typeof(BAD_PARAM);
             Type badOperationType = typeof(BAD_OPERATION);
-            s_BadParamConstr = badParamType.GetConstructor(new Type[] { typeof(int), typeof(CompletionStatus) });
-            s_BadOperationConstr = badOperationType.GetConstructor(new Type[] { typeof(int), typeof(CompletionStatus) });            
+            s_BadParamConstr = badParamType.GetConstructor(new Type[] { ReflectionHelper.Int32Type, typeof(CompletionStatus) });
+            s_BadOperationConstr = badOperationType.GetConstructor(new Type[] { ReflectionHelper.Int32Type, typeof(CompletionStatus) });            
         }
 
         #endregion SConstructor
@@ -185,7 +185,7 @@ namespace Ch.Elca.Iiop.Idl {
                                        TypeAttributes.Sealed | visibility;
 
             m_builder = modBuilder.DefineType(fullName, typeAttrs, typeof(System.ValueType),
-                                              new System.Type[] { typeof(IIdlEntity) });            
+                                              new System.Type[] { ReflectionHelper.IIdlEntityType });            
             BeginType();
         }
         
@@ -242,7 +242,7 @@ namespace Ch.Elca.Iiop.Idl {
         private void AddInitalizedField() {
             // used to detect uninitalized unions, field is automatically initalized to false
             m_initalizedField = m_ilEmitHelper.AddFieldWithCustomAttrs(m_builder, INIT_FIELD_NAME, 
-                                                                       new TypeContainer(typeof(System.Boolean)), 
+                                                                       new TypeContainer(ReflectionHelper.BooleanType), 
                                                                        FieldAttributes.Private);
         }
 
@@ -640,7 +640,7 @@ namespace Ch.Elca.Iiop.Idl {
             }
             
             Type discrTypeCls = m_discrType.GetCompactClsType(); // for discriminator do not split boxed value types, because only the listed unseparable types usable
-            if (discrTypeCls.Equals(typeof(System.Boolean))) {
+            if (discrTypeCls.Equals(ReflectionHelper.BooleanType)) {
                 if (!(discVal is System.Boolean)) {
                     throw new InvalidUnionDiscriminatorValue(discVal, discrTypeCls);
                 }

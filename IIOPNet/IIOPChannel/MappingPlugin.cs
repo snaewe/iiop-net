@@ -150,9 +150,8 @@ namespace Ch.Elca.Iiop.Idl {
         /// <param name="idlType">the idl type (mapped from idl to CLS) used to describe serialisation / deserialisation, e.g. java.util.ArrayListImpl</param>
         /// <param name="mapper">the mapper, knowing how to map instances of CLS ArrayList to java.util.ArrayListImpl and in the other direction</param>
         public void AddMapping(Type clsType, Type idlType, ICustomMapper mapper) {            
-            // check that idlType implements IIdlEntity:
-            Type idlEntityType = typeof(IIdlEntity);
-            if (!(idlEntityType.IsAssignableFrom(idlType))) {
+            // check that idlType implements IIdlEntity:            
+            if (!(ReflectionHelper.IIdlEntityType.IsAssignableFrom(idlType))) {
                 throw new Exception("illegal type for custom mapping encountered: " + idlType.FullName);
             }
             // be aware: mapping is not bijektive, because of impl classes; however for an idl type only one

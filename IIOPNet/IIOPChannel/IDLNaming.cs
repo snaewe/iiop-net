@@ -341,8 +341,8 @@ namespace Ch.Elca.Iiop.Idl {
             s_clsMapSpecial.Add(ReflectionHelper.Int16Type, "short");
             s_clsMapSpecial.Add(ReflectionHelper.Int32Type, "long");
             s_clsMapSpecial.Add(ReflectionHelper.Int64Type, "long long");
-            s_clsMapSpecial.Add(typeof(System.Byte), "octet");
-            s_clsMapSpecial.Add(typeof(System.Boolean), "boolean");
+            s_clsMapSpecial.Add(ReflectionHelper.ByteType, "octet");
+            s_clsMapSpecial.Add(ReflectionHelper.BooleanType, "boolean");
             s_clsMapSpecial.Add(typeof(void), "void");
 
             s_clsMapSpecial.Add(typeof(System.Single), "float");

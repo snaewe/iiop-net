@@ -1129,8 +1129,8 @@ namespace Ch.Elca.Iiop.Tests {
 			MemoryStream outStream = new MemoryStream();
             CdrOutputStream cdrOut = new CdrOutputStreamImpl(outStream, 0);
             Serialiser ser = new ByteSerialiser();
-            ser.Serialise(typeof(Byte), (byte)11, new AttributeExtCollection(), cdrOut);
-            ser.Serialise(typeof(Byte), (byte)12, new AttributeExtCollection(), cdrOut);
+            ser.Serialise(ReflectionHelper.ByteType, (byte)11, new AttributeExtCollection(), cdrOut);
+            ser.Serialise(ReflectionHelper.ByteType, (byte)12, new AttributeExtCollection(), cdrOut);
             outStream.Seek(0, SeekOrigin.Begin);
             Assertion.AssertEquals(11, outStream.ReadByte());
             Assertion.AssertEquals(12, outStream.ReadByte());
@@ -1145,9 +1145,9 @@ namespace Ch.Elca.Iiop.Tests {
         	CdrInputStreamImpl cdrIn = new CdrInputStreamImpl(inStream);
         	cdrIn.ConfigStream(0, new GiopVersion(1, 2));
 			Serialiser ser = new ByteSerialiser();			
-        	Assertion.AssertEquals(11, ser.Deserialise(typeof(Byte), 
+        	Assertion.AssertEquals(11, ser.Deserialise(ReflectionHelper.ByteType, 
         	                                           new AttributeExtCollection(), cdrIn));        	
-        	Assertion.AssertEquals(12, ser.Deserialise(typeof(Byte), 
+        	Assertion.AssertEquals(12, ser.Deserialise(ReflectionHelper.ByteType, 
         	                                           new AttributeExtCollection(), cdrIn));
         	inStream.Close();        	
         }
@@ -1156,8 +1156,8 @@ namespace Ch.Elca.Iiop.Tests {
 			MemoryStream outStream = new MemoryStream();
             CdrOutputStream cdrOut = new CdrOutputStreamImpl(outStream, 0);
             Serialiser ser = new BooleanSerialiser();
-            ser.Serialise(typeof(Boolean), true, new AttributeExtCollection(), cdrOut);
-            ser.Serialise(typeof(Boolean), false, new AttributeExtCollection(), cdrOut);
+            ser.Serialise(ReflectionHelper.BooleanType, true, new AttributeExtCollection(), cdrOut);
+            ser.Serialise(ReflectionHelper.BooleanType, false, new AttributeExtCollection(), cdrOut);
             outStream.Seek(0, SeekOrigin.Begin);
             Assertion.AssertEquals(1, outStream.ReadByte());
             Assertion.AssertEquals(0, outStream.ReadByte());
@@ -1172,9 +1172,9 @@ namespace Ch.Elca.Iiop.Tests {
         	CdrInputStreamImpl cdrIn = new CdrInputStreamImpl(inStream);
         	cdrIn.ConfigStream(0, new GiopVersion(1, 2));
 			Serialiser ser = new BooleanSerialiser();
-        	Assertion.AssertEquals(false, ser.Deserialise(typeof(Boolean), 
+        	Assertion.AssertEquals(false, ser.Deserialise(ReflectionHelper.BooleanType, 
         	                                              new AttributeExtCollection(), cdrIn));        	
-        	Assertion.AssertEquals(true, ser.Deserialise(typeof(Boolean), 
+        	Assertion.AssertEquals(true, ser.Deserialise(ReflectionHelper.BooleanType, 
         	                                             new AttributeExtCollection(), cdrIn));
         	inStream.Close();        	
         }

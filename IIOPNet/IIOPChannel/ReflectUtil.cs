@@ -51,6 +51,8 @@ namespace Ch.Elca.Iiop.Util {
         private static Type s_int16Type = typeof(System.Int16);
         private static Type s_int32Type = typeof(System.Int32);
         private static Type s_int64Type = typeof(System.Int64);
+        private static Type s_booleanType = typeof(System.Boolean);
+        private static Type s_byteType = typeof(System.Byte);
         
         #endregion SFields
         #region SProperties
@@ -117,6 +119,20 @@ namespace Ch.Elca.Iiop.Util {
                 return s_int64Type;
             }
         }        
+        
+        /// <summary>caches typeof(Byte)</summary>
+        public static Type ByteType {
+            get {
+                return s_byteType;
+            }
+        }
+        
+        /// <summary>caches typeof(Boolean)</summary>
+        public static Type BooleanType {
+            get {
+                return s_booleanType;
+            }
+        }
         
         #endregion SProperties        
         #region SMethods
