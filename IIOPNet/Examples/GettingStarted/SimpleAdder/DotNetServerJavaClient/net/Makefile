@@ -17,7 +17,7 @@ $(bin)IIOPChannel.dll: $(IIOPCHANNEL)
 	copy /y $(IIOPCHANNEL) $(bin)IIOPChannel.dll
 
 $(SERVEREXE): $(bin)IIOPChannel.dll *.cs
-	csc /t:exe /out:$@ /r:$(bin)IIOPChannel.dll *.cs
+	csc $(CSFLAGS) /t:exe /out:$@ /r:$(bin)IIOPChannel.dll *.cs
 
 
 build-idl: $(IDL) $(IDL)$(IDLPath).idl $(SERVEREXE) 
