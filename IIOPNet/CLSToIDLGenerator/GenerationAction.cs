@@ -313,7 +313,7 @@ namespace Ch.Elca.Iiop.Idl {
         /// <param name="shouldThrowException">if true, generate a raise clause for method: GenericUserException</param>
         private void MapMethods(Type typToMap, bool shouldThrowException, BindingFlags flags) {
             MethodInfo[] methods = typToMap.GetMethods(flags);
-            foreach (MethodInfo info in methods) { // TBD: exclude overriden methods here
+            foreach (MethodInfo info in methods) { 
                 if ((!info.IsPrivate) && (!CheckIsMethodInInterfaceOrBase(typToMap, info, flags))) { // private methods are not exposed
                     MapMethod(info, typToMap, shouldThrowException);    
                 }
@@ -338,6 +338,23 @@ namespace Ch.Elca.Iiop.Idl {
         }
 
         /// <summary>
+        /// checks, if the property is already defined in a base class or an interface. If so, don't map it again
+        /// </summary>
+        /// <returns>true, if contained in a base class or interface, else returns false</returns>
+        private bool CheckIsPropertyInInterfaceOrBase(Type typeToMap, PropertyInfo prop, BindingFlags flags) {
+            bool result = false;
+            Type baseType = typeToMap.BaseType;
+            if (baseType != null) {
+                result = IsPropertyInType(baseType, prop, flags);
+            }
+            Type[] interfaces = typeToMap.GetInterfaces();
+            for (int i = 0; i < interfaces.Length; i++) {
+                result = result || IsPropertyInType(interfaces[i], prop, flags);
+            }
+            return result;
+        }
+
+        /// <summary>
         /// checks if a method with the same signature and name as method is in type
         /// </summary>
         private bool IsMethodInType(Type type, MethodInfo method, BindingFlags flags) {
@@ -345,6 +362,19 @@ namespace Ch.Elca.Iiop.Idl {
                                                    ExtractParamTypesFromParamInfoArray(method.GetParameters()),
                                                    null);
             if (typeMethod != null) {
+                return true;
+            } else {
+                return false;    
+            }
+        }
+
+        /// <summary>
+        /// checks if a method with the same signature and name as method is in type
+        /// </summary>
+        private bool IsPropertyInType(Type type, PropertyInfo prop, BindingFlags flags) {
+            
+            PropertyInfo typeProp = type.GetProperty(prop.Name, flags);
+            if (typeProp != null) {
                 return true;
             } else {
                 return false;    
@@ -379,17 +409,17 @@ namespace Ch.Elca.Iiop.Idl {
                     MapField(field, typeToMap);
                 }
             }
-        }
-            
+        }            
         
         /// <summary>map the properties of a type</summary>
         private void MapProperties(Type typeToMap, BindingFlags flags) {
             PropertyInfo[] properties = typeToMap.GetProperties(flags);
             foreach (PropertyInfo info in properties) {
-                MapProperty(info, typeToMap);
+               if (!CheckIsPropertyInInterfaceOrBase(typeToMap, info, flags)) {
+                   MapProperty(info, typeToMap);
+               }
             }
         }
-
 
         private void MapField(FieldInfo fieldToMap, Type declaringType) {
             Type fieldType = fieldToMap.FieldType;
