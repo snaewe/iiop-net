@@ -185,7 +185,11 @@ namespace Ch.Elca.Iiop.Util {
         }
 
         public override int GetHashCode() {
-            return base.GetHashCode();
+            int result = 0;
+            for (int i = 0; i < m_attributes.Count; i++) {
+                result = result ^ m_attributes[i].GetHashCode();
+            }
+            return result;
         }
 
         #region Implementation of ICollection
