@@ -521,6 +521,8 @@ namespace Ch.Elca.Iiop.IntegrationTests {
             Assertion.AssertEquals(argInit + 1, arg);
         }
 
+        delegate System.Int32 TestOutArgsDelegate(System.Int32 arg, out System.Int32 argOut);
+
         [Test]
         public void TestOutArgs() {
             System.Int32 argOut;
@@ -528,6 +530,15 @@ namespace Ch.Elca.Iiop.IntegrationTests {
             System.Int32 result = m_testService.TestOut(arg, out argOut);
             Assertion.AssertEquals(arg, argOut);
             Assertion.AssertEquals(arg, result);
+
+            System.Int32 argOut2;
+            TestOutArgsDelegate oad = new TestOutArgsDelegate(m_testService.TestOut);
+            // async call
+            IAsyncResult ar = oad.BeginInvoke(arg, out argOut2, null, null);
+            // wait for response
+            System.Int32 result2 = oad.EndInvoke(out argOut2, ar);
+            Assertion.AssertEquals(arg, argOut2);
+            Assertion.AssertEquals(arg, result2);
         }
 
         [Test]
