@@ -679,17 +679,19 @@ namespace Ch.Elca.Iiop.Marshalling {
 
         public override void Serialise(Type formal, object actual, AttributeExtCollection attributes,
                                        CdrOutputStream targetStream) {
-            // check if actual parameter is an IDL-struct: 
-            // this is an illegal parameter for IDL-abstract value parameters
-            AttributeExtCollection attrs = AttributeExtCollection.ConvertToAttributeCollection(actual.GetType().GetCustomAttributes(true));
-            if (attrs.IsInCollection(typeof(IdlStructAttribute))) {
-                // IDL-struct illegal parameter for formal type abstract value (actual type: actual.GetType() )
-                throw new MARSHAL(20011, CompletionStatus.Completed_MayBe);
-            }
-            // check if it's a value-type:
-            if (!ClsToIdlMapper.IsDefaultMarshalByVal(actual.GetType())) {
-                // only a value type is possible as acutal value for a formal type abstract value / value base, actual type: actual.GetType() )
-                throw new MARSHAL(20012, CompletionStatus.Completed_MayBe);            	
+            if (actual != null) {
+                // check if actual parameter is an IDL-struct: 
+                // this is an illegal parameter for IDL-abstract value parameters
+                AttributeExtCollection attrs = AttributeExtCollection.ConvertToAttributeCollection(actual.GetType().GetCustomAttributes(true));
+                if (attrs.IsInCollection(typeof(IdlStructAttribute))) {
+                    // IDL-struct illegal parameter for formal type abstract value (actual type: actual.GetType() )
+                    throw new MARSHAL(20011, CompletionStatus.Completed_MayBe);
+                }
+                // check if it's a value-type:
+                if (!ClsToIdlMapper.IsDefaultMarshalByVal(actual.GetType())) {
+                    // only a value type is possible as acutal value for a formal type abstract value / value base, actual type: actual.GetType() )
+                    throw new MARSHAL(20012, CompletionStatus.Completed_MayBe);
+                }
             }
             // if actual parameter is ok, serialize as idl-value object
             m_valObjectSer.Serialise(formal, actual, attributes, targetStream);
