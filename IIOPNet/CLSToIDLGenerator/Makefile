@@ -10,7 +10,7 @@ $(Dest)IIOPChannel.dll: $(IIOPChannel)
 	copy $(IIOPChannel) $@
 
 $(Dest)CLSIDLGenerator.exe: $(Dest)IIOPChannel.dll *.cs
-	csc $(CSFLAGS) /r:$(Dest)IIOPChannel.dll /t:exe /out:$@ *.cs 
+	csc $(CSFLAGS) /res:GeneratorMappingPluginSchema.xsd /r:$(Dest)IIOPChannel.dll /t:exe /out:$@ *.cs 
 
 
 clean:

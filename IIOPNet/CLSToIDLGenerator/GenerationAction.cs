@@ -520,7 +520,9 @@ namespace Ch.Elca.Iiop.Idl {
         
 
         public object MapToIdlEnum(Type clsType) {    
-            if (m_depManager.CheckMapped(clsType)) { return null; }
+            if (m_depManager.CheckMapped(clsType)) { 
+                return null; 
+            }
             // do a sanity check
             // TBD
 

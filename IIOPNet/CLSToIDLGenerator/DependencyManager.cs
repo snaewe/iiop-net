@@ -94,6 +94,17 @@ namespace Ch.Elca.Iiop.Idl {
             return m_defaultMappedTypes.Contains(toMap);
         }
 
+        /// <summary>
+        /// checks if a custom mapping is specified for the target idl type.
+        /// </summary>
+        private bool IsCustomMapped(Type idlType) {
+            if (!(typeof(IIdlEntity).IsAssignableFrom(idlType))) {
+                return false;
+            }
+            GeneratorMappingPlugin mappingPlugin = GeneratorMappingPlugin.GetSingleton();
+            return mappingPlugin.IsCustomMappingTarget(idlType);
+        }
+
         
         /// <summary>
         /// register a type that is mapped. The idl-definition of this type is stored in the file idlFile
@@ -110,15 +121,21 @@ namespace Ch.Elca.Iiop.Idl {
 
         /// <summary>get the name of the idl-file for the mapped type</summary>
         public string GetIdlFileForMappedType(Type mapped) {
-            object res = m_filesForMappedTypes[mapped];
-            return (string) res;
+            if (!IsCustomMapped(mapped)) { 
+                object res = m_filesForMappedTypes[mapped];
+                return (string) res;
+            } else {
+                GeneratorMappingPlugin mappingPlugin = GeneratorMappingPlugin.GetSingleton();
+                GeneratorCustomMappingDesc mappingDesc = mappingPlugin.GetMappingForIdlTarget(mapped);
+                return mappingDesc.IdlFileName;
+            }
         }
 
         /// <summary>checks if a type is already mapped</summary>
         /// <returns>true, if mapped, else false</returns>
         public bool CheckMapped(Type toMap) {
             if ((m_alreadyMappedTypes.Contains(toMap)) || (m_defaultMappedTypes.Contains(toMap)) ||
-                (toMap.IsSubclassOf(typeof(IIdlEntity)))) { 
+                (typeof(IIdlEntity).IsAssignableFrom(toMap))) { 
                 return true; 
             } else {
                 return false;
@@ -148,7 +165,11 @@ namespace Ch.Elca.Iiop.Idl {
             IEnumerator enumerator = deps.GetEnumerator();
             while (enumerator.MoveNext()) {
                 MapTypeInfo info = (MapTypeInfo) enumerator.Current;        
-                if (!(CheckMapped(info.m_type) || (m_toMap.Contains(info)))) {
+
+
+                // check if already mapped
+                // CheckMapped for custom mapped types is ture, because in info target type is stored.
+                if (!(CheckMapped(info.m_type) || m_toMap.Contains(info))) {
                     m_toMap.Enqueue(info);
                 }
             }
@@ -170,7 +191,9 @@ namespace Ch.Elca.Iiop.Idl {
                 MapTypeInfo info = (MapTypeInfo) enumerator.Current;
                 Debug.WriteLine("getTypesToIncludeBefore-content: " + depInfo.ForType + 
                                 ", pot include: " + info.m_type + ", already mapped: " + CheckMapped(info.m_type));
-                if (CheckMapped(info.m_type) && (!(m_defaultMappedTypes.Contains(info.m_type)))) { // is already mapped, add an include; for default mapped types an include is not necessary or already present
+                // is already mapped, add an include; for default mapped types an include is not necessary or already present
+                // for custom mapped types CheckMapped results in true, because it implements IIdlEntity
+                if ((CheckMapped(info.m_type) && (!(m_defaultMappedTypes.Contains(info.m_type))))) {
                     Debug.WriteLine("add it");
                     result.Add(info);
                 }
@@ -207,7 +230,8 @@ namespace Ch.Elca.Iiop.Idl {
                 // boxed value types can't have forward declaration --> be sure to not include boxed value types here
                 if ((ClsToIdlMapper.IsDefaultMarshalByVal(info.m_type) || 
                      ClsToIdlMapper.IsMappedToAbstractValueType(info.m_type, info.m_attributes) ||
-                    (ClsToIdlMapper.IsMarshalByRef(info.m_type))) && (!(info.m_type.IsSubclassOf(typeof(BoxedValueBase))))) {
+                     ClsToIdlMapper.IsMarshalByRef(info.m_type)) && 
+                    (!(info.m_type.IsSubclassOf(typeof(BoxedValueBase))))) {
                     // potentially forward reference is needed:
                     AddToNeededRefList(result, info);
                 }
@@ -217,8 +241,10 @@ namespace Ch.Elca.Iiop.Idl {
 
         /// <summary>add to needed ref list,if not already added and if not already mapped</summary>
         private void AddToNeededRefList(ArrayList neededRefList, MapTypeInfo info) {
+            // only need forward reference if type is not already defined
+            // do not generate forward declarations for custom mapped, because full idl already present
+            // for custom mapped: CheckMapped results in true -> ok.
             if ((!neededRefList.Contains(info)) && (!CheckMapped(info.m_type))) { // need a forward reference
-                // only need forward reference if type is not already defined
                 neededRefList.Add(info);
             }                
         }
@@ -254,15 +280,16 @@ namespace Ch.Elca.Iiop.Idl {
         /// gets the type, which should be mapped next
         /// </summary>
         public MapTypeInfo GetNextTypeToMap() {
-            object result = null;
+            MapTypeInfo result = null;
             
             while (m_toMap.Count > 0) {
-                result = (MapTypeInfo) m_toMap.Dequeue();
-                if (!CheckMapped((((MapTypeInfo)result).m_type))) {
+                MapTypeInfo candidate = (MapTypeInfo) m_toMap.Dequeue();
+                if (!CheckMapped(candidate.m_type)) {
+                    result = candidate;
                     break;
                 }
             }
-            return (MapTypeInfo) result;
+            return result;
         }
 
         #endregion IMethods

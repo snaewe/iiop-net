@@ -148,9 +148,21 @@ namespace Ch.Elca.Iiop.Idl {
         /// <param name="clsType">the native cls type, e.g. ArrayList</param>
         /// <param name="idlType">the idl type (mapped from idl to CLS) used to describe serialisation / deserialisation, e.g. java.util.ArrayListImpl</param>
         /// <param name="mapper">the mapper, knowing how to map instances of CLS ArrayList to java.util.ArrayListImpl and in the other direction</param>
-        public void AddMapping(Type clsType, Type idlType, ICustomMapper mapper) {
+        public void AddMapping(Type clsType, Type idlType, ICustomMapper mapper) {            
+            // check that idlType implements IIdlEntity:
+            Type idlEntityType = typeof(IIdlEntity);
+            if (!(idlEntityType.IsAssignableFrom(idlType))) {
+                throw new Exception("illegal type for custom mapping encountered: " + idlType.FullName);
+            }
+            // be aware: mapping is not bijektive, because of impl classes; however for an idl type only one
+            // cls type is allowed
+            if (m_mappingsIdl.ContainsKey(idlType) && (!((CustomMappingDesc)m_mappingsIdl[idlType]).ClsType.Equals(clsType))) {
+                throw new Exception("mapping constraint violated, tried to insert another cls type " + clsType + 
+                                     "mapped to the idl type " + idlType);
+            }
+
             CustomMappingDesc desc = new CustomMappingDesc(clsType, idlType, mapper);
-            m_mappingsCls[clsType] = desc;
+            m_mappingsCls[clsType] = desc;           
             m_mappingsIdl[idlType] = desc;
             // check for impl class attribute, if present: add impl class here too
             object[] implAttr = idlType.GetCustomAttributes(typeof(ImplClassAttribute), false);
@@ -158,8 +170,10 @@ namespace Ch.Elca.Iiop.Idl {
                 ImplClassAttribute implCl = (ImplClassAttribute) implAttr[0];
                 // get the type
                 Type implIdlType = Repository.LoadType(implCl.ImplClass);
-                CustomMappingDesc descImpl = new CustomMappingDesc(clsType, implIdlType, mapper);
-                m_mappingsIdl[implIdlType] = descImpl;
+                if (implIdlType != null) { // if impl type not found, (test needed e.g. when called from CLSToIDLGen)
+                    CustomMappingDesc descImpl = new CustomMappingDesc(clsType, implIdlType, mapper);
+                    m_mappingsIdl[implIdlType] = descImpl;
+                }
             }
         }
         

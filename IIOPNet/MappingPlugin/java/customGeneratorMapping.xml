@@ -1,0 +1,11 @@
+<?xml version='1.0'?>
+<generatorMappings>
+
+    <mapping>
+        <clsType>System.Collections.ArrayList,mscorlib</clsType>
+        <idlTypeName>java.util.ArrayList</idlTypeName>
+        <idlTypeAssembly>javaCollections</idlTypeAssembly>
+        <idlFile>java\util\ArrayList.idl</idlFile>
+    </mapping>
+
+</generatorMappings>

@@ -31,6 +31,7 @@
 using System;
 using System.Reflection;
 using System.IO;
+using System.Diagnostics;
 
 namespace Ch.Elca.Iiop.Idl {
 
@@ -39,6 +40,47 @@ namespace Ch.Elca.Iiop.Idl {
     /// </summary>
     public class IdlGenerator {
 
+        #region Types
+
+        private class CustomAssemblyResolver {
+
+            private string m_baseDir;
+
+            public CustomAssemblyResolver(string baseDir) {
+                m_baseDir = baseDir;
+            }
+
+            public Assembly AssemblyResolve(object sender, ResolveEventArgs args) {
+                Debug.WriteLine("custom resolve");
+                Debug.WriteLine("assembly: " + args.Name);
+                
+                Assembly found = LoadByRelativePath(args.Name + ".dll");
+                if (found != null) {
+                    return found;
+                }
+                found = LoadByRelativePath(args.Name + ".exe");
+                if (found != null) {
+                    return found;
+                }
+                found = LoadByRelativePath(args.Name + Path.PathSeparator + args.Name + ".dll");
+                if (found != null) {
+                    return found;
+                }
+                found = LoadByRelativePath(args.Name + Path.PathSeparator + args.Name + ".exe");
+                if (found != null) {
+                    return found;
+                }
+                // nothing found
+                return null;
+            }
+
+            private Assembly LoadByRelativePath(string asmFileName) {
+                string candidate = Path.Combine(m_baseDir, asmFileName);
+                return Assembly.LoadFrom(candidate);
+            }
+        }
+
+        #endregion Types
         #region SFields
 
         /// <summary>
@@ -55,6 +97,7 @@ namespace Ch.Elca.Iiop.Idl {
         [STAThread]
         public static void Main(string[] args) {
             Type typeToMap = ParseArgs(args);
+
             Console.WriteLine("emitting Predef.idl");
             EmitPredefIdl();
             Console.WriteLine("generating IDL for type: " + typeToMap.FullName);
@@ -75,6 +118,7 @@ namespace Ch.Elca.Iiop.Idl {
             Console.WriteLine("options are:");
             Console.WriteLine("-h              help");
             Console.WriteLine("-o directory    output directory (default is `-o .`)");
+            Console.WriteLine("-c xmlfile      specifies custom mappings");
         }
 
         public static void Error(String message) {
@@ -88,6 +132,7 @@ namespace Ch.Elca.Iiop.Idl {
         private static Type ParseArgs(string[] args) {
             int i = 0;
 
+            System.IO.FileInfo configFile = null;
             while ((i < args.Length) && (args[i][0] == '-')) {
                 switch (args[i]) {
                     case "-h":
@@ -97,6 +142,10 @@ namespace Ch.Elca.Iiop.Idl {
                     case "-o":
                         i++;
                         s_destination = args[i++];
+                        break;
+                    case "-c":
+                        i++;
+                        configFile = new System.IO.FileInfo(args[i++]);
                         break;
                     default:
                         Error(String.Format("Error: invalid option {0}", args[i]));
@@ -121,12 +170,38 @@ namespace Ch.Elca.Iiop.Idl {
             } catch (Exception e) {
                 Error(String.Format("Error while loading assembly: {0}", e.Message));
             }
+
+            // append private assembly search path: directory of assembly containing type to map -> find assemblies it depends on
+            SetupAppDomain(assembly);
+
             try {
                 type = assembly.GetType(args[i], true);
             } catch (Exception e) {
                 Error(String.Format("Error while loading type: {0}", e.Message));
             }
+
+            if (configFile != null) {
+                // add custom mappings from file
+       	        GeneratorMappingPlugin plugin = GeneratorMappingPlugin.GetSingleton();
+       	        plugin.AddMappingsFromFile(configFile);
+            }
+
             return type;
+        }
+
+        /// <summary>
+        /// set up the AppDomain for the type to map in the containing assembly assemblyToMap
+        /// </summary>
+        /// <param name="assemblyToMap">the assembly containing the type to map</param>
+        private static void SetupAppDomain(Assembly assemblyToMap) {
+            AppDomain curDomain = AppDomain.CurrentDomain;
+            curDomain.AppendPrivatePath(curDomain.BaseDirectory);
+            // directory of the assembly containing the typ to map
+            // make sure to probe in directory containing type to map, if not found itself ...
+            string directoryName = new FileInfo(assemblyToMap.Location).DirectoryName;
+            CustomAssemblyResolver resolver = new CustomAssemblyResolver(directoryName);
+            ResolveEventHandler hndlr = new ResolveEventHandler(resolver.AssemblyResolve);
+            curDomain.AssemblyResolve += hndlr;
         }
 
         private static void EmitPredefIdl() {
