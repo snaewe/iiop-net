@@ -1,4 +1,4 @@
-NUNIT=D:\Programme\NUnitV2\bin\nunit.framework.dll 
+NUNIT=$(NUNITV2_HOME)\bin\nunit.framework.dll 
 IIOPCHANNEL = ..\..\..\IIOPChannel\bin\IIOPChannel.dll 
 IIOPCHANNELPDB = ..\..\..\IIOPChannel\bin\IIOPChannel.pdb 
 bin         = bin\ 
@@ -28,4 +28,10 @@ compile-idl:
 	cd IDL 
 	..\..\..\..\IDLToCLSCompiler\IDLCompiler\bin\IDLToCLSCompiler.exe -o ..\bin client Ch\Elca\Iiop\IntegrationTests\TestService.idl
 	cd ..
+
+clean:
+	if exist IDL del /s /q IDL
+	if exist bin del /s /q bin
+	if exist IDL rmdir /s /q IDL
+	if exist bin rmdir /s /q bin
 

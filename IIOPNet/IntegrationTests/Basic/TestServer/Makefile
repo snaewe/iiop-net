@@ -18,3 +18,8 @@ build-server: $(bin)IIOPChannel.dll *.cs
 build-idl:
     ..\..\..\CLSToIDLGenerator\bin\CLSIDLGenerator.exe -o IDL Ch.Elca.Iiop.IntegrationTests.TestService bin\testServer.exe
 
+clean:
+	if exist IDL del /s /q IDL
+	if exist bin del /s /q bin
+	if exist IDL rmdir /s /q IDL
+	if exist bin rmdir /s /q bin
