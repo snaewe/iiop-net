@@ -206,9 +206,9 @@ namespace omg.org.CosNaming {
         [return: WideChar(false)]
         [FromIdlName("to_string")]
         [ThrowsIdlException(typeof(omg.org.CosNaming.NamingContext_package.InvalidName))]        
-        string  to_string([IdlSequence(0)]NameComponent[] name);
+        string  to_string([IdlSequenceAttribute(0L)]NameComponent[] name);
         
-        [return: IdlSequence(0)]
+        [return: IdlSequenceAttribute(0L)]
         [FromIdlName("to_name")]
         [ThrowsIdlException(typeof(omg.org.CosNaming.NamingContext_package.InvalidName))]        
         NameComponent[] to_name([StringValue][WideChar(false)] string name);
