@@ -103,7 +103,7 @@ namespace Ch.Elca.Iiop.Cdr {
         uint WCharSet {
             get; 
             set;
-        }
+        }        
 
         #endregion IProperties
         #region IMethods
@@ -136,7 +136,7 @@ namespace Ch.Elca.Iiop.Cdr {
         /// <summary>skip the remaining bytes in the message</summary>
         /// <remarks>throws an exception if length not known</remarks>
         void SkipRest();
-
+        
         #endregion IMethods
 
     }
@@ -199,7 +199,7 @@ namespace Ch.Elca.Iiop.Cdr {
             get; 
             set;
         }
-
+        
         #endregion IProperties
         #region IMethods
 
@@ -215,7 +215,7 @@ namespace Ch.Elca.Iiop.Cdr {
         /// <summary>writes opaque data to the stream</summary>        
         void WriteOpaque(byte[] data);
 
-	void WriteBytes(byte[] data, int offset, int count);
+        void WriteBytes(byte[] data, int offset, int count);
 
         /// <summary>
         /// forces the alignement on a boundary. Is for example useful in IIOP 1.2, where a request/response body
@@ -470,6 +470,8 @@ namespace Ch.Elca.Iiop.Cdr {
 
         private ulong m_startPeekPosition = 0;
         
+        private Stream m_backingStream = null;
+        
         #endregion IFields
         #region IConstructors
 
@@ -501,6 +503,13 @@ namespace Ch.Elca.Iiop.Cdr {
                 m_wcharSet = value;
             }
         }
+        
+        /// <summary>gets the stream, which was used to construct the stream</summary>        
+        internal Stream BackingStream {
+            get {
+                return m_backingStream;                
+            }
+        }
 
         #endregion IProperties
         #region IMethods
@@ -508,6 +517,7 @@ namespace Ch.Elca.Iiop.Cdr {
         protected override void SetStream(Stream stream) {
             // use a peeksupporting stream, because peek-support is needed for value-type deserialization
             base.SetStream(new PeekSupportingStream(stream));
+            m_backingStream = stream;
         }
         
         /// <summary>
@@ -798,6 +808,12 @@ namespace Ch.Elca.Iiop.Cdr {
             }
             set {
                 m_wcharSet = value;
+            }
+        }
+        
+        internal Stream BackingStream {
+            get {
+                return base.BaseStream;
             }
         }
 

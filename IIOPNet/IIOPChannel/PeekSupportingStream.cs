@@ -101,19 +101,47 @@ namespace Ch.Elca.Iiop.Util {
             m_stream.Close();
         }
 
+        /// <returns>
+        /// count, 
+        /// if possible to read the requested nr of bytes 
+        /// (end of stream not reached in the middle), 
+        /// otherwise
+        /// throws an IOException
+        /// </returns>
         public override int Read(byte[] buffer, int offset, int count) {
             lock(this) {
-                int read = count;
+                
                 if (offset + count > buffer.Length) { 
                     throw new ArgumentException("buffer is not large enough"); 
                 }
-                for (int i = 0; i < count; i++) {
-                    int result = ReadByte();
-                    if (result < 0) { read = i; break; }
-                    buffer[offset+i] = (byte)result;
+                
+                if (m_isPeeking) {
+                    // not efficient, but ok for small number of reads in peeking mode
+                    for (int i = 0; i < count; i++) {
+                        int result = ReadByte(); // throws exception if not available
+                        buffer[offset+i] = (byte)result;
+                    }
+                    return count;
+                } else {
+                    // efficient reading
+                    int readTotal = 0;
+                    int currentOffset = offset;
+                    while (readTotal < count) {
+                        if (m_peekBuffer != null) {
+                            // read form peek-buffer
+                            buffer[currentOffset] = (byte)InternalReadByte(); // throws Exception, if not available
+                            readTotal++;
+                            currentOffset++;
+                        } else {
+                            IoUtil.ReadExactly(m_stream, buffer, currentOffset, 
+                                               count - readTotal); // throws Exception, if not available
+                            break; // read completed
+                        }
+                    }
+                    // always read count bytes (or throws exception if not possible)
+                    return count;
                 }
-                return read;
-            }
+            } // end lock
         }
 
         public override int ReadByte() {
