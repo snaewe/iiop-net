@@ -143,7 +143,11 @@ namespace Ch.Elca.Iiop {
 
         internal string ChanUri {
             get {
-                return m_chanUri.ToString();
+                if (m_chanUri != null) {
+                    return m_chanUri.ToString();
+                } else {
+                    return null;
+                }
             }
         }
 

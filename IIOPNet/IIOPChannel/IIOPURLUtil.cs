@@ -106,6 +106,9 @@ namespace Ch.Elca.Iiop.Util {
                 // skip
                 uri = new Uri(url);
                 objectUri = uri.PathAndQuery;
+                if ((objectUri != null) && (objectUri.StartsWith("/"))) {
+                    objectUri = objectUri.Substring(1);
+                }
             } else if (url.StartsWith("IOR:")) {
                 Ior ior = new Ior(url);
                 uri = new Uri("iiop://"+ior.HostName+":"+ior.Port);
