@@ -31,6 +31,10 @@ interface TestService {
     TestUnionE EchoTestUnionE(in TestUnionE arg);   
     any EchoAny(in any arg);
     any RetrieveUnknownUnion();
+    any RetrieveWStringAsAny(in wstring arg);
+
+    wchar EchoWChar(in wchar arg);
+    wstring EchoWString(in wstring arg);
 
     // test for forum bug report: idl wstring sequences
     wstringSeq RetrieveWstringSeq(in wstring val, in long nrOfElems);

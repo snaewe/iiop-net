@@ -16,15 +16,31 @@ class TestService_impl : virtual public POA_TestService,
 {
 
 public:
+  CORBA::WChar EchoWChar(CORBA::WChar arg);
+  CORBA::WChar* EchoWString(const CORBA::WChar* arg);
   ::TestUnion EchoTestUnion(const ::TestUnion& arg);
   ::TestUnionE EchoTestUnionE(const ::TestUnionE& arg);
   CORBA::Any* RetrieveUnknownUnion();
+  CORBA::Any* RetrieveWStringAsAny(const CORBA::WChar* arg);
   CORBA::Any* EchoAny(const CORBA::Any& arg);
   ::wstringSeq* RetrieveWstringSeq(const CORBA::WChar * val, CORBA::Long nrOrElems);
   ::wstringSeq* EchoWstringSeq(const ::wstringSeq& arg);
   ::seqOfWStringSeq* EchoSeqOfWStringSeq(const ::seqOfWStringSeq& arg);
   TestService::InnerStruct EchoInnerStruct(const TestService::InnerStruct& arg);
 };
+
+CORBA::WChar 
+TestService_impl::EchoWChar(CORBA::WChar arg) 
+{
+  return arg;
+}
+
+CORBA::WChar* 
+TestService_impl::EchoWString(const CORBA::WChar* arg) 
+{
+    return (CORBA::WChar*)arg;
+}
+
 
 ::TestUnion
 TestService_impl::EchoTestUnion (const ::TestUnion& arg)
@@ -44,6 +60,14 @@ TestService_impl::RetrieveUnknownUnion() {
     result.valE0(13);
     CORBA::Any* resultAny = new CORBA::Any;
     *resultAny <<= result;
+    return resultAny;
+}
+
+CORBA::Any* 
+TestService_impl::RetrieveWStringAsAny(const CORBA::WChar* arg) {
+    CORBA::WChar* argVal = (CORBA::WChar*)arg;
+    CORBA::Any* resultAny = new CORBA::Any;
+    *resultAny <<= argVal;
     return resultAny;
 }
 

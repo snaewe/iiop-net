@@ -128,6 +128,27 @@ namespace Ch.Elca.Iiop.IntegrationTests {
             Assertion.AssertEquals(TestEnumForU.B, result2.Discriminator);
         }
 
+//        [Test]
+//        public void TestPassingStringAsAny() {
+//            string arg = "test";
+//            string result = (string)m_testService.EchoAny(arg);
+//            Assertion.AssertEquals(arg, result);
+//        }
+
+        [Test]
+        public void TestReceivingStringAsAny() {
+            string arg = "test";
+            string result = (string)m_testService.RetrieveWStringAsAny(arg);
+            Assertion.AssertEquals(arg, result);
+        }
+
+        [Test]
+        public void TestPassingSimpleAsAny() {
+            int arg = 21;
+            int result = (int)m_testService.EchoAny(arg);
+            Assertion.AssertEquals(arg, result);
+        }
+
         [Test]
         public void TestReceivingUnknownUnionsAsAny() {
 	        object result = m_testService.RetrieveUnknownUnion();
@@ -189,6 +210,20 @@ namespace Ch.Elca.Iiop.IntegrationTests {
             TestService_package.InnerStruct result = m_testService.EchoInnerStruct(arg);
             Assertion.AssertNotNull(result);
             Assertion.AssertEquals(arg.Field1, result.Field1);
+        }
+
+        [Test]
+        public void TestWChar() {
+            char arg = 'a';
+            char result = m_testService.EchoWChar(arg);
+            Assertion.AssertEquals(arg, result);
+        }
+
+        [Test]
+        public void TestWString() {
+            string arg = "test";
+            string result = m_testService.EchoWString(arg);
+            Assertion.AssertEquals(arg, result);
         }
 
 
