@@ -1528,10 +1528,19 @@ public class IDLParser{/*@bgen(jjtree)*/
         break;
       }
       jj_consume_token(30);
+      switch ((jj_ntk==-1)?jj_ntk_calc():jj_ntk) {
+      case 81:
+        raises_expr();
+        break;
+      default:
+        jj_la1[30] = jj_gen;
+        ;
+        break;
+      }
       jj_consume_token(12);
-                                                                            jjtree.closeNodeScope(jjtn000, true);
-                                                                            jjtc000 = false;
-                                                                            jjtn000.setIdent(ident);
+                                                                                              jjtree.closeNodeScope(jjtn000, true);
+                                                                                              jjtc000 = false;
+                                                                                              jjtn000.setIdent(ident);
     } catch (Exception jjte000) {
           if (jjtc000) {
             jjtree.clearNodeScope(jjtn000);
@@ -1567,7 +1576,7 @@ public class IDLParser{/*@bgen(jjtree)*/
           ;
           break;
         default:
-          jj_la1[30] = jj_gen;
+          jj_la1[31] = jj_gen;
           goto label_10;
           break;
         }
@@ -1661,7 +1670,7 @@ public class IDLParser{/*@bgen(jjtree)*/
                                      ident = "NotANumber";
         break;
       default:
-        jj_la1[31] = jj_gen;
+        jj_la1[32] = jj_gen;
         jj_consume_token(-1);
         throw new ParseException();
         break;
@@ -1736,7 +1745,7 @@ public class IDLParser{/*@bgen(jjtree)*/
           octet_type();
           break;
         default:
-          jj_la1[32] = jj_gen;
+          jj_la1[33] = jj_gen;
           jj_consume_token(-1);
           throw new ParseException();
           break;
@@ -1806,7 +1815,7 @@ public class IDLParser{/*@bgen(jjtree)*/
           ;
           break;
         default:
-          jj_la1[33] = jj_gen;
+          jj_la1[34] = jj_gen;
           goto label_11;
           break;
         }
@@ -1850,7 +1859,7 @@ public class IDLParser{/*@bgen(jjtree)*/
           ;
           break;
         default:
-          jj_la1[34] = jj_gen;
+          jj_la1[35] = jj_gen;
           goto label_12;
           break;
         }
@@ -1894,7 +1903,7 @@ public class IDLParser{/*@bgen(jjtree)*/
           ;
           break;
         default:
-          jj_la1[35] = jj_gen;
+          jj_la1[36] = jj_gen;
           goto label_13;
           break;
         }
@@ -1939,7 +1948,7 @@ public class IDLParser{/*@bgen(jjtree)*/
           ;
           break;
         default:
-          jj_la1[36] = jj_gen;
+          jj_la1[37] = jj_gen;
           goto label_14;
           break;
         }
@@ -1951,7 +1960,7 @@ public class IDLParser{/*@bgen(jjtree)*/
           jj_consume_token(39);
           break;
         default:
-          jj_la1[37] = jj_gen;
+          jj_la1[38] = jj_gen;
           jj_consume_token(-1);
           throw new ParseException();
           break;
@@ -1996,7 +2005,7 @@ public class IDLParser{/*@bgen(jjtree)*/
           ;
           break;
         default:
-          jj_la1[38] = jj_gen;
+          jj_la1[39] = jj_gen;
           goto label_15;
           break;
         }
@@ -2008,7 +2017,7 @@ public class IDLParser{/*@bgen(jjtree)*/
           jj_consume_token(41);
           break;
         default:
-          jj_la1[39] = jj_gen;
+          jj_la1[40] = jj_gen;
           jj_consume_token(-1);
           throw new ParseException();
           break;
@@ -2054,7 +2063,7 @@ public class IDLParser{/*@bgen(jjtree)*/
           ;
           break;
         default:
-          jj_la1[40] = jj_gen;
+          jj_la1[41] = jj_gen;
           goto label_16;
           break;
         }
@@ -2069,7 +2078,7 @@ public class IDLParser{/*@bgen(jjtree)*/
           jj_consume_token(44);
           break;
         default:
-          jj_la1[41] = jj_gen;
+          jj_la1[42] = jj_gen;
           jj_consume_token(-1);
           throw new ParseException();
           break;
@@ -2113,7 +2122,7 @@ public class IDLParser{/*@bgen(jjtree)*/
         unary_op = unary_operator();
         break;
       default:
-        jj_la1[42] = jj_gen;
+        jj_la1[43] = jj_gen;
         ;
         break;
       }
@@ -2158,7 +2167,7 @@ public class IDLParser{/*@bgen(jjtree)*/
         {if (true) return UnaryOps.UnaryNegate;}
       break;
     default:
-      jj_la1[43] = jj_gen;
+      jj_la1[44] = jj_gen;
       jj_consume_token(-1);
       throw new ParseException();
       break;
@@ -2201,7 +2210,7 @@ public class IDLParser{/*@bgen(jjtree)*/
         jj_consume_token(30);
         break;
       default:
-        jj_la1[44] = jj_gen;
+        jj_la1[45] = jj_gen;
         jj_consume_token(-1);
         throw new ParseException();
         break;
@@ -2250,7 +2259,7 @@ public class IDLParser{/*@bgen(jjtree)*/
                               jjtn000.setLitVal(new StringLiteral((String)litVal, false));
         break;
       default:
-        jj_la1[45] = jj_gen;
+        jj_la1[46] = jj_gen;
         if (jj_2_12(2)) {
           litVal = wide_string_literal();
                                    jjtree.closeNodeScope(jjtn000, true);
@@ -2265,7 +2274,7 @@ public class IDLParser{/*@bgen(jjtree)*/
                                  jjtn000.setLitVal(new CharLiteral((Char)litVal, false));
             break;
           default:
-            jj_la1[46] = jj_gen;
+            jj_la1[47] = jj_gen;
             if (jj_2_13(2)) {
               litVal = wide_character_literal();
                                       jjtree.closeNodeScope(jjtn000, true);
@@ -2297,7 +2306,7 @@ public class IDLParser{/*@bgen(jjtree)*/
                                jjtn000.setLitVal(new BooleanLiteral((Boolean)litVal));
                 break;
               default:
-                jj_la1[47] = jj_gen;
+                jj_la1[48] = jj_gen;
                 jj_consume_token(-1);
                 throw new ParseException();
                 break;
@@ -2341,7 +2350,7 @@ public class IDLParser{/*@bgen(jjtree)*/
             {if (true) return false;}
       break;
     default:
-      jj_la1[48] = jj_gen;
+      jj_la1[49] = jj_gen;
       jj_consume_token(-1);
       throw new ParseException();
       break;
@@ -2404,7 +2413,7 @@ public class IDLParser{/*@bgen(jjtree)*/
         simple_declarator();
         break;
       default:
-        jj_la1[49] = jj_gen;
+        jj_la1[50] = jj_gen;
         jj_consume_token(-1);
         throw new ParseException();
         break;
@@ -2505,7 +2514,7 @@ public class IDLParser{/*@bgen(jjtree)*/
         constr_type_spec();
         break;
       default:
-        jj_la1[50] = jj_gen;
+        jj_la1[51] = jj_gen;
         jj_consume_token(-1);
         throw new ParseException();
         break;
@@ -2564,7 +2573,7 @@ public class IDLParser{/*@bgen(jjtree)*/
         scoped_name();
         break;
       default:
-        jj_la1[51] = jj_gen;
+        jj_la1[52] = jj_gen;
         jj_consume_token(-1);
         throw new ParseException();
         break;
@@ -2628,7 +2637,7 @@ public class IDLParser{/*@bgen(jjtree)*/
           value_base_type();
           break;
         default:
-          jj_la1[52] = jj_gen;
+          jj_la1[53] = jj_gen;
           jj_consume_token(-1);
           throw new ParseException();
           break;
@@ -2676,7 +2685,7 @@ public class IDLParser{/*@bgen(jjtree)*/
         fixed_pt_type();
         break;
       default:
-        jj_la1[53] = jj_gen;
+        jj_la1[54] = jj_gen;
         jj_consume_token(-1);
         throw new ParseException();
         break;
@@ -2720,7 +2729,7 @@ public class IDLParser{/*@bgen(jjtree)*/
         enum_type();
         break;
       default:
-        jj_la1[54] = jj_gen;
+        jj_la1[55] = jj_gen;
         jj_consume_token(-1);
         throw new ParseException();
         break;
@@ -2760,7 +2769,7 @@ public class IDLParser{/*@bgen(jjtree)*/
           ;
           break;
         default:
-          jj_la1[55] = jj_gen;
+          jj_la1[56] = jj_gen;
           goto label_17;
           break;
         }
@@ -2805,7 +2814,7 @@ public class IDLParser{/*@bgen(jjtree)*/
           simple_declarator();
           break;
         default:
-          jj_la1[56] = jj_gen;
+          jj_la1[57] = jj_gen;
           jj_consume_token(-1);
           throw new ParseException();
           break;
@@ -2911,7 +2920,7 @@ public class IDLParser{/*@bgen(jjtree)*/
         floating_pt_type_double();
         break;
       default:
-        jj_la1[57] = jj_gen;
+        jj_la1[58] = jj_gen;
         jj_consume_token(-1);
         throw new ParseException();
         break;
@@ -2999,7 +3008,7 @@ public class IDLParser{/*@bgen(jjtree)*/
         unsigned_int();
         break;
       default:
-        jj_la1[58] = jj_gen;
+        jj_la1[59] = jj_gen;
         jj_consume_token(-1);
         throw new ParseException();
         break;
@@ -3042,7 +3051,7 @@ public class IDLParser{/*@bgen(jjtree)*/
           signed_short_int();
           break;
         default:
-          jj_la1[59] = jj_gen;
+          jj_la1[60] = jj_gen;
           jj_consume_token(-1);
           throw new ParseException();
           break;
@@ -3132,7 +3141,7 @@ public class IDLParser{/*@bgen(jjtree)*/
           unsigned_short_int();
           break;
         default:
-          jj_la1[60] = jj_gen;
+          jj_la1[61] = jj_gen;
           jj_consume_token(-1);
           throw new ParseException();
           break;
@@ -3371,7 +3380,7 @@ public class IDLParser{/*@bgen(jjtree)*/
           ;
           break;
         default:
-          jj_la1[61] = jj_gen;
+          jj_la1[62] = jj_gen;
           goto label_18;
           break;
         }
@@ -3500,7 +3509,7 @@ public class IDLParser{/*@bgen(jjtree)*/
         scoped_name();
         break;
       default:
-        jj_la1[62] = jj_gen;
+        jj_la1[63] = jj_gen;
         jj_consume_token(-1);
         throw new ParseException();
         break;
@@ -3541,7 +3550,7 @@ public class IDLParser{/*@bgen(jjtree)*/
           ;
           break;
         default:
-          jj_la1[63] = jj_gen;
+          jj_la1[64] = jj_gen;
           goto label_19;
           break;
         }
@@ -3584,7 +3593,7 @@ public class IDLParser{/*@bgen(jjtree)*/
           ;
           break;
         default:
-          jj_la1[64] = jj_gen;
+          jj_la1[65] = jj_gen;
           goto label_20;
           break;
         }
@@ -3635,7 +3644,7 @@ public class IDLParser{/*@bgen(jjtree)*/
                    jjtn000.setDefault();
         break;
       default:
-        jj_la1[65] = jj_gen;
+        jj_la1[66] = jj_gen;
         jj_consume_token(-1);
         throw new ParseException();
         break;
@@ -3708,7 +3717,7 @@ public class IDLParser{/*@bgen(jjtree)*/
           ;
           break;
         default:
-          jj_la1[66] = jj_gen;
+          jj_la1[67] = jj_gen;
           goto label_21;
           break;
         }
@@ -3794,7 +3803,7 @@ public class IDLParser{/*@bgen(jjtree)*/
         positive_int_const();
         break;
       default:
-        jj_la1[67] = jj_gen;
+        jj_la1[68] = jj_gen;
         ;
         break;
       }
@@ -3835,7 +3844,7 @@ public class IDLParser{/*@bgen(jjtree)*/
         jj_consume_token(69);
         break;
       default:
-        jj_la1[68] = jj_gen;
+        jj_la1[69] = jj_gen;
         ;
         break;
       }
@@ -3875,7 +3884,7 @@ public class IDLParser{/*@bgen(jjtree)*/
         jj_consume_token(69);
         break;
       default:
-        jj_la1[69] = jj_gen;
+        jj_la1[70] = jj_gen;
         ;
         break;
       }
@@ -3915,7 +3924,7 @@ public class IDLParser{/*@bgen(jjtree)*/
           ;
           break;
         default:
-          jj_la1[70] = jj_gen;
+          jj_la1[71] = jj_gen;
           goto label_22;
           break;
         }
@@ -3990,7 +3999,7 @@ public class IDLParser{/*@bgen(jjtree)*/
                  isReadOnly = true;
         break;
       default:
-        jj_la1[71] = jj_gen;
+        jj_la1[72] = jj_gen;
         ;
         break;
       }
@@ -4003,7 +4012,7 @@ public class IDLParser{/*@bgen(jjtree)*/
           ;
           break;
         default:
-          jj_la1[72] = jj_gen;
+          jj_la1[73] = jj_gen;
           goto label_23;
           break;
         }
@@ -4072,7 +4081,7 @@ public class IDLParser{/*@bgen(jjtree)*/
           ;
           break;
         default:
-          jj_la1[73] = jj_gen;
+          jj_la1[74] = jj_gen;
           goto label_24;
           break;
         }
@@ -4120,7 +4129,7 @@ public class IDLParser{/*@bgen(jjtree)*/
         opAttr = op_attribute();
         break;
       default:
-        jj_la1[74] = jj_gen;
+        jj_la1[75] = jj_gen;
         ;
         break;
       }
@@ -4132,7 +4141,7 @@ public class IDLParser{/*@bgen(jjtree)*/
         raises_expr();
         break;
       default:
-        jj_la1[75] = jj_gen;
+        jj_la1[76] = jj_gen;
         ;
         break;
       }
@@ -4141,7 +4150,7 @@ public class IDLParser{/*@bgen(jjtree)*/
         context_expr();
         break;
       default:
-        jj_la1[76] = jj_gen;
+        jj_la1[77] = jj_gen;
         ;
         break;
       }
@@ -4207,7 +4216,7 @@ public class IDLParser{/*@bgen(jjtree)*/
         jj_consume_token(78);
         break;
       default:
-        jj_la1[77] = jj_gen;
+        jj_la1[78] = jj_gen;
         jj_consume_token(-1);
         throw new ParseException();
         break;
@@ -4252,7 +4261,7 @@ public class IDLParser{/*@bgen(jjtree)*/
             ;
             break;
           default:
-            jj_la1[78] = jj_gen;
+            jj_la1[79] = jj_gen;
             goto label_25;
             break;
           }
@@ -4263,7 +4272,7 @@ public class IDLParser{/*@bgen(jjtree)*/
         
         break;
       default:
-        jj_la1[79] = jj_gen;
+        jj_la1[80] = jj_gen;
         ;
         break;
       }
@@ -4347,7 +4356,7 @@ public class IDLParser{/*@bgen(jjtree)*/
             jjtn000.setParamDir(ASTparam_attribute.ParamDir_INOUT);
         break;
       default:
-        jj_la1[80] = jj_gen;
+        jj_la1[81] = jj_gen;
         jj_consume_token(-1);
         throw new ParseException();
         break;
@@ -4375,7 +4384,7 @@ public class IDLParser{/*@bgen(jjtree)*/
           ;
           break;
         default:
-          jj_la1[81] = jj_gen;
+          jj_la1[82] = jj_gen;
           goto label_26;
           break;
         }
@@ -4423,7 +4432,7 @@ public class IDLParser{/*@bgen(jjtree)*/
           ;
           break;
         default:
-          jj_la1[82] = jj_gen;
+          jj_la1[83] = jj_gen;
           goto label_27;
           break;
         }
@@ -4488,7 +4497,7 @@ public class IDLParser{/*@bgen(jjtree)*/
         scoped_name();
         break;
       default:
-        jj_la1[83] = jj_gen;
+        jj_la1[84] = jj_gen;
         jj_consume_token(-1);
         throw new ParseException();
         break;
@@ -4622,7 +4631,7 @@ public class IDLParser{/*@bgen(jjtree)*/
                                                                 {if (true) return System.Int64.Parse(hexVal, System.Globalization.NumberStyles.AllowHexSpecifier);}
       break;
     default:
-      jj_la1[84] = jj_gen;
+      jj_la1[85] = jj_gen;
       jj_consume_token(-1);
       throw new ParseException();
       break;
@@ -4677,7 +4686,7 @@ public class IDLParser{/*@bgen(jjtree)*/
         floatLiteral = jj_consume_token(IDLParserConstants.FLOATTWO);
         break;
       default:
-        jj_la1[85] = jj_gen;
+        jj_la1[86] = jj_gen;
         jj_consume_token(-1);
         throw new ParseException();
         break;
@@ -4697,7 +4706,7 @@ public class IDLParser{/*@bgen(jjtree)*/
       {if (true) return Double.PositiveInfinity;}
       break;
     default:
-      jj_la1[86] = jj_gen;
+      jj_la1[87] = jj_gen;
       jj_consume_token(-1);
       throw new ParseException();
       break;
@@ -4715,7 +4724,7 @@ public class IDLParser{/*@bgen(jjtree)*/
         jj_consume_token(IDLParserConstants.FIXED);
         break;
       default:
-        jj_la1[87] = jj_gen;
+        jj_la1[88] = jj_gen;
         ;
         break;
       }
@@ -4727,7 +4736,7 @@ public class IDLParser{/*@bgen(jjtree)*/
         jj_consume_token(88);
         break;
       default:
-        jj_la1[88] = jj_gen;
+        jj_la1[89] = jj_gen;
         jj_consume_token(-1);
         throw new ParseException();
         break;
@@ -4745,7 +4754,7 @@ public class IDLParser{/*@bgen(jjtree)*/
           jj_consume_token(88);
           break;
         default:
-          jj_la1[89] = jj_gen;
+          jj_la1[90] = jj_gen;
           jj_consume_token(-1);
           throw new ParseException();
           break;
@@ -4761,14 +4770,14 @@ public class IDLParser{/*@bgen(jjtree)*/
           jj_consume_token(88);
           break;
         default:
-          jj_la1[90] = jj_gen;
+          jj_la1[91] = jj_gen;
           jj_consume_token(-1);
           throw new ParseException();
           break;
         }
         break;
       default:
-        jj_la1[91] = jj_gen;
+        jj_la1[92] = jj_gen;
         jj_consume_token(-1);
         throw new ParseException();
         break;
@@ -6141,7 +6150,7 @@ public class IDLParser{/*@bgen(jjtree)*/
   public bool lookingAhead = false;
   private bool jj_semLA;
   private int jj_gen;
-  private int[] jj_la1 = new int[92];
+  private int[] jj_la1 = new int[93];
   static private uint[] jj_la1_0;
   static private uint[] jj_la1_1;
   static private uint[] jj_la1_2;
@@ -6153,16 +6162,16 @@ public class IDLParser{/*@bgen(jjtree)*/
       jj_la1_3_init();
    }
    private static void jj_la1_0_init() {
-      jj_la1_0 = new uint[] {0x0,0xc72000,0xc72001,0x0,0x2000,0x0,0xc72000,0x60000,0x60000,0x80000,0x60000,0x200000,0x200000,0x100000,0x200000,0x200000,0x20000,0x80000,0x2000000,0x200000,0x1c200000,0x800000,0x80000,0x2000000,0x1000000,0x100000,0x100000,0x1c200000,0xc000000,0x80000000,0x100000,0x0,0x200000,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x20200000,0x0,0x0,0x0,0x0,0x0,0x200000,0x200000,0x0,0x0,0x0,0x100000,0x0,0x0,0x0,0x0,0x0,0x200000,0x200000,0x0,0x0,0x0,0x100000,0x100000,0x0,0x0,0x0,0x0,0x100000,0x200000,0x0,0x0,0x0,0x200000,0x100000,0x80000000,0x80000000,0x100000,0x100000,0x200000,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,};
+      jj_la1_0 = new uint[] {0x0,0xc72000,0xc72001,0x0,0x2000,0x0,0xc72000,0x60000,0x60000,0x80000,0x60000,0x200000,0x200000,0x100000,0x200000,0x200000,0x20000,0x80000,0x2000000,0x200000,0x1c200000,0x800000,0x80000,0x2000000,0x1000000,0x100000,0x100000,0x1c200000,0xc000000,0x80000000,0x0,0x100000,0x0,0x200000,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x20200000,0x0,0x0,0x0,0x0,0x0,0x200000,0x200000,0x0,0x0,0x0,0x100000,0x0,0x0,0x0,0x0,0x0,0x200000,0x200000,0x0,0x0,0x0,0x100000,0x100000,0x0,0x0,0x0,0x0,0x100000,0x200000,0x0,0x0,0x0,0x200000,0x100000,0x80000000,0x80000000,0x100000,0x100000,0x200000,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,};
    }
    private static void jj_la1_1_init() {
-      jj_la1_1 = new uint[] {0x0,0x60030001,0x60030001,0x60030001,0x0,0x0,0x60030001,0x0,0x0,0x0,0x0,0x7fff0001,0x7fff0001,0x0,0x0,0x0,0x0,0x0,0x0,0x7fff0001,0x7fff0001,0x0,0x0,0x0,0x0,0x0,0x0,0x7fff0001,0x0,0x0,0x0,0x2,0x79c0000,0x8,0x10,0x20,0xc0,0xc0,0x300,0x300,0x1c00,0x1c00,0x2300,0x2300,0xc002,0x0,0x0,0xc002,0xc000,0x60030000,0x7ffc0000,0x1ffc0000,0x1ff00000,0x0,0x60000000,0x0,0x0,0x1c0000,0x700000,0x200000,0x400000,0x7ffc0000,0x2f00000,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x7ffc0000,0x0,0x0,0x0,0x1ffc0000,0x0,0x0,0x0,0x0,0x0,0x1ffc0000,0x0,0x0,0x2,0x0,0x0,0x0,0x0,0x0,};
+      jj_la1_1 = new uint[] {0x0,0x60030001,0x60030001,0x60030001,0x0,0x0,0x60030001,0x0,0x0,0x0,0x0,0x7fff0001,0x7fff0001,0x0,0x0,0x0,0x0,0x0,0x0,0x7fff0001,0x7fff0001,0x0,0x0,0x0,0x0,0x0,0x0,0x7fff0001,0x0,0x0,0x0,0x0,0x2,0x79c0000,0x8,0x10,0x20,0xc0,0xc0,0x300,0x300,0x1c00,0x1c00,0x2300,0x2300,0xc002,0x0,0x0,0xc002,0xc000,0x60030000,0x7ffc0000,0x1ffc0000,0x1ff00000,0x0,0x60000000,0x0,0x0,0x1c0000,0x700000,0x200000,0x400000,0x7ffc0000,0x2f00000,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x7ffc0000,0x0,0x0,0x0,0x1ffc0000,0x0,0x0,0x0,0x0,0x0,0x1ffc0000,0x0,0x0,0x2,0x0,0x0,0x0,0x0,0x0,};
    }
    private static void jj_la1_2_init() {
-      jj_la1_2 = new uint[] {0x0,0x2001004,0x2001004,0x1004,0x0,0x2000000,0x2001004,0x0,0x0,0x0,0x0,0x12107cc4,0x12107cc4,0x0,0x0,0x0,0x0,0x0,0x0,0x12107cc4,0x12107cc4,0x0,0x0,0x0,0x0,0x0,0x0,0x12107cc4,0x0,0x0,0x0,0x10000000,0x100800c0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0xf0600000,0xe0000000,0x0,0x600000,0x0,0x4,0x101800cc,0x101800c8,0x100000,0x800c8,0x4,0x0,0x10000000,0x0,0x0,0x0,0x0,0x101800cc,0x10000004,0x3,0x3,0x3,0x0,0x0,0x10,0x10,0x100,0x400,0x0,0x101800cc,0x2000,0x20000,0x40000,0x101040c0,0x0,0x18000,0x18000,0x0,0x0,0x101000c0,0xe0000000,0x0,0x200000,0x0,0x1800000,0x1800000,0x1800000,0x400000,};
+      jj_la1_2 = new uint[] {0x0,0x2001004,0x2001004,0x1004,0x0,0x2000000,0x2001004,0x0,0x0,0x0,0x0,0x12107cc4,0x12107cc4,0x0,0x0,0x0,0x0,0x0,0x0,0x12107cc4,0x12107cc4,0x0,0x0,0x0,0x0,0x0,0x0,0x12107cc4,0x0,0x0,0x20000,0x0,0x10000000,0x100800c0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0xf0600000,0xe0000000,0x0,0x600000,0x0,0x4,0x101800cc,0x101800c8,0x100000,0x800c8,0x4,0x0,0x10000000,0x0,0x0,0x0,0x0,0x101800cc,0x10000004,0x3,0x3,0x3,0x0,0x0,0x10,0x10,0x100,0x400,0x0,0x101800cc,0x2000,0x20000,0x40000,0x101040c0,0x0,0x18000,0x18000,0x0,0x0,0x101000c0,0xe0000000,0x0,0x200000,0x0,0x1800000,0x1800000,0x1800000,0x400000,};
    }
    private static void jj_la1_3_init() {
-      jj_la1_3 = new uint[] {0x50,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0xbf,0x10,0x4,0x83,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x3,0x3,0x80,0x0,0x0,0x0,0x80,};
+      jj_la1_3 = new uint[] {0x50,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0xbf,0x10,0x4,0x83,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x3,0x3,0x80,0x0,0x0,0x0,0x80,};
    }
   private JJCalls[] jj_2_rtns = new JJCalls[20];
   private bool jj_rescan = false;
@@ -6174,7 +6183,7 @@ public class IDLParser{/*@bgen(jjtree)*/
     token = new Token();
     jj_ntk = -1;
     jj_gen = 0;
-    for (int i = 0; i < 92; i++) jj_la1[i] = -1;
+    for (int i = 0; i < 93; i++) jj_la1[i] = -1;
     for (int i = 0; i < jj_2_rtns.Length; i++) jj_2_rtns[i] = new JJCalls();
   }
 
@@ -6185,7 +6194,7 @@ public class IDLParser{/*@bgen(jjtree)*/
     jj_ntk = -1;
     jjtree.reset();
     jj_gen = 0;
-    for (int i = 0; i < 92; i++) jj_la1[i] = -1;
+    for (int i = 0; i < 93; i++) jj_la1[i] = -1;
     for (int i = 0; i < jj_2_rtns.Length; i++) jj_2_rtns[i] = new JJCalls();
   }
 
@@ -6195,7 +6204,7 @@ public class IDLParser{/*@bgen(jjtree)*/
     token = new Token();
     jj_ntk = -1;
     jj_gen = 0;
-    for (int i = 0; i < 92; i++) jj_la1[i] = -1;
+    for (int i = 0; i < 93; i++) jj_la1[i] = -1;
     for (int i = 0; i < jj_2_rtns.Length; i++) jj_2_rtns[i] = new JJCalls();
   }
 
@@ -6206,7 +6215,7 @@ public class IDLParser{/*@bgen(jjtree)*/
     jj_ntk = -1;
     jjtree.reset();
     jj_gen = 0;
-    for (int i = 0; i < 92; i++) jj_la1[i] = -1;
+    for (int i = 0; i < 93; i++) jj_la1[i] = -1;
     for (int i = 0; i < jj_2_rtns.Length; i++) jj_2_rtns[i] = new JJCalls();
   }
 
@@ -6215,7 +6224,7 @@ public class IDLParser{/*@bgen(jjtree)*/
     token = new Token();
     jj_ntk = -1;
     jj_gen = 0;
-    for (int i = 0; i < 92; i++) jj_la1[i] = -1;
+    for (int i = 0; i < 93; i++) jj_la1[i] = -1;
     for (int i = 0; i < jj_2_rtns.Length; i++) jj_2_rtns[i] = new JJCalls();
   }
 
@@ -6225,7 +6234,7 @@ public class IDLParser{/*@bgen(jjtree)*/
     jj_ntk = -1;
     jjtree.reset();
     jj_gen = 0;
-    for (int i = 0; i < 92; i++) jj_la1[i] = -1;
+    for (int i = 0; i < 93; i++) jj_la1[i] = -1;
     for (int i = 0; i < jj_2_rtns.Length; i++) jj_2_rtns[i] = new JJCalls();
   }
 
@@ -6343,7 +6352,7 @@ public class IDLParser{/*@bgen(jjtree)*/
       la1tokens[jj_kind] = true;
       jj_kind = -1;
     }
-    for (int i = 0; i < 92; i++) {
+    for (int i = 0; i < 93; i++) {
       if (jj_la1[i] == jj_gen) {
         for (int j = 0; j < 32; j++) {
           if ((jj_la1_0[i] & (1<<j)) != 0) {

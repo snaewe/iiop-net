@@ -561,7 +561,7 @@ void state_member() :
 void init_decl() :
 { String ident = ""; }
 {
-	"factory" ident = identifier() "(" [ init_param_delcs() ] ")" ";" { jjtThis.setIdent(ident); }
+	"factory" ident = identifier() "(" [ init_param_delcs() ] ")" [ raises_expr() ] ";" { jjtThis.setIdent(ident); }
 }
 
 /* Production 24, chapter 3.4, CORBA 2.3.1 */
