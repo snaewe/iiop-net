@@ -28,6 +28,7 @@
  */
 
 using System;
+using System.Globalization;
 using Ch.Elca.Iiop.Idl;
 using omg.org.CORBA;
 
@@ -187,7 +188,14 @@ namespace Ch.Elca.Iiop.JavaCollectionMappers {
     
     public class DateMapper : ICustomMapper {
         
-        private static DateTime s_javaOffsetBase = new DateTime(1970, 1, 1, 0, 0, 0);
+        private static DateTime s_javaOffsetBase;
+
+        static DateMapper() {
+            CultureInfo gmtCulture = new CultureInfo("en-GB");
+            s_javaOffsetBase  = new DateTime(1970, 1, 1, 0, 0, 0, 
+                                             gmtCulture.Calendar);            
+        }
+
     
         public object CreateClsForIdlInstance(object idlInstance) {
             java.util._DateImpl source = (java.util._DateImpl)idlInstance;
@@ -198,12 +206,13 @@ namespace Ch.Elca.Iiop.JavaCollectionMappers {
             } else {
                  result = s_javaOffsetBase - new TimeSpan(offsetTicks * -1);
             }
-            return result;
+            return result.ToLocalTime();
         }
         
         public object CreateIdlForClsInstance(object clsInstance) {
             java.util._DateImpl result = new java.util._DateImpl();
             System.DateTime source = (System.DateTime)clsInstance;
+            source = source.ToUniversalTime(); // convert to GMT for offset creation
              
             long tickOffset;           
             if (source >= s_javaOffsetBase) {
