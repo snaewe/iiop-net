@@ -349,7 +349,7 @@ namespace Ch.Elca.Iiop.Idl {
                     gen.Emit(OpCodes.Beq, exceptionLabel);
                 }
                 // after all tests, no forbidden value for default case used -> jump to ok
-                gen.Emit(OpCodes.Br_S, jumpOnOk);
+                gen.Emit(OpCodes.Br, jumpOnOk);
                 gen.MarkLabel(exceptionLabel);
             }
             
@@ -456,13 +456,13 @@ namespace Ch.Elca.Iiop.Idl {
             //        push first discr constant for switch case considered
             //        beq case2
             //          ...
-            //        br.s default
+            //        br default
             // case1 :
             //          ...
-            //          br.s end
+            //          br end
             // case2 :
             //          ...
-            //          br.s end
+            //          br end
             // default:
             //          ...
             
@@ -486,7 +486,7 @@ namespace Ch.Elca.Iiop.Idl {
                 }
             }
             // if nothing found, jump to default case
-            gen.Emit(OpCodes.Br_S, defaultCaseLabel);
+            gen.Emit(OpCodes.Br, defaultCaseLabel);
 
             // part2: code for cases (jump-targets)
             SwitchCase defaultCaseFound = null;
@@ -500,7 +500,7 @@ namespace Ch.Elca.Iiop.Idl {
                 gen.MarkLabel(switchCase.IlLabelAssigned);
                 // the field to return
                 GenerateGetFieldOfUnionType(gen, switchCase.ElemField);
-                gen.Emit(OpCodes.Br_S, endOfMethod); // jump to exit point
+                gen.Emit(OpCodes.Br, endOfMethod); // jump to exit point
             }
 
             // the default case
