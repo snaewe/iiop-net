@@ -1,5 +1,30 @@
-Latest Changes (15 July 2003)
------------------------------
+Latest Changes (04 August 2003)
+-------------------------------
+
+This release is a bug-fix release.
+
+bugs fixed:
+
+- fixed attributes-bug in Channel/Compiler (bug #773479)
+- oneway CLS methods now supported
+- CLS to IDL generator bug #780820 fixed (Idl for dependant types not generated for interfaces).
+- name mapping implementation (from IDL to CLS and from CLS to IDL names) imporved. 
+  Special names (name mapping exceptions) are now better supported.
+- .NET server states now in the IOR sent to clients in every case, that remote object supports GIOP 1.2.
+- overloaded CLS methods are now handled corretly
+
+new features:
+
+- added initial support for LocateRequest/LocateReply GIOP messages
+- added a -r option to IDL to CLS compiler for using types from assembly instead of generating them.
+
+new tests:
+
+- added more integration tests, e.g. WAS5 test
+
+
+Version 1.3.0 (15 July 2003)
+----------------------------
 
 This release is a bug-fix and compatibility improvement release.
 
