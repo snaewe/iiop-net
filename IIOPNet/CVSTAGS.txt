@@ -1,3 +1,4 @@
+31.12.2004    iiop-net-1-7-0-final
 03.10.2004    iiop-net-1-7-0-rc1
 30.08.2004    iiop-net-1-7-0-rc0
 08.06.2004    iiop-net-1-6-2-final

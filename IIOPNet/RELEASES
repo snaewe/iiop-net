@@ -1,3 +1,42 @@
+version 1.7.0 final (31 December 2004)
+--------------------------------------
+
+bugs fixed:
+- IDLToCLSCompiler: id D / d not accepted (bug #1042055)
+- IDLToCLSCompiler: big unsigned literals not accepted (bug #1087684)
+- CLSToIDLGenerator: Idl Sequence attribute not considered; anonymous sequences used in not allowed places (bug #1036222)
+- IDLToCLSCompiler: Nested types inside structs/unions are incorrectly generated (bug #1093359)
+- IDLToCLSCompiler: Nested types generated in a previous pass can't be referenced (bug #1093766)
+
+changes:
+- IDLPreprocessor: handling of \ in preprocessor -> concat next line with current read line
+- IIOPChannel: added to clientformattersinkprovider and serverformattersinkprovider a constructor
+  Taking a IDictionary and an ICollection to support RemotingConfiguration.Configure
+- IIOPChannel: separated tracing better between debug and release mode.
+- IIOPChannel: File Trace listener will only be installed when compiling with base-debug
+- SSLPlugin: now possible to load certifcate either by certifcateHash or certificateSubject
+- Corrected mapping for System.Type; it's now directly mapped to a Corba TypeCode
+- CLSToIDLGenerator: GenericUserException no longer part of predef.idl; now in an own file
+- GenericUserException: don't use WStringValue, but wstring instead for fields
+
+new features:
+- IIOPChannel: made any mapping more configurable: now possible to map all string/array either to the boxed form or to the
+  non-boxed form, i.e. for a .NET string passed as any there are now generally two possiblities:
+  * map to corba wstring
+  * map to WStringValue
+- IIOPChannel: support for iiop-ssl:// and corbaloc:iiop-ssl 
+  addresses to connect to ssl secured servers
+- IIOPChannel: setting requestHeaders.CommonTransportKeys.IPAddress on the server side
+- CLSToIDLGenerator: now possible to use ThrowsIdlException Attribute to direct generator to generate exceptions;
+  At runtime, those exceptions are not wrapped into GenericUserExceptions
+
+examples:
+- tutorial on handling java exceptions in an IIOP.NET client
+
+new tests:
+- jboss ssl
+
+
 version 1.7.0 rc1 (03 October 2004)
 -----------------------------------
 
