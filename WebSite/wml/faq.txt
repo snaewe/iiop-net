@@ -287,14 +287,15 @@ the remote object represented by the IOR:
 <FAQ question="How can I get the stringified IOR from a proxy object?">
 
 <p>
-The following method (from Ch.Elca.Iiop in IIOPChannel.dll) returns the stringified IOR of a remote object, given its local proxy:
-
+The following method (from Ch.Elca.Iiop in IIOPChannel.dll) returns the stringified IOR of an object, given its local proxy: 
 <pre>
     OrbServices orb = OrbServices.GetSingleton();
     String ior = orb.object_to_string(proxy);
 </pre>
 
-<p><strong>For version before 13 April 2004 (v1.6.0 and earlier)</strong>, use the following (otherwise deprecated) code:
+<p>Since 12 August 2004, this code works also for local objects, but those must first be registered with <code>RemotingServices.Marshall</code>.
+
+<p><strong>For versions before 13 April 2004 (v1.6.0 and earlier)</strong>, use the following (otherwise deprecated) code:
 
 <pre>
     String ior = ProxyHelper.GetIorForProxy(proxy);
