@@ -35,6 +35,7 @@ using System.Runtime.Remoting.Messaging;
 using Ch.Elca.Iiop.Cdr;
 using Ch.Elca.Iiop.Util;
 using Ch.Elca.Iiop.MessageHandling;
+using omg.org.CORBA;
 
 
 namespace Ch.Elca.Iiop {
@@ -185,28 +186,28 @@ namespace Ch.Elca.Iiop {
                         }
                         break;
             		default:
-            			throw new IOException("unsupported GIOP-msg received: " +
-            			                      msgHeader.GiopType);
+                        Trace.WriteLine("unsupported GIOP-msg received: " + msgHeader.GiopType);
+                        throw new COMM_FAILURE(155, CompletionStatus.Completed_MayBe);
             	}
             	
             } // end while (!fullyRead)
-           
-            // find request_id in message
-            uint msgReqId = FindRequestIdInReply(responseStream);
-            if (msgReqId != reqNr) {
-                throw new IOException("reply out of sequence: " + msgReqId + 
-                                      "; expected was: " + reqNr);
-            }
 
-            responseStream.Seek(0, SeekOrigin.Begin); // assure stream is read from beginning in formatter
-            
+                      
 #if TRACE            
+            responseStream.Seek(0, SeekOrigin.Begin); // assure stream is read from beginning
             byte[] data = new byte[responseStream.Length];
             responseStream.Read(data, 0, (int)responseStream.Length);
             OutputHelper.DebugBuffer(data);
-            responseStream.Seek(0, SeekOrigin.Begin); // assure stream is read from beginning in formatter            
 #endif
 
+            // find request_id in message
+            uint msgReqId = FindRequestIdInReply(responseStream);
+            if (msgReqId != reqNr) {
+                Trace.WriteLine("reply out of sequence: " + msgReqId + "; expected was: " + reqNr);
+                throw new COMM_FAILURE(154, CompletionStatus.Completed_MayBe);
+            }
+            
+            responseStream.Seek(0, SeekOrigin.Begin); // assure stream is read from beginning in formatter
             return responseStream;
 
         }        
