@@ -568,7 +568,7 @@ namespace Ch.Elca.Iiop.CorbaObjRef {
     
         #region IFields
         
-        [IdlSequence(0)]
+        [IdlSequence(0L)]
         public byte[] Data;
         
         #endregion IFields

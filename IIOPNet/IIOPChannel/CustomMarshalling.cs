@@ -95,22 +95,22 @@ namespace Corba {
         /// <summary>writes boxed values</summary>
         void write_boxed(object val, BoxedValueAttribute attr);
         void write_TypeCode(omg.org.CORBA.TypeCode val);
-        void write_any_array([IdlSequenceAttribute(0)][ObjectIdlType(IdlTypeObject.Any)] object[] seq,
+        void write_any_array([IdlSequenceAttribute(0L)][ObjectIdlType(IdlTypeObject.Any)] object[] seq,
                              int offset, int length);
-        void write_boolean_array([IdlSequenceAttribute(0)] bool[] seq, int offset, int length);
-        void write_char_array([IdlSequenceAttribute(0)] [WideCharAttribute(false)] char[] seq,
+        void write_boolean_array([IdlSequenceAttribute(0L)] bool[] seq, int offset, int length);
+        void write_char_array([IdlSequenceAttribute(0L)] [WideCharAttribute(false)] char[] seq,
                               int offset, int length);
-        void write_wchar_array([IdlSequenceAttribute(0)] [WideCharAttribute(true)] char[]seq,
+        void write_wchar_array([IdlSequenceAttribute(0L)] [WideCharAttribute(true)] char[]seq,
                                int offset, int length);
-        void write_octet_array([IdlSequenceAttribute(0)] byte[] seq, int offset, int length);
-        void write_short_array([IdlSequenceAttribute(0)] short[] seq, int offset, int length);
-        void write_ushort_array([IdlSequenceAttribute(0)] short[] seq, int offset, int length);
-        void write_long_array([IdlSequenceAttribute(0)] int[] seq, int offset, int length);
-        void write_ulong_array([IdlSequenceAttribute(0)] int[] seq, int offset, int length);
-        void write_ulonglong_array([IdlSequenceAttribute(0)] long[] seq, int offset, int length);
-        void write_longlong_array([IdlSequenceAttribute(0)] long[] seq, int offset, int length);
-        void write_float_array([IdlSequenceAttribute(0)] float[] seq, int offset, int length);
-        void write_double_array([IdlSequenceAttribute(0)] double[] seq, int offset, int length);
+        void write_octet_array([IdlSequenceAttribute(0L)] byte[] seq, int offset, int length);
+        void write_short_array([IdlSequenceAttribute(0L)] short[] seq, int offset, int length);
+        void write_ushort_array([IdlSequenceAttribute(0L)] short[] seq, int offset, int length);
+        void write_long_array([IdlSequenceAttribute(0L)] int[] seq, int offset, int length);
+        void write_ulong_array([IdlSequenceAttribute(0L)] int[] seq, int offset, int length);
+        void write_ulonglong_array([IdlSequenceAttribute(0L)] long[] seq, int offset, int length);
+        void write_longlong_array([IdlSequenceAttribute(0L)] long[] seq, int offset, int length);
+        void write_float_array([IdlSequenceAttribute(0L)] float[] seq, int offset, int length);
+        void write_double_array([IdlSequenceAttribute(0L)] double[] seq, int offset, int length);
 
         #endregion IMethods
 
@@ -170,23 +170,23 @@ namespace Corba {
         object read_boxed(BoxedValueAttribute attr, Type boxedType, AttributeExtCollection boxedTypeAttrs);
         omg.org.CORBA.TypeCode read_TypeCode();
 
-        void read_any_array([IdlSequenceAttribute(0)][ObjectIdlTypeAttribute(IdlTypeObject.Any)] ref object[] seq,
+        void read_any_array([IdlSequenceAttribute(0L)][ObjectIdlTypeAttribute(IdlTypeObject.Any)] ref object[] seq,
                             int offset, int length);
-        void read_boolean_array([IdlSequenceAttribute(0)] ref bool[] seq, int offset, int length);
-        void read_char_array([IdlSequenceAttribute(0)] [WideCharAttribute(false)] ref char[] seq,
+        void read_boolean_array([IdlSequenceAttribute(0L)] ref bool[] seq, int offset, int length);
+        void read_char_array([IdlSequenceAttribute(0L)] [WideCharAttribute(false)] ref char[] seq,
                              int offset, int length);
-        void read_wchar_array([IdlSequenceAttribute(0)] [WideCharAttribute(true)] ref char[]seq,
+        void read_wchar_array([IdlSequenceAttribute(0L)] [WideCharAttribute(true)] ref char[]seq,
                               int offset, int length);
-        void read_octet_array([IdlSequenceAttribute(0)] ref byte[] seq, int offset, int length);
+        void read_octet_array([IdlSequenceAttribute(0L)] ref byte[] seq, int offset, int length);
         byte[] read_octet_array();
-        void read_short_array([IdlSequenceAttribute(0)] ref short[] seq, int offset, int length);
-        void read_ushort_array([IdlSequenceAttribute(0)] ref short[] seq, int offset, int length);
-        void read_long_array([IdlSequenceAttribute(0)] ref int[] seq, int offset, int length);
-        void read_ulong_array([IdlSequenceAttribute(0)] ref int[] seq, int offset, int length);
-        void read_ulonglong_array([IdlSequenceAttribute(0)] ref long[] seq, int offset, int length);
-        void read_longlong_array([IdlSequenceAttribute(0)] ref long[] seq, int offset, int length);
-        void read_float_array([IdlSequenceAttribute(0)] ref float[] seq, int offset, int length);
-        void read_double_array([IdlSequenceAttribute(0)] ref double[] seq, int offset, int length);    
+        void read_short_array([IdlSequenceAttribute(0L)] ref short[] seq, int offset, int length);
+        void read_ushort_array([IdlSequenceAttribute(0L)] ref short[] seq, int offset, int length);
+        void read_long_array([IdlSequenceAttribute(0L)] ref int[] seq, int offset, int length);
+        void read_ulong_array([IdlSequenceAttribute(0L)] ref int[] seq, int offset, int length);
+        void read_ulonglong_array([IdlSequenceAttribute(0L)] ref long[] seq, int offset, int length);
+        void read_longlong_array([IdlSequenceAttribute(0L)] ref long[] seq, int offset, int length);
+        void read_float_array([IdlSequenceAttribute(0L)] ref float[] seq, int offset, int length);
+        void read_double_array([IdlSequenceAttribute(0L)] ref double[] seq, int offset, int length);    
 
         #endregion IMethods
 
@@ -375,97 +375,97 @@ namespace Corba {
                                  val, m_cdrOut);
         }
 
-        public void write_any_array([IdlSequenceAttribute(0)][ObjectIdlType(IdlTypeObject.Any)] object[] seq,
+        public void write_any_array([IdlSequenceAttribute(0L)][ObjectIdlType(IdlTypeObject.Any)] object[] seq,
                                     int offset, int length) {
             m_marshaller.Marshal(ReflectionHelper.ObjectArrayType, 
                                  new AttributeExtCollection(new Attribute[] { 
-                                         new IdlSequenceAttribute(0), 
+                                         new IdlSequenceAttribute(0L), 
                                          new ObjectIdlTypeAttribute(IdlTypeObject.Any) } ),
                                  seq, m_cdrOut);
         }
 
-        public void write_boolean_array([IdlSequenceAttribute(0)] bool[] seq, int offset, int length) {
+        public void write_boolean_array([IdlSequenceAttribute(0L)] bool[] seq, int offset, int length) {
             m_marshaller.Marshal(seq.GetType(), 
                                  new AttributeExtCollection(new Attribute[] { 
-                                         new IdlSequenceAttribute(0) } ),
+                                         new IdlSequenceAttribute(0L) } ),
                                  seq, m_cdrOut);
         }
 
-        public void write_char_array([IdlSequenceAttribute(0)] [WideCharAttribute(false)] char[] seq,
+        public void write_char_array([IdlSequenceAttribute(0L)] [WideCharAttribute(false)] char[] seq,
                                      int offset, int length)  {
             m_marshaller.Marshal(seq.GetType(), 
                                  new AttributeExtCollection(new Attribute[] { 
-                                         new IdlSequenceAttribute(0), new WideCharAttribute(false) } ),
+                                         new IdlSequenceAttribute(0L), new WideCharAttribute(false) } ),
                                  seq, m_cdrOut);
         }
 
-        public void write_wchar_array([IdlSequenceAttribute(0)] [WideCharAttribute(true)] char[]seq,
+        public void write_wchar_array([IdlSequenceAttribute(0L)] [WideCharAttribute(true)] char[]seq,
                                       int offset, int length) {
             m_marshaller.Marshal(seq.GetType(), 
                                  new AttributeExtCollection(new Attribute[] { 
-                                         new IdlSequenceAttribute(0), new WideCharAttribute(true) } ),
+                                         new IdlSequenceAttribute(0L), new WideCharAttribute(true) } ),
                                  seq, m_cdrOut);
         }
 
-        public void write_octet_array([IdlSequenceAttribute(0)] byte[] seq, int offset, int length) {
+        public void write_octet_array([IdlSequenceAttribute(0L)] byte[] seq, int offset, int length) {
             m_marshaller.Marshal(seq.GetType(), 
                                  new AttributeExtCollection(new Attribute[] { 
-                                         new IdlSequenceAttribute(0) } ),
+                                         new IdlSequenceAttribute(0L) } ),
                                  seq, m_cdrOut);
         }
 
-        public void write_short_array([IdlSequenceAttribute(0)] short[] seq, int offset, int length) {
+        public void write_short_array([IdlSequenceAttribute(0L)] short[] seq, int offset, int length) {
             m_marshaller.Marshal(seq.GetType(), 
                                  new AttributeExtCollection(new Attribute[] { 
-                                         new IdlSequenceAttribute(0) } ),
+                                         new IdlSequenceAttribute(0L) } ),
                                  seq, m_cdrOut);
         }
 
-        public void write_ushort_array([IdlSequenceAttribute(0)] short[] seq, int offset, int length) {
+        public void write_ushort_array([IdlSequenceAttribute(0L)] short[] seq, int offset, int length) {
             m_marshaller.Marshal(seq.GetType(), 
                                  new AttributeExtCollection(new Attribute[] { 
-                                         new IdlSequenceAttribute(0) } ),
+                                         new IdlSequenceAttribute(0L) } ),
                                  seq, m_cdrOut);
         }
 
-        public void write_long_array([IdlSequenceAttribute(0)] int[] seq, int offset, int length) {
+        public void write_long_array([IdlSequenceAttribute(0L)] int[] seq, int offset, int length) {
             m_marshaller.Marshal(seq.GetType(),
                                  new AttributeExtCollection(new Attribute[] { 
-                                         new IdlSequenceAttribute(0) } ),
+                                         new IdlSequenceAttribute(0L) } ),
                                  seq, m_cdrOut);
         }
 
-        public void write_ulong_array([IdlSequenceAttribute(0)] int[] seq, int offset, int length) {
+        public void write_ulong_array([IdlSequenceAttribute(0L)] int[] seq, int offset, int length) {
             m_marshaller.Marshal(seq.GetType(), 
                                  new AttributeExtCollection(new Attribute[] { 
-                                         new IdlSequenceAttribute(0) } ), 
+                                         new IdlSequenceAttribute(0L) } ), 
                                  seq, m_cdrOut);
         }
 
-        public void write_ulonglong_array([IdlSequenceAttribute(0)] long[] seq, int offset, int length) {
+        public void write_ulonglong_array([IdlSequenceAttribute(0L)] long[] seq, int offset, int length) {
             m_marshaller.Marshal(seq.GetType(), 
                                  new AttributeExtCollection(new Attribute[] { 
-                                         new IdlSequenceAttribute(0) } ), 
+                                         new IdlSequenceAttribute(0L) } ), 
                                  seq, m_cdrOut);
         }
 
-        public void write_longlong_array([IdlSequenceAttribute(0)] long[] seq, int offset, int length) {
+        public void write_longlong_array([IdlSequenceAttribute(0L)] long[] seq, int offset, int length) {
             m_marshaller.Marshal(seq.GetType(), 
                                  new AttributeExtCollection(new Attribute[] { 
-                                         new IdlSequenceAttribute(0) } ),
+                                         new IdlSequenceAttribute(0L) } ),
                                  seq, m_cdrOut);
         }
         
-        public void write_float_array([IdlSequenceAttribute(0)] float[] seq, int offset, int length) {
+        public void write_float_array([IdlSequenceAttribute(0L)] float[] seq, int offset, int length) {
             m_marshaller.Marshal(seq.GetType(), 
                                  new AttributeExtCollection(new Attribute[] { 
-                                         new IdlSequenceAttribute(0) } ), 
+                                         new IdlSequenceAttribute(0L) } ), 
                                  seq, m_cdrOut);
         }
-        public void write_double_array([IdlSequenceAttribute(0)] double[] seq, int offset, int length) {
+        public void write_double_array([IdlSequenceAttribute(0L)] double[] seq, int offset, int length) {
             m_marshaller.Marshal(seq.GetType(), 
                                  new AttributeExtCollection(new Attribute[] {
-                                         new IdlSequenceAttribute(0) } ), 
+                                         new IdlSequenceAttribute(0L) } ), 
                                  seq, m_cdrOut);
         }
 
@@ -650,42 +650,42 @@ namespace Corba {
             return null;
         }
 
-        public void read_any_array([IdlSequenceAttribute(0)][ObjectIdlType(IdlTypeObject.Any)] ref object[] seq, int offset, int length) {
+        public void read_any_array([IdlSequenceAttribute(0L)][ObjectIdlType(IdlTypeObject.Any)] ref object[] seq, int offset, int length) {
             object[] res = (object[])m_marshaller.Unmarshal(ReflectionHelper.ObjectArrayType, 
                                                             new AttributeExtCollection(new Attribute[] { 
-                                                                    new IdlSequenceAttribute(0),
+                                                                    new IdlSequenceAttribute(0L),
                                                                     new ObjectIdlTypeAttribute(IdlTypeObject.Any) } ),
                                                             m_cdrIn);
             Array.Copy((Array)res, 0, (Array)seq, offset, length);
         }
 
-        public void read_boolean_array([IdlSequenceAttribute(0)] ref bool[] seq, int offset, int length) {
+        public void read_boolean_array([IdlSequenceAttribute(0L)] ref bool[] seq, int offset, int length) {
             bool[] res = (bool[])m_marshaller.Unmarshal(seq.GetType(), 
                                                         new AttributeExtCollection(new Attribute[] { 
-                                                                new IdlSequenceAttribute(0) } ), 
+                                                                new IdlSequenceAttribute(0L) } ), 
                                                         m_cdrIn);
             Array.Copy((Array)res, 0, (Array)seq, offset, length);
         }
 
-        public void read_char_array([IdlSequenceAttribute(0)] [WideCharAttribute(false)] ref char[] seq, int offset, int length) {
+        public void read_char_array([IdlSequenceAttribute(0L)] [WideCharAttribute(false)] ref char[] seq, int offset, int length) {
             char[] res = (char[])m_marshaller.Unmarshal(seq.GetType(), 
                                                         new AttributeExtCollection(new Attribute[] { 
-                                                                new IdlSequenceAttribute(0), 
+                                                                new IdlSequenceAttribute(0L), 
                                                                 new WideCharAttribute(false) } ),
                                                         m_cdrIn);
             Array.Copy((Array)res, 0, (Array)seq, offset, length);
         }
 
-        public void read_wchar_array([IdlSequenceAttribute(0)] [WideCharAttribute(true)] ref char[]seq, int offset, int length) { 
+        public void read_wchar_array([IdlSequenceAttribute(0L)] [WideCharAttribute(true)] ref char[]seq, int offset, int length) { 
             char[] res = (char[])m_marshaller.Unmarshal(seq.GetType(),
                                                         new AttributeExtCollection(new Attribute[] { 
-                                                                new IdlSequenceAttribute(0), 
+                                                                new IdlSequenceAttribute(0L), 
                                                                 new WideCharAttribute(true) } ),
                                                         m_cdrIn);            
             Array.Copy((Array)res, 0, (Array)seq, offset, length);
         }
 
-        public void read_octet_array([IdlSequenceAttribute(0)] ref byte[] seq, int offset, int length) {
+        public void read_octet_array([IdlSequenceAttribute(0L)] ref byte[] seq, int offset, int length) {
             byte[] res = read_octet_array();
             Array.Copy((Array)res, 0, (Array)seq, offset, length);
         }
@@ -693,71 +693,71 @@ namespace Corba {
         public byte[] read_octet_array() {
             byte[] res = (byte[])m_marshaller.Unmarshal(typeof(byte[]),
                                                         new AttributeExtCollection(new Attribute[] { 
-                                                                new IdlSequenceAttribute(0) } ),
+                                                                new IdlSequenceAttribute(0L) } ),
                                                         m_cdrIn);
             return res;
         }
 
 
-        public void read_short_array([IdlSequenceAttribute(0)] ref short[] seq, int offset, int length) {
+        public void read_short_array([IdlSequenceAttribute(0L)] ref short[] seq, int offset, int length) {
             short[] res = (short[])m_marshaller.Unmarshal(seq.GetType(), 
                                                           new AttributeExtCollection(new Attribute[] { 
-                                                                  new IdlSequenceAttribute(0) } ),
+                                                                  new IdlSequenceAttribute(0L) } ),
                                                           m_cdrIn);
             Array.Copy((Array)res, 0, (Array)seq, offset, length);
         }
 
-        public void read_ushort_array([IdlSequenceAttribute(0)] ref short[] seq, int offset, int length) {
+        public void read_ushort_array([IdlSequenceAttribute(0L)] ref short[] seq, int offset, int length) {
             short[] res = (short[])m_marshaller.Unmarshal(seq.GetType(),
                                                           new AttributeExtCollection(new Attribute[] { 
-                                                                  new IdlSequenceAttribute(0) } ),
+                                                                  new IdlSequenceAttribute(0L) } ),
                                                           m_cdrIn);
             Array.Copy((Array)res, 0, (Array)seq, offset, length);
         }
 
-        public void read_long_array([IdlSequenceAttribute(0)] ref int[] seq, int offset, int length) {
+        public void read_long_array([IdlSequenceAttribute(0L)] ref int[] seq, int offset, int length) {
             int[] res = (int[])m_marshaller.Unmarshal(seq.GetType(), 
                                                       new AttributeExtCollection(new Attribute[] { 
-                                                              new IdlSequenceAttribute(0) } ),
+                                                              new IdlSequenceAttribute(0L) } ),
                                                       m_cdrIn);
             Array.Copy((Array)res, 0, (Array)seq, offset, length);
         }
 
-        public void read_ulong_array([IdlSequenceAttribute(0)] ref int[] seq, int offset, int length) {
+        public void read_ulong_array([IdlSequenceAttribute(0L)] ref int[] seq, int offset, int length) {
             int[] res = (int[])m_marshaller.Unmarshal(seq.GetType(), 
                                                       new AttributeExtCollection(new Attribute[] { 
-                                                              new IdlSequenceAttribute(0) } ),
+                                                              new IdlSequenceAttribute(0L) } ),
                                                       m_cdrIn);
             Array.Copy((Array)res, 0, (Array)seq, offset, length);
         }
 
-        public void read_ulonglong_array([IdlSequenceAttribute(0)] ref long[] seq, int offset, int length) {
+        public void read_ulonglong_array([IdlSequenceAttribute(0L)] ref long[] seq, int offset, int length) {
             long[] res = (long[])m_marshaller.Unmarshal(seq.GetType(),
                                                         new AttributeExtCollection(new Attribute[] {
-                                                                new IdlSequenceAttribute(0) } ),
+                                                                new IdlSequenceAttribute(0L) } ),
                                                         m_cdrIn);
             Array.Copy((Array)res, 0, (Array)seq, offset, length);
         }
 
-        public void read_longlong_array([IdlSequenceAttribute(0)] ref long[] seq, int offset, int length) {
+        public void read_longlong_array([IdlSequenceAttribute(0L)] ref long[] seq, int offset, int length) {
             long[] res = (long[])m_marshaller.Unmarshal(seq.GetType(),
                                                         new AttributeExtCollection(new Attribute[] { 
-                                                                new IdlSequenceAttribute(0) } ),
+                                                                new IdlSequenceAttribute(0L) } ),
                                                         m_cdrIn);
             Array.Copy((Array)res, 0, (Array)seq, offset, length);
         }
 
-        public void read_float_array([IdlSequenceAttribute(0)] ref float[] seq, int offset, int length) {
+        public void read_float_array([IdlSequenceAttribute(0L)] ref float[] seq, int offset, int length) {
             float[] res = (float[])m_marshaller.Unmarshal(seq.GetType(),
                                                           new AttributeExtCollection(new Attribute[] { 
-                                                                  new IdlSequenceAttribute(0) } ), m_cdrIn);
+                                                                  new IdlSequenceAttribute(0L) } ), m_cdrIn);
             Array.Copy((Array)res, 0, (Array)seq, offset, length);
         }
 
-        public void read_double_array([IdlSequenceAttribute(0)] ref double[] seq, int offset, int length) {
+        public void read_double_array([IdlSequenceAttribute(0L)] ref double[] seq, int offset, int length) {
             double[] res = (double[])m_marshaller.Unmarshal(seq.GetType(), 
                                                             new AttributeExtCollection(new Attribute[] { 
-                                                                    new IdlSequenceAttribute(0) } ),
+                                                                    new IdlSequenceAttribute(0L) } ),
                                                             m_cdrIn);
             Array.Copy((Array)res, 0, (Array)seq, offset, length);
         }

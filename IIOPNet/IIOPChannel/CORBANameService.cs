@@ -98,7 +98,7 @@ namespace omg.org.CosNaming {
 
         #region IFields
         
-        [IdlSequenceAttribute(0)] 
+        [IdlSequenceAttribute(0L)] 
         public NameComponent[] binding_name;
         public BindingType binding_type;                                  
         
@@ -113,7 +113,7 @@ namespace omg.org.CosNaming {
         [FromIdlName("next_one")]
         bool next_one(out Binding b);
         [FromIdlName("next_n")]
-        bool next_n(int how_many, [IdlSequenceAttribute(0)] out Binding[] bl);
+        bool next_n(int how_many, [IdlSequenceAttribute(0L)] out Binding[] bl);
         [FromIdlName("destroy")]
         void destroy();
     }
@@ -133,39 +133,39 @@ namespace omg.org.CosNaming {
         [ThrowsIdlException(typeof(omg.org.CosNaming.NamingContext_package.NotFound))]
         [ThrowsIdlException(typeof(omg.org.CosNaming.NamingContext_package.CannotProceed))]
         [ThrowsIdlException(typeof(omg.org.CosNaming.NamingContext_package.InvalidName))]
-        MarshalByRefObject resolve([IdlSequenceAttribute(0)] NameComponent[] nameComponents);
+        MarshalByRefObject resolve([IdlSequenceAttribute(0L)] NameComponent[] nameComponents);
         /// <summary>bind an object for the name</summary>
         [FromIdlName("bind")]
         [ThrowsIdlException(typeof(omg.org.CosNaming.NamingContext_package.NotFound))]
         [ThrowsIdlException(typeof(omg.org.CosNaming.NamingContext_package.CannotProceed))]
         [ThrowsIdlException(typeof(omg.org.CosNaming.NamingContext_package.InvalidName))]
         [ThrowsIdlException(typeof(omg.org.CosNaming.NamingContext_package.AlreadyBound))]
-        void bind([IdlSequenceAttribute(0)] NameComponent[] nameComponents, MarshalByRefObject obj);
+        void bind([IdlSequenceAttribute(0L)] NameComponent[] nameComponents, MarshalByRefObject obj);
 
         [FromIdlName("rebind")]
         [ThrowsIdlException(typeof(omg.org.CosNaming.NamingContext_package.NotFound))]
         [ThrowsIdlException(typeof(omg.org.CosNaming.NamingContext_package.CannotProceed))]
         [ThrowsIdlException(typeof(omg.org.CosNaming.NamingContext_package.InvalidName))]        
-        void rebind([IdlSequenceAttribute(0)] NameComponent[] nameComponents, MarshalByRefObject obj);
+        void rebind([IdlSequenceAttribute(0L)] NameComponent[] nameComponents, MarshalByRefObject obj);
     
         [FromIdlName("bind_context")]
         [ThrowsIdlException(typeof(omg.org.CosNaming.NamingContext_package.NotFound))]
         [ThrowsIdlException(typeof(omg.org.CosNaming.NamingContext_package.CannotProceed))]
         [ThrowsIdlException(typeof(omg.org.CosNaming.NamingContext_package.InvalidName))]
         [ThrowsIdlException(typeof(omg.org.CosNaming.NamingContext_package.AlreadyBound))]        
-        void  bind_context([IdlSequenceAttribute(0)] NameComponent[] nameComponents, NamingContext toBind);
+        void  bind_context([IdlSequenceAttribute(0L)] NameComponent[] nameComponents, NamingContext toBind);
     
         [FromIdlName("rebind_context")]
         [ThrowsIdlException(typeof(omg.org.CosNaming.NamingContext_package.NotFound))]
         [ThrowsIdlException(typeof(omg.org.CosNaming.NamingContext_package.CannotProceed))]
         [ThrowsIdlException(typeof(omg.org.CosNaming.NamingContext_package.InvalidName))]        
-        void  rebind_context([IdlSequenceAttribute(0)] NameComponent[] nameComponents, NamingContext toRebind);
+        void  rebind_context([IdlSequenceAttribute(0L)] NameComponent[] nameComponents, NamingContext toRebind);
     
         [FromIdlName("unbind")]
         [ThrowsIdlException(typeof(omg.org.CosNaming.NamingContext_package.NotFound))]
         [ThrowsIdlException(typeof(omg.org.CosNaming.NamingContext_package.CannotProceed))]
         [ThrowsIdlException(typeof(omg.org.CosNaming.NamingContext_package.InvalidName))]        
-        void  unbind([IdlSequenceAttribute(0)] NameComponent[] nameComponents);
+        void  unbind([IdlSequenceAttribute(0L)] NameComponent[] nameComponents);
     
         [FromIdlName("new_context")]
         NamingContext new_context();
@@ -175,14 +175,14 @@ namespace omg.org.CosNaming {
         [ThrowsIdlException(typeof(omg.org.CosNaming.NamingContext_package.CannotProceed))]
         [ThrowsIdlException(typeof(omg.org.CosNaming.NamingContext_package.InvalidName))]
         [ThrowsIdlException(typeof(omg.org.CosNaming.NamingContext_package.AlreadyBound))]        
-        NamingContext bind_new_context([IdlSequenceAttribute(0)] NameComponent[] nameComponents);
+        NamingContext bind_new_context([IdlSequenceAttribute(0L)] NameComponent[] nameComponents);
         
         [FromIdlName("destroy")]
         [ThrowsIdlException(typeof(omg.org.CosNaming.NamingContext_package.NotEmpty))]        
         void destroy();
         
         [FromIdlName("list")]
-        void list (int how_many, [IdlSequenceAttribute(0)] out Binding[] bl, out BindingIterator bi);
+        void list (int how_many, [IdlSequenceAttribute(0L)] out Binding[] bl, out BindingIterator bi);
 
         #endregion IMethods
 
@@ -238,7 +238,7 @@ namespace omg.org.CosNaming {
         #endregion IConstructors
         #region IMethods
         
-        public MarshalByRefObject resolve([IdlSequenceAttribute(0)] NameComponent[] nameComponents) {
+        public MarshalByRefObject resolve([IdlSequenceAttribute(0L)] NameComponent[] nameComponents) {
             // create uri for name-components:
             string name = CreateNameForNameComponents(nameComponents);        
             
@@ -312,7 +312,7 @@ namespace omg.org.CosNaming {
             return name;
         }
         
-        public void bind([IdlSequenceAttribute(0)] NameComponent[] nameComponents, MarshalByRefObject obj) {
+        public void bind([IdlSequenceAttribute(0L)] NameComponent[] nameComponents, MarshalByRefObject obj) {
             string name = CreateNameForNameComponents(nameComponents);
             // bind the object to the name
             
@@ -325,7 +325,7 @@ namespace omg.org.CosNaming {
             }
         }
 
-        public void unbind([IdlSequenceAttribute(0)] NameComponent[] nameComponents) {
+        public void unbind([IdlSequenceAttribute(0L)] NameComponent[] nameComponents) {
             string name = CreateNameForNameComponents(nameComponents);
             lock(m_nameTable.SyncRoot) {
                 if (!(m_nameTable.ContainsKey(name))) { 
@@ -335,7 +335,7 @@ namespace omg.org.CosNaming {
             }
         }
 
-        public void rebind([IdlSequenceAttribute(0)] NameComponent[] nameComponents, MarshalByRefObject obj) {
+        public void rebind([IdlSequenceAttribute(0L)] NameComponent[] nameComponents, MarshalByRefObject obj) {
             unbind(nameComponents);
             bind(nameComponents, obj);
         }
@@ -348,19 +348,19 @@ namespace omg.org.CosNaming {
             throw new NO_IMPLEMENT(0, CompletionStatus.Completed_MayBe);
         }
 
-        public void rebind_context([IdlSequenceAttribute(0)] NameComponent[] nameComponents, NamingContext nameCtx) {
+        public void rebind_context([IdlSequenceAttribute(0L)] NameComponent[] nameComponents, NamingContext nameCtx) {
             throw new NO_IMPLEMENT(0, CompletionStatus.Completed_MayBe);
         }
 
-        public void bind_context([IdlSequenceAttribute(0)] NameComponent[] nameComponents, NamingContext nameCtx) {
+        public void bind_context([IdlSequenceAttribute(0L)] NameComponent[] nameComponents, NamingContext nameCtx) {
             throw new NO_IMPLEMENT(0, omg.org.CORBA.CompletionStatus.Completed_MayBe);
         }
 
-        public NamingContext bind_new_context([IdlSequenceAttribute(0)] NameComponent[] nameComponents) {
+        public NamingContext bind_new_context([IdlSequenceAttribute(0L)] NameComponent[] nameComponents) {
             throw new NO_IMPLEMENT(0, CompletionStatus.Completed_MayBe);
         }
         
-        public void list (int how_many, [IdlSequenceAttribute(0)] out Binding[] bl, out BindingIterator bi) {
+        public void list (int how_many, [IdlSequenceAttribute(0L)] out Binding[] bl, out BindingIterator bi) {
             throw new NO_IMPLEMENT(0, CompletionStatus.Completed_MayBe);
         }
 
@@ -414,7 +414,7 @@ namespace omg.org.CosNaming.NamingContext_package {
         #region IFields
         
         public NotFoundReason why;
-        [IdlSequenceAttribute(0)]
+        [IdlSequenceAttribute(0L)]
         public NameComponent[] rest_of_name;
 
         #endregion IFields
@@ -440,7 +440,7 @@ namespace omg.org.CosNaming.NamingContext_package {
         #region IFields
         
         public NamingContext cxt;
-        [IdlSequenceAttribute(0)]
+        [IdlSequenceAttribute(0L)]
         public NameComponent[] rest_of_name;
 
         #endregion IFields
