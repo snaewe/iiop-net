@@ -124,7 +124,11 @@ namespace Ch.Elca.Iiop.Idl {
         /// <returns></returns>
         public static string MapFullTypeNameToIdl(Type forType) {
             // TODO: exceptions in naming
-            return MapNamespaceToIdl(forType) + "/" + MapShortTypeNameToIdl(forType);
+            string nameSpaceInIdl = MapNamespaceToIdl(forType);
+            if (!nameSpaceInIdl.Equals("")) {
+                nameSpaceInIdl += "/";
+            }
+            return nameSpaceInIdl + MapShortTypeNameToIdl(forType);
         }
 
         /// <summary>
@@ -135,8 +139,13 @@ namespace Ch.Elca.Iiop.Idl {
         // generator needs scoped form
         public static string MapFullTypeNameToIdlScoped(Type forType) {
             string result = forType.Namespace;
+            if (result == null) { 
+                result = ""; 
+            }
             result = result.Replace(".", "::");
-            if (result.Length > 0) { result += "::"; }
+            if (result.Length > 0) { 
+                result += "::"; 
+            }
             result = "::" + result;
             result += MapShortTypeNameToIdl(forType);
             return result;
@@ -177,6 +186,9 @@ namespace Ch.Elca.Iiop.Idl {
         /// </summary>
         private static string MapNamespaceToIdl(Type forType) {
             string result = forType.Namespace;
+            if (result == null) { 
+                result = "";
+            }
             result = result.Replace(".", "/");
             return result;
         }
@@ -188,6 +200,9 @@ namespace Ch.Elca.Iiop.Idl {
         public static string[] MapNamespaceToIdlModules(Type forType) {
             // TODO: exceptions
             string clsNamespace = forType.Namespace;
+            if (clsNamespace == null) {
+                clsNamespace = "";
+            }
             string[] modules = clsNamespace.Split(new char[] { Char.Parse(".") } );
 
             return modules;
