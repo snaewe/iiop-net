@@ -4,6 +4,9 @@ build: nunit-var
 	cd Basic
 	$(MAKE) build
 	cd ..
+        cd JavaRMIIIOP
+	$(MAKE) build
+	cd ..
 
 nunit-var:        
 	@if not defined NUNITV2_HOME echo Set the NUNITV2_HOME variable to the NUnit V2 home directory. Please check TestInstructions.txt.
@@ -11,5 +14,8 @@ nunit-var:
 
 clean:
 	cd Basic
+	$(MAKE) clean
+	cd ..
+	cd JavaRMIIIOP
 	$(MAKE) clean
 	cd ..
