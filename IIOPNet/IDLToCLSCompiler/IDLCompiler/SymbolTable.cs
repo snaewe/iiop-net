@@ -102,7 +102,26 @@ public class SymbolTable {
     public Scope getTopScope() {
         return m_topScope;
     }
-    
+
+    /// <summary>
+    /// resolve a scoped name to a symbol starting in searchScope 
+    /// </summary>
+    private Symbol ResolveScopedNameToSymbolFromScope(Scope searchScope, IList parts) {
+        if ((parts == null) || (parts.Count == 0)) {
+            return null;
+        }
+        Scope currentScope = searchScope;
+        for (int i = 0; i < parts.Count - 1; i++) {
+            // resolve scopes
+            currentScope = currentScope.getChildScope((String)parts[i]);
+            if (currentScope == null) { 
+                return null; // not found within this searchScope
+            }
+        }
+        // resolve symbol
+        Symbol sym = currentScope.getSymbol((String)parts[parts.Count - 1]);
+        return sym;
+    }    
     
     /// <summary>search starting from serachScope for a scope with name scopeNameParts
     private Scope ResolveScopedNameToScopeFromScope(Scope searchScope, IList parts) {
@@ -119,6 +138,36 @@ public class SymbolTable {
         }
         return currentScope;
     }
+    
+    /// <summary>serach for a scoped name representing a symbol with name parts in searchStartScope and all visible scopes</summary>
+    public Symbol ResolveScopedNameToSymbol(Scope searchStartScope, IList parts) {
+        Queue scopesToSearch = new Queue();
+        IList alreadySearchedScopes = new ArrayList(); // more efficient, don't search two times the same scope.
+        scopesToSearch.Enqueue(searchStartScope);
+        Symbol found = null;
+        // search in this scope and all parent scopes
+        while ((found == null) && (scopesToSearch.Count > 0)) {
+            Scope searchScope = (Scope)scopesToSearch.Dequeue();
+            alreadySearchedScopes.Add(searchScope);
+            found = ResolveScopedNameToSymbolFromScope(searchScope, parts);
+            // if not found: next scope to search in is parent scope
+            if ((searchScope.getParentScope() != null) &&
+                (!alreadySearchedScopes.Contains(searchScope.getParentScope()))) {
+                // if parent scope not null, search in parent
+                scopesToSearch.Enqueue(searchScope.getParentScope());
+            }
+            // for interfaces, search in inherited scopes as described in CORBA 2.3, section 3.15.2
+            // "Inheritance causes all identifiers defined in base interfaces, both direct and indirect, to
+            // be visible in derived interfaces"
+            foreach (Scope inheritedScope in searchScope.GetInheritedScopes()) {
+                if (!alreadySearchedScopes.Contains(inheritedScope)) {
+                    scopesToSearch.Enqueue(inheritedScope);
+                }
+            }
+        }    
+        return found;
+    }
+    
     
     /// <summary>serach for a scoped name with name parts in searchStartScope and all visible scopes</summary>
     public Scope ResolveScopedNameToScope(Scope searchStartScope, IList parts) {

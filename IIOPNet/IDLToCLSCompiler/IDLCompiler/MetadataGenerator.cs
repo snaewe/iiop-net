@@ -610,28 +610,7 @@ public class MetaDataGenerator : IDLParserVisitor {
         Symbol result = (Symbol)node.jjtGetChild(0).jjtAccept(this, data);
         return result;
     }
-
-    
-    /**
-     * resolve a scoped name starting in searchScope
-     */
-    private Symbol ResolveScopedNameToSymbol(Scope searchScope, ArrayList parts) {
-        if ((parts == null) || (parts.Count == 0)) {
-            return null;
-        }
-        Scope currentScope = searchScope;
-        for (int i = 0; i < parts.Count - 1; i++) {
-            // resolve scopes
-            currentScope = currentScope.getChildScope((String)parts[i]);
-            if (currentScope == null) { 
-                return null; // not found within this searchScope
-            }
-        }
-        // resolve symbol
-        Symbol sym = currentScope.getSymbol((String)parts[parts.Count - 1]);
-        return sym;
-    }
-        
+            
     /**
      * @see parser.IDLParserVisitor#visit(ASTscoped_name, Object)
      * @param data a buildinfo instance
@@ -645,36 +624,11 @@ public class MetaDataGenerator : IDLParserVisitor {
             currentScope = m_symbolTable.getTopScope(); 
         }
         
-        Queue scopesToSearch = new Queue();
-        IList alreadySearchedScopes = new ArrayList(); // more efficient, don't search two times the same scope.
-        scopesToSearch.Enqueue(currentScope);
-        Symbol found = null;
-        // search in this scope and all parent scopes
-        while ((found == null) && (scopesToSearch.Count > 0)) {
-            Scope searchScope = (Scope)scopesToSearch.Dequeue();
-            alreadySearchedScopes.Add(searchScope);
-            found = ResolveScopedNameToSymbol(searchScope, parts);
-            // if not found: next scope to search in is parent scope
-            if ((searchScope.getParentScope() != null) &&
-                (!alreadySearchedScopes.Contains(searchScope.getParentScope()))) {
-                // if parent scope not null, search in parent
-                scopesToSearch.Enqueue(searchScope.getParentScope());
-            }
-            // for interfaces, search in inherited scopes as described in CORBA 2.3, section 3.15.2
-            // "Inheritance causes all identifiers defined in base interfaces, both direct and indirect, to
-            // be visible in derived interfaces"
-            foreach (Scope inheritedScope in searchScope.GetInheritedScopes()) {
-                if (!alreadySearchedScopes.Contains(inheritedScope)) {
-                    scopesToSearch.Enqueue(inheritedScope);
-                }
-            }
-        }        
-        
+        Symbol found = m_symbolTable.ResolveScopedNameToSymbol(currentScope, parts);        
         if (found == null) {
             throw new InvalidIdlException("scoped name not resolvable: " + node.getScopedName() + 
                                        "; currentscope: " + ((BuildInfo) data).GetBuildScope().getScopeName()); 
-        }
-        
+        }        
         return found;
     }
 
