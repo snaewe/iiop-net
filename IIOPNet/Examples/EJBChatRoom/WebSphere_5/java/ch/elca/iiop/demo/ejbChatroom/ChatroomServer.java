@@ -1,5 +1,5 @@
 /* 
- * ChatroomClients.java
+ * ChatroomServer.java
  *
  * Project: IIOP.NET
  * Examples
