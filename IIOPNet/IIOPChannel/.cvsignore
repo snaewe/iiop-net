@@ -1,4 +1,5 @@
 bin
 obj
-IIOPChannel.csproj.user
+*.csproj.user
 .#*
+*.bak
