@@ -1,5 +1,11 @@
-Latest Changes (16 June 2003)
+Latest Changes (24 June 2003)
 -----------------------------
+
+- added EJB interop example
+- Bug fixes for bugs #758697 and #758341 (IDLtoCLSCompiler)
+
+Version 1.2.1 (16 June 2003)
+----------------------------
 
 - Improved IIOP.Net channel
 - supports now simple two way interoperability with Mico ORB
