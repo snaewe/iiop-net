@@ -470,11 +470,19 @@ namespace Ch.Elca.Iiop.Tests {
         public void TestRequestDeserialisation() {          
             MemoryStream sourceStream = new MemoryStream();
             // prepare msg
-            CdrOutputStreamImpl cdrOut = new CdrOutputStreamImpl(sourceStream, 0, new GiopVersion(1, 2));
+            uint requestId = 5;
+            byte responseFlags = 3;
+            string methodName = "Add";
+            int nrOfArgs = 2;
+            int arg1 = 1;
+            int arg2 = 2;
+            GiopVersion version = new GiopVersion(1, 2);
+            CdrOutputStreamImpl cdrOut = new CdrOutputStreamImpl(sourceStream, 0, 
+                                                                 version);
             cdrOut.WriteOpaque(m_giopMagic);
             // version
-            cdrOut.WriteOctet(1);
-            cdrOut.WriteOctet(2);
+            cdrOut.WriteOctet(version.Major);
+            cdrOut.WriteOctet(version.Minor);
             // flags
             cdrOut.WriteOctet(0);
             // msg-type: request
@@ -482,22 +490,22 @@ namespace Ch.Elca.Iiop.Tests {
             // msg-length
             cdrOut.WriteULong(68);
             // request-id
-            cdrOut.WriteULong(5);
+            cdrOut.WriteULong(requestId);
             // response-flags
-            cdrOut.WriteOctet(3);
+            cdrOut.WriteOctet(responseFlags);
             cdrOut.WritePadding(3);
             // target: key type
             cdrOut.WriteULong(0);
             cdrOut.WriteULong(26); // key length
             cdrOut.WriteOpaque(new byte[] { 116, 0, 101, 0, 115, 0, 116, 0, 111, 0, 98, 0, 106, 0, 101, 0, 99, 0, 116, 0, 44, 115, 116, 114, 61, 102 }); // testobject,str=f
             // method name
-            cdrOut.WriteString("Add");
+            cdrOut.WriteString(methodName);
             // no service contexts
             cdrOut.WriteULong(0);
             cdrOut.ForceWriteAlign(Aligns.Align8);
             // parameters
-            cdrOut.WriteLong(1);
-            cdrOut.WriteLong(2);
+            cdrOut.WriteLong(arg1);
+            cdrOut.WriteLong(arg2);
 
             // create a connection context: this is needed for request deserialisation
             GiopConnectionDesc conDesc = new GiopConnectionDesc();
@@ -524,17 +532,17 @@ namespace Ch.Elca.Iiop.Tests {
 
             // now check if values are correct
             Assertion.Assert("deserialised message is null", result != null);
-            Assertion.AssertEquals(5, result.Properties[SimpleGiopMsg.REQUEST_ID_KEY]);
-            Assertion.AssertEquals(new GiopVersion(1, 2), result.Properties[SimpleGiopMsg.GIOP_VERSION_KEY]);
-            Assertion.AssertEquals(3, result.Properties[SimpleGiopMsg.RESPONSE_FLAGS_KEY]);
+            Assertion.AssertEquals(requestId, result.Properties[SimpleGiopMsg.REQUEST_ID_KEY]);
+            Assertion.AssertEquals(version, result.Properties[SimpleGiopMsg.GIOP_VERSION_KEY]);
+            Assertion.AssertEquals(responseFlags, result.Properties[SimpleGiopMsg.RESPONSE_FLAGS_KEY]);
             Assertion.AssertEquals("testobject", result.Properties[SimpleGiopMsg.URI_KEY]);
             Assertion.AssertEquals("Ch.Elca.Iiop.Tests.TestService", result.Properties[SimpleGiopMsg.TYPENAME_KEY]);
-            Assertion.AssertEquals("Add", result.Properties[SimpleGiopMsg.METHODNAME_KEY]);
+            Assertion.AssertEquals(methodName, result.Properties[SimpleGiopMsg.METHODNAME_KEY]);
             object[] args = (object[])result.Properties[SimpleGiopMsg.ARGS_KEY];
             Assertion.Assert("args is null", args != null);
-            Assertion.AssertEquals(2, args.Length);
-            Assertion.AssertEquals(1, args[0]);
-            Assertion.AssertEquals(2, args[1]);
+            Assertion.AssertEquals(nrOfArgs, args.Length);
+            Assertion.AssertEquals(arg1, args[0]);
+            Assertion.AssertEquals(arg2, args[1]);
         }
         
         public void TestReplyDeserialisation() {
