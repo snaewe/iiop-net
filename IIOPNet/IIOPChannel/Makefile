@@ -12,6 +12,7 @@ $(Dest)IIOPChannel.dll: *.cs
 	
 
 build-unit-tests: build nunit-var
+	if not exist $(UnitTestDest)nul mkdir $(UnitTestDest)
 	csc /nowarn:0618 $(CSFLAGS) /d:UnitTest /r:$(NUNITV2_HOME)\bin\nunit.framework.dll /t:library /out:$(UnitTestDest)IIOPChannel.dll *.cs
 
 nunit-var:
@@ -19,6 +20,6 @@ nunit-var:
 	if not defined NUNITV2_HOME exit 2
 
 clean:
-	del /s /q $(Dest)*.dll
-	del /s /q $(Dest)*.pdb
-	rmdir /s /q $(Dest) 
+	if exist $(Dest)*.dll del /s /q $(Dest)*.dll
+	if exist $(Dest)*.pdb del /s /q $(Dest)*.pdb
+	if exist $(Dest)nul rmdir /s /q $(Dest) 
