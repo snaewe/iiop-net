@@ -105,6 +105,11 @@ namespace Ch.Elca.Iiop.IdlPreprocessor {
         
         private static Encoding s_latin1 = Encoding.GetEncoding("ISO-8859-1");
         
+        /// <summary>
+        /// the path to the default IDL files
+        /// </summary>
+        private static DirectoryInfo s_idlPath; 
+        
         #endregion SFields
         #region IFields
         
@@ -122,6 +127,16 @@ namespace Ch.Elca.Iiop.IdlPreprocessor {
         private Stack m_ifBlockStack = new Stack();
        
         #endregion IFields
+        #region SConstructor
+        
+        static IDLPreprocessor() {
+            FileInfo locOfPreprocAsm = new FileInfo(typeof(IDLPreprocessor).Assembly.Location);
+            string asmDirectory = locOfPreprocAsm.Directory.FullName;
+            s_idlPath = new DirectoryInfo(Path.Combine(asmDirectory, 
+            	                                       ".." + Path.DirectorySeparatorChar + ".." + Path.DirectorySeparatorChar + "IDL"));            
+        }
+        
+        #endregion SConstructor
         #region IConstructors
     
         /// <summary>
@@ -149,6 +164,11 @@ namespace Ch.Elca.Iiop.IdlPreprocessor {
         /// <summary>defines a preprocessor symbol</summary>
         public static void AddDefine(String define) {
             s_userDefined.Add(define, "");
+        }
+        
+        /// <summary>configures the directory, where to find the default idl files </summary>
+        public static void SetIdlDir(DirectoryInfo idlDir) {
+            s_idlPath = idlDir;
         }
         
         #endregion SMethods
@@ -226,7 +246,7 @@ namespace Ch.Elca.Iiop.IdlPreprocessor {
             }
             
             // fileToInclude enclosed in quotation mark: search in current directory for file
-            // TODO: fileToInclude enclosed in <>: search in compiler include dir!
+            // fileToInclude enclosed in <>: search in compiler include dir!
             String fileToInclude = tokens[1];
             if (fileToInclude.StartsWith("\"")) { 
                 fileToInclude = fileToInclude.Substring(1); 
@@ -247,6 +267,8 @@ namespace Ch.Elca.Iiop.IdlPreprocessor {
                     // illegal include: ending > missing
                     throw new IllegalPreprocDirectiveException(currentLine);
                 }
+                // combine IDL path
+                fileToInclude = Path.Combine(s_idlPath.FullName, fileToInclude);
             }            
 
             FileInfo toInclude = new FileInfo(fileToInclude);

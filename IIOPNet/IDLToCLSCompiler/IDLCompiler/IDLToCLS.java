@@ -42,6 +42,7 @@ import Ch.Elca.Iiop.IdlPreprocessor.IDLPreprocessor;
 import System.Diagnostics.*;
 import System.IO.Directory;
 import System.IO.FileInfo;
+import System.IO.DirectoryInfo;
 import System.IO.MemoryStream;
 import System.IO.SeekOrigin;
 import System.Reflection.Assembly;
@@ -111,6 +112,7 @@ public class IDLToCLS {
         System.out.println("-r assembly     assemblys to check for types in, instead of generating them");
         System.out.println("-c xmlfile      specifies custom mappings");
         System.out.println("-d define       defines a preprocessor symbol");
+        System.out.println("-idir directory specifies the directory, containing default idl files");
     }
     
     public static void Error(String message) {
@@ -152,6 +154,10 @@ public class IDLToCLS {
             } else if (args[i].equals("-d")) {
                 i++;
                 IDLPreprocessor.AddDefine(args[i++].Trim());
+            } else if (args[i].equals("-idir")) {
+                i++;
+                DirectoryInfo dir = new DirectoryInfo(args[i++]);
+                IDLPreprocessor.SetIdlDir(dir);
             } else {
                 Error(String.Format("Error: invalid option {0}", args[i]));
             }
