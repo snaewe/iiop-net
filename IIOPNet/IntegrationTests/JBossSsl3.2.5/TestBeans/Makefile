@@ -36,7 +36,7 @@ setup: jboss-vars
 	@if EXIST $(JBOSS_SSL_CONF_DIR) rmdir /s $(JBOSS_SSL_CONF_DIR)
 	
 	xcopy /s $(JBOSS_HOME_3_2_5)\server\all $(JBOSS_SSL_CONF_DIR) 
-	@del /Q $(JBOSS_SSL_CONF_DIR)deploy\jboss*integration_ejb.jar
+	@if EXIST (JBOSS_SSL_CONF_DIR)deploy\jboss*integration_ejb.jar del /Q $(JBOSS_SSL_CONF_DIR)deploy\jboss*integration_ejb.jar
 	copy /Y JbossSslConf\conf\jacorb.properties $(JBOSS_SSL_CONF_DIR)conf\jacorb.properties
  	copy /Y JbossSslConf\deploy\iiop-service.xml $(JBOSS_SSL_CONF_DIR)deploy\iiop-service.xml
 	if not EXIST $(JBOSS_SSL_CONF_CER_DIR) mkdir $(JBOSS_SSL_CONF_CER_DIR)
