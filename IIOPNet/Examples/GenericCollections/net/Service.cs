@@ -95,7 +95,7 @@ namespace Ch.Elca.Iiop.Demo.StorageSystem {
 					do {
 						String value = c.GetValue(filter[i].key);
 						match = (value != null) && (value == filter[i].value);
-					} while ((++i == filter.Length) || (!match));
+					} while ((++i < filter.Length) && match);
 					if (match) {
 						matches.Add(c);
 					}
