@@ -54,6 +54,8 @@ public interface TestService extends java.rmi.Remote {
 
     public byte[] TestAppendElementToByteArray(byte[] arg, byte toAppend) throws RemoteException;
 
+    public long[] TestAppendElementToLongArray(long[] arg, long toAppend) throws RemoteException;
+
     public String[] TestAppendElementToStringArray(String[] arg, String toAppend) throws RemoteException;
 
     public String[] CreateTwoElemStringArray(String arg1, String arg2) throws RemoteException;

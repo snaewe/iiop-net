@@ -246,7 +246,7 @@ namespace Ch.Elca.Iiop.Idl {
                 case 'F':
                     return "float";
                 case 'J':
-                    return "long long";
+                    return "long_long";
                 case 'S':
                     return "short";
                 case 'L':

@@ -162,15 +162,33 @@ namespace Ch.Elca.Iiop.IntegrationTests {
             System.Byte toAppend = 2;
             System.Byte[] result = m_testService.TestAppendElementToByteArray(arg, toAppend);
             Assertion.AssertEquals(2, result.Length);
-            Assertion.AssertEquals((System.Byte) 1, result[0]);
-            Assertion.AssertEquals((System.Byte) 2, result[1]);
+            Assertion.AssertEquals((System.Byte) arg[0], result[0]);
+            Assertion.AssertEquals((System.Byte) toAppend, result[1]);
 
             arg = null;
             toAppend = 3;
             result = m_testService.TestAppendElementToByteArray(arg, toAppend);
             Assertion.AssertEquals(1, result.Length);
-            Assertion.AssertEquals((System.Byte) 3, result[0]);
+            Assertion.AssertEquals((System.Byte) toAppend, result[0]);
         }
+
+        [Test]
+        public void TestLongArray() {
+            System.Int64[] arg = new System.Int64[1];
+            arg[0] = 134;
+            System.Int64 toAppend = 1901;
+            System.Int64[] result = m_testService.TestAppendElementToLongArray(arg, toAppend);
+            Assertion.AssertEquals(2, result.Length);
+            Assertion.AssertEquals((System.Int64) arg[0], result[0]);
+            Assertion.AssertEquals((System.Int64) toAppend, result[1]);
+
+            arg = null;
+            toAppend = 3098;
+            result = m_testService.TestAppendElementToLongArray(arg, toAppend);
+            Assertion.AssertEquals(1, result.Length);
+            Assertion.AssertEquals((System.Int64) toAppend, result[0]);
+        }
+
 
         [Test]
         public void TestStringArray() {            

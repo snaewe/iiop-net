@@ -98,6 +98,18 @@ public class TestServiceImpl extends PortableRemoteObject implements TestService
         return result;
     }
 
+    public long[] TestAppendElementToLongArray(long[] arg, long toAppend) throws RemoteException {
+        long[] result;
+        if (arg != null) {
+            result = new long[arg.length + 1];
+            System.arraycopy(arg, 0, result, 0, arg.length);
+        } else {
+            result = new long[1];
+        }
+        result[result.length - 1] = toAppend;
+        return result;
+    }
+
     public String[] TestAppendElementToStringArray(String[] arg, String toAppend) throws RemoteException {
         String[] result;
         if (arg != null) {
