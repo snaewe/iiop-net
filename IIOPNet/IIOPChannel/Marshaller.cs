@@ -218,13 +218,13 @@ namespace Ch.Elca.Iiop.Marshalling {
 
         internal void Marshal(object actual, CdrOutputStream targetStream) {
             base.Marshal(m_formalToSer, 
-                         (AttributeExtCollection)m_attributes.Clone(),
+                         m_attributes, // attributecollection can't be modified -> can pass it without copying
                          m_ser, actual, targetStream);
         }
 
         internal object Unmarshal(CdrInputStream sourceStream) {
             return base.Unmarshal(m_formalToSer, m_formal, 
-                                  (AttributeExtCollection)m_attributes.Clone(),
+                                  m_attributes, // attributecollection can't be modified -> can pass it without copying
                                   m_ser, sourceStream);
         }
 

@@ -232,7 +232,7 @@ namespace omg.org.CORBA {
         /// </summary>
         /// <returns>a collection of Attributes</returns>
         internal virtual AttributeExtCollection GetClsAttributesForTypeCode() {
-            return new AttributeExtCollection();
+            return AttributeExtCollection.EmptyCollection;
         }
 
         
@@ -648,7 +648,7 @@ namespace omg.org.CORBA {
             m_name = encap.ReadString();
             TypeCodeSerializer ser = new TypeCodeSerializer();
             m_aliased = (TypeCode) ser.Deserialise(ReflectionHelper.CorbaTypeCodeType, 
-                                                   new AttributeExtCollection(), encap);
+                                                   AttributeExtCollection.EmptyCollection, encap);
         }
 
         internal override void WriteToStream(CdrOutputStream cdrStream) {
@@ -657,7 +657,7 @@ namespace omg.org.CORBA {
             encap.WriteString(m_id);
             encap.WriteString(m_name);
             TypeCodeSerializer ser = new TypeCodeSerializer();
-            ser.Serialise(ReflectionHelper.CorbaTypeCodeType, m_aliased, new AttributeExtCollection(), encap);
+            ser.Serialise(ReflectionHelper.CorbaTypeCodeType, m_aliased, AttributeExtCollection.EmptyCollection, encap);
             encap.WriteToTargetStream();
         }
 
@@ -1131,7 +1131,7 @@ namespace omg.org.CORBA {
         internal override AttributeExtCollection GetClsAttributesForTypeCode() {
             AttributeExtCollection resultColl =
                 new AttributeExtCollection(new Attribute[] { CreateSequenceAttribute() } );
-            resultColl.InsertAttributes(((TypeCodeImpl)m_seqType).GetClsAttributesForTypeCode());
+            resultColl = resultColl.MergeAttributeCollections(((TypeCodeImpl)m_seqType).GetClsAttributesForTypeCode());
             return resultColl;
         }
 

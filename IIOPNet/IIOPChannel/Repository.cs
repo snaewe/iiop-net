@@ -436,7 +436,7 @@ namespace Ch.Elca.Iiop.Idl {
         
         public static AttributeExtCollection GetAttrsForTypeCode(omg.org.CORBA.TypeCode typeCode) {
             if (!(typeCode is omg.org.CORBA.TypeCodeImpl)) { 
-                return new AttributeExtCollection(); 
+                return AttributeExtCollection.EmptyCollection; 
             } else {
                 return (typeCode as TypeCodeImpl).GetClsAttributesForTypeCode();
             }
@@ -545,7 +545,7 @@ namespace Ch.Elca.Iiop.Idl {
         #region Implementation of MappingAction
         public object MapToIdlStruct(Type clsType) {
             StructTC result = new StructTC();
-            RegisterCreatedTypeCodeForType(clsType, new AttributeExtCollection(),
+            RegisterCreatedTypeCodeForType(clsType, AttributeExtCollection.EmptyCollection,
                                            result);
             
             FieldInfo[] members = ReflectionHelper.GetAllDeclaredInstanceFields(clsType);
@@ -564,7 +564,7 @@ namespace Ch.Elca.Iiop.Idl {
         }
         public object MapToIdlUnion(Type clsType) {
             UnionTC result = new UnionTC();            
-            RegisterCreatedTypeCodeForType(clsType, new AttributeExtCollection(),
+            RegisterCreatedTypeCodeForType(clsType, AttributeExtCollection.EmptyCollection,
                                            result);
             
             // first get discriminator type
@@ -642,7 +642,7 @@ namespace Ch.Elca.Iiop.Idl {
             AbstractIfTC result =
                 new AbstractIfTC(Repository.GetRepositoryID(clsType), 
                                  IdlNaming.ReverseIdlToClsNameMapping(clsType.Name));
-            RegisterCreatedTypeCodeForType(clsType, new AttributeExtCollection(),
+            RegisterCreatedTypeCodeForType(clsType, AttributeExtCollection.EmptyCollection,
                                            result);
             return result;
             
@@ -650,7 +650,7 @@ namespace Ch.Elca.Iiop.Idl {
         public object MapToIdlLocalInterface(Type clsType) {
             LocalIfTC result = new LocalIfTC(Repository.GetRepositoryID(clsType), 
                                              IdlNaming.ReverseIdlToClsNameMapping(clsType.Name));
-            RegisterCreatedTypeCodeForType(clsType, new AttributeExtCollection(),
+            RegisterCreatedTypeCodeForType(clsType, AttributeExtCollection.EmptyCollection,
                                            result);
             return result;            
         }
@@ -658,7 +658,7 @@ namespace Ch.Elca.Iiop.Idl {
         public object MapToIdlConcreteInterface(Type clsType) {
             ObjRefTC result = new ObjRefTC(Repository.GetRepositoryID(clsType),
                                            IdlNaming.ReverseIdlToClsNameMapping(clsType.Name));
-            RegisterCreatedTypeCodeForType(clsType, new AttributeExtCollection(),
+            RegisterCreatedTypeCodeForType(clsType, AttributeExtCollection.EmptyCollection,
                                            result);
             return result;            
         }
@@ -669,10 +669,10 @@ namespace Ch.Elca.Iiop.Idl {
                 baseTypeCode = new NullTC();
             } else {
                 baseTypeCode = CreateOrGetTypeCodeForType(clsType.BaseType, 
-                                                          new AttributeExtCollection(new Attribute[0]));
+                                                          AttributeExtCollection.EmptyCollection);
             }
             ValueTypeTC result = new ValueTypeTC();
-            RegisterCreatedTypeCodeForType(clsType, new AttributeExtCollection(),
+            RegisterCreatedTypeCodeForType(clsType, AttributeExtCollection.EmptyCollection,
                                            result);                        
             
             // create the TypeCodes for the members
@@ -702,10 +702,10 @@ namespace Ch.Elca.Iiop.Idl {
                 baseTypeCode = new NullTC();
             } else {
                 baseTypeCode = CreateOrGetTypeCodeForType(clsType.BaseType, 
-                                   new AttributeExtCollection(new Attribute[0]));
+                                   AttributeExtCollection.EmptyCollection);
             }
             ValueTypeTC result = new ValueTypeTC();            
-            RegisterCreatedTypeCodeForType(clsType, new AttributeExtCollection(),
+            RegisterCreatedTypeCodeForType(clsType, AttributeExtCollection.EmptyCollection,
                                            result);
             result.Initalize(Repository.GetRepositoryID(clsType),
                              IdlNaming.ReverseIdlToClsNameMapping(clsType.Name), 
@@ -754,7 +754,7 @@ namespace Ch.Elca.Iiop.Idl {
         public object MapToIdlSequence(Type clsType, int bound) {            
             // sequence should not contain itself! -> do not register typecode
             omg.org.CORBA.TypeCode elementTC = CreateOrGetTypeCodeForType(clsType.GetElementType(),
-                                                   new AttributeExtCollection(new Attribute[0]));
+                                                   AttributeExtCollection.EmptyCollection);
             return new SequenceTC(elementTC, bound);
         }
         public object MapToIdlAny(Type clsType) {
@@ -769,14 +769,14 @@ namespace Ch.Elca.Iiop.Idl {
             throw new INTERNAL(1940, CompletionStatus.Completed_MayBe);
         }
         public object MapToWStringValue(Type clsType) {
-            return MapToIdlBoxedValueType(clsType, new AttributeExtCollection(), false);
+            return MapToIdlBoxedValueType(clsType, AttributeExtCollection.EmptyCollection, false);
         }
         public object MapToStringValue(Type clsType) {
-            return MapToIdlBoxedValueType(clsType, new AttributeExtCollection(), false);
+            return MapToIdlBoxedValueType(clsType, AttributeExtCollection.EmptyCollection, false);
         }
         public object MapException(Type clsType) {
             ExceptTC result = new ExceptTC();
-            RegisterCreatedTypeCodeForType(clsType, new AttributeExtCollection(),
+            RegisterCreatedTypeCodeForType(clsType, AttributeExtCollection.EmptyCollection,
                                            result);
             
             FieldInfo[] members = ReflectionHelper.GetAllDeclaredInstanceFields(clsType);
@@ -797,7 +797,7 @@ namespace Ch.Elca.Iiop.Idl {
             EnumTC result = new EnumTC(Repository.GetRepositoryID(clsType), 
                                        IdlNaming.ReverseIdlToClsNameMapping(clsType.Name),
                                        names);
-            RegisterCreatedTypeCodeForType(clsType, new AttributeExtCollection(),
+            RegisterCreatedTypeCodeForType(clsType, AttributeExtCollection.EmptyCollection,
                                            result);                        
             return result;
 

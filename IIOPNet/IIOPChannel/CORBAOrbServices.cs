@@ -180,7 +180,7 @@ namespace omg.org.CORBA {
 		/// <summary>takes an object an returns the typecode for it</summary>
 		public TypeCode create_tc_for(object forObject) {
 			if (!(forObject == null)) {
-				return Repository.CreateTypeCodeForType(forObject.GetType(), new AttributeExtCollection());
+				return Repository.CreateTypeCodeForType(forObject.GetType(), AttributeExtCollection.EmptyCollection);
 			} else {
 				return new NullTC();
 			}

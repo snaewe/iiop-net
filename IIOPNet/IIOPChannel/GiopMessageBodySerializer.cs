@@ -722,7 +722,7 @@ namespace Ch.Elca.Iiop.MessageHandling {
             }
             
             Marshaller marshaller = Marshaller.GetSingleton();
-            marshaller.Marshal(corbaEx.GetType(), new Util.AttributeExtCollection(new Attribute[0]),
+            marshaller.Marshal(corbaEx.GetType(), Util.AttributeExtCollection.EmptyCollection,
                                corbaEx, targetStream);
         }
 
@@ -739,7 +739,7 @@ namespace Ch.Elca.Iiop.MessageHandling {
             }
             // marshal the exception
             Marshaller marshaller = Marshaller.GetSingleton();
-            marshaller.Marshal(exceptionType, new Util.AttributeExtCollection(new Attribute[0]),
+            marshaller.Marshal(exceptionType, Util.AttributeExtCollection.EmptyCollection,
                                toSerialise, targetStream);
         }
 
@@ -821,7 +821,7 @@ namespace Ch.Elca.Iiop.MessageHandling {
 
             Marshaller marshaller = Marshaller.GetSingleton();
             Exception result = (Exception) marshaller.Unmarshal(typeof(omg.org.CORBA.AbstractCORBASystemException),
-                                                                new Util.AttributeExtCollection(new Attribute[0]),
+                                                                Util.AttributeExtCollection.EmptyCollection,
                                                                 cdrStream);
             
             if (result == null) { 
@@ -837,7 +837,7 @@ namespace Ch.Elca.Iiop.MessageHandling {
 
             Marshaller marshaller = Marshaller.GetSingleton();
             Exception result = (Exception) marshaller.Unmarshal(typeof(AbstractUserException),
-                                                                new Util.AttributeExtCollection(new Attribute[0]),
+                                                                Util.AttributeExtCollection.EmptyCollection,
                                                                 cdrStream);
             if (result == null) {
                 throw new Exception("user exception received from peer orb, but was not deserializable");
@@ -855,7 +855,8 @@ namespace Ch.Elca.Iiop.MessageHandling {
             AlignBodyIfNeeded(cdrStream, version);
             // read the Location fwd IOR
             Marshaller marshaller = Marshaller.GetSingleton();
-            MarshalByRefObject newProxy = marshaller.Unmarshal(request.MethodBase.DeclaringType, new AttributeExtCollection(), cdrStream)
+            MarshalByRefObject newProxy = marshaller.Unmarshal(request.MethodBase.DeclaringType, 
+                                                               AttributeExtCollection.EmptyCollection, cdrStream)
                                               as MarshalByRefObject;
             if (newProxy == null) {
                 throw new OBJECT_NOT_EXIST(2402, CompletionStatus.Completed_No);

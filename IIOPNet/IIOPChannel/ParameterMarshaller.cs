@@ -113,8 +113,9 @@ namespace Ch.Elca.Iiop.Marshalling {
         /// <param name="actual">the values, which should be marshalled for the parameters</param>
         public void SerialiseRequestArgs(MethodInfo method, object[] actual, CdrOutputStream targetStream) {
             ParameterInfo[] parameters = method.GetParameters();
-            int actualParamNr = 0;
-            foreach (ParameterInfo paramInfo in parameters) {
+            
+            for (int actualParamNr = 0; actualParamNr < parameters.Length; actualParamNr++) {
+                ParameterInfo paramInfo = parameters[actualParamNr];
                 // iterate through the parameters, nonOut and nonRetval params are serialised for a request
                 if (IsInParam(paramInfo) || IsRefParam(paramInfo)) {
                     AttributeExtCollection paramAttrs = ReflectionHelper.CollectParameterAttributes(paramInfo, 
@@ -124,7 +125,6 @@ namespace Ch.Elca.Iiop.Marshalling {
                 }
                 // move to next parameter
                 // out-args are also part of the actual array -> move to next for those whithout doing something
-                actualParamNr++;
             }
         }
 
@@ -137,24 +137,17 @@ namespace Ch.Elca.Iiop.Marshalling {
         /// </returns>
         public object[] DeserialiseRequestArgs(MethodInfo method, CdrInputStream sourceStream) {
             ParameterInfo[] parameters = method.GetParameters();
-            ArrayList demarshalled = new ArrayList();
-            
-            foreach (ParameterInfo paramInfo in parameters) {
+
+
+            object[] result = new object[parameters.Length];
+            for (int actualParamNr = 0; actualParamNr < parameters.Length; actualParamNr++) {
+                ParameterInfo paramInfo = parameters[actualParamNr];
                 if (IsInParam(paramInfo) || IsRefParam(paramInfo)) {
                     AttributeExtCollection paramAttrs = ReflectionHelper.CollectParameterAttributes(paramInfo, 
                                                                                                     method);
-                    object unmarshalledParam = Unmarshal(paramInfo.ParameterType, paramAttrs,
+                    result[actualParamNr] = Unmarshal(paramInfo.ParameterType, paramAttrs,
                                                          sourceStream);
-                    demarshalled.Add(unmarshalledParam);
-                } else if (IsOutParam(paramInfo)) {
-                    // add null for an out parameter
-                    demarshalled.Add(null);
-                }
-            }
-            // prepare the result
-            object[] result = demarshalled.ToArray();
-            if (result == null) { 
-                result = new object[0]; 
+                } // else: null for an out parameter
             }
             return result;
         }
@@ -189,7 +182,8 @@ namespace Ch.Elca.Iiop.Marshalling {
             }
             // ... then the out/ref args
             int outParamNr = 0;
-            foreach (ParameterInfo paramInfo in parameters) {
+            for (int actualParamNr = 0; actualParamNr < parameters.Length; actualParamNr++) {
+                ParameterInfo paramInfo = parameters[actualParamNr];
                 // iterate through the parameters, out/ref parameters are serialised
                 if (IsOutParam(paramInfo) || IsRefParam(paramInfo)) {
                     AttributeExtCollection paramAttrs = ReflectionHelper.CollectParameterAttributes(paramInfo, 
@@ -238,25 +232,22 @@ namespace Ch.Elca.Iiop.Marshalling {
             }
             
             // ... then the outargs
-            ArrayList demarshalledOutArgs = new ArrayList();
+            outArgs = new object[parameters.Length];            
             bool outArgFound = false;
-            foreach (ParameterInfo paramInfo in parameters) {
+            for (int actualParamNr = 0; actualParamNr < parameters.Length; actualParamNr++) {                    
+                ParameterInfo paramInfo = parameters[actualParamNr];
                 if (IsOutParam(paramInfo) || IsRefParam(paramInfo)) {
                     AttributeExtCollection paramAttrs = ReflectionHelper.CollectParameterAttributes(paramInfo, 
                                                                                                     method);
-                    object unmarshalledParam = Unmarshal(paramInfo.ParameterType, paramAttrs, 
-                                                         sourceStream);
-                    demarshalledOutArgs.Add(unmarshalledParam);
+                    outArgs[actualParamNr] = Unmarshal(paramInfo.ParameterType, paramAttrs, 
+                                                       sourceStream);                    
                     outArgFound = true;
-                } else {
-                    demarshalledOutArgs.Add(null); // for an in param null must be added to out-args
-                }
+                } // else: for an in param null must be added to out-args
             }
 
             // prepare the result
-            outArgs = demarshalledOutArgs.ToArray();
             // need to return empty array, if no out-arg is present, because otherwise async calls fail
-            if ((!outArgFound) || (outArgs == null)) { 
+            if (!outArgFound) {
                 outArgs = new object[0]; 
             }
             return retValue;
@@ -266,3 +257,110 @@ namespace Ch.Elca.Iiop.Marshalling {
 
     }
 }
+
+
+#if UnitTest
+
+namespace Ch.Elca.Iiop.Tests {
+    
+    using System.IO;
+    using NUnit.Framework;
+    using Ch.Elca.Iiop;
+    using Ch.Elca.Iiop.Idl;
+    using Ch.Elca.Iiop.Util;
+    using Ch.Elca.Iiop.Marshalling;
+    using Ch.Elca.Iiop.Cdr;
+    using omg.org.CORBA;
+    
+
+    public class ParameterMarshallerTestRemote : MarshalByRefObject {
+        
+        public int TestSomeInts(int a1, int a2, int a3, int a4, int a5) {
+            return a1 + a2 + a3 + a4 + a5; // unimportant for test
+        }
+        
+    }
+
+    /// <summary>
+    /// Unit-tests for testing request/reply serialisation/deserialisation
+    /// </summary>
+    public class ParameterMarshallerTest : TestCase {
+        
+        private MethodInfo GetTestSomeIntMethod() {
+            Type parameterMarshallerTestRemoteType = typeof(ParameterMarshallerTestRemote);
+            return parameterMarshallerTestRemoteType.GetMethod("TestSomeInts", BindingFlags.Instance | BindingFlags.Public);
+        }
+        
+        private void CheckArrayEqual(object[] a1, object[] a2) {
+            Assertion.AssertEquals(a1.Length, a2.Length);
+            for (int i = 0; i < a1.Length; i++) {
+                Assertion.AssertEquals(a1[i], a2[i]);
+            }            
+        }
+        
+        
+        public void TestRequestArguments() {
+            MethodInfo testMethod = GetTestSomeIntMethod();
+            
+            object[] actual = new object[] { 1 , 2, 3, 4, 5 };
+            for (int j = 0; j < 10; j++) { // test more than one call
+                object[] deser = MarshalAndUnmarshalRequestArgsOnce(testMethod, actual);
+                CheckArrayEqual(actual, deser);
+            }
+        }
+        
+        private object[] MarshalAndUnmarshalRequestArgsOnce(MethodInfo testMethod, object[] actual) {
+            ParameterMarshaller marshaller = ParameterMarshaller.GetSingleton();
+            
+            MemoryStream data = new MemoryStream();
+            GiopVersion version = new GiopVersion(1, 2);
+            byte endian = 0;
+            CdrOutputStream targetStream = new CdrOutputStreamImpl(data, endian, version);            
+            marshaller.SerialiseRequestArgs(testMethod, actual, targetStream);
+            
+            data.Seek(0, SeekOrigin.Begin);
+            CdrInputStreamImpl sourceStream = new CdrInputStreamImpl(data);
+            sourceStream.ConfigStream(endian, version);
+            object[] deser = marshaller.DeserialiseRequestArgs(testMethod, sourceStream);
+            return deser;
+        }
+        
+        public void TestReplyArguments() {                       
+            MethodInfo testMethod = GetTestSomeIntMethod();
+            
+            object returnValue = 9876;
+            object[] outArgs = new object[0];
+            for (int j = 0; j < 10; j++) { // check more than one call
+                object[] deserOut;
+                object deser = MarshalAndUnmarshalResponeArgsOnce(testMethod, returnValue, outArgs, 
+                                                                  out deserOut);
+                Assertion.AssertEquals(returnValue, deser);
+                CheckArrayEqual(outArgs, deserOut);
+            }
+            
+        }
+        
+        private object MarshalAndUnmarshalResponeArgsOnce(MethodInfo testMethod, object returnValue,
+                                                          object[] outArgs, out object[] deserOutArgs) {
+            ParameterMarshaller marshaller = ParameterMarshaller.GetSingleton();
+            
+            MemoryStream data = new MemoryStream();
+            GiopVersion version = new GiopVersion(1, 2);
+            byte endian = 0;
+            CdrOutputStream targetStream = new CdrOutputStreamImpl(data, endian, version);
+            marshaller.SerialiseResponseArgs(testMethod, returnValue, outArgs, targetStream);
+            
+            data.Seek(0, SeekOrigin.Begin);            
+            CdrInputStreamImpl sourceStream = new CdrInputStreamImpl(data);
+            sourceStream.ConfigStream(endian, version);            
+            object returnValueDeser = marshaller.DeserialiseResponseArgs(testMethod, sourceStream, 
+                                                                         out deserOutArgs);
+            return returnValueDeser;
+        }
+        
+        
+    }
+    
+}
+
+#endif

@@ -696,7 +696,7 @@ namespace Ch.Elca.Iiop.Idl {
             return IdlNaming.MapFullTypeNameToIdlScoped(dotNetType);
         }
         public object MapToIdlSequence(System.Type dotNetType, int bound) {
-            string refToElemType = (string)m_mapper.MapClsType(dotNetType.GetElementType(), new Util.AttributeExtCollection(), this);
+            string refToElemType = (string)m_mapper.MapClsType(dotNetType.GetElementType(), Util.AttributeExtCollection.EmptyCollection, this);
             return "sequence<" + refToElemType + ">";
         }
         public object MapToIdlBoxedValueType(System.Type dotNetType, AttributeExtCollection attributes, bool isAlreadyBoxed) {

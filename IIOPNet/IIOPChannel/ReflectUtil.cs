@@ -357,7 +357,7 @@ namespace Ch.Elca.Iiop.Util {
                         MethodInfo found = IsMethodDefinedInInterface(member, interf);
                         if (found != null) {
                             // add attributes from interface definition if not already present                                                
-                            result.AddMissingAttributes(found.GetCustomAttributes(true));
+                            result = result.MergeMissingAttributes(found.GetCustomAttributes(true));
                         }
                     }                    
                 }    
@@ -383,7 +383,7 @@ namespace Ch.Elca.Iiop.Util {
                 // add param attributes from base definition if not already present
                 ParameterInfo[] baseParams = baseDecl.GetParameters();
                 ParameterInfo baseParamToConsider = baseParams[paramInfo.Position];
-                result.AddMissingAttributes(baseParamToConsider.GetCustomAttributes(true));
+                result = result.MergeMissingAttributes(baseParamToConsider.GetCustomAttributes(true));
             }
             
             Type declaringType = paramInMethod.DeclaringType;
@@ -395,7 +395,7 @@ namespace Ch.Elca.Iiop.Util {
                     // add param attributes from interface definition if not already present
                     ParameterInfo[] ifParams = found.GetParameters();
                     ParameterInfo ifParamToConsider = ifParams[paramInfo.Position];
-                    result.AddMissingAttributes(ifParamToConsider.GetCustomAttributes(true));
+                    result = result.MergeMissingAttributes(ifParamToConsider.GetCustomAttributes(true));
                 }
             }
 
@@ -419,7 +419,7 @@ namespace Ch.Elca.Iiop.Util {
             MethodInfo baseDecl = method.GetBaseDefinition();
             if (!baseDecl.Equals(method)) {
                 // add return param attributes from base definition if not already present               
-                result.AddMissingAttributes(baseDecl.ReturnTypeCustomAttributes.GetCustomAttributes(true));
+                result = result.MergeMissingAttributes(baseDecl.ReturnTypeCustomAttributes.GetCustomAttributes(true));
             }
             
             Type declaringType = method.DeclaringType;
@@ -429,7 +429,7 @@ namespace Ch.Elca.Iiop.Util {
                 MethodInfo found = IsMethodDefinedInInterface(method, interf);
                 if (found != null) {
                     // add return param attributes from interface definition if not already present
-                    result.AddMissingAttributes(found.ReturnTypeCustomAttributes.GetCustomAttributes(true));
+                    result = result.MergeMissingAttributes(found.ReturnTypeCustomAttributes.GetCustomAttributes(true));
                 }
             }
 

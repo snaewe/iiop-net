@@ -2117,9 +2117,9 @@ public class MetaDataGenerator : IDLParserVisitor {
         AttributeExtCollection elemAttributes = elemType.GetCompactTypeAttrInstances();
         long seqAttrOrderNr = IdlSequenceAttribute.DetermineSequenceAttributeOrderNr(elemAttributes);
         IdlSequenceAttribute seqAttr = new IdlSequenceAttribute(seqAttrOrderNr, bound);
-        AttributeExtCollection sequenceAttributes = new AttributeExtCollection();
-        sequenceAttributes.InsertAttributes(elemAttributes);
-        sequenceAttributes.InsertAttribute(seqAttr);
+        AttributeExtCollection sequenceAttributes = 
+            new AttributeExtCollection(elemAttributes);
+        sequenceAttributes = sequenceAttributes.MergeAttribute(seqAttr);
         TypeContainer result = new TypeContainer(arrayType,
                                                  sequenceAttributes );
         return result;

@@ -70,6 +70,11 @@ namespace Ch.Elca.Iiop.Idl {
         
         #endregion IProperties
         #region IMethods
+        
+        public void RemoveAttributeOfType(Type attrType) {
+            Attribute found;
+            m_attributes = m_attributes.RemoveAttributeOfType(attrType, out found);
+        }
 
         public override bool Equals(object obj) {
             if (!(obj is MapTypeInfo)) { 

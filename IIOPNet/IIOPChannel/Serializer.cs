@@ -518,7 +518,7 @@ namespace Ch.Elca.Iiop.Marshalling {
                 currentType = currentType.BaseType;
                 if (currentType == ReflectionHelper.ObjectType || currentType == ReflectionHelper.ValueTypeType ||
                    (ClsToIdlMapper.IsMappedToAbstractValueType(currentType,
-                                                               new AttributeExtCollection()))) { // abstract value types are not serialized
+                                                               AttributeExtCollection.EmptyCollection))) { // abstract value types are not serialized
                     break;
                 }
             }
@@ -1091,15 +1091,16 @@ namespace Ch.Elca.Iiop.Marshalling {
                                        CdrOutputStream targetStream) {
             if (attributes.IsInCollection(ReflectionHelper.IdlSequenceAttributeType)) {                
                 // mapped from an IDL-sequence or CLS to IDL mapping
-                IdlSequenceAttribute seqAttr = (IdlSequenceAttribute)
-                    attributes.RemoveAttributeOfType(ReflectionHelper.IdlSequenceAttributeType); // this attribute is handled --> remove it
+                Attribute seqAttr;
+                attributes = attributes.RemoveAttributeOfType(ReflectionHelper.IdlSequenceAttributeType, 
+                                                              out seqAttr); // this attribute is handled --> remove it
 
                 Array array = (Array) actual;
                 if (array == null) {
                     // not allowed for a sequence:
                     throw new BAD_PARAM(3433, CompletionStatus.Completed_MayBe);
                 }
-                CheckBound((uint)array.Length, seqAttr);
+                CheckBound((uint)array.Length, (IdlSequenceAttribute)seqAttr);
                 targetStream.WriteULong((uint)array.Length);
                 // get marshaller for elemtype
                 Type elemType = formal.GetElementType();
@@ -1120,10 +1121,11 @@ namespace Ch.Elca.Iiop.Marshalling {
                                            CdrInputStream sourceStream) {
             if (attributes.IsInCollection(ReflectionHelper.IdlSequenceAttributeType)) {
                 // mapped from an IDL-sequence
-                IdlSequenceAttribute seqAttr = 
-                    (IdlSequenceAttribute)attributes.RemoveAttributeOfType(ReflectionHelper.IdlSequenceAttributeType);
+                Attribute seqAttr; 
+                    attributes = attributes.RemoveAttributeOfType(ReflectionHelper.IdlSequenceAttributeType,
+                                                                  out seqAttr);
                 uint nrOfElements = sourceStream.ReadULong();
-                CheckBound(nrOfElements, seqAttr);
+                CheckBound(nrOfElements, (IdlSequenceAttribute)seqAttr);
                 
                 Array result = Array.CreateInstance(formal.GetElementType(), (int)nrOfElements);                
                 // get marshaller for array element type
@@ -1212,9 +1214,10 @@ namespace Ch.Elca.Iiop.Marshalling {
             m_typeCodeSer.Serialise(ReflectionHelper.CorbaTypeCodeType, typeCode, attributes, targetStream);
             if (actual != null) {               
                 Marshaller marshaller = Marshaller.GetSingleton();
-                attributes.RemoveAttributeOfType(typeof(ObjectIdlTypeAttribute));
+                Attribute attr;
+                attributes = attributes.RemoveAttributeOfType(typeof(ObjectIdlTypeAttribute), out attr);
                 AttributeExtCollection typeAttributes = Repository.GetAttrsForTypeCode(typeCode);
-                attributes.InsertAttributes(typeAttributes); // add the attributes belonging to the typecode
+                attributes = attributes.MergeAttributeCollections(typeAttributes); // add the attributes belonging to the typecode
                 marshaller.Marshal(actualType, attributes, actual, targetStream);
             }
         }

@@ -39,28 +39,47 @@ namespace Ch.Elca.Iiop.Util {
     /// <summary>
     /// A more powerful Attribute collection than AttributeCollection.
     /// </summary>
-    public class AttributeExtCollection : ICollection, ICloneable {
+    public class AttributeExtCollection : ICollection {
         
         #region SFields
         
-        private static Attribute[] s_emptyAttrArray = new Attribute[0];
+        private static AttributeExtCollection s_emptyCollection = new AttributeExtCollection();
         
         #endregion
         #region IFields
         
-        private ArrayList m_attributes = new ArrayList();
+        private ArrayList m_attributes;
         
         #endregion IFields
         #region IConstructors
 
         public AttributeExtCollection() {
+            m_attributes = new ArrayList();    
         }
         
-        public AttributeExtCollection(Attribute[] attrs) : this() {
+        public AttributeExtCollection(Attribute[] attrs) {
+            m_attributes = new ArrayList();
             m_attributes.AddRange(attrs);
         }
 
+        public AttributeExtCollection(AttributeExtCollection coll) {
+            m_attributes = (ArrayList)coll.m_attributes.Clone();
+        }
+        
+        private AttributeExtCollection(ArrayList content) {
+            m_attributes = content;
+        }
+
         #endregion IConstructors
+        #region SProperties
+        
+        public static AttributeExtCollection EmptyCollection {
+            get {
+                return s_emptyCollection;
+            }
+        }
+        
+        #endregion SProperties
         #region IProperties
         
         public bool IsSynchronized {
@@ -80,6 +99,7 @@ namespace Ch.Elca.Iiop.Util {
                 return m_attributes.SyncRoot; 
             }
         }
+        
         #endregion IProperties
         #region SMethods
         
@@ -87,14 +107,13 @@ namespace Ch.Elca.Iiop.Util {
         /// creates an AttibuteExtCollection containing all Attributes in attrs
         /// </summary>
         public static AttributeExtCollection ConvertToAttributeCollection(object[] attrs) {
-            Attribute[] result = s_emptyAttrArray;
-            if (attrs != null) {
-                result = new Attribute[attrs.Length];
-                for (int i = 0; i < attrs.Length; i++) {
-                    result[i] = (Attribute) attrs[i];
-                }
+            if ((attrs != null) && (attrs.Length > 0)) {
+                ArrayList resultList = new ArrayList();
+                resultList.AddRange(attrs);
+                return new AttributeExtCollection(resultList);
+            } else {
+                return EmptyCollection;
             }
-            return new AttributeExtCollection(result);
         }
 
         #endregion
@@ -111,7 +130,9 @@ namespace Ch.Elca.Iiop.Util {
             IEnumerator enumerator = GetEnumerator();
             while (enumerator.MoveNext()) {
                 Attribute attr = (Attribute)enumerator.Current;
-                if (attr.GetType() == attrType) { return true; }
+                if (attr.GetType() == attrType) { 
+                    return true; 
+                }
             }
             return false;
         }
@@ -156,39 +177,45 @@ namespace Ch.Elca.Iiop.Util {
         /// with the highest order number
         /// </remarks>
         /// <returns>The removed attribute, or null if not found</returns>
-        public Attribute RemoveAttributeOfType(Type attrType) {
-            Attribute foundAttr = GetAttributeForType(attrType);
+        public AttributeExtCollection RemoveAttributeOfType(Type attrType, out Attribute foundAttr) {
+            foundAttr = GetAttributeForType(attrType);
             if (foundAttr != null) {
-                m_attributes.Remove(foundAttr);
+                ArrayList newCollection = (ArrayList)m_attributes.Clone();                
+                newCollection.Remove(foundAttr);
+                return new AttributeExtCollection(newCollection);
+            } else {
+                return this;
             }
-            return foundAttr;
         }
 
         /// <summary>
         /// insert the attribute in the collection at the first position
         /// </summary>
-        public void InsertAttribute(Attribute attr) {
-            Debug.WriteLine("insert into attribute collection attribute of type: " + attr.GetType().FullName+" size:"+m_attributes.Count);
-            m_attributes.Insert(0, attr);
-            Debug.WriteLine("attr inserted");
+        public AttributeExtCollection MergeAttribute(Attribute attr) {
+            ArrayList newAttributes = (ArrayList)m_attributes.Clone();            
+            newAttributes.Insert(0, attr);
+            return new AttributeExtCollection(newAttributes);
         }
         
         /// <summary>
-        /// inserts all attributes from coll into the collection
-        public void InsertAttributes(AttributeExtCollection coll) {
-            IEnumerator enumerator = coll.GetEnumerator();
-            while (enumerator.MoveNext()) {
-                Attribute attr = (Attribute) enumerator.Current;
-                InsertAttribute(attr);
-            }
+        /// returns an attribute collection produced by merging this collection and the argument collection.
+        /// </summary>
+        public AttributeExtCollection MergeAttributeCollections(AttributeExtCollection coll) {
+            // first the new ones
+            ArrayList resultList = (ArrayList)coll.m_attributes.Clone();
+            // append content of this collection
+            resultList.AddRange(m_attributes);
+            return new AttributeExtCollection(resultList);
         }
 
-        public void AddMissingAttributes(object[] toAdd) {
+        public AttributeExtCollection MergeMissingAttributes(object[] toAdd) {
+            ArrayList resultList = (ArrayList)m_attributes.Clone();                        
             foreach (Attribute attr in toAdd) {
-                if (!Contains(attr)) {
-                    InsertAttribute(attr);
+                if (!resultList.Contains(attr)) {
+                    resultList.Insert(0, attr);
                 }
             }
+            return new AttributeExtCollection(resultList);
         }
 
         public override bool Equals(object obj) {
@@ -232,14 +259,6 @@ namespace Ch.Elca.Iiop.Util {
 
         #endregion Implementation of IEnumerable
         
-        /// <summary>creates a copy of AttributeExtCollection; 
-        /// does not create a copy of the Attributes</summary>
-        public virtual object Clone() {
-            AttributeExtCollection copy = new AttributeExtCollection();
-            copy.m_attributes = (ArrayList)m_attributes.Clone();
-            return copy;
-        }
-
         #endregion IMethods
         
     }

@@ -745,7 +745,7 @@ namespace Ch.Elca.Iiop.CorbaObjRef {
             }
             m_id = taggedComponentId;
             m_taggedComponentDataType = taggedComponentDataType;
-            AttributeExtCollection attributes = new AttributeExtCollection();
+            AttributeExtCollection attributes = AttributeExtCollection.EmptyCollection;
             m_componentDataMarshaller = new MarshallerForType(taggedComponentDataType, 
                                                               attributes);
             m_encodingRules = encodingRules;            

@@ -384,7 +384,7 @@ namespace Ch.Elca.Iiop.Idl {
                 // because the sequence type itself will never be mapped to a type on it's own.
                 // remark: there are no sequences of sequences because of the CLS to IDL mapping,
                 // only sequences of boxed sequences!
-                info.Attributes.RemoveAttributeOfType(ReflectionHelper.IdlSequenceAttributeType);
+                info.RemoveAttributeOfType(ReflectionHelper.IdlSequenceAttributeType);
                 Type elemType = info.Type.GetElementType();
                 info = new MapTypeInfo(elemType, info.Attributes);
             }
