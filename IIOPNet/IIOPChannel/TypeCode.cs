@@ -446,7 +446,7 @@ namespace omg.org.CORBA {
         #region IMethods
         
         internal override Type GetClsForTypeCode() {
-            return typeof(void);
+            return ReflectionHelper.VoidType;
         }
 
         #endregion IMethods

@@ -384,7 +384,7 @@ namespace Ch.Elca.Iiop.Idl {
             }
             
             MethodBuilder modifier = m_ilEmitHelper.AddMethod(m_builder, "Set" + switchCase.ElemName, 
-                                                              parameters, new TypeContainer(typeof(void)), 
+                                                              parameters, new TypeContainer(ReflectionHelper.VoidType), 
                                                               MethodAttributes.Public | MethodAttributes.HideBySig);
 
             ILGenerator gen = modifier.GetILGenerator();
@@ -543,7 +543,7 @@ namespace Ch.Elca.Iiop.Idl {
             ParameterSpec[] parameters = new ParameterSpec[] { discrArg };
             
             MethodBuilder modifier = m_ilEmitHelper.AddMethod(m_builder, "SetDefault", 
-                                                              parameters, new TypeContainer(typeof(void)), 
+                                                              parameters, new TypeContainer(ReflectionHelper.VoidType), 
                                                               MethodAttributes.Public | MethodAttributes.HideBySig);
 
             ILGenerator gen = modifier.GetILGenerator();

@@ -162,7 +162,6 @@ namespace Ch.Elca.Iiop.Idl {
 
 
         // the following expressions are evaluated here for efficiency reasons
-        private static Type s_voidType = typeof(void);
         private static Type s_singleType = typeof(System.Single);
         private static Type s_doubleType = typeof(System.Double);
         private static Type s_charType = typeof(System.Char);
@@ -261,7 +260,7 @@ namespace Ch.Elca.Iiop.Idl {
                 clsType.Equals(ReflectionHelper.Int64Type) ||
                 clsType.Equals(ReflectionHelper.ByteType) ||
                 clsType.Equals(ReflectionHelper.BooleanType) ||
-                clsType.Equals(s_voidType) ||
+                clsType.Equals(ReflectionHelper.VoidType) ||
                 clsType.Equals(s_singleType) ||
                 clsType.Equals(s_doubleType) ||
                 clsType.Equals(s_charType) ||
@@ -404,7 +403,7 @@ namespace Ch.Elca.Iiop.Idl {
                 return action.MapToIdlDouble(clsType);
             } else if (clsType.Equals(s_singleType)) {
                 return action.MapToIdlFloat(clsType);
-            } else if (clsType.Equals(s_voidType)) {
+            } else if (clsType.Equals(ReflectionHelper.VoidType)) {
                 return action.MapToIdlVoid(clsType);
             } else {
                 // not mappable as primitive type: clsType
@@ -903,7 +902,7 @@ namespace Ch.Elca.Iiop.Tests {
 
         public void TestMapToIdlVoid() {
             ClsToIdlMapper mapper = ClsToIdlMapper.GetSingleton();
-            MappingToResult mapResult = (MappingToResult)mapper.MapClsType(typeof(void), 
+            MappingToResult mapResult = (MappingToResult)mapper.MapClsType(ReflectionHelper.VoidType, 
                                                                            new AttributeExtCollection(),
                                                                            s_testAction);
 			Assertion.AssertEquals(MappingToResult.IdlVoid, mapResult);        

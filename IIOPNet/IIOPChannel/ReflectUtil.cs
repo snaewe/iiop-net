@@ -49,6 +49,7 @@ namespace Ch.Elca.Iiop.Util {
         private static Type s_idlUnionAttrType = typeof(IdlUnionAttribute);
         private static Type s_fromIdlNameAttributeType = typeof(FromIdlNameAttribute);
                 
+        private static Type s_voidType = typeof(void);
         private static Type s_stringType = typeof(string);
         private static Type s_int16Type = typeof(System.Int16);
         private static Type s_int32Type = typeof(System.Int32);
@@ -106,6 +107,13 @@ namespace Ch.Elca.Iiop.Util {
         public static Type FromIdlNameAttributeType {
             get {
                 return s_fromIdlNameAttributeType;
+            }
+        }
+        
+        /// <summary>caches typeof(void)</summary>
+        public static Type VoidType {
+            get {
+                return s_voidType;               
             }
         }
                 

@@ -46,8 +46,6 @@ namespace Ch.Elca.Iiop.Marshalling {
 
         private static ParameterMarshaller s_singletonMarshaller = new ParameterMarshaller();
 
-        private static Type s_voidType = typeof(void);
-
         #endregion SFields
         #region IConstructors
         
@@ -182,7 +180,7 @@ namespace Ch.Elca.Iiop.Marshalling {
                                           CdrOutputStream targetStream) {
             ParameterInfo[] parameters = method.GetParameters();
             // first serialise the return value, 
-            if (!method.ReturnType.Equals(s_voidType)) {
+            if (!method.ReturnType.Equals(ReflectionHelper.VoidType)) {
                 AttributeExtCollection returnAttr = ReflectionHelper.CollectReturnParameterAttributes(method);
                 Marshal(method.ReturnType, returnAttr, retValue, targetStream);
             }
@@ -205,7 +203,7 @@ namespace Ch.Elca.Iiop.Marshalling {
         /// <param name="method">the method to check</param>
         /// <returns>true, if response args are present, otherwise returns false</returns>
         public bool HasResponseArgs(MethodInfo method) {
-            if (!method.ReturnType.Equals(s_voidType)) {
+            if (!method.ReturnType.Equals(ReflectionHelper.VoidType)) {
                 return true;
             }
             
@@ -231,7 +229,7 @@ namespace Ch.Elca.Iiop.Marshalling {
             ParameterInfo[] parameters = method.GetParameters();
             // demarshal first the return value, 
             object retValue = null;
-            if (!method.ReturnType.Equals(s_voidType)) {
+            if (!method.ReturnType.Equals(ReflectionHelper.VoidType)) {
                 AttributeExtCollection returnAttr = ReflectionHelper.CollectReturnParameterAttributes(method);
                 retValue = Unmarshal(method.ReturnType, returnAttr, sourceStream);
             }

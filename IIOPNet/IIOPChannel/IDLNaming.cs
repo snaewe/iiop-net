@@ -343,7 +343,7 @@ namespace Ch.Elca.Iiop.Idl {
             s_clsMapSpecial.Add(ReflectionHelper.Int64Type, "long long");
             s_clsMapSpecial.Add(ReflectionHelper.ByteType, "octet");
             s_clsMapSpecial.Add(ReflectionHelper.BooleanType, "boolean");
-            s_clsMapSpecial.Add(typeof(void), "void");
+            s_clsMapSpecial.Add(ReflectionHelper.VoidType, "void");
 
             s_clsMapSpecial.Add(typeof(System.Single), "float");
             s_clsMapSpecial.Add(typeof(System.Double), "double");
