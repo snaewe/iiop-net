@@ -233,6 +233,9 @@ public class MetaDataGenerator implements IDLParserVisitor {
     /** is the generator initalized for parsing a file */
     private boolean m_initalized = false;
 
+    /** used to store value types generated: for this types an implementation class must be provided */
+    private LinkedList m_valueTypesDefined = new LinkedList();
+
     #endregion IFields
     #region IConstructors
 
@@ -258,6 +261,19 @@ public class MetaDataGenerator implements IDLParserVisitor {
     public void SaveAssembly() {
         // save the assembly to disk
         m_asmBuilder.Save(m_targetAsmName + ".dll");
+        // print a remark to remember implementing the valuetypes:
+        PrintNeededValueImplList();
+    }
+
+    /** prints a list of value types for which an implementation must be provided. */
+    private void PrintNeededValueImplList() {
+        if (m_valueTypesDefined.size() > 0) {
+            System.out.println("\nDon't forget to provide an implementation for the following value types: \n");
+            for (int i = 0; i < m_valueTypesDefined.size(); i++) {
+                System.out.println(((Type)m_valueTypesDefined.get(i)).get_FullName());
+            }
+            System.out.println("");
+        }        
     }
 
     /** initalize the generator for next source, with using the same target assembly / target modules */
@@ -809,6 +825,8 @@ public class MetaDataGenerator implements IDLParserVisitor {
         // finally create the type
         Type resultType = valueToBuild.CreateType();
         m_typeManager.ReplaceFwdDeclWithFullDecl(resultType, forSymbol);
+        // add to list of value types generated for informing the user of need for implementation class
+        m_valueTypesDefined.add(resultType);
         return null;
     }
     
