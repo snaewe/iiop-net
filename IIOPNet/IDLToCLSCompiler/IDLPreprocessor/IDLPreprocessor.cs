@@ -219,9 +219,12 @@ namespace Ch.Elca.Iiop.IdlPreprocessor {
             if (result != null) {
                 result = result.Trim();
                 while (result.EndsWith("\\")) { // continuation
-                    result = result.Substring(0, result.Length - 1); // remove trailing \
+                    result = result.Substring(0, result.Length - 1); // remove trailing \                    
                     string nextLine = m_fileStream.ReadLine();
-                    result = result + (nextLine != null ? " " + nextLine.Trim() : String.Empty);
+                    if (nextLine == null) {
+                        throw new PreprocessingException("not allowed to have a \\ as last non-whitespace character in file");
+                    }
+                    result = result + " " + nextLine.Trim();
                 }
             }
             return result;
