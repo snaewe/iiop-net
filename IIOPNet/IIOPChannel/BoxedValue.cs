@@ -47,6 +47,9 @@ namespace Ch.Elca.Iiop.Idl {
         
         /// <summary>the name of the static method, which returns the first non-boxed type, when following the boxing chain (array of boxed is here not considered as non-boxed type)</summary>
         public const string GET_FIRST_NONBOXED_TYPE_METHODNAME = "GetFirstNonBoxedType";
+        
+        /// <summary>the name of the static method, which returns the name of the first non-boxed type, when following the boxing chain (array of boxed is here not considered as non-boxed type)</summary>
+        public const string GET_FIRST_NONBOXED_TYPENAME_METHODNAME = "GetFirstNonBoxedTypeName";
 
         #endregion Constants
         #region IConstructors

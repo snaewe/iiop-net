@@ -78,7 +78,7 @@ namespace Ch.Elca.Iiop.IdlCompiler.Action {
                                     GetKnownType(forSymbol).GetCompactClsType().FullName +
                                     " is already declared for symbol: " + forSymbol);
             }
-            TypeContainer container = new TypeContainer(type, new CustomAttributeBuilder[0]);
+            TypeContainer container = new CompileTimeTypeContainer(this, type, new CustomAttributeBuilder[0]);
             m_typesInCreation[forSymbol] = container;
         }
 
@@ -140,6 +140,15 @@ namespace Ch.Elca.Iiop.IdlCompiler.Action {
         }
         
         /// <summary>
+        /// checks, if type is known by ModuleBuilder and if yes, returns it;
+        /// otherwise, returns null.
+        ///</summary>
+        internal Type GetTypeFromBuildModule(string fullName) {
+            Type result = m_modBuilder.GetType(fullName);
+            return result;
+        }
+        
+        /// <summary>
         ///  checks, if a type is already defined in a previous run
         /// </summary>
         public bool CheckInBuildModulesForType(Symbol forSymbol) {
@@ -178,13 +187,14 @@ namespace Ch.Elca.Iiop.IdlCompiler.Action {
             if (result == null) {
                 Type fromBuildMod = GetTypeFromBuildModule(forSymbol);
                 if (fromBuildMod != null) {
-                    result = new TypeContainer(fromBuildMod, new CustomAttributeBuilder[0]);
+                    result = new CompileTimeTypeContainer(this, fromBuildMod, new CustomAttributeBuilder[0]);
                 }        
             }
             if (result == null) { 
                 // check in types, which are defined in referenced assemblies
                 Type fromAsm = m_refAsmTypes.GetTypeFromRefAssemblies(forSymbol);
                 if (fromAsm != null) {
+                    // remark: all types in ref assemblies are fully completed -> no need for compileTimeTypeContainer
                     result = new TypeContainer(fromAsm, new CustomAttributeBuilder[0]);
                 }
             }
@@ -204,7 +214,7 @@ namespace Ch.Elca.Iiop.IdlCompiler.Action {
         
         /// <summary>register a full type definition (CreateType() already called)</summary>
         public void RegisterTypeDefinition(Type fullDecl, Symbol forSymbol) {
-            TypeContainer container = new TypeContainer(fullDecl, new CustomAttributeBuilder[0]);
+            TypeContainer container = new CompileTimeTypeContainer(this, fullDecl, new CustomAttributeBuilder[0]);
             AddTypeDefinition(container, forSymbol);
         }
 
@@ -215,7 +225,7 @@ namespace Ch.Elca.Iiop.IdlCompiler.Action {
         public void ReplaceFwdDeclWithFullDecl(Type fullDecl, Symbol forSymbol) {
             m_typesInCreation.Remove(forSymbol);
             // add to the fully created types
-            TypeContainer container = new TypeContainer(fullDecl, new CustomAttributeBuilder[0]);
+            TypeContainer container = new CompileTimeTypeContainer(this, fullDecl, new CustomAttributeBuilder[0]);
             m_typeTable[forSymbol] = container;
         }
 

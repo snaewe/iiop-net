@@ -67,10 +67,6 @@ namespace Ch.Elca.Iiop.Idl {
         /// <summary>
         /// check if CLS type is a fusioned form;
         /// </summary>
-        /// <remarks>
-        /// attention: make sure, this is not called before all involved boxed types are completetly created; 
-        /// otherwise type couldn't be loaded from assembly?
-        /// </remakrs>
         private void CheckForFusionedForm() {
         	// initalize for non-splittable:
         	m_separatedClsType = m_clsType;
@@ -85,20 +81,29 @@ namespace Ch.Elca.Iiop.Idl {
                 }
                 String boxedValueRepId = ((RepositoryIDAttribute)attrColl.GetAttributeForType(typeof(RepositoryIDAttribute))).Id;
                 try {
-                    m_separatedClsType = (Type)m_clsType.InvokeMember(BoxedValueBase.GET_FIRST_NONBOXED_TYPE_METHODNAME,
-                                                                      BindingFlags.InvokeMethod | BindingFlags.Public |
-                                                                      BindingFlags.NonPublic | BindingFlags.Static |
-                                                                      BindingFlags.DeclaredOnly,
-                                                                      null, null, new System.Object[0]);
-                    m_separatedAttrs = new CustomAttributeBuilder[] { 
-                                           new BoxedValueAttribute(boxedValueRepId).CreateAttributeBuilder() };
-                    
+                    SplitBoxedForm(boxedValueRepId);
                 } catch (Exception e) {
                     // invalid boxedValueType found: static method missing or not callable: BoxedValueBase.GET_FIRST_NONBOXED_TYPE_METHODNAME
                     Console.WriteLine("problematic boxed val found: " + m_clsType.FullName + "; ex: " + e);
                     throw new INTERNAL(890, CompletionStatus.Completed_MayBe);
                 }
             }
+        }
+        
+        
+        /// <summary>split the boxed representation of a boxedValueType into unboxed + attributes</summary>
+        /// <remarks>
+        /// attention: make sure, this is not called before all involved boxed types are completetly created; 
+        /// otherwise type couldn't be loaded from assembly?
+        /// </remakrs>
+        protected virtual void SplitBoxedForm(string boxedValueRepId) {
+            m_separatedClsType = (Type)m_clsType.InvokeMember(BoxedValueBase.GET_FIRST_NONBOXED_TYPE_METHODNAME,
+                                                              BindingFlags.InvokeMethod | BindingFlags.Public |
+                                                              BindingFlags.NonPublic | BindingFlags.Static |
+                                                              BindingFlags.DeclaredOnly,
+                                                              null, null, new System.Object[0]);
+            m_separatedAttrs = new CustomAttributeBuilder[] { 
+                                   new BoxedValueAttribute(boxedValueRepId).CreateAttributeBuilder() };
         }
 
         /// <summary>
@@ -149,6 +154,13 @@ namespace Ch.Elca.Iiop.Idl {
                     CheckForFusionedForm();
                 }
                 return m_separatedAttrs;
+            }
+        }
+        
+        protected void SetSeparated(Type separatedType, CustomAttributeBuilder[] separatedAttrs) {
+            lock(this) {
+                m_separatedClsType = separatedType;
+                m_separatedAttrs = separatedAttrs;
             }
         }
 

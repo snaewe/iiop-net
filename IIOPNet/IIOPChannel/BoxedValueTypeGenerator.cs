@@ -204,7 +204,8 @@ namespace Ch.Elca.Iiop.Idl {
             // define getBoxed type methods:
             DefineGetBoxedType(boxBuilder, valField);
             DefineGetBoxedTypeAttributes(boxBuilder, valField);
-            DefineGetFirstNonBoxedType(boxBuilder, arrayType);            
+            DefineGetFirstNonBoxedType(boxBuilder, arrayType);
+            DefineGetFirstNonBoxedTypeName(boxBuilder, arrayType);
             // define the constructors
             DefineEmptyDefaultConstr(boxBuilder);
             // define the constructor which sets the valField directly
@@ -304,6 +305,7 @@ namespace Ch.Elca.Iiop.Idl {
             }
 
             DefineGetFirstNonBoxedType(boxBuilder, fullUnboxed);
+            DefineGetFirstNonBoxedTypeName(boxBuilder, fullUnboxed);
             // define the constructors
             DefineEmptyDefaultConstr(boxBuilder);
             // define the constructor which sets the valField directly
@@ -386,6 +388,17 @@ namespace Ch.Elca.Iiop.Idl {
             MethodInfo getTypeFromH = typeof(Type).GetMethod("GetTypeFromHandle", BindingFlags.Public | BindingFlags.Static);
             bodyGen.Emit(OpCodes.Call, getTypeFromH); // call the static method --> therefore no need to push this to the stack
             bodyGen.Emit(OpCodes.Ret); // return the type                
+        }
+        
+        /// <summary>define the static method, which returns the full unboxed type name of the boxed value in this boxed value type</summary>
+        private void DefineGetFirstNonBoxedTypeName(TypeBuilder boxBuilder, Type fullUnboxed) {
+            MethodBuilder getMethodBuilder = boxBuilder.DefineMethod(BoxedValueBase.GET_FIRST_NONBOXED_TYPENAME_METHODNAME,
+                                                                     MethodAttributes.Static | MethodAttributes.Public |
+                                                                        MethodAttributes.HideBySig,
+                                                                     typeof(string), new Type[0]);
+            ILGenerator bodyGen = getMethodBuilder.GetILGenerator();
+            bodyGen.Emit(OpCodes.Ldstr, fullUnboxed.FullName); // load name for the field-type
+            bodyGen.Emit(OpCodes.Ret); // return the type-name
         }
 
         /// <summary>
