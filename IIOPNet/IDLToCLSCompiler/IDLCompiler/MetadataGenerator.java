@@ -1487,7 +1487,7 @@ public class MetaDataGenerator implements IDLParserVisitor {
      * @return a type type container for the wchar type
      */
     public Object visit(ASTwide_char_type node, Object data) {
-        CustomAttributeBuilder[] attrs = new CustomAttributeBuilder[] { new WideCharAttribute(false).CreateAttributeBuilder() };
+        CustomAttributeBuilder[] attrs = new CustomAttributeBuilder[] { new WideCharAttribute(true).CreateAttributeBuilder() };
         TypeContainer containter = new TypeContainer(System.Char.class.ToType(), attrs);
         return containter;
     }
