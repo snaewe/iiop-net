@@ -81,6 +81,30 @@ namespace Ch.Elca.Iiop.IntegrationTests {
             return arg;
         }
 
+        public System.Byte[] TestAppendElementToByteArray(System.Byte[] arg, System.Byte toAppend) {
+            System.Byte[] result;
+            if (arg != null) {
+                result = new System.Byte[arg.Length + 1];
+                Array.Copy((Array) arg, (Array) result, arg.Length);
+            } else {
+                result = new System.Byte[1];
+            }
+            result[result.Length - 1] = toAppend;
+            return result;
+        }
+
+        public System.String[] TestAppendElementToStringArray(System.String[] arg, System.String toAppend) {
+            System.String[] result;
+            if (arg != null) {
+                result = new System.String[arg.Length + 1];
+                Array.Copy((Array) arg, (Array) result, arg.Length);
+            } else {
+                result = new System.String[1];
+            }
+            result[result.Length - 1] = toAppend;
+            return result;
+        }
+
         public override object InitializeLifetimeService() {
             // live forever
             return null;

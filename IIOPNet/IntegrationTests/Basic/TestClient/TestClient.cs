@@ -131,7 +131,7 @@ namespace Ch.Elca.Iiop.IntegrationTests {
             m_testService.TestVoid();
         }
         
-/*        [Test]
+        [Test]
         public void TestChar() {
             System.Char arg = 'a';
             System.Char result = m_testService.TestEchoChar(arg);
@@ -139,7 +139,7 @@ namespace Ch.Elca.Iiop.IntegrationTests {
             arg = '0';
             result = m_testService.TestEchoChar(arg);
             Assertion.AssertEquals(arg, result);
-        } */
+        }
         
         [Test]
         public void TestString() {
@@ -153,7 +153,7 @@ namespace Ch.Elca.Iiop.IntegrationTests {
             Assertion.AssertEquals(arg, result);
         }       
 
-/*        [Test]
+        [Test]
         public void TestEnumeration() {
             TestEnum arg = TestEnum.TestEnum_A;
             TestEnum result = m_testService.TestEchoEnumVal(arg);
@@ -161,7 +161,41 @@ namespace Ch.Elca.Iiop.IntegrationTests {
             arg = TestEnum.TestEnum_D;
             result = m_testService.TestEchoEnumVal(arg);
             Assertion.AssertEquals(arg, result);
-        } */
+        }
+
+        [Test]
+        public void TestByteArray() {
+            System.Byte[] arg = new System.Byte[1];
+            arg[0] = 1;
+            System.Byte toAppend = 2;
+            System.Byte[] result = m_testService.TestAppendElementToByteArray(arg, toAppend);
+            Assertion.AssertEquals(2, result.Length);
+            Assertion.AssertEquals((System.Byte) 1, result[0]);
+            Assertion.AssertEquals((System.Byte) 2, result[1]);
+
+            arg = null;
+            toAppend = 3;
+            result = m_testService.TestAppendElementToByteArray(arg, toAppend);
+            Assertion.AssertEquals(1, result.Length);
+            Assertion.AssertEquals((System.Byte) 3, result[0]);
+        }
+
+        [Test]
+        public void TestStringArray() {
+            System.String[] arg = new System.String[1];
+            arg[0] = "abc";
+            System.String toAppend = "def";
+            System.String[] result = m_testService.TestAppendElementToStringArray(arg, toAppend);
+            Assertion.AssertEquals(2, result.Length);
+            Assertion.AssertEquals("abc", result[0]);
+            Assertion.AssertEquals("def", result[1]);
+
+            arg = null;
+            toAppend = "hik";
+            result = m_testService.TestAppendElementToStringArray(arg, toAppend);
+            Assertion.AssertEquals(1, result.Length);
+            Assertion.AssertEquals("hik", result[0]);
+        }
 
     }
 
