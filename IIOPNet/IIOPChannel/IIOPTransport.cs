@@ -53,10 +53,7 @@ namespace Ch.Elca.Iiop {
         #region IFields
     
         // empty property table
-        private IDictionary m_properties = new Hashtable();
-
-        private Uri         m_target;
-        
+        private IDictionary m_properties = new Hashtable();       
         private GiopClientConnectionManager m_conManager;
 
         #endregion IFields
@@ -65,11 +62,6 @@ namespace Ch.Elca.Iiop {
         internal IiopClientTransportSink(string url, object channelData, 
                                          GiopClientConnectionManager conManager) {
             Trace.WriteLine("create transport sink for URL: " + url);
-            
-            string objectURI;
-            m_target = IiopUrlUtil.ParseUrl(url, out objectURI);
-
-            Trace.WriteLine("client transport, host: " + m_target.Host + ", port :" + m_target.Port);
             m_conManager = conManager;    
         }
 
