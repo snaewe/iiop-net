@@ -677,6 +677,15 @@ namespace omg.org.CORBA {
         public override int length() {
             return m_length;
         }
+        
+        protected override void ReadFromStream(CdrInputStream cdrStream) {
+            m_length = (int)cdrStream.ReadULong();
+        }
+
+        internal override void WriteToStream(CdrOutputStream cdrStream) {
+            base.WriteToStream(cdrStream);
+            cdrStream.WriteULong((uint)m_length);
+        }
     
         internal override Type GetClsForTypeCode() {
             return typeof(System.String);
@@ -716,6 +725,15 @@ namespace omg.org.CORBA {
 
         public override int length() {
             return m_length;
+        }
+        
+        protected override void ReadFromStream(CdrInputStream cdrStream) {
+            m_length = (int)cdrStream.ReadULong();
+        }
+
+        internal override void WriteToStream(CdrOutputStream cdrStream) {
+            base.WriteToStream(cdrStream);
+            cdrStream.WriteULong((uint)m_length);
         }
     
         internal override Type GetClsForTypeCode() {
