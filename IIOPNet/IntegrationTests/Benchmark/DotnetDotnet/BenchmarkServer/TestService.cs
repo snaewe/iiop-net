@@ -100,6 +100,18 @@ namespace Ch.Elca.Iiop.Benchmarks {
         public void VVal2(ValType2 vt) {
             // do nothing
         }
+
+        public double[] DoulbeArrCreate(int nrOfElems) {
+            return new double[nrOfElems];
+        }
+
+        public double[] DoubleArrEcho(double[] arg) {
+            return arg;
+        }
+        
+        public int DoubleArrCountElems(double[] arg) {
+            return arg.Length;
+        }
         
         public override object InitializeLifetimeService() {
             // live forever

@@ -109,6 +109,10 @@ namespace Ch.Elca.Iiop.Benchmarks {
         ValType2 Val2(bool repeat);
         ValType2 Val2Val2(ValType2 vt);
         void VVal2(ValType2 vt);
+
+        double[] DoulbeArrCreate(int nrOfElems);
+        double[] DoubleArrEcho(double[] arg);
+        int DoubleArrCountElems(double[] arg);
                 
     }
 

@@ -174,6 +174,19 @@ namespace Ch.Elca.Iiop.Benchmarks {
             m_testService.VVal2(vt);
         }
 
+        void CallDoulbeArrCreate() {
+            double[] result = m_testService.DoulbeArrCreate(5000);
+        }
+
+        void CallDoubleArrEcho() {
+            double[] arg = new double[5000];
+            m_testService.DoubleArrEcho(arg);
+        }
+
+        void CallDoubleArrCountElems() {
+            double[] arg = new double[5000];
+            m_testService.DoubleArrCountElems(arg);
+        }
 
         delegate void TestProcedure();
 
@@ -231,6 +244,10 @@ namespace Ch.Elca.Iiop.Benchmarks {
             tc.ExecuteTest(false, "(Val2Rep)Val2", new TestProcedure(tc.CallVal2Val2Rep));
             tc.ExecuteTest(false, "()Val2", new TestProcedure(tc.CallVal2));
             tc.ExecuteTest(false, "()Val2Rep", new TestProcedure(tc.CallVal2Rep));
+            tc.ExecuteTest(false, "()double[]", new TestProcedure(tc.CallDoulbeArrCreate));
+            tc.ExecuteTest(false, "(double[])double[]", new TestProcedure(tc.CallDoubleArrEcho));
+            tc.ExecuteTest(false, "(double[])V", new TestProcedure(tc.CallDoubleArrCountElems));
+
             tc.TearDownEnvironment();
 
             Console.WriteLine(String.Format("Total time = {0} s", tc.m_totalTime.TotalSeconds));
