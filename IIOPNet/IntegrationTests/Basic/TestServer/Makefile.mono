@@ -12,31 +12,31 @@ build-server: $(bin)TestServer.exe
 build-idl: IDL/Ch/Elca/Iiop/IntegrationTests/TestService.idl IDL/Ch/Elca/Iiop/IntegrationTests/ISimpleTestInterface.idl
 
 $(bin)IIOPChannel.dll: $(IIOPCHANNEL)
-    [ -d $(bin) ] || mkdir $(bin)
-    cp $(IIOPCHANNEL) $(bin)
+	[ -d $(bin) ] || mkdir $(bin)
+	cp $(IIOPCHANNEL) $(bin)
 
 $(bin)TestServer.exe: $(bin)IIOPChannel.dll $(bin)testExceptionService.dll *.cs
-    mcs $(CSFLAGS) /t:exe /r:$(bin)IIOPChannel.dll /r:$(bin)testExceptionService.dll /out:$(bin)TestServer.exe *.cs
+	mcs $(CSFLAGS) /t:exe /r:$(bin)IIOPChannel.dll /r:$(bin)testExceptionService.dll /out:$(bin)TestServer.exe *.cs
     
 $(bin)testExceptionService.dll: TestExceptionService.idl
-    mono ../../../IDLToCLSCompiler/IDLCompiler/bin/IDLToCLSCompiler.exe -o $(bin) testExceptionService TestExceptionService.idl
+	mono ../../../IDLToCLSCompiler/IDLCompiler/bin/IDLToCLSCompiler.exe -o $(bin) testExceptionService TestExceptionService.idl
 
 
 IDL/Ch/Elca/Iiop/IntegrationTests/TestService.idl: $(bin)TestServer.exe
-    mono ../../../CLSToIDLGenerator/bin/CLSIDLGenerator.exe -o IDL Ch.Elca.Iiop.IntegrationTests.TestService $(bin)TestServer.exe
-    cp TestExceptionService.idl IDL/Ch/Elca/Iiop/IntegrationTests/ 
+	mono ../../../CLSToIDLGenerator/bin/CLSIDLGenerator.exe -o IDL Ch.Elca.Iiop.IntegrationTests.TestService $(bin)TestServer.exe
+	cp TestExceptionService.idl IDL/Ch/Elca/Iiop/IntegrationTests/ 
 
 IDL/Ch/Elca/Iiop/IntegrationTests/ISimpleTestInterface.idl: $(bin)TestServer.exe
-    mono ../../../CLSToIDLGenerator/bin/CLSIDLGenerator.exe -o IDL Ch.Elca.Iiop.IntegrationTests.ISimpleTestInterface $(bin)TestServer.exe
+	mono ../../../CLSToIDLGenerator/bin/CLSIDLGenerator.exe -o IDL Ch.Elca.Iiop.IntegrationTests.ISimpleTestInterface $(bin)TestServer.exe
 
 
 start-server:
-    @mono $(LAUNCH) mono bin/TestServer.exe >> pid
+	@mono $(LAUNCH) mono bin/TestServer.exe >> pid
 
 stop-server:
-    @-for p in `cat pid`; do mono $(KILL) $$p; done
-    @rm -f pid
+	@-for p in `cat pid`; do mono $(KILL) $$p; done
+	@rm -f pid
 
 clean:
-    rm -rf IDL
-    rm -rf bin
+	rm -rf IDL
+	rm -rf bin

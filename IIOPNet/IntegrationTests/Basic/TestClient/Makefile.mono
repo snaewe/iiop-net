@@ -9,24 +9,24 @@ build-client: $(bin)ClientTest.dll
 compile-idl: IDL/Ch/Elca/Iiop/IntegrationTests/TestService.idl
 
 IDL/Ch/Elca/Iiop/IntegrationTests/TestService.idl: ../TestServer/IDL/Ch/Elca/Iiop/IntegrationTests/TestService.idl
-    [ -d IDL ] || mkdir IDL
-    cp -f ../../../IDLToCLSCompiler/IDL/*.idl IDL
-    cp -r ../TestServer/IDL/* IDL
+	[ -d IDL ] || mkdir IDL
+	cp -f ../../../IDLToCLSCompiler/IDL/*.idl IDL
+	cp -r ../TestServer/IDL/* IDL
 
 $(bin)Client.dll: IDL/Ch/Elca/Iiop/IntegrationTests/TestService.idl IDL/Ch/Elca/Iiop/IntegrationTests/TestExceptionService.idl IDL/Ch/Elca/Iiop/IntegrationTests/ISimpleTestInterface.idl
-    cd IDL; mono ../../../../IDLToCLSCompiler/IDLCompiler/bin/IDLToCLSCompiler.exe -o ../bin Client Ch/Elca/Iiop/IntegrationTests/TestService.idl Ch/Elca/Iiop/IntegrationTests/TestExceptionService.idl Ch/Elca/Iiop/IntegrationTests/ISimpleTestInterface.idl
+	cd IDL; mono ../../../../IDLToCLSCompiler/IDLCompiler/bin/IDLToCLSCompiler.exe -o ../bin Client Ch/Elca/Iiop/IntegrationTests/TestService.idl Ch/Elca/Iiop/IntegrationTests/TestExceptionService.idl Ch/Elca/Iiop/IntegrationTests/ISimpleTestInterface.idl
 
 $(bin)IIOPChannel.dll: $(IIOPCHANNEL)
-    [ -d $(bin) ] || mkdir $(bin)
-    cp $(IIOPCHANNEL) $(bin)
+	[ -d $(bin) ] || mkdir $(bin)
+	cp $(IIOPCHANNEL) $(bin)
 
 $(bin)ClientTest.dll: $(bin)IIOPChannel.dll $(bin)Client.dll *.cs
-    mcs $(CSFLAGS) /t:library /r:$(NUNIT) /r:$(bin)IIOPChannel.dll /r:$(bin)Client.dll /out:$(bin)ClientTest.dll TestClient.cs ValueTypeImpls.cs
+	mcs $(CSFLAGS) /t:library /r:$(NUNIT) /r:$(bin)IIOPChannel.dll /r:$(bin)Client.dll /out:$(bin)ClientTest.dll TestClient.cs ValueTypeImpls.cs
 
 start-client:
-    @echo "Basic IntegrationTest"
-    mono ${NUNITV2_HOME}/bin/nunit-console.exe bin/ClientTest.dll
+	@echo "Basic IntegrationTest"
+	mono ${NUNITV2_HOME}/bin/nunit-console.exe bin/ClientTest.dll
 
 clean:
-    rm -rf IDL
-    rm -rf bin
+	rm -rf IDL
+	rm -rf bin
