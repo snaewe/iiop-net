@@ -137,6 +137,23 @@ namespace Ch.Elca.Iiop.IDLCompiler.Tests {
                                    returnType, testMethod.ReturnType);                                            
         }
         
+        private void CheckFieldPresent(Type testType, string fieldName,
+                                       Type fieldType, BindingFlags flags) {
+            FieldInfo testField = testType.GetField(fieldName, flags);                                           
+            Assertion.AssertNotNull(String.Format("field {0} not found in type {1}", fieldName, testType.FullName),
+                                    testField);
+            Assertion.AssertEquals(String.Format("wrong field type {0} in field {1}", 
+                                                 testField.FieldType, testField.Name),
+                                   fieldType, testField.FieldType);        
+        }
+        
+        private void CheckNumberOfFields(Type testType, BindingFlags flags, 
+                                         System.Int32 expected) {
+            FieldInfo[] fields = testType.GetFields(flags);
+            Assertion.AssertEquals("wrong number of fields found in type: " + testType.FullName,
+                                   expected, fields.Length);        
+        }
+        
         private void CheckIIdlEntityInheritance(Type testType) {
             Type idlEntityIf = testType.GetInterface("IIdlEntity");
             Assertion.AssertNotNull(String.Format("type {0} doesn't inherit from IIdlEntity", testType.FullName),
@@ -259,7 +276,11 @@ namespace Ch.Elca.Iiop.IDLCompiler.Tests {
             
             CheckMethodPresent(valType, "EchoOctet",
                                typeof(System.Byte), new Type[] { typeof(System.Byte) });
-                        
+            CheckFieldPresent(valType, "m_x", typeof(System.Byte), 
+                              BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.DeclaredOnly);
+            CheckNumberOfFields(valType, BindingFlags.Public | BindingFlags.NonPublic |
+                                         BindingFlags.Instance | BindingFlags.DeclaredOnly,
+                                1);                                    
             writer.Close();
         }
         
@@ -284,7 +305,13 @@ namespace Ch.Elca.Iiop.IDLCompiler.Tests {
             // must be a struct
             Assertion.Assert("is a struct", structType.IsValueType);
             CheckIdlStructAttributePresent(structType);
+            CheckSerializableAttributePresent(structType);
             
+            CheckFieldPresent(structType, "a", typeof(System.Int32), 
+                              BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly);            
+            CheckNumberOfFields(structType, BindingFlags.Public | BindingFlags.NonPublic |
+                                            BindingFlags.Instance | BindingFlags.DeclaredOnly,
+                                1);
             writer.Close();
         }
                 
