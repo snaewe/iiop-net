@@ -94,6 +94,12 @@ namespace parser {
 
     public struct FloatLiteral : Literal {
 
+        #region SFields
+
+        public static readonly Type s_single = typeof(Single);
+        public static readonly Type s_double = typeof(Double);
+
+        #endregion SFields
         #region IFields
         
         private double m_value;
@@ -136,10 +142,11 @@ namespace parser {
         }
 
         public void EmitLoadValue(ILGenerator gen, Type targetType) {
-            if (targetType.Equals(typeof(Single))) {
+            if (targetType.Equals(s_single)) {
                 Single val = Convert.ToSingle(m_value);
                 gen.Emit(OpCodes.Ldc_R4, val);
-            } else if (targetType.Equals(typeof(Double))) {
+//                gen.Emit(OpCodes.Ldc_R4, (float)m_value);
+            } else if (targetType.Equals(s_double)) {
                 gen.Emit(OpCodes.Ldc_R8, m_value);
             } else {
                 throw new LiteralTypeMismatchException("floating point", targetType);
