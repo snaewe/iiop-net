@@ -28,7 +28,7 @@
  */
 
 
-package action;
+package Ch.Elca.Iiop.IdlCompiler.Action;
 
 import System.Reflection.*;
 import System.Reflection.Emit.*;

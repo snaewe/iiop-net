@@ -27,11 +27,12 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
+package Ch.Elca.Iiop.IdlCompiler;
+
 
 import java.io.*;
 
-import action.MetaDataGenerator;
-
+import Ch.Elca.Iiop.IdlCompiler.Action.MetaDataGenerator;
 import parser.IDLParser;
 import parser.ASTspecification;
 

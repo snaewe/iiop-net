@@ -27,7 +27,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
-package action;
+package Ch.Elca.Iiop.IdlCompiler.Action;
 
 import java.io.FileOutputStream;
 import java.io.PrintWriter;

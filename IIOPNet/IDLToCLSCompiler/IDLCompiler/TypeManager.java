@@ -29,7 +29,7 @@
 
 
 
-package action;
+package Ch.Elca.Iiop.IdlCompiler.Action;
 
 import java.util.Hashtable;
 
