@@ -31,6 +31,7 @@
 using System;
 using System.Reflection;
 using System.Reflection.Emit;
+using System.Collections;
 using Ch.Elca.Iiop.Idl;
 using Ch.Elca.Iiop.Marshalling;
 using Ch.Elca.Iiop.Cdr;
@@ -103,12 +104,15 @@ namespace omg.org.CORBA {
         [return:StringValueAttribute()]
         string name();
 
-        /// <summary>get the number of members for kinds: tk_struct, tk_value, tk_enum, ...</summary>
+        /// <summary>get the number of members for kinds: tk_struct, tk_value, tk_enum, tk_union ...</summary>
         int member_count();
         [return:StringValueAttribute()]
         string member_name(int index);
 
-        // for union: not mapped
+        // for union:        
+        object member_label (int index);        
+        TypeCode discriminator_type();
+        int default_index();
 
         /// <summary>for kinds: string, sequence</summary>
         int length();
@@ -165,6 +169,22 @@ namespace omg.org.CORBA {
 
         #endregion IConstructors
 
+    }
+
+    internal struct UnionSwitchCase {
+        #region IFields
+
+        internal object DiscriminatorValue;
+        internal omg.org.CORBA.TypeCode ElementType;
+        internal string ElementName;
+
+        #endregion IFields
+
+        public UnionSwitchCase(object discriminatorValue, string elementName, TypeCode elementType) {
+            DiscriminatorValue = discriminatorValue;
+            ElementType = elementType;
+            ElementName = elementName;
+        }
     }
 
 
@@ -252,6 +272,15 @@ namespace omg.org.CORBA {
         }
         [return:StringValueAttribute()]
         public virtual string member_name(int index) {
+            throw new BAD_OPERATION(0, CompletionStatus.Completed_No);
+        }
+        public virtual object member_label (int index) {
+            throw new BAD_OPERATION(0, CompletionStatus.Completed_No);
+        }
+        public virtual omg.org.CORBA.TypeCode discriminator_type() {
+            throw new BAD_OPERATION(0, CompletionStatus.Completed_No);
+        }
+        public virtual int default_index() {
             throw new BAD_OPERATION(0, CompletionStatus.Completed_No);
         }
         public virtual omg.org.CORBA.TypeCode member_type(int index)     {
@@ -771,6 +800,28 @@ namespace omg.org.CORBA {
             return result;
         }
 
+        internal override Type CreateType(ModuleBuilder modBuilder, string fullTypeName) {            
+            TypeBuilder result = modBuilder.DefineType(fullTypeName, 
+                                                       TypeAttributes.Class | TypeAttributes.Public | TypeAttributes.Sealed,
+                                                       typeof(System.Enum));
+            result.DefineField("value__", typeof(System.Int32), 
+                               FieldAttributes.Public | FieldAttributes.SpecialName | FieldAttributes.RTSpecialName);
+        
+            // add enum entries
+            for (int i = 0; i < m_members.Length; i++) {
+                String enumeratorId = m_members[i];
+                FieldBuilder enumVal = result.DefineField(enumeratorId, result, 
+                                                          FieldAttributes.Public | FieldAttributes.Static | FieldAttributes.Literal);
+                enumVal.SetConstant((System.Int32) i);
+            }
+
+            // add IDLEnum attribute
+            result.SetCustomAttribute(new IdlEnumAttribute().CreateAttributeBuilder());
+        
+            // create the type
+            return result.CreateType();            
+        }
+
         #endregion IMethods
 
     }
@@ -1017,6 +1068,239 @@ namespace omg.org.CORBA {
 
     }
 
+    internal class UnionTC : TypeCodeImpl {
+
+        #region Types
+
+        /// <summary>
+        /// represents a switch-case in the following form:
+        /// element name / type
+        /// corresponding discriminator values
+        /// </summary>
+        struct ElementCase {
+            
+            #region IFields
+            public string ElemName;
+            public TypeContainer ElemType;
+            private ArrayList discriminatorValues;
+            #endregion IFields
+            #region IConstrutors
+
+            public ElementCase(string elemName, TypeContainer elemType) {
+                ElemName = elemName;
+                ElemType = elemType;
+                discriminatorValues = new ArrayList();
+            }
+
+            public void AddDiscriminatorValue(object discValue) {
+                discriminatorValues.Add(discValue);
+            }
+
+            public object[] GetDiscriminatorValues() {
+                return (object[])discriminatorValues.ToArray(typeof(object));
+            }
+
+            #endregion IConstructors
+        }
+
+        #endregion Types
+        #region IFields
+
+        private string m_id;
+        private string m_name;
+        
+        private omg.org.CORBA.TypeCode m_discriminatorType;
+
+        private int m_defaultCase;
+
+        private UnionSwitchCase[] m_members = new UnionSwitchCase[0];
+
+        #endregion IFields
+        #region IConstructors
+        
+        public UnionTC(CdrInputStream cdrStream) : base(cdrStream, TCKind.tk_union) {
+        }
+
+        public UnionTC(string repositoryID, string name, 
+                       omg.org.CORBA.TypeCode discriminatorType, int defaultCase,
+                       UnionSwitchCase[] switchCases) : base(TCKind.tk_union) {
+            m_id = repositoryID;
+            m_name = name;
+            m_discriminatorType = discriminatorType;
+            m_defaultCase = defaultCase;
+            m_members = switchCases;
+        }
+
+        #endregion IConstructors
+        #region IMethods
+
+        [return:StringValueAttribute()]
+        public override string id() {
+            return m_id;
+        }
+
+        [return:StringValueAttribute()]
+        public override string name() {
+            return m_name;
+        }
+
+        public override object member_label (int index) {
+            return m_members[index].DiscriminatorValue;
+        }
+        
+        public override omg.org.CORBA.TypeCode discriminator_type() {
+            return m_discriminatorType;
+        }
+
+        public override int default_index() {
+            return m_defaultCase;
+        }
+
+        public override int member_count() {
+            return m_members.Length;
+        }
+
+        [return:StringValueAttribute()]
+        public override string member_name(int index) {
+            return m_members[index].ElementName;
+        }
+        public override TypeCode member_type(int index) {
+            return m_members[index].ElementType;
+        }
+
+        protected override void ReadFromStream(CdrInputStream cdrStream) {
+            CdrEncapsulationInputStream encap = cdrStream.ReadEncapsulation();
+            m_id = encap.ReadString();
+            m_name = encap.ReadString();
+            Marshaller marshaller = Marshaller.GetSingleton();
+            TypeCodeSerializer ser = new TypeCodeSerializer();
+            m_discriminatorType = (omg.org.CORBA.TypeCode)ser.Deserialise(typeof(omg.org.CORBA.TypeCode), 
+                                                                          new AttributeExtCollection(new Attribute[0]), 
+                                                                          encap);
+            Type discrTypeCls = ((TypeCodeImpl)m_discriminatorType).GetClsForTypeCode();
+            m_defaultCase = encap.ReadLong();
+            
+            uint length = encap.ReadULong();
+            m_members = new UnionSwitchCase[length];            
+            for (int i = 0; i < length; i++) {
+                object discrLabel = marshaller.Unmarshal(discrTypeCls, new AttributeExtCollection(new Attribute[0]), 
+                                                         encap);
+                string memberName = encap.ReadString();                
+                omg.org.CORBA.TypeCode memberType = (omg.org.CORBA.TypeCode)ser.Deserialise(typeof(omg.org.CORBA.TypeCode), 
+                                                                                            new AttributeExtCollection(new Attribute[0]), 
+                                                                                            encap);    
+                UnionSwitchCase member = new UnionSwitchCase(discrLabel, memberName, memberType);
+                m_members[i] = member;
+            }
+        }
+
+        internal override void WriteToStream(CdrOutputStream cdrStream) {
+            // write common part: typecode nr
+            base.WriteToStream(cdrStream);
+            // complex type-code: in encapsulation
+            CdrEncapsulationOutputStream encap = new CdrEncapsulationOutputStream(0);
+            encap.WriteString(m_id);
+            encap.WriteString(m_name);
+            Marshaller marshaller = Marshaller.GetSingleton();
+            TypeCodeSerializer ser = new TypeCodeSerializer();
+            Type discrTypeCls = ((TypeCodeImpl)m_discriminatorType).GetClsForTypeCode();
+            ser.Serialise(typeof(omg.org.CORBA.TypeCode), m_discriminatorType, 
+                          new AttributeExtCollection(new Attribute[0]), encap);
+            encap.WriteLong(m_defaultCase);
+            
+            encap.WriteULong((uint)m_members.Length);
+            for (int i = 0; i < m_members.Length; i++) {
+                marshaller.Marshal(discrTypeCls, new AttributeExtCollection(new Attribute[0]), 
+                                   m_members[i].DiscriminatorValue, encap);
+                encap.WriteString(m_members[i].ElementName);
+                ser.Serialise(typeof(omg.org.CORBA.TypeCode), m_members[i].ElementType,
+                             new AttributeExtCollection(new Attribute[0]), encap);
+            }            
+
+            cdrStream.WriteEncapsulation(encap);
+        }
+
+        internal override Type GetClsForTypeCode() {
+            Type result = Repository.GetTypeForId(m_id);
+            if (result == null) {
+                // create the type represented by this typeCode
+                string typeName = Repository.GetTypeNameForId(m_id);
+                result = TypeFromTypeCodeRuntimeGenerator.GetSingleton().CreateOrGetType(typeName, this);
+            }
+            return result;
+
+        }
+
+        private ArrayList CoveredDiscriminatorRange() {
+            ArrayList result = new ArrayList();
+            for (int i = 0; i < m_members.Length; i++) {
+                UnionSwitchCase switchCase = m_members[i];
+                if (i == m_defaultCase) {
+                    continue;
+                }
+                if (result.Contains(switchCase.DiscriminatorValue)) {
+                    throw new MARSHAL(880, CompletionStatus.Completed_MayBe);
+                }
+                result.Add(switchCase.DiscriminatorValue);
+            }
+            return result;
+        }
+
+        /// <summary>
+        /// collects all disriminator values, which uses the same element.
+        /// </summary>
+        private Hashtable CollectCases() {
+            Hashtable result = new Hashtable();
+            for (int i = 0; i < m_members.Length; i++) {
+                if (i == m_defaultCase) {
+                    if (result.Contains(m_members[i].ElementName)) {
+                        throw new MARSHAL(881, CompletionStatus.Completed_MayBe);
+                    }
+                    ElementCase elemCase = new ElementCase(m_members[i].ElementName,
+                                                           new TypeContainer(((TypeCodeImpl)m_members[i].ElementType).GetClsForTypeCode(),
+                                                                             ((TypeCodeImpl)m_members[i].ElementType).GetAttributes()));
+                    elemCase.AddDiscriminatorValue(UnionGenerationHelper.DefaultCaseDiscriminator);
+                    result[m_members[i].ElementName] = elemCase;
+                } else {
+                    if (result.Contains(m_members[i].ElementName)) {
+                        ElementCase current = (ElementCase) result[m_members[i].ElementName];
+                        current.AddDiscriminatorValue(m_members[i].DiscriminatorValue);
+                    } else {
+                        ElementCase elemCase = new ElementCase(m_members[i].ElementName,
+                                                               new TypeContainer(((TypeCodeImpl)m_members[i].ElementType).GetClsForTypeCode(),
+                                                                                 ((TypeCodeImpl)m_members[i].ElementType).GetAttributes()));
+                        elemCase.AddDiscriminatorValue(m_members[i].DiscriminatorValue);
+                        result[m_members[i].ElementName] = elemCase;
+                    }
+                }
+            }
+            return result;
+        }
+
+        internal override Type CreateType(ModuleBuilder modBuilder, string fullTypeName) {
+            UnionGenerationHelper genHelper = new UnionGenerationHelper(modBuilder, fullTypeName, 
+                                                                        TypeAttributes.Public);
+            
+            TypeContainer discrType = new TypeContainer(((TypeCodeImpl)m_discriminatorType).GetClsForTypeCode(), 
+                                                        ((TypeCodeImpl)m_discriminatorType).GetAttributes());
+            // extract covered discr range from m_members
+            ArrayList coveredDiscriminatorRange = CoveredDiscriminatorRange();             
+            genHelper.AddDiscriminatorFieldAndProperty(discrType, coveredDiscriminatorRange);
+            
+            Hashtable cases = CollectCases();
+            foreach (ElementCase elemCase in cases.Values) {                                
+                genHelper.GenerateSwitchCase(elemCase.ElemType, elemCase.ElemName, 
+                                             elemCase.GetDiscriminatorValues());                
+            }                       
+            
+            // create the resulting type
+            return genHelper.FinalizeType();
+        }
+
+        #endregion IMethods
+
+    }
+
     internal class ExceptTC : BaseStructTC {
 
         #region IConstructors
@@ -1237,7 +1521,7 @@ namespace Ch.Elca.Iiop.Marshalling {
                 case omg.org.CORBA.TCKind.tk_ulonglong:
                     return new omg.org.CORBA.ULongLongTC();
                 case omg.org.CORBA.TCKind.tk_union:
-                    throw new NotSupportedException("Union not supported");
+                    return new omg.org.CORBA.UnionTC(sourceStream);
                 case omg.org.CORBA.TCKind.tk_ushort:
                     return new omg.org.CORBA.UShortTC();
                 case omg.org.CORBA.TCKind.tk_value:
