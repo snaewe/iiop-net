@@ -120,6 +120,7 @@ namespace Ch.Elca.Iiop.IdlPreprocessor {
         private Hashtable m_defined;
         
         private StreamReader m_fileStream;
+        private DirectoryInfo m_thisFileDirectory;
         
         /// <summary>stores the preprocessor result</summary>
         private StreamWriter m_outputStream;
@@ -196,6 +197,7 @@ namespace Ch.Elca.Iiop.IdlPreprocessor {
                                                            FileAccess.Read, 
                                                            FileShare.Read),
                                             s_latin1);
+            m_thisFileDirectory = toProcess.Directory;
             m_outData = new MemoryStream();
             m_outputStream = new StreamWriter(m_outData, s_latin1);
             m_outputStream.AutoFlush = true;
@@ -270,9 +272,11 @@ namespace Ch.Elca.Iiop.IdlPreprocessor {
                     return fi;
                 }        
             }
-            // Return last value (error handling will extract the file name
-            // from the FileInfo)
-            return fi;
+            if (File.Exists(Path.Combine(m_thisFileDirectory.FullName, name))) {
+                // search also in the same directory, then the file containing the include directive
+                return new FileInfo(Path.Combine(m_thisFileDirectory.FullName, name));
+            }
+            return new FileInfo(name); // File not found; for error handling, wrap name inside a FileInfo
         }
 
         /// <summary>processes an include directive</summary>
@@ -296,7 +300,7 @@ namespace Ch.Elca.Iiop.IdlPreprocessor {
             fileToInclude = fileToInclude.Substring(1, fileToInclude.Length - 2);
 
             if ((ch0 == '"') && (ch1 == '"')) {
-                toInclude = new FileInfo(fileToInclude);
+                toInclude = new FileInfo(Path.Combine(m_thisFileDirectory.FullName, fileToInclude)); // search in the directory, the file containing the include is in
             } else if ((ch0 != '<') || (ch1 != '>')) {
                 throw new IllegalPreprocDirectiveException(currentLine);
             }
