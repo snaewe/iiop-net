@@ -1056,9 +1056,11 @@ public class MetaDataGenerator implements IDLParserVisitor {
                 if (!privateName.startsWith("m_")) { 
                     privateName = "m_" + privateName; 
                 }
+                privateName = IdlNaming.MapIdlNameToClsName(privateName);
                 fieldBuild = builder.DefineField(privateName, fieldType.GetClsType(), FieldAttributes.Family);
             } else { // map to public field
-                fieldBuild = builder.DefineField(decl[i], fieldType.GetClsType(), FieldAttributes.Public);
+                String fieldName = IdlNaming.MapIdlNameToClsName(decl[i]);
+                fieldBuild = builder.DefineField(fieldName, fieldType.GetClsType(), FieldAttributes.Public);
             }
             // add custom attributes
             for (int j = 0; j < fieldType.GetAttrs().length; j++) {
@@ -1836,16 +1838,17 @@ public class MetaDataGenerator implements IDLParserVisitor {
         PropertyBuilder propBuild;
         for (int i = 1; i < node.jjtGetNumChildren(); i++) {
             ASTsimple_declarator simpleDecl = (ASTsimple_declarator) node.jjtGetChild(i);
-            propBuild = builder.DefineProperty(simpleDecl.getIdent(), PropertyAttributes.None, 
+            String propName = IdlNaming.MapIdlNameToClsName(simpleDecl.getIdent());
+            propBuild = builder.DefineProperty(propName, PropertyAttributes.None, 
                                                propType.GetClsType(), System.Type.EmptyTypes);
             // set the methods for the property
-            MethodBuilder getAccessor = builder.DefineMethod("__get_" + simpleDecl.getIdent(), 
+            MethodBuilder getAccessor = builder.DefineMethod("__get_" + propName, 
                                                              MethodAttributes.Virtual | MethodAttributes.Abstract | MethodAttributes.Public | MethodAttributes.HideBySig | MethodAttributes.SpecialName, 
                                                              propType.GetClsType(), System.Type.EmptyTypes);
             propBuild.SetGetMethod(getAccessor);
             MethodBuilder setAccessor = null;
             if (!(node.isReadOnly())) {
-                setAccessor = builder.DefineMethod("__set_" + simpleDecl.getIdent(), 
+                setAccessor = builder.DefineMethod("__set_" + propName, 
                                                    MethodAttributes.Virtual | MethodAttributes.Abstract | MethodAttributes.Public | MethodAttributes.HideBySig | MethodAttributes.SpecialName, 
                                                    null, new System.Type[] { propType.GetClsType() });
                 propBuild.SetSetMethod(setAccessor);
@@ -2063,7 +2066,7 @@ public class MetaDataGenerator implements IDLParserVisitor {
         int direction = ((ASTparam_attribute) node.jjtGetChild(0)).getParamDir();
         // determine name and type
         TypeContainer paramType = (TypeContainer)node.jjtGetChild(1).jjtAccept(this, data);
-        String paramName = ((ASTsimple_declarator)node.jjtGetChild(2)).getIdent();
+        String paramName = IdlNaming.MapIdlNameToClsName(((ASTsimple_declarator)node.jjtGetChild(2)).getIdent());
         
         ParameterSpec result = new ParameterSpec(paramName, paramType, direction);
         return result;
