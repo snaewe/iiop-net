@@ -31,6 +31,7 @@
 using System;
 using System.IO;
 using System.Net;
+using System.Collections;
 using Ch.Elca.Iiop.CorbaObjRef;
 
 
@@ -102,6 +103,12 @@ namespace Ch.Elca.Iiop {
         /// <summary>returns true, if this transport factory can create a transport for the given IOR, otherwise false</summary>
         bool CanCreateTranporForIor(Ior target);
         
+        /// <summary>
+        /// extract options, which are specific to the transport factory
+        /// </summary>        
+        void SetupClientOptions(IDictionary options);
+
+        
     }
     
     /// <summary>creates server transports</summary>
@@ -110,6 +117,11 @@ namespace Ch.Elca.Iiop {
         /// <summary>creates a connecton listener, which notifies about new clients 
         /// using clientAcceptCallback</summary>
         IServerConnectionListener CreateConnectionListener(ClientAccepted clientAcceptCallBack);
+        
+        /// <summary>
+        /// extract options, which are specific to the transport factory
+        /// </summary>        
+        void SetupServerOptions(IDictionary options);
     }
     
     /// <summary>creates client and server transports</summary>

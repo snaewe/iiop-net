@@ -34,6 +34,7 @@ using System.Net.Sockets;
 using System.Net;
 using System.Threading;
 using System.Diagnostics;
+using System.Collections;
 using Ch.Elca.Iiop.CorbaObjRef;
 using omg.org.CORBA;
 
@@ -221,6 +222,14 @@ namespace Ch.Elca.Iiop {
             IServerConnectionListener result = new TcpConnectionListener();
             result.Setup(clientAcceptCallBack);
             return result;
+        }
+        
+        public void SetupClientOptions(IDictionary options) {
+            // no specific options, ignore
+        }
+        
+        public void SetupServerOptions(IDictionary options) {
+            // no specific options, ignore
         }
         
         #endregion IMethods

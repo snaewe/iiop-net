@@ -136,9 +136,12 @@ namespace Ch.Elca.Iiop {
                                 entry.Value;
                             break;
                         default: 
-                            Trace.WriteLine("unknown property found for IIOP channel: " +
+                            Debug.WriteLine("unknown property found for IIOP channel: " +
                                             entry.Key);
-                            break; // ignore, because unknown
+                            // pass non-default options further on to the client and server-channel for handling by the e.g. transport-factory
+                            serverProp[entry.Key] = entry.Value;
+                            clientProp[entry.Key] = entry.Value;
+                            break;
                     }
                 }
             }
@@ -275,7 +278,8 @@ namespace Ch.Elca.Iiop {
             }
             m_providerChain = sinkProvider;
             IClientTransportFactory clientTransportFactory = new TcpTransportFactory();
-
+            IDictionary nonDefaultOptions = new Hashtable();
+            
             if (properties != null) {
                 foreach (DictionaryEntry entry in properties) {
                     switch ((string)entry.Key) {
@@ -291,12 +295,15 @@ namespace Ch.Elca.Iiop {
                                 Activator.CreateInstance(transportFactoryType);
                             break;
                         default: 
-                            Trace.WriteLine("unknown property found for IIOPClient channel: " + entry.Key);
-                            break; // ignore, because unknown
+                            Debug.WriteLine("non-default property found for IIOPClient channel: " + entry.Key);
+                            nonDefaultOptions[entry.Key] = entry.Value;
+                            break;
                     }
                 }
             }
-
+            
+            // handle non-default options now by transport factory
+            clientTransportFactory.SetupClientOptions(nonDefaultOptions);
             InitChannel(clientTransportFactory);
         }
 
@@ -498,6 +505,7 @@ namespace Ch.Elca.Iiop {
             m_providerChain = sinkProvider;
             IServerTransportFactory serverTransportFactory =
                 new TcpTransportFactory();
+            IDictionary nonDefaultOptions = new Hashtable();
 
             // parse properties
             if (properties != null) {
@@ -527,11 +535,14 @@ namespace Ch.Elca.Iiop {
                                 Activator.CreateInstance(transportFactoryType);
                             break;
                         default: 
-                            Trace.WriteLine("unknown property found for IIOPServer channel: " + entry.Key);
-                            break; // ignore, because unknown
+                            Debug.WriteLine("non-default property found for IIOPServer channel: " + entry.Key);
+                            nonDefaultOptions[entry.Key] = entry.Value;
+                            break;
                     }
                 }
-            }            
+            }
+            // handle non-default options now by transport factory
+            serverTransportFactory.SetupServerOptions(nonDefaultOptions);
             InitChannel(serverTransportFactory);
         }
         
