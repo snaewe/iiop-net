@@ -33,6 +33,7 @@ using System.Reflection;
 using System.Xml;
 using System.Xml.Schema;
 using System.IO;
+using Ch.Elca.Iiop.Util;
 
 
 namespace Ch.Elca.Iiop.Idl {
@@ -165,7 +166,7 @@ namespace Ch.Elca.Iiop.Idl {
             m_mappingsCls[clsType] = desc;           
             m_mappingsIdl[idlType] = desc;
             // check for impl class attribute, if present: add impl class here too
-            object[] implAttr = idlType.GetCustomAttributes(typeof(ImplClassAttribute), false);
+            object[] implAttr = idlType.GetCustomAttributes(ReflectionHelper.ImplClassAttributeType, false);
             if ((implAttr != null) && (implAttr.Length > 0)) {
                 ImplClassAttribute implCl = (ImplClassAttribute) implAttr[0];
                 // get the type

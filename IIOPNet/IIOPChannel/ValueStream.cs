@@ -195,9 +195,9 @@ namespace Ch.Elca.Iiop.Cdr {
             if (baseType != null) {
                 AttributeExtCollection attrs = AttributeExtCollection.ConvertToAttributeCollection(
                                                     baseType.GetCustomAttributes(false));
-                if (attrs.IsInCollection(typeof(ImplClassAttribute))) {
+                if (attrs.IsInCollection(ReflectionHelper.ImplClassAttributeType)) {
                     ImplClassAttribute implAttr = (ImplClassAttribute)
-                                                  attrs.GetAttributeForType(typeof(ImplClassAttribute));
+                                                  attrs.GetAttributeForType(ReflectionHelper.ImplClassAttributeType);
                     Type implClass = Repository.LoadType(implAttr.ImplClass);
                     if (implClass == null) {                        
                         Trace.WriteLine("implementation class : " + implAttr.ImplClass + 
@@ -673,7 +673,7 @@ namespace Ch.Elca.Iiop.Cdr {
 
         /// <summary>creates an instance of the given type via reflection</summary>
         private object CreateInstance(Type actualType) {
-            object[] implAttr = actualType.GetCustomAttributes(typeof(ImplClassAttribute), false);
+            object[] implAttr = actualType.GetCustomAttributes(ReflectionHelper.ImplClassAttributeType, false);
             if ((implAttr != null) && (implAttr.Length > 0)) {
                 if (implAttr.Length > 1) { 
                     // invalid type: actualType, only one ImplClassAttribute allowed

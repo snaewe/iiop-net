@@ -43,6 +43,7 @@ namespace Ch.Elca.Iiop.Util {
     	private static Type s_iIdlEntityType = typeof(IIdlEntity);
     	
     	private static Type s_idlEnumAttributeType = typeof(IdlEnumAttribute);
+    	private static Type s_implClassAttributeType = typeof(ImplClassAttribute);
     	    	
     	private static Type s_stringType = typeof(string);
     	
@@ -73,6 +74,12 @@ namespace Ch.Elca.Iiop.Util {
     			return s_stringType;
     		}
     	}    	    	
+    	
+    	public static Type ImplClassAttributeType {
+    		get {
+    			return s_implClassAttributeType;
+    		}
+    	}
     	
     	#endregion SProperties    	
     	#region SMethods
