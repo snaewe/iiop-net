@@ -117,7 +117,7 @@ namespace Ch.Elca.Iiop {
             responseHeaders = new TransportHeaders();
             responseHeaders[GiopConnectionDesc.CLIENT_TR_HEADER_KEY]= m_conDesc; // add to response headers
             Stream responseStream = null;
-			          
+                      
             Debug.WriteLine("receiving an IIOP message in the Client side Transport sink");
             responseStream = ReceiveResponseMessage(forReqId);
             Debug.WriteLine("message received");
@@ -153,6 +153,29 @@ namespace Ch.Elca.Iiop {
         /// received is not a reply for the request.</returns>
         private Stream ReceiveResponseMessage(uint reqNr) {
             
+            bool responseMessageFound = false;
+            Stream responseStream = null;
+            while (!responseMessageFound) {
+                responseStream = ReadResponseMessage();
+
+                // find request_id in message
+                uint msgReqId = FindRequestIdInReply(responseStream);
+                if (msgReqId == reqNr) {
+                    responseMessageFound = true;        
+                } else if (msgReqId > reqNr) {
+                    Trace.WriteLine("reply of sequence: " + msgReqId + "; expected was: " + reqNr);
+                    throw new COMM_FAILURE(154, CompletionStatus.Completed_MayBe);
+                } else if (msgReqId < reqNr) {
+                    Trace.WriteLine("ignoring reply of sequence (older reply again): " + msgReqId + "; expected was: " + reqNr);
+                    // ignore: received an older reply again
+                }
+            }
+            
+            responseStream.Seek(0, SeekOrigin.Begin); // assure stream is read from beginning in formatter
+            return responseStream;            
+        }
+        
+        private Stream ReadResponseMessage() {
             Stream responseStream = null;
             bool fullyRead = false;
             
@@ -161,9 +184,9 @@ namespace Ch.Elca.Iiop {
                 CdrInputStreamImpl reader = new CdrInputStreamImpl(m_transportStream);
                 GiopHeader msgHeader = new GiopHeader(reader);
              
-            	switch(msgHeader.GiopType) {
-            		case GiopMsgTypes.Reply:
-            		    if ((msgHeader.GiopFlags & GiopHeader.FRAGMENT_MASK) > 0) {
+                switch(msgHeader.GiopType) {
+                    case GiopMsgTypes.Reply:
+                        if ((msgHeader.GiopFlags & GiopHeader.FRAGMENT_MASK) > 0) {
                             m_fragmentAssembler.StartFragment(reader, msgHeader);
                         } else {
                             // no fragmentation
@@ -176,20 +199,20 @@ namespace Ch.Elca.Iiop {
                             fullyRead = true; // no more fragments
                         }                    
                         break;
-            		case GiopMsgTypes.Fragment:
-            			if (!(m_fragmentAssembler.IsLastFragment(msgHeader))) {
+                    case GiopMsgTypes.Fragment:
+                        if (!(m_fragmentAssembler.IsLastFragment(msgHeader))) {
                             m_fragmentAssembler.AddFragment(reader, msgHeader);
                         } else {
                             responseStream = m_fragmentAssembler.FinishFragmentedMsg(reader, 
                                                                                      msgHeader);
-                        	fullyRead = true; // no more fragments
+                            fullyRead = true; // no more fragments
                         }
                         break;
-            		default:
+                    default:
                         Trace.WriteLine("unsupported GIOP-msg received: " + msgHeader.GiopType);
                         throw new INTERNAL(155, CompletionStatus.Completed_MayBe);
-            	}
-            	
+                }
+                
             } // end while (!fullyRead)
 
                       
@@ -199,18 +222,8 @@ namespace Ch.Elca.Iiop {
             responseStream.Read(data, 0, (int)responseStream.Length);
             OutputHelper.DebugBuffer(data);
 #endif
-
-            // find request_id in message
-            uint msgReqId = FindRequestIdInReply(responseStream);
-            if (msgReqId != reqNr) {
-                Trace.WriteLine("reply out of sequence: " + msgReqId + "; expected was: " + reqNr);
-                throw new COMM_FAILURE(154, CompletionStatus.Completed_MayBe);
-            }
-            
-            responseStream.Seek(0, SeekOrigin.Begin); // assure stream is read from beginning in formatter
             return responseStream;
-
-        }        
+        }
         
         
         /// <summary>extract the requestid from the message</summary>
