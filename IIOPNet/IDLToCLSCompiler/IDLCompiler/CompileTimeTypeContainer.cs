@@ -45,7 +45,7 @@ namespace Ch.Elca.Iiop.IdlCompiler.Action {
         #endregion IFIelds
         #region IConstructors
     
-        private CompileTimeTypeContainer(TypeManager typeManager, Type clsType, AttributeExtCollection attrs) : 
+        public CompileTimeTypeContainer(TypeManager typeManager, Type clsType, AttributeExtCollection attrs) : 
             base(clsType, attrs) {
             m_typeManager = typeManager;
         }
