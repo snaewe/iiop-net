@@ -2,11 +2,15 @@
 
 <SUBJECT>Overview</SUBJECT>
 <p/>
+<img alt="IIOP.NET celebrates it's first anniversary" src="images/birthday_cake.gif" align="right" width="88" height="91">
 
 IIOP.NET allows a seamless interoperation between .NET, CORBA and J2EE distributed objects. This is done by incorporating CORBA/IIOP support into
 .NET, leveraging the remoting framework.<BR>
 <p/>
 IIOP.NET is released under the LGPL license.
+
+<p/>
+The project celebrated its first anniversary on May, 2! During this time, IIOP.NET was downloaded around 2500 times, and grew from a small experimental project to a stable and useful application. Thank you very much to all the IIOP.NET community.
 
 <H2 class="contentPart">Features</H2>
 <p/>
