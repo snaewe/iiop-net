@@ -588,6 +588,7 @@ jacorb.interop.chunk_custom_rmi_valuetypes=off
 <li>Andrew S. Townley 
 <li>David Tzur
 <li>Christopher Vijith
+<li>Michael Watkin
 </ul>
 
 </FAQ>
