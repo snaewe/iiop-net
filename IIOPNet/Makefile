@@ -46,7 +46,7 @@ test:
 	$(MAKE) test
 	cd ..	
 
-clean:
+clean-base:
 	cd IIOPChannel
 	$(MAKE) clean
 	cd ..
@@ -56,6 +56,8 @@ clean:
 	cd IDLToCLSCompiler
 	$(MAKE) clean
 	cd ..
+
+clean: clean-base
 	cd Examples
 	$(MAKE) clean
 	cd ..
