@@ -341,6 +341,11 @@ namespace ch.elca.iiop.integrationTests {
             Assertion.AssertEquals(result.val1.Msg, result.val2.Msg);
         }
 
+        [Test]
+        public void TestReadOnlyProperty() {
+            System.Int32 newVal = m_test.testProp;
+            Assertion.AssertEquals(Test_package.TEST_PROP_INIT_VAL.ConstVal, newVal);
+        }
 
     }
 

@@ -218,13 +218,17 @@ public class TestBean implements SessionBean {
     public Object EchoAnything(Object arg) {
         return arg;
     }
+    
+    public int getTestProp() {
+        return Test.TEST_PROP_INIT_VAL;
+    }
        
     /// <summary>
     /// used to check, if a reference passed is equal to this object itself.
     /// </summary>
     public boolean CheckEqualityWith(Test toCheck) {
         return toCheck.equals(this);
-    }         
-
+    }
+    
 }
 

@@ -76,5 +76,9 @@ public interface Test extends EJBObject {
     public TestSerializableClassC TestEchoSerializableC(TestSerializableClassC arg) throws RemoteException;        
 
     public TestSerializableClassD TestChangeSerilizableD(TestSerializableClassD arg, String newMessage) throws RemoteException;
+    
+    public int getTestProp() throws RemoteException;
+
+    public static final int TEST_PROP_INIT_VAL = 11;
 
 }
