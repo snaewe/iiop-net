@@ -35,19 +35,19 @@ import java.util.Hashtable;
  * Remark: This is not a clean solution, but it choosen for simplicity.
  * It doesn't scale as normally required by EJB solutions.
  */
-public class ChatroomClients {
+public class ChatroomServer {
 
 
-    private static ChatroomClients s_chatroomClients = new ChatroomClients();
+    private static ChatroomServer s_chatroomServer = new ChatroomServer();
 
     private Hashtable m_clients = new Hashtable();
 
-    private ChatroomClients() {
+    private ChatroomServer() {
         super();
     }
     
-    public static ChatroomClients getSingleton() {
-    	return s_chatroomClients;
+    public static ChatroomServer getSingleton() {
+    	return s_chatroomServer;
     }
     
     /**
