@@ -8,7 +8,7 @@ Yes, it does. This is in fact the platform it was developed on.
 <H2 class="about">Does IIOP.NET work with mono?</H2>
 
 <p>
-Currently (mono 0.26) not, but only few features are missing. 
+Currently (mono 0.28) not, but only few features are missing. 
 We are regularly testing IIOP.NET against the mono CVS and reporting the problems we find to the mono team. 
 
 <p>We expect IIOP.NET to work on Mono pretty soon.
@@ -137,6 +137,55 @@ Add the following configuration lines in the files <code>%NUnit2%\bin\nunit-cons
     &lt;supportedRuntime version="v1.1.4322" /&gt; 
   &lt;/startup&gt; 
 </pre>
+
+<a name="#idltocls"></a>
+<H2 class="about">How do I use the IDLToCLSCompiler?</H2>
+
+<p>The IDLToCLSCompiler creates the .NET proxies for one or more IDL files.
+
+<pre>
+IDLToCLSCompiler [options] target_assembly idl-files...
+
+target_assembly   is the name of the target assembly without .dll
+idl-files         one or more idl files containg OMG IDL definitions
+
+options are
+-h               help
+-r assembly      assemblies to check for types in, instead of generating them
+-c xmlfile       specifies custom mappings
+-d define        defines a preprocessor symbol
+-idir directory  directory containing idl files (multiple -idir allowed)
+</pre>
+
+<h4>Examples:</h4>
+
+<dl>
+<dt>
+<pre>IDLToCLSCompiler proxy def.idl</pre>
+</dt><dd>
+generate <code>proxy.dll</code> from <code>def.idl</code> in the current directory.
+</dd>
+
+<dt><pre>IDLToCLSCompiler proxy def1.idl def2.idl</pre>
+</dt><dd>
+generate <code>proxy.dll</code> from <code>def1.idl</code> and <code>def2.idl</code> in the current directory.
+</dd>
+
+<dt><pre>IDLToCLSCompiler -o bin proxy def.idl</pre>
+</dt><dd>
+generate <code>proxy.dll</code> from <code>def.idl</code> in the directory <code>bin</code>.
+</dd>
+
+<dt><pre>IDLToCLSCompiler -o bin -idir c:\IDL -idir d:\IDL proxy def.idl</pre>
+</dt><dd>
+generate <code>proxy.dll</code> from <code>def.idl</code> in the directory <code>bin</code>; search for imported idl files in <code>c:\IDL</code> and <code>d:\IDL</code>.
+</dd>
+
+<dt><pre>IDLToCLSCompiler -dIIOPNet proxy def.idl</pre>
+</dt><dd>
+generate <code>proxy.dll</code> from <code>def.idl</code> in the current directory; the symbol "IIOPNet" is defined for the IDL preprocessor
+</dd>
+</dl>
 
 <a name="#stringifiedIOR"></a>
 <H2 class="about">How can I access an object using its stringified IOR?</H2>
