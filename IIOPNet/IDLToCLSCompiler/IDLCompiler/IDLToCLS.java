@@ -106,8 +106,8 @@ public class IDLToCLS {
         File file = new File(fileName);
         // all Preprocessor instances share the same symbol definitions
         IDLPreprocessor preproc = new IDLPreprocessor(file);
-        preproc.process();
-        InputStream result = preproc.getProcessed();
+        preproc.Process();
+        InputStream result = preproc.GetProcessed();
         BufferedReader reader = new BufferedReader(new InputStreamReader(result));
         String line = "";
         while (line != null) {
