@@ -86,4 +86,5 @@ using System.Runtime.CompilerServices;
 //
 
 [assembly: AssemblyDelaySign(false)]
+[assembly: AssemblyKeyFile(@"..\..\Key.snk")]
 [assembly: AssemblyKeyName("")]

@@ -1,3 +1,4 @@
+Key = ../../Key.snk
 IIOPChannel = ../../IIOPChannel/bin/IIOPChannel.dll
 IDLPreprocessor = ../IDLPreprocessor/bin/IDLPreprocessor.dll
 Dest = bin/
@@ -15,7 +16,7 @@ $(Dest)IDLPreprocessor.dll: $(IDLPreprocessor)
 	[ -d $(Dest) ] || mkdir $(Dest)
 	cp $(IDLPreprocessor) $(Dest)IDLPreprocessor.dll
 
-$(Dest)IDLToCLSCompiler.exe: $(Dest)IIOPChannel.dll $(Dest)IDLPreprocessor.dll *.cs
+$(Dest)IDLToCLSCompiler.exe: $(Dest)IIOPChannel.dll $(Dest)IDLPreprocessor.dll *.cs $(Key)
 	mcs -nowarn:0162 $(CSFLAGS) /res:MappingPluginSchema.xsd /r:$(Dest)IIOPChannel.dll /r:$(Dest)IDLPreprocessor.dll /t:exe /out:$(Dest)IDLToCLSCompiler.exe *.cs
 
 nunit-var:
@@ -32,7 +33,7 @@ $(DestUt)IDLPreprocessor.dll: $(IDLPreprocessor)
 	[ -d $(DestUt) ] || mkdir $(DestUt)
 	cp $(IDLPreprocessor) $(DestUt)IDLPreprocessor.dll
 
-$(DestUt)IDLToCLSCompiler.exe: $(DestUt)IIOPChannel.dll $(DestUt)IDLPreprocessor.dll *.cs
+$(DestUt)IDLToCLSCompiler.exe: $(DestUt)IIOPChannel.dll $(DestUt)IDLPreprocessor.dll *.cs $(Key)
 	mcs $(CSFLAGS) /d:UnitTest /res:MappingPluginSchema.xsd /r:${NUNITV2_HOME}/bin/nunit.framework.dll /r:$(DestUt)IIOPChannel.dll /r:$(DestUt)IDLPreprocessor.dll /t:exe /out:$(DestUt)IDLToCLSCompiler.exe *.cs
 
 test: build-tests

@@ -98,4 +98,5 @@ using System.Runtime.CompilerServices;
 //
 [assembly: AssemblyDelaySign(false)]
 //[assembly: AssemblyKeyFile(@"\\Mentalis\pieter\cabackup\slkey.snk")]
+[assembly: AssemblyKeyFile(@"..\..\..\Key.snk")]
 [assembly: AssemblyKeyName("")]

@@ -86,6 +86,7 @@ using System.Security.Permissions;
 //       documentation for more information on this.
 //
 [assembly: AssemblyDelaySign(false)]
+[assembly: AssemblyKeyFile(@"..\Key.snk")]
 [assembly: AssemblyKeyName("")]
 
 // needed CAS for IIOP.NET

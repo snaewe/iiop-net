@@ -1,3 +1,4 @@
+Key=../Key.snk
 Dest=bin/
 UnitTestDest=bin/UnitTest/
 
@@ -5,7 +6,7 @@ build: build-dll
 
 build-dll: $(Dest)IIOPChannel.dll
 
-$(Dest)IIOPChannel.dll: *.cs
+$(Dest)IIOPChannel.dll: *.cs $(Key)
 	[ -d $(Dest) ] || mkdir $(Dest)
 	mcs $(CSFLAGS) /t:library /out:$@ *.cs Mono/*.cs
 

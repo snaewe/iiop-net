@@ -1,10 +1,11 @@
+Key = ..\..\Key.snk
 Dest = bin\ 
 
 build: build-dll
 
 build-dll: bin\IDLPreprocessor.dll
 
-$(Dest)IDLPreprocessor.dll: *.cs
+$(Dest)IDLPreprocessor.dll: *.cs $(Key)
 	if not exist $(Dest)nul mkdir $(Dest)
 	csc $(CSFLAGS) /t:library /out:$@ *.cs
 

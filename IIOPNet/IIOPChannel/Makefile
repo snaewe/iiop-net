@@ -1,16 +1,15 @@
+Key = ..\Key.snk
 Dest = bin\ 
 UnitTestDest = bin\UnitTest\ 
-
 
 build: build-dll
 
 build-dll: $(Dest)IIOPChannel.dll
 	
-$(Dest)IIOPChannel.dll: *.cs
+$(Dest)IIOPChannel.dll: *.cs $(Key)
 	if not exist $(Dest)nul mkdir $(Dest)
 	csc $(CSFLAGS) /res:MappingPluginSchema.xsd /t:library /out:$@ *.cs
 	
-
 build-unit-tests: build nunit-var *.cs
 	if not exist $(UnitTestDest)nul mkdir $(UnitTestDest)
 	csc /nowarn:0618 $(CSFLAGS) /d:UnitTest /r:$(NUNITV2_HOME)\bin\nunit.framework.dll /t:library /out:$(UnitTestDest)IIOPChannel.dll *.cs
