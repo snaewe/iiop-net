@@ -236,7 +236,7 @@ namespace Ch.Elca.Iiop.MessageHandling {
             }
             
             // for GIOP >= 1.2, a union is used for target information
-            uint targetAdrType = cdrStream.ReadULong();
+            ushort targetAdrType = cdrStream.ReadUShort();
             switch (targetAdrType) {
                 case 0:
                     return ReadTargetKey(cdrStream);
