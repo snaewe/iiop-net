@@ -100,6 +100,7 @@ public class IDLToCLS {
         System.out.println("-h              help");
         System.out.println("-o directory    output directory (default is `-o .`)");
         System.out.println("-r assembly     assemblys to check for types in, instead of generating them");
+        System.out.println("-c xmlfile      specifies custom mappings");
     }
     
     public static void Error(String message) {
