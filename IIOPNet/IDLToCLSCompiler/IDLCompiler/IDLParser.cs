@@ -155,7 +155,6 @@ public class IDLParser{/*@bgen(jjtree)*/
           default:
             jj_la1[0] = jj_gen;
             goto label_1;
-            break;
           }
         }
         label_1: ;
@@ -167,11 +166,13 @@ public class IDLParser{/*@bgen(jjtree)*/
                 jjtree.closeNodeScope(m_defForPrefix, true); // close inserted definition node scope for prefix
         }
         {if (true) return jjtn000;}
+        break;
       case 0:
         jj_consume_token(0);
                 jjtree.closeNodeScope(jjtn000, true);
                 jjtc000 = false;
                 {if (true) return jjtn000;}
+        break;
       default:
         jj_la1[1] = jj_gen;
         jj_consume_token(-1);
@@ -535,9 +536,11 @@ public class IDLParser{/*@bgen(jjtree)*/
     case 20:
       jj_consume_token(20);
                  {if (true) return 1;}
+      break;
     case 21:
       jj_consume_token(21);
                {if (true) return 2;}
+      break;
     default:
       jj_la1[9] = jj_gen;
       jj_consume_token(-1);
