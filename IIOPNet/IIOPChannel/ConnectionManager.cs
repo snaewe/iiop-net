@@ -37,6 +37,7 @@ using omg.org.CORBA;
 
 using Ch.Elca.Iiop.Services;
 using Ch.Elca.Iiop.Util;
+using Ch.Elca.Iiop.CorbaObjRef;
 
 namespace Ch.Elca.Iiop {
 
@@ -131,10 +132,14 @@ namespace Ch.Elca.Iiop {
         
         /// <summary>checks, if availabe connections contain one, which is usable</summary>
         /// <returns>the connection, if found, otherwise null.</returns>
-        private GiopClientConnection GetFromAvailable(Uri chanUri) {
+        private GiopClientConnection GetFromAvailable(string connectionKey) {
+            if (connectionKey == null) {
+                return null;
+            }
+            
             lock(this) {
             
-            ArrayList avConnections = (ArrayList) m_availableclientConnections[chanUri.ToString()];
+            ArrayList avConnections = (ArrayList) m_availableclientConnections[connectionKey];
             while ((avConnections != null) && (avConnections.Count > 0)) { // lock not needed for avConnections, because all using methods exclusive
                 // connection must not be available for other clients if used by this one
                 ConnectionUsageDescription connectionDesc = (ConnectionUsageDescription) avConnections[0];
@@ -153,24 +158,21 @@ namespace Ch.Elca.Iiop {
         
         
         /// <summary>allocation a connection for the message.</summary>
-        internal GiopClientConnectionDesc AllocateConnectionFor(IMessage msg) {            
+        internal GiopClientConnectionDesc AllocateConnectionFor(IMessage msg, Ior target) {
             GiopClientConnection result = null;
-        	string targetUri = msg.Properties[MessageHandling.SimpleGiopMsg.URI_KEY] as string;
-        	lock(this) {
-        	    if ((targetUri != null) && (IiopUrlUtil.IsUrl(targetUri))) {
-                    string objectUri;
-                    Uri chanUri = IiopUrlUtil.ParseUrl(targetUri, out objectUri);
-                    result = GetFromAvailable(chanUri);    
+            lock(this) {
+                if (target != null) {
+                    string targetKey = m_transportFactory.GetEndpointKey(target);
+                    result = GetFromAvailable(targetKey);
 
                     // if connection not reusable, create new one
                     if (result == null) {
                         IClientTransport transport =
-                            m_transportFactory.CreateTransport(chanUri.Host,
-                                                               chanUri.Port);
+                            m_transportFactory.CreateTransport(target);
                         // already open connection here, because GetConnectionFor 
                         // should returns an open connection (if not closed meanwhile)
                         transport.OpenConnection();
-                        result = new GiopClientConnection(chanUri, transport);
+                        result = new GiopClientConnection(targetKey, transport);
                     }
                 } else {
                     // should not occur?
@@ -178,37 +180,38 @@ namespace Ch.Elca.Iiop {
                                                      omg.org.CORBA.CompletionStatus.Completed_No);
                 }                
                 m_allocatedConnections[msg] = result;
-        	}
-        	
-        	return result.Desc;
+            }
+            
+            return result.Desc;
 
         }
         
         internal void ReleaseConnectionFor(IMessage msg) {
             lock(this) {
-    			GiopClientConnection connection = 
-    			    (GiopClientConnection)m_allocatedConnections[msg];
-    			
-    			if (connection == null) {
-    				throw new INTERNAL(11111, 
-    				                   CompletionStatus.Completed_MayBe);
-    			}
-    			// remove from allocated connections
-    			m_allocatedConnections.Remove(msg);
-    			
-    			// check if reusable
-    			if (connection.CheckConnected() && connection.Desc.ReqNumberGen.IsAbleToGenerateNext()) {
-                    ArrayList avConnections = (ArrayList) m_availableclientConnections[connection.ChanUri];
+                GiopClientConnection connection = 
+                    (GiopClientConnection)m_allocatedConnections[msg];
+
+                if (connection == null) {
+                    throw new INTERNAL(11111, 
+                                       CompletionStatus.Completed_MayBe);
+                }
+                // remove from allocated connections
+                m_allocatedConnections.Remove(msg);
+
+                // check if reusable
+                if ((connection.ConnectionKey != null) && connection.CheckConnected() && 
+                    connection.Desc.ReqNumberGen.IsAbleToGenerateNext()) {
+                    ArrayList avConnections = (ArrayList) m_availableclientConnections[connection.ConnectionKey];
                     if (avConnections == null) {
                         avConnections = new ArrayList();
-                        m_availableclientConnections.Add(connection.ChanUri, avConnections);
+                        m_availableclientConnections.Add(connection.ConnectionKey, avConnections);
                     }
                     ConnectionUsageDescription desc = new ConnectionUsageDescription(connection);
                     avConnections.Add(desc);
                 } else {
                     connection.CloseConnection(); // not usable further, because connection information not gettable
                 }            	            	
-    		}
+            }
         }
         
         /// <summary>get the reserved connection for the message forMessage</summary>

@@ -31,6 +31,7 @@
 using System;
 using System.IO;
 using System.Net.Sockets;
+using Ch.Elca.Iiop.CorbaObjRef;
 
 namespace Ch.Elca.Iiop {
 
@@ -152,9 +153,14 @@ namespace Ch.Elca.Iiop {
     /// </summary>
     internal class TcpClientTransportFactory : IClientTransportFactory {
         
-        /// <summary><see cref="Ch.Elca.Iiop.IClientTransportFactory.CreateTransport(string, int)"/></summary>
-        public IClientTransport CreateTransport(string targetHost, int targetPort) {
-            return new TcpClientTransport(targetHost, targetPort);
+        /// <summary><see cref="Ch.Elca.Iiop.IClientTransportFactory.CreateTransport(Ior)"/></summary>
+        public IClientTransport CreateTransport(Ior target) {
+            return new TcpClientTransport(target.HostName, target.Port);
+        }
+        
+        /// <summary><see cref="Ch.Elca.Iiop.IClientTransportFactory.GetEndpointKey(Ior)"/></summary>
+        public string GetEndpointKey(Ior target) {
+            return "iiop://"+target.HostName+":"+target.Port;
         }
                 
     }

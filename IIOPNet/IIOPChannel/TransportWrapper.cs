@@ -30,6 +30,7 @@
 
 using System;
 using System.IO;
+using Ch.Elca.Iiop.CorbaObjRef;
 
 
 namespace Ch.Elca.Iiop {
@@ -90,8 +91,12 @@ namespace Ch.Elca.Iiop {
     /// </summary>
     internal interface IClientTransportFactory {
         
-        /// <summary>creates a client transport to the targetHost/targetPort</summary>
-        IClientTransport CreateTransport(string targetHost, int targetPort);
+        /// <summary>creates a client transport to the target</summary>
+        IClientTransport CreateTransport(Ior target);
+        
+        /// <summary>creates a key identifying an endpoint; if two keys for two IORs are equal, 
+        /// then the transport can be used to connect to both.</summary>
+        string GetEndpointKey(Ior target);
                 
     }
     

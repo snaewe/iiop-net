@@ -139,20 +139,17 @@ namespace Ch.Elca.Iiop {
 
         private GiopClientConnectionDesc m_assocDesc;
 
-        private Uri m_chanUri;
-        
-        private string m_host;
-        private int m_port;
-        
+        private string m_connectionKey;
+                
         private IClientTransport m_clientTransport;
 
         #endregion IFields
         #region IConstructors
 
-        internal GiopClientConnection(Uri chanUri, IClientTransport transport) {
-            m_chanUri = chanUri;
-        	m_assocDesc = new GiopClientConnectionDesc();
-            m_clientTransport = transport;            
+        internal GiopClientConnection(string connectionKey, IClientTransport transport) {
+            m_connectionKey = connectionKey;
+            m_assocDesc = new GiopClientConnectionDesc();
+            m_clientTransport = transport;
         }
 
         #endregion IConstructors
@@ -164,13 +161,9 @@ namespace Ch.Elca.Iiop {
             }
         }
 
-        internal string ChanUri {
+        internal string ConnectionKey {
             get {
-                if (m_chanUri != null) {
-                    return m_chanUri.ToString();
-                } else {
-                    return null;
-                }
+                return m_connectionKey;
             }
         }
 
@@ -184,10 +177,8 @@ namespace Ch.Elca.Iiop {
         #region IMethods
 
 
-        internal void ConnectTo(string host, int port) {
+        internal void Connect() {
             m_clientTransport.OpenConnection();
-            m_host = host;
-            m_port = port;
         }
 
         internal bool CheckConnected() {

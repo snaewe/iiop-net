@@ -108,15 +108,13 @@ namespace Ch.Elca.Iiop.MessageHandling {
         }
 
         /// <summary>serialises an outgoing .NET request Message on client side</summary>
-        public void SerialiseOutgoingRequestMessage(IMessage msg, Stream targetStream, 
-                                                    uint requestId, GiopConnectionDesc conDesc) {
+        public void SerialiseOutgoingRequestMessage(IMessage msg, Ior target, GiopConnectionDesc conDesc,
+                                                    Stream targetStream, uint requestId) {
             if (msg is IConstructionCallMessage) {
                 // not supported in CORBA, TBD: replace through do nothing instead of exception
                 throw new NotSupportedException("client activated objects are not supported with this channel");
             } else if (msg is IMethodCallMessage) {
-                // extract IOR out of the target addr
-                Ior ior = IiopUrlUtil.CreateIorForUrl((msg as IMethodCallMessage).Uri, "");
-                GiopVersion version = ior.Version;
+                GiopVersion version = target.Version;
                 // write a CORBA request message into the stream targetStream
                 GiopHeader header = new GiopHeader(version.Major, version.Minor,
                                                    0, GiopMsgTypes.Request);
@@ -126,7 +124,7 @@ namespace Ch.Elca.Iiop.MessageHandling {
                 msg.Properties[SimpleGiopMsg.REQUEST_ID_KEY] = requestId; // set request-id
                 ser.SerialiseRequest(msg as IMethodCallMessage, 
                                      msgOutput.GetMessageContentWritingStream(),
-                                     ior, requestId, conDesc);
+                                     target, requestId, conDesc);
                 msgOutput.CloseStream();
             } else {
                 throw new NotImplementedException("handling for this type of .NET message is not implemented at the moment, type: " +
@@ -355,6 +353,7 @@ namespace Ch.Elca.Iiop.Tests {
             MethodInfo methodToCall = typeof(TestService).GetMethod("Add");
             object[] args = new object[] { ((Int32) 1), ((Int32) 2) };
             string uri = "iiop://localhost:8087/testuri"; // Giop 1.2 will be used because no version spec in uri
+            Ior target = IiopUrlUtil.CreateIorForUrl(uri, "");
             TestMessage msg = new TestMessage(methodToCall, args, uri);
             // prepare connection context
             GiopClientConnectionDesc conDesc = new GiopClientConnectionDesc();
@@ -364,7 +363,7 @@ namespace Ch.Elca.Iiop.Tests {
             MemoryStream targetStream = new MemoryStream();
             
             uint reqId = 5;
-            handler.SerialiseOutgoingRequestMessage(msg, targetStream, reqId, conDesc);
+            handler.SerialiseOutgoingRequestMessage(msg, target, conDesc, targetStream, reqId);
             
             // check to serialised stream
             targetStream.Seek(0, SeekOrigin.Begin);

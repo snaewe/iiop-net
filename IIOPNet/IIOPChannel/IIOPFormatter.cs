@@ -36,6 +36,9 @@ using System.IO;
 using System.Diagnostics;
 using Ch.Elca.Iiop.MessageHandling;
 using Ch.Elca.Iiop.Services;
+using Ch.Elca.Iiop.CorbaObjRef;
+using Ch.Elca.Iiop.Util;
+using omg.org.CORBA;
 
 namespace Ch.Elca.Iiop {
 
@@ -126,7 +129,8 @@ namespace Ch.Elca.Iiop {
         #region IMethods
         
         /// <summary>serialises the .NET msg to a GIOP-message</summary>
-        private void SerialiseRequest(IMessage msg, uint reqId, GiopConnectionDesc conDesc,
+        private void SerialiseRequest(IMessage msg, Ior target, GiopConnectionDesc conDesc,
+                                      uint reqId,
                                       out ITransportHeaders headers, out Stream stream) {
             headers = new TransportHeaders();
             headers[GiopConnectionDesc.CLIENT_TR_HEADER_KEY] = conDesc;
@@ -137,7 +141,7 @@ namespace Ch.Elca.Iiop {
                 stream = new MemoryStream(); // create a new stream
             }
             GiopMessageHandler handler = GiopMessageHandler.GetSingleton();
-            handler.SerialiseOutgoingRequestMessage(msg, stream, reqId, conDesc);
+            handler.SerialiseOutgoingRequestMessage(msg, target, conDesc, stream, reqId);
         }
 
         /// <summary>deserialises an IIOP-msg from the response stream</summary>
@@ -161,9 +165,23 @@ namespace Ch.Elca.Iiop {
         
         /// <summary>allocates a connection and adds 
         /// the connectionDesc to the message</summary>
-        private GiopClientConnectionDesc AllocateConnection(IMessage msg) {
-            GiopClientConnectionDesc result = m_conManager.AllocateConnectionFor(msg);                        
-            return result;
+        private GiopClientConnectionDesc AllocateConnection(IMessage msg, Ior target) {
+            return m_conManager.AllocateConnectionFor(msg, target);
+        }
+        
+        private Ior DetermineTarget(IMessage msg) {
+            IMethodMessage methodMsg = msg as IMethodMessage;
+            if ((methodMsg == null) || (methodMsg.Uri == null)){
+                throw new INTERNAL(319, CompletionStatus.Completed_No);
+            }
+            // for urls, which are not stringified iors, no very accurate type information,
+            // because pass as repository id information base type of all corba interfaces: Object;
+            // for urls, which are stringified iors, the type information is extracted from the ior directly
+            Ior target = IiopUrlUtil.CreateIorForUrl(methodMsg.Uri, "");
+            if (target == null) {
+                throw new INTERNAL(319, CompletionStatus.Completed_No);
+            }
+            return target;
         }
         
         private uint GetRequestNumberFor(IMessage msg, GiopClientConnectionDesc conDesc) {            
@@ -174,14 +192,15 @@ namespace Ch.Elca.Iiop {
         #region Implementation of IMessageSink
         public IMessage SyncProcessMessage(IMessage msg) {
             // allocate (reserve) connection
-            GiopClientConnectionDesc conDesc = AllocateConnection(msg);
+            Ior target = DetermineTarget(msg);
+            GiopClientConnectionDesc conDesc = AllocateConnection(msg, target);
             uint reqId = GetRequestNumberFor(msg, conDesc);
             // serialise
             IMessage result;
             try {
                 ITransportHeaders requestHeaders;
                 Stream requestStream;
-                SerialiseRequest(msg, reqId, conDesc,
+                SerialiseRequest(msg, target, conDesc, reqId,
                                  out requestHeaders, out requestStream);
 
                 // pass the serialised GIOP-request to the first stream handling sink
@@ -202,13 +221,14 @@ namespace Ch.Elca.Iiop {
 
         public IMessageCtrl AsyncProcessMessage(IMessage msg, IMessageSink replySink) {
             // allocate (reserve) connection
-            GiopClientConnectionDesc conDesc = AllocateConnection(msg);
+            Ior target = DetermineTarget(msg);
+            GiopClientConnectionDesc conDesc = AllocateConnection(msg, target);
             uint reqId = GetRequestNumberFor(msg, conDesc);
             
             try {
                 ITransportHeaders requestHeaders;
                 Stream requestStream;
-                SerialiseRequest(msg, reqId, conDesc,
+                SerialiseRequest(msg, target, conDesc, reqId,
                                  out requestHeaders, out requestStream);
                 // pass the serialised GIOP-request to the first stream handling sink
                 // this sink is the last sink in the message handling sink chain, therefore the reply sink chain of all the previous message handling
