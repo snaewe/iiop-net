@@ -271,8 +271,10 @@ namespace Ch.Elca.Iiop.Cdr {
                     ImplClassAttribute implAttr = (ImplClassAttribute)
                                                   attrs.GetAttributeForType(typeof(ImplClassAttribute));
                     Type implClass = Repository.LoadType(implAttr.ImplClass);
-                    if (implClass == null) { 
-                        throw new Exception("impl class: " + implAttr.ImplClass + " not found "); 
+                    if (implClass == null) {                        
+                        Trace.WriteLine("implementation class : " + implAttr.ImplClass + 
+                                    " of value-type: " + baseType + " couldn't be found");
+                        throw new NO_IMPLEMENT(1, CompletionStatus.Completed_MayBe);
                     }
                     if (implClass.Equals(forType)) {
                         return true;
@@ -604,7 +606,7 @@ namespace Ch.Elca.Iiop.Cdr {
                 chunk.IsContinuationExpected = false;
             } else {
                 if (chunk.IsDataAvailable()) { 
-                	throw new InvalidCdrDataException("chunk can't end here, data is present in chunk"); 
+                    throw new InvalidCdrDataException("chunk can't end here, data is present in chunk"); 
                 }
                 chunk.IsContinuationExpected = true;
             }
@@ -636,7 +638,7 @@ namespace Ch.Elca.Iiop.Cdr {
             int endTag = ReadLong();
 
             if (endTag >= 0) { 
-            	throw new InvalidCdrDataException("end-tag for a chunk must be < 0"); 
+                throw new InvalidCdrDataException("end-tag for a chunk must be < 0"); 
             }
             int levelsToEnd = m_chunkStack.Count + 2 + endTag; // already removed topmost element --> add 2 here
             if (levelsToEnd <= 0) { throw new InvalidCdrDataException("invalid end-chunk tag"); }
@@ -670,14 +672,15 @@ namespace Ch.Elca.Iiop.Cdr {
             object[] implAttr = actualType.GetCustomAttributes(typeof(ImplClassAttribute), false);
             if ((implAttr != null) && (implAttr.Length > 0)) {
                 if (implAttr.Length > 1) { 
-                	throw new Exception("invalid type: " + actualType + ", only on ImplClassAttribute allowed"); 
+                    throw new Exception("invalid type: " + actualType + ", only on ImplClassAttribute allowed"); 
                 }
                 ImplClassAttribute implCl = (ImplClassAttribute) implAttr[0];
                 // get the type
                 actualType = Repository.LoadType(implCl.ImplClass);
                 if (actualType == null) { 
-                    Trace.WriteLine("implementation class : " + implCl.ImplClass + " of value-type: " + actualType + " couldn't be found"); 
-                	throw new NO_IMPLEMENT(1, CompletionStatus.Completed_MayBe);
+                    Trace.WriteLine("implementation class : " + implCl.ImplClass + 
+                                    " of value-type: " + actualType + " couldn't be found");
+                    throw new NO_IMPLEMENT(1, CompletionStatus.Completed_MayBe);
                 }
             }
             // type must not be abstract for beeing instantiable

@@ -39,6 +39,7 @@ using Ch.Elca.Iiop.Util;
 using Ch.Elca.Iiop.Idl;
 using Ch.Elca.Iiop.CorbaObjRef;
 using Corba;
+using omg.org.CORBA;
 
 namespace Ch.Elca.Iiop.Marshalling {
 
@@ -270,7 +271,8 @@ namespace Ch.Elca.Iiop.Marshalling {
                                        CdrOutputStream targetStream) {
             bool useWide = UseWideOk(attributes);
             if (actual == null) { 
-                throw new ArgumentNullException("string may not be null, if StringValueAttriubte is set"); 
+                // string may not be null, if StringValueAttriubte is set"
+                throw new BAD_PARAM(10040, CompletionStatus.Completed_MayBe);
             }
             if (useWide) {
                 targetStream.WriteWString((string)actual);
@@ -316,10 +318,12 @@ namespace Ch.Elca.Iiop.Marshalling {
             MarshalByRefObject target = (MarshalByRefObject) actual; // this could be a proxy or the server object
             // get or create the objRef for the target
             ObjRef refToTarget =  RemotingServices.Marshal(target);
-            Debug.WriteLine("marshal object reference : " + refToTarget + ", with URI: " + refToTarget.URI);
+            Debug.WriteLine("marshal object reference : " + refToTarget + 
+                            ", with URI: " + refToTarget.URI);
             // get the target address and port
             string host; int port; GiopVersion version;
-            byte[] objectKey = ExtractDataFromObjRef(refToTarget, out host, out port, out version);
+            byte[] objectKey = ExtractDataFromObjRef(refToTarget, out host, out port,
+                                                     out version);
             if ((objectKey == null) || (host == null)) { 
                 throw new ArgumentException("the objRef: " + refToTarget + ", uri: " +
                                             refToTarget.URI + "is not serializable, because connection data is missing (hostName=" +
@@ -333,7 +337,8 @@ namespace Ch.Elca.Iiop.Marshalling {
                 repositoryID = ""; 
             } // CORBA::Object has "" repository id
             // now create an IOR with the above information
-            InternetIiopProfile profile = new InternetIiopProfile(version, host, (ushort)port, objectKey);
+            InternetIiopProfile profile = new InternetIiopProfile(version, host,
+                                                                  (ushort)port, objectKey);
             Ior ior = new Ior(repositoryID, new IorProfile[] { profile });
             // now write the IOR to the stream
             ior.WriteToStream(targetStream);
@@ -404,7 +409,9 @@ namespace Ch.Elca.Iiop.Marshalling {
 
             if ((!(formal.Equals(typeof(MarshalByRefObject)))) && !(formal.IsAssignableFrom(interfaceType))) {
                 // for formal-parameter MarshalByRefObject everything is possible, the other formal types must be checked    
-                throw new Exception("received obj-reference is not compatible with the required formal parameter, formal: " + formal + ", received: " + interfaceType);
+                Trace.WriteLine("received obj-reference is not compatible with the required formal parameter, formal: " +
+                                formal + ", received: " + interfaceType);
+                throw new MARSHAL(20010, CompletionStatus.Completed_MayBe);
             }
             
             // create a proxy
@@ -469,7 +476,11 @@ namespace Ch.Elca.Iiop.Marshalling {
         
         public override void Serialise(Type formal, object actual, AttributeExtCollection attributes,
                                        CdrOutputStream targetStream) {
-            if (!formal.IsSubclassOf(typeof(BoxedValueBase))) { throw new ArgumentException("BoxedValueSerializer can only serialize formal types, which are subclasses of BoxedValueBase"); }
+            if (!formal.IsSubclassOf(typeof(BoxedValueBase))) { 
+                // BoxedValueSerializer can only serialize formal types, 
+                // which are subclasses of BoxedValueBase
+                throw new INTERNAL(10041, CompletionStatus.Completed_MayBe);
+            }
             // perform a boxing
             object boxed = null;
             if (actual != null) {
@@ -482,7 +493,9 @@ namespace Ch.Elca.Iiop.Marshalling {
                                            CdrInputStream sourceStream) {
             Debug.WriteLine("deserialise boxed value, formal: " + formal);
             if (!formal.IsSubclassOf(typeof(BoxedValueBase))) { 
-                throw new ArgumentException("BoxedValueSerializer can only serialize formal types, which are subclasses of BoxedValueBase"); 
+                // BoxedValueSerializer can only serialize formal types,
+                // which are subclasses of BoxedValueBase
+                throw new INTERNAL(10041, CompletionStatus.Completed_MayBe);
             }
 
             BoxedValueBase boxedResult = (BoxedValueBase) m_valueSer.Deserialise(formal, attributes, sourceStream);
@@ -544,14 +557,17 @@ namespace Ch.Elca.Iiop.Marshalling {
 
         public override void Serialise(Type formal, object actual, AttributeExtCollection attributes,
                                        CdrOutputStream targetStream) {
-            // check if actual parameter is an IDL-struct mapped to a value-type: this is an illegal parameter for IDL-abstract value parameters
+            // check if actual parameter is an IDL-struct: 
+            // this is an illegal parameter for IDL-abstract value parameters
             AttributeExtCollection attrs = AttributeExtCollection.ConvertToAttributeCollection(actual.GetType().GetCustomAttributes(true));
             if (attrs.IsInCollection(typeof(IdlStructAttribute))) {
-                throw new Exception("IDL-struct illegal parameter for formal type abstract value (actual type: " + actual.GetType());
+                // IDL-struct illegal parameter for formal type abstract value (actual type: actual.GetType() )
+                throw new MARSHAL(20011, CompletionStatus.Completed_MayBe);
             }
             // check if it's a value-type:
             if (!ClsToIdlMapper.IsDefaultMarshalByVal(actual.GetType())) {
-                throw new Exception("only a value type is possible as acutal value for a formal type abstract value / value base, actual type: " + actual.GetType());
+                // only a value type is possible as acutal value for a formal type abstract value / value base, actual type: actual.GetType() )
+                throw new MARSHAL(20012, CompletionStatus.Completed_MayBe);            	
             }
             // if actual parameter is ok, serialize as idl-value object
             m_valObjectSer.Serialise(formal, actual, attributes, targetStream);
@@ -640,7 +656,8 @@ namespace Ch.Elca.Iiop.Marshalling {
                 // unmarshal the enum-value
                 object val = marshaller.Unmarshal(underlyingType, attributes, sourceStream);
                 if (!Enum.IsDefined(formal, val)) { 
-                    throw new Exception("illegal enum value for enum: " + formal + ", val: " + val); 
+                    // illegal enum value for enum: formal, val: val
+                    throw new BAD_PARAM(10041, CompletionStatus.Completed_MayBe);
                 }
                 return Enum.ToObject(formal, val);
             }
@@ -670,7 +687,10 @@ namespace Ch.Elca.Iiop.Marshalling {
                     marshaller.Marshal(array.GetValue(i), targetStream);
                 }
             } else {
-                throw new ArgumentException("attribute is missing: IDLSequnce, IDLSequenceSerializer can only serialize IDLSequences, no general CLS-arrays, use boxedValueser instead");
+                // attribute is missing: IDLSequnce, IDLSequenceSerializer can only
+                // serialize IDLSequences, no general CLS-arrays, use boxedValueser
+                // instead
+                throw new INTERNAL(10040, CompletionStatus.Completed_MayBe);
             }
         }
 
@@ -691,7 +711,11 @@ namespace Ch.Elca.Iiop.Marshalling {
                 }
                 return result;
             } else {
-                throw new ArgumentException("attribute is missing: IDLSequnce, IDLSequenceSerializer can only serialize IDLSequences, no general CLS-arrays, use boxedValueser instead");
+                // attribute is missing: IDLSequnce, IDLSequenceSerializer can
+                // only serialize IDLSequences,
+                // no general CLS-arrays, use boxedValueser instead
+                throw new INTERNAL(10040, CompletionStatus.Completed_MayBe);
+                
             }
         }
 
@@ -760,9 +784,10 @@ namespace Ch.Elca.Iiop.Marshalling {
                 targetStream.WriteBool(false); // a value-type is serialised
                 m_objRefSer.Serialise(formal, actual, attributes, targetStream);
             } else {
-                throw new Exception("actual value (" + actual + ") with type: " +
-                                     actual.GetType() + " is not serializable for the formal type: " +
-                                     formal);
+                // actual value ( actual ) with type: 
+                // actual.GetType() is not serializable for the formal type
+                // formal
+                throw new BAD_PARAM(6, CompletionStatus.Completed_MayBe);
             }
         }
 

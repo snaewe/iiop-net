@@ -651,7 +651,8 @@ namespace Ch.Elca.Iiop.Cdr {
                 return true; 
             }
             else { 
-                throw new InvalidCdrDataException("invalid data for boolean: " + read); 
+                // invalid data for boolean: read
+                throw new BAD_PARAM(10030, CompletionStatus.Completed_MayBe);
             }
         }
         

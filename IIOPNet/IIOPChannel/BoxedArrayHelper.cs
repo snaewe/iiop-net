@@ -30,10 +30,11 @@
 
 using System;
 using System.Reflection;
+using omg.org.CORBA;
 
-namespace Ch.Elca.Iiop.Idl {
+namespace Ch.Elca.Iiop.Idl {		
     
-    public class BoxedArrayHelper {
+    public sealed class BoxedArrayHelper {
         
         #region Constants
         
@@ -43,29 +44,36 @@ namespace Ch.Elca.Iiop.Idl {
         #region SMethods
 
         /// <summary>
-        /// returns the boxed content for a boxed value type, if a one dimensional array of a non-array or of an array type should be boxed
+        /// returns the boxed content for a boxed value type, if a one dimensional array of a non-array
+        /// or of an array type should be boxed
         /// </summary>
         /// <remarks>
         /// This method is called via reflection
         /// </remarks>
         public static object BoxOneDimArray(Type valueBoxType, object arrayToBox) {
             if (!(arrayToBox is Array)) { 
-                throw new ArgumentException("invalid argument type: " + arrayToBox.GetType() +", expected: System.Array"); 
+                // invalid argument type: arrayToBox.GetType(), expected: System.Array
+                throw new INTERNAL(30009, CompletionStatus.Completed_MayBe);
             }
             Array array = (Array) arrayToBox;
 
             object boxContent = null; // the boxed content for the valueBox
             if (array == null) {
-                throw new ArgumentException("array: can't box null");
+                // array: can't box null
+                throw new BAD_PARAM(30010, CompletionStatus.Completed_MayBe);
             } else if (array.Rank > 1) {
-                throw new ArgumentException("array: only one dim-arrays are supported (array of array of array is also possible, but not true moredim)");
+                // array: only one dim-arrays are supported (array of array of array is also possible, but not true moredim)
+                throw new INTERNAL(30010, CompletionStatus.Completed_MayBe);
             }
             // array is ok
             Type boxed = null;
             try {
-                boxed = (Type)valueBoxType.InvokeMember(BoxedValueBase.GET_BOXED_TYPE_METHOD_NAME, BindingFlags.InvokeMethod | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static | BindingFlags.DeclaredOnly, null, null, new object[0]);
-            } catch (Exception e) {
-                throw new Exception("invalid type: " + valueBoxType + ", static method missing or not callable: " + BoxedValueBase.GET_BOXED_TYPE_METHOD_NAME, e);
+                boxed = (Type)valueBoxType.InvokeMember(BoxedValueBase.GET_BOXED_TYPE_METHOD_NAME,
+                                                        BindingFlags.InvokeMethod | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static | BindingFlags.DeclaredOnly,
+                                                        null, null, new object[0]);
+            } catch (Exception) {
+                // invalid type: valueBoxType static method missing or not callable: BoxedValueBase.GET_BOXED_TYPE_METHOD_NAME
+                throw new INTERNAL(30011, CompletionStatus.Completed_MayBe);
             }
             if (array.GetType().GetElementType().IsArray) {
                 boxContent = Array.CreateInstance(boxed.GetElementType(), array.Length);

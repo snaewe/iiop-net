@@ -29,8 +29,10 @@
 
 using System;
 using System.ComponentModel;
+using System.Diagnostics;
 using Ch.Elca.Iiop.Util;
 using Corba;
+using omg.org.CORBA;
 
 namespace Ch.Elca.Iiop.Idl {
 
@@ -320,7 +322,8 @@ namespace Ch.Elca.Iiop.Idl {
                 Type boxed = Repository.GetBoxedValueType((BoxedValueAttribute)
                                                           attributes.GetAttributeForType(s_boxedValAttrType));
                 if (boxed == null) { 
-                    throw new Exception("boxed type not found for boxed value attribute"); 
+                    Trace.WriteLine("boxed type not found for boxed value attribute"); 
+                    throw new NO_IMPLEMENT(10001, CompletionStatus.Completed_MayBe);
                 }
                 clsType = boxed; // transformation
                 return action.MapToIdlBoxedValueType(boxed, attributes, false);
