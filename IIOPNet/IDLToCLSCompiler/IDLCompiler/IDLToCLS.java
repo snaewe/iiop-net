@@ -40,6 +40,8 @@ import Ch.Elca.Iiop.IdlPreprocessor.IDLPreprocessor;
 
 import System.Diagnostics.*;
 import System.IO.Directory;
+import System.Reflection.Assembly;
+import java.util.LinkedList;
 
 /**
  * 
@@ -57,6 +59,8 @@ public class IDLToCLS {
     private String[] m_inputFileNames = null;
     private String m_asmPrefix = null;
     private String m_destination = ".";
+
+    private LinkedList m_refAssemblies = new LinkedList();
     
     #endregion IFields
     #region IConstructors
@@ -94,6 +98,7 @@ public class IDLToCLS {
         System.out.println("options are:");
         System.out.println("-h              help");
         System.out.println("-o directory    output directory (default is `-o .`)");
+        System.out.println("-r assembly     assemblys to check for types in, instead of generating them");
     }
     
     public static void Error(String message) {
@@ -117,6 +122,15 @@ public class IDLToCLS {
             } else if (args[i].equals("-o")) {
                 i++;
                 m_destination = args[i++];
+            } else if (args[i].equals("-r")) {
+                i++;
+                try {                    
+                    Assembly refAsm = Assembly.LoadFrom(args[i++]);
+                    m_refAssemblies.add(refAsm);
+                } catch (Exception ex) {
+                    System.out.println("can't load assembly: " + args[i]);
+                    System.exit(3);
+                }                
             } else {
                 Error(String.Format("Error: invalid option {0}", args[i]));
             }
@@ -154,7 +168,7 @@ public class IDLToCLS {
     }
     
     public void MapIdl() throws Exception {
-        MetaDataGenerator generator = new MetaDataGenerator(m_asmPrefix, m_destination);
+        MetaDataGenerator generator = new MetaDataGenerator(m_asmPrefix, m_destination, m_refAssemblies);
         for (int i = 0; i < m_inputFileNames.length; i++) {
             System.out.println("processing file: " + m_inputFileNames[i]);
             Trace.WriteLine("");

@@ -122,6 +122,8 @@ import System.Reflection.Emit.*;
 import System.Type;
 import System.Diagnostics.*;
 import System.IO.Directory;
+import System.IO.FileInfo;
+import System.IO.Path;
 
 import Ch.Elca.Iiop.Idl.*;
 import Ch.Elca.Iiop.Marshalling.ICustomMarshalled;
@@ -228,6 +230,8 @@ public class MetaDataGenerator implements IDLParserVisitor {
 
     private String m_targetAsmName;
 
+    private TypesInAssemblyManager m_typesInRefAsms;
+
     /** reference to one of the internal constructor of class ParameterInfo. Used for assigning custom attributes to the return parameter */
     private ConstructorInfo m_paramBuildConstr;
     /** is the generator initalized for parsing a file */
@@ -239,7 +243,7 @@ public class MetaDataGenerator implements IDLParserVisitor {
     #endregion IFields
     #region IConstructors
 
-    public MetaDataGenerator(String targetAssemblyName, String targetDir) {
+    public MetaDataGenerator(String targetAssemblyName, String targetDir, LinkedList refAssemblies) {
         m_targetAsmName = targetAssemblyName;
         AssemblyName asmname = new AssemblyName();
         asmname.set_Name(targetAssemblyName);
@@ -252,6 +256,12 @@ public class MetaDataGenerator implements IDLParserVisitor {
         m_paramBuildConstr = paramBuildType.GetConstructor(BindingFlags.NonPublic | BindingFlags.Instance, null,
                                                            new Type[] { MethodBuilder.class.ToType(), System.Int32.class.ToType(), ParameterAttributes.class.ToType(), String.class.ToType() }, 
                                                            null);
+        // channel assembly contains predef types, which shouldn't be regenerated.
+        FileInfo compilerPath = new FileInfo(this.GetType().get_Assembly().get_Location());
+        refAssemblies.add(Assembly.LoadFrom(compilerPath.get_DirectoryName() + 
+                                            Path.DirectorySeparatorChar + "IIOPChannel.dll")); 
+        m_typesInRefAsms = new TypesInAssemblyManager(refAssemblies);
+        
     }
 
     #endregion IConstructors
@@ -280,7 +290,7 @@ public class MetaDataGenerator implements IDLParserVisitor {
     public void InitalizeForSource(SymbolTable symbolTable) {
         m_symbolTable = symbolTable;
         // helps to find already declared types
-        m_typeManager = new TypeManager(m_modBuilderManager);
+        m_typeManager = new TypeManager(m_modBuilderManager, m_typesInRefAsms);
         // ready for code generation
         m_initalized = true;
     }
@@ -288,6 +298,11 @@ public class MetaDataGenerator implements IDLParserVisitor {
     /** checks if a type generation can be skipped, because type is already defined in a previous run over a parse tree 
      * this method is used to support runs over more than one parse tree */
     private boolean CheckSkip(Symbol forSymbol) {
+        
+        if (m_typeManager.IsTypeDeclaredInRefAssemblies(forSymbol)) {
+            return true; // skip, because already defined in a referenced assembly -> this overrides the def from idl
+        }
+        
         // do skip, if type is not known (or only fwd declared) in current run over a parse tree, but is known from a previous run
         if (m_typeManager.IsTypeFullyDeclarded(forSymbol)) { 
             return false; 
@@ -302,6 +317,10 @@ public class MetaDataGenerator implements IDLParserVisitor {
     /** register a skipped type 
      *  this method is used to support runs over more than one parse tree */
     private void RegisterSkipped(Symbol forSymbol, boolean fwdDecl) {
+        if (m_typeManager.IsTypeDeclaredInRefAssemblies(forSymbol)) {
+            return; // if defined in a referenced asm -> do not register as skipped
+        }
+        
         m_typeManager.RegisterTypeFromBuildModule(forSymbol, fwdDecl);
         // register nested types too, if present
         if (!fwdDecl) { 

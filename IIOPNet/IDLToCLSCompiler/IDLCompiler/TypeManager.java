@@ -50,11 +50,14 @@ public class TypeManager {
     private Hashtable m_typedefTable = new Hashtable();
     private ModuleBuilderManager m_manager;
 
+    private TypesInAssemblyManager m_refAsmTypes;
+
     #endregion IFields
     #region IConstructors
 
-    public TypeManager(ModuleBuilderManager manager) {
+    public TypeManager(ModuleBuilderManager manager, TypesInAssemblyManager refAsmTypes) {
         m_manager = manager;
+        m_refAsmTypes = refAsmTypes;
     }
 
     #endregion IConstructors
@@ -101,6 +104,11 @@ public class TypeManager {
         } else {
             return true;
         }
+    }
+
+    /** checks, if a type is already declared in a referenced assembly */
+    public boolean IsTypeDeclaredInRefAssemblies(Symbol forSymbol) {
+        return m_refAsmTypes.GetTypeFromRefAssemblies(forSymbol) != null;
     }
 
     #region methods for supporting generation for more than one parse result    
@@ -166,6 +174,13 @@ public class TypeManager {
         TypeContainer result = (TypeContainer)m_typeTable.get(forSymbol);
         if (result == null) {
             result = (TypeContainer)m_typesInCreation.get(forSymbol);
+        }
+        if (result == null) { 
+            // check in types, which are defined in referenced assemblies
+            Type fromAsm = m_refAsmTypes.GetTypeFromRefAssemblies(forSymbol);
+            if (fromAsm != null) {
+                result = new TypeContainer(fromAsm, new CustomAttributeBuilder[0]);
+            }
         }
         return result;
     }
