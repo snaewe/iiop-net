@@ -1,0 +1,9 @@
+*.ps
+*.dvi
+*.jpg
+*.aux
+*.log
+*.toc
+*.bat
+*.lof
+*.ldb
