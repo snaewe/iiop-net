@@ -65,7 +65,7 @@ public class IDLToCLS {
                 Debug.WriteLine("assembly: " + args.Name);
                 string asmSimpleName = args.Name;
                 if (asmSimpleName.IndexOf(",") > 0) {
-                	asmSimpleName = asmSimpleName.Substring(0, asmSimpleName.IndexOf(",")).Trim();
+                    asmSimpleName = asmSimpleName.Substring(0, asmSimpleName.IndexOf(",")).Trim();
                 }
                 
                 Assembly found = LoadByRelativePath(asmSimpleName + ".dll");
@@ -123,6 +123,7 @@ public class IDLToCLS {
     
     private string m_keyFile;
     private bool m_delaySign = false;
+    private string m_asmVersion = null;
     
     #endregion IFields
     #region IConstructors
@@ -174,6 +175,7 @@ public class IDLToCLS {
         Console.WriteLine("-vtSkelO        Overwrite already present valuetype skeleton implementations");
         Console.WriteLine("-snk            sign key file (used for generating strong named assemblies)");
         Console.WriteLine("-delaySign      delay signing of assembly (snk file contains only a pk)");
+        Console.WriteLine("-asmVersion     the version of the generated assembly");
     }
     
     public static void Error(String message) {
@@ -249,6 +251,9 @@ public class IDLToCLS {
             } else if (args[i].Equals("-delaySign")) {
                 i++;
                 m_delaySign = true;
+            } else if (args[i].Equals("-asmVersion")) {
+                i++;
+                m_asmVersion = args[i++];
             } else if (args[i].Equals("-basedir")) {
                 i++;
                 string base_dir = args[i++];
@@ -355,6 +360,9 @@ public class IDLToCLS {
                 result.SetPublicKey(publicKey);
                 publicKeyStream.Close();
             }
+        }
+        if (m_asmVersion != null) {
+            result.Version = new Version(m_asmVersion);
         }
         return result;
     }
