@@ -420,11 +420,82 @@ namespace Ch.Elca.Iiop.Idl {
             for (int i = 0; i < members.Length; i++) {                
                 omg.org.CORBA.TypeCode memberType = Repository.CreateTypeCodeForType(members[i].FieldType, 
                                                         AttributeExtCollection.ConvertToAttributeCollection(
-                                                            members[i].FieldType.GetCustomAttributes(true)));
+                                                            members[i].GetCustomAttributes(true)));
                 structMembers[i] = new StructMember(members[i].Name, memberType);
             }
             return new StructTC(Repository.GetRepositoryID(clsType), clsType.FullName, 
                                 structMembers);
+        }
+        public object MapToIdlUnion(Type clsType) {
+            // first get discriminator type
+            FieldInfo discriminator = clsType.GetField(UnionGenerationHelper.DISCR_FIELD_NAME, 
+                                                       BindingFlags.Instance | 
+                                                       BindingFlags.DeclaredOnly |
+                                                       BindingFlags.NonPublic);
+            omg.org.CORBA.TypeCode discrTypeCode = 
+                Repository.CreateTypeCodeForType(discriminator.FieldType, 
+                                                 AttributeExtCollection.ConvertToAttributeCollection(
+                                                     discriminator.GetCustomAttributes(true)));
+
+            // get the methods used for typecode creation
+            MethodInfo getCoveredDiscrMethod = clsType.GetMethod(UnionGenerationHelper.GET_COVERED_DISCR_VALUES,
+                                                                 BindingFlags.Static | BindingFlags.NonPublic |
+                                                                 BindingFlags.DeclaredOnly);
+            MethodInfo getDefaultFieldMethod = clsType.GetMethod(UnionGenerationHelper.GET_DEFAULT_FIELD,
+                                                                 BindingFlags.Static | BindingFlags.NonPublic |
+                                                                 BindingFlags.DeclaredOnly);
+            MethodInfo getFieldForDiscrVal = clsType.GetMethod(UnionGenerationHelper.GET_FIELD_FOR_DISCR_METHOD,
+                                                               BindingFlags.Static | BindingFlags.NonPublic |
+                                                               BindingFlags.DeclaredOnly);
+
+            // get all discriminator values used in switch-cases
+            object[] coveredDiscrs = (object[])getCoveredDiscrMethod.Invoke(null, new object[0]);
+            if (coveredDiscrs == null) {
+                throw new INTERNAL(898, CompletionStatus.Completed_MayBe);
+            }
+                        
+            FieldInfo defaultField = (FieldInfo)getDefaultFieldMethod.Invoke(null, new object[0]);
+            
+            UnionSwitchCase[] cases = null;
+            int defaultCaseNumber = -1; // no default case
+            if (defaultField != null) {
+                cases = new UnionSwitchCase[coveredDiscrs.Length + 1];
+                omg.org.CORBA.TypeCode elemType = 
+                    Repository.CreateTypeCodeForType(defaultField.FieldType, 
+                                                     AttributeExtCollection.ConvertToAttributeCollection(
+                                                         defaultField.GetCustomAttributes(true)));
+                // create a default value of type discriminiator type, because of possible discriminator types, this 
+                // is possible with Activator.CreateInstance ...
+                object dummyValue = null;
+                try {
+                    dummyValue = Activator.CreateInstance(discriminator.FieldType);
+                } catch (Exception) {
+                    throw new MARSHAL(881, CompletionStatus.Completed_MayBe);
+                }
+                cases[coveredDiscrs.Length] = new UnionSwitchCase(dummyValue, defaultField.Name.Substring(2),
+                                                                  elemType);
+                defaultCaseNumber = coveredDiscrs.Length;
+            } else {
+                cases = new UnionSwitchCase[coveredDiscrs.Length];
+            }
+            
+            // add a UnionSwitchCase to typecode for every discriminator value used
+            for (int i = 0; i < coveredDiscrs.Length; i++) {
+                FieldInfo caseField = (FieldInfo)getFieldForDiscrVal.Invoke(null, new object[] { coveredDiscrs[i] });
+                if (caseField == null) {
+                    throw new INTERNAL(898, CompletionStatus.Completed_MayBe);
+                }
+                omg.org.CORBA.TypeCode elemType = 
+                    Repository.CreateTypeCodeForType(caseField.FieldType, 
+                                                     AttributeExtCollection.ConvertToAttributeCollection(
+                                                         caseField.GetCustomAttributes(true)));
+                // extract name of element field: strip m_
+                UnionSwitchCase switchCase = new UnionSwitchCase(coveredDiscrs[i], caseField.Name.Substring(2),
+                                                                 elemType);
+                cases[i] = switchCase;
+            }                                                                                                
+            return new UnionTC(Repository.GetRepositoryID(clsType), clsType.FullName,
+                               discrTypeCode, defaultCaseNumber, cases);
         }
         public object MapToIdlAbstractInterface(Type clsType) {
             return new AbstractIfTC(Repository.GetRepositoryID(clsType), clsType.FullName);
@@ -451,7 +522,7 @@ namespace Ch.Elca.Iiop.Idl {
             for (int i = 0; i < members.Length; i++) {
                 omg.org.CORBA.TypeCode memberType = Repository.CreateTypeCodeForType(members[i].FieldType, 
                                                         AttributeExtCollection.ConvertToAttributeCollection(
-                                                            members[i].FieldType.GetCustomAttributes(true)));
+                                                            members[i].GetCustomAttributes(true)));
                 short visibility;
                 if (members[i].IsPrivate) { 
                     visibility = VISIBILITY_PRIVATE; 
@@ -538,7 +609,7 @@ namespace Ch.Elca.Iiop.Idl {
             for (int i = 0; i < members.Length; i++) {                
                 omg.org.CORBA.TypeCode memberType = Repository.CreateTypeCodeForType(members[i].FieldType,
                                                         AttributeExtCollection.ConvertToAttributeCollection(
-                                                            members[i].FieldType.GetCustomAttributes(true)));
+                                                            members[i].GetCustomAttributes(true)));
                 exMembers[i] = new StructMember(members[i].Name, memberType);
             }
             return new ExceptTC(Repository.GetRepositoryID(clsType), clsType.FullName, exMembers);
