@@ -893,6 +893,39 @@ namespace Ch.Elca.Iiop.IntegrationTests {
 
         }
 
+        [Test]
+        public void TestSeqOfSeqByRefBugReport() {
+            SSensi arg0Elem = new SSensi();
+            arg0Elem.ICode = 1;
+            arg0Elem.IDev = 1;
+            arg0Elem.Sensibilites = new Int64[] { 1L, 2L };
+            SSensi arg1Elem = new SSensi();
+            arg1Elem.ICode = 2;
+            arg1Elem.IDev = 2;
+            arg1Elem.Sensibilites = new Int64[0];            
+            SSensi[] arg = new SSensi[] { arg0Elem, arg1Elem } ;
+            int argLengthBefore = arg.Length;
+            m_testService.TestDuplicateSeqOfSeqInOut(ref arg);          
+            Assertion.AssertEquals("wrong length", argLengthBefore * 2, arg.Length);
+            CheckSSensiEquality(arg0Elem, arg[0]);
+            CheckSSensiEquality(arg0Elem, arg[1]);
+            CheckSSensiEquality(arg1Elem, arg[2]);
+            CheckSSensiEquality(arg1Elem, arg[3]);
+        }
+
+        private void CheckSSensiEquality(SSensi expected, SSensi compare) {
+            Assertion.AssertEquals("wrong ICode", expected.ICode, compare.ICode);
+            Assertion.AssertEquals("wrong IDev", expected.IDev, compare.IDev);
+            Assertion.AssertNotNull("wrong Sensibilities", expected.Sensibilites);
+            Assertion.AssertNotNull("wrong Sensibilities", compare.Sensibilites);
+            Assertion.AssertEquals("wrong number of entries in Sensibilities", expected.Sensibilites.Length, 
+                                   compare.Sensibilites.Length);
+            for (int i = 0; i < expected.Sensibilites.Length; i++) {
+                Assertion.AssertEquals("wrong sensibilities element " + i, expected.Sensibilites[i],
+                                       compare.Sensibilites[i]);
+            }
+        }
+
         #endregion IMethods
 
 

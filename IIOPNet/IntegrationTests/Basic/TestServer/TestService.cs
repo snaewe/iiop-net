@@ -76,6 +76,15 @@ namespace Ch.Elca.Iiop.IntegrationTests {
         public TestSerializableClassE[] RecArrEntry;
     }
 
+    [IdlStruct]
+    public struct SSensi { 
+        public int ICode; 
+        public int IDev; 
+        [IdlSequence(0)]
+        public long[] Sensibilites;
+    }
+
+
 
     public class Adder : MarshalByRefObject {
         public System.Int32 Add(System.Int32 sum1, System.Int32 sum2) {
@@ -464,6 +473,17 @@ namespace Ch.Elca.Iiop.IntegrationTests {
             get {
                 throw new omg.org.CORBA.INTERNAL(29, 
                                            omg.org.CORBA.CompletionStatus.Completed_Yes);
+            }
+        }
+
+        public void TestDuplicateSeqOfSeqInOut([IdlSequence(0)] ref SSensi[] arg) {
+            if (arg != null) {
+               SSensi[] result = new SSensi[arg.Length * 2];
+               for (int i = 0; i < arg.Length; i++) {
+                   result[i*2] = arg[i];
+                   result[i*2 + 1] = arg[i];
+               }
+               arg = result;
             }
         }
         
