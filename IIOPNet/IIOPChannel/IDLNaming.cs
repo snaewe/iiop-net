@@ -30,6 +30,7 @@
 using System;
 using System.Reflection;
 using System.Collections;
+using Ch.Elca.Iiop.Util;
 
 namespace Ch.Elca.Iiop.Idl {
 
@@ -47,6 +48,9 @@ namespace Ch.Elca.Iiop.Idl {
         private static ArrayList s_idlKeywordList = new ArrayList();
 
         private static IComparer s_keyWordComparer = new CaseInsensitiveComparer();
+    	
+    	/// <summary>used as helper to map type names to idl for Cls types</summary>
+    	private static GenerationActionReference s_genIdlNameforClsType = new GenerationActionReference();
 
         #endregion SFields
         #region SConstructor
@@ -71,14 +75,14 @@ namespace Ch.Elca.Iiop.Idl {
         
         /// <summary>creates the Idl-name for a name, which was mapped from IDL to CLS</summary>
         internal static string ReverseIdlToClsNameMapping(string mappedNameInCls) {
-        	string result = mappedNameInCls;
-        	if (result.StartsWith("_")) {
-        	    // remove leading underscore, according to section 3.2.3.1 in CORBA 2.3.1 standard
-        	    // the underscore is not removed during name mapping, to handle idl id's which would be mapped
-        	    // to a CLS keyword easily
-        	    result = result.Substring(1);
-        	}
-        	return result;
+            string result = mappedNameInCls;
+            if (result.StartsWith("_")) {
+                // remove leading underscore, according to section 3.2.3.1 in CORBA 2.3.1 standard
+                // the underscore is not removed during name mapping, to handle idl id's which would be mapped
+                // to a CLS keyword easily
+                result = result.Substring(1);
+            }
+            return result;
         }
         
         /// <summary>creates the CLS-name for a name, which was mapped from CLS to IDL</summary>
@@ -90,15 +94,31 @@ namespace Ch.Elca.Iiop.Idl {
                 result = result.Substring(1);
             }
             return result;
-        }
-
+        }                
+        
         /// <summary>
         /// Maps the method name for the CLS method to IDL
         /// </summary>
-        public static string MapClsMethodNameToIdlName(MethodInfo method) {
-            // TODO: handle overloaded methods
+        public static string MapClsMethodNameToIdlName(MethodInfo method, bool isOverloaded) {            
             // TODO: handle exceptions in method name mapping -> use standard name mapping
-            return method.Name;
+            string methodName = method.Name;
+            if (isOverloaded) {
+                // do the mangling                
+                ParameterInfo[] parameters = method.GetParameters();
+            	if (parameters.Length == 0) {
+            	    methodName += "__";
+            	}
+                ClsToIdlMapper mapper = ClsToIdlMapper.GetSingleton();
+                foreach (ParameterInfo parameter in parameters) {
+                    string mappedTypeName = (string)mapper.MapClsType(parameter.ParameterType,
+                                                                      AttributeExtCollection.ConvertToAttributeCollection(parameter.GetCustomAttributes(true)),
+                                                                      s_genIdlNameforClsType);
+                	mappedTypeName.Replace(" ", "_");
+                	mappedTypeName.Replace("::", "__");
+                	methodName = methodName + "__" + mappedTypeName;
+                }                
+            }
+            return methodName;
         }
         
         /// <summary>
@@ -453,4 +473,125 @@ namespace Ch.Elca.Iiop.Idl {
         #endregion SMethods
 
     }
+    
+    
+    /// <summary>returns the IDL for a type referenced from another type. This class doesn't write type declarations/definition, this is left to GenerationActionDefineTypes
+    /// All methods returns the IDL-string which shoulb be inserted, if the specified type is referenced</summary>
+    public class GenerationActionReference : MappingAction {
+    
+        #region IFields
+
+        private ClsToIdlMapper m_mapper = ClsToIdlMapper.GetSingleton();
+
+        #endregion IFields
+        #region IMethods
+
+        #region Implementation of MappingAction
+        
+        public object MapToIdlLong(System.Type dotNetType) {
+            return "long";
+        }
+        public object MapToIdlULong(System.Type dotNetType) {
+            return "ulong";
+        }
+        public object MapToIdlLongLong(System.Type dotNetType) {
+            return "long long";
+        }
+        public object MapToIdlULongLong(System.Type dotNetType) {
+            return "ulong ulong";
+        }
+        public object MapToIdlUShort(System.Type dotNetType) {
+            return "ushort";
+        }
+        public object MapToIdlShort(System.Type dotNetType) {
+            return "short";
+        }
+        public object MapToIdlOctet(System.Type dotNetType) {
+            return "octet";
+        }
+        public object MapToIdlVoid(System.Type dotNetType) {
+            return "void";
+        }        
+        public object MapToIdlFloat(System.Type dotNetType) {
+            return "float";
+        }
+        public object MapToIdlDouble(System.Type dotNetType) {
+            return "double";
+        }
+        public object MapToIdlChar(System.Type dotNetType) {
+            return "char";
+        }
+        public object MapToIdlWChar(System.Type dotNetType) {
+            return "wchar";
+        }
+        public object MapToIdlBoolean(System.Type dotNetType) {
+            return "boolean";
+        }
+        public object MapToIdlString(System.Type dotNetType) {
+            return "string";
+        }
+        public object MapToIdlWString(System.Type dotNetType) {
+            return "wstring";
+        }
+        public object MapToIdlAny(System.Type dotNetType) {
+            return "any";
+        }
+        public object MapToStringValue(System.Type dotNetType) {
+            return "::CORBA::StringValue";
+        }
+        public object MapToWStringValue(System.Type dotNetType) {
+            return "::CORBA::WStringValue";
+        }
+        public object MapToIdlEnum(System.Type dotNetType) {
+            return IdlNaming.MapFullTypeNameToIdlScoped(dotNetType);
+        }
+        public object MapToIdlConcreteInterface(System.Type dotNetType) {
+            if (!dotNetType.Equals(typeof(MarshalByRefObject))) {
+                return IdlNaming.MapFullTypeNameToIdlScoped(dotNetType);
+            } else {
+                return "Object";
+            }
+        }
+        public object MapToIdlConcreateValueType(System.Type dotNetType) {
+            return IdlNaming.MapFullTypeNameToIdlScoped(dotNetType);
+        }
+        public object MapToIdlAbstractInterface(System.Type dotNetType) {
+            return IdlNaming.MapFullTypeNameToIdlScoped(dotNetType);
+        }
+        public object MapToIdlStruct(System.Type dotNetType) {
+            return IdlNaming.MapFullTypeNameToIdlScoped(dotNetType);
+        }
+        public object MapToIdlAbstractValueType(System.Type dotNetType) {
+            return IdlNaming.MapFullTypeNameToIdlScoped(dotNetType);
+        }
+        public object MapToIdlSequence(System.Type dotNetType) {
+            string refToElemType = (string)m_mapper.MapClsType(dotNetType.GetElementType(), new Util.AttributeExtCollection(), this);
+            return "sequence<" + refToElemType + ">";
+        }
+        public object MapToIdlBoxedValueType(System.Type dotNetType, AttributeExtCollection attributes, bool isAlreadyBoxed) {
+            // the dotNetType is a subclass of BoxedValueBase representing the boxed value type
+            return IdlNaming.MapFullTypeNameToIdlScoped(dotNetType);
+        }
+        public object MapToValueBase(System.Type dotNetType) {
+            return "::CORBA::ValueBase";
+        }
+        public object MapToAbstractBase(System.Type dotNetType) {
+            return "::CORBA:AbstractBase";
+        }
+        
+        public object MapToTypeDesc(System.Type dotNetType) {
+            return null;
+        }        
+        public object MapToTypeCode(System.Type dotNetType) {
+            return "::CORBA::TypeCode";
+        }
+        public object MapException(System.Type dotNetType) {
+            return IdlNaming.MapShortTypeNameToIdl(dotNetType);
+        }
+        #endregion
+
+        #endregion IMethods
+
+    }
+    
 }

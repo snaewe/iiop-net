@@ -144,12 +144,12 @@ namespace Ch.Elca.Iiop.Idl {
 
 
 
-         private string CreateIdlFullName(string[] modules, string typeName) {
+        private string CreateIdlFullName(string[] modules, string typeName) {
             String path  = String.Join(Path.DirectorySeparatorChar.ToString(), modules);
             return Path.Combine(path, typeName) + ".idl";
         }
 
-       /// <summary>opens the file-output stream</summary>
+        /// <summary>opens the file-output stream</summary>
         private TextWriter OpenFile(string IdlName) {
             string name = Path.Combine(m_outputDirectory, IdlName);
             string dir  = Path.GetDirectoryName(name);
@@ -272,6 +272,22 @@ namespace Ch.Elca.Iiop.Idl {
             m_currentOutputStream.WriteLine("#pragma ID " + idlName + " \"" + repId + "\"");
             m_currentOutputStream.WriteLine("");
         }
+        
+        /// <summary>checks, if the cls method is overloaded seen from type inType</summary>
+        private bool IsClsMethodOverloaded(MethodInfo method, Type inType) {
+            MethodInfo[] methods = inType.GetMethods(BindingFlags.Instance | BindingFlags.Public);
+        	int nrOfOverloads = 0;
+        	foreach (MethodInfo methodFound in methods) {
+        		if (methodFound.Name.Equals(method.Name)) {
+        		    nrOfOverloads++;
+        		}
+        	}
+        	if (nrOfOverloads > 1) {
+        		return true;
+        	} else {
+        		return false;
+        	}
+        }
 
         /// <summary>maps a method to IDL</summary>
         /// <param name="shouldThrowException">if true, generate a raise clause for method: GenericUserException</param>
@@ -300,7 +316,8 @@ namespace Ch.Elca.Iiop.Idl {
                                                                   m_refMapper);
             m_currentOutputStream.Write(returnTypeMapped + " ");
             
-            string mappedMethodName = IdlNaming.MapClsMethodNameToIdlName(methodToMap);
+            bool isOverloaded = IsClsMethodOverloaded(methodToMap, declaringType);
+            string mappedMethodName = IdlNaming.MapClsMethodNameToIdlName(methodToMap, isOverloaded);
             m_currentOutputStream.Write(mappedMethodName + "(");
             
             ParameterInfo[] methodParams = methodToMap.GetParameters();
@@ -827,125 +844,6 @@ namespace Ch.Elca.Iiop.Idl {
 
     }
 
-
-    /// <summary>returns the IDL for a type referenced from another type. This class doesn't write type declarations/definition, this is left to GenerationActionDefineTypes
-    /// All methods returns the IDL-string which shoulb be inserted, if the specified type is referenced</summary>
-    internal class GenerationActionReference : MappingAction {
-    
-        #region IFields
-
-        private ClsToIdlMapper m_mapper = ClsToIdlMapper.GetSingleton();
-
-        #endregion IFields
-        #region IMethods
-
-        #region Implementation of MappingAction
-        
-        public object MapToIdlLong(System.Type dotNetType) {
-            return "long";
-        }
-        public object MapToIdlULong(System.Type dotNetType) {
-            return "ulong";
-        }
-        public object MapToIdlLongLong(System.Type dotNetType) {
-            return "long long";
-        }
-        public object MapToIdlULongLong(System.Type dotNetType) {
-            return "ulong ulong";
-        }
-        public object MapToIdlUShort(System.Type dotNetType) {
-            return "ushort";
-        }
-        public object MapToIdlShort(System.Type dotNetType) {
-            return "short";
-        }
-        public object MapToIdlOctet(System.Type dotNetType) {
-            return "octet";
-        }
-        public object MapToIdlVoid(System.Type dotNetType) {
-            return "void";
-        }        
-        public object MapToIdlFloat(System.Type dotNetType) {
-            return "float";
-        }
-        public object MapToIdlDouble(System.Type dotNetType) {
-            return "double";
-        }
-        public object MapToIdlChar(System.Type dotNetType) {
-            return "char";
-        }
-        public object MapToIdlWChar(System.Type dotNetType) {
-            return "wchar";
-        }
-        public object MapToIdlBoolean(System.Type dotNetType) {
-            return "boolean";
-        }
-        public object MapToIdlString(System.Type dotNetType) {
-            return "string";
-        }
-        public object MapToIdlWString(System.Type dotNetType) {
-            return "wstring";
-        }
-        public object MapToIdlAny(System.Type dotNetType) {
-            return "any";
-        }
-        public object MapToStringValue(System.Type dotNetType) {
-            return "::CORBA::StringValue";
-        }
-        public object MapToWStringValue(System.Type dotNetType) {
-            return "::CORBA::WStringValue";
-        }
-        public object MapToIdlEnum(System.Type dotNetType) {
-            return IdlNaming.MapFullTypeNameToIdlScoped(dotNetType);
-        }
-        public object MapToIdlConcreteInterface(System.Type dotNetType) {
-            if (!dotNetType.Equals(typeof(MarshalByRefObject))) {
-                return IdlNaming.MapFullTypeNameToIdlScoped(dotNetType);
-            } else {
-            	return "Object";
-            }
-        }
-        public object MapToIdlConcreateValueType(System.Type dotNetType) {
-            return IdlNaming.MapFullTypeNameToIdlScoped(dotNetType);
-        }
-        public object MapToIdlAbstractInterface(System.Type dotNetType) {
-            return IdlNaming.MapFullTypeNameToIdlScoped(dotNetType);
-        }
-        public object MapToIdlStruct(System.Type dotNetType) {
-            return IdlNaming.MapFullTypeNameToIdlScoped(dotNetType);
-        }
-        public object MapToIdlAbstractValueType(System.Type dotNetType) {
-            return IdlNaming.MapFullTypeNameToIdlScoped(dotNetType);
-        }
-        public object MapToIdlSequence(System.Type dotNetType) {
-            string refToElemType = (string)m_mapper.MapClsType(dotNetType.GetElementType(), new Util.AttributeExtCollection(), this);
-            return "sequence<" + refToElemType + ">";
-        }
-        public object MapToIdlBoxedValueType(System.Type dotNetType, AttributeExtCollection attributes, bool isAlreadyBoxed) {
-            // the dotNetType is a subclass of BoxedValueBase representing the boxed value type
-            return IdlNaming.MapFullTypeNameToIdlScoped(dotNetType);
-        }
-        public object MapToValueBase(System.Type dotNetType) {
-            return "::CORBA::ValueBase";
-        }
-        public object MapToAbstractBase(System.Type dotNetType) {
-            return "::CORBA:AbstractBase";
-        }
-        
-        public object MapToTypeDesc(System.Type dotNetType) {
-            return null;
-        }        
-        public object MapToTypeCode(System.Type dotNetType) {
-            return "::CORBA::TypeCode";
-        }
-        public object MapException(System.Type dotNetType) {
-            return IdlNaming.MapShortTypeNameToIdl(dotNetType);
-        }
-        #endregion
-
-        #endregion IMethods
-
-    }
 
     ///<summary>this action writes forward declarations for interfaces and valuetypes</summary>
     internal class GenerationActionWriteFwdDeclarations : MappingAction {
