@@ -71,15 +71,16 @@ namespace Ch.Elca.Iiop.Services {
         #endregion SMethods
         #region IMethods
         	
-        public NamingContext GetNameService(string host, int port) {
-			string nsKey = String.Format("NameService:{0}:{1}", host, port);
+        public NamingContext GetNameService(string host, int port, GiopVersion version) {
+			string nsKey = String.Format("NameService:{0}:{1}:{2}.{3}", host, port, 
+                                         version.Major, version.Minor);
 	
 			lock(m_initalServices.SyncRoot) {
 				NamingContext result = null;
 				if (!m_initalServices.ContainsKey(nsKey)) {
 				
 				    string objectURI = IiopUrlUtil.GetObjUriForObjectInfo(InitialCOSNamingContextImpl.s_initalnamingObjKey,
-                                                                  new GiopVersion(1, 0));
+                                                                  version);
                     string url = IiopUrlUtil.GetUrl(host, port, objectURI);
                     result = (NamingContext)RemotingServices.Connect(typeof(NamingContext), url);
                     m_initalServices.Add(nsKey, result);
@@ -88,6 +89,10 @@ namespace Ch.Elca.Iiop.Services {
                 }
                 return result;
             }
+        }
+
+        public NamingContext GetNameService(string host, int port) {
+            return GetNameService(host, port, new GiopVersion(1, 0));
         }
         
         #endregion IMethods
