@@ -238,13 +238,7 @@ public class IDLParser{/*@bgen(jjtree)*/
   } else {
     jjtree.popNode();
   }
-  if (jjte000 is ParseException) {
-    {if (true) throw (ParseException)jjte000;}
-  }
-  if (jjte000 is System.SystemException) {
-    {if (true) throw (System.SystemException)jjte000;}
-  }
-  {if (true) throw (Error)jjte000;}
+{if (true) throw jjte000;}
     } finally {
   if (jjtc000) {
     jjtree.closeNodeScope(jjtn000, true);
@@ -316,13 +310,7 @@ public class IDLParser{/*@bgen(jjtree)*/
     } else {
       jjtree.popNode();
     }
-    if (jjte000 is ParseException) {
-      {if (true) throw (ParseException)jjte000;}
-    }
-    if (jjte000 is System.SystemException) {
-      {if (true) throw (System.SystemException)jjte000;}
-    }
-    {if (true) throw (Error)jjte000;}
+  {if (true) throw jjte000;}
     } finally {
     if (jjtc000) {
       jjtree.closeNodeScope(jjtn000, true);
@@ -381,13 +369,7 @@ public class IDLParser{/*@bgen(jjtree)*/
     } else {
       jjtree.popNode();
     }
-    if (jjte000 is ParseException) {
-      {if (true) throw (ParseException)jjte000;}
-    }
-    if (jjte000 is System.SystemException) {
-      {if (true) throw (System.SystemException)jjte000;}
-    }
-    {if (true) throw (Error)jjte000;}
+  {if (true) throw jjte000;}
     } finally {
     if (jjtc000) {
       jjtree.closeNodeScope(jjtn000, true);
@@ -417,13 +399,7 @@ public class IDLParser{/*@bgen(jjtree)*/
     } else {
       jjtree.popNode();
     }
-    if (jjte000 is ParseException) {
-      {if (true) throw (ParseException)jjte000;}
-    }
-    if (jjte000 is System.SystemException) {
-      {if (true) throw (System.SystemException)jjte000;}
-    }
-    {if (true) throw (Error)jjte000;}
+  {if (true) throw jjte000;}
     } finally {
     if (jjtc000) {
       jjtree.closeNodeScope(jjtn000, true);
@@ -460,13 +436,7 @@ public class IDLParser{/*@bgen(jjtree)*/
     } else {
       jjtree.popNode();
     }
-    if (jjte000 is ParseException) {
-      {if (true) throw (ParseException)jjte000;}
-    }
-    if (jjte000 is System.SystemException) {
-      {if (true) throw (System.SystemException)jjte000;}
-    }
-    {if (true) throw (Error)jjte000;}
+  {if (true) throw jjte000;}
     } finally {
     if (jjtc000) {
       jjtree.closeNodeScope(jjtn000, true);
@@ -512,13 +482,7 @@ public class IDLParser{/*@bgen(jjtree)*/
     } else {
       jjtree.popNode();
     }
-    if (jjte000 is ParseException) {
-      {if (true) throw (ParseException)jjte000;}
-    }
-    if (jjte000 is System.SystemException) {
-      {if (true) throw (System.SystemException)jjte000;}
-    }
-    {if (true) throw (Error)jjte000;}
+  {if (true) throw jjte000;}
     } finally {
     if (jjtc000) {
       jjtree.closeNodeScope(jjtn000, true);
@@ -571,13 +535,7 @@ public class IDLParser{/*@bgen(jjtree)*/
     } else {
       jjtree.popNode();
     }
-    if (jjte000 is ParseException) {
-      {if (true) throw (ParseException)jjte000;}
-    }
-    if (jjte000 is System.SystemException) {
-      {if (true) throw (System.SystemException)jjte000;}
-    }
-    {if (true) throw (Error)jjte000;}
+  {if (true) throw jjte000;}
     } finally {
     if (jjtc000) {
       jjtree.closeNodeScope(jjtn000, true);
@@ -660,13 +618,7 @@ public class IDLParser{/*@bgen(jjtree)*/
     } else {
       jjtree.popNode();
     }
-    if (jjte000 is ParseException) {
-      {if (true) throw (ParseException)jjte000;}
-    }
-    if (jjte000 is System.SystemException) {
-      {if (true) throw (System.SystemException)jjte000;}
-    }
-    {if (true) throw (Error)jjte000;}
+  {if (true) throw jjte000;}
     } finally {
     if (jjtc000) {
       jjtree.closeNodeScope(jjtn000, true);
@@ -740,13 +692,7 @@ public class IDLParser{/*@bgen(jjtree)*/
     } else {
       jjtree.popNode();
     }
-    if (jjte000 is ParseException) {
-      {if (true) throw (ParseException)jjte000;}
-    }
-    if (jjte000 is System.SystemException) {
-      {if (true) throw (System.SystemException)jjte000;}
-    }
-    {if (true) throw (Error)jjte000;}
+  {if (true) throw jjte000;}
     } finally {
     if (jjtc000) {
       jjtree.closeNodeScope(jjtn000, true);
@@ -785,13 +731,7 @@ public class IDLParser{/*@bgen(jjtree)*/
     } else {
       jjtree.popNode();
     }
-    if (jjte000 is ParseException) {
-      {if (true) throw (ParseException)jjte000;}
-    }
-    if (jjte000 is System.SystemException) {
-      {if (true) throw (System.SystemException)jjte000;}
-    }
-    {if (true) throw (Error)jjte000;}
+  {if (true) throw jjte000;}
     } finally {
     if (jjtc000) {
       jjtree.closeNodeScope(jjtn000, true);
@@ -814,13 +754,7 @@ public class IDLParser{/*@bgen(jjtree)*/
       } else {
         jjtree.popNode();
       }
-      if (jjte000 is ParseException) {
-        {if (true) throw (ParseException)jjte000;}
-      }
-      if (jjte000 is System.SystemException) {
-        {if (true) throw (System.SystemException)jjte000;}
-      }
-      {if (true) throw (Error)jjte000;}
+    {if (true) throw jjte000;}
     } finally {
       if (jjtc000) {
         jjtree.closeNodeScope(jjtn000, true);
@@ -874,13 +808,7 @@ public class IDLParser{/*@bgen(jjtree)*/
     } else {
       jjtree.popNode();
     }
-    if (jjte000 is ParseException) {
-      {if (true) throw (ParseException)jjte000;}
-    }
-    if (jjte000 is System.SystemException) {
-      {if (true) throw (System.SystemException)jjte000;}
-    }
-    {if (true) throw (Error)jjte000;}
+  {if (true) throw jjte000;}
     } finally {
     if (jjtc000) {
       jjtree.closeNodeScope(jjtn000, true);
@@ -914,13 +842,7 @@ public class IDLParser{/*@bgen(jjtree)*/
       } else {
         jjtree.popNode();
       }
-      if (jjte000 is ParseException) {
-        {if (true) throw (ParseException)jjte000;}
-      }
-      if (jjte000 is System.SystemException) {
-        {if (true) throw (System.SystemException)jjte000;}
-      }
-      {if (true) throw (Error)jjte000;}
+    {if (true) throw jjte000;}
     } finally {
       if (jjtc000) {
         jjtree.closeNodeScope(jjtn000, true);
@@ -962,13 +884,7 @@ public class IDLParser{/*@bgen(jjtree)*/
       } else {
         jjtree.popNode();
       }
-      if (jjte000 is ParseException) {
-        {if (true) throw (ParseException)jjte000;}
-      }
-      if (jjte000 is System.SystemException) {
-        {if (true) throw (System.SystemException)jjte000;}
-      }
-      {if (true) throw (Error)jjte000;}
+    {if (true) throw jjte000;}
     } finally {
       if (jjtc000) {
         jjtree.closeNodeScope(jjtn000, true);
@@ -1000,13 +916,7 @@ public class IDLParser{/*@bgen(jjtree)*/
       } else {
         jjtree.popNode();
       }
-      if (jjte000 is ParseException) {
-        {if (true) throw (ParseException)jjte000;}
-      }
-      if (jjte000 is System.SystemException) {
-        {if (true) throw (System.SystemException)jjte000;}
-      }
-      {if (true) throw (Error)jjte000;}
+    {if (true) throw jjte000;}
     } finally {
       if (jjtc000) {
         jjtree.closeNodeScope(jjtn000, true);
@@ -1101,13 +1011,7 @@ public class IDLParser{/*@bgen(jjtree)*/
       } else {
         jjtree.popNode();
       }
-      if (jjte000 is ParseException) {
-        {if (true) throw (ParseException)jjte000;}
-      }
-      if (jjte000 is System.SystemException) {
-        {if (true) throw (System.SystemException)jjte000;}
-      }
-      {if (true) throw (Error)jjte000;}
+    {if (true) throw jjte000;}
     } finally {
       if (jjtc000) {
         jjtree.closeNodeScope(jjtn000, true);
@@ -1187,13 +1091,7 @@ public class IDLParser{/*@bgen(jjtree)*/
       } else {
         jjtree.popNode();
       }
-      if (jjte000 is ParseException) {
-        {if (true) throw (ParseException)jjte000;}
-      }
-      if (jjte000 is System.SystemException) {
-        {if (true) throw (System.SystemException)jjte000;}
-      }
-      {if (true) throw (Error)jjte000;}
+    {if (true) throw jjte000;}
     } finally {
       if (jjtc000) {
         jjtree.closeNodeScope(jjtn000, true);
@@ -1249,13 +1147,7 @@ public class IDLParser{/*@bgen(jjtree)*/
       } else {
         jjtree.popNode();
       }
-      if (jjte000 is ParseException) {
-        {if (true) throw (ParseException)jjte000;}
-      }
-      if (jjte000 is System.SystemException) {
-        {if (true) throw (System.SystemException)jjte000;}
-      }
-      {if (true) throw (Error)jjte000;}
+    {if (true) throw jjte000;}
     } finally {
       if (jjtc000) {
         jjtree.closeNodeScope(jjtn000, true);
@@ -1303,13 +1195,7 @@ public class IDLParser{/*@bgen(jjtree)*/
       } else {
         jjtree.popNode();
       }
-      if (jjte000 is ParseException) {
-        {if (true) throw (ParseException)jjte000;}
-      }
-      if (jjte000 is System.SystemException) {
-        {if (true) throw (System.SystemException)jjte000;}
-      }
-      {if (true) throw (Error)jjte000;}
+    {if (true) throw jjte000;}
     } finally {
       if (jjtc000) {
         jjtree.closeNodeScope(jjtn000, true);
@@ -1347,13 +1233,7 @@ public class IDLParser{/*@bgen(jjtree)*/
       } else {
         jjtree.popNode();
       }
-      if (jjte000 is ParseException) {
-        {if (true) throw (ParseException)jjte000;}
-      }
-      if (jjte000 is System.SystemException) {
-        {if (true) throw (System.SystemException)jjte000;}
-      }
-      {if (true) throw (Error)jjte000;}
+    {if (true) throw jjte000;}
     } finally {
       if (jjtc000) {
         jjtree.closeNodeScope(jjtn000, true);
@@ -1376,13 +1256,7 @@ public class IDLParser{/*@bgen(jjtree)*/
       } else {
         jjtree.popNode();
       }
-      if (jjte000 is ParseException) {
-        {if (true) throw (ParseException)jjte000;}
-      }
-      if (jjte000 is System.SystemException) {
-        {if (true) throw (System.SystemException)jjte000;}
-      }
-      {if (true) throw (Error)jjte000;}
+    {if (true) throw jjte000;}
     } finally {
       if (jjtc000) {
         jjtree.closeNodeScope(jjtn000, true);
@@ -1448,13 +1322,7 @@ public class IDLParser{/*@bgen(jjtree)*/
       } else {
         jjtree.popNode();
       }
-      if (jjte000 is ParseException) {
-        {if (true) throw (ParseException)jjte000;}
-      }
-      if (jjte000 is System.SystemException) {
-        {if (true) throw (System.SystemException)jjte000;}
-      }
-      {if (true) throw (Error)jjte000;}
+    {if (true) throw jjte000;}
     } finally {
       if (jjtc000) {
         jjtree.closeNodeScope(jjtn000, true);
@@ -1494,13 +1362,7 @@ public class IDLParser{/*@bgen(jjtree)*/
       } else {
         jjtree.popNode();
       }
-      if (jjte000 is ParseException) {
-        {if (true) throw (ParseException)jjte000;}
-      }
-      if (jjte000 is System.SystemException) {
-        {if (true) throw (System.SystemException)jjte000;}
-      }
-      {if (true) throw (Error)jjte000;}
+    {if (true) throw jjte000;}
     } finally {
       if (jjtc000) {
         jjtree.closeNodeScope(jjtn000, true);
@@ -1548,13 +1410,7 @@ public class IDLParser{/*@bgen(jjtree)*/
       } else {
         jjtree.popNode();
       }
-      if (jjte000 is ParseException) {
-        {if (true) throw (ParseException)jjte000;}
-      }
-      if (jjte000 is System.SystemException) {
-        {if (true) throw (System.SystemException)jjte000;}
-      }
-      {if (true) throw (Error)jjte000;}
+    {if (true) throw jjte000;}
     } finally {
       if (jjtc000) {
         jjtree.closeNodeScope(jjtn000, true);
@@ -1592,13 +1448,7 @@ public class IDLParser{/*@bgen(jjtree)*/
       } else {
         jjtree.popNode();
       }
-      if (jjte000 is ParseException) {
-        {if (true) throw (ParseException)jjte000;}
-      }
-      if (jjte000 is System.SystemException) {
-        {if (true) throw (System.SystemException)jjte000;}
-      }
-      {if (true) throw (Error)jjte000;}
+    {if (true) throw jjte000;}
     } finally {
       if (jjtc000) {
         jjtree.closeNodeScope(jjtn000, true);
@@ -1623,13 +1473,7 @@ public class IDLParser{/*@bgen(jjtree)*/
       } else {
         jjtree.popNode();
       }
-      if (jjte000 is ParseException) {
-        {if (true) throw (ParseException)jjte000;}
-      }
-      if (jjte000 is System.SystemException) {
-        {if (true) throw (System.SystemException)jjte000;}
-      }
-      {if (true) throw (Error)jjte000;}
+    {if (true) throw jjte000;}
     } finally {
       if (jjtc000) {
         jjtree.closeNodeScope(jjtn000, true);
@@ -1689,13 +1533,7 @@ public class IDLParser{/*@bgen(jjtree)*/
     } else {
       jjtree.popNode();
     }
-    if (jjte000 is ParseException) {
-      {if (true) throw (ParseException)jjte000;}
-    }
-    if (jjte000 is System.SystemException) {
-      {if (true) throw (System.SystemException)jjte000;}
-    }
-    {if (true) throw (Error)jjte000;}
+  {if (true) throw jjte000;}
     } finally {
     if (jjtc000) {
       jjtree.closeNodeScope(jjtn000, true);
@@ -1758,13 +1596,7 @@ public class IDLParser{/*@bgen(jjtree)*/
     } else {
       jjtree.popNode();
     }
-    if (jjte000 is ParseException) {
-      {if (true) throw (ParseException)jjte000;}
-    }
-    if (jjte000 is System.SystemException) {
-      {if (true) throw (System.SystemException)jjte000;}
-    }
-    {if (true) throw (Error)jjte000;}
+  {if (true) throw jjte000;}
     } finally {
     if (jjtc000) {
       jjtree.closeNodeScope(jjtn000, true);
@@ -1787,13 +1619,7 @@ public class IDLParser{/*@bgen(jjtree)*/
     } else {
       jjtree.popNode();
     }
-    if (jjte000 is ParseException) {
-      {if (true) throw (ParseException)jjte000;}
-    }
-    if (jjte000 is System.SystemException) {
-      {if (true) throw (System.SystemException)jjte000;}
-    }
-    {if (true) throw (Error)jjte000;}
+  {if (true) throw jjte000;}
     } finally {
     if (jjtc000) {
       jjtree.closeNodeScope(jjtn000, true);
@@ -1831,13 +1657,7 @@ public class IDLParser{/*@bgen(jjtree)*/
     } else {
       jjtree.popNode();
     }
-    if (jjte000 is ParseException) {
-      {if (true) throw (ParseException)jjte000;}
-    }
-    if (jjte000 is System.SystemException) {
-      {if (true) throw (System.SystemException)jjte000;}
-    }
-    {if (true) throw (Error)jjte000;}
+  {if (true) throw jjte000;}
     } finally {
     if (jjtc000) {
       jjtree.closeNodeScope(jjtn000, true);
@@ -1875,13 +1695,7 @@ public class IDLParser{/*@bgen(jjtree)*/
     } else {
       jjtree.popNode();
     }
-    if (jjte000 is ParseException) {
-      {if (true) throw (ParseException)jjte000;}
-    }
-    if (jjte000 is System.SystemException) {
-      {if (true) throw (System.SystemException)jjte000;}
-    }
-    {if (true) throw (Error)jjte000;}
+  {if (true) throw jjte000;}
     } finally {
     if (jjtc000) {
       jjtree.closeNodeScope(jjtn000, true);
@@ -1919,13 +1733,7 @@ public class IDLParser{/*@bgen(jjtree)*/
     } else {
       jjtree.popNode();
     }
-    if (jjte000 is ParseException) {
-      {if (true) throw (ParseException)jjte000;}
-    }
-    if (jjte000 is System.SystemException) {
-      {if (true) throw (System.SystemException)jjte000;}
-    }
-    {if (true) throw (Error)jjte000;}
+  {if (true) throw jjte000;}
     } finally {
     if (jjtc000) {
       jjtree.closeNodeScope(jjtn000, true);
@@ -1976,13 +1784,7 @@ public class IDLParser{/*@bgen(jjtree)*/
     } else {
       jjtree.popNode();
     }
-    if (jjte000 is ParseException) {
-      {if (true) throw (ParseException)jjte000;}
-    }
-    if (jjte000 is System.SystemException) {
-      {if (true) throw (System.SystemException)jjte000;}
-    }
-    {if (true) throw (Error)jjte000;}
+  {if (true) throw jjte000;}
     } finally {
     if (jjtc000) {
       jjtree.closeNodeScope(jjtn000, true);
@@ -2033,13 +1835,7 @@ public class IDLParser{/*@bgen(jjtree)*/
     } else {
       jjtree.popNode();
     }
-    if (jjte000 is ParseException) {
-      {if (true) throw (ParseException)jjte000;}
-    }
-    if (jjte000 is System.SystemException) {
-      {if (true) throw (System.SystemException)jjte000;}
-    }
-    {if (true) throw (Error)jjte000;}
+  {if (true) throw jjte000;}
     } finally {
     if (jjtc000) {
       jjtree.closeNodeScope(jjtn000, true);
@@ -2094,13 +1890,7 @@ public class IDLParser{/*@bgen(jjtree)*/
     } else {
       jjtree.popNode();
     }
-    if (jjte000 is ParseException) {
-      {if (true) throw (ParseException)jjte000;}
-    }
-    if (jjte000 is System.SystemException) {
-      {if (true) throw (System.SystemException)jjte000;}
-    }
-    {if (true) throw (Error)jjte000;}
+  {if (true) throw jjte000;}
     } finally {
     if (jjtc000) {
       jjtree.closeNodeScope(jjtn000, true);
@@ -2170,13 +1960,7 @@ public class IDLParser{/*@bgen(jjtree)*/
     } else {
       jjtree.popNode();
     }
-    if (jjte000 is ParseException) {
-      {if (true) throw (ParseException)jjte000;}
-    }
-    if (jjte000 is System.SystemException) {
-      {if (true) throw (System.SystemException)jjte000;}
-    }
-    {if (true) throw (Error)jjte000;}
+  {if (true) throw jjte000;}
     } finally {
     if (jjtc000) {
       jjtree.closeNodeScope(jjtn000, true);
@@ -2238,13 +2022,7 @@ public class IDLParser{/*@bgen(jjtree)*/
     } else {
       jjtree.popNode();
     }
-    if (jjte000 is ParseException) {
-      {if (true) throw (ParseException)jjte000;}
-    }
-    if (jjte000 is System.SystemException) {
-      {if (true) throw (System.SystemException)jjte000;}
-    }
-    {if (true) throw (Error)jjte000;}
+  {if (true) throw jjte000;}
     } finally {
     if (jjtc000) {
       jjtree.closeNodeScope(jjtn000, true);
@@ -2334,13 +2112,7 @@ public class IDLParser{/*@bgen(jjtree)*/
   } else {
     jjtree.popNode();
   }
-  if (jjte000 is ParseException) {
-    {if (true) throw (ParseException)jjte000;}
-  }
-  if (jjte000 is System.SystemException) {
-    {if (true) throw (System.SystemException)jjte000;}
-  }
-  {if (true) throw (Error)jjte000;}
+{if (true) throw jjte000;}
     } finally {
   if (jjtc000) {
     jjtree.closeNodeScope(jjtn000, true);
@@ -2400,13 +2172,7 @@ public class IDLParser{/*@bgen(jjtree)*/
     } else {
       jjtree.popNode();
     }
-    if (jjte000 is ParseException) {
-      {if (true) throw (ParseException)jjte000;}
-    }
-    if (jjte000 is System.SystemException) {
-      {if (true) throw (System.SystemException)jjte000;}
-    }
-    {if (true) throw (Error)jjte000;}
+  {if (true) throw jjte000;}
     } finally {
     if (jjtc000) {
       jjtree.closeNodeScope(jjtn000, true);
@@ -2452,13 +2218,7 @@ public class IDLParser{/*@bgen(jjtree)*/
     } else {
       jjtree.popNode();
     }
-    if (jjte000 is ParseException) {
-      {if (true) throw (ParseException)jjte000;}
-    }
-    if (jjte000 is System.SystemException) {
-      {if (true) throw (System.SystemException)jjte000;}
-    }
-    {if (true) throw (Error)jjte000;}
+  {if (true) throw jjte000;}
     } finally {
     if (jjtc000) {
       jjtree.closeNodeScope(jjtn000, true);
@@ -2493,13 +2253,7 @@ public class IDLParser{/*@bgen(jjtree)*/
     } else {
       jjtree.popNode();
     }
-    if (jjte000 is ParseException) {
-      {if (true) throw (ParseException)jjte000;}
-    }
-    if (jjte000 is System.SystemException) {
-      {if (true) throw (System.SystemException)jjte000;}
-    }
-    {if (true) throw (Error)jjte000;}
+  {if (true) throw jjte000;}
     } finally {
     if (jjtc000) {
       jjtree.closeNodeScope(jjtn000, true);
@@ -2553,13 +2307,7 @@ public class IDLParser{/*@bgen(jjtree)*/
     } else {
       jjtree.popNode();
     }
-    if (jjte000 is ParseException) {
-      {if (true) throw (ParseException)jjte000;}
-    }
-    if (jjte000 is System.SystemException) {
-      {if (true) throw (System.SystemException)jjte000;}
-    }
-    {if (true) throw (Error)jjte000;}
+  {if (true) throw jjte000;}
     } finally {
     if (jjtc000) {
       jjtree.closeNodeScope(jjtn000, true);
@@ -2612,13 +2360,7 @@ public class IDLParser{/*@bgen(jjtree)*/
     } else {
       jjtree.popNode();
     }
-    if (jjte000 is ParseException) {
-      {if (true) throw (ParseException)jjte000;}
-    }
-    if (jjte000 is System.SystemException) {
-      {if (true) throw (System.SystemException)jjte000;}
-    }
-    {if (true) throw (Error)jjte000;}
+  {if (true) throw jjte000;}
     } finally {
     if (jjtc000) {
       jjtree.closeNodeScope(jjtn000, true);
@@ -2677,13 +2419,7 @@ public class IDLParser{/*@bgen(jjtree)*/
     } else {
       jjtree.popNode();
     }
-    if (jjte000 is ParseException) {
-      {if (true) throw (ParseException)jjte000;}
-    }
-    if (jjte000 is System.SystemException) {
-      {if (true) throw (System.SystemException)jjte000;}
-    }
-    {if (true) throw (Error)jjte000;}
+  {if (true) throw jjte000;}
     } finally {
     if (jjtc000) {
       jjtree.closeNodeScope(jjtn000, true);
@@ -2724,13 +2460,7 @@ public class IDLParser{/*@bgen(jjtree)*/
     } else {
       jjtree.popNode();
     }
-    if (jjte000 is ParseException) {
-      {if (true) throw (ParseException)jjte000;}
-    }
-    if (jjte000 is System.SystemException) {
-      {if (true) throw (System.SystemException)jjte000;}
-    }
-    {if (true) throw (Error)jjte000;}
+  {if (true) throw jjte000;}
     } finally {
     if (jjtc000) {
       jjtree.closeNodeScope(jjtn000, true);
@@ -2768,13 +2498,7 @@ public class IDLParser{/*@bgen(jjtree)*/
     } else {
       jjtree.popNode();
     }
-    if (jjte000 is ParseException) {
-      {if (true) throw (ParseException)jjte000;}
-    }
-    if (jjte000 is System.SystemException) {
-      {if (true) throw (System.SystemException)jjte000;}
-    }
-    {if (true) throw (Error)jjte000;}
+  {if (true) throw jjte000;}
     } finally {
     if (jjtc000) {
       jjtree.closeNodeScope(jjtn000, true);
@@ -2812,13 +2536,7 @@ public class IDLParser{/*@bgen(jjtree)*/
     } else {
       jjtree.popNode();
     }
-    if (jjte000 is ParseException) {
-      {if (true) throw (ParseException)jjte000;}
-    }
-    if (jjte000 is System.SystemException) {
-      {if (true) throw (System.SystemException)jjte000;}
-    }
-    {if (true) throw (Error)jjte000;}
+  {if (true) throw jjte000;}
     } finally {
     if (jjtc000) {
       jjtree.closeNodeScope(jjtn000, true);
@@ -2854,13 +2572,7 @@ public class IDLParser{/*@bgen(jjtree)*/
     } else {
       jjtree.popNode();
     }
-    if (jjte000 is ParseException) {
-      {if (true) throw (ParseException)jjte000;}
-    }
-    if (jjte000 is System.SystemException) {
-      {if (true) throw (System.SystemException)jjte000;}
-    }
-    {if (true) throw (Error)jjte000;}
+  {if (true) throw jjte000;}
     } finally {
     if (jjtc000) {
       jjtree.closeNodeScope(jjtn000, true);
@@ -2886,13 +2598,7 @@ public class IDLParser{/*@bgen(jjtree)*/
     } else {
       jjtree.popNode();
     }
-    if (jjte000 is ParseException) {
-      {if (true) throw (ParseException)jjte000;}
-    }
-    if (jjte000 is System.SystemException) {
-      {if (true) throw (System.SystemException)jjte000;}
-    }
-    {if (true) throw (Error)jjte000;}
+  {if (true) throw jjte000;}
     } finally {
     if (jjtc000) {
       jjtree.closeNodeScope(jjtn000, true);
@@ -2915,13 +2621,7 @@ public class IDLParser{/*@bgen(jjtree)*/
     } else {
       jjtree.popNode();
     }
-    if (jjte000 is ParseException) {
-      {if (true) throw (ParseException)jjte000;}
-    }
-    if (jjte000 is System.SystemException) {
-      {if (true) throw (System.SystemException)jjte000;}
-    }
-    {if (true) throw (Error)jjte000;}
+  {if (true) throw jjte000;}
     } finally {
     if (jjtc000) {
       jjtree.closeNodeScope(jjtn000, true);
@@ -2959,13 +2659,7 @@ public class IDLParser{/*@bgen(jjtree)*/
     } else {
       jjtree.popNode();
     }
-    if (jjte000 is ParseException) {
-      {if (true) throw (ParseException)jjte000;}
-    }
-    if (jjte000 is System.SystemException) {
-      {if (true) throw (System.SystemException)jjte000;}
-    }
-    {if (true) throw (Error)jjte000;}
+  {if (true) throw jjte000;}
     } finally {
     if (jjtc000) {
       jjtree.closeNodeScope(jjtn000, true);
@@ -3047,13 +2741,7 @@ public class IDLParser{/*@bgen(jjtree)*/
     } else {
       jjtree.popNode();
     }
-    if (jjte000 is ParseException) {
-      {if (true) throw (ParseException)jjte000;}
-    }
-    if (jjte000 is System.SystemException) {
-      {if (true) throw (System.SystemException)jjte000;}
-    }
-    {if (true) throw (Error)jjte000;}
+  {if (true) throw jjte000;}
     } finally {
     if (jjtc000) {
       jjtree.closeNodeScope(jjtn000, true);
@@ -3091,13 +2779,7 @@ public class IDLParser{/*@bgen(jjtree)*/
     } else {
       jjtree.popNode();
     }
-    if (jjte000 is ParseException) {
-      {if (true) throw (ParseException)jjte000;}
-    }
-    if (jjte000 is System.SystemException) {
-      {if (true) throw (System.SystemException)jjte000;}
-    }
-    {if (true) throw (Error)jjte000;}
+  {if (true) throw jjte000;}
     } finally {
     if (jjtc000) {
       jjtree.closeNodeScope(jjtn000, true);
@@ -3181,13 +2863,7 @@ public class IDLParser{/*@bgen(jjtree)*/
     } else {
       jjtree.popNode();
     }
-    if (jjte000 is ParseException) {
-      {if (true) throw (ParseException)jjte000;}
-    }
-    if (jjte000 is System.SystemException) {
-      {if (true) throw (System.SystemException)jjte000;}
-    }
-    {if (true) throw (Error)jjte000;}
+  {if (true) throw jjte000;}
     } finally {
     if (jjtc000) {
       jjtree.closeNodeScope(jjtn000, true);
@@ -3359,13 +3035,7 @@ public class IDLParser{/*@bgen(jjtree)*/
     } else {
       jjtree.popNode();
     }
-    if (jjte000 is ParseException) {
-      {if (true) throw (ParseException)jjte000;}
-    }
-    if (jjte000 is System.SystemException) {
-      {if (true) throw (System.SystemException)jjte000;}
-    }
-    {if (true) throw (Error)jjte000;}
+  {if (true) throw jjte000;}
     } finally {
     if (jjtc000) {
       jjtree.closeNodeScope(jjtn000, true);
@@ -3421,13 +3091,7 @@ public class IDLParser{/*@bgen(jjtree)*/
     } else {
       jjtree.popNode();
     }
-    if (jjte000 is ParseException) {
-      {if (true) throw (ParseException)jjte000;}
-    }
-    if (jjte000 is System.SystemException) {
-      {if (true) throw (System.SystemException)jjte000;}
-    }
-    {if (true) throw (Error)jjte000;}
+  {if (true) throw jjte000;}
     } finally {
     if (jjtc000) {
       jjtree.closeNodeScope(jjtn000, true);
@@ -3452,13 +3116,7 @@ public class IDLParser{/*@bgen(jjtree)*/
     } else {
       jjtree.popNode();
     }
-    if (jjte000 is ParseException) {
-      {if (true) throw (ParseException)jjte000;}
-    }
-    if (jjte000 is System.SystemException) {
-      {if (true) throw (System.SystemException)jjte000;}
-    }
-    {if (true) throw (Error)jjte000;}
+  {if (true) throw jjte000;}
     } finally {
     if (jjtc000) {
       jjtree.closeNodeScope(jjtn000, true);
@@ -3495,13 +3153,7 @@ public class IDLParser{/*@bgen(jjtree)*/
     } else {
       jjtree.popNode();
     }
-    if (jjte000 is ParseException) {
-      {if (true) throw (ParseException)jjte000;}
-    }
-    if (jjte000 is System.SystemException) {
-      {if (true) throw (System.SystemException)jjte000;}
-    }
-    {if (true) throw (Error)jjte000;}
+  {if (true) throw jjte000;}
     } finally {
     if (jjtc000) {
       jjtree.closeNodeScope(jjtn000, true);
@@ -3548,13 +3200,7 @@ public class IDLParser{/*@bgen(jjtree)*/
     } else {
       jjtree.popNode();
     }
-    if (jjte000 is ParseException) {
-      {if (true) throw (ParseException)jjte000;}
-    }
-    if (jjte000 is System.SystemException) {
-      {if (true) throw (System.SystemException)jjte000;}
-    }
-    {if (true) throw (Error)jjte000;}
+  {if (true) throw jjte000;}
     } finally {
     if (jjtc000) {
       jjtree.closeNodeScope(jjtn000, true);
@@ -3591,13 +3237,7 @@ public class IDLParser{/*@bgen(jjtree)*/
     } else {
       jjtree.popNode();
     }
-    if (jjte000 is ParseException) {
-      {if (true) throw (ParseException)jjte000;}
-    }
-    if (jjte000 is System.SystemException) {
-      {if (true) throw (System.SystemException)jjte000;}
-    }
-    {if (true) throw (Error)jjte000;}
+  {if (true) throw jjte000;}
     } finally {
     if (jjtc000) {
       jjtree.closeNodeScope(jjtn000, true);
@@ -3636,13 +3276,7 @@ public class IDLParser{/*@bgen(jjtree)*/
     } else {
       jjtree.popNode();
     }
-    if (jjte000 is ParseException) {
-      {if (true) throw (ParseException)jjte000;}
-    }
-    if (jjte000 is System.SystemException) {
-      {if (true) throw (System.SystemException)jjte000;}
-    }
-    {if (true) throw (Error)jjte000;}
+  {if (true) throw jjte000;}
     } finally {
     if (jjtc000) {
       jjtree.closeNodeScope(jjtn000, true);
@@ -3683,13 +3317,7 @@ public class IDLParser{/*@bgen(jjtree)*/
     } else {
       jjtree.popNode();
     }
-    if (jjte000 is ParseException) {
-      {if (true) throw (ParseException)jjte000;}
-    }
-    if (jjte000 is System.SystemException) {
-      {if (true) throw (System.SystemException)jjte000;}
-    }
-    {if (true) throw (Error)jjte000;}
+  {if (true) throw jjte000;}
     } finally {
     if (jjtc000) {
       jjtree.closeNodeScope(jjtn000, true);
@@ -3713,13 +3341,7 @@ public class IDLParser{/*@bgen(jjtree)*/
     } else {
       jjtree.popNode();
     }
-    if (jjte000 is ParseException) {
-      {if (true) throw (ParseException)jjte000;}
-    }
-    if (jjte000 is System.SystemException) {
-      {if (true) throw (System.SystemException)jjte000;}
-    }
-    {if (true) throw (Error)jjte000;}
+  {if (true) throw jjte000;}
     } finally {
     if (jjtc000) {
       jjtree.closeNodeScope(jjtn000, true);
@@ -3766,13 +3388,7 @@ public class IDLParser{/*@bgen(jjtree)*/
     } else {
       jjtree.popNode();
     }
-    if (jjte000 is ParseException) {
-      {if (true) throw (ParseException)jjte000;}
-    }
-    if (jjte000 is System.SystemException) {
-      {if (true) throw (System.SystemException)jjte000;}
-    }
-    {if (true) throw (Error)jjte000;}
+  {if (true) throw jjte000;}
     } finally {
     if (jjtc000) {
       jjtree.closeNodeScope(jjtn000, true);
@@ -3800,13 +3416,7 @@ public class IDLParser{/*@bgen(jjtree)*/
     } else {
       jjtree.popNode();
     }
-    if (jjte000 is ParseException) {
-      {if (true) throw (ParseException)jjte000;}
-    }
-    if (jjte000 is System.SystemException) {
-      {if (true) throw (System.SystemException)jjte000;}
-    }
-    {if (true) throw (Error)jjte000;}
+  {if (true) throw jjte000;}
     } finally {
     if (jjtc000) {
       jjtree.closeNodeScope(jjtn000, true);
@@ -3842,13 +3452,7 @@ public class IDLParser{/*@bgen(jjtree)*/
     } else {
       jjtree.popNode();
     }
-    if (jjte000 is ParseException) {
-      {if (true) throw (ParseException)jjte000;}
-    }
-    if (jjte000 is System.SystemException) {
-      {if (true) throw (System.SystemException)jjte000;}
-    }
-    {if (true) throw (Error)jjte000;}
+  {if (true) throw jjte000;}
     } finally {
     if (jjtc000) {
       jjtree.closeNodeScope(jjtn000, true);
@@ -3882,13 +3486,7 @@ public class IDLParser{/*@bgen(jjtree)*/
     } else {
       jjtree.popNode();
     }
-    if (jjte000 is ParseException) {
-      {if (true) throw (ParseException)jjte000;}
-    }
-    if (jjte000 is System.SystemException) {
-      {if (true) throw (System.SystemException)jjte000;}
-    }
-    {if (true) throw (Error)jjte000;}
+  {if (true) throw jjte000;}
     } finally {
     if (jjtc000) {
       jjtree.closeNodeScope(jjtn000, true);
@@ -3922,13 +3520,7 @@ public class IDLParser{/*@bgen(jjtree)*/
     } else {
       jjtree.popNode();
     }
-    if (jjte000 is ParseException) {
-      {if (true) throw (ParseException)jjte000;}
-    }
-    if (jjte000 is System.SystemException) {
-      {if (true) throw (System.SystemException)jjte000;}
-    }
-    {if (true) throw (Error)jjte000;}
+  {if (true) throw jjte000;}
     } finally {
     if (jjtc000) {
       jjtree.closeNodeScope(jjtn000, true);
@@ -3968,13 +3560,7 @@ public class IDLParser{/*@bgen(jjtree)*/
     } else {
       jjtree.popNode();
     }
-    if (jjte000 is ParseException) {
-      {if (true) throw (ParseException)jjte000;}
-    }
-    if (jjte000 is System.SystemException) {
-      {if (true) throw (System.SystemException)jjte000;}
-    }
-    {if (true) throw (Error)jjte000;}
+  {if (true) throw jjte000;}
     } finally {
     if (jjtc000) {
       jjtree.closeNodeScope(jjtn000, true);
@@ -3999,13 +3585,7 @@ public class IDLParser{/*@bgen(jjtree)*/
     } else {
       jjtree.popNode();
     }
-    if (jjte000 is ParseException) {
-      {if (true) throw (ParseException)jjte000;}
-    }
-    if (jjte000 is System.SystemException) {
-      {if (true) throw (System.SystemException)jjte000;}
-    }
-    {if (true) throw (Error)jjte000;}
+  {if (true) throw jjte000;}
     } finally {
     if (jjtc000) {
       jjtree.closeNodeScope(jjtn000, true);
@@ -4058,13 +3638,7 @@ public class IDLParser{/*@bgen(jjtree)*/
     } else {
       jjtree.popNode();
     }
-    if (jjte000 is ParseException) {
-      {if (true) throw (ParseException)jjte000;}
-    }
-    if (jjte000 is System.SystemException) {
-      {if (true) throw (System.SystemException)jjte000;}
-    }
-    {if (true) throw (Error)jjte000;}
+  {if (true) throw jjte000;}
     } finally {
     if (jjtc000) {
       jjtree.closeNodeScope(jjtn000, true);
@@ -4129,13 +3703,7 @@ public class IDLParser{/*@bgen(jjtree)*/
     } else {
       jjtree.popNode();
     }
-    if (jjte000 is ParseException) {
-      {if (true) throw (ParseException)jjte000;}
-    }
-    if (jjte000 is System.SystemException) {
-      {if (true) throw (System.SystemException)jjte000;}
-    }
-    {if (true) throw (Error)jjte000;}
+  {if (true) throw jjte000;}
     } finally {
     if (jjtc000) {
       jjtree.closeNodeScope(jjtn000, true);
@@ -4192,13 +3760,7 @@ public class IDLParser{/*@bgen(jjtree)*/
     } else {
       jjtree.popNode();
     }
-    if (jjte000 is ParseException) {
-      {if (true) throw (ParseException)jjte000;}
-    }
-    if (jjte000 is System.SystemException) {
-      {if (true) throw (System.SystemException)jjte000;}
-    }
-    {if (true) throw (Error)jjte000;}
+  {if (true) throw jjte000;}
     } finally {
     if (jjtc000) {
       jjtree.closeNodeScope(jjtn000, true);
@@ -4255,13 +3817,7 @@ public class IDLParser{/*@bgen(jjtree)*/
     } else {
       jjtree.popNode();
     }
-    if (jjte000 is ParseException) {
-      {if (true) throw (ParseException)jjte000;}
-    }
-    if (jjte000 is System.SystemException) {
-      {if (true) throw (System.SystemException)jjte000;}
-    }
-    {if (true) throw (Error)jjte000;}
+  {if (true) throw jjte000;}
     } finally {
     if (jjtc000) {
       jjtree.closeNodeScope(jjtn000, true);
@@ -4311,13 +3867,7 @@ public class IDLParser{/*@bgen(jjtree)*/
     } else {
       jjtree.popNode();
     }
-    if (jjte000 is ParseException) {
-      {if (true) throw (ParseException)jjte000;}
-    }
-    if (jjte000 is System.SystemException) {
-      {if (true) throw (System.SystemException)jjte000;}
-    }
-    {if (true) throw (Error)jjte000;}
+  {if (true) throw jjte000;}
     } finally {
     if (jjtc000) {
       jjtree.closeNodeScope(jjtn000, true);
@@ -4342,13 +3892,7 @@ public class IDLParser{/*@bgen(jjtree)*/
     } else {
       jjtree.popNode();
     }
-    if (jjte000 is ParseException) {
-      {if (true) throw (ParseException)jjte000;}
-    }
-    if (jjte000 is System.SystemException) {
-      {if (true) throw (System.SystemException)jjte000;}
-    }
-    {if (true) throw (Error)jjte000;}
+  {if (true) throw jjte000;}
     } finally {
     if (jjtc000) {
       jjtree.closeNodeScope(jjtn000, true);
@@ -4428,13 +3972,7 @@ public class IDLParser{/*@bgen(jjtree)*/
     } else {
       jjtree.popNode();
     }
-    if (jjte000 is ParseException) {
-      {if (true) throw (ParseException)jjte000;}
-    }
-    if (jjte000 is System.SystemException) {
-      {if (true) throw (System.SystemException)jjte000;}
-    }
-    {if (true) throw (Error)jjte000;}
+  {if (true) throw jjte000;}
     } finally {
     if (jjtc000) {
       jjtree.closeNodeScope(jjtn000, true);
@@ -4477,13 +4015,7 @@ public class IDLParser{/*@bgen(jjtree)*/
     } else {
       jjtree.popNode();
     }
-    if (jjte000 is ParseException) {
-      {if (true) throw (ParseException)jjte000;}
-    }
-    if (jjte000 is System.SystemException) {
-      {if (true) throw (System.SystemException)jjte000;}
-    }
-    {if (true) throw (Error)jjte000;}
+  {if (true) throw jjte000;}
     } finally {
     if (jjtc000) {
       jjtree.closeNodeScope(jjtn000, true);
@@ -4536,13 +4068,7 @@ public class IDLParser{/*@bgen(jjtree)*/
     } else {
       jjtree.popNode();
     }
-    if (jjte000 is ParseException) {
-      {if (true) throw (ParseException)jjte000;}
-    }
-    if (jjte000 is System.SystemException) {
-      {if (true) throw (System.SystemException)jjte000;}
-    }
-    {if (true) throw (Error)jjte000;}
+  {if (true) throw jjte000;}
     } finally {
     if (jjtc000) {
       jjtree.closeNodeScope(jjtn000, true);
@@ -4570,13 +4096,7 @@ public class IDLParser{/*@bgen(jjtree)*/
       } else {
         jjtree.popNode();
       }
-      if (jjte000 is ParseException) {
-        {if (true) throw (ParseException)jjte000;}
-      }
-      if (jjte000 is System.SystemException) {
-        {if (true) throw (System.SystemException)jjte000;}
-      }
-      {if (true) throw (Error)jjte000;}
+    {if (true) throw jjte000;}
     } finally {
       if (jjtc000) {
         jjtree.closeNodeScope(jjtn000, true);
