@@ -1,11 +1,34 @@
+version 1.7.0 rc0 (30 August 2004)
+----------------------------------
+
 bugs fixed:
 - IIOPChannel: Problem with out-arguments serialization (bug #1015505)
+- IIOPChannel/IDLToCLSCompiler: Sequences of bounded seq: bound is'nt correctly checked (bug #972106)
+- IIOPChannel: Exception while processing IOR's unknown profile type (bug #979785)
+- IIOPChannel: corrected a problem with outargs and location forwards
+- IIOPChannel: corrected a problem with forward replys on is_a calls (BAD_PARAM 20010)
+- IIOPChannel: corrected problem with java long long array
+- IIOPChannel: corrected problem with java inner classes
 
 changes:
-
+- some performance optimizations
+- improved mono compatibility (but still some problems)
+- OrbServices.object_to_string works now also for objects hosted locally, not only for proxies on client side
+- IDLToCLSCompiler now accepts CORBA::TypeCode in idl files
+- support ulong as any passing with ULong typecode instead of default Long typecode
+- IIOP.NET channel/compiler/plugin assemblies now marked CLSCompliant
+- enable debug output in debug build (nmake rebuild-base-debug)
 
 new features:
+- SSL support
+- IDLToCLSCompiler: wildcards / basedirectory support on command line
 
+examples:
+- Getting started: Simple Adder example using SSL support in 
+  Examples\GettingStarted\SimpleAdder\DotNetServerDotNetClientSSL\
+
+new tests:
+- websphere 5.1
 
 version 1.6.2 final (08 June 2004)
 ----------------------------------
