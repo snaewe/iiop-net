@@ -363,8 +363,7 @@ namespace Ch.Elca.Iiop.Marshalling {
             if (serverData != null) {
                 string host = serverData.HostName;
                 int port = serverData.Port;
-                GiopVersion version;
-                byte[] objectKey = IiopUrlUtil.GetObjectInfoForObjUri(objRef.URI, out version);
+                byte[] objectKey = IiopUrlUtil.GetObjectKeyForObjUri(objRef.URI);
                 if ((objectKey == null) || (host == null)) { 
                     // the objRef: " + refToTarget + ", uri: " +
                     // refToTarget.URI + is not serialisable, because connection data is missing 
@@ -375,7 +374,8 @@ namespace Ch.Elca.Iiop.Marshalling {
                 if (obj.GetType().Equals(typeof(MarshalByRefObject))) {
                     repositoryID = "";
                 }
-                InternetIiopProfile profile = new InternetIiopProfile(version, host,
+                // this server support GIOP 1.2 --> create an GIOP 1.2 profile
+                InternetIiopProfile profile = new InternetIiopProfile(new GiopVersion(1, 2), host,
                                                                       (ushort)port, objectKey);
                 Ior ior = new Ior(repositoryID, new IorProfile[] { profile });
                 return ior;                

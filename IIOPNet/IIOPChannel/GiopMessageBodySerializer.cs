@@ -251,26 +251,26 @@ namespace Ch.Elca.Iiop.MessageHandling {
         private string ReadTarget(CdrInputStream cdrStream, GiopVersion version) {
             if ((version.Major == 1) && (version.Minor <= 1)) { 
                 // for GIOP 1.0 / 1.1 only object key is possible
-                return ReadTargetKey(cdrStream, version);
+                return ReadTargetKey(cdrStream);
             }
             
             // for GIOP >= 1.2, a union is used for target information
             ulong targetAdrType = cdrStream.ReadULong();
             switch (targetAdrType) {
                 case 0:
-                    return ReadTargetKey(cdrStream, version);
+                    return ReadTargetKey(cdrStream);
                 default:
                     throw new NotSupportedException("target address type not supported: " + targetAdrType);
             }
         }
 
-        private string ReadTargetKey(CdrInputStream cdrStream, GiopVersion version) {
+        private string ReadTargetKey(CdrInputStream cdrStream) {
             uint length = cdrStream.ReadULong();
             Debug.WriteLine("object key follows:");
             byte[] objectKey = cdrStream.ReadOpaque((int)length);
                     
             // get the object-URI of the responsible object
-            return IiopUrlUtil.GetObjUriForObjectInfo(objectKey, version);
+            return IiopUrlUtil.GetObjUriForObjectKey(objectKey);
         }
 
         /// <summary>aquire the information for a specific object method call</summary>

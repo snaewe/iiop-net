@@ -241,13 +241,15 @@ namespace Ch.Elca.Iiop.Util {
             return true;
         }
 
+        
         /// <summary>
-        /// take a CORBA object Key and create a .NET obj-URI out of it
+        /// take a CORBA object Key and the GIOP-Version
+        /// and create a .NET obj-URI out of it
+        /// If giopVersion is null -> do not include version info into uri.
         /// </summary>
         /// <param name="objectKey"></param>
         /// <returns></returns>
-        public static string GetObjUriForObjectInfo(byte[] objectKey, 
-                                                    GiopVersion version) {
+        private static string GetObjUriForObjectKeyAndOptInfo(byte[] objectKey, object giopVersion) {
             if (CheckNonStringifyTag(objectKey)) {
                 // an URI pointing to a native .NET remoting framework object, therefore the .NET URI must be
                 // reproduced from which this objectKey was created
@@ -257,11 +259,34 @@ namespace Ch.Elca.Iiop.Util {
                 return StringUtil.GetStringFromWideChar(objectId);
             } else {
                 // stringify it
-                return IorStringifyUtil.Stringify(objectKey) + "," + GIOP_ID + "=" + 
-                                                  version.Major + "." + version.Minor + "," +
-                                                  STRINGIFIED_ID + "=t"; 
-            }
+                string result = IorStringifyUtil.Stringify(objectKey);
+                if (giopVersion != null) {
+                    result += "," + GIOP_ID + "=" + ((GiopVersion)giopVersion).Major + "." +
+                              ((GiopVersion)giopVersion).Minor;
+                }                
+                return  result + "," + STRINGIFIED_ID + "=t";
+            }            
         }
+
+        /// <summary>
+        /// take a CORBA object Key and the GIOP-Version
+        /// and create a .NET obj-URI out of it
+        /// </summary>
+        /// <param name="objectKey"></param>
+        /// <returns></returns>
+        public static string GetObjUriForObjectInfo(byte[] objectKey, 
+                                                    GiopVersion version) {
+            return GetObjUriForObjectKeyAndOptInfo(objectKey, version);
+        }
+
+        /// <summary>
+        /// take a CORBA object Key and create a .NET obj-URI out of it
+        /// </summary>
+        /// <param name="objectKey"></param>
+        /// <returns></returns>
+        public static string GetObjUriForObjectKey(byte[] objectKey) {
+            return GetObjUriForObjectKeyAndOptInfo(objectKey, null);
+        }        
 
         #endregion SMethods
 

@@ -92,8 +92,7 @@ namespace Ch.Elca.Iiop.Services {
                     // create the init service, which provides access to other service (for JDK orbs)
                     s_corbaInitService = new CORBAInitServiceImpl();
                     RemotingServices.Marshal(s_corbaInitService, 
-                                             IiopUrlUtil.GetObjUriForObjectInfo(s_corbaObjKey,
-                                                                                new GiopVersion(1, 0)));
+                                             IiopUrlUtil.GetObjUriForObjectKey(s_corbaObjKey));
                 }
             }
         }
@@ -105,8 +104,7 @@ namespace Ch.Elca.Iiop.Services {
             // create root naming context and publish it
             m_initalContext = new InitialCOSNamingContextImpl();
             RemotingServices.Marshal(m_initalContext,
-                                     IiopUrlUtil.GetObjUriForObjectInfo(InitialCOSNamingContextImpl.s_initalnamingObjKey,
-                                                                        new GiopVersion(1, 0)));    
+                                     IiopUrlUtil.GetObjUriForObjectKey(InitialCOSNamingContextImpl.s_initalnamingObjKey));
         }
 
         public MarshalByRefObject _get([WideCharAttribute(false)][StringValueAttribute] string serviceName) {
