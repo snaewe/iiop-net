@@ -44,7 +44,7 @@ public class SymbolTypedef : Symbol {
     #endregion IConstructors
     #region IMethods
     
-    public String toString() {
+    public override string ToString() {
         return "typedef declaration with name: " + m_symbolName;
     }
 
