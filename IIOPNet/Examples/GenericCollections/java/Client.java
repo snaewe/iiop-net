@@ -97,7 +97,9 @@ public class Client {
 				System.out.println("0. Return to previous menu");
 				System.out.println("1. Set Entry");
 				System.out.println("2. Show Entries");
-				System.out.println("3. Delete Container");
+// bug: server-side ObjRef deserialization
+// not supported yet
+//				System.out.println("3. Delete Container");
 				switch (readInt()) {
 					case 0:
 						quit = true;
@@ -108,10 +110,12 @@ public class Client {
 					case 2:
 						dumpContainer(c);
 						break;
-					case 3:
-						m.DeleteContainer(c);
-						quit = true;
-						break;
+// bug: server-side ObjRef deserialization
+// not supported yet
+//					case 3:
+//						m.DeleteContainer(c);
+//						quit = true;
+//						break;
 				}
 			} while (!quit);
 		} catch (GenericUserException e) {

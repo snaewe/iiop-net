@@ -109,9 +109,11 @@ namespace Ch.Elca.Iiop.Demo.StorageSystem {
 			return res;
 		}
 		
-		public void DeleteContainer(Container c) {
-			m_containers.Remove(c);
-		}
+// bug: server-side ObjRef deserialization
+// not supported yet
+//		public void DeleteContainer(Container c) {
+//			m_containers.Remove(c);
+//		}
 
                 public override object InitializeLifetimeService() {
                     return null; // live forever
