@@ -131,11 +131,13 @@ public class IDLToCLS {
     #region SMethods
 
     public static void Main(String[] args) {
+#if TRACE
         // enable trace
-        // Trace.Listeners.Add(new TextWriterTraceListener(System.Console.Out));
-        // Trace.AutoFlush = true;
-        // Trace.Indent();
-        
+        Trace.Listeners.Add(new TextWriterTraceListener(System.Console.Out));
+        Trace.AutoFlush = true;
+        Trace.Indent();                
+#endif
+
         try {
             Thread.CurrentThread.CurrentCulture = new CultureInfo("en-US");
             IDLToCLS mapper = new IDLToCLS(args);
