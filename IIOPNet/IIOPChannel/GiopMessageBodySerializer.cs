@@ -297,8 +297,8 @@ namespace Ch.Elca.Iiop.MessageHandling {
                                  byte[] objectKey, GiopVersion version) {
             if (!((version.Major == 1) && (version.Minor <= 1))) {
                 // for GIOP >= 1.2
-                uint targetAdrType = 0;
-                cdrStream.WriteULong(targetAdrType); // object key adressing
+                ushort targetAdrType = 0;
+                cdrStream.WriteUShort(targetAdrType); // object key adressing
             }
             WriteTargetKey(cdrStream, objectKey);
         }
