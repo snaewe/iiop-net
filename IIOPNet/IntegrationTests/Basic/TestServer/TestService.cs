@@ -28,6 +28,7 @@
 
 using System;
 using Ch.Elca.Iiop.Idl;
+using omg.org.CORBA;
 
 namespace Ch.Elca.Iiop.IntegrationTests {
 
@@ -331,6 +332,26 @@ namespace Ch.Elca.Iiop.IntegrationTests {
 
         public IdlArrayContainer EchoIdlArrayContainer(IdlArrayContainer arrayContainer) {
             return arrayContainer;            
+        }
+
+        public object RetrieveIdlIntArrayAsAny([IdlArray(0, 5)] int[] arg) {
+            // test with explicit typecode-creation
+            IOrbServices orbServices = OrbServices.GetSingleton();
+            omg.org.CORBA.TypeCode arrayTC = 
+                orbServices.create_array_tc(5, orbServices.create_tc_for_type(typeof(int)));
+            Any arrayAsAny = new Any(arg, arrayTC);
+            return arrayAsAny;
+        }
+
+        public object RetrieveIdlInt2DimArray2x2AsAny([IdlArray(0, 2)][IdlArrayDimension(0, 1, 2)] System.Int32[,] arg) {
+            // test with explicit typecode-creation
+            IOrbServices orbServices = OrbServices.GetSingleton();
+            omg.org.CORBA.TypeCode innerArrayTC = 
+                orbServices.create_array_tc(2, orbServices.create_tc_for_type(typeof(int)));
+            omg.org.CORBA.TypeCode arrayTC = 
+                orbServices.create_array_tc(2, innerArrayTC);
+            Any arrayAsAny = new Any(arg, arrayTC);
+            return arrayAsAny;
         }
 
         public Adder RetrieveAdder() {

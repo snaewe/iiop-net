@@ -486,6 +486,22 @@ namespace Ch.Elca.Iiop.IntegrationTests {
                 for (int j = 0; j < container.TwoDimIntArray2x2.GetLength(1); j++) {
                     Assertion.AssertEquals(container.TwoDimIntArray2x2[i,j], result.TwoDimIntArray2x2[i,j]);
                 }                
+            }
+
+            // test with any container
+            int[] arg1Dim = new int[] { 1, 2, 3, 4, 5 };
+            int[] result1Dim = (int[])m_testService.RetrieveIdlIntArrayAsAny(arg1Dim);
+            for (int i = 0; i < arg1Dim.Length; i++) {
+                Assertion.AssertEquals(arg1Dim[i], result1Dim[i]);
+            }
+            
+
+            int[,] arg2Dim = new int[,] { { 1,2 }, {3, 4} };
+            int[,] result2Dim = (int[,])m_testService.RetrieveIdlInt2DimArray2x2AsAny(arg2Dim);
+            for (int i = 0; i < arg2Dim.GetLength(0); i++) {
+                for (int j = 0; j < arg2Dim.GetLength(1); j++) {
+                    Assertion.AssertEquals(arg2Dim[i,j], result2Dim[i,j]);
+                }                
             }            
         }
 

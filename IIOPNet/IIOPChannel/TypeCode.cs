@@ -1259,11 +1259,12 @@ namespace omg.org.CORBA {
             attrColl = attrColl.RemoveAttribute(innerAttribute);
             IList dimensionAttributes;
             attrColl = attrColl.RemoveAssociatedAttributes(innerAttribute.OrderNr, out dimensionAttributes);                
-            int[] dimensions = new int[1 + dimensionAttributes.Count];
+            int[] dimensions = new int[2 + dimensionAttributes.Count]; // 1 for this dimension, 1 for the old first dimension + those for the dimensionAttributes
             dimensions[0] = m_length;
+            dimensions[1] = innerAttribute.FirstDimensionSize;
             for (int i = 0; i < dimensionAttributes.Count; i++) {
-                dimensions[i+1] = 
-                    ((IdlArrayDimensionAttribute)dimensionAttributes[i]).DimensionSize;
+                dimensions[((IdlArrayDimensionAttribute)dimensionAttributes[i]).DimensionNr + 1] = 
+                    ((IdlArrayDimensionAttribute)dimensionAttributes[i]).DimensionSize; // shift rigth
             }
             return dimensions;
         }
