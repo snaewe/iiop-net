@@ -80,7 +80,7 @@ namespace Ch.Elca.Iiop.Idl {
             // some default types
             m_defaultMappedTypes.Add(typeof(System.Object));
             m_defaultMappedTypes.Add(typeof(System.Type));
-            m_defaultMappedTypes.Add(typeof(Corba.TypeCode));
+            m_defaultMappedTypes.Add(typeof(omg.org.CORBA.TypeCode));
             m_defaultMappedTypes.Add(typeof(GenericUserException));
         }
         
