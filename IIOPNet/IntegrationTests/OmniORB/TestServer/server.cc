@@ -33,6 +33,8 @@ public:
   ::seqOfWStringSeq* EchoSeqOfWStringSeq(const ::seqOfWStringSeq& arg);
   ::boundedLongSeq* EchoBoundedSeq(const ::boundedLongSeq& arg);
   ::Uuids* EchoUuids(const ::Uuids& arg);
+  CORBA::Any *RetrieveUuidAsAny(CORBA::Long nrOfElementsOuter, CORBA::Long nrOfElementsInner, 
+                                CORBA::Octet elemVal);
   TestService::InnerStruct EchoInnerStruct(const TestService::InnerStruct& arg);
   ::RecStruct* EchoRecStruct(const RecStruct& arg);
 
@@ -141,6 +143,30 @@ TestService_impl::EchoBoundedSeq(const ::boundedLongSeq& arg) {
 ::Uuids*
 TestService_impl::EchoUuids(const ::Uuids& arg) {
   return new ::Uuids(arg);
+}
+
+CORBA::Any*
+TestService_impl::RetrieveUuidAsAny(CORBA::Long nrOfElementsOuter, CORBA::Long nrOfElementsInner, 
+                                    CORBA::Octet elemVal) {
+    CORBA::Any* resultAny = new CORBA::Any;
+    
+    Uuid* contentArr = new Uuid[nrOfElementsOuter];
+    for (int i = 0; i < nrOfElementsOuter; i++) {
+        CORBA::Octet* innerContent = new CORBA::Octet[nrOfElementsInner];
+        for (int j = 0; j < nrOfElementsInner; j++) {
+            innerContent[j] = elemVal;
+        }
+        Uuid* innerArrElem = new Uuid((CORBA::ULong)nrOfElementsInner, innerContent);
+        contentArr[i] = *innerArrElem;
+    }
+        
+    Uuids* resultSeq = new Uuids((CORBA::ULong)nrOfElementsOuter, (CORBA::ULong)nrOfElementsOuter,
+                                 contentArr);
+   
+    *resultAny <<= resultSeq;
+    return resultAny;
+
+  
 }
 
 TestService::InnerStruct 

@@ -81,6 +81,7 @@ interface TestService {
 
     boundedLongSeq EchoBoundedSeq(in boundedLongSeq arg);
     Uuids EchoUuids(in Uuids arg);
+    any RetrieveUuidAsAny(in long nrOfelementsOuter, in long nrOfElementsInner, in octet elemVal);
 
     InnerStruct EchoInnerStruct(in InnerStruct arg);
 

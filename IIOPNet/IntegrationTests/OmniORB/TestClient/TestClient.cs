@@ -287,6 +287,22 @@ namespace Ch.Elca.Iiop.IntegrationTests {
         }
 
         [Test]
+        public void TestRetrieveSeqOfBoundedSeqAsAny() {
+            int outerLength = 20;
+            int innerLength = 4;
+            byte elemVal = 2;
+            byte[][] result = (byte[][])m_testService.RetrieveUuidAsAny(outerLength, innerLength, elemVal);
+            Assertion.AssertNotNull(result);
+            Assertion.AssertEquals("wrong nr of Uuid elements", outerLength, result.Length);
+            for (int i = 0; i < result.Length; i++) {
+                Assertion.AssertEquals(innerLength, result[i].Length);
+                for (int j = 0; j < result[i].Length; j++) {
+                    Assertion.AssertEquals(elemVal, result[i][j]);
+                }
+            }
+        }
+
+        [Test]
         public void TestNestedStructTypes() {
             TestService_package.InnerStruct arg = new TestService_package.InnerStruct();
             arg.Field1 = 21;
