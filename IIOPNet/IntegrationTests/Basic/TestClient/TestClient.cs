@@ -765,10 +765,11 @@ namespace Ch.Elca.Iiop.IntegrationTests {
             NameComponent[] name = new NameComponent[] { new NameComponent("testXYZ", "") };
             // get the reference to non-existent service
             m_testService = (TestService)nameService.resolve(name);            
-        }
+        }        
 
         [Test]
         public void TestRaisesClauseUserException() {
+            // interface was mapped from idl to cls on the server side
             try {
                 m_testExService.ThrowTestException();
             } catch (TestException) {
@@ -776,10 +777,20 @@ namespace Ch.Elca.Iiop.IntegrationTests {
             } catch (Exception ex) {
                 Assertion.Fail("wrong exception type: " + ex.GetType());
             }
+            // interface is defined in CLS on the server side
+            try {
+                m_testService.ThrowKnownException();
+            } catch (TestNetExceptionMappedToIdl tex) {
+                Assertion.AssertEquals("wrong code", 10, tex.code);
+                // ok, expected this exception
+            } catch (Exception ex) {
+                Assertion.Fail("wrong exception type: " + ex.GetType());
+            }            
         }
         
         [Test]
         public void TestRaisesClauseSystemException() {
+            // interface was mapped from idl to cls on the server side
             try {
                 m_testExService.ThrowSystemException();
             } catch (omg.org.CORBA.NO_IMPLEMENT nex) {
@@ -793,6 +804,7 @@ namespace Ch.Elca.Iiop.IntegrationTests {
         
         [Test]
         public void TestRaisesClauseNotIncludedUserException() {
+            // interface was mapped from idl to cls on the server side
             try {
                 m_testExService.ThrowDotNetException();
             } catch (omg.org.CORBA.UNKNOWN uex) {
@@ -802,6 +814,53 @@ namespace Ch.Elca.Iiop.IntegrationTests {
             } catch (Exception ex) {
                 Assertion.Fail("wrong exception type: " + ex.GetType());
             }
+            // interface is defined in CLS on the server side
+            try {
+                m_testService.ThrowUnKnownException();
+            } catch (GenericUserException) {
+                // ok, expected this exception
+            } catch (Exception ex) {
+                Assertion.Fail("wrong exception type: " + ex.GetType());
+            }
+        }
+
+
+        [Test]
+        public void TestAttributesThrowingExceptions() {
+            // interface was mapped from idl to cls on the server side
+            try {
+                bool result = m_testExService.TestAttrWithException;
+            } catch (omg.org.CORBA.UNKNOWN uex) {
+                Assertion.AssertEquals("wrong minor code", 190, uex.Minor);
+                Assertion.AssertEquals("wrong status", omg.org.CORBA.CompletionStatus.Completed_Yes, uex.Status);
+            } catch (Exception ex) {
+                Assertion.Fail("wrong exception type: " + ex.GetType());
+            }
+            try {
+                m_testExService.TestAttrWithException = true;
+            } catch (omg.org.CORBA.NO_IMPLEMENT nex) {
+                Assertion.AssertEquals("wrong minor code", 10, nex.Minor);
+                Assertion.AssertEquals("wrong status", omg.org.CORBA.CompletionStatus.Completed_Yes, nex.Status);
+            } catch (Exception ex) {
+                Assertion.Fail("wrong exception type: " + ex.GetType());
+            }
+            // interface is defined in CLS on the server side
+            try {
+                bool result2 = m_testService.TestPropWithGetUserException;
+            } catch (omg.org.CORBA.UNKNOWN uex) {
+                Assertion.AssertEquals("wrong minor code", 190, uex.Minor);
+                Assertion.AssertEquals("wrong status", omg.org.CORBA.CompletionStatus.Completed_Yes, uex.Status);
+            } catch (Exception ex) {
+                Assertion.Fail("wrong exception type: " + ex.GetType());
+            }
+            try {
+                bool result3 =m_testService.TestPropWithGetSystemException;
+            } catch (omg.org.CORBA.INTERNAL iex) {
+                Assertion.AssertEquals("wrong minor code", 29, iex.Minor);
+                Assertion.AssertEquals("wrong status", omg.org.CORBA.CompletionStatus.Completed_Yes, iex.Status);
+            } catch (Exception ex) {
+                Assertion.Fail("wrong exception type: " + ex.GetType());
+            }            
         }
 
         [Test]

@@ -440,6 +440,32 @@ namespace Ch.Elca.Iiop.IntegrationTests {
         public Type EchoType(Type arg) {
             return arg;
         }
+
+        [ThrowsIdlException(typeof(TestNetExceptionMappedToIdl))]
+        public void ThrowKnownException() {
+            TestNetExceptionMappedToIdl testEx = new TestNetExceptionMappedToIdl(10);            
+            throw testEx;
+        }
+        
+        [ThrowsIdlException(typeof(TestNetExceptionMappedToIdl))]        
+        public void ThrowUnKnownException() {
+            throw new NotSupportedException("test-ex");
+        }
+
+        public bool TestPropWithGetUserException {
+            get {
+                TestException testEx = new TestException();
+                testEx.Msg = "test-msg";
+                throw testEx;
+            }
+        }
+
+        public bool TestPropWithGetSystemException {
+            get {
+                throw new omg.org.CORBA.INTERNAL(29, 
+                                           omg.org.CORBA.CompletionStatus.Completed_Yes);
+            }
+        }
         
         public override object InitializeLifetimeService() {
             // live forever
@@ -503,12 +529,38 @@ namespace Ch.Elca.Iiop.IntegrationTests {
             throw new omg.org.CORBA.NO_IMPLEMENT(9, 
                                                  omg.org.CORBA.CompletionStatus.Completed_Yes);
         }        
+
+        public bool TestAttrWithException {
+            get {
+                TestException result = new TestException();
+                result.Msg = "test-msg";
+                throw result;                             
+            }
+            set {
+                throw new omg.org.CORBA.NO_IMPLEMENT(10, 
+                                                     omg.org.CORBA.CompletionStatus.Completed_Yes);
+            }
+        }
         
         public override object InitializeLifetimeService() {
             // live forever
             return null;
         }
         
+    }
+
+
+    public class TestNetExceptionMappedToIdl : AbstractUserException {
+
+        private int code;
+
+        public TestNetExceptionMappedToIdl() : this(0) {
+        }
+
+        public TestNetExceptionMappedToIdl(int code) {
+            this.code = code;
+        }
+
     }
 
 }
