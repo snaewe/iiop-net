@@ -36,6 +36,9 @@ using System.Text;
 
 using Ch.Elca.Iiop.Cdr;
 using Ch.Elca.Iiop.Util;
+using Ch.Elca.Iiop.Idl;
+using Ch.Elca.Iiop.Marshalling;
+using Ch.Elca.Iiop.Services;
 using omg.org.CORBA;
 
 namespace Ch.Elca.Iiop.CorbaObjRef {
@@ -44,22 +47,25 @@ namespace Ch.Elca.Iiop.CorbaObjRef {
     /// Interface supported by all tagged-components. 
     /// Tagged Components are used in IorProfiles.
     /// </summary>
-    public interface TaggedComponent {
+    public interface ITaggedComponent {
         
         #region IProperties
-
-        /// <summary>
-        /// used for non-concrete tagged-components, may return null
-        /// </summary>
-        byte[] ByteData { get; set; }
+        
+        uint Id { 
+            get; 
+        }
+        
+        /// <summary>the component data to serialise / deserialise</summary>
+        ITaggedComponentData ComponentData {
+            get;
+        }
 
         #endregion IProperties
-        #region IMethods
 
-        uint GetId();
-
-        #endregion IMethods
-
+    }
+    
+    /// <summary>Marker interface for tagged component data</summary>
+    public interface ITaggedComponentData : IIdlEntity {
     }
 
 
@@ -282,7 +288,7 @@ namespace Ch.Elca.Iiop.CorbaObjRef {
         protected byte[] m_objectKey;
         
         /// <summary>the tagged components in this profile</summary>
-        protected TaggedComponent[] m_taggedComponents;
+        protected ITaggedComponent[] m_taggedComponents;
 
         #endregion IFields
         #region IConstructors
@@ -333,7 +339,7 @@ namespace Ch.Elca.Iiop.CorbaObjRef {
         }
         
         /// <summary>the tagged components in this profile</summary>
-        public TaggedComponent[] TaggedComponents {
+        public ITaggedComponent[] TaggedComponents {
             get { 
                 return m_taggedComponents; 
             }
@@ -371,12 +377,13 @@ namespace Ch.Elca.Iiop.CorbaObjRef {
 
         public InternetIiopProfile(GiopVersion version, string hostName, ushort port, byte[] objectKey) : base(version, hostName, port, objectKey) {
             // set the default tagged components
-            m_taggedComponents = new TaggedComponent[1];
+            m_taggedComponents = new ITaggedComponent[1];
             // default codesetComponent
-            m_taggedComponents[0] = new CodeSetComponent(Services.CodeSetService.DEFAULT_CHAR_SET,
-                                                         new uint[] {Services.CodeSetService.ISO646IEC_SINGLE },
-                                                         Services.CodeSetService.DEFAULT_WCHAR_SET,
-                                                         new uint[] { Services.CodeSetService.ISO646IEC_MULTI });
+            m_taggedComponents[0] = new TaggedComponent(TaggedComponentIds.CODESET_COMPONENT_ID, 
+                                                        new CodeSetComponentData(Services.CodeSetService.DEFAULT_CHAR_SET,
+                                                                                 new int[] {Services.CodeSetService.ISO646IEC_SINGLE },
+                                                                                 Services.CodeSetService.DEFAULT_WCHAR_SET,
+                                                                                 new int[] { Services.CodeSetService.ISO646IEC_MULTI }));
         }
 
         /// <summary>
@@ -458,7 +465,7 @@ namespace Ch.Elca.Iiop.CorbaObjRef {
             if (!(m_giopVersion.Major == 1 && m_giopVersion.Minor == 0)) { // for GIOP >= 1.1, tagged components are possible
                 encapStream.WriteULong((uint)m_taggedComponents.Length);
                 foreach (TaggedComponent comp in m_taggedComponents) {
-                    TaggedComponentSerializer ser = TaggedComponentSerRegistry.GetSerializer(comp.GetId());
+                    TaggedComponentSerializer ser = TaggedComponentSerRegistry.GetSerializer(comp.Id);
                     ser.WriteToStream(comp, encapStream);
                 }
             }
@@ -483,12 +490,13 @@ namespace Ch.Elca.Iiop.CorbaObjRef {
 
         public MultipleComponentsProfile() : base(new GiopVersion(1,2), null, 0, null) {
             // set the default tagged components
-            m_taggedComponents = new TaggedComponent[1];
+            m_taggedComponents = new ITaggedComponent[1];
             // default codesetComponent
-            m_taggedComponents[0] = new CodeSetComponent(Services.CodeSetService.DEFAULT_CHAR_SET,
-                                                         new uint[] {Services.CodeSetService.ISO646IEC_SINGLE },
-                                                         Services.CodeSetService.DEFAULT_WCHAR_SET,
-                                                         new uint[] { Services.CodeSetService.ISO646IEC_MULTI });
+            m_taggedComponents[0] = new TaggedComponent(TaggedComponentIds.CODESET_COMPONENT_ID, 
+                                                        new CodeSetComponentData(Services.CodeSetService.DEFAULT_CHAR_SET,
+                                                                                 new int[] {Services.CodeSetService.ISO646IEC_SINGLE },
+                                                                                 Services.CodeSetService.DEFAULT_WCHAR_SET,
+                                                                                 new int[] { Services.CodeSetService.ISO646IEC_MULTI }));
         }
 
         /// <summary>
@@ -541,7 +549,7 @@ namespace Ch.Elca.Iiop.CorbaObjRef {
             // the tagged components
             encapStream.WriteULong((uint)m_taggedComponents.Length);
             foreach (TaggedComponent comp in m_taggedComponents) {
-                TaggedComponentSerializer ser = TaggedComponentSerRegistry.GetSerializer(comp.GetId());
+                TaggedComponentSerializer ser = TaggedComponentSerRegistry.GetSerializer(comp.Id);
                 ser.WriteToStream(comp, encapStream);
             }
             // write the whole encapsulation to the stream
@@ -553,156 +561,249 @@ namespace Ch.Elca.Iiop.CorbaObjRef {
     }
 
 
+    [IdlStruct]
+    public struct GenericTaggedComponentData : ITaggedComponentData {
+    
+        #region IFields
+        
+        [IdlSequence]
+        public byte[] Data;
+        
+        #endregion IFields
+        #region IConstructors
+                
+        public GenericTaggedComponentData(byte[] data) {
+            Data = data;
+        }
+        
+        #endregion IConstructors
+    
+    }
+
+
     /// <summary>
     /// generic tagged component
     /// </summary>
-    public class GenericTaggedComponent : TaggedComponent {
+    public class TaggedComponent : ITaggedComponent {
         
         #region IFields
         
-        private byte[] m_data;
         private uint m_id;
+        private ITaggedComponentData m_componentData;
 
         #endregion IFields
         #region IConstructors
 
-        public GenericTaggedComponent(uint id, byte[] data) {
-            m_data = data;
+        public TaggedComponent(uint id, ITaggedComponentData data) {
             m_id = id;
+            m_componentData = data;            
         }
 
         #endregion IConstructors
         #region IProperties
 
-        public byte[] ByteData { 
-            get { 
-                return m_data; 
-            } 
-            set { 
-                m_data = value; 
-            } 
+        public uint Id {
+            get {
+                return m_id;
+            }
+        }
+        
+        public ITaggedComponentData ComponentData {
+            get {
+                return m_componentData;
+            }
         }
 
+        #endregion IProperties
+
+    }    
+    
+      
+    /// <summary>describes rules to use for tagged component data serialisation</summary>
+    internal class TaggedComponentEncodingRules {
+        
+        
+        #region IFields
+        
+        private bool m_isEncapsulated;
+        
+        #endregion IFields
+        #region IConstructors
+        
+        public TaggedComponentEncodingRules(bool isEncapsulated) {
+            m_isEncapsulated = isEncapsulated;    
+        }
+        
+        #endregion IConstructors
+        #region IProperties
+        
+        public bool IsEncapsulated {
+            get {
+                return m_isEncapsulated;
+            }
+        }                
+        
+        #endregion IProperties
+        
+    }
+    
+
+    /// <summary>
+    /// serializer for tagged components
+    /// </summary>
+    internal class TaggedComponentSerializer {
+        
+
+        #region IFields
+        
+        private uint m_id;
+        private Type m_taggedComponentDataType;
+        
+        private MarshallerForType m_componentDataMarshaller;
+        
+        private TaggedComponentEncodingRules m_encodingRules;
+        
+        #endregion IFields
+        #region IConstructors
+        
+        public TaggedComponentSerializer(uint taggedComponentId, Type taggedComponentDataType,
+                                         TaggedComponentEncodingRules encodingRules) {
+            if ((taggedComponentDataType == null) || (encodingRules == null)) {
+                throw new INTERNAL(113, CompletionStatus.Completed_MayBe);
+            }
+            m_id = taggedComponentId;
+            m_taggedComponentDataType = taggedComponentDataType;
+            AttributeExtCollection attributes = new AttributeExtCollection();
+            m_componentDataMarshaller = new MarshallerForType(taggedComponentDataType, 
+                                                              attributes);
+            m_encodingRules = encodingRules;            
+        }
+        
+        /// <summary>used to create efficiently a clone for another id</summary>
+        private TaggedComponentSerializer(uint taggedComponentId, Type taggedComponentDataType,
+                                          TaggedComponentEncodingRules encodingRules,
+                                          MarshallerForType componentDataMarshaller) {
+            m_id = taggedComponentId;
+            m_taggedComponentDataType = taggedComponentDataType;
+            m_componentDataMarshaller = componentDataMarshaller;
+            m_encodingRules = encodingRules;                                              
+        }
+        
+        #endregion IConstructors        
+        #region IProperties
+        
+        public uint Id {
+            get {
+                return m_id;
+            }
+        }                
+        
+        /// <summary>
+        /// the type of the tagged component data for this id
+        /// </summary>
+        public Type TaggedComponentDataType {
+            get {
+                return m_taggedComponentDataType;
+            }
+        }
+        
         #endregion IProperties
         #region IMethods
 
-        public uint GetId() { return m_id; }
-
-        #endregion IMethods
-
-    }
-
-
-    /// <summary>
-    /// this tagged-component in an IOR responsible for CodeSet-Information
-    /// </summary>
-    public class CodeSetComponent : TaggedComponent {
-    
-        #region Constants
-
-        internal const uint CODESET_COMPONENT_ID = 0x0001;        
-
-        #endregion Constants
-        #region IFields
-
-        private uint m_nativeCharSet;
-        private uint m_nativeWCharSet;
-
-        private uint[] m_charConvSet;
-        private uint[] m_wcharConvSet;
-
-        #endregion IFields
-        #region IConstructors
-
-        public CodeSetComponent(uint nativeCharSet, uint[] charConvSet,
-                                uint nativeWCharSet, uint[] wcharConvSet) {
-            m_nativeCharSet = nativeCharSet;
-            m_nativeWCharSet = nativeWCharSet;
-            
-            m_charConvSet = charConvSet;
-            if (m_charConvSet == null) { 
-                m_charConvSet = new uint[0]; 
-            }
-            m_wcharConvSet = wcharConvSet;
-            if (m_wcharConvSet == null) { 
-                m_wcharConvSet = new uint[0]; 
-            }
+        public void WriteToStream(TaggedComponent toSer, CdrOutputStream cdrStream) {
+            cdrStream.WriteULong(m_id);
+            if (m_encodingRules.IsEncapsulated) {
+                // marshal tagged component data to an encapsulation
+                CdrEncapsulationOutputStream encap = new CdrEncapsulationOutputStream(0);
+                m_componentDataMarshaller.Marshal(toSer.ComponentData, encap);
+                // write encapsulation to the stream
+                cdrStream.WriteEncapsulation(encap);                
+            } else {
+                m_componentDataMarshaller.Marshal(toSer.ComponentData, cdrStream);
+            }                                    
         }
-
-        #endregion IConstructors
-        #region IProperties
-
-        public uint NativeCharSet { 
-            get {
-                return m_nativeCharSet; 
-            }
-        }
-
-        public uint NativeWCharSet { 
-            get { 
-                return m_nativeWCharSet; 
-            }
-        }
-
-        public uint[] CharConvSet { 
-            get { 
-                return m_charConvSet; 
-            }
+               
+        public ITaggedComponent ReadFromStream(CdrInputStream cdrStream) {
+            if (m_encodingRules.IsEncapsulated) {
+                CdrEncapsulationInputStream encap = cdrStream.ReadEncapsulation();                
+                ITaggedComponentData data = m_componentDataMarshaller.Unmarshal(encap) as
+                                                ITaggedComponentData;
+                return new TaggedComponent(m_id, data);                
+            } else {
+                ITaggedComponentData data = m_componentDataMarshaller.Unmarshal(cdrStream) as
+                                                ITaggedComponentData;
+                return new TaggedComponent(m_id, data);                
+            }                    
         }
         
-        public uint[] WCharConvSet { 
-            get { 
-                return m_wcharConvSet; 
-            }
-        }
-
-        public byte[] ByteData { 
-            get { 
-                return null; 
-            } 
-            set {
-            }
-        } // not used here
-
-        #endregion IProperties
-        #region IMethods     
-
-        public uint GetId() {
-            return CODESET_COMPONENT_ID;
-        }
 
         #endregion IMethods
+        #region SMethods
+        
+        internal static TaggedComponentSerializer GetCloneForId(TaggedComponentSerializer prototype, 
+                                                                uint newId) {
+            return new TaggedComponentSerializer(newId, prototype.m_taggedComponentDataType,
+                                                 prototype.m_encodingRules, prototype.m_componentDataMarshaller);
+        }
+        
+        #endregion SMethods
 
+    }    
+    
+    
+    public sealed class TaggedComponentIds {
+    
+        #region Constants
+        
+        public const uint CODESET_COMPONENT_ID = 1;
+        public const uint TAG_SSL_SEC_TRANS = 20;        
+        
+        #endregion Constants
+        #region IConstructors
+        
+        private TaggedComponentIds() {
+        }
+        
+        #endregion IConstructors        
+    
     }
-
-
+    
+    
     /// <summary>
     /// registry managing serializer for tagged components
     /// </summary>
     internal class TaggedComponentSerRegistry {
-        
+
         #region SFields
         
         private static Hashtable s_taggedComponetsSer = new Hashtable();
+        
+        private static TaggedComponentSerializer s_genericSerializerPrototype;
 
         #endregion SFields
         #region SConstructor
         
         static TaggedComponentSerRegistry() {
-            AddTaggedComponentSer(new CodeSetComponentSer());
+            s_genericSerializerPrototype = new TaggedComponentSerializer(0, typeof(GenericTaggedComponentData),
+                                                                         new TaggedComponentEncodingRules(false));
+            AddTaggedComponentSer(new TaggedComponentSerializer(TaggedComponentIds.CODESET_COMPONENT_ID, typeof(CodeSetComponentData),
+                                                                new TaggedComponentEncodingRules(true)));
+//            AddTaggedComponentSer(new TaggedComponentSerializer(TaggedComponentIds.TAG_SSL_SEC_TRANS, typeof(SSLComponentData),
+//                                                                new TaggedComponentEncodingRules(true)));
         }
 
         #endregion SConstructor
         #region SMethods
 
         private static void AddTaggedComponentSer(TaggedComponentSerializer ser) {
-            s_taggedComponetsSer.Add(ser.GetId(), ser);
+            s_taggedComponetsSer.Add(ser.Id, ser);
         }
 
         public static TaggedComponentSerializer GetSerializer(uint id) {
             TaggedComponentSerializer ser = (TaggedComponentSerializer)s_taggedComponetsSer[id];
             if (ser == null) {
-                ser = new GenericTaggedComponentSer(id);
+                // more efficient to clone a generic prototype, because of type mapping costs
+                ser = TaggedComponentSerializer.GetCloneForId(s_genericSerializerPrototype, id);
             }
             return ser;
         }
@@ -711,118 +812,6 @@ namespace Ch.Elca.Iiop.CorbaObjRef {
 
     }
     
-
-    /// <summary>
-    /// base class for serializer for tagged components
-    /// </summary>
-    internal abstract class TaggedComponentSerializer {
-        
-        #region IMethods
-
-        public abstract void WriteToStream(TaggedComponent toSer, CdrOutputStream cdrStream);
-        public abstract TaggedComponent ReadFromStream(CdrInputStream cdrStream);
-
-        public abstract uint GetId();
-
-        #endregion IMethods
-
-    }
-
-    /// <summary>
-    /// generic serializer for unknown tagged components
-    /// </summary>
-    internal class GenericTaggedComponentSer : TaggedComponentSerializer {
-        
-        #region IFields
-
-        private uint m_id;
-
-        #endregion IFields
-        #region IConstructors
-
-        public GenericTaggedComponentSer(uint id) {
-            m_id = id;
-        }
-
-        #endregion IConstructors
-        #region IMethods
-        
-        public override void WriteToStream(TaggedComponent toSer, CdrOutputStream cdrStream) {
-            cdrStream.WriteULong(toSer.GetId());
-            cdrStream.WriteULong((uint)toSer.ByteData.Length);
-            cdrStream.WriteOpaque(toSer.ByteData);
-        }
-        
-        public override TaggedComponent ReadFromStream(CdrInputStream cdrStream) {
-            uint bytesToFollow = cdrStream.ReadULong();
-            byte[] data = cdrStream.ReadOpaque((int)bytesToFollow);
-            return new GenericTaggedComponent(m_id, data);
-        }
-
-        public override uint GetId() {
-            return m_id;
-        }
-
-        #endregion IMethods
-
-    }
-
-    /// <summary>
-    /// tagged components serializer for codesetcomponent
-    /// </summary>
-    internal class CodeSetComponentSer : TaggedComponentSerializer {
-
-        #region IMethods
-
-        public override uint GetId() {
-            return CodeSetComponent.CODESET_COMPONENT_ID;
-        }
-
-        public override void WriteToStream(TaggedComponent toSer, CdrOutputStream cdrStream) {
-            CodeSetComponent asCodeSetComp = (CodeSetComponent) toSer;
-            cdrStream.WriteULong(toSer.GetId());
-            CdrEncapsulationOutputStream encap = new CdrEncapsulationOutputStream(0);
-
-            encap.WriteULong(asCodeSetComp.NativeCharSet);
-            encap.WriteULong((uint)asCodeSetComp.CharConvSet.Length);
-            foreach (uint convSet in asCodeSetComp.CharConvSet) {
-                encap.WriteULong(convSet);
-            }
-
-            encap.WriteULong(asCodeSetComp.NativeWCharSet);
-            encap.WriteULong((uint)asCodeSetComp.WCharConvSet.Length);
-            foreach (uint convSet in asCodeSetComp.WCharConvSet) {
-                encap.WriteULong(convSet);
-            }
-
-            // write encapsulation to the stream
-            cdrStream.WriteEncapsulation(encap);
-        }
-
-        public override TaggedComponent ReadFromStream(CdrInputStream cdrStream) {
-            CdrEncapsulationInputStream encap = cdrStream.ReadEncapsulation();
-
-            uint nativeCharCodeSet = encap.ReadULong();
-            uint nrOfConvSets = encap.ReadULong();
-            uint[] charConvSet = new uint[nrOfConvSets];
-            for (int i = 0; i < nrOfConvSets; i++) {
-                charConvSet[i] = encap.ReadULong();
-            }
-
-            uint nativeWCharCodeSet = encap.ReadULong();
-            uint nrOfWCharConvSets = encap.ReadULong();
-            uint[] wcharConvSet = new uint[nrOfWCharConvSets];
-            for (int i = 0; i< nrOfWCharConvSets; i++) {
-                wcharConvSet[i] = encap.ReadULong();
-            }
-
-            return new CodeSetComponent(nativeCharCodeSet, charConvSet, 
-                                        nativeWCharCodeSet, wcharConvSet);
-        }
-
-        #endregion IMethods
-
-    }
 
 }
 
