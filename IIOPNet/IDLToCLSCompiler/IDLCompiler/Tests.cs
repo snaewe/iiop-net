@@ -120,15 +120,28 @@ namespace Ch.Elca.Iiop.IDLCompiler.Tests {
                                                             false);
             Assertion.AssertEquals("wrong number of IdlStructAttribute", 1, attrs.Length);
         }
-                
+        
+        private void CheckIdlUnionAttributePresent(Type unionType) {
+            object[] attrs = unionType.GetCustomAttributes(typeof(IdlUnionAttribute), 
+                                                           false);
+            Assertion.AssertEquals("wrong number of IdlUnionAttribute", 1, attrs.Length);
+        }
+        
         private void CheckSerializableAttributePresent(Type toCheck) {
             Assertion.AssertEquals("not serializable", true, toCheck.IsSerializable);
         }
+
+        private void CheckPublicInstanceMethodPresent(Type testType, string methodName, 
+                                                      Type returnType, Type[] paramTypes) {
+            CheckMethodPresent(testType, methodName, returnType, paramTypes,
+                               BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly);
+
+        }
         
         private void CheckMethodPresent(Type testType, string methodName, 
-                                        Type returnType, Type[] paramTypes) {
+                                        Type returnType, Type[] paramTypes, BindingFlags attrs) {
             MethodInfo testMethod = testType.GetMethod(methodName, 
-                                                       BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly,
+                                                       attrs,
                                                        null, paramTypes, null);
             Assertion.AssertNotNull(String.Format("method {0} not found", methodName),
                                     testMethod);
@@ -196,8 +209,8 @@ namespace Ch.Elca.Iiop.IDLCompiler.Tests {
                        
             // check if interface is correctly created
             Type ifType = result.GetType("testmod.Test", true);
-            CheckMethodPresent(ifType, "EchoOctet", 
-                               typeof(System.Byte), new Type[] { typeof(System.Byte) });
+            CheckPublicInstanceMethodPresent(ifType, "EchoOctet", 
+                                             typeof(System.Byte), new Type[] { typeof(System.Byte) });
             CheckRepId(ifType, "IDL:testmod/Test:1.0");
             CheckInterfaceAttr(ifType, ifAttrVal);
             CheckIIdlEntityInheritance(ifType);            
@@ -283,8 +296,8 @@ namespace Ch.Elca.Iiop.IDLCompiler.Tests {
             
             CheckIIdlEntityInheritance(valType);
             
-            CheckMethodPresent(valType, "EchoOctet",
-                               typeof(System.Byte), new Type[] { typeof(System.Byte) });
+            CheckPublicInstanceMethodPresent(valType, "EchoOctet",
+                                             typeof(System.Byte), new Type[] { typeof(System.Byte) });
             CheckFieldPresent(valType, "m_x", typeof(System.Byte), 
                               BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.DeclaredOnly);
             CheckNumberOfFields(valType, BindingFlags.Public | BindingFlags.NonPublic |
@@ -323,9 +336,61 @@ namespace Ch.Elca.Iiop.IDLCompiler.Tests {
                                 1);
             writer.Close();
         }
-                
-        #endregion IMethods
-    
+        
+        [Test]
+        public void TestUnion() {
+            MemoryStream testSource = new MemoryStream();
+            StreamWriter writer = new StreamWriter(testSource, s_latin1);
+            
+            // idl:
+            writer.WriteLine("module testmod {");
+            writer.WriteLine("    union Test switch(long) {");
+            writer.WriteLine("        case 0: short val0;");
+            writer.WriteLine("        case 1: ");
+            writer.WriteLine("        case 2: long val1;");
+			writer.WriteLine("        default: boolean val2;");
+            writer.WriteLine("    };");
+            writer.WriteLine("};");
+            
+            writer.Flush();
+            testSource.Seek(0, SeekOrigin.Begin);
+            Assembly result = CreateIdl(testSource);
+                       
+            // check if union is correctly created
+            Type unionType = result.GetType("testmod.Test", true);
+            // must be a struct
+            Assertion.Assert("is a struct", unionType.IsValueType);
+            CheckIdlUnionAttributePresent(unionType);
+
+            CheckFieldPresent(unionType, "m_discriminator", typeof(System.Int32), 
+                              BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.DeclaredOnly);
+            CheckFieldPresent(unionType, "m_val0", typeof(System.Int16), 
+                              BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.DeclaredOnly);
+            CheckFieldPresent(unionType, "m_val1", typeof(System.Int32), 
+                              BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.DeclaredOnly);
+            CheckFieldPresent(unionType, "m_val2", typeof(System.Boolean), 
+                              BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.DeclaredOnly);
+
+            CheckPublicInstanceMethodPresent(unionType, "Getval0",
+                                             typeof(System.Int16), Type.EmptyTypes);
+            CheckPublicInstanceMethodPresent(unionType, "Getval1",
+                                             typeof(System.Int32), Type.EmptyTypes);
+            CheckPublicInstanceMethodPresent(unionType, "Getval2",
+                                             typeof(System.Boolean), Type.EmptyTypes);
+
+            CheckPublicInstanceMethodPresent(unionType, "Setval0",
+                                             typeof(void), new Type[] { typeof(System.Int16) });
+            CheckPublicInstanceMethodPresent(unionType, "Setval1",
+                                             typeof(void), new Type[] { typeof(System.Int32), typeof(System.Int32) } );
+            CheckPublicInstanceMethodPresent(unionType, "Setval2",
+                                             typeof(void), new Type[] { typeof(System.Boolean), typeof(System.Int32) } );            
+
+            CheckMethodPresent(unionType, "GetFieldForDiscriminator", 
+                               typeof(FieldInfo), new Type[] { typeof(System.Int32) },
+                               BindingFlags.NonPublic | BindingFlags.DeclaredOnly | BindingFlags.Static);
+            
+            writer.Close();
+        }          
         
         [Test]
         public void TestIdlSequenceParamters() {
@@ -361,7 +426,49 @@ namespace Ch.Elca.Iiop.IDLCompiler.Tests {
             CheckOnlySpecificCustomAttrInCollection(paramAttrs, typeof(IdlSequenceAttribute));
             object[] returnAttrs = seqMethod.ReturnTypeCustomAttributes.GetCustomAttributes(false);
             CheckOnlySpecificCustomAttrInCollection(returnAttrs, typeof(IdlSequenceAttribute));            
-        }        
+        }
+
+        public void TestConstants() {
+            MemoryStream testSource = new MemoryStream();
+            StreamWriter writer = new StreamWriter(testSource, s_latin1);
+            
+            // idl:
+            writer.WriteLine("module testmod {");
+            writer.WriteLine("    interface Test {");
+            writer.WriteLine("        const long MyConstant = 11;");
+            writer.WriteLine("    };");
+            writer.WriteLine("const long MyOutsideTypeConstant = 13;");
+            writer.WriteLine("};");
+            writer.WriteLine("const long MyOutsideAllConstant = 19;");
+            writer.Flush();
+            testSource.Seek(0, SeekOrigin.Begin);
+            Assembly result = CreateIdl(testSource);
+                       
+            // check if classes for constants were created correctly
+            Type const1Type = result.GetType("testmod.Test_package.MyConstant", true);
+            Type const2Type = result.GetType("testmod.MyOutsideTypeConstant", true);
+            Type const3Type = result.GetType("MyOutsideAllConstant", true);
+
+            CheckFieldPresent(const1Type, "ConstVal", typeof(System.Int32), 
+                              BindingFlags.Public | BindingFlags.Static | BindingFlags.DeclaredOnly);
+            CheckNumberOfFields(const1Type, BindingFlags.Public | BindingFlags.NonPublic |
+                                            BindingFlags.Instance | BindingFlags.Static | BindingFlags.DeclaredOnly,
+                                1);                                    
+            
+            CheckFieldPresent(const2Type, "ConstVal", typeof(System.Int32), 
+                              BindingFlags.Public | BindingFlags.Static | BindingFlags.DeclaredOnly);
+            CheckNumberOfFields(const2Type, BindingFlags.Public | BindingFlags.NonPublic |
+                                            BindingFlags.Instance | BindingFlags.Static | BindingFlags.DeclaredOnly,
+                                1);
+
+            CheckFieldPresent(const3Type, "ConstVal", typeof(System.Int32), 
+                              BindingFlags.Public | BindingFlags.Static | BindingFlags.DeclaredOnly);
+            CheckNumberOfFields(const3Type, BindingFlags.Public | BindingFlags.NonPublic |
+                                            BindingFlags.Instance | BindingFlags.Static | BindingFlags.DeclaredOnly,
+                                1);            
+        }
+
+        #endregion IMethods     
         
     }
         
