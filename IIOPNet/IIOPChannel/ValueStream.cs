@@ -171,6 +171,19 @@ namespace Ch.Elca.Iiop.Cdr {
             return (int) (m_streamStartPos + m_chunkLength - m_stream.GetPosition());
         }
 
+        
+        /// <summary>
+        /// gets the nr of bytes read across the chunk border (if read accross)
+        /// </summary>
+        /// <returns>nr of bytes after border, if border was crossed; 0 if border not crossed</returns>
+        internal uint GetNrOfBytesReadPassBorder() {
+            if (!IsBorderCrossed()) {
+                return 0;
+            } else {
+                return (uint) (m_stream.GetPosition() - (m_streamStartPos + m_chunkLength));
+            }
+        }
+
         #endregion IMethods
 
     }
@@ -420,6 +433,10 @@ namespace Ch.Elca.Iiop.Cdr {
 
         public int ReadLong() {
             int result = m_baseStream.ReadLong();
+            // if chunking is enabled and chunk is finished just before reading this long, 
+            // check, if this long is a legal chunk start, if yes -> update chunkinfo's
+            CheckChunkStart(result); 
+            // check if chunk border is crossed, if chunking is enabled
             CheckPosition();
             return result;
         }
@@ -457,6 +474,47 @@ namespace Ch.Elca.Iiop.Cdr {
 
         #region value-type specific operation
 
+        /// <summary>
+        /// checks, if chunk is finished just before reading possibleStart.
+        /// If yes, checks if possible start is a legal start for a new chunk and
+        /// updates chunk-info's accordingly
+        /// </summary>
+        /// <param name="possibleStart"></param>
+        private void CheckChunkStart(int possibleStart) {
+            if (!IsChunkActive()) {
+                return;
+            }
+            // get active chunk
+            ChunkInfo info = (ChunkInfo)m_chunkStack.Peek();
+            if (info.GetNrOfBytesReadPassBorder() == 4) {
+                // possibleStart must be a chunk-start, because read accross border with last
+                // read-long.
+                if (possibleStart < 0) {
+                    // end tag
+                    // TODO: What to do here?
+                } else if ((possibleStart > 0) && (possibleStart < MIN_VALUE_TAG)) {
+                    info.IsContinuationExpected = false; // set chunk to active
+                    info.SetContinuationLength(possibleStart); // set chunk to start after possible start and contains possibleStart bytes
+                } else if (possibleStart <= MAX_VALUE_TAG) {
+                    // a value type starting here -> current chunk is deactived while nested val type is read
+                    info.IsContinuationExpected = true;
+                }
+            }
+        }
+
+        /// <summary>check if a chunk is active</summary>
+        /// <returns></returns>
+        private bool IsChunkActive() {
+            if (m_chunkStack.Count == 0) { return false; }
+            ChunkInfo info = (ChunkInfo)m_chunkStack.Peek(); // chunks are not nested -> check only topmost
+            if (info.IsContinuationExpected || info.IsFinished) { // not active
+                // is continuationExpected means, that a chunk of a nested value type follows;
+                // the current chunk is inactive up to end of inner value type chunk.
+                return false;
+            } else {
+                return true;
+            }
+        }
         
         /// <summary>
         /// check, if the current position violates chunk constraints
@@ -472,7 +530,7 @@ namespace Ch.Elca.Iiop.Cdr {
         /// </summary>
         private void CheckChunkPosition() {
             if (m_chunkStack.Count == 0) { 
-                return; 
+                return; // no chunking used -> return
             }
             ChunkInfo chunkInfo = (ChunkInfo)m_chunkStack.Peek();
             if (chunkInfo.IsBorderCrossed()) {
@@ -563,7 +621,7 @@ namespace Ch.Elca.Iiop.Cdr {
                         // can't deserialise custom value type, because ICustomMarshalled not implented
                         throw new INTERNAL(909, CompletionStatus.Completed_MayBe);
                     }
-                    HandleChunks(null, chunked);
+//                    HandleChunks(null, chunked);
                     ((ICustomMarshalled) instance).Deserialise(new DataInputStreamImpl(this));
                 }
             }
@@ -590,45 +648,34 @@ namespace Ch.Elca.Iiop.Cdr {
             FieldInfo[] fields = ofType.GetFields(BindingFlags.DeclaredOnly | BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
             foreach (FieldInfo fieldInfo in fields) {
                 if (!fieldInfo.IsNotSerialized) { // do not serialize transient fields
-                    HandleChunks(fieldInfo, chunkedRep);    
+//                    HandleChunks(fieldInfo, chunkedRep);    
                     ReadAndSetField(fieldInfo, instance);
                 }
             }
         }
 
-        /// <summary>check for chunk-starts, continuation chunks</summary>
-        private void HandleChunks(FieldInfo info, bool chunked) {
-            if (!chunked) { 
-                return; 
-            }
-            
-            ChunkInfo chunk = (ChunkInfo) m_chunkStack.Peek();    
-            if ((info == null) || (!CheckForInnerValueType(info))) {
-                if (!chunk.IsContinuationExpected && chunk.IsDataAvailable()) { return; } // chunk is active at the moment, no chunk length follows
-                // the chunk starts/continues here; if the last chunk is finished, i.e. no more data is available, the chunk must continue with a new chunk length
-                int chunkLength = ReadLong(); 
-                chunk.SetContinuationLength(chunkLength);
-                chunk.IsContinuationExpected = false;
-            } else {
-                if (chunk.IsDataAvailable()) { 
-                    // chunk can't end here, data is present in chunk
-                    throw new MARSHAL(912, CompletionStatus.Completed_MayBe);
-                }
-                chunk.IsContinuationExpected = true;
-            }
-        }
+//        /// <summary>check for chunk-starts, continuation chunks</summary>
+//        private void HandleChunks(FieldInfo info, bool chunked) {
+//            if (!chunked) { 
+//                return; 
+//            }
+//            
+//            ChunkInfo chunk = (ChunkInfo) m_chunkStack.Peek();    
+//            if ((info == null) || (!CheckForInnerValueType(info))) {
+//                if (!chunk.IsContinuationExpected && chunk.IsDataAvailable()) { return; } // chunk is active at the moment, no chunk length follows
+//                // the chunk starts/continues here; if the last chunk is finished, i.e. no more data is available, the chunk must continue with a new chunk length
+//                int chunkLength = ReadLong(); 
+//                chunk.SetContinuationLength(chunkLength);
+//                chunk.IsContinuationExpected = false;
+//            } else {
+//                if (chunk.IsDataAvailable()) { 
+//                    // chunk can't end here, data is present in chunk
+//                    throw new MARSHAL(912, CompletionStatus.Completed_MayBe);
+//                }
+//                chunk.IsContinuationExpected = true;
+//            }
+//        }
 
-        /// <summary>check if a chunk is active</summary>
-        /// <returns></returns>
-        private bool IsChunkActive() {
-            if (m_chunkStack.Count == 0) { return false; }
-            ChunkInfo info = (ChunkInfo)m_chunkStack.Peek();
-            if (info.IsContinuationExpected || info.IsFinished) { // not active
-                return false;
-            } else {
-                return true;
-            }
-        }
 
         /// <summary>ends chunk(s) here</summary>
         private void EndChunk() {
@@ -996,6 +1043,7 @@ namespace Ch.Elca.Iiop.Cdr {
                 WriteULong(ValueBaseStream.INDIRECTION_TAG);
                 int offset = (int)(m_baseStream.GetPosition() - info.StreamPos);
                 WriteLong((-1) * offset); // write the nr of bytes the value is before the current position
+                return; // write completed
             }
 
             // prepare to add instance to write to indirection table
