@@ -102,6 +102,15 @@ namespace Ch.Elca.Iiop.IntegrationTests {
             return arg;
         }
     }
+    
+    /// <summary>don't use supported interface here, to check if client is able to detect,
+    /// that the impl class is compatible with interface</summary>
+    public class TestUnknownEchoInterfaceImpl : MarshalByRefObject, TestEchoInterface {
+        public System.Int32 EchoInt(System.Int32 arg) {
+            return arg;
+        }
+    }
+
 
     public interface TestInterfaceA {
         System.String Msg {
@@ -305,6 +314,15 @@ namespace Ch.Elca.Iiop.IntegrationTests {
             return new Adder();
         }
 
+        public object RetrieveAdderAsAny() {
+            return RetrieveAdder();
+        }
+
+        [return: ObjectIdlTypeAttribute(IdlTypeObject.AbstractBase)]
+        public object RetrieveAdderForAbstractInterfaceBase() {
+            return RetrieveAdder();
+        }
+
         public System.Int32 AddWithAdder(Adder adder, System.Int32 sum1, System.Int32 sum2) {
             return adder.Add(sum1, sum2);
         }
@@ -338,6 +356,14 @@ namespace Ch.Elca.Iiop.IntegrationTests {
 
         public TestEchoInterface RetrieveEchoInterfaceImplementor() {
             return new TestAbstrInterfaceImplByMarshalByRef();
+        }
+
+        public TestEchoInterface RetrieveUnknownEchoInterfaceImplementor() {
+            return new TestUnknownEchoInterfaceImpl();
+        }
+
+        public object RetrieveUnknownEchoInterfaceImplementorAsAny() {
+            return RetrieveUnknownEchoInterfaceImplementor();
         }
 
         public TestInterfaceA RetrieveTestInterfaceAImplementor(System.String initialMsg) {

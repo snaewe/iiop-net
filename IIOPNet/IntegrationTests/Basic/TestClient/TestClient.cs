@@ -432,6 +432,26 @@ namespace Ch.Elca.Iiop.IntegrationTests {
         }
 
         [Test]
+        public void TestRemoteObjectPassedAsAny() {
+            Object adderAsObject = m_testService.RetrieveAdderAsAny();
+            Adder adder = (Adder)adderAsObject;
+            System.Int32 arg1 = 1;
+            System.Int32 arg2 = 2;
+            System.Int32 result = adder.Add(1, 2);
+            Assertion.AssertEquals((System.Int32) arg1 + arg2, result);            
+        }
+
+        [Test]
+        public void TestRemoteObjectPassedForAbstractBase() {
+            Object adderAsAbstractBase = m_testService.RetrieveAdderForAbstractInterfaceBase();
+            Adder adder = (Adder)adderAsAbstractBase;
+            System.Int32 arg1 = 1;
+            System.Int32 arg2 = 2;
+            System.Int32 result = adder.Add(1, 2);
+            Assertion.AssertEquals((System.Int32) arg1 + arg2, result);
+        }
+
+        [Test]
         public void TestSendRefOfAProxy() {
             Adder adder = m_testService.RetrieveAdder();
             System.Int32 arg1 = 1;
@@ -539,6 +559,33 @@ namespace Ch.Elca.Iiop.IntegrationTests {
             System.Int32 echo = result.EchoInt(arg);
             Assertion.AssertEquals(arg, echo);
         }
+        [Test]
+        public void TestReceivingUnknownInterfaceImplementor() {
+            TestEchoInterface result = m_testService.RetrieveUnknownEchoInterfaceImplementor();
+            // result is a proxy
+            Assertion.AssertEquals(true, RemotingServices.IsTransparentProxy(result));
+            System.Int32 arg = 23;
+            System.Int32 echo = result.EchoInt(arg);
+            Assertion.AssertEquals(arg, echo);
+        }
+
+
+
+
+        /// <summary>
+        /// Checks unknown implementation class of interface as any
+        /// </summary>
+        [Test]
+        public void TestReceivingUnknownInterfaceImplementorAsAny() {
+            object resultAsAny = m_testService.RetrieveUnknownEchoInterfaceImplementorAsAny();
+            TestEchoInterface result = (TestEchoInterface)resultAsAny;
+            // result is a proxy
+            Assertion.AssertEquals(true, RemotingServices.IsTransparentProxy(result));
+            System.Int32 arg = 23;
+            System.Int32 echo = result.EchoInt(arg);
+            Assertion.AssertEquals(arg, echo);
+        }
+
 
         /// <summary>
         /// Checks if a ByVal actual value for a formal parameter interface is passed correctly
