@@ -1,10 +1,10 @@
-/* ValueTypeImpls.cs
+/* TestRecursiveValType.java
  *
  * Project: IIOP.NET
  * IntegrationTests
  *
  * WHEN      RESPONSIBLE
- * 09.07.03  Dominic Ullmann (DUL), dominic.ullmann -at- elca.ch
+ * 09.11.03  Dominic Ullmann (DUL), dominic.ullmann -at- elca.ch
  *
  * Copyright 2003 ELCA Informatique SA
  * Av. de la Harpe 22-24, 1000 Lausanne 13, Switzerland
@@ -25,45 +25,19 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
-using System;
-
-namespace Ch.Elca.Iiop.IntegrationTests {
+package Ch.Elca.Iiop.IntegrationTests;
 
 
-    [Serializable]
-    public class TestSerializableClassB1Impl : TestSerializableClassB1 {
-    
-    }
+public class TestRecursiveValType implements java.io.Serializable {
+// Variables
+public TestRecursiveValType[] children;
 
-    [Serializable]
-    public class TestSerializableClassB2Impl : TestSerializableClassB2 {
-    
-    }
+public TestRecursiveValType(int nrOfChildren) {
+	children = new TestRecursiveValType[nrOfChildren];
+}
 
-    [Serializable]
-    public class TestSerializableClassCImpl : TestSerializableClassC {    
-    
-        public override System.String Format() {
-            return Msg;
-        }
-    }
-    
-    [Serializable]
-    public class TestSerializableClassDImpl : TestSerializableClassD {    
-    
-    }
-
-    [Serializable]
-    public class TestSerializableMixedValAndBaseImpl : TestSerializableMixedValAndBase {
-    
-
-    }
-    
-    [Serializable]
-    public class TestRecursiveValTypeImpl : TestRecursiveValType {
-    
-    }
-
-
+public TestRecursiveValType() {
+    children = null;
+}
 
 }

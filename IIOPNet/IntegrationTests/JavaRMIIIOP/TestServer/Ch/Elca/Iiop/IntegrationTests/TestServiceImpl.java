@@ -187,5 +187,10 @@ public class TestServiceImpl extends PortableRemoteObject implements TestService
     public void setTestProp(int val) throws RemoteException {
         m_val = val;
     }
+    
+    public TestRecursiveValType TestRecursiveValueType(int nrOfChildren) throws RemoteException {
+        TestRecursiveValType result = new TestRecursiveValType(nrOfChildren);
+        return result;
+    }
         
 }

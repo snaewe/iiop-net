@@ -383,6 +383,15 @@ namespace Ch.Elca.Iiop.IntegrationTests {
             System.Int32 newVal = m_testService.testProp;
             Assertion.AssertEquals(arg, newVal);
         }
+        
+        [Test]
+        public void TestRecursiveValueType() {
+            int nrOfChildren = 5;
+            TestRecursiveValType result = m_testService.TestRecursiveValueType(nrOfChildren);
+            Assertion.AssertNotNull(result);
+            Assertion.AssertNotNull(result.children);
+            Assertion.AssertEquals(nrOfChildren, result.children.Length);
+        }
 
         [Test]
         public void TestFragments() {
@@ -398,7 +407,7 @@ namespace Ch.Elca.Iiop.IntegrationTests {
             for (int i = 0; i < size + 1; i++) {
                 Assertion.AssertEquals((byte)(i % 256), result[i]);
             }
-        }
+        }                
         
     }
 

@@ -87,5 +87,7 @@ public interface TestService extends java.rmi.Remote {
     public int getTestProp() throws RemoteException;
 
     public void setTestProp(int val) throws RemoteException;
+    
+    public TestRecursiveValType TestRecursiveValueType(int nrOfChildren) throws RemoteException;
 
 }
