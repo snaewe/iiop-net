@@ -24,7 +24,7 @@ start-client:
 
 test:
         @$(MAKE) /C start-server
-        @$(DELAY) 300
+        @$(DELAY) 150
         @$(MAKE) /C start-client
         @$(MAKE) /C stop-server
 
