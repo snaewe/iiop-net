@@ -1,12 +1,16 @@
 enum TestEnumForU2 {
-    A1, B1, C1
+    A1, B1, C1, D1, E1
 };
 
 
 union TestUnionE2 switch(TestEnumForU2) {
     case A1: short valE0;
     case B1:
-    case C1: long valE1;
-    // omniorb does use indirection to serialise typecode, if the following is used: TestEnumForU2 valE1;
-    // this is not supported by IIOP.NET at the moment
+    case C1: TestEnumForU2 valE1;
+    // test recursive typecode + indirections
+    case D1: sequence<TestUnionE2> valE2;
+    // test indirections
+    case E1: sequence<TestEnumForU2> valE3;
 };
+
+
