@@ -548,7 +548,7 @@ namespace Ch.Elca.Iiop.IntegrationTests {
         delegate System.Int32 TestOutArgsDelegate(System.Int32 arg, out System.Int32 argOut);
 
         [Test]
-        public void TestOutArgs() {
+        public void TestOutArgsMixed() {
             System.Int32 argOut;
             System.Int32 arg = 1;
             System.Int32 result = m_testService.TestOut(arg, out argOut);
@@ -564,7 +564,14 @@ namespace Ch.Elca.Iiop.IntegrationTests {
             Assertion.AssertEquals(arg, argOut2);
             Assertion.AssertEquals(arg, result2);
         }
-
+        
+        [Test]
+        public void TestOutArgAlone() {
+            System.Int32 result;
+            m_testService.Assign5ToOut(out result);
+            Assertion.AssertEquals(5, result);
+        }
+        
         [Test]
         public void TestOverloadedMethods() {
             System.Int32 arg1int = 1;

@@ -222,6 +222,10 @@ namespace Ch.Elca.Iiop.IntegrationTests {
             argOut = inArg;
             return inArg;
         }
+        
+        public void Assign5ToOut(out System.Int32 argOut) {
+            argOut = 5;
+        }
 
         public int AddOverloaded(int arg1, int arg2) {
             return arg1 + arg2;

@@ -192,6 +192,8 @@ namespace Ch.Elca.Iiop.IntegrationTests {
         System.Int32 TestRef(ref System.Int32 argRef);
 
         System.Int32 TestOut(System.Int32 inArg, out System.Int32 argOut);
+        
+        void Assign5ToOut(out System.Int32 argOut);
 
         int AddOverloaded(int arg1, int arg2);
 
