@@ -3534,6 +3534,9 @@ public class IDLParser{/*@bgen(jjtree)*/
       case 67:
         jj_consume_token(67);
         jj_consume_token(22);
+                  jjtree.closeNodeScope(jjtn000, true);
+                  jjtc000 = false;
+                   jjtn000.setDefault();
         break;
       default:
         jj_la1[63] = jj_gen;

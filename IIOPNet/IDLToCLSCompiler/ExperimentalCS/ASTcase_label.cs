@@ -5,17 +5,38 @@ using System;
 namespace parser {
 
 public class ASTcase_label : SimpleNode {
+  
+  #region IFields
+  
+  private bool m_isDefault = false;
+  
+  #endregion IFields
+  #region IConstructors
+  
   public ASTcase_label(int id) : base(id) {
   }
 
   public ASTcase_label(IDLParser p, int id) : base(p, id) {
   }
 
+  #endregion IConstructors
+  #region IMethods
 
   /** Accept the visitor. **/
   public override Object jjtAccept(IDLParserVisitor visitor, Object data) {
     return visitor.visit(this, data);
   }
+  
+  public bool isDefault() {
+    return m_isDefault;
+  }
+  
+  public void setDefault() {
+    m_isDefault = true;
+  }
+  
+  #endregion IMethods
+  
 }
 
 

@@ -1098,11 +1098,11 @@ void casex() :
 /* Production 76, chapter 3.4, corba 2.3.1 */
 
 void case_label() :
-{}
+{ }
 {
   "case" const_exp() ":"
 |
-  "default" ":"
+  "default" ":" {  jjtThis.setDefault(); }
 }
 
 /* Production 77, chapter 3.4, corba 2.3.1 */
