@@ -56,7 +56,7 @@ namespace Ch.Elca.Iiop.Util {
         #region SFields
 
         private static byte[] s_nonStringifyTag = new byte[] { 44, 115, 116, 114, 61, 102 };
-        private static UnicodeEncoding s_cachedEncoder = new UnicodeEncoding(true, false);
+        private static UnicodeEncoding s_cachedEncoder = new UnicodeEncoding(false, false);
 
         #endregion SFields
         #region IConstructors
