@@ -69,7 +69,7 @@ namespace Ch.Elca.Iiop.IdlCompiler.Action {
         /// </summary>
         private Hashtable m_fwdDeclaredTypes = new Hashtable();
         private Hashtable m_completeTypeTable = new Hashtable();
-        private Hashtable m_typedefTable = new Hashtable();
+
         /// <summary>
         /// for structs, union: only recursion allowed is through an idl sequence -> handle special
         /// </summary>
