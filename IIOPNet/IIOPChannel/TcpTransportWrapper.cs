@@ -31,6 +31,9 @@
 using System;
 using System.IO;
 using System.Net.Sockets;
+using System.Net;
+using System.Threading;
+using System.Diagnostics;
 using Ch.Elca.Iiop.CorbaObjRef;
 
 namespace Ch.Elca.Iiop {
@@ -165,6 +168,137 @@ namespace Ch.Elca.Iiop {
                 
     }
     
+    /// <summary>implementers wait for and accept client connections on their supported transport mechanism.
+    /// </summary>
+    internal class TcpConnectionListener : IServerConnectionListener {
+        
+        #region IFields
+        
+        private ClientAccepted m_clientAcceptCallback;
+        
+        private Thread m_listenerThread;        
+        private TcpListener m_listener;
+        
+        private bool m_listenerActive = false;
+        private bool m_isInitalized = false;
+        
+        #endregion IFields
+        #region IMethods        
+        
+        private void SetupListenerThread() {
+            ThreadStart listenerStart = new ThreadStart(ListenForMessages);
+            m_listenerThread = new Thread(listenerStart);
+            m_listenerThread.IsBackground = true;
+        }
+        
+        private void ListenForMessages() {
+            while (m_listenerActive) {
+                // receive messages
+                TcpClient client = null;
+                try {
+                    client = m_listener.AcceptTcpClient();
+                    if (client != null) { // everything ok
+                        // disable Nagle algorithm, to reduce delay
+                        client.NoDelay = true;
+                        // now process the message of this client
+                        TcpServerTransport transport = new TcpServerTransport(client);
+                        m_clientAcceptCallback(transport);
+                    } else {
+                        Trace.WriteLine("acceptTcpClient hasn't worked");
+                    }
+                } catch (Exception e) {
+                    Debug.WriteLine("Exception in server listener thread: " + e);
+                    if (client != null)  { 
+                        client.Close(); 
+                    }
+                }
+            }
+        }
+        
+        /// <summary><see cref="Ch.Elca.Iiop.IServerConnectionListener.Setup"</summary>
+        public void Setup(ClientAccepted clientAcceptCallback) {
+            if (m_isInitalized) {
+                throw CreateAlreadyListeningException();
+            }
+            m_isInitalized = true;
+            m_clientAcceptCallback = clientAcceptCallback;
+            SetupListenerThread();            
+        }
+        
+        /// <summary><see cref="Ch.Elca.Iiop.IServerConnectionListener.IsInitalized"</summary>
+        public bool IsInitalized() {
+            return m_isInitalized;
+        }
+        
+        /// <summary><see cref="Ch.Elca.Iiop.IServerConnectionListener.StartListening"</summary>
+        public int StartListening(int listeningPortSuggestion) {
+            if (!m_isInitalized) {
+                throw CreateNotInitalizedException();
+            }
+            if (m_listenerActive) {
+                throw CreateAlreadyListeningException();
+            }
+            int resultPort = listeningPortSuggestion;
+            
+            // use IPAddress.Any and not m_myAddress, to allow connections to loopback and normal ip
+            m_listener = new TcpListener(IPAddress.Any, listeningPortSuggestion);            
+            // start TCP-Listening
+            m_listener.Start();
+            if (listeningPortSuggestion == 0) { 
+                // auto-assign port selected
+                resultPort = ((IPEndPoint)m_listener.LocalEndpoint).Port; 
+            }
+            m_listenerActive = true;
+            // start the handler thread
+            m_listenerThread.Start();
+            return resultPort;
+        }
+        
+        /// <summary><see cref="Ch.Elca.Iiop.IServerConnectionListener.IsListening"</summary>
+        public bool IsListening() {
+            return m_listenerActive;    
+        }
+        
+        /// <summary><see cref="Ch.Elca.Iiop.IServerConnectionListener.StopListening"</summary>
+        public void StopListening() {
+            if (!m_listenerActive) {
+                throw CreateNotListeningException();
+            }
+            m_listenerActive = false;
+            if (m_listenerThread != null) { 
+                try {
+                    m_listenerThread.Interrupt(); m_listenerThread.Abort(); 
+                } catch (Exception) { }
+            }
+            if (m_listener != null) { 
+                m_listener.Stop();
+            }
+        }
+        
+        
+        #region Exceptions
+        
+        private Exception CreateNotListeningException() {
+            return new InvalidOperationException("Listener is not listening");    
+        }
+        
+        private Exception CreateAlreadyListeningException() {
+            return new InvalidOperationException("Listener is already listening");    
+        }
+        
+        private Exception CreateNotInitalizedException() {
+            return new InvalidOperationException("Listener not initalized; call setup first");
+        }
+        
+        private Exception CreateAlreadyInitalizedException() {
+            return new InvalidOperationException("Listener already initalized");
+        }
+        
+        #endregion Exceptions        
+        #endregion IMethods
+        
+    }
+
     
 
 

@@ -102,9 +102,34 @@ namespace Ch.Elca.Iiop {
     
     
     
+    /// <summary>delegate to a method, which should be called, when a client connection is accepted</summary>
+    delegate void ClientAccepted(IServerTransport acceptedTransport);
     
-    
-
+    /// <summary>implementers wait for and accept client connections on their supported transport mechanism.
+    /// </summary>
+    interface IServerConnectionListener {
+        
+        #region IMethods
+        
+        /// <summary>initalizes the listener, must only be called once</summary>
+        void Setup(ClientAccepted clientAcceptCallback);
+        
+        /// <summary>has setup already been called</summary>
+        bool IsInitalized();
+        
+        /// <summary>starts the listing for clients; calls ClientAccepted callback, when a client is accepted.</summary>
+        /// <returns>the port the listener is listening on; may be different from listeningPortSuggestion</returns>
+        int StartListening(int listeningPortSuggestion);
+        
+        /// <summary>is this listener active</summary>
+        bool IsListening();
+        
+        /// <summary>stops accepting client connections</summary>
+        void StopListening();
+        
+        #endregion IMethods
+        
+    }
 
 
 }

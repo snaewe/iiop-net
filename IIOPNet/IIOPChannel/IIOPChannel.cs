@@ -37,6 +37,7 @@ using System.Collections;
 using System.Diagnostics;
 using System.Net.Sockets;
 using System.Threading;
+using System.Text;
 using Ch.Elca.Iiop.Util;
 using Ch.Elca.Iiop.CorbaObjRef;
 
@@ -365,15 +366,12 @@ namespace Ch.Elca.Iiop {
         private bool m_useIpAddr = true;
         private IPAddress m_myAddress;
 
-        private TcpListener m_listener;
-        private Thread m_listenerThread;
-
         private IServerChannelSinkProvider m_providerChain;
         /// <summary>the standard transport sink for this channel</summary>
         private IiopServerTransportSink m_transportSink;
+        
+        private IServerConnectionListener m_connectionListener;
 
-	// flag needed because TcpListener.Active is protected and cannot be accessed from the channel
-	private bool m_listenerActive = false;
 
         #endregion IFields
         #region SConstructor
@@ -395,13 +393,12 @@ namespace Ch.Elca.Iiop {
         #endregion SConstructor
         #region IConstructors
 
-        public IiopServerChannel() {
-            InitChannel();
+        public IiopServerChannel() : this(0) {            
         }
 
         public IiopServerChannel(int port) {
             m_port = port;
-            InitChannel();
+            InitChannel(new TcpConnectionListener());
         }
 
         /// <summary>Constructor used by configuration</summary>
@@ -435,7 +432,7 @@ namespace Ch.Elca.Iiop {
                     }
                 }
             }
-            InitChannel();
+            InitChannel(new TcpConnectionListener());
         }
         
         #endregion IConstructors
@@ -480,11 +477,12 @@ namespace Ch.Elca.Iiop {
         }
         
         /// <summary>initalize the channel</summary>
-        private void InitChannel() {
-            if (m_port < 0) { 
+        private void InitChannel(IServerConnectionListener connectionListener) {            
+            if (m_port < 0) {
                 throw new ArgumentException("illegal port to listen on: " + m_port); 
             }
-            SetupChannelData();
+            m_connectionListener = connectionListener;
+            SetupChannelData(m_port);
             // create the default provider chain, if no chain specified
             if (m_providerChain == null) {
                 m_providerChain = new IiopServerFormatterSinkProvider();
@@ -501,7 +499,7 @@ namespace Ch.Elca.Iiop {
             StandardCorbaOps.SetUpHandler();
         }
 
-        private void SetupChannelData() {
+        private void SetupChannelData(int listeningPort) {
             string hostName = Dns.GetHostName();
             IPHostEntry ipEntry = Dns.GetHostByName(hostName);
             IPAddress[] ipAddrs = ipEntry.AddressList;
@@ -510,77 +508,41 @@ namespace Ch.Elca.Iiop {
             }
             m_myAddress = ipAddrs[0];
             if (m_useIpAddr) {
-                m_channelData = new IiopChannelData(m_myAddress.ToString(), m_port);
+                m_channelData = new IiopChannelData(m_myAddress.ToString(), listeningPort);
             } else {
-                m_channelData = new IiopChannelData(hostName, m_port);
+                m_channelData = new IiopChannelData(hostName, listeningPort);
             }
         }
 
         #region Implementation of IChannelReceiver
         public void StartListening(object data) {
-            if (m_listener == null) {
-                SetupListenerThread();
+            
+            if (!m_connectionListener.IsInitalized()) {
+                m_connectionListener.Setup(new ClientAccepted(this.ProcessClientMessages));
             }
-            // start TCP-Listening
-	    if (!m_listenerActive) {
-                m_listener.Start();
-                if (m_port == 0) { 
-                    // auto-assign port selected -> update data for this port
-                    m_port = ((IPEndPoint)m_listener.LocalEndpoint).Port; 
-                    SetupChannelData();
+            // start Listening
+            if (!m_connectionListener.IsListening()) {
+                int listeningPort = m_connectionListener.StartListening(m_port);
+                if (listeningPort != m_port) {
+                    // recreate channel date for this new port
+                    SetupChannelData(listeningPort);
                 }
-    	        m_listenerActive = true;
-                // start the handler thread
-                m_listenerThread.Start();
-	    }
-        }
-
-        private void SetupListenerThread() {
-            // use IPAddress.Any and not m_myAddress, to allow connections to loopback and normal ip
-            m_listener = new TcpListener(IPAddress.Any, m_port);
-            ThreadStart listenerStart = new ThreadStart(ListenForMessages);
-            m_listenerThread = new Thread(listenerStart);
-            m_listenerThread.IsBackground = true;
+            }
         }
 
         /// <summary>
-        /// this method handles the incoming messages
+        /// this method handles the incoming messages; it's called by the IServerListener
         /// </summary>
-        private void ListenForMessages() {
-            while (m_listenerActive) {
-                // receive messages
-                TcpClient client = null;
-                try {
-                    client = m_listener.AcceptTcpClient();
-                    if (client != null) { // everything ok
-                        // disable Nagle algorithm, to reduce delay
-                        client.NoDelay = true;
-                        // now process the message of this client
-                        TcpServerTransport transport = new TcpServerTransport(client);
-                        ServerRequestHandler handler =
-                            new ServerRequestHandler(transport, m_transportSink);
-                        handler.StartMsgHandling();
-                    } else {
-                        Trace.WriteLine("acceptTcpClient hasn't worked");
-                    }
-                } catch (Exception e) {
-                    Debug.WriteLine("Exception in server listener thread: " + e);
-                    if (client != null)  { 
-                        client.Close(); 
-                    }
-                }
-
-            }
+        private void ProcessClientMessages(IServerTransport transport) {
+            ServerRequestHandler handler =
+                new ServerRequestHandler(transport, m_transportSink);
+            handler.StartMsgHandling();
         }
             
         public void StopListening(object data) {
-            m_listenerActive = false;
-            if (m_listenerThread != null) { 
-                try {
-                    m_listenerThread.Interrupt(); m_listenerThread.Abort(); 
-                } catch (Exception) { }
+            if (m_connectionListener.IsListening()) {
+                m_connectionListener.StopListening();
             }
-            if (m_listener != null) { m_listener.Stop(); }
         }
 
         public string[] GetUrlsForUri(string objectURI) {
@@ -650,8 +612,13 @@ namespace Ch.Elca.Iiop {
         #region IMethods
 
         public override String ToString() {
-            return "IIOP-channel data, hostname: " + m_hostName + 
-                   ", port: " + m_port;
+            StringBuilder result = new StringBuilder();
+            result.Append("IIOP-channel data, hostname: " + m_hostName +
+                          ", port: " + m_port);
+            foreach (ITaggedComponent taggedComp in m_additionTaggedComponents) {
+                result.Append("; tagged component with id: " + taggedComp.Id);
+            }
+            return result.ToString();
         }
         
         /// <summary>add passed additional tagged component to all IOR for objects hosted by this appdomain.</summary>
