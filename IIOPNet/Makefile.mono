@@ -10,14 +10,23 @@ build-base:
 	$(MAKE) -C CLSToIDLGenerator -f Makefile.mono build
 	$(MAKE) -C IDLToCLSCompiler -f Makefile.mono build
 
+build-base-debug:
+	$(MAKE) CSFLAGS='/debug+ /d:DEBUG /d:TRACE' -f Makefile.mono build-base
 
 build-tests: build-base
 	$(MAKE) -C IIOPChannel -f Makefile.mono build-unit-tests
 	$(MAKE) -C IntegrationTests -f Makefile.mono build
 
-clean:
+clean-base:
 	$(MAKE) -C IIOPChannel -f Makefile.mono clean
 	$(MAKE) -C CLSToIDLGenerator -f Makefile.mono clean
 	$(MAKE) -C IDLToCLSCompiler -f Makefile.mono clean
+
+clean: clean-base
 	$(MAKE) -C Examples -f Makefile.mono clean
 	$(MAKE) -C IntegrationTests -f Makefile.mono clean
+
+rebuild-base: clean-base build-base
+
+rebuild-base-debug: clean-base build-base-debug
+
