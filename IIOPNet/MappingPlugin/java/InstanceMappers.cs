@@ -45,6 +45,7 @@ namespace Ch.Elca.Iiop.JavaCollectionMappers {
         private static Type s_singleType = typeof(System.Single);
         private static Type s_doubleType = typeof(System.Double);
         private static Type s_charType = typeof(System.Char);
+        private static Type s_stringType = typeof(System.String);
         
         private static Type s_javaBoxInteger = typeof(java.lang._Integer);
         private static Type s_javaBoxShort = typeof(java.lang._Short);
@@ -56,7 +57,8 @@ namespace Ch.Elca.Iiop.JavaCollectionMappers {
 
         /// <summary>checks, if clsPrimitive is one of the cls primitive types, which must be boxed to java boxes
         protected bool IsClsPrimitive(object clsPrimitive) {
-    	    if ((clsPrimitive != null) && (ClsToIdlMapper.IsMappablePrimitiveType(clsPrimitive.GetType()))) {
+    	    if ((clsPrimitive != null) && (ClsToIdlMapper.IsMappablePrimitiveType(clsPrimitive.GetType())) &&
+                (!clsPrimitive.GetType().Equals(s_stringType))) {
     	    	return true;
     	    } else {
     	        return false;
