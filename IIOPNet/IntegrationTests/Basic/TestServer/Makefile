@@ -6,21 +6,23 @@ DELAY = ..\..\Utils\delay.exe
 
 bin         = bin\ 
 
-build: build-server build-idl
+build: build-idl
 
-$(bin):
-        if not exist $@nul mkdir $@
+build-server: $(bin)TestServer.exe
 
-$(bin)IIOPChannel.dll: $(bin) $(IIOPCHANNEL)
+build-idl: IDL\Ch\Elca\Iiop\IntegrationTests\TestService.idl
+
+
+$(bin)IIOPChannel.dll: $(IIOPCHANNEL)
+        if not exist $(bin)nul mkdir $(bin)
         copy /y $(IIOPCHANNEL) $(bin)IIOPChannel.dll
 	if exist $(IIOPCHANNELPDB) copy /y $(IIOPCHANNELPDB) $(bin)IIOPChannel.pdb
 
-build-server: $(bin)IIOPChannel.dll *.cs
-    csc $(CSFLAGS) /t:exe /r:$(bin)IIOPChannel.dll /out:$(bin)TestServer.exe TestService.cs TestServer.cs
-    
+$(bin)TestServer.exe: $(bin)IIOPChannel.dll *.cs
+    csc $(CSFLAGS) /t:exe /r:$(bin)IIOPChannel.dll /out:$(bin)TestServer.exe *.cs
 
-build-idl:
-    ..\..\..\CLSToIDLGenerator\bin\CLSIDLGenerator.exe -o IDL Ch.Elca.Iiop.IntegrationTests.TestService bin\testServer.exe
+IDL\Ch\Elca\Iiop\IntegrationTests\TestService.idl: $(bin)TestServer.exe
+    ..\..\..\CLSToIDLGenerator\bin\CLSIDLGenerator.exe -o IDL Ch.Elca.Iiop.IntegrationTests.TestService $(bin)TestServer.exe
 
 
 start-server:

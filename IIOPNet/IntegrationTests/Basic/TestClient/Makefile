@@ -3,31 +3,33 @@ IIOPCHANNEL = ..\..\..\IIOPChannel\bin\IIOPChannel.dll
 IIOPCHANNELPDB = ..\..\..\IIOPChannel\bin\IIOPChannel.pdb 
 bin         = bin\ 
 
-build: copy-idl compile-idl build-client
+build: build-client
 
-$(bin):
-        if not exist $@nul mkdir $@
+build-client: $(bin)ClientTest.dll
 
-$(bin)IIOPChannel.dll: $(bin) $(IIOPCHANNEL)
-        copy /y $(IIOPCHANNEL) $(bin)IIOPChannel.dll
-        if exist $(IIOPCHANNELPDB) copy /y $(IIOPCHANNELPDB) $(bin)IIOPChannel.pdb
-
-build-client: $(bin)IIOPChannel.dll *.cs
-	if not exist bin\nul mkdir bin
-	csc $(CSFLAGS) /t:library /r:$(NUNIT) /r:bin\IIOPChannel.dll /r:bin\Client.dll /out:bin\ClientTest.dll TestClient.cs ValueTypeImpls.cs
+compile-idl: IDL\Ch\Elca\Iiop\IntegrationTests\TestService.idl
 
 
-copy-idl:
+IDL\Ch\Elca\Iiop\IntegrationTests\TestService.idl: ..\TestServer\IDL\Ch\Elca\Iiop\IntegrationTests\TestService.idl
     if not exist IDL\nul mkdir IDL
     cd IDL
     copy ..\..\..\..\IDLToCLSCompiler\IDL\*.idl .
     xcopy /s /q /y ..\..\TestServer\IDL .
     cd ..
 
-compile-idl:
+$(bin)Client.dll: IDL\Ch\Elca\Iiop\IntegrationTests\TestService.idl
 	cd IDL 
 	..\..\..\..\IDLToCLSCompiler\IDLCompiler\bin\IDLToCLSCompiler.exe -o ..\bin client Ch\Elca\Iiop\IntegrationTests\TestService.idl
 	cd ..
+
+
+$(bin)IIOPChannel.dll: $(IIOPCHANNEL)
+        if not exist $(bin)nul mkdir $(bin)
+        copy /y $(IIOPCHANNEL) $(bin)IIOPChannel.dll
+        if exist $(IIOPCHANNELPDB) copy /y $(IIOPCHANNELPDB) $(bin)IIOPChannel.pdb
+
+$(bin)ClientTest.dll: $(bin)IIOPChannel.dll $(bin)Client.dll *.cs
+	csc $(CSFLAGS) /t:library /r:$(NUNIT) /r:$(bin)IIOPChannel.dll /r:$(bin)Client.dll /out:$(bin)ClientTest.dll TestClient.cs ValueTypeImpls.cs
 
 
 start-client:
