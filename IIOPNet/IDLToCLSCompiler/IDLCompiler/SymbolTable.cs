@@ -50,7 +50,7 @@ public class SymbolTable {
     #region IConstructors
 
     public SymbolTable() {
-        m_currentScope = new Scope("", null);
+        m_currentScope = new Scope("", null, false);
         m_topScope = m_currentScope;
     }
 
@@ -58,14 +58,19 @@ public class SymbolTable {
     #region IMethods
 
     /** opens a scope in the current scope */
-    public Scope openScope(String scopeName) {
+    public Scope openScope(String scopeName, bool isTypeScope) {
         if (m_currentScope.containsChildScope(scopeName)) {
             m_currentScope = m_currentScope.getChildScope(scopeName);
         } else {
-            Scope newScope = new Scope(scopeName, m_currentScope);
+            Scope newScope = new Scope(scopeName, m_currentScope, isTypeScope);
             m_currentScope = newScope;
         }
         return m_currentScope;
+    }
+
+    /** opens a scope in the current scope */
+    private Scope openScope(String scopeName) {
+        return openScope(scopeName, false);
     }
 
     private void openScopes(Stack scopesToOpen) {

@@ -54,15 +54,18 @@ public class Scope {
 
     private Hashtable m_pragmas = new Hashtable();
 
+    private bool m_isTypeScope = false;
+
     #endregion IFields
     #region IConstructors
 
-    public Scope(String name, Scope parentScope) {
+    public Scope(String name, Scope parentScope, bool isTypeScope) {
         m_scopeName = name;
         m_parentScope = parentScope;
         if (m_parentScope != null) {
             m_parentScope.addChildScope(this);
         }
+        m_isTypeScope = isTypeScope;
     }
 
     #endregion IConstructors
@@ -107,7 +110,11 @@ public class Scope {
     
     public IEnumerator getChildScopeEnumeration() {
         return m_childScopes.Values.GetEnumerator();
-    }    
+    }
+    
+    public bool IsTypeScope() {
+        return m_isTypeScope;
+    }
     
     /// <sumamry>
     /// add a full defined symbol. This method is not intended for forwardDeclarations
@@ -123,7 +130,7 @@ public class Scope {
         Symbol newSymbol = new SymbolDefinition(symbolName, this);
         m_symbols[symbolName] = newSymbol;
     }
-    
+   
     /// <sumamry>
     /// add a symbol for a value, like a const or a enumerator of an enumeration.
     /// </summary>
@@ -239,10 +246,12 @@ public class Scope {
         Scope parentOfContainer = getParentScope();
         String nestedScopeName = getScopeName() + "_package";
         if (!(parentOfContainer.containsChildScope(nestedScopeName))) {
-            parentOfContainer.addChildScope(new Scope(nestedScopeName, parentOfContainer));
+            parentOfContainer.addChildScope(new Scope(nestedScopeName, parentOfContainer, false));
         }
         Scope nestedScope = parentOfContainer.getChildScope(nestedScopeName);
-        nestedScope.addSymbol(createdFor.getSymbolName());
+        // To CHECK: Is the following problematic, because a Symboldefinition is added 
+        // and not e.g. a SymbolValue for constants?
+        nestedScope.addSymbol(createdFor.getSymbolName());        
         return nestedScope;
     }
 
