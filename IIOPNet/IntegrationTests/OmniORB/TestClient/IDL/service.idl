@@ -51,10 +51,18 @@ typedef sequence < octet > octet_seq;
 typedef sequence < octet_seq > seq_of_octect_seq;
 
 typedef long longTD;
+typedef string stringList[5];  
+typedef long intList[5];  
+typedef long int2Dim[2][2];  
 
 struct StructWithTypedefMember {
     longTD longtdField;
 };
+
+struct BlobData { 
+  short ident; 
+  longTD data[3]; 
+}; 
 
 
 interface TestService {
@@ -99,6 +107,15 @@ interface TestService {
     
     // test escaped-identitfier rule (_ not transmitted)
     attribute boundedLongSeq _sequence;
+
+    // test for idl arrays
+    
+
+    BlobData EchoBlobData(in BlobData data);    
+    intList EchoIntList5(in intList arg);  
+    int2Dim EchoInt2Dim2x2(in int2Dim arg);  
+    stringList EchoStringList5(in stringList arg);
+
 }; 
 
 

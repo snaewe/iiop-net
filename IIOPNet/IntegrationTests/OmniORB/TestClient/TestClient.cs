@@ -430,6 +430,53 @@ namespace Ch.Elca.Iiop.IntegrationTests {
             Assertion.Assert("service not found", found);
         }
 
+        [Test]
+        public void TestOneDimIdlIntArray() {
+            int[] arg = new int[] { 1, 2, 3, 4, 5 };
+            int[] result = m_testService.EchoIntList5(arg);
+            Assertion.AssertEquals(arg.Length, result.Length);
+            for (int i = 0; i < arg.Length; i++) {
+                Assertion.AssertEquals(arg[i], result[i]);
+            }            
+        }
+
+        [Test]
+        public void TestOneDimIdlStringArray() {
+            string[] arg = new string[] { "1", "2", "3", "4", "5" };
+            string[] result = m_testService.EchoStringList5(arg);
+            Assertion.AssertEquals(arg.Length, result.Length);
+            for (int i = 0; i < arg.Length; i++) {
+                Assertion.AssertEquals(arg[i], result[i]);
+            }            
+        }
+
+        [Test]
+        public void TestTwoDimIdlIntArray() {
+            int[,] arg = new int[,] { {1, 2}, {3, 4} };
+            int[,] result = m_testService.EchoInt2Dim2x2(arg);
+            Assertion.AssertEquals(arg.GetLength(0), result.GetLength(0));
+            Assertion.AssertEquals(arg.GetLength(1), result.GetLength(1));
+            for (int i = 0; i < arg.GetLength(0); i++) {
+                for (int j = 0; j < arg.GetLength(1); j++) {
+                    Assertion.AssertEquals(arg[i,j], result[i,j]);
+                }
+            }            
+        }
+
+        [Test]
+        public void TestStructContainingArray() {
+            BlobData arg = new BlobData();
+            arg.ident = 1;
+            arg.data = new int[] { 1, 2, 3 };
+            BlobData result = m_testService.EchoBlobData(arg);    
+            Assertion.AssertEquals(arg.ident, result.ident);
+            Assertion.AssertEquals(arg.data.Length, result.data.Length);
+            for (int i = 0; i < arg.data.Length; i++) {
+                Assertion.AssertEquals(arg.data[i], result.data[i]);
+            }            
+        }
+        
+
 
     }
 

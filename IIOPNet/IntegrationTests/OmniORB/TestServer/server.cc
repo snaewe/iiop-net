@@ -45,6 +45,13 @@ public:
     CORBA::Octet octet(CORBA::Octet arg);
   boundedLongSeq* sequence();
   void sequence(const boundedLongSeq& _v);  
+
+  BlobData EchoBlobData(const BlobData& data);
+  intList_slice* EchoIntList5(const intList arg);
+  int2Dim_slice* EchoInt2Dim2x2(const int2Dim arg);
+  stringList_slice* EchoStringList5(const stringList arg);
+  
+
 };
 
 CORBA::WChar 
@@ -225,6 +232,27 @@ TestService_impl::sequence() {
 void
 TestService_impl::sequence(const boundedLongSeq& _v) {
     m_intSeq = new ::boundedLongSeq(_v);
+}
+
+
+BlobData
+TestService_impl::EchoBlobData(const BlobData& data) {
+   return data;
+}
+
+intList_slice* 
+TestService_impl::EchoIntList5(const intList arg) {
+    return intList_dup(arg);
+}
+
+int2Dim_slice* 
+TestService_impl::EchoInt2Dim2x2(const int2Dim arg) {
+    return int2Dim_dup(arg);
+}
+
+stringList_slice*
+TestService_impl::EchoStringList5(const stringList arg) {
+    return stringList_dup(arg);
 }
 
 
