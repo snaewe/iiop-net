@@ -155,7 +155,6 @@ public class IDLParser{/*@bgen(jjtree)*/
           default:
             jj_la1[0] = jj_gen;
             goto label_1;
-            break;
           }
         }
         label_1: ;
@@ -167,18 +166,15 @@ public class IDLParser{/*@bgen(jjtree)*/
                 jjtree.closeNodeScope(m_defForPrefix, true); // close inserted definition node scope for prefix
         }
         {if (true) return jjtn000;}
-        break;
       case 0:
         jj_consume_token(0);
                 jjtree.closeNodeScope(jjtn000, true);
                 jjtc000 = false;
                 {if (true) return jjtn000;}
-        break;
       default:
         jj_la1[1] = jj_gen;
         jj_consume_token(-1);
         throw new ParseException();
-        break;
       }
     } catch (Exception jjte000) {
   if (jjtc000) {
@@ -250,7 +246,6 @@ public class IDLParser{/*@bgen(jjtree)*/
                 jj_la1[4] = jj_gen;
                 jj_consume_token(-1);
                 throw new ParseException();
-                break;
               }
             }
             break;
@@ -312,7 +307,6 @@ public class IDLParser{/*@bgen(jjtree)*/
         default:
           jj_la1[5] = jj_gen;
           goto label_2;
-          break;
         }
       }
       label_2: ;
@@ -540,16 +534,13 @@ public class IDLParser{/*@bgen(jjtree)*/
     case 20:
       jj_consume_token(20);
                  {if (true) return 1;}
-      break;
     case 21:
       jj_consume_token(21);
                {if (true) return 2;}
-      break;
     default:
       jj_la1[9] = jj_gen;
       jj_consume_token(-1);
       throw new ParseException();
-      break;
     }
     throw new Error("Missing return statement in function");
   }
@@ -596,7 +587,6 @@ public class IDLParser{/*@bgen(jjtree)*/
         default:
           jj_la1[10] = jj_gen;
           goto label_3;
-          break;
         }
         export();
       }
@@ -680,7 +670,6 @@ public class IDLParser{/*@bgen(jjtree)*/
         jj_la1[11] = jj_gen;
         jj_consume_token(-1);
         throw new ParseException();
-        break;
       }
     } catch (Exception jjte000) {
     if (jjtc000) {
@@ -720,7 +709,6 @@ public class IDLParser{/*@bgen(jjtree)*/
         default:
           jj_la1[12] = jj_gen;
           goto label_4;
-          break;
         }
         jj_consume_token(23);
         interface_name();
@@ -805,7 +793,6 @@ public class IDLParser{/*@bgen(jjtree)*/
         default:
           jj_la1[14] = jj_gen;
           goto label_5;
-          break;
         }
         jj_consume_token(24);
         part = identifier();
@@ -1032,7 +1019,6 @@ public class IDLParser{/*@bgen(jjtree)*/
         default:
           jj_la1[18] = jj_gen;
           goto label_6;
-          break;
         }
         export();
       }
@@ -1118,7 +1104,6 @@ public class IDLParser{/*@bgen(jjtree)*/
         default:
           jj_la1[19] = jj_gen;
           goto label_7;
-          break;
         }
         value_element();
       }
@@ -1238,7 +1223,6 @@ public class IDLParser{/*@bgen(jjtree)*/
         default:
           jj_la1[24] = jj_gen;
           goto label_8;
-          break;
         }
         jj_consume_token(23);
         value_name();
@@ -1282,7 +1266,6 @@ public class IDLParser{/*@bgen(jjtree)*/
         default:
           jj_la1[25] = jj_gen;
           goto label_9;
-          break;
         }
         jj_consume_token(23);
         interface_name();
@@ -1388,7 +1371,6 @@ public class IDLParser{/*@bgen(jjtree)*/
         jj_la1[26] = jj_gen;
         jj_consume_token(-1);
         throw new ParseException();
-        break;
       }
     } catch (Exception jjte000) {
           if (jjtc000) {
@@ -1431,7 +1413,6 @@ public class IDLParser{/*@bgen(jjtree)*/
         jj_la1[27] = jj_gen;
         jj_consume_token(-1);
         throw new ParseException();
-        break;
       }
       type_spec();
       declarators();
@@ -1518,7 +1499,6 @@ public class IDLParser{/*@bgen(jjtree)*/
         default:
           jj_la1[29] = jj_gen;
           goto label_10;
-          break;
         }
         jj_consume_token(23);
         init_param_decl();
@@ -1613,7 +1593,6 @@ public class IDLParser{/*@bgen(jjtree)*/
         jj_la1[30] = jj_gen;
         jj_consume_token(-1);
         throw new ParseException();
-        break;
       }
       jj_consume_token(37);
       const_exp();
@@ -1688,7 +1667,6 @@ public class IDLParser{/*@bgen(jjtree)*/
           jj_la1[31] = jj_gen;
           jj_consume_token(-1);
           throw new ParseException();
-          break;
         }
       }
     } catch (Exception jjte000) {
@@ -1757,7 +1735,6 @@ public class IDLParser{/*@bgen(jjtree)*/
         default:
           jj_la1[32] = jj_gen;
           goto label_11;
-          break;
         }
         jj_consume_token(38);
         xor_expr();
@@ -1801,7 +1778,6 @@ public class IDLParser{/*@bgen(jjtree)*/
         default:
           jj_la1[33] = jj_gen;
           goto label_12;
-          break;
         }
         jj_consume_token(39);
         and_expr();
@@ -1845,7 +1821,6 @@ public class IDLParser{/*@bgen(jjtree)*/
         default:
           jj_la1[34] = jj_gen;
           goto label_13;
-          break;
         }
         jj_consume_token(40);
         shift_expr();
@@ -1890,7 +1865,6 @@ public class IDLParser{/*@bgen(jjtree)*/
         default:
           jj_la1[35] = jj_gen;
           goto label_14;
-          break;
         }
         switch ((jj_ntk==-1)?jj_ntk_calc():jj_ntk) {
         case 41:
@@ -1903,7 +1877,6 @@ public class IDLParser{/*@bgen(jjtree)*/
           jj_la1[36] = jj_gen;
           jj_consume_token(-1);
           throw new ParseException();
-          break;
         }
         add_expr();
       }
@@ -1947,7 +1920,6 @@ public class IDLParser{/*@bgen(jjtree)*/
         default:
           jj_la1[37] = jj_gen;
           goto label_15;
-          break;
         }
         switch ((jj_ntk==-1)?jj_ntk_calc():jj_ntk) {
         case 43:
@@ -1960,7 +1932,6 @@ public class IDLParser{/*@bgen(jjtree)*/
           jj_la1[38] = jj_gen;
           jj_consume_token(-1);
           throw new ParseException();
-          break;
         }
         mult_expr();
       }
@@ -2005,7 +1976,6 @@ public class IDLParser{/*@bgen(jjtree)*/
         default:
           jj_la1[39] = jj_gen;
           goto label_16;
-          break;
         }
         switch ((jj_ntk==-1)?jj_ntk_calc():jj_ntk) {
         case 45:
@@ -2021,7 +1991,6 @@ public class IDLParser{/*@bgen(jjtree)*/
           jj_la1[40] = jj_gen;
           jj_consume_token(-1);
           throw new ParseException();
-          break;
         }
         unary_expr();
       }
@@ -2097,20 +2066,16 @@ public class IDLParser{/*@bgen(jjtree)*/
     case 44:
       jj_consume_token(44);
         {if (true) return UnaryOps.UnaryMinus;}
-      break;
     case 43:
       jj_consume_token(43);
         {if (true) return UnaryOps.UnaryPlus;}
-      break;
     case 48:
       jj_consume_token(48);
         {if (true) return UnaryOps.UnaryNegate;}
-      break;
     default:
       jj_la1[42] = jj_gen;
       jj_consume_token(-1);
       throw new ParseException();
-      break;
     }
     throw new Error("Missing return statement in function");
   }
@@ -2152,7 +2117,6 @@ public class IDLParser{/*@bgen(jjtree)*/
         jj_la1[43] = jj_gen;
         jj_consume_token(-1);
         throw new ParseException();
-        break;
       }
     } catch (Exception jjte000) {
     if (jjtc000) {
@@ -2227,7 +2191,6 @@ public class IDLParser{/*@bgen(jjtree)*/
                                 jjtree.closeNodeScope(jjtn000, true);
                                 jjtc000 = false;
                                 {if (true) throw new NotSupportedException("fixed point literal not yet supported");}
-                break;
               case 36:
               case 89:
               case IDLParserConstants.FLOATONE:
@@ -2248,7 +2211,6 @@ public class IDLParser{/*@bgen(jjtree)*/
                 jj_la1[46] = jj_gen;
                 jj_consume_token(-1);
                 throw new ParseException();
-                break;
               }
             }
             break;
@@ -2283,16 +2245,13 @@ public class IDLParser{/*@bgen(jjtree)*/
     case 49:
       jj_consume_token(49);
            {if (true) return true;}
-      break;
     case 50:
       jj_consume_token(50);
             {if (true) return false;}
-      break;
     default:
       jj_la1[47] = jj_gen;
       jj_consume_token(-1);
       throw new ParseException();
-      break;
     }
     throw new Error("Missing return statement in function");
   }
@@ -2355,7 +2314,6 @@ public class IDLParser{/*@bgen(jjtree)*/
         jj_la1[48] = jj_gen;
         jj_consume_token(-1);
         throw new ParseException();
-        break;
       }
     } catch (Exception jjte000) {
     if (jjtc000) {
@@ -2456,7 +2414,6 @@ public class IDLParser{/*@bgen(jjtree)*/
         jj_la1[49] = jj_gen;
         jj_consume_token(-1);
         throw new ParseException();
-        break;
       }
     } catch (Exception jjte000) {
     if (jjtc000) {
@@ -2515,7 +2472,6 @@ public class IDLParser{/*@bgen(jjtree)*/
         jj_la1[50] = jj_gen;
         jj_consume_token(-1);
         throw new ParseException();
-        break;
       }
     } catch (Exception jjte000) {
     if (jjtc000) {
@@ -2579,7 +2535,6 @@ public class IDLParser{/*@bgen(jjtree)*/
           jj_la1[51] = jj_gen;
           jj_consume_token(-1);
           throw new ParseException();
-          break;
         }
       }
     } catch (Exception jjte000) {
@@ -2627,7 +2582,6 @@ public class IDLParser{/*@bgen(jjtree)*/
         jj_la1[52] = jj_gen;
         jj_consume_token(-1);
         throw new ParseException();
-        break;
       }
     } catch (Exception jjte000) {
     if (jjtc000) {
@@ -2671,7 +2625,6 @@ public class IDLParser{/*@bgen(jjtree)*/
         jj_la1[53] = jj_gen;
         jj_consume_token(-1);
         throw new ParseException();
-        break;
       }
     } catch (Exception jjte000) {
     if (jjtc000) {
@@ -2710,7 +2663,6 @@ public class IDLParser{/*@bgen(jjtree)*/
         default:
           jj_la1[54] = jj_gen;
           goto label_17;
-          break;
         }
         jj_consume_token(23);
         declarator();
@@ -2756,7 +2708,6 @@ public class IDLParser{/*@bgen(jjtree)*/
           jj_la1[55] = jj_gen;
           jj_consume_token(-1);
           throw new ParseException();
-          break;
         }
       }
     } catch (Exception jjte000) {
@@ -2862,7 +2813,6 @@ public class IDLParser{/*@bgen(jjtree)*/
         jj_la1[56] = jj_gen;
         jj_consume_token(-1);
         throw new ParseException();
-        break;
       }
     } catch (Exception jjte000) {
     if (jjtc000) {
@@ -2950,7 +2900,6 @@ public class IDLParser{/*@bgen(jjtree)*/
         jj_la1[57] = jj_gen;
         jj_consume_token(-1);
         throw new ParseException();
-        break;
       }
     } catch (Exception jjte000) {
     if (jjtc000) {
@@ -2993,7 +2942,6 @@ public class IDLParser{/*@bgen(jjtree)*/
           jj_la1[58] = jj_gen;
           jj_consume_token(-1);
           throw new ParseException();
-          break;
         }
       }
     } catch (Exception jjte000) {
@@ -3083,7 +3031,6 @@ public class IDLParser{/*@bgen(jjtree)*/
           jj_la1[59] = jj_gen;
           jj_consume_token(-1);
           throw new ParseException();
-          break;
         }
       }
     } catch (Exception jjte000) {
@@ -3321,7 +3268,6 @@ public class IDLParser{/*@bgen(jjtree)*/
         default:
           jj_la1[60] = jj_gen;
           goto label_18;
-          break;
         }
       }
       label_18: ;
@@ -3451,7 +3397,6 @@ public class IDLParser{/*@bgen(jjtree)*/
         jj_la1[61] = jj_gen;
         jj_consume_token(-1);
         throw new ParseException();
-        break;
       }
     } catch (Exception jjte000) {
     if (jjtc000) {
@@ -3491,7 +3436,6 @@ public class IDLParser{/*@bgen(jjtree)*/
         default:
           jj_la1[62] = jj_gen;
           goto label_19;
-          break;
         }
       }
       label_19: ;
@@ -3534,7 +3478,6 @@ public class IDLParser{/*@bgen(jjtree)*/
         default:
           jj_la1[63] = jj_gen;
           goto label_20;
-          break;
         }
       }
       label_20: ;
@@ -3586,7 +3529,6 @@ public class IDLParser{/*@bgen(jjtree)*/
         jj_la1[64] = jj_gen;
         jj_consume_token(-1);
         throw new ParseException();
-        break;
       }
     } catch (Exception jjte000) {
     if (jjtc000) {
@@ -3658,7 +3600,6 @@ public class IDLParser{/*@bgen(jjtree)*/
         default:
           jj_la1[65] = jj_gen;
           goto label_21;
-          break;
         }
         jj_consume_token(23);
         enumerator();
@@ -3865,7 +3806,6 @@ public class IDLParser{/*@bgen(jjtree)*/
         default:
           jj_la1[69] = jj_gen;
           goto label_22;
-          break;
         }
       }
       label_22: ;
@@ -3953,7 +3893,6 @@ public class IDLParser{/*@bgen(jjtree)*/
         default:
           jj_la1[71] = jj_gen;
           goto label_23;
-          break;
         }
         jj_consume_token(23);
         simple_declarator();
@@ -4022,7 +3961,6 @@ public class IDLParser{/*@bgen(jjtree)*/
         default:
           jj_la1[72] = jj_gen;
           goto label_24;
-          break;
         }
         member();
       }
@@ -4158,7 +4096,6 @@ public class IDLParser{/*@bgen(jjtree)*/
         jj_la1[76] = jj_gen;
         jj_consume_token(-1);
         throw new ParseException();
-        break;
       }
     } catch (Exception jjte000) {
     if (jjtc000) {
@@ -4202,7 +4139,6 @@ public class IDLParser{/*@bgen(jjtree)*/
           default:
             jj_la1[77] = jj_gen;
             goto label_25;
-            break;
           }
           jj_consume_token(23);
           param_dcl();
@@ -4298,7 +4234,6 @@ public class IDLParser{/*@bgen(jjtree)*/
         jj_la1[79] = jj_gen;
         jj_consume_token(-1);
         throw new ParseException();
-        break;
       }
     } finally {
     if (jjtc000) {
@@ -4325,7 +4260,6 @@ public class IDLParser{/*@bgen(jjtree)*/
         default:
           jj_la1[80] = jj_gen;
           goto label_26;
-          break;
         }
         jj_consume_token(23);
         scoped_name();
@@ -4373,7 +4307,6 @@ public class IDLParser{/*@bgen(jjtree)*/
         default:
           jj_la1[81] = jj_gen;
           goto label_27;
-          break;
         }
         jj_consume_token(23);
         contElem = string_literal();
@@ -4439,7 +4372,6 @@ public class IDLParser{/*@bgen(jjtree)*/
         jj_la1[82] = jj_gen;
         jj_consume_token(-1);
         throw new ParseException();
-        break;
       }
     } catch (Exception jjte000) {
     if (jjtc000) {
@@ -4548,7 +4480,6 @@ public class IDLParser{/*@bgen(jjtree)*/
                                                                 }
                                                                 // TODO: // return Long.Parse(octVal, 8);
                                                                 {if (true) throw new NotSupportedException("octal constants are not yet supported");}
-      break;
     case IDLParserConstants.DECIMALINT:
       intToken = jj_consume_token(IDLParserConstants.DECIMALINT);
                                                                 String val = intToken.image;
@@ -4557,7 +4488,6 @@ public class IDLParser{/*@bgen(jjtree)*/
                                                                         val = val.Substring(0, val.Length-1); // remove u, U, L, l
                                                                 }
                                                                 {if (true) return System.Int64.Parse(val);}
-      break;
     case IDLParserConstants.HEXADECIMALINT:
       intToken = jj_consume_token(IDLParserConstants.HEXADECIMALINT);
                                                         String hexVal = intToken.image;
@@ -4568,12 +4498,10 @@ public class IDLParser{/*@bgen(jjtree)*/
                                                                         hexVal = hexVal.Substring(0, hexVal.Length-1); // remove u, U, L, l
                                                                 }
                                                                 {if (true) return System.Int64.Parse(hexVal, System.Globalization.NumberStyles.AllowHexSpecifier);}
-      break;
     default:
       jj_la1[83] = jj_gen;
       jj_consume_token(-1);
       throw new ParseException();
-      break;
     }
     throw new Error("Missing return statement in function");
   }
@@ -4632,27 +4560,22 @@ public class IDLParser{/*@bgen(jjtree)*/
         jj_la1[84] = jj_gen;
         jj_consume_token(-1);
         throw new ParseException();
-        break;
       }
           String floatVal = floatLiteral.image;
       if (floatVal.EndsWith("f") || floatVal.EndsWith("F") || floatVal.EndsWith("l") || floatVal.EndsWith("L")) {
         floatVal = floatVal.Substring(0, floatVal.Length - 1);
       }
       {if (true) return Double.Parse(floatVal);}
-      break;
     case 36:
       jj_consume_token(36);
       {if (true) return Double.NaN;}
-      break;
     case 89:
       jj_consume_token(89);
       {if (true) return Double.PositiveInfinity;}
-      break;
     default:
       jj_la1[85] = jj_gen;
       jj_consume_token(-1);
       throw new ParseException();
-      break;
     }
     throw new Error("Missing return statement in function");
   }
@@ -4682,7 +4605,6 @@ public class IDLParser{/*@bgen(jjtree)*/
         jj_la1[87] = jj_gen;
         jj_consume_token(-1);
         throw new ParseException();
-        break;
       }
     } else {
       switch ((jj_ntk==-1)?jj_ntk_calc():jj_ntk) {
@@ -4700,7 +4622,6 @@ public class IDLParser{/*@bgen(jjtree)*/
           jj_la1[88] = jj_gen;
           jj_consume_token(-1);
           throw new ParseException();
-          break;
         }
         break;
       case IDLParserConstants.FIXED:
@@ -4716,14 +4637,12 @@ public class IDLParser{/*@bgen(jjtree)*/
           jj_la1[89] = jj_gen;
           jj_consume_token(-1);
           throw new ParseException();
-          break;
         }
         break;
       default:
         jj_la1[90] = jj_gen;
         jj_consume_token(-1);
         throw new ParseException();
-        break;
       }
     }
         String fixedVal = fixedLiteral.image;

@@ -291,7 +291,7 @@ public class JavaCharStream
                  return '\\';
               }
            }
-           catch(System.IO.IOException e)
+           catch(System.IO.IOException)
            {
               if (backSlashCnt > 1)
                  backup(backSlashCnt);
@@ -316,7 +316,7 @@ public class JavaCharStream
 
            column += 4;
         }
-        catch(System.IO.IOException e)
+        catch(System.IO.IOException)
         {
            throw new Exception("Invalid escape character at line " + line +
                                          " column " + column + ".");
