@@ -270,6 +270,22 @@ namespace Ch.Elca.Iiop.Idl {
             return modules;
         }
         
+        private static void InitMapClsToIdlSpecial() {
+            s_clsMapSpecial.Add(typeof(System.Int16), "short");
+            s_clsMapSpecial.Add(typeof(System.Int32), "long");
+            s_clsMapSpecial.Add(typeof(System.Int64), "long long");
+            s_clsMapSpecial.Add(typeof(System.Byte), "octet");
+            s_clsMapSpecial.Add(typeof(System.Boolean), "boolean");
+            s_clsMapSpecial.Add(typeof(void), "void");
+
+            s_clsMapSpecial.Add(typeof(System.Single), "float");
+            s_clsMapSpecial.Add(typeof(System.Double), "double");
+            
+            s_clsMapSpecial.Add(typeof(System.Char), "wchar");
+            s_clsMapSpecial.Add(typeof(System.String), "wstring");
+        }
+
+        
         #region Keyword handling
         
         /// <summary>checks, if the given name clashes with a cls keyword</summary>
@@ -288,21 +304,6 @@ namespace Ch.Elca.Iiop.Idl {
             } else {
                 return false;
             }
-        }
-
-        private static void InitMapClsToIdlSpecial() {
-            s_clsMapSpecial.Add(typeof(System.Int16), "short");
-            s_clsMapSpecial.Add(typeof(System.Int32), "long");
-            s_clsMapSpecial.Add(typeof(System.Int64), "long long");
-            s_clsMapSpecial.Add(typeof(System.Byte), "octet");
-            s_clsMapSpecial.Add(typeof(System.Boolean), "boolean");
-            s_clsMapSpecial.Add(typeof(void), "void");
-
-            s_clsMapSpecial.Add(typeof(System.Single), "float");
-            s_clsMapSpecial.Add(typeof(System.Double), "double");
-            
-            s_clsMapSpecial.Add(typeof(System.Char), "wchar");
-            s_clsMapSpecial.Add(typeof(System.String), "wstring");
         }
         
         /// <summary>initalize the CLS keyword-list</summary>
