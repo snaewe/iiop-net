@@ -200,6 +200,11 @@ generate <code>proxy.dll</code> from <code>def.idl</code> in the current directo
 </dd>
 </dl>
 
+<h4>Notes:</h4>
+
+<p>The compiler will warn you that you must provide the implementation for the classes implementing the CORBA valuetypes. The article <a href="http://www.codeproject.com/csharp/iiop_net_and_EJB.asp">Accessing an EJB from .NET Using IIOP.NET: an Example</a> contains a detailed explanation and example (see step 4).
+
+<p>
 <a name="#stringifiedIOR"></a>
 <H2 class="about">How can I access an object using its stringified IOR?</H2>
 
@@ -291,3 +296,13 @@ For each callback, ensure that the following points are fullfilled:
 <li><em>XYZImpl</em> implements all the inherited abstract methods and properties
 </ul>
 
+<a name="#1414"></a>
+<H2 class="about">CORBA system exception, completed: Completed_MayBe minor: 1414</H2>
+
+<P>This exception is thrown by IIOP.NET whenever it receives an object reference of an unknown type.
+The most common errors are:
+<ul>
+<li>the required type was not mapped with the IDLToCLSCompiler
+<li>the assembly containing the mapped type was not found by IIOP.NET (it must be in the same directory or in the GAC)
+<li>the mapped type is a value type and you didn't provide an implementation for it
+</ul>
