@@ -31,6 +31,8 @@ using System;
 using System.Collections;
 using Ch.Elca.Iiop.Cdr;
 using System.Runtime.Remoting;
+using System.Runtime.Remoting.Messaging;
+using Ch.Elca.Iiop.CorbaObjRef;
 
 namespace Ch.Elca.Iiop.Services {
 
@@ -197,7 +199,8 @@ namespace Ch.Elca.Iiop.Services {
         /// This method is called when a request is sent
         /// </summary>
         /// <returns>The ServiceContext to include or null</returns>
-        public abstract ServiceContext InsertContextForRequestToSend();
+        public abstract ServiceContext InsertContextForRequestToSend(IMethodCallMessage msg, Ior targetIor,
+                                                                     GiopConnectionContext conContext);
 
         /// <summary>
         /// This method is called, when a reply is sent
@@ -246,7 +249,8 @@ namespace Ch.Elca.Iiop.Services {
             // nothing to do
         }
         
-        public override ServiceContext InsertContextForRequestToSend() {
+        public override ServiceContext InsertContextForRequestToSend(IMethodCallMessage msg, Ior targetIor,
+                                                                     GiopConnectionContext conContext) {
             // nothing to do
             return null;
         }
@@ -365,13 +369,14 @@ namespace Ch.Elca.Iiop.Services {
         /// Inform the registered interceptors: a request will be sent
         /// </summary>
         /// <returns>The collected contexts</returns>
-        internal ServiceContextCollection InformInterceptorsRequestToSend() {
+        internal ServiceContextCollection InformInterceptorsRequestToSend(IMethodCallMessage msg, Ior targetIor,
+                                                                          GiopConnectionContext conContext) {
             ServiceContextCollection cntxColl = new ServiceContextCollection();
             lock (m_services.SyncRoot) {
                 IEnumerator enumerator = m_services.Values.GetEnumerator();
                 while (enumerator.MoveNext()) {
                     CorbaService service = (CorbaService) enumerator.Current;
-                    ServiceContext cntx = service.InsertContextForRequestToSend();
+                    ServiceContext cntx = service.InsertContextForRequestToSend(msg, targetIor, conContext);
                     if (cntx != null) {
                         cntxColl.AddServiceContext(cntx);
                     }

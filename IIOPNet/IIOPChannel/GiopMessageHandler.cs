@@ -311,11 +311,16 @@ namespace Ch.Elca.Iiop.Tests {
         }
         
         public void TestRequestSerialisation() {
+            // prepare message
             MethodInfo methodToCall = typeof(TestService).GetMethod("Add");
             object[] args = new object[] { ((Int32) 1), ((Int32) 2) };
             string uri = "iiop://localhost:8087/testuri"; // Giop 1.2 will be used because no version spec in uri
             TestMessage msg = new TestMessage(methodToCall, args, uri);
-            
+            // prepare connection context
+            IiopClientConnectionManager manager = IiopClientConnectionManager.GetManager();
+			GiopClientConnectionContext context = manager.AllocateConnection(msg);
+
+            // serialise            
             GiopMessageHandler handler = GiopMessageHandler.GetSingleton();
             MemoryStream targetStream = new MemoryStream();
 
@@ -367,6 +372,8 @@ namespace Ch.Elca.Iiop.Tests {
             // now params are following
             Assertion.AssertEquals(1, cdrIn.ReadLong());
             Assertion.AssertEquals(2, cdrIn.ReadLong());
+            // release connection context
+            manager.ReleaseConnection(msg);
         }
         
         public void TestReplySerialisation() {
@@ -487,6 +494,8 @@ namespace Ch.Elca.Iiop.Tests {
             Assertion.AssertEquals(2, args.Length);
             Assertion.AssertEquals(1, args[0]);
             Assertion.AssertEquals(2, args[1]);
+            // release connection
+            IiopServerConnectionManager.GetManager().UnregisterActiveConnection();
         }
         
         public void TestReplyDeserialisation() {

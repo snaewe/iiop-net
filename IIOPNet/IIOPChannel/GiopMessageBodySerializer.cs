@@ -329,7 +329,8 @@ namespace Ch.Elca.Iiop.MessageHandling {
             GiopVersion version = targetIor.Version;
 
             ServiceContextCollection cntxColl = CosServices.GetSingleton().
-                                                    InformInterceptorsRequestToSend();
+                                                    InformInterceptorsRequestToSend(methodCall, targetIor, 
+                                                                                    IiopConnectionManager.GetCurrentConnectionContext());
             if ((version.Major == 1) && (version.Minor <= 1)) { // for GIOP 1.0 / 1.1
                 SerialiseContext(targetStream, cntxColl); // service context                
             }

@@ -29,7 +29,9 @@
 
 
 using System;
+using System.Runtime.Remoting.Messaging;
 using Ch.Elca.Iiop.Cdr;
+using Ch.Elca.Iiop.CorbaObjRef;
 using omg.org.CORBA;
 
 namespace Ch.Elca.Iiop.Services {
@@ -99,7 +101,8 @@ namespace Ch.Elca.Iiop.Services {
             return null;
         }
 
-        public override ServiceContext InsertContextForRequestToSend() {
+        public override ServiceContext InsertContextForRequestToSend(IMethodCallMessage msg, Ior targetIor,
+                                                                     GiopConnectionContext conContext) {
             // add default codesets ?!
             return new CodeSetServiceContext(DEFAULT_CHAR_SET, DEFAULT_WCHAR_SET);
         }

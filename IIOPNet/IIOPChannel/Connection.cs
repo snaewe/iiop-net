@@ -42,7 +42,7 @@ namespace Ch.Elca.Iiop {
     /// Stores information associated with a GIOP connection,
     /// e.g. the Codesets chosen
     /// </summary>
-    internal class GiopConnectionContext {
+    public class GiopConnectionContext {
 
         #region IFields
 
@@ -54,13 +54,13 @@ namespace Ch.Elca.Iiop {
         #endregion IFields
         #region IConstructors
 
-        public GiopConnectionContext() {
+        internal GiopConnectionContext() {
         }
 
         #endregion IConstructors
         #region IProperties
 
-        internal uint CharSet {
+        public uint CharSet {
             get {
                 return m_charSetChosen;
             }
@@ -69,7 +69,7 @@ namespace Ch.Elca.Iiop {
             }
         }
 
-        internal uint WCharSet {
+        public uint WCharSet {
             get {
                 return m_wcharSetChosen;
             }
