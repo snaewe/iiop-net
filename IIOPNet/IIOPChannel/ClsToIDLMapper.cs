@@ -317,6 +317,12 @@ namespace Ch.Elca.Iiop.Idl {
                 clsType = clsType.GetElementType(); 
             }
             
+            // check for plugged special mappings, e.g. CLS ArrayList -> java.util.ArrayList
+            CustomMapperRegistry cReg = CustomMapperRegistry.GetSingleton();
+            if (cReg.IsCustomMappingPresentForCls(clsType)) {
+                clsType = cReg.GetMappingForCls(clsType).IdlType;
+            }
+
             // check some standard cases
             if (attributes.IsInCollection(s_boxedValAttrType)) { 
                 // load the boxed value-type for this attribute

@@ -100,6 +100,19 @@ namespace Ch.Elca.Iiop.Marshalling {
         /// <remarks>this method is available for efficieny reason; normally other overloaded method is used</remarks>
         protected void Marshal(Type formal, AttributeExtCollection attributes, Serialiser serialiser,
                                object actual, CdrOutputStream targetStream) {
+            
+            // check for plugged special mappings, e.g. CLS ArrayList -> java.util.ArrayList
+            // --> if present, need to convert instance before serialising
+            CustomMapperRegistry cReg = CustomMapperRegistry.GetSingleton();
+            if ((actual != null) && (cReg.IsCustomMappingPresentForCls(actual.GetType()))) {
+                ICustomMapper mapper = cReg.GetMappingForCls(actual.GetType()).Mapper;
+                actual = mapper.CreateIdlForClsInstance(actual);
+                // check, if mapped is instance is assignable to formal -> otherwise will not work on other side ...
+                if (!formal.IsAssignableFrom(actual.GetType())) {
+                    throw new BAD_PARAM(12310, CompletionStatus.Completed_MayBe);
+                }
+            }
+            
             // check for .NET true moredimensional arrays, the must be converted before serialized:
             if ((actual != null) && (actual.GetType().IsArray) && (actual.GetType().GetArrayRank() > 1)) {
                 actual = BoxedArrayHelper.ConvertMoreDimToNestedOneDim((Array)actual);
@@ -151,12 +164,26 @@ namespace Ch.Elca.Iiop.Marshalling {
         protected object Unmarshal(Type formalSer, Type formalSig, AttributeExtCollection attributes,
                                    Serialiser serialiser, CdrInputStream sourceStream) {
             object result = serialiser.Deserialise(formalSer, attributes, sourceStream);
+            
+            // check for plugged special mappings, e.g. CLS ArrayList -> java.util.ArrayList
+            // --> if present, need to convert instance after deserialising
+            CustomMapperRegistry cReg = CustomMapperRegistry.GetSingleton();
+            if ((result != null) && (cReg.IsCustomMappingPresentForIdl(result.GetType()))) {
+                ICustomMapper mapper = cReg.GetMappingForIdl(result.GetType()).Mapper;
+                result = mapper.CreateClsForIdlInstance(result);
+                // check, if mapped instance is assignable to formal in CLS signature -> otherwise will not work.
+                if (!formalSig.IsAssignableFrom(result.GetType())) {
+                    throw new BAD_PARAM(12311, CompletionStatus.Completed_MayBe);
+                }
+            }
+            
             if ((formalSig.IsArray) && (formalSig.GetArrayRank() > 1)) { // a true .NET moredimensional array
                 if ((result != null) && (!result.GetType().IsArray)) {
                     throw new BAD_PARAM(9004, CompletionStatus.Completed_MayBe);
                 }
                 result = BoxedArrayHelper.ConvertNestedOneDimToMoreDim((Array)result);
             }
+
             return result;            
         }
 

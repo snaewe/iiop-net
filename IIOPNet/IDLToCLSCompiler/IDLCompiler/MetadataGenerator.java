@@ -1065,6 +1065,7 @@ public class MetaDataGenerator implements IDLParserVisitor {
         }
         String[] decl = (String[])node.jjtGetChild(1).jjtAccept(this, data);
         FieldBuilder fieldBuild;
+    	Type clsType = GetTypeFromTypeContainer(fieldType);
         for (int i = 0; i < decl.length; i++) {
             if (node.isPrivate()) { // map to protected field
                 String privateName = decl[i];
@@ -1074,10 +1075,10 @@ public class MetaDataGenerator implements IDLParserVisitor {
                     privateName = "m_" + privateName; 
                 }
                 privateName = IdlNaming.MapIdlNameToClsName(privateName);
-                fieldBuild = builder.DefineField(privateName, fieldType.GetClsType(), FieldAttributes.Family);
+                fieldBuild = builder.DefineField(privateName, clsType, FieldAttributes.Family);
             } else { // map to public field
                 String fieldName = IdlNaming.MapIdlNameToClsName(decl[i]);
-                fieldBuild = builder.DefineField(fieldName, fieldType.GetClsType(), FieldAttributes.Public);
+                fieldBuild = builder.DefineField(fieldName, clsType, FieldAttributes.Public);
             }
             // add custom attributes
             for (int j = 0; j < fieldType.GetAttrs().length; j++) {
@@ -1852,22 +1853,23 @@ public class MetaDataGenerator implements IDLParserVisitor {
         if (propType.GetClsType().IsSubclassOf(BoxedValueBase.class.ToType())) {
             propType = mapBoxedValueTypeToUnboxed(propType.GetClsType());
         }
+        Type propTypeCls = GetTypeFromTypeContainer(propType);
         PropertyBuilder propBuild;
         for (int i = 1; i < node.jjtGetNumChildren(); i++) {
             ASTsimple_declarator simpleDecl = (ASTsimple_declarator) node.jjtGetChild(i);
             String propName = IdlNaming.MapIdlNameToClsName(simpleDecl.getIdent());
             propBuild = builder.DefineProperty(propName, PropertyAttributes.None, 
-                                               propType.GetClsType(), System.Type.EmptyTypes);
+                                               propTypeCls, System.Type.EmptyTypes);
             // set the methods for the property
             MethodBuilder getAccessor = builder.DefineMethod("__get_" + propName, 
                                                              MethodAttributes.Virtual | MethodAttributes.Abstract | MethodAttributes.Public | MethodAttributes.HideBySig | MethodAttributes.SpecialName, 
-                                                             propType.GetClsType(), System.Type.EmptyTypes);
+                                                             propTypeCls, System.Type.EmptyTypes);
             propBuild.SetGetMethod(getAccessor);
             MethodBuilder setAccessor = null;
             if (!(node.isReadOnly())) {
                 setAccessor = builder.DefineMethod("__set_" + propName, 
                                                    MethodAttributes.Virtual | MethodAttributes.Abstract | MethodAttributes.Public | MethodAttributes.HideBySig | MethodAttributes.SpecialName, 
-                                                   null, new System.Type[] { propType.GetClsType() });
+                                                   null, new System.Type[] { propTypeCls });
                 propBuild.SetSetMethod(setAccessor);
             }
             
@@ -1995,7 +1997,8 @@ public class MetaDataGenerator implements IDLParserVisitor {
         TypeBuilder typeAtBuild = buildInfo.GetContainterType();
         MethodBuilder methodBuild = typeAtBuild.DefineMethod(methodName,  
                                                              MethodAttributes.Virtual | MethodAttributes.Abstract | MethodAttributes.Public | MethodAttributes.HideBySig,
-                                                             returnType.GetClsType(), paramTypes);
+                                                             GetTypeFromTypeContainer(returnType), 
+                                                             paramTypes);
         // define the paramter-names / attributes
         for (int i = 0; i < params.length; i++) {
             DefineParamter(methodBuild, params[i], i+1);
@@ -2011,19 +2014,35 @@ public class MetaDataGenerator implements IDLParserVisitor {
     /** retrieve the correct type out of ParameterSpec. Consider parameter-direction too */
     private Type GetParamType(ParameterSpec spec) {
         TypeContainer specType = spec.GetParamType();
-        // special handling for BoxedValue types --> unbox it
+    	// special handling for BoxedValue types --> unbox it
         if (specType.GetClsType().IsSubclassOf(BoxedValueBase.class.ToType())) {
             specType = mapBoxedValueTypeToUnboxed(specType.GetClsType());
         }
-        Type resultType;
+
+    	Type clsType = GetTypeFromTypeContainer(specType);
+    	Type resultType;
+    	// get correct type for param direction:
         if (spec.IsIn()) {
-            resultType = specType.GetClsType();
+            resultType = clsType;
         } else { // out or inout parameter
             // need a type which represents a reference to the parametertype
-            Assembly declAssembly = specType.GetClsType().get_Assembly();
-            resultType = declAssembly.GetType(specType.GetClsType().get_FullName() + "&"); // not nice, better solution ?
+            Assembly declAssembly = clsType.get_Assembly();
+            resultType = declAssembly.GetType(clsType.get_FullName() + "&"); // not nice, better solution ?
         }
         return resultType;
+    }
+    
+    /** 
+     * retrieves the cls type out of the type container: considers custom mapping.
+     **/
+    private Type GetTypeFromTypeContainer(TypeContainer specType) {        
+    	Type clsType = specType.GetClsType();
+    	// check for custom Mapping here:
+    	CompilerMappingPlugin plugin = CompilerMappingPlugin.GetSingleton();
+    	if (plugin.IsCustomMappingPresentForIdl(clsType.get_FullName())) {
+    	    clsType = plugin.GetMappingForIdl(clsType.get_FullName());
+    	}    
+    	return clsType;
     }
 
     private void DefineParamter(MethodBuilder methodBuild, ParameterSpec spec, int paramNr) {
