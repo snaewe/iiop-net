@@ -18,7 +18,7 @@ build-idl: $(IDL)
 	copy ..\..\..\..\..\IDLToCLSCompiler\IDL\*.idl $(IDL)
 	xcopy /s /y ..\java\IDL $(IDL)
 	cd $(IDL)
-	$(IDLToCLS) $(TARGETASM) $(Adder)Adder.idl
+	$(IDLToCLS) -o ..\$(BIN) $(TARGETASM) $(Adder)Adder.idl
 	cd ..
 
 build-client: $(BIN)$(TARGETASM).dll $(BIN)IIOPChannel.dll NClient.cs
