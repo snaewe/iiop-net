@@ -200,11 +200,12 @@ namespace Ch.Elca.Iiop.Idl {
         public static string[] MapNamespaceToIdlModules(Type forType) {
             // TODO: exceptions
             string clsNamespace = forType.Namespace;
-            if (clsNamespace == null) {
-                clsNamespace = "";
+            string[] modules;
+            if ((clsNamespace != null) && (!clsNamespace.Trim().Equals(""))) {
+                modules = clsNamespace.Split(new char[] { Char.Parse(".") } );
+            } else {
+                modules = new string[0];
             }
-            string[] modules = clsNamespace.Split(new char[] { Char.Parse(".") } );
-
             return modules;
         }
 
