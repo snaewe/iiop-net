@@ -36,7 +36,7 @@ IntegrationTests:
 REQUIREMENTS
 ------------
 
-IIOP.NET requires Microsoft's .NET Framework 1.0 and a
+IIOP.NET requires Microsoft's .NET Framework 1.0 or 1.1 and a
 a C# compiler.
 
 The IDLToCLSCompiler requires Microsoft's J# redistributable
