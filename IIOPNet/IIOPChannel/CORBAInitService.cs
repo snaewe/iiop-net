@@ -44,6 +44,7 @@ namespace Ch.Elca.Iiop.Services {
 
         #region IMethods
 
+        [FromIdlName("get")]
         MarshalByRefObject _get([WideCharAttribute(false)][StringValueAttribute] string serviceName);
 
         #endregion IMethods
