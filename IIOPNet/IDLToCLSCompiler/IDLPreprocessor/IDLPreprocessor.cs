@@ -95,7 +95,7 @@ namespace Ch.Elca.Iiop.IdlPreprocessor {
         
         }
         
-           #endregion Types
+        #endregion Types
         #region SFields
         
         /// <summary>
@@ -110,6 +110,8 @@ namespace Ch.Elca.Iiop.IdlPreprocessor {
         /// the path to the default IDL files
         /// </summary>
         private static DirectoryInfo s_idlPath; 
+        
+        private static Regex s_tokenStringEx = new Regex(@"\s+");
         
         #endregion SFields
         #region IFields
@@ -232,15 +234,6 @@ namespace Ch.Elca.Iiop.IdlPreprocessor {
             return m_outData;
         }
 
-        /// <summary>
-        /// split a string to tokens; whitespaces are the token separating characters.
-        /// </summary>
-        private String[] SplitTokens(string toSplit) {
-            Regex tokenStringEx = new Regex(@"\s+");
-            return tokenStringEx.Split(toSplit);
-        }
-
-
         #region implementation of the preprocessing actions
 
         /// <summary>processes an include directive</summary>
@@ -249,7 +242,7 @@ namespace Ch.Elca.Iiop.IdlPreprocessor {
         /// </exception>
         private void ProcessInclude(String currentLine) {
             currentLine = currentLine.Trim();
-            String[] tokens = SplitTokens(currentLine);
+            String[] tokens = s_tokenStringEx.Split(currentLine);
             if (tokens.Length != 2) { 
                 throw new IllegalPreprocDirectiveException(currentLine, 
                                                            "file argument not found / more than one argument");
@@ -311,7 +304,7 @@ namespace Ch.Elca.Iiop.IdlPreprocessor {
 
             currentLine = currentLine.Trim();
             // split by whitespaces
-            String[] tokens = SplitTokens(currentLine);
+            String[] tokens = s_tokenStringEx.Split(currentLine);
             if (tokens.Length <= 1) { 
                 throw new IllegalPreprocDirectiveException(currentLine,
                                                   "define missing argument");
@@ -337,7 +330,7 @@ namespace Ch.Elca.Iiop.IdlPreprocessor {
     private void ProcessIfNDef(String currentLine) {        
         currentLine = currentLine.Trim();
         // split by whitespaces
-        String[] tokens = SplitTokens(currentLine);
+        String[] tokens = s_tokenStringEx.Split(currentLine);
         if (tokens.Length <= 1) { 
             throw new IllegalPreprocDirectiveException(currentLine,
                                               "ifndef missing argument");            
@@ -358,7 +351,7 @@ namespace Ch.Elca.Iiop.IdlPreprocessor {
     private void ProcessIfDef(String currentLine) {
         currentLine = currentLine.Trim();
         // split by spaces
-        String[] tokens = SplitTokens(currentLine);
+        String[] tokens = s_tokenStringEx.Split(currentLine);
         if (tokens.Length <= 1) { 
             throw new IllegalPreprocDirectiveException(currentLine,
                                               "ifdef missing argument");            
