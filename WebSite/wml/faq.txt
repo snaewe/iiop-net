@@ -520,6 +520,7 @@ The most common errors are:
 <li>Urs C. Muff
 <li>Andre Natal
 <li>SangHyun Park
+<li>Bill Petheram
 <li>Dirk O. Siebnich
 <li>David Tzur
 </ul>
