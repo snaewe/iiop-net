@@ -125,6 +125,8 @@ o"></A></TD></TR>
 <br>
   <strong><a href="#faq5_6">5.6 How do I implement the _is_a test?</a></strong>
 <br>
+  <strong><a href="#faq5_7">5.7 How do I implement the _non_existant test?</a></strong>
+<br>
   <H2 class="contentPart">6. Accessing .NET Objects from CORBA with IIOP.NET</H2>
   <strong><a href="#faq6_1">6.1 How do I implement the CORBA USER_ID and SYSTEM_ID policies?</a></strong>
 <br>
@@ -358,9 +360,13 @@ the remote object represented by the IOR:
 <p>
 The following method (from Ch.Elca.Iiop in IIOPChannel.dll) returns the stringified IOR of a remote object, given its local proxy:
 <pre>
+    OrbServices orb = OrbServices.GetSingleton();
+    String ior = orb.object_to_string(proxy);
+</pre>
+<p><strong>For version before 13 April 2004 (v1.6.0 and earlier)</strong>, use the following (otherwise deprecated) code:
+<pre>
     String ior = ProxyHelper.GetIorForProxy(proxy);
 </pre>
-<p>This won't obviously work, when the proxy is created manually with RemotingServices.Connect using a .NET URI or a corbaloc URI. In this case the above call will return the URI used in Connect.
 	<br><br><br>
 	<p>
   <strong><a name="faq5_3">5.3 How can I access an object using its corbaloc:iiop address?</a></strong>
@@ -443,12 +449,25 @@ int PerformAddition(int val1, int val2) {
 	<br><br><br>
 	<p>
   <strong><a name="faq5_6">5.6 How do I implement the _is_a test?</a></strong>
-<p><code>_is_a</code> is currently rudimentary supported. The <code>_is_a</code> test can be done in the following (cumbersome) way:
+<p><code>_is_a</code> is realized as
+<pre>
+    OrbServices orb = OrbServices.GetSingleton();
+    bool isA = orb.is_a(proxy, typeof(QueriedInterface));
+</pre>
+<p><strong>For versions before 13 April 2004 (v1.6.0 and earlier), OrbServices is not available!</strong> You shall use the following (otherwise deprecated) pattern:
 <pre>
     bool isA = ((omg.org.CORBA.IObject)proxy)._is_a(
         Ch.Elca.Iiop.Idl.Repository.GetRepositoryID(typeof(InterfaceType)));
 </pre>
-<p>Please avoid this pattern if you can, as we are going to provide a simpler and better integrated implentation for <code>_is_a</code>.
+	<br><br><br>
+	<p>
+  <strong><a name="faq5_7">5.7 How do I implement the _non_existant test?</a></strong>
+<p><code>_non_existent</code> is realized as
+<pre>
+    OrbServices orb = OrbServices.GetSingleton();
+    bool nonExistant = orb.non_existent(proxy);
+</pre>
+<p>OrbServices is available only since 13 April 2004.
 	<br><br><br>
   <H2 class="contentPart">6. Accessing .NET Objects from CORBA with IIOP.NET</H2>
 	<p>
