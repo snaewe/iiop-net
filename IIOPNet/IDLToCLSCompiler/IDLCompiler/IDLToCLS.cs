@@ -33,6 +33,8 @@ using System.Diagnostics;
 using System.Collections;
 using System.Reflection;
 using System.Text;
+using System.CodeDom;
+using System.CodeDom.Compiler;
 using parser;
 using Ch.Elca.Iiop.IdlCompiler.Action;
 using Ch.Elca.Iiop.IdlPreprocessor;
@@ -45,6 +47,12 @@ namespace Ch.Elca.Iiop.IdlCompiler {
 /// </summary>
 public class IDLToCLS {
 
+    #region Constants
+    
+    private const string DEFAULT_CODE_PROVIDER_NAME = 
+        "Microsoft.CSharp.CSharpCodeProvider,System,Version=1.0.5000.0,Culture=neutral,PublicKeyToken=b77a5c561934e089";
+    
+    #endregion Constants
     #region IFields
     
     private String[] m_inputFileNames = null;
@@ -52,6 +60,11 @@ public class IDLToCLS {
     private String m_destination = ".";
 
     private ArrayList m_refAssemblies = new ArrayList();
+    
+    private CodeDomProvider m_vtSkelcodeDomProvider = null;
+    private DirectoryInfo m_vtSkelTd = new DirectoryInfo(".");
+    private bool m_vtSkelOverwrite = false;
+    private bool m_vtSkelEnable = false;
     
     #endregion IFields
     #region IConstructors
@@ -93,6 +106,10 @@ public class IDLToCLS {
         Console.WriteLine("-c xmlfile      specifies custom mappings");
         Console.WriteLine("-d define       defines a preprocessor symbol");
         Console.WriteLine("-idir directory directory containing idl files (multiple -idir allowed)");
+        Console.WriteLine("-vtSkel         enable creation of value type implementation skeletons");
+        Console.WriteLine("-vtSkelProv     The fully qualified name of the codedomprovider to use for value type skeleton generation");
+        Console.WriteLine("-vtSkelTd       The targetDirectory for generated valuetype impl skeletons");
+        Console.WriteLine("-vtSkelO        Overwrite already present valuetype skeleton implementations");
     }
     
     public static void Error(String message) {
@@ -138,6 +155,27 @@ public class IDLToCLS {
                 i++;
                 DirectoryInfo dir = new DirectoryInfo(args[i++]);
                 IDLPreprocessor.SetIdlDir(dir);
+            } else if (args[i].Equals("-vtSkel")) {
+                i++;
+                m_vtSkelEnable = true;
+            } else if (args[i].Equals("-vtSkelProv")) {
+                i++;
+                string providerTypeName = args[i++].Trim();
+                Type codeDomProvType = Type.GetType(providerTypeName, false);
+                if (codeDomProvType == null) {
+                    Error(String.Format("provider {0} not found!",
+                                        providerTypeName));
+                }
+                m_vtSkelcodeDomProvider = 
+                    (CodeDomProvider) Activator.CreateInstance(codeDomProvType);
+                                           
+                
+            } else if (args[i].Equals("-vtSkelTd")) {
+                i++;
+                m_vtSkelTd = new DirectoryInfo(args[i++]);
+            } else if (args[i].Equals("-vtSkelO")) {
+                i++;
+                m_vtSkelOverwrite = true;
             } else {
                 Error(String.Format("Error: invalid option {0}", args[i]));
             }
@@ -156,6 +194,18 @@ public class IDLToCLS {
         
         m_inputFileNames = new String[args.Length - i];
         Array.Copy(args, i, m_inputFileNames, 0, m_inputFileNames.Length);
+        
+        if (m_vtSkelEnable && (m_vtSkelcodeDomProvider == null)) {
+            // load default provider
+            Type defaultCodeDomProvType = Type.GetType(DEFAULT_CODE_PROVIDER_NAME ,false);
+            if (defaultCodeDomProvType == null) {
+                Error(String.Format("Default CodeDom Provider {0} not found!",
+                                    DEFAULT_CODE_PROVIDER_NAME));
+            }
+            m_vtSkelcodeDomProvider = 
+                (CodeDomProvider) Activator.CreateInstance(defaultCodeDomProvType);
+        }
+        
     }
     
     private MemoryStream Preprocess(String fileName) {
@@ -168,7 +218,7 @@ public class IDLToCLS {
         // debug print, create a new memory stream to protect resultProc from beeing manipulated...
         MemoryStream forRead = new MemoryStream();
         resultProc.WriteTo(forRead);
-	forRead.Seek(0, SeekOrigin.Begin); 
+        forRead.Seek(0, SeekOrigin.Begin); 
         Encoding latin1 = Encoding.GetEncoding("ISO-8859-1");
         StreamReader stReader = new StreamReader(forRead, latin1);
         String line = "";
@@ -176,7 +226,7 @@ public class IDLToCLS {
             Debug.WriteLine(line);
             line = stReader.ReadLine();
         }
-	stReader.Close();
+        stReader.Close();
 
         // make sure, resultStream is at the beginning
         resultProc.Seek(0, SeekOrigin.Begin);
@@ -184,7 +234,14 @@ public class IDLToCLS {
     }
 
     public void MapIdl() {
-        MetaDataGenerator generator = new MetaDataGenerator(m_asmPrefix, m_destination, m_refAssemblies);
+        MetaDataGenerator generator = new MetaDataGenerator(m_asmPrefix, m_destination, 
+                                                            m_refAssemblies);
+        if (m_vtSkelEnable) {
+            generator.EnableValueTypeSkeletonGeneration(m_vtSkelcodeDomProvider,
+                                                        m_vtSkelTd,
+                                                        m_vtSkelOverwrite);
+        }
+        
         for (int i = 0; i < m_inputFileNames.Length; i++) {
             Console.WriteLine("processing file: " + m_inputFileNames[i]);
             Trace.WriteLine("");

@@ -34,6 +34,8 @@ using System.Collections;
 using System.Reflection;
 using System.Reflection.Emit;
 using System.Diagnostics;
+using System.CodeDom;
+using System.CodeDom.Compiler;
 using parser;
 using symboltable;
 using Ch.Elca.Iiop.Idl;
@@ -138,6 +140,10 @@ public class MetaDataGenerator : IDLParserVisitor {
 
     /** used to store value types generated: for this types an implementation class must be provided */
     private ArrayList m_valueTypesDefined = new ArrayList();
+    
+    private DirectoryInfo m_valTypeImplSkelTargetDir = new DirectoryInfo(".");
+    private bool m_valTypeImplSkelOverwriteWhenExist = false;
+    private CodeDomProvider m_valTypeImplSkelProvider = null;
 
     #endregion IFields
     #region IConstructors
@@ -157,7 +163,7 @@ public class MetaDataGenerator : IDLParserVisitor {
     }
 
     #endregion IConstructors
-    #region IProperties
+    #region IProperties            
     #endregion IProperties
     #region IMethods
     
@@ -189,8 +195,13 @@ public class MetaDataGenerator : IDLParserVisitor {
     public void SaveAssembly() {
         // save the assembly to disk
         m_asmBuilder.Save(m_targetAsmName + ".dll");
-        // print a remark to remember implementing the valuetypes:
-        PrintNeededValueImplList();
+        
+        if (m_valTypeImplSkelProvider != null) {
+            CreateValueTypeImplSkeletons();
+        } else {
+            // print a remark to remember implementing the valuetypes:
+            PrintNeededValueImplList();
+        }
     }
     
     #if UnitTest
@@ -209,6 +220,49 @@ public class MetaDataGenerator : IDLParserVisitor {
                 Console.WriteLine(((Type)m_valueTypesDefined[i]).FullName);
             }
             Console.WriteLine("");
+        }        
+    }
+    
+    /// <summary>
+    /// Enable the generation of skeletons for corba value types
+    /// </summary>
+    /// <param name="provider">
+    /// The provider to use for generation; must be != null.
+    /// </param>
+    /// <param name="targetDir">
+    /// The targetDirectory for the generated files
+    /// </param>
+    /// <param name="overwriteWhenExist">
+    /// Specify, if an already existing file should be overwritten.
+    /// </param>
+    public void EnableValueTypeSkeletonGeneration(CodeDomProvider provider,
+                                                  DirectoryInfo targetDir,
+                                                  bool overwriteWhenExist) {
+        if (provider == null) {
+            throw new ArgumentException("provider must be != null");
+        }
+        m_valTypeImplSkelProvider = provider;
+        m_valTypeImplSkelTargetDir = targetDir;
+        m_valTypeImplSkelOverwriteWhenExist = overwriteWhenExist;    
+    }    
+    
+    /// <sumamry>
+    /// Creates skeleton implementations for the value type implementations.
+    /// </sumamry>
+    private void CreateValueTypeImplSkeletons() {
+        ValueTypeImplGenerator gen = 
+            new ValueTypeImplGenerator(m_valTypeImplSkelProvider,
+                                       m_valTypeImplSkelTargetDir,
+                                       m_valTypeImplSkelOverwriteWhenExist);
+        if (m_valueTypesDefined.Count > 0) {
+            Console.WriteLine("\nDon't forget to complete implementation for the following value types: \n");
+        }
+        
+        for (int i = 0; i < m_valueTypesDefined.Count; i++) {
+            bool generated = gen.GenerateValueTypeImpl((Type)m_valueTypesDefined[i]);
+            if (generated) {
+                Console.WriteLine(((Type)m_valueTypesDefined[i]).FullName);
+            }
         }        
     }
 
