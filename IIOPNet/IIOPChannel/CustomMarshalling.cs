@@ -377,7 +377,7 @@ namespace Corba {
 
         public void write_any_array([IdlSequenceAttribute][ObjectIdlType(IdlTypeObject.Any)] object[] seq,
                                     int offset, int length) {
-            m_marshaller.Marshal(typeof(object[]), 
+            m_marshaller.Marshal(ReflectionHelper.ObjectArrayType, 
                                  new AttributeExtCollection(new Attribute[] { 
                                          new IdlSequenceAttribute(), 
                                          new ObjectIdlTypeAttribute(IdlTypeObject.Any) } ),
@@ -651,7 +651,7 @@ namespace Corba {
         }
 
         public void read_any_array([IdlSequenceAttribute][ObjectIdlType(IdlTypeObject.Any)] ref object[] seq, int offset, int length) {
-            object[] res = (object[])m_marshaller.Unmarshal(typeof(object[]), 
+            object[] res = (object[])m_marshaller.Unmarshal(ReflectionHelper.ObjectArrayType, 
                                                             new AttributeExtCollection(new Attribute[] { 
                                                                     new IdlSequenceAttribute(),
                                                                     new ObjectIdlTypeAttribute(IdlTypeObject.Any) } ),

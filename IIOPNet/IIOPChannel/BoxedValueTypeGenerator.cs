@@ -414,7 +414,7 @@ namespace Ch.Elca.Iiop.Idl {
             MethodBuilder getMethodBuilder = boxBuilder.DefineMethod(BoxedValueBase.GET_BOXED_TYPE_ATTRIBUTES_METHOD_NAME,
                                                                      MethodAttributes.Static | MethodAttributes.Public |
                                                                         MethodAttributes.HideBySig,
-                                                                     typeof(object[]), new Type[0]);
+                                                                     ReflectionHelper.ObjectArrayType, new Type[0]);
             ILGenerator bodyGen = getMethodBuilder.GetILGenerator();
             bodyGen.Emit(OpCodes.Ldtoken, boxBuilder); // load token for the boxed type
             // now use Type.GetTypeFromHandle to get a Type-object

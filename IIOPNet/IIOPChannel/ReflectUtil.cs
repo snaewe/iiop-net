@@ -66,6 +66,7 @@ namespace Ch.Elca.Iiop.Util {
         private static Type s_doubleType = typeof(System.Double);
         
         private static Type s_objectType = typeof(System.Object);
+        private static Type s_objectArrayType = typeof(System.Object[]);
         private static Type s_valueTypeType = typeof(System.ValueType);
         private static Type s_marshalByRefType = typeof(MarshalByRefObject);
         private static Type s_typeType = typeof(System.Type);
@@ -232,6 +233,13 @@ namespace Ch.Elca.Iiop.Util {
         public static Type ObjectType {
             get {
                 return s_objectType;
+            }
+        }
+        
+        /// <summary>caches typeof(object[])</summary>
+        public static Type ObjectArrayType {
+            get {
+                return s_objectArrayType;
             }
         }
         

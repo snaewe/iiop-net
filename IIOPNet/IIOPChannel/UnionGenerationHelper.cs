@@ -606,10 +606,10 @@ namespace Ch.Elca.Iiop.Idl {
             Type discrTypeCls = m_discrType.GetCompactClsType();
             MethodBuilder methodToBuild = m_ilEmitHelper.AddMethod(m_builder, GET_COVERED_DISCR_VALUES,
                                                                    new ParameterSpec[0],
-                                                                   new TypeContainer(typeof(object[])),
+                                                                   new TypeContainer(ReflectionHelper.ObjectArrayType),
                                                                    MethodAttributes.Private | MethodAttributes.HideBySig | MethodAttributes.Static);
             ILGenerator gen = methodToBuild.GetILGenerator();
-            LocalBuilder resultRef = gen.DeclareLocal(typeof(object[]));
+            LocalBuilder resultRef = gen.DeclareLocal(ReflectionHelper.ObjectArrayType);
 
             gen.Emit(OpCodes.Ldc_I4, m_coveredDiscrs.Count);
             gen.Emit(OpCodes.Newarr, ReflectionHelper.ObjectType);
