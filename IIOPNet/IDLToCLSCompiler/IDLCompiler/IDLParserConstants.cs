@@ -12,7 +12,9 @@ public class IDLParserConstants {
   public const int FLOATTWO = 98;
   public const int CHARACTER = 99;
   public const int STRING = 100;
-  public const int FIXED = 101;
+  public const int WIDESTRING = 101;
+  public const int REPIDVAL_STRING = 102;
+  public const int FIXED = 103;
 
   public const int DEFAULT = 0;
   public const int IN_LINE_COMMENT = 1;
@@ -120,6 +122,8 @@ public class IDLParserConstants {
     "<FLOATTWO>",
     "<CHARACTER>",
     "<STRING>",
+    "<WIDESTRING>",
+    "<REPIDVAL_STRING>",
     "<FIXED>",
   };
 
