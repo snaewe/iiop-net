@@ -7,6 +7,7 @@ Building the test
 -----------------
 
 - set WAS_HOME to the AppServer directory of your websphere application server, e.g. C:\Websphere5\AppServer
+- set NUNITV2_HOME to your NUNIT V2.0 home directory, e.g. C:\Programme\NUnitV2
 - use nmake to build the application and the unit-tests
 
 Deploying the test application containing the test beans
