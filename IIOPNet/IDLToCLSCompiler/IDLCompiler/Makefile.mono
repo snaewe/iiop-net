@@ -1,0 +1,25 @@
+
+IIOPChannel = ../../IIOPChannel/bin/IIOPChannel.dll
+IDLPreprocessor = ../IDLPreprocessor/bin/IDLPreprocessor.dll
+Dest = bin/
+
+
+build: build-exe
+
+build-exe: $(Dest)IDLToCLSCompiler.exe
+
+
+$(Dest)IIOPChannel.dll: $(IIOPChannel)
+	[ -d $(Dest) ] || mkdir $(Dest)
+	cp $(IIOPChannel) $(Dest)IIOPChannel.dll
+
+$(Dest)IDLPreprocessor.dll: $(IDLPreprocessor)
+	[ -d $(Dest) ] || mkdir $(Dest)
+	cp $(IDLPreprocessor) $(Dest)IDLPreprocessor.dll
+
+$(Dest)IDLToCLSCompiler.exe: $(Dest)IIOPChannel.dll $(Dest)IDLPreprocessor.dll *.cs
+	mcs $(CSFLAGS) /res:MappingPluginSchema.xsd /r:$(Dest)IIOPChannel.dll /r:$(Dest)IDLPreprocessor.dll /t:exe /out:$(Dest)IDLToCLSCompiler.exe *.cs
+
+clean:
+	rm -fr $(Dest) 
+
