@@ -1,0 +1,42 @@
+
+
+union TestUnion switch (long) {
+    case 0: short val0;
+    case 1: 
+    case 2: long val1;
+    default: boolean val2;
+};
+
+enum TestEnumForU {
+    A, B, C
+};
+
+union TestUnionE switch(TestEnumForU) {
+    case A: short valE0;
+    case B:
+    case C: TestEnumForU valE1;
+};
+
+enum TestEnumForU2 {
+    A1, B1, C1
+};
+
+
+union TestUnionE2 switch(TestEnumForU2) {
+    case A1: short valE0;
+    case B1:
+    case C1: long valE1;
+    // omniorb does use indirection to serialise typecode, if the following is used: TestEnumForU2 valE1;
+    // this is not supported by IIOP.NET at the moment
+};
+
+interface TestService {
+    TestUnion EchoTestUnion(in TestUnion arg);
+    TestUnionE EchoTestUnionE(in TestUnionE arg);   
+    any EchoAny(in any arg);
+    any RetrieveUnknownUnion();
+}; 
+
+
+
+

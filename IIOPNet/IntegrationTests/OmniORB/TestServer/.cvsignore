@@ -1,0 +1,9 @@
+*.obj
+*.exe
+*.ilk
+*.log
+*.bak
+pid
+serviceSK.cc
+serviceDynSK.cc
+service.hh
