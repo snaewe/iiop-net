@@ -545,7 +545,7 @@ void const_dcl() :
   "const" const_type() ident = identifier() "=" const_exp() { 
 	jjtThis.setIdent(ident);
 	Scope currentScope = m_symbolTable.getCurrentScope();
-	currentScope.addSymbol(ident);
+	currentScope.addSymbolValue(ident);
  }
 }
 
@@ -1131,7 +1131,11 @@ void enum_type() :
 void enumerator() :
 { String ident = ""; }
 {
-  ident = identifier() { jjtThis.setIdent(ident); }
+  ident = identifier() { 
+      jjtThis.setIdent(ident); 
+      Scope currentScope = m_symbolTable.getCurrentScope();
+      currentScope.addSymbolValue(ident);
+  }
 }
 
 /* Production 80, chapter 3.4, corba 2.3.1 */
