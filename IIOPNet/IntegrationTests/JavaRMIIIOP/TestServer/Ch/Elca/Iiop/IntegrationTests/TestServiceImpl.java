@@ -159,6 +159,10 @@ public class TestServiceImpl extends PortableRemoteObject implements TestService
         return arg;
     }
 
+    public TestSerWithInner TestEchoWithInner(TestSerWithInner arg) throws RemoteException {
+        return arg;
+    }
+
     public TestSerializableMixedValAndBase TestMixedSerType(boolean arg1, short arg2, int arg3, String arg4) throws RemoteException {
         TestSerializableMixedValAndBase result = new TestSerializableMixedValAndBase();
         result.basicVal1 = arg1;

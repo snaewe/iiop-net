@@ -371,6 +371,20 @@ namespace Ch.Elca.Iiop.IntegrationTests {
            Assertion.AssertEquals(arg4, result.val1.Msg);
            Assertion.AssertEquals(arg4, result.val2.Msg);
         }
+
+        [Test]
+        public void TestInnerClassSerializable() {
+           TestSerWithInner__AnInnerClass inner = new TestSerWithInner__AnInnerClassImpl();
+           TestSerWithInner arg = new TestSerWithInnerImpl();
+           arg.Field1 = inner;
+           
+           TestSerWithInner result = m_testService.TestEchoWithInner(arg);
+           Assertion.AssertNotNull(result);
+           Assertion.AssertNotNull(result.Field1);
+           Assertion.AssertEquals(arg.Field1.InnerField1,  result.Field1.InnerField1);
+           Assertion.AssertEquals(arg.Field1.InnerField2,  result.Field1.InnerField2);
+        }
+
        
         /// <summary>
         /// Test receiving instances, if formal parameter is System.Object

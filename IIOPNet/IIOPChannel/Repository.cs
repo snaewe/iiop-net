@@ -194,6 +194,7 @@ namespace Ch.Elca.Iiop.Idl {
                 if (elemNameSpace.Length > 0) { 
                     elemNameSpace = "." + elemNameSpace; 
                 } 
+                unqualElemType = ResolveRmiInnerTypeMapping(unqualElemType);
                 // determine name of boxed value type
                 typeName = "org.omg.boxedRMI" + elemNameSpace + ".seq" + arrayRank + "_" + unqualElemType;
                 Debug.WriteLine("mapped rmi id to boxed value type name:" + typeName);
@@ -212,12 +213,17 @@ namespace Ch.Elca.Iiop.Idl {
                     	typeName = "J" + typeName;
                     }
                 }
+                typeName = ResolveRmiInnerTypeMapping(typeName);
                 
                 // do name mapping (e.g. resolve clashes with CLS keywords)
                 typeName = IdlNaming.MapRmiNameToClsName(typeName);
             }
             
             return typeName;
+        }
+        
+        private static string ResolveRmiInnerTypeMapping(string typeName) {            
+            return typeName.Replace(@"\U0024", "__");            
         }
         
         /// <param name="elemNamespace">the namespace of the elementType</param>

@@ -59,6 +59,28 @@ namespace Ch.Elca.Iiop.IntegrationTests {
     }
 
     [Serializable]
+    public class TestSerWithInnerImpl : TestSerWithInner {
+
+        public TestSerWithInnerImpl() {
+        }    
+    
+    }
+
+    [Serializable]
+    public class TestSerWithInner__AnInnerClassImpl : TestSerWithInner__AnInnerClass {    
+
+        public TestSerWithInner__AnInnerClassImpl() {
+        }    
+
+        public TestSerWithInner__AnInnerClassImpl(TestSerWithInner arg) {
+            m_thisU00240 = arg;
+        }    
+
+    
+    }
+
+
+    [Serializable]
     public class TestSerializableMixedValAndBaseImpl : TestSerializableMixedValAndBase {
     
 
