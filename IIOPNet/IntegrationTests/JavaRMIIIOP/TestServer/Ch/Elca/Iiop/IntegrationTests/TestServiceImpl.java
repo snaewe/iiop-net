@@ -33,6 +33,7 @@ import javax.rmi.PortableRemoteObject;
 
 public class TestServiceImpl extends PortableRemoteObject implements TestService {
 
+    private int m_val = 0;
 
     public TestServiceImpl() throws java.rmi.RemoteException {
         super(); // invoke rmi linking and remote object initialization
@@ -159,6 +160,14 @@ public class TestServiceImpl extends PortableRemoteObject implements TestService
 
     public Object GetDoubleAsAny(double val) throws RemoteException {
         return new Double(val);
+    }
+
+    public int getTestProp() throws RemoteException {
+        return m_val;
+    }
+
+    public void setTestProp(int val) throws RemoteException {
+        m_val = val;
     }
         
 }

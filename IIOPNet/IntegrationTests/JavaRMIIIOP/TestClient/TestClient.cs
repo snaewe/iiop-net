@@ -348,12 +348,21 @@ namespace Ch.Elca.Iiop.IntegrationTests {
             Assertion.AssertEquals(result.GetType().FullName, "java.lang.Double");
         }
 
+        [Test]
         public void TestPassingForFormalParamObjectComplexTypes() {           
             TestSerializableClassB1 arg2 = new TestSerializableClassB1Impl();
             arg2.Msg = "msg";
             TestSerializableClassB1 result2 = (TestSerializableClassB1) m_testService.EchoAnything(arg2);
             Assertion.AssertEquals(arg2.Msg, result2.Msg);
-        }        
+        }
+
+        [Test]
+        public void TestProperty() {
+            System.Int32 arg = 10;
+            m_testService.testProp = arg;
+            System.Int32 newVal = m_testService.testProp;
+            Assertion.AssertEquals(arg, newVal);
+        }
         
     }
 

@@ -78,6 +78,10 @@ public interface TestService extends java.rmi.Remote {
 
     public Object GetDoubleAsAny(double val) throws RemoteException;
 
-    public Object EchoAnything(Object arg) throws RemoteException;                
+    public Object EchoAnything(Object arg) throws RemoteException;
+
+    public int getTestProp() throws RemoteException;
+
+    public void setTestProp(int val) throws RemoteException;
 
 }
