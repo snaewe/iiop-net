@@ -89,10 +89,10 @@ public class IDLToCLS {
         Console.WriteLine("options are:");
         Console.WriteLine("-h              help");
         Console.WriteLine("-o directory    output directory (default is `-o .`)");
-        Console.WriteLine("-r assembly     assemblys to check for types in, instead of generating them");
+        Console.WriteLine("-r assembly     assemblies to check for types in, instead of generating them");
         Console.WriteLine("-c xmlfile      specifies custom mappings");
         Console.WriteLine("-d define       defines a preprocessor symbol");
-        Console.WriteLine("-idir directory specifies the directory, containing default idl files");
+        Console.WriteLine("-idir directory directory containing idl files (multiple -idir allowed)");
     }
     
     public static void Error(String message) {

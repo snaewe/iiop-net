@@ -109,7 +109,12 @@ namespace Ch.Elca.Iiop.IdlPreprocessor {
         /// <summary>
         /// the path to the default IDL files
         /// </summary>
-        private static DirectoryInfo s_idlPath; 
+        // private static DirectoryInfo s_idlPath; 
+	
+        /// <summary>
+        /// the path to the IDL files: a List of DirectoryInfo entries
+        /// </summary>
+	private static IList s_idlPath;
         
         private static Regex s_tokenSplitEx = new Regex(@"\s+");
         
@@ -135,8 +140,13 @@ namespace Ch.Elca.Iiop.IdlPreprocessor {
         static IDLPreprocessor() {
             FileInfo locOfPreprocAsm = new FileInfo(typeof(IDLPreprocessor).Assembly.Location);
             string asmDirectory = locOfPreprocAsm.Directory.FullName;
-            s_idlPath = new DirectoryInfo(Path.Combine(asmDirectory, 
-            	                                       ".." + Path.DirectorySeparatorChar + ".." + Path.DirectorySeparatorChar + "IDL"));            
+	    s_idlPath = new ArrayList();
+	    // IDL: first look in current directory
+	    //      then in the %IIOPNet%/IDL directory
+	    //      (assume that IDLtoCLS is in %IIOPNet%/IDLtoCLSCompiler/IDLCompiler/bin)
+	    s_idlPath.Add(new DirectoryInfo("."));
+            s_idlPath.Add(new DirectoryInfo(Path.Combine(asmDirectory, 
+            	                                       ".." + Path.DirectorySeparatorChar + ".." + Path.DirectorySeparatorChar + "IDL")));
         }
         
         #endregion SConstructor
@@ -171,7 +181,7 @@ namespace Ch.Elca.Iiop.IdlPreprocessor {
         
         /// <summary>configures the directory, where to find the default idl files </summary>
         public static void SetIdlDir(DirectoryInfo idlDir) {
-            s_idlPath = idlDir;
+            s_idlPath.Add(idlDir);
         }
         
         #endregion SMethods
@@ -181,6 +191,10 @@ namespace Ch.Elca.Iiop.IdlPreprocessor {
         /// <exception cref="System.IO.IOException">Problem with IO, e.g file not found</exception>
         private void Init(FileInfo toProcess) {
             // for IDL files, latin 1 is used            
+	    if (!toProcess.Exists) {
+		    Console.WriteLine("File not found error: " + toProcess.Name);
+		    Environment.Exit(2);
+	    }
             m_fileStream = new StreamReader(new FileStream(toProcess.FullName,
                                                            FileMode.Open,
                                                            FileAccess.Read, 
@@ -235,6 +249,21 @@ namespace Ch.Elca.Iiop.IdlPreprocessor {
         }
 
         #region implementation of the preprocessing actions
+	
+	/// <summary>find a file using the s_idlPath list as base directory</summary>
+	private FileInfo GetFile(String name) {
+            FileInfo fi = null;
+
+            foreach (DirectoryInfo di in s_idlPath) {
+                fi = new FileInfo(Path.Combine(di.FullName, name));
+                if (fi.Exists) {
+                    return fi;
+                }		
+            }
+            // Return last value (error handling will extract the file name
+            // from the FileInfo)
+            return fi;
+	}
 
         /// <summary>processes an include directive</summary>
         /// <exception cref="IllegalPreprocDirective">
@@ -251,34 +280,20 @@ namespace Ch.Elca.Iiop.IdlPreprocessor {
             // fileToInclude enclosed in quotation mark: search in current directory for file
             // fileToInclude enclosed in <>: search in compiler include dir!
             String fileToInclude = tokens[1];
-            if (fileToInclude.StartsWith("\"")) { 
-                fileToInclude = fileToInclude.Substring(1); 
-                if (fileToInclude.EndsWith("\"")) { 
-                    fileToInclude = fileToInclude.Substring(0, 
-                                                            fileToInclude.Length - 1);
-                } else {
-                    // illegal include: ending " missing
-                    throw new IllegalPreprocDirectiveException(currentLine);
-                }
-                // check if file exists, else search in compiler inlcude dir
-                FileInfo fileInc = new FileInfo(fileToInclude);
-                if (!fileInc.Exists) {
-                	fileToInclude = Path.Combine(s_idlPath.FullName, fileToInclude);
-                }
-            } else if (fileToInclude.StartsWith("<")) {
-                fileToInclude = fileToInclude.Substring(1); 
-                if (fileToInclude.EndsWith(">")) {
-                    fileToInclude = fileToInclude.Substring(0, 
-                                                            fileToInclude.Length - 1);
-                } else {
-                    // illegal include: ending > missing
-                    throw new IllegalPreprocDirectiveException(currentLine);
-                }
-                // combine IDL path
-                fileToInclude = Path.Combine(s_idlPath.FullName, fileToInclude);
-            }            
+	    FileInfo toInclude = null;
+	    char ch0 = fileToInclude[0];
+	    char ch1 = fileToInclude[fileToInclude.Length-1];
+	    fileToInclude = fileToInclude.Substring(1, fileToInclude.Length - 2);
 
-            FileInfo toInclude = new FileInfo(fileToInclude);
+	    if ((ch0 == '"') && (ch1 == '"')) {
+	        toInclude = new FileInfo(fileToInclude);
+	    } else if ((ch0 != '<') || (ch1 != '>')) {
+                throw new IllegalPreprocDirectiveException(currentLine);
+	    }
+	    if ((toInclude == null) || (!toInclude.Exists)) {
+                toInclude = GetFile(fileToInclude);
+	    }
+			    
             IDLPreprocessor includePreproc = new IDLPreprocessor(toInclude, 
                                                                  m_defined);
             includePreproc.Process();
