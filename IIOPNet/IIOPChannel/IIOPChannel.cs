@@ -418,8 +418,17 @@ namespace Ch.Elca.Iiop {
 
         #region Constants
         
+        /// <summary>
+        /// the listening port
+        /// </summary>
         public const string PORT_KEY = "port";
+        /// <summary>
+        /// the ip-address to use to bind-to and to. is also used as basis for machineName, if machineName not specified.
+        /// </summary>
         public const string BIND_TO_KEY = "bindTo";
+        /// <summary>
+        /// use ip-address instead of hostname (only useful, if bindTo is not specified)
+        /// </summary>
         public const string USE_IPADDRESS_KEY = "useIpAddress";
         /// <summary>
         /// used to specify the machine name, which should be used by remote clients to connect to this server side;
@@ -474,6 +483,9 @@ namespace Ch.Elca.Iiop {
         public IiopServerChannel(int port) {
             m_port = port;
             InitChannel(new TcpTransportFactory());
+        }
+        
+        public IiopServerChannel(IDictionary properties) : this(properties, new IiopServerFormatterSinkProvider()) {            
         }
 
         /// <summary>Constructor used by configuration</summary>
@@ -613,10 +625,11 @@ namespace Ch.Elca.Iiop {
         }
 
         private void SetupChannelData(string hostName, int port, ITaggedComponent[] additionalComponents) {
-            m_channelData = new IiopChannelData(hostName, port);
+            IiopChannelData newChannelData = new IiopChannelData(hostName, port);
             if ((additionalComponents != null) && (additionalComponents.Length > 0)){
-                m_channelData.AddAdditionalTaggedComponents(additionalComponents);
+                newChannelData.AddAdditionalTaggedComponents(additionalComponents);
             }
+            m_channelData = newChannelData;
         }
 
         #region Implementation of IChannelReceiver
