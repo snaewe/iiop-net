@@ -178,6 +178,16 @@ namespace Ch.Elca.Iiop {
             } // end while (!fullyRead)
 
             responseStream.Seek(0, SeekOrigin.Begin); // assure stream is read from beginning in formatter
+            byte[] data = new byte[responseStream.Length];
+            responseStream.Read(data, 0, (int)responseStream.Length);
+            for (int i = 0; i < data.Length; i++) {
+                if (i % 16 == 0) { 
+                    Debug.WriteLine(""); 
+                }
+                Debug.Write(data[i] + " ");
+            }
+
+            responseStream.Seek(0, SeekOrigin.Begin); // assure stream is read from beginning in formatter
                                          
         }
 
