@@ -175,6 +175,11 @@ namespace Ch.Elca.Iiop {
             }
 
             if (stringified) {
+                // check for leading appdomain-id in objectId and remove it (e.g. for initial nameing context, this is the case)
+                if ((objectId.IndexOf("/") > 0) && 
+                    (objectId.LastIndexOf("/") + 1 < objectId.Length)) {
+                    objectId = objectId.Substring(objectId.LastIndexOf("/") + 1);
+                }
                 return IorStringifyUtil.Destringify(objectId);
             } else {
                 byte[] result = StringUtil.GetByteArrRepForString(objectId);
