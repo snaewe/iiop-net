@@ -933,9 +933,11 @@ namespace Ch.Elca.Iiop.Marshalling {
                 typeCode = Repository.CreateTypeCodeForType(actualType, attributes);
             }
             typeCode.WriteToStream(targetStream);
-            if (actual != null) {
+            if (actual != null) {            	
                 Marshaller marshaller = Marshaller.GetSingleton();
                 attributes.RemoveAttributeOfType(typeof(ObjectIdlTypeAttribute));
+                AttributeExtCollection typeAttributes = Repository.GetAttrsForTypeCode(typeCode);
+                attributes.InsertAttributes(typeAttributes); // add the attributes belonging to the typecode
                 marshaller.Marshal(actualType, attributes, actual, targetStream);
             }
         }
@@ -947,8 +949,9 @@ namespace Ch.Elca.Iiop.Marshalling {
             // when returning 0 in a mico-server for any, the typecode used is VoidTC
             if ((!(typeCode is NullTC)) && (!(typeCode is VoidTC))) {
                 Type dotNetType = Repository.GetTypeForTypeCode(typeCode);
+                AttributeExtCollection typeAttributes = Repository.GetAttrsForTypeCode(typeCode);
                 Marshaller marshaller = Marshaller.GetSingleton();
-                object result = marshaller.Unmarshal(dotNetType, new AttributeExtCollection(new Attribute[0]), sourceStream);
+                object result = marshaller.Unmarshal(dotNetType, typeAttributes, sourceStream);
                 if (result is BoxedValueBase) {
                     result = ((BoxedValueBase)result).Unbox(); // unboxing the boxed-value, because BoxedValueTypes are internal types, which should not be used by users
                 }

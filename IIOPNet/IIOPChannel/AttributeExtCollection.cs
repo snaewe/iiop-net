@@ -153,6 +153,16 @@ namespace Ch.Elca.Iiop.Util {
         public void InsertAttribute(Attribute attr) {
             m_attributes.Insert(0, attr);
         }
+        
+        /// <summary>
+        /// inserts all attributes from coll into the collection
+        public void InsertAttributes(AttributeExtCollection coll) {
+            IEnumerator enumerator = coll.GetEnumerator();
+            while (enumerator.MoveNext()) {
+                Attribute attr = (Attribute) enumerator.Current;
+                InsertAttribute(attr);
+            }
+        }
 
         public void AddMissingAttributes(object[] toAdd) {
             foreach (Attribute attr in toAdd) {

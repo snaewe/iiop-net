@@ -224,12 +224,21 @@ namespace omg.org.CORBA {
         protected virtual void ReadFromStream(CdrInputStream cdrStream) { }
 
         internal abstract Type GetClsForTypeCode();
+        
+
+        /// <summary>
+        /// returns the CLS attributes, which descirbes the type together with cls-type
+        /// </summary>
+        /// <returns>a collection of Attributes</returns>
+        internal virtual AttributeExtCollection GetClsAttributesForTypeCode() {
+            return new AttributeExtCollection();
+        }
 
         
         /// <summary>
         /// returns the CLS attributes, which descirbes the type together with cls-type
         /// </summary>
-        /// <returns></returns>
+        /// <returns>a collection of attribute-builders</returns>
         internal virtual CustomAttributeBuilder[] GetAttributes() {
             return new CustomAttributeBuilder[0];
         }
@@ -560,6 +569,14 @@ namespace omg.org.CORBA {
         internal override Type GetClsForTypeCode() {
             return typeof(System.Char);
         }
+        
+        internal override AttributeExtCollection GetClsAttributesForTypeCode() {
+            return new AttributeExtCollection(new Attribute[] { new WideCharAttribute(false) });
+        }
+
+        internal override CustomAttributeBuilder[] GetAttributes() {
+            return new CustomAttributeBuilder[] { new WideCharAttribute(false).CreateAttributeBuilder() };
+        }
 
         #endregion IMethods
 
@@ -620,13 +637,21 @@ namespace omg.org.CORBA {
         
         #region IConstructors
         
-        public WCharTC() : base(TCKind.tk_char) { }
+        public WCharTC() : base(TCKind.tk_wchar) { }
 
         #endregion IConstructors
         #region IMethods
         
         internal override Type GetClsForTypeCode() {
             return typeof(System.Char);
+        }
+        
+        internal override AttributeExtCollection GetClsAttributesForTypeCode() {
+            return new AttributeExtCollection(new Attribute[] { new WideCharAttribute(true) });
+        }
+
+        internal override CustomAttributeBuilder[] GetAttributes() {
+            return new CustomAttributeBuilder[] { new WideCharAttribute(true).CreateAttributeBuilder() };
         }
 
         #endregion IMethods
@@ -656,6 +681,17 @@ namespace omg.org.CORBA {
         internal override Type GetClsForTypeCode() {
             return typeof(System.String);
         }
+        
+        internal override AttributeExtCollection GetClsAttributesForTypeCode() {
+            return new AttributeExtCollection(new Attribute[] { new WideCharAttribute(false), 
+                                                                new StringValueAttribute() });
+        }
+
+        internal override CustomAttributeBuilder[] GetAttributes() {
+            return new CustomAttributeBuilder[] { new WideCharAttribute(false).CreateAttributeBuilder(),
+                                                  new StringValueAttribute().CreateAttributeBuilder() };
+        }
+
 
         #endregion IMethods
 
@@ -685,6 +721,17 @@ namespace omg.org.CORBA {
         internal override Type GetClsForTypeCode() {
             return typeof(System.String);
         }
+        
+        internal override AttributeExtCollection GetClsAttributesForTypeCode() {
+            return new AttributeExtCollection(new Attribute[] { new WideCharAttribute(true), 
+                                                                new StringValueAttribute() });
+        }
+
+        internal override CustomAttributeBuilder[] GetAttributes() {
+            return new CustomAttributeBuilder[] { new WideCharAttribute(true).CreateAttributeBuilder(),
+                                                  new StringValueAttribute().CreateAttributeBuilder() };
+        }
+
 
         #endregion IMethods
 
@@ -956,10 +1003,13 @@ namespace omg.org.CORBA {
             return arrayType;
         }
 
+        internal override AttributeExtCollection GetClsAttributesForTypeCode() {
+            return new AttributeExtCollection(new Attribute[] { new IdlSequenceAttribute() });
+        }
+
         internal override CustomAttributeBuilder[] GetAttributes() {
             return new CustomAttributeBuilder[] { new IdlSequenceAttribute().CreateAttributeBuilder() };
         }
-
 
         #endregion IMethods
 
@@ -1063,7 +1113,7 @@ namespace omg.org.CORBA {
         
         public StructTC(CdrInputStream cdrStream) : base(cdrStream, TCKind.tk_struct) { }
         public StructTC(string repositoryID, string name, StructMember[] members) : base(repositoryID, name, members, TCKind.tk_struct) { }
-
+        
         #endregion IConstructors
 
     }

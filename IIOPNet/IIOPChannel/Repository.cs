@@ -414,7 +414,14 @@ namespace Ch.Elca.Iiop.Idl {
                 return (typeCode as TypeCodeImpl).GetClsForTypeCode();
             }
         }
-
+        
+        public static AttributeExtCollection GetAttrsForTypeCode(omg.org.CORBA.TypeCode typeCode) {
+            if (!(typeCode is omg.org.CORBA.TypeCodeImpl)) { 
+                return new AttributeExtCollection(); 
+            } else {
+                return (typeCode as TypeCodeImpl).GetClsAttributesForTypeCode();
+            }
+        }
         #endregion for typecodes
         #endregion SMethods
 
