@@ -256,16 +256,20 @@ namespace Ch.Elca.Iiop.Marshalling {
             
             // ... then the outargs
             ArrayList demarshalledOutArgs = new ArrayList();
+            bool outArgFound = false;
             foreach (ParameterInfo paramInfo in parameters) {
                 if (IsOutParam(paramInfo) || IsRefParam(paramInfo)) {
                     object unmarshalledParam = Unmarshal(paramInfo, sourceStream);
                     demarshalledOutArgs.Add(unmarshalledParam);
+                    outArgFound = true;
+                } else {
+                    demarshalledOutArgs.Add(null); // for an in param null must be added to out-args
                 }
             }
 
             // prepare the result
             outArgs = demarshalledOutArgs.ToArray();
-            if (outArgs == null) { 
+            if ((!outArgFound) || (outArgs == null)) { 
                 outArgs = new object[0]; 
             }
             return retValue;
