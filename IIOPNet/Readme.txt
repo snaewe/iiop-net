@@ -34,6 +34,14 @@ IIOP.NET requires Microsoft's .NET Framework 1.0 and a
 a C# compiler.
 
 
+INSTALLATION
+------------
+
+To run the tutorials, you must copy the files "ir.idl" and "orb.idl"
+in the ./IDL directory. You will find these two files as part of your
+Java SDK in the %JAVAHOME%\lib directory.
+
+
 BUILDING IIOP.NET
 -----------------
 
