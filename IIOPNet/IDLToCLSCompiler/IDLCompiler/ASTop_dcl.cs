@@ -68,6 +68,11 @@ public class ASTop_dcl : SimpleNodeWithIdent {
         return m_opAttr;
     }
     
+    public override string GetIdentification() {
+        return "method " + getIdent() + " " + 
+                   ((SimpleNode)jjtGetParent()).GetIdentification();
+    }
+    
     #endregion IMethods
     
 }

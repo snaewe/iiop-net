@@ -84,6 +84,17 @@ public class SimpleNode : Node {
       }
     }
   }
+  
+  /// <summary>
+  /// provides a description of the node, which allows the user to find
+  /// the idl part from which this node has been created.  
+  /// </summary>
+  /// <remarks>
+  /// This method is needed for construction of error messages.
+  /// </remarks>
+  public virtual string GetIdentification() {
+      return "";
+  }
 }
 
 

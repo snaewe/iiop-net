@@ -16,6 +16,13 @@ public class ASTparam_dcl : SimpleNode {
   public override Object jjtAccept(IDLParserVisitor visitor, Object data) {
     return visitor.visit(this, data);
   }
+  
+  public override string GetIdentification() {      
+      return "parameter " + 
+             ((ASTsimple_declarator)jjtGetChild(2)).getIdent() +
+             " in " + ((SimpleNode)jjtGetParent()).GetIdentification();
+  }
+  
 }
 
 

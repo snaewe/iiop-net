@@ -2257,8 +2257,8 @@ public class MetaDataGenerator : IDLParserVisitor {
         // determine name and type
         TypeContainer paramType = (TypeContainer)node.jjtGetChild(1).jjtAccept(this, data);
         if (paramType == null) {
-            throw new InvalidIdlException(String.Format("parameter type not (yet) defined for paramter {0}", 
-                                                        ((ASTsimple_declarator)node.jjtGetChild(2)).getIdent()));
+            throw new InvalidIdlException(String.Format("parameter type not (yet) defined for {0}", 
+                                                        node.GetIdentification()));
         }
         paramType = ReplaceByCustomMappedIfNeeded(paramType);
         String paramName = IdlNaming.MapIdlNameToClsName(((ASTsimple_declarator)node.jjtGetChild(2)).getIdent());
