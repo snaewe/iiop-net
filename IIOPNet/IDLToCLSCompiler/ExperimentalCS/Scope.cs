@@ -219,6 +219,21 @@ public class Scope {
         }
     }
 
+    /// <summary>
+    /// create or retrieve a Scope for nested IDL-types, which may not be nested inside the mapped CLS type of the container scope.
+    /// </summary>
+    /// <param name="cratedFor">the Symbol for which the nested scope should be created / retrieved</param>
+    public Scope GetScopeForNested(Symbol createdFor) {
+        Scope parentOfContainer = getParentScope();
+        String nestedScopeName = getScopeName() + "_package";
+        if (!(parentOfContainer.containsChildScope(nestedScopeName))) {
+            parentOfContainer.addChildScope(new Scope(nestedScopeName, parentOfContainer));
+        }
+        Scope nestedScope = parentOfContainer.getChildScope(nestedScopeName);
+        nestedScope.addSymbol(createdFor.getSymbolName());
+        return nestedScope;
+    }
+
     public override String ToString() {
         String result = "scope begins: " + m_scopeName + "\n";
         // symbols
