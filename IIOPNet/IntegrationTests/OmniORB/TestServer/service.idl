@@ -63,6 +63,7 @@ interface TestService {
     any RetrieveWStringAsAny(in wstring arg);
 
     any RetrieveStructWithTypedefMember(in long elemVal);
+    any RetrieveTypedefedSeq(in long nrOfElems, in long memberVal);
 
     wchar EchoWChar(in wchar arg);
     wstring EchoWString(in wstring arg);

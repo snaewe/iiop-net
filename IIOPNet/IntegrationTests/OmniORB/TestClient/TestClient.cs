@@ -175,6 +175,13 @@ namespace Ch.Elca.Iiop.IntegrationTests {
             Assertion.AssertNotNull("test struct with typedef null", result);
             Assertion.AssertEquals(typeof(StructWithTypedefMember), result.GetType());            
             Assertion.AssertEquals(memberElem, ((StructWithTypedefMember)result).longtdField);
+            // test to receive a typedefed type directly
+            int nrOfElems = 1;
+            object result2 = m_testService.RetrieveTypedefedSeq(nrOfElems, memberElem);
+            Assertion.AssertNotNull("typedefed seq null", result2);
+            Assertion.AssertEquals(typeof(int[]), result2.GetType());
+            Assertion.AssertEquals(nrOfElems, ((int[])result2).Length);
+            Assertion.AssertEquals(memberElem, ((int[])result2)[0]);
         }
 
         [Test]
