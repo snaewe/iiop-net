@@ -747,20 +747,20 @@ public class MetaDataGenerator implements IDLParserVisitor {
             // properties
             PropertyInfo[] properties = ifType.GetProperties(BindingFlags.Instance | BindingFlags.Public);
             for (int j = 0; j < properties.length; j++) {
-                PropertyBuilder propBuild = classBuilder.DefineProperty(properties[i].get_Name(), PropertyAttributes.None,
-                                                                        properties[i].get_PropertyType(), System.Type.EmptyTypes);
+                PropertyBuilder propBuild = classBuilder.DefineProperty(properties[j].get_Name(), PropertyAttributes.None,
+                                                                        properties[j].get_PropertyType(), System.Type.EmptyTypes);
 
 
                 // set the methods for the property
-                MethodBuilder getAccessor = classBuilder.DefineMethod("__get_" + properties[i].get_Name(), 
+                MethodBuilder getAccessor = classBuilder.DefineMethod("__get_" + properties[j].get_Name(), 
                                                                       MethodAttributes.Virtual | MethodAttributes.Abstract | MethodAttributes.Public | MethodAttributes.HideBySig | MethodAttributes.SpecialName, 
-                                                                      properties[i].get_PropertyType(), System.Type.EmptyTypes);
+                                                                      properties[j].get_PropertyType(), System.Type.EmptyTypes);
                 propBuild.SetGetMethod(getAccessor);
                 MethodBuilder setAccessor = null;
-                if (properties[i].get_CanWrite()) {
-                    setAccessor = classBuilder.DefineMethod("__set_" + properties[i].get_Name(), 
+                if (properties[j].get_CanWrite()) {
+                    setAccessor = classBuilder.DefineMethod("__set_" + properties[j].get_Name(), 
                                                             MethodAttributes.Virtual | MethodAttributes.Abstract | MethodAttributes.Public | MethodAttributes.HideBySig | MethodAttributes.SpecialName, 
-                                                            null, new System.Type[] { properties[i].get_PropertyType() });
+                                                            null, new System.Type[] { properties[j].get_PropertyType() });
                     propBuild.SetSetMethod(setAccessor);
                 }
             
@@ -770,7 +770,7 @@ public class MetaDataGenerator implements IDLParserVisitor {
                     valParam = setAccessor.DefineParameter(1, ParameterAttributes.None, "value"); 
                 }
                 // add custom attributes
-                Object[] attrs = properties[i].GetCustomAttributes(true);
+                Object[] attrs = properties[j].GetCustomAttributes(true);
                 for (int k = 0; k < attrs.length; k++) {
                     if (attrs[k] instanceof IIdlAttribute) {
                         CustomAttributeBuilder attrBuilder = ((IIdlAttribute) attrs[k]).CreateAttributeBuilder();
