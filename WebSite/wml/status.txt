@@ -64,6 +64,9 @@ Interoperation with the following ORBs has been reported:
 	<report version="4.0.2" color="green">ok</report>
 	<report version="4.0.3" color="green">ok</report>
 </software>
+<software name="JacORB">
+	<report version="" color="green">JacORB doesn't support Anys with typecode 30 (see <a href="faq.html#faq7_11">FAQ 7.11</a>)</report>
+</software>
 </reports>
 
 <p/>

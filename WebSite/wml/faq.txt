@@ -613,6 +613,24 @@ jacorb.interop.chunk_custom_rmi_valuetypes=off
 <p>You can explicitely specify the local IP address used in the IIOP messages. See <a href="#faq5_9">How do I force IIOP.NET to use a given IP address for callbacks?</a>.
 
 </FAQ>
+
+<FAQ question="JacORB throws a 'org.omg.CORBA.MARSHAL: Cannot handle TypeCode with kind 30  minor code: 0  completed: No'">
+
+<p/>JacORB is not able to handle the CORBA any type with typecode 30 (boxed type value). Usually, this happens when a .NET string is converted into an <code>any</code> type.
+
+<p/>To avoid this problem, the string must be explicitely serialized as a CORBA <code>wstring</code>:
+
+<pre>
+  OrbServices orb = OrbServices.GetSingleton();
+  TypeCode wstringTC = orb.create_wstring_tc(0);
+  Any any = new Any("myString", wstringTC);
+  myObject.Test(any);
+</pre>
+
+<p/>This <a href="http://sourceforge.net/forum/forum.php?thread_id=1051887&forum_id=274081">forum thread</a> contains a longer discussion of the problem.
+
+</FAQ>
+
 </FAQ-SECTION>
 
 <FAQ-SECTION name="About">
