@@ -54,11 +54,11 @@ namespace Ch.Elca.Iiop.IDLCompiler.Tests {
         
         private static Encoding s_latin1 = Encoding.GetEncoding("ISO-8859-1");
         
-        #endregion SFields
+        #endregion
         #region IFields
 
 
-        #endregion IFields
+        #endregion
         #region IMethods
 
         [SetUp]
@@ -468,7 +468,7 @@ namespace Ch.Elca.Iiop.IDLCompiler.Tests {
                                 1);            
         }
 
-        #endregion IMethods     
+        #endregion
         
     }
         
