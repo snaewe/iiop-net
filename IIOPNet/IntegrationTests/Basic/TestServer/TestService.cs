@@ -30,6 +30,11 @@ using System;
 
 namespace Ch.Elca.Iiop.IntegrationTests {
 
+    public enum TestEnum {
+        A, B, C, D
+    }
+
+
     public class TestService : MarshalByRefObject {
 
         public System.Double TestIncDouble(System.Double arg) {
@@ -70,6 +75,10 @@ namespace Ch.Elca.Iiop.IntegrationTests {
 
         public System.String TestAppendString(System.String basic, System.String toAppend) {
             return basic + toAppend;
+        }
+
+        public TestEnum TestEchoEnumVal(TestEnum arg) {
+            return arg;
         }
 
         public override object InitializeLifetimeService() {

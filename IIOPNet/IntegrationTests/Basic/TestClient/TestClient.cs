@@ -153,6 +153,16 @@ namespace Ch.Elca.Iiop.IntegrationTests {
             Assertion.AssertEquals(arg, result);
         }       
 
+/*        [Test]
+        public void TestEnumeration() {
+            TestEnum arg = TestEnum.TestEnum_A;
+            TestEnum result = m_testService.TestEchoEnumVal(arg);
+            Assertion.AssertEquals(arg, result);
+            arg = TestEnum.TestEnum_D;
+            result = m_testService.TestEchoEnumVal(arg);
+            Assertion.AssertEquals(arg, result);
+        } */
+
     }
 
 }
