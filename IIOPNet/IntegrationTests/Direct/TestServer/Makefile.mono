@@ -1,0 +1,34 @@
+IIOPCHANNEL = ../../../IIOPChannel/bin/IIOPChannel.dll
+LAUNCH = ../../Utils/launch.exe
+KILL = ../../Utils/kill.exe
+DELAY = ../../Utils/delay.exe
+
+bin = bin/
+
+build: $(bin)TestServiceCommon.dll $(bin)TestServer.exe
+
+$(bin)IIOPChannel.dll: $(IIOPCHANNEL)
+	[ -d $(bin) ] || mkdir $(bin)
+	cp $(IIOPCHANNEL) $(bin)
+
+$(bin)testUnion.dll: TestUnionAndConst.idl
+	mono ../../../IDLToCLSCompiler/IDLCompiler/bin/IDLToCLSCompiler.exe -o $(bin) testUnion TestUnionAndConst.idl
+
+$(bin)testUnionNotForClient.dll: TestUnionNotPresentClient.idl
+	mono ../../../IDLToCLSCompiler/IDLCompiler/bin/IDLToCLSCompiler.exe -o $(bin) testUnionNotForClient TestUnionNotPresentClient.idl
+
+$(bin)TestServiceCommon.dll: $(bin)IIOPChannel.dll $(bin)testUnion.dll TestServiceCommon.cs
+	mcs $(CSFLAGS) /t:library /r:$(bin)testUnion.dll /r:$(bin)IIOPChannel.dll /out:$(bin)TestServiceCommon.dll TestServiceCommon.cs
+
+$(bin)TestServer.exe: $(bin)IIOPChannel.dll $(bin)TestServiceCommon.dll $(bin)testUnion.dll $(bin)testUnionNotForClient.dll TestServer.cs TestService.cs
+	mcs $(CSFLAGS) /t:exe /r:$(bin)IIOPChannel.dll /r:$(bin)testUnion.dll /r:$(bin)testUnionNotForClient.dll /r:$(bin)TestServiceCommon.dll /out:$(bin)TestServer.exe TestServer.cs TestService.cs
+
+start-server:
+	@$(LAUNCH) bin/TestServer.exe >> pid
+
+stop-server:
+	@for p in $(cat pid); done do $(KILL) $A; done
+	@rm pid
+
+clean:
+	rm -rf bin

@@ -1,0 +1,14 @@
+build:
+	$(MAKE) -C Utils build -f Makefile.mono
+	$(MAKE) -C Basic build -f Makefile.mono
+	$(MAKE) -C Direct build -f Makefile.mono
+
+test:
+	$(MAKE) -C Utils test -f Makefile.mono
+	$(MAKE) -C Basic test -f Makefile.mono
+	$(MAKE) -C Direct test -f Makefile.mono
+
+clean:
+	$(MAKE) -C Utils clean -f Makefile.mono
+	$(MAKE) -C Basic clean -f Makefile.mono
+	$(MAKE) -C Direct clean -f Makefile.mono

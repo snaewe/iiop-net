@@ -1,0 +1,29 @@
+NUNIT=$(MONO_SRCDIR)/runtime/NUnit.Framework.dll
+IIOPCHANNEL = ../../../IIOPChannel/bin/IIOPChannel.dll
+TestService = ../TestServer/bin/TestServiceCommon.dll
+TestUnion = ../TestServer/bin/TestUnion.dll
+bin = bin/
+
+build: $(bin)ClientTest.dll
+
+$(bin)TestUnion.dll : $(TestUnion)
+	cp -f $(TestUnion) $(bin)
+	
+
+$(bin)IIOPChannel.dll: $(IIOPCHANNEL)
+	[ -d $(bin) ] || mkdir $(bin)
+	cp $(IIOPCHANNEL) $(bin)
+
+$(bin)TestServiceCommon.dll: $(TestService)
+	[ -d $(bin) ] || mkdir $(bin)
+	cp $(TestService) $(bin)TestServiceCommon.dll
+
+$(bin)ClientTest.dll: $(bin)IIOPChannel.dll $(bin)TestUnion.dll $(bin)TestServiceCommon.dll *.cs
+	mcs $(CSFLAGS) /t:library /r:$(NUNIT) /r:$(bin)TestUnion.dll /r:$(bin)TestServiceCommon.dll /r:$(bin)IIOPChannel.dll /out:$(bin)/ClientTest.dll TestClient.cs
+
+start-client:
+	@echo "Direct IntegrationTest"
+	mono ${MONO_SRCDIR}/bin/nunit-console.exe /assembly:bin/ClientTest.dll
+
+clean:
+	rm -rf bin
