@@ -128,13 +128,8 @@ import Ch.Elca.Iiop.Util.AttributeExtCollection;
 import Ch.Elca.Iiop.AbstractUserException;
 
 /**
- * 
- * @version 
- * @author dul
- * 
- *
+ * generates CLS metadeta for OMG IDL
  */
-
 public class MetaDataGenerator implements IDLParserVisitor {
 
     private SymbolTable m_symbolTable;
@@ -200,27 +195,27 @@ public class MetaDataGenerator implements IDLParserVisitor {
         #endregion IConstructors
         #region IMethods
 
-        public String getPramName() {
+        public String GetPramName() {
             return m_paramName;
         }
         
-        public TypeContainer getParamType() {
+        public TypeContainer GetParamType() {
             return m_paramType;
         }
 
-        public int getParamDirection() {
+        public int GetParamDirection() {
             return m_direction;
         }
 
-        public boolean isInOut() {
+        public boolean IsInOut() {
             return (m_direction == ASTparam_attribute.ParamDir_INOUT);
         }
 
-        public boolean isIn() {
+        public boolean IsIn() {
             return (m_direction == ASTparam_attribute.ParamDir_IN);
         }
 
-        public boolean isOut() {
+        public boolean IsOut() {
             return (m_direction == ASTparam_attribute.ParamDir_OUT);
         }
 
@@ -1924,13 +1919,13 @@ public class MetaDataGenerator implements IDLParserVisitor {
 
     /** retrieve the correct type out of ParameterSpec. Consider parameter-direction too */
     private Type getParamType(ParameterSpec spec) {
-        TypeContainer specType = spec.getParamType();
+        TypeContainer specType = spec.GetParamType();
         // special handling for BoxedValue types --> unbox it
         if (specType.getCLSType().IsSubclassOf(BoxedValueBase.class.ToType())) {
             specType = mapBoxedValueTypeToUnboxed(specType.getCLSType());
         }
         Type resultType;
-        if (spec.isIn()) {
+        if (spec.IsIn()) {
             resultType = specType.getCLSType();
         } else { // out or inout parameter
             // need a type which represents a reference to the parametertype
@@ -1942,10 +1937,12 @@ public class MetaDataGenerator implements IDLParserVisitor {
 
     private void defineParamter(MethodBuilder methodBuild, ParameterSpec spec, int paramNr) {
         ParameterAttributes paramAttr = ParameterAttributes.None;
-        if (spec.isOut()) { paramAttr = paramAttr | ParameterAttributes.Out; }
-        ParameterBuilder paramBuild = methodBuild.DefineParameter(paramNr, paramAttr, spec.getPramName());
+        if (spec.IsOut()) { 
+            paramAttr = paramAttr | ParameterAttributes.Out; 
+        }
+        ParameterBuilder paramBuild = methodBuild.DefineParameter(paramNr, paramAttr, spec.GetPramName());
         // custom attribute spec
-        TypeContainer specType = spec.getParamType();
+        TypeContainer specType = spec.GetParamType();
         // special handling for BoxedValue types --> unbox it
         if (specType.getCLSType().IsSubclassOf(BoxedValueBase.class.ToType())) {
             specType = mapBoxedValueTypeToUnboxed(specType.getCLSType());
