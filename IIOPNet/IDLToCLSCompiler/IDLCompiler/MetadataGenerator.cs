@@ -82,6 +82,32 @@ public class MetaDataGenerator : IDLParserVisitor {
         #endregion IMethods
     }
 
+    /// <summary>
+    /// helper class to pass information for union-visitor methods
+    /// </summary>
+    private class UnionBuildInfo : BuildInfo {
+        #region IFields
+
+        private UnionGenerationHelper m_helper;
+
+        #endregion IFields
+        #region IConstructors
+
+        public UnionBuildInfo(Scope buildScope, UnionGenerationHelper helper) : base(buildScope, helper.Builder) {
+            m_helper = helper;
+        }
+
+        #endregion IConstructors
+        #region IMethods
+
+        public UnionGenerationHelper GetGenerationHelper() {
+            return m_helper;
+        }
+
+        #endregion IMethods
+
+    }
+
     #endregion Types
     #region IFields
 
@@ -748,7 +774,8 @@ public class MetaDataGenerator : IDLParserVisitor {
         AddSerializableAttribute(valueToBuild);
 
         // generate elements
-        BuildInfo buildInfo = new BuildInfo(enclosingScope, valueToBuild);
+        BuildInfo buildInfo = new BuildInfo(enclosingScope.getChildScope(forSymbol.getSymbolName()), 
+                                            valueToBuild);
         for (int i = 1; i < node.jjtGetNumChildren(); i++) { // for all value_element children
             ASTvalue_element elem = (ASTvalue_element)node.jjtGetChild(i);
             elem.jjtAccept(this, buildInfo);    
@@ -796,7 +823,8 @@ public class MetaDataGenerator : IDLParserVisitor {
                                                        enclosingScope.getRepositoryIdFor(node.getIdent()));
 
         // generate elements
-        BuildInfo buildInfo = new BuildInfo(enclosingScope, valueToBuild);
+        BuildInfo buildInfo = new BuildInfo(enclosingScope.getChildScope(forSymbol.getSymbolName()), 
+                                            valueToBuild);
         for (int i = bodyNodeIndex; i < node.jjtGetNumChildren(); i++) { // for all export children
             Node child = node.jjtGetChild(i);
             child.jjtAccept(this, buildInfo);    
@@ -1050,8 +1078,38 @@ public class MetaDataGenerator : IDLParserVisitor {
      * remark: fields in interfaces are not CLS-compliant!
      */
     public Object visit(ASTconst_dcl node, Object data) {
-        // throw new NotSupportedException("constants are not yet supported");
-        Console.WriteLine("warning: constants are not yet supported; " + node.getIdent());
+        CheckParameterForBuildInfo(data, node);
+        BuildInfo buildInfo = (BuildInfo)data;
+        TypeContainer constType = (TypeContainer)node.jjtGetChild(0).jjtAccept(this, data);
+        Literal val = (Literal)node.jjtGetChild(1).jjtAccept(this, data);
+        Scope enclosingScope = buildInfo.GetBuildScope();
+        SymbolValue constSymbol = (SymbolValue)enclosingScope.getSymbol(node.getIdent());
+        Scope targetScope = enclosingScope;
+        if (enclosingScope.IsTypeScope()) {
+            targetScope = buildInfo.GetBuildScope().GetScopeForNested(constSymbol);
+        }
+        
+        String constContainerName = targetScope.getFullyQualifiedNameForSymbol(constSymbol.getSymbolName());
+        TypeBuilder constContainer = m_modBuilder.DefineType(constContainerName, 
+                                                             TypeAttributes.Class | TypeAttributes.Sealed | TypeAttributes.Public, 
+                                                             typeof(System.Object), new System.Type[] { typeof(IIdlEntity) });
+
+        IlEmitHelper emitHelper = IlEmitHelper.GetSingleton();
+        FieldBuilder constField = emitHelper.AddFieldWithCustomAttrs(constContainer, "ConstVal", constType, 
+                                                                     FieldAttributes.Static | FieldAttributes.InitOnly | FieldAttributes.Public);
+        
+        // add private default constructor
+        constContainer.DefineDefaultConstructor(MethodAttributes.Private);
+        // add static initalizer
+        ConstructorBuilder staticInit = constContainer.DefineConstructor(MethodAttributes.Private | MethodAttributes.Static, 
+                                                                        CallingConventions.Standard, Type.EmptyTypes);        
+        ILGenerator constrIl = staticInit.GetILGenerator();
+        val.EmitLoadValue(constrIl, constType.GetSeparatedClsType());
+        constrIl.Emit(OpCodes.Stsfld, constField);
+        constrIl.Emit(OpCodes.Ret);
+
+        // create the type
+        constContainer.CreateType();
         return null;
     }
 
@@ -1059,70 +1117,131 @@ public class MetaDataGenerator : IDLParserVisitor {
      * @see parser.IDLParserVisitor#visit(ASTconst_type, Object)
      */
     public Object visit(ASTconst_type node, Object data) {
-        return null;
+        CheckParameterForBuildInfo(data, node);
+        BuildInfo buildInfo = (BuildInfo)data;
+        SimpleNode child = (SimpleNode)node.jjtGetChild(0);
+        return ResovleTypeSpec(child, buildInfo);
     }
 
     /**
      * @see parser.IDLParserVisitor#visit(ASTconst_exp, Object)
      */
     public Object visit(ASTconst_exp node, Object data) {
-        throw new NotImplementedException("expr eval");
+        // evaluate or_expr
+        Object result = node.jjtGetChild(0).jjtAccept(this, data);
+        return result;
     }
 
     /**
      * @see parser.IDLParserVisitor#visit(ASTor_expr, Object)
      */
     public Object visit(ASTor_expr node, Object data) {
-        throw new NotImplementedException("expr eval");
+        if (node.jjtGetNumChildren() > 1) {
+        	throw new NotImplementedException("only simple expressions are supported yet");
+        }
+        // evaluate the xor-expr
+        Object result = node.jjtGetChild(0).jjtAccept(this, data);
+        return result;
     }
 
     /**
      * @see parser.IDLParserVisitor#visit(ASTxor_expr, Object)
      */
     public Object visit(ASTxor_expr node, Object data) {
-        throw new NotImplementedException("expr eval");    
+        if (node.jjtGetNumChildren() > 1) {
+        	throw new NotImplementedException("only simple expressions are supported yet");
+        }
+        // evaluate the and-expr
+        Object result = node.jjtGetChild(0).jjtAccept(this, data);
+        return result;
     }
 
     /**
      * @see parser.IDLParserVisitor#visit(ASTand_expr, Object)
      */
     public Object visit(ASTand_expr node, Object data) {
-        throw new NotImplementedException("expr eval");    
+        if (node.jjtGetNumChildren() > 1) {
+        	throw new NotImplementedException("only simple expressions are supported yet");
+        }
+        // evaluate the shift-expr
+        Object result = node.jjtGetChild(0).jjtAccept(this, data);
+        return result;
     }
 
     /**
      * @see parser.IDLParserVisitor#visit(ASTshift_expr, Object)
      */
     public Object visit(ASTshift_expr node, Object data) {
-        throw new NotImplementedException("expr eval");    
+		if (node.jjtGetNumChildren() > 1) {
+        	throw new NotImplementedException("only simple expressions are supported yet");
+        }
+        // evaluate the add-expr
+        Object result = node.jjtGetChild(0).jjtAccept(this, data);
+        return result;
     }
 
     /**
      * @see parser.IDLParserVisitor#visit(ASTadd_expr, Object)
      */
     public Object visit(ASTadd_expr node, Object data) {
-        throw new NotImplementedException("expr eval");
+		if (node.jjtGetNumChildren() > 1) {
+        	throw new NotImplementedException("only simple expressions are supported yet");
+        }
+        // evaluate the mult-expr
+        Object result = node.jjtGetChild(0).jjtAccept(this, data);
+        return result;
     }
 
     /**
      * @see parser.IDLParserVisitor#visit(ASTmult_expr, Object)
      */
     public Object visit(ASTmult_expr node, Object data) {
-        throw new NotImplementedException("expr eval");
+   		if (node.jjtGetNumChildren() > 1) {
+        	throw new NotImplementedException("only simple expressions are supported yet");
+        }
+        // evaluate the unary-expr
+        Object result = node.jjtGetChild(0).jjtAccept(this, data);
+        return result;
     }
 
     /**
      * @see parser.IDLParserVisitor#visit(ASTunary_expr, Object)
      */
-    public Object visit(ASTunary_expr node, Object data) {
-        throw new NotImplementedException("expr eval");
+    public Object visit(ASTunary_expr node, Object data) {   		
+        // evaluate the primary-expr
+        Literal result = (Literal)node.jjtGetChild(0).jjtAccept(this, data);
+        switch (node.GetUnaryOperation()) {
+            case UnaryOps.UnaryNegate:
+                throw new NotImplementedException("unary operator negation not implemented");
+            case UnaryOps.UnaryMinus:
+                result.InvertSign();
+                break;
+            default:
+                // for UnaryOps.Plus and UnaryOps.None: nothing to do
+                break;
+        }        
+        return result;
     }
 
     /**
      * @see parser.IDLParserVisitor#visit(ASTprimary_expr, Object)
      */
     public Object visit(ASTprimary_expr node, Object data) {
-        throw new NotImplementedException("expr eval");
+        // possible cases (one child):
+        // scoped_name
+        // literal
+        // const_exp
+        Object result = node.jjtGetChild(0).jjtAccept(this, data);
+        if (result is SymbolValue) {
+            // a scoped name, which points to a symbol containing a value
+            return ((SymbolValue)result).GetValueAsLiteral();
+        } else if (result is Symbol) {
+            // A Symbol, but no value symbol, TODO: check if this is correct behaviour
+            throw new InvalidIdlException("no valid primary expression: " + result);
+        } else {
+            // a literal: a Literal Value
+            return result;
+        }
     }
 
     /**
@@ -1551,44 +1670,210 @@ public class MetaDataGenerator : IDLParserVisitor {
         return null;
     }
 
+    private void CheckDiscrValAssignableToDiscrType(object discrVal, TypeContainer discrType) {
+        Type clsDiscrType = discrType.GetCompactClsType();
+        if (clsDiscrType.IsEnum) {
+            if (!clsDiscrType.Equals(discrVal.GetType())) {
+                throw new InvalidIdlException(
+                    String.Format("discr val {0} not assignable to type: {1}", discrVal, clsDiscrType));
+            }
+        } else if (clsDiscrType.Equals(typeof(System.Int16))) {
+            if ((!(discrVal is System.Int64)) || 
+                ((System.Int64)discrVal < System.Int16.MinValue) ||
+                ((System.Int64)discrVal > System.Int16.MaxValue)) {
+                throw new InvalidIdlException(
+                    String.Format("discr val {0} not assignable to type: {1}", discrVal, clsDiscrType));
+            }
+        } else if (clsDiscrType.Equals(typeof(System.Int32))) {
+            if ((!(discrVal is System.Int64)) ||
+                ((System.Int64)discrVal < System.Int32.MinValue) ||
+                ((System.Int64)discrVal > System.Int32.MaxValue)) {
+                throw new InvalidIdlException(
+                    String.Format("discr val {0} not assignable to type: {1}", discrVal, clsDiscrType));
+            }
+        } else if (clsDiscrType.Equals(typeof(System.Int64))) {
+            if (!clsDiscrType.Equals(discrVal.GetType())) {
+                throw new InvalidIdlException(
+                    String.Format("discr val {0} not assignable to type: {1}", discrVal, clsDiscrType));
+            }
+        } else if (clsDiscrType.Equals(typeof(System.Char))) {
+            if (!clsDiscrType.Equals(discrVal.GetType())) {
+                throw new InvalidIdlException(
+                    String.Format("discr val {0} not assignable to type: {1}", discrVal, clsDiscrType));
+            }
+        } else if (clsDiscrType.Equals(typeof(System.Boolean))) {
+            if (!clsDiscrType.Equals(discrVal.GetType())) {
+                throw new InvalidIdlException(
+                    String.Format("discr val {0} not assignable to type: {1}", discrVal, clsDiscrType));
+            }
+        } else {
+            throw new InternalCompilerException("precond violation: discr type");
+        }
+    }
+
+    /// <summary>helper methods to collect discriminator values for casex node; checks if const-type is ok</summary>
+    private object[] CollectDiscriminatorValuesForCase(ASTcasex node, TypeContainer discrType,
+                                                       BuildInfo unionInfo) {
+        object[] result = new object[node.jjtGetNumChildren() - 1];
+        for (int i = 0; i < node.jjtGetNumChildren() - 1; i++) {
+            if (!((ASTcase_label)node.jjtGetChild(i)).isDefault()) {
+                object discVal = ((Literal)node.jjtGetChild(i).jjtAccept(this, unionInfo)).GetValue();
+                // check if val ok ...
+                CheckDiscrValAssignableToDiscrType(discVal, discrType);
+                result[i] = discVal;
+            } else {
+                // default case
+                result[i] = UnionGenerationHelper.DefaultCaseDiscriminator;
+            }
+        }
+        return result;
+    }
+
+    /// <summary>
+    /// collects all explicitely used discriminator values in switch cases.
+    /// </summary>
+    private ArrayList ExtractCoveredDiscriminatorRange(ASTswitch_body node, TypeContainer discrType,
+                                                       BuildInfo unionInfo) {
+        ArrayList result = new ArrayList();
+        for (int i = 0; i < node.jjtGetNumChildren(); i++) {
+            ASTcasex caseNode = (ASTcasex)node.jjtGetChild(i);
+            object[] discrValsForCase = CollectDiscriminatorValuesForCase(caseNode, discrType, unionInfo);
+            foreach (object discrVal in discrValsForCase) {
+                if (discrVal.Equals(UnionGenerationHelper.DefaultCaseDiscriminator)) {
+                    continue; // do not add default case here
+                }
+                if (result.Contains(discrVal)) {
+                    throw new InvalidIdlException("discriminator value used more than once in union: " + discrVal);
+                }
+                result.Add(discrVal);
+            }
+        }
+        return result;
+    }
+
     /**
      * @see parser.IDLParserVisitor#visit(ASTunion_type, Object)
      */
     public Object visit(ASTunion_type node, Object data) {
-        throw new NotImplementedException("union support");
+        // generate the struct for this union
+        CheckParameterForBuildInfo(data, node);
+        BuildInfo buildInfo = (BuildInfo) data;
+        Symbol forSymbol = buildInfo.GetBuildScope().getSymbol(node.getIdent());
+        // check if type is known from a previous run over a parse tree --> if so: skip
+        // not needed to check if struct is a nested types, because parent type should already be skipped --> code generation for all nested types skipped to
+        if (CheckSkip(forSymbol)) { 
+            return null; 
+        }
+   
+        // create Helper for union generation
+        UnionGenerationHelper genHelper = null;
+        if (buildInfo.GetContainterType() == null) {
+            // independent dcl
+            String fullyQualName = buildInfo.GetBuildScope().getFullyQualifiedNameForSymbol(forSymbol.getSymbolName());
+            genHelper = new UnionGenerationHelper(m_modBuilder, fullyQualName, 
+                                                  TypeAttributes.Public);
+        } else {
+            // nested dcl
+            if (buildInfo.GetContainterType().IsClass) {
+                String fullyQualName = buildInfo.GetBuildScope().getFullyQualifiedNameForSymbol(forSymbol.getSymbolName());
+                genHelper = new UnionGenerationHelper(buildInfo.GetContainterType(), fullyQualName,
+                                                      TypeAttributes.Public);
+            } else {
+                // only a class can contain nested types --> therefore use another solution than a nested type for container types which are not classes
+                Scope nestedScope = buildInfo.GetBuildScope().GetScopeForNested(forSymbol);
+                String fullyQualName = nestedScope.getFullyQualifiedNameForSymbol(forSymbol.getSymbolName());
+                genHelper = new UnionGenerationHelper(m_modBuilder, fullyQualName, 
+                                                      TypeAttributes.Public);
+            }            
+        }
+        UnionBuildInfo thisInfo = new UnionBuildInfo(buildInfo.GetBuildScope(), genHelper);                        
+
+        Node switchBody = node.jjtGetChild(1);
+        TypeContainer discrType = (TypeContainer)node.jjtGetChild(0).jjtAccept(this, thisInfo);
+        discrType = ReplaceByCustomMappedIfNeeded(discrType);
+        ArrayList coveredDiscriminatorRange = ExtractCoveredDiscriminatorRange((ASTswitch_body)switchBody, 
+                                                                               discrType, thisInfo);
+        
+        genHelper.AddDiscriminatorFieldAndProperty(discrType, coveredDiscriminatorRange);
+        switchBody.jjtAccept(this, thisInfo);        
+        
+        // create the resulting type
+        Type resultType = genHelper.FinalizeType();
+        // type must be registered with the type-manager
+        m_typeManager.RegisterTypeDefinition(resultType, forSymbol);
+        return new TypeContainer(resultType, new CustomAttributeBuilder[0]);
     }
 
     /**
      * @see parser.IDLParserVisitor#visit(ASTswitch_type_spec, Object)
      */
     public Object visit(ASTswitch_type_spec node, Object data) {
-        throw new NotImplementedException("union support");
+        if (!(data is UnionBuildInfo)) {
+            throw new InternalCompilerException("invalid parameter in visis ASTswitch_type_spec");
+        }
+        UnionBuildInfo buildInfo = (UnionBuildInfo)data;
+        SimpleNode child = (SimpleNode)node.jjtGetChild(0);
+        return ResovleTypeSpec(child, buildInfo);
     }
 
     /**
      * @see parser.IDLParserVisitor#visit(ASTswitch_body, Object)
      */
     public Object visit(ASTswitch_body node, Object data) {        
-        throw new NotImplementedException("union support");    }
+        if (!(data is UnionBuildInfo)) {
+            throw new InternalCompilerException("invalid parameter in visit ASTswitch_body");
+        }
+        UnionBuildInfo buildInfo = (UnionBuildInfo)data;
+       
+        // visit the different switch cases:
+        node.childrenAccept(this, buildInfo);               
+        return null;
+    }
 
     /**
      * @see parser.IDLParserVisitor#visit(ASTcasex, Object)
      */
     public Object visit(ASTcasex node, Object data) {
-        throw new NotImplementedException("union support");    }
+        if (!(data is UnionBuildInfo)) {
+            throw new InternalCompilerException("invalid parameter in visit ASTswitch_body");
+        }
+        UnionBuildInfo buildInfo = (UnionBuildInfo)data;
+        // REFACTORING possiblity: replace direct use of values by using the Literals
+        // case node consists of one or more case-labels followed by an element spec
+        // collect the data for this switch-case
+        object[] discriminatorValues = CollectDiscriminatorValuesForCase(node, 
+                                                                         buildInfo.GetGenerationHelper().DiscriminatorType, 
+                                                                         buildInfo);
+        
+        ASTelement_spec elemSpec = (ASTelement_spec)node.jjtGetChild(node.jjtGetNumChildren() - 1);
+        ASTtype_spec typeSpecNode = (ASTtype_spec)elemSpec.jjtGetChild(0);
+        TypeContainer elemType = (TypeContainer)typeSpecNode.jjtAccept(this, buildInfo);
+        elemType = ReplaceByCustomMappedIfNeeded(elemType);
+        Node elemDecl = elemSpec.jjtGetChild(1).jjtGetChild(0);
+        if (elemDecl is ASTcomplex_declarator) {
+            throw new NotSupportedException("complex_declarator is unsupported by this compiler");
+        }            
+        string elemDeclIdent = ((ASTsimple_declarator) elemDecl).getIdent(); // a simple delcarator        
+        // generate the methods/field for this switch-case
+        buildInfo.GetGenerationHelper().GenerateSwitchCase(elemType, elemDeclIdent, discriminatorValues);
+
+        return null;
+    }
 
     /**
      * @see parser.IDLParserVisitor#visit(ASTcase_label, Object)
      */
     public Object visit(ASTcase_label node, Object data) {
-        throw new NotImplementedException("union support");
+        // child constains a const_exp
+        return node.jjtGetChild(0).jjtAccept(this, data);
     }
 
     /**
      * @see parser.IDLParserVisitor#visit(ASTelement_spec, Object)
      */
     public Object visit(ASTelement_spec node, Object data) {
-        throw new NotImplementedException("union support");
+        // nothing to do, nodes are handled by a parent node
+        return null;
     }
 
     /**
@@ -1649,7 +1934,7 @@ public class MetaDataGenerator : IDLParserVisitor {
             // update symbol with value
             SymbolValue symbol = (SymbolValue)buildInfo.GetBuildScope().getSymbol(enumeratorId);
             object enumVal = Enum.ToObject(resultType, (System.Int32) i);
-            symbol.SetValue(enumVal);
+            symbol.SetValueAsLiteral(new EnumValLiteral(enumVal));
         }
 
         // type must be registered with the type-manager
