@@ -76,7 +76,9 @@ namespace Ch.Elca.Iiop.Idl {
                     CustomAttributeBuilder builder =
                         ((IIdlAttribute) attr).CreateAttributeBuilder();
                     custAttrBuilders.Add(builder);
-                }                    
+                } else {
+                    throw new INTERNAL(454, CompletionStatus.Completed_MayBe);
+                }
             }
             CustomAttributeBuilder[] custAttrBuilderArray = 
                 (CustomAttributeBuilder[])custAttrBuilders.ToArray(typeof(CustomAttributeBuilder));
