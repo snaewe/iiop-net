@@ -1,5 +1,13 @@
-Latest Changes (09 June 2003)
+Latest Changes (16 June 2003)
 -----------------------------
+
+- Improved IIOP.Net channel
+- supports now simple two way interoperability with Mico ORB
+- Bug fix for bug #754820 (Generator)
+
+
+Version 1.2 (09 June 2003)
+--------------------------
 - IDL to CLS compiler
 - GettingStarted examples showing how to use the tools
 
