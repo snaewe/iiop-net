@@ -30,6 +30,7 @@
 
 using System;
 using System.Runtime.Remoting.Messaging;
+using System.Collections;
 using Ch.Elca.Iiop.Cdr;
 using Ch.Elca.Iiop.CorbaObjRef;
 using Ch.Elca.Iiop.Idl;
@@ -143,7 +144,7 @@ namespace Ch.Elca.Iiop.Services {
         
         private ITaggedComponent FindCodeSetComponent(IorProfile[] profiles) {
             foreach (IorProfile profile in profiles) {
-                ITaggedComponent[] components = profile.TaggedComponents;
+                IList components = profile.TaggedComponents;
                 foreach (ITaggedComponent taggedComp in components) {
                     if (taggedComp.Id == TaggedComponentIds.CODESET_COMPONENT_ID) {
                     	return taggedComp;

@@ -416,6 +416,9 @@ namespace Ch.Elca.Iiop.Marshalling {
                 // this server support GIOP 1.2 --> create an GIOP 1.2 profile
                 InternetIiopProfile profile = new InternetIiopProfile(new GiopVersion(1, 2), host,
                                                                       (ushort)port, objectKey);
+                // add additional tagged components according to the channel options, e.g. for SSL
+                profile.AddTaggedComponents(serverData.AdditionalTaggedComponents);
+                
                 Ior ior = new Ior(repositoryID, new IorProfile[] { profile });
                 return ior;                
             } else {

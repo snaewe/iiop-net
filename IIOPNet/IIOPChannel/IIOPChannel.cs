@@ -38,6 +38,7 @@ using System.Diagnostics;
 using System.Net.Sockets;
 using System.Threading;
 using Ch.Elca.Iiop.Util;
+using Ch.Elca.Iiop.CorbaObjRef;
 
 #if TRACE
 using System.IO;
@@ -573,7 +574,7 @@ namespace Ch.Elca.Iiop {
         }
             
         public void StopListening(object data) {
-	    m_listenerActive = false;
+            m_listenerActive = false;
             if (m_listenerThread != null) { 
                 try {
                     m_listenerThread.Interrupt(); m_listenerThread.Abort(); 
@@ -610,10 +611,17 @@ namespace Ch.Elca.Iiop {
     /// </remarks>
     [Serializable] // must be serializable for the .NET framework
     public class IiopChannelData : ChannelDataStore {
+
+        #region SFields
         
+        private Type s_taggedComponentType = typeof(ITaggedComponent);
+        
+        #endregion SFields
         #region IFields
         private string m_hostName;
         private int m_port;
+        
+        private ArrayList m_additionTaggedComponents = new ArrayList();
         #endregion IFields
         #region IConstructors
         public IiopChannelData(string hostName, int port) : base(new String[] { "iiop://"+hostName+":"+port } ) {
@@ -630,6 +638,13 @@ namespace Ch.Elca.Iiop {
         public int Port {
             get { return m_port; }
         }
+        
+        /// <summary>allows to add additional tagged component to an IOR marshalled over this channel.</summary>
+        public ITaggedComponent[] AdditionalTaggedComponents {
+            get {
+                return (ITaggedComponent[])m_additionTaggedComponents.ToArray(s_taggedComponentType);
+            }
+        }
 
         #endregion
         #region IMethods
@@ -637,6 +652,11 @@ namespace Ch.Elca.Iiop {
         public override String ToString() {
             return "IIOP-channel data, hostname: " + m_hostName + 
                    ", port: " + m_port;
+        }
+        
+        /// <summary>add passed additional tagged component to all IOR for objects hosted by this appdomain.</summary>
+        public void AddAdditionalTaggedComponent(ITaggedComponent taggedComponent) {
+            m_additionTaggedComponents.Add(taggedComponent);
         }
 
         #endregion IMethods
