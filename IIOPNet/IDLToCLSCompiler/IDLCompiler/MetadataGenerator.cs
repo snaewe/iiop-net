@@ -858,6 +858,9 @@ public class MetaDataGenerator : IDLParserVisitor {
         String fullyQualName = enclosingScope.getFullyQualifiedNameForSymbol(forSymbol.getSymbolName());
         // get the boxed type
         TypeContainer boxedType = (TypeContainer)node.jjtGetChild(0).jjtAccept(this, data);
+        if (boxedType == null) {
+            throw new InvalidIdlException(String.Format("boxed type not (yet) defined for boxed value type"));
+        }
         boxedType = ReplaceByCustomMappedIfNeeded(boxedType);
         Trace.WriteLine("generating code for boxed value type: " + fullyQualName);
         BoxedValueTypeGenerator boxedValueGen = new BoxedValueTypeGenerator();
@@ -986,6 +989,9 @@ public class MetaDataGenerator : IDLParserVisitor {
         ASTtype_spec typeSpecNode = (ASTtype_spec)node.jjtGetChild(0);
         TypeContainer fieldType = (TypeContainer)typeSpecNode.jjtAccept(this, info);
         fieldType = ReplaceByCustomMappedIfNeeded(fieldType);
+        if (fieldType == null) {
+            throw new InvalidIdlException(String.Format("field type not (yet) defined for state member in value type"));
+        }
         String[] decl = (String[])node.jjtGetChild(1).jjtAccept(this, data);
 
         for (int i = 0; i < decl.Length; i++) {
@@ -1088,7 +1094,12 @@ public class MetaDataGenerator : IDLParserVisitor {
         TypeContainer constType = (TypeContainer)node.jjtGetChild(0).jjtAccept(this, data);
         Literal val = (Literal)node.jjtGetChild(1).jjtAccept(this, data);
         Scope enclosingScope = buildInfo.GetBuildScope();
-        SymbolValue constSymbol = (SymbolValue)enclosingScope.getSymbol(node.getIdent());
+        SymbolValue constSymbol = (SymbolValue)enclosingScope.getSymbol(node.getIdent());        
+        if (val == null) {
+            throw new InvalidIdlException("constant can't be evaluated: " + constSymbol.getSymbolName());
+        }
+        // set the value of the constant:
+        constSymbol.SetValueAsLiteral(val);
         Scope targetScope = enclosingScope;
         if (enclosingScope.IsTypeScope()) {
             targetScope = buildInfo.GetBuildScope().GetScopeForNested(constSymbol);
@@ -1666,6 +1677,9 @@ public class MetaDataGenerator : IDLParserVisitor {
         TypeBuilder builder = info.GetContainterType();
         ASTtype_spec typeSpecNode = (ASTtype_spec)node.jjtGetChild(0);
         TypeContainer fieldType = (TypeContainer)typeSpecNode.jjtAccept(this, info);
+        if (fieldType == null) {
+            throw new InvalidIdlException(String.Format("field type not (yet) defined for struct-member"));
+        }
         fieldType = ReplaceByCustomMappedIfNeeded(fieldType);
         String[] decl = (String[])node.jjtGetChild(1).jjtAccept(this, info);
         for (int i = 0; i < decl.Length; i++) {
@@ -1722,7 +1736,11 @@ public class MetaDataGenerator : IDLParserVisitor {
         object[] result = new object[node.jjtGetNumChildren() - 1];
         for (int i = 0; i < node.jjtGetNumChildren() - 1; i++) {
             if (!((ASTcase_label)node.jjtGetChild(i)).isDefault()) {
-                object discVal = ((Literal)node.jjtGetChild(i).jjtAccept(this, unionInfo)).GetValue();
+                Literal litVal = ((Literal)node.jjtGetChild(i).jjtAccept(this, unionInfo));
+                if (litVal == null) {
+                	throw new InvalidIdlException("invalid union, discrimitator value for case not retrievable");
+                }
+                object discVal = litVal.GetValue();
                 // check if val ok ...
                 CheckDiscrValAssignableToDiscrType(discVal, discrType);
                 result[i] = discVal;
@@ -1795,6 +1813,9 @@ public class MetaDataGenerator : IDLParserVisitor {
 
         Node switchBody = node.jjtGetChild(1);
         TypeContainer discrType = (TypeContainer)node.jjtGetChild(0).jjtAccept(this, thisInfo);
+        if (discrType == null) {
+            throw new InvalidIdlException(String.Format("dicriminator type not (yet) defined for union"));
+        }
         discrType = ReplaceByCustomMappedIfNeeded(discrType);
         ArrayList coveredDiscriminatorRange = ExtractCoveredDiscriminatorRange((ASTswitch_body)switchBody, 
                                                                                discrType, thisInfo);
@@ -1853,6 +1874,9 @@ public class MetaDataGenerator : IDLParserVisitor {
         ASTelement_spec elemSpec = (ASTelement_spec)node.jjtGetChild(node.jjtGetNumChildren() - 1);
         ASTtype_spec typeSpecNode = (ASTtype_spec)elemSpec.jjtGetChild(0);
         TypeContainer elemType = (TypeContainer)typeSpecNode.jjtAccept(this, buildInfo);
+        if (elemType == null) {
+            throw new InvalidIdlException(String.Format("union elem type not defined for union"));
+        }
         elemType = ReplaceByCustomMappedIfNeeded(elemType);
         Node elemDecl = elemSpec.jjtGetChild(1).jjtGetChild(0);
         if (elemDecl is ASTcomplex_declarator) {
@@ -1968,6 +1992,9 @@ public class MetaDataGenerator : IDLParserVisitor {
         Node elemTypeNode = node.jjtGetChild(0);
         Debug.WriteLine("determine element type of IDLSequence");
         TypeContainer elemType = (TypeContainer)elemTypeNode.jjtAccept(this, data);
+        if (elemType == null) {
+            throw new InvalidIdlException(String.Format("sequence type not defined for sequence"));
+        }
         elemType = ReplaceByCustomMappedIfNeeded(elemType);
         // use here the fusioned type as element type; potential unboxing of element type 
         // should be done by users of TypeContainer (if needed)!
@@ -1976,11 +2003,9 @@ public class MetaDataGenerator : IDLParserVisitor {
         Type arrayType;
         if (elemType.GetCompactClsType() is TypeBuilder) {
             Module declModule = ((TypeBuilder)elemType.GetCompactClsType()).Module;
-            Debug.WriteLine("get-elem-Type: " + declModule.GetType(elemType.GetCompactClsType().FullName));
             arrayType = declModule.GetType(elemType.GetCompactClsType().FullName + "[]"); // not nice, better solution ?
         } else {
             Assembly declAssembly = elemType.GetCompactClsType().Assembly;
-            Debug.WriteLine("decl-Assembly: " + declAssembly);
             arrayType = declAssembly.GetType(elemType.GetCompactClsType().FullName + "[]"); // not nice, better solution ?
         }
         
@@ -2037,6 +2062,9 @@ public class MetaDataGenerator : IDLParserVisitor {
         TypeBuilder builder = info.GetContainterType();
         ASTparam_type_spec typeSpecNode = (ASTparam_type_spec)node.jjtGetChild(0);
         TypeContainer propType = (TypeContainer)typeSpecNode.jjtAccept(this, info);
+        if (propType == null) {
+            throw new InvalidIdlException(String.Format("attribute type not defined for attribute(s)"));
+        }
         propType = ReplaceByCustomMappedIfNeeded(propType);
         for (int i = 1; i < node.jjtGetNumChildren(); i++) {
             ASTsimple_declarator simpleDecl = (ASTsimple_declarator) node.jjtGetChild(i);
@@ -2181,6 +2209,9 @@ public class MetaDataGenerator : IDLParserVisitor {
         } else {
             // <parameter type spec>
             returnType = (TypeContainer) node.jjtGetChild(0).jjtAccept(this, data);
+            if (returnType == null) {
+                throw new InvalidIdlException(String.Format("type not (yet) defined for return paramter"));
+            }
             returnType = ReplaceByCustomMappedIfNeeded(returnType);
         }
         return returnType;
@@ -2209,6 +2240,10 @@ public class MetaDataGenerator : IDLParserVisitor {
         ParameterSpec.ParameterDirection direction = ((ASTparam_attribute) node.jjtGetChild(0)).getParamDir();
         // determine name and type
         TypeContainer paramType = (TypeContainer)node.jjtGetChild(1).jjtAccept(this, data);
+        if (paramType == null) {
+            throw new InvalidIdlException(String.Format("parameter type not (yet) defined for paramter {0}", 
+                                                        ((ASTsimple_declarator)node.jjtGetChild(2)).getIdent()));
+        }
         paramType = ReplaceByCustomMappedIfNeeded(paramType);
         String paramName = IdlNaming.MapIdlNameToClsName(((ASTsimple_declarator)node.jjtGetChild(2)).getIdent());
         
