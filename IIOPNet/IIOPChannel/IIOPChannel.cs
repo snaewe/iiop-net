@@ -333,7 +333,7 @@ namespace Ch.Elca.Iiop {
         private int m_port = 8085;
         private IiopChannelData m_channelData;
 
-        private bool m_useIPAddr = true;
+        private bool m_useIpAddr = true;
         private IPAddress m_myAddress;
 
         private TcpListener m_listener;
@@ -377,7 +377,7 @@ namespace Ch.Elca.Iiop {
                             m_port = Convert.ToInt32(entry.Value); 
                             break;
                         case "useIpAddress": 
-                            m_useIPAddr = Convert.ToBoolean(entry.Value); 
+                            m_useIpAddr = Convert.ToBoolean(entry.Value); 
                             break;
                         default: 
                             Trace.WriteLine("unknown property found for IIOPClient channel: " + entry.Key);
@@ -459,7 +459,7 @@ namespace Ch.Elca.Iiop {
                 throw new Exception("can't determine ip-addr of local machine, abort channel creation"); 
             }
             m_myAddress = ipAddrs[0];
-            if (m_useIPAddr) {
+            if (m_useIpAddr) {
                 m_channelData = new IiopChannelData(m_myAddress.ToString(), m_port);
             } else {
                 m_channelData = new IiopChannelData(hostName, m_port);

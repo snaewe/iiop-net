@@ -88,7 +88,7 @@ namespace Ch.Elca.Iiop.MessageHandling {
                                                                  out IMessage resultMsg) {
             Debug.WriteLine("receive message at client side");            
             CdrMessageInputStream msgInput = new CdrMessageInputStream(sourceStream);
-            IiopMsgTypes msgType = msgInput.Header.GIOP_Type;
+            IiopMsgTypes msgType = msgInput.Header.GiopType;
             Debug.WriteLine("message-type: " + msgType);
             CdrInputStream msgBody = msgInput.GetMessageContentReadingStream();
             // deserialize message body
@@ -109,7 +109,7 @@ namespace Ch.Elca.Iiop.MessageHandling {
         /// <returns>the .NET message created from this IIOP-message</returns>
         public IncomingHandlingStatus ParseIncomingServerMessage(Stream sourceStream, out IMessage resultMsg) {
             CdrMessageInputStream msgInput = new CdrMessageInputStream(sourceStream);
-            IiopMsgTypes msgType = msgInput.Header.GIOP_Type;
+            IiopMsgTypes msgType = msgInput.Header.GiopType;
             CdrInputStream msgBody = msgInput.GetMessageContentReadingStream();
             // deserialize the message body (the GIOP-request id is included in this message)
             switch (msgType) {

@@ -48,7 +48,7 @@ namespace Ch.Elca.Iiop.Util {
         private bool m_isPeeking = false;
         private MemoryStream m_peekBuffer = null;
         /// <summary>stores the position in the peek buffer distributed last to a reader, when reading without peek</summary>
-        private long m_UpToPosInPeekBufferRead = 0;
+        private long m_upToPosInPeekBufferRead = 0;
 
         #endregion IFields
         #region IConstructors
@@ -138,7 +138,7 @@ namespace Ch.Elca.Iiop.Util {
             // if peek-buffer isn't empty, read from it
             if (m_peekBuffer != null) {
                 int result =  m_peekBuffer.ReadByte();
-                m_UpToPosInPeekBufferRead++;
+                m_upToPosInPeekBufferRead++;
                 if (m_peekBuffer.Position == m_peekBuffer.Length) {
                     m_peekBuffer = null; // peek buffer now read, next operation uses stream
                 }
@@ -172,7 +172,7 @@ namespace Ch.Elca.Iiop.Util {
                 if (m_isPeeking) { return; }
                 m_isPeeking = true;
                 if (m_peekBuffer == null) {
-                    m_UpToPosInPeekBufferRead = 0; // nothing in peek-buffer distributed
+                    m_upToPosInPeekBufferRead = 0; // nothing in peek-buffer distributed
                     m_peekBuffer = new MemoryStream(); 
                 }
             }
@@ -185,7 +185,7 @@ namespace Ch.Elca.Iiop.Util {
                     throw new InvalidOperationException("not in peeking mode"); 
                 }
                 m_isPeeking = false;
-                m_peekBuffer.Seek(m_UpToPosInPeekBufferRead, SeekOrigin.Begin); // reset the buffer to the current position for reading
+                m_peekBuffer.Seek(m_upToPosInPeekBufferRead, SeekOrigin.Begin); // reset the buffer to the current position for reading
                 if (m_peekBuffer.Length == 0) { 
                     m_peekBuffer = null; 
                 }

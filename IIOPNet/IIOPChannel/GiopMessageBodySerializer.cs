@@ -175,13 +175,13 @@ namespace Ch.Elca.Iiop.MessageHandling {
 
         protected void AlignBodyIfNeeded(CdrInputStream cdrStream, GiopVersion version) {
             if ((version.Major == 1) && (version.Minor >= 2)) {
-                cdrStream.ForceReadAlign(Aligns.Align_8);
+                cdrStream.ForceReadAlign(Aligns.Align8);
             } // force an align on 8 for GIOP-version >= 1.2
         }
 
         protected void AlignBodyIfNeeded(CdrOutputStream cdrStream, GiopVersion version) {
             if ((version.Major == 1) && (version.Minor >= 2)) { 
-                cdrStream.ForceWriteAlign(Aligns.Align_8); 
+                cdrStream.ForceWriteAlign(Aligns.Align8); 
             } // force an align on 8 for GIOP-version >= 1.2
         }
 
@@ -658,7 +658,7 @@ namespace Ch.Elca.Iiop.MessageHandling {
         public uint DeserialiseFragment(CdrInputStream sourceStream, GiopHeader header,
                                         out uint moreBytesToFollow) {
             uint reqId = sourceStream.ReadULong();
-            moreBytesToFollow = header.Content_Msg_Length - 4; // 4 bytes for req-id
+            moreBytesToFollow = header.ContentMsgLength - 4; // 4 bytes for req-id
             return reqId;
         }
 

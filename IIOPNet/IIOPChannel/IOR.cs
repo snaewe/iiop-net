@@ -71,7 +71,7 @@ namespace Ch.Elca.Iiop.CorbaObjRef {
 
         private byte[] m_objectKey;
         private GiopVersion m_version;
-        private string m_typID;
+        private string m_typId;
         private string m_hostName;
         private ushort m_port;
         
@@ -109,7 +109,7 @@ namespace Ch.Elca.Iiop.CorbaObjRef {
                 profiles = new IorProfile[0]; 
             }
             m_profiles = profiles;
-            m_typID = typeName;
+            m_typId = typeName;
 
             if (profiles.Length > 0) { // if profiles are present, an InternetIIOPProfile is required
                 IorProfile profile = SearchInternetIIOPProfile(profiles);
@@ -139,7 +139,7 @@ namespace Ch.Elca.Iiop.CorbaObjRef {
         /// <summary>the TypeID of this IOR</summary>
         public string TypID {
             get { 
-                return m_typID; 
+                return m_typId; 
             }
         }
 
@@ -198,7 +198,7 @@ namespace Ch.Elca.Iiop.CorbaObjRef {
         /// <summary>returns true, if this IOR represents a null reference</summary>
         /// <returns>true, if a IOR represents null reference, otherwise false</returns>
         public bool IsNullReference() {
-            return (m_typID.Equals("") && (m_profiles.Length == 0));
+            return (m_typId.Equals("") && (m_profiles.Length == 0));
         }
 
         /// <summary>get the IOR data out of a stream containing a stringified IOR.</summary>
@@ -210,7 +210,7 @@ namespace Ch.Elca.Iiop.CorbaObjRef {
         }
 
         private void ParseIOR(CdrInputStream cdrStream) {
-            m_typID = cdrStream.ReadString();
+            m_typId = cdrStream.ReadString();
             ulong nrOfProfiles = cdrStream.ReadULong();
             m_profiles = new IorProfile[nrOfProfiles];
             for (ulong i = 0; i < nrOfProfiles; i++) {
@@ -258,7 +258,7 @@ namespace Ch.Elca.Iiop.CorbaObjRef {
         /// write this IOR to a CDR-Stream in non-strignified form
         /// </summary>
         public void WriteToStream(CdrOutputStream cdrStream) {
-            cdrStream.WriteString(m_typID);
+            cdrStream.WriteString(m_typId);
             cdrStream.WriteULong((uint)m_profiles.Length); // nr of profiles
             for (int i = 0; i < m_profiles.Length; i++) {
                 m_profiles[i].WriteToStream(cdrStream);

@@ -44,7 +44,7 @@ namespace Ch.Elca.Iiop.Marshalling {
     /// <remarks>
     /// The class Marshaller is used by the ParameterMarshaller to marshal / unmarshal the parameters. 
     /// 
-    /// The Marshaller uses serializer classes for accomplishing it’s task of marshalling / unmarshalling values.
+    /// The Marshaller uses serializer classes for accomplishing its task of marshalling / unmarshalling values.
     /// </remarks>
     internal class Marshaller {
 
@@ -213,8 +213,8 @@ namespace Ch.Elca.Iiop.Marshalling {
         private Serialiser m_marshalByValSer = new ValueObjectSerializer();
         private Serialiser m_boxedValueSer = new BoxedValueSerializer();
         private Serialiser m_enumSer = new EnumSerializer();
-        private Serialiser m_seqSer = new IDLSequenceSerializer();
-        private Serialiser m_structSer = new IDLStructSerializer();
+        private Serialiser m_seqSer = new IdlSequenceSerializer();
+        private Serialiser m_structSer = new IdlStructSerializer();
         private Serialiser m_exceptSer = new ExceptionSerializer();
 
         /// <summary>stores the mapping for base types</summary>

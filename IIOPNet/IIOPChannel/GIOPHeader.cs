@@ -137,13 +137,13 @@ namespace Ch.Elca.Iiop {
             }
         }
 
-        public IiopMsgTypes GIOP_Type {
+        public IiopMsgTypes GiopType {
             get { 
                 return m_type; 
             }
         }
 
-        public uint Content_Msg_Length {
+        public uint ContentMsgLength {
             get { 
                 return m_msgLength; 
             }
