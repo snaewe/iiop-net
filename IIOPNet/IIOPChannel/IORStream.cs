@@ -337,9 +337,9 @@ namespace Ch.Elca.Iiop.Tests {
     /// <summary>
     /// Unit test for testing IorStream
     /// </summary>
-    public class IorTest : TestCase {
+    public class IorStreamTest : TestCase {
         
-        public IorTest() {
+        public IorStreamTest() {
         }
 
         public void TestIorDeStringification() {

@@ -749,3 +749,35 @@ namespace Ch.Elca.Iiop.CorbaObjRef {
     }
 
 }
+
+#if UnitTest
+
+namespace Ch.Elca.Iiop.Tests {
+	
+    using NUnit.Framework;
+    using Ch.Elca.Iiop.CorbaObjRef;
+    
+    /// <summary>
+    /// Unit-test for class Ior
+    /// </summary>
+    public class IorTest : TestCase {
+        
+        public IorTest() {
+        }
+
+        public void TestIorCreation() {
+            string iorString = "IOR:0000000000000024524d493a48656c6c6f496e746572666163653a3030303030303030303030303030303000000000010000000000000050000102000000000c31302e34302e32302e3531001f9500000000000853617948656C6C6F0000000100000001000000200000000000010001000000020501000100010020000101090000000100010100";
+            Ior ior = new Ior(iorString);
+            Assertion.AssertEquals("10.40.20.51", ior.HostName);
+            Assertion.AssertEquals(8085, ior.Port);
+            Assertion.AssertEquals(1, ior.Version.Major);
+            Assertion.AssertEquals(2, ior.Version.Minor);
+            byte[] oid = { 0x53, 0x61, 0x79, 0x48, 0x65, 0x6C, 0x6C, 0x6F };
+            Assertion.Equals(oid, ior.ObjectKey);
+        }
+        
+    }
+
+}
+
+#endif
