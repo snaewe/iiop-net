@@ -1,0 +1,435 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<HTML>
+<HEAD>
+<TITLE>IIOP.NET - Handling java-side exceptions in .NET howto</TITLE>
+<link type="text/css" rel="stylesheet" href="style/basic.css">
+</HEAD>
+<BODY style="margin=0px">
+<TABLE BORDER="0" CELLPADDING="0" CELLSPACING="0" width="100%" height="100%" rules="none" style="margin=0px;" summary="">
+<!--Line 0 -->
+<TR>
+  <TD width="0px" height="0px"></TD>
+  <TD width="120px" height="0px"></TD>
+  <TD width="18px" height="0px"></TD>
+  <TD width="280px" height="0px"></TD>
+  <TD height="0px"></TD>
+  <TD width="1px" height="0px"></TD>
+  <TD width="88px" height="0px"></TD>
+  <TD width="120px" height="0px"></TD>
+  <TD width="1px" height="0px"></TD>
+  <TD width="44px" height="0px"></TD>
+</TR>
+<!--Line 1 -->
+<TR>
+  <TD width="0px" height="34px"></TD>
+  <TD COLSPAN="6"></TD>
+  <TD ALIGN="RIGHT" STYLE="padding-right: 8px;">
+<a href="contact.html" class="contactLink">Contact us</A>
+|
+<a href="links.html" class="contactLink">Links</A>
+  </TD>
+  <TD bgcolor="#666633"></TD>
+  <TD height="34px"></TD>
+</TR>
+<!--Line 2 -->
+<TR>
+  <TD width="0px" height="69px"></TD>
+  <TD COLSPAN="3"><IMG SRC="images/iiop_logo_top.gif" alt=""></TD>
+  <TD COLSPAN="4"></TD>
+  <TD bgcolor="#666633" width="1px"></TD>
+  <TD height="69px"></TD>
+</TR>
+<!--Line 3 -->
+<TR>
+  <TD width="0px" height="4px"></TD>
+  <TD height="4px" COLSPAN="9" BGCOLOR="#CC3300"></TD>
+</TR>
+<!--Line 4 + 5 -->
+<TR>
+  <TD width="0"></TD>
+  <TD width="120">
+  <!-- menu begin -->
+<P class="menu">
+<TABLE border="1" rules="none" STYLE="border-width="0" 0 1 0" CELLPADDING="4" CELLSPACING="0" WIDTH="100%" STYLE="BORDER-COLOR:#CC3300; border-style: solid" summary="">
+<TR><TD class="menu"><a class="menuLink" href="index.html">Overview</A></TD></TR>
+<TR><TD class="menu"><a class="menuLink" href="documentation.html">Documentation</A></TD></TR>
+<TR><TD class="menu"><a class="menuLink" href="faq.html">FAQ</A></TD></TR>
+<TR><TD class="menu"><a class="menuLink" href="http://sourceforge.net/forum/forum.php?forum_id=274081">Forum</A></TD></TR>
+<TR><TD class="menu"><a class="menuLink" href="status.html">Status</A></TD></TR>
+<TR><TD class="menu"><a class="menuLink" href="license.html">License</A></TD></TR>
+<TR><TD class="menu"><a class="menuLink" href="download.html">Download</A></TD></TR>
+<TR><TD class="menu"><a class="menuLink" href="links.html">Links</A></TD></TR>
+<TR><TD class="menu"><a class="menuLink" href="contact.html">Contact us</A></TD></TR>
+</TABLE>
+<P class="menu">
+<TABLE BORDER="1" rules="none" CELLPADDING="4" CELLSPACING="0" WIDTH="100%" STYLE="BORDER-COLOR:#000000" summary="">
+<TR><TD class="bottomMenu"><A class="bottomMenuLink" target="_blank" href="http://www.sf.net/projects/iiop-net">SF Project Page</A></TD></TR>
+<TR><TD class="bottomMenu"><A href="http://sourceforge.net"> <IMG border="0" src="http://sourceforge.net/sflogo.php?gr
+oup_id=80227&amp;type=2" width="106" height="30" border="0" alt="SourceForge Log
+o"></A></TD></TR>
+</TABLE>
+<P class="menu">
+<TABLE border="0" bgcolor="#CC3300" width="100%" height="100%" summary="">
+<TR>
+<TD></TD>
+</TR>
+</TABLE>
+  <!-- menu end -->
+  </TD>
+  <TD></TD>
+  <TD COLSPAN="2" ROWSPAN="3" STYLE="padding-top: 15px; padding-right: 8px">
+  <!-- content begin -->
+  <H2 class="contentPart">Handling java-side exceptions in .NET howto</H2>
+<p>This howto explains how to handle java exceptions thrown in the java-part of a distributed application and forwarded with IIOP.NET to the .NET part of the application.
+<p>This document assumes you are using Java 1.4 or later
+<p>The code for this tutorial can be found in <code>Examples/Exceptions/JavaSideExceptions</code>.
+<p><b>Mapping</b>
+<p>Java exception classes are extensions of <code>java.lang.Exception</code>. In IDL, each java exception class <code><em>T</em>Exception</code> is mapped to a CORBA exception <code><em>T</em>Ex</code> containing a custom-serialized valuetype <code><em>T</em>Exception</code>. The <code>IDLToCLSCompiler</code> generates a .NET exception <code><em>T</em>Ex</code> and an abstract class <code><em>T</em>Exception</code>.
+<p>Because exceptions are serialized (i.e. CORBA valuetypes), their translation to .NET is not automated and requires the implementation of the methods contained in the class. Each exception class used requires the implementation of a class <code>ExceptionImpl</code>. The complexity and the number of methods to provide depends mostly on the java-side implementation of the <code>java.lang.Exception</code> class. In our example using Java JDK 1.4, this requires more than 20 methods in 3 classes (<code>java.lang.Exception</code> relies on <code>java.lang.Throwable</code> and <code>java.lang.StackTraceElement</code>).
+<p><b>Step 1: create a custom exception or use an existing java exception class</b>
+<p>Custom exceptions must inherit from <code>java.lang.Exception</code> and implement <code>java.io.Serializable</code>.
+<p>
+<table border="1" summary="">
+<tr><td><pre>
+
+import java.io.Serializable;
+import java.rmi.Remote;
+import java.rmi.RemoteException;
+
+public class CustomException extends Exception implements Serializable {
+
+    public String reason;
+
+    public CustomException(String message, String reason) throws java.rmi.RemoteException {
+        super(message); 
+	this.reason = reason;
+    }
+}
+
+</pre></td></tr>
+</table>
+<p><b>Step 2: create IDL description</b>
+<p>Create the IDL description for your java object as usual. Because the exception is mentioned in some <code>throws</code> clause, there is no need to explicitely generate the IDL for your exception.
+<p><b>Step 3: create .NET stubs</b>
+<p>Use the <code>IDLToCLSCompiler</code> to generate the .NET stubs. Take note of which valuetypes must be locally implemented.
+<p><b>Step 4: implement valuetype classes</b>
+<p>The compiler generates an abstract class <code>CustomException</code>, you must implement <code>CustomExceptionImpl</code> implementing all the abstract methods of <code>CustomException</code>. Because this class indirectly inherits from <code>java.lang.Exception</code>, the methods defined there must also be implemented here. The methods depend on the java implementation of Exception; the following example shows the code for the Sun JDK 1.4.
+<p>For each custom exception, you must create an implementation class. Below, the implementation class <code>CustomExceptionImpl</code> for class <code>CustomException</code>.
+<p>
+<table border="1" summary="">
+<tr><td><pre>
+
+namespace tutorial {
+    
+    using java.lang;
+
+    public class CustomExceptionImpl: CustomException {
+
+
+        private ExceptionCommon m_data = new ExceptionCommon();
+
+
+        public CustomExceptionImpl() : base() {
+        }
+            
+        public override void Deserialise(Corba.DataInputStream stream) {
+            m_data.Deserialise(stream);
+            reason = stream.read_WStringValue();
+        }
+                
+        public override void Serialize(Corba.DataOutputStream stream) {
+            m_data.Serialise(stream);
+        }
+
+        public override Throwable initCause(Throwable arg) {
+            return null;
+        }
+                
+        public override string toString() {
+            return ToString();
+        }
+
+        public override Throwable fillInStackTrace() {
+            return null;
+        }
+
+        public override Throwable cause {
+            get { return m_data.Cause; }
+        }
+
+        public override string localizedMessage {
+            get { return m_data.Msg; }
+        }
+
+        public override string message {
+            get { return m_data.Msg; }
+        }
+
+        public override void printStackTrace__() {    
+        }
+
+        public override void printStackTrace__java_io_PrintStream(java.io.PrintStream arg) {
+        }
+
+        public override void printStackTrace__java_io_PrintWriter(java.io.PrintWriter arg) {
+        }
+
+        public override StackTraceElement[] stackTrace {
+            get { return m_data.Trace; }
+            set { }
+        }
+
+        public override string ToString() {
+            return base.ToString() + "; msg: " + m_data.Msg;
+        }
+
+    }
+}
+
+</pre></td></tr>
+</table>
+<p>The data and code for <code>java.lang.Exception</code> is factored out in an own class <code>ExceptionCommon</code> to allow code reuse when more than one exception class is used. Each exception class must deserialize the <code>java.lang.Exception</code> fields before deserializing its own fields. This code depends on the java-side implementation!
+<p>
+<table border="1" summary="">
+<tr><td><pre>
+
+namespace java.lang {
+
+/// <summary>
+/// used to Deserialise the java.lang.Exception data
+/// </summary>
+public class ExceptionCommon {
+
+    private java.lang.Throwable m_cause;
+    private string m_msg;
+    private java.lang.StackTraceElement[] m_trace;
+
+    public java.lang.Throwable Cause {
+        get { 
+            return m_cause; 
+        }
+    }
+
+    public string Msg {
+        get { 
+            return m_msg; 
+        }
+    }
+
+    public java.lang.StackTraceElement[] Trace {
+        get { 
+            return m_trace; 
+        }
+    }
+
+    public void Deserialise(Corba.DataInputStream stream) {
+        stream.read_octet(); // ignore format version: java RMI specific
+        stream.read_boolean(); // ignore default read object: java RMI specific
+            
+        m_cause = (java.lang.Throwable)stream.read_ValueOfType(typeof(java.lang.Throwable));
+        m_msg = stream.read_WStringValue();
+
+        object boxedTrace = stream.read_Value();
+        if (boxedTrace != null) {
+            m_trace = (StackTraceElement[])((BoxedValueBase) boxedTrace).Unbox();
+        }
+
+    }
+
+    public void Serialise(Corba.DataOutputStream stream) {
+        throw new omg.org.CORBA.NO_IMPLEMENT(2876, omg.org.CORBA.CompletionStatus.Completed_MayBe);
+    }
+
+}
+
+    
+public class StackTraceElementImpl : StackTraceElement {
+
+    public override int hashCode() {
+        return GetHashCode();
+    }            
+        
+    public override string toString() {
+        return "StackTraceElement:\n" + "in class: " + m_declaringClass + 
+            " (file: " + m_fileName + "); method: " + m_methodName;
+    }
+
+    public override bool equals([ObjectIdlTypeAttribute(IdlTypeObject.Any)] object arg) {
+        return this.Equals(arg);
+    }
+
+    public override string className {
+        get { return m_declaringClass; }
+    }
+
+    public override string fileName {
+        get { return m_fileName; }
+    }
+
+    public override int lineNumber {
+        get { return m_lineNumber; }
+    }
+
+    public override string methodName {
+        get { return m_methodName; }
+    }
+
+    public override bool nativeMethod {
+        get { return false; }
+    }
+        
+}
+
+[Serializable]
+public class ThrowableImpl : Throwable {
+
+
+    private ExceptionCommon m_data = new ExceptionCommon();
+
+
+    public ThrowableImpl() : base() {
+    }
+        
+    public override void Deserialise(Corba.DataInputStream stream) {
+        m_data.Deserialise(stream);
+    }
+            
+    public override void Serialize(Corba.DataOutputStream stream) {
+        m_data.Serialise(stream);
+    }
+
+    public override Throwable initCause(Throwable arg) {
+        return null;
+    }
+            
+    public override string toString() {
+        return ToString();
+    }
+
+    public override Throwable fillInStackTrace() {
+        return null;
+    }
+
+    public override Throwable cause {
+        get { return m_data.Cause; }
+    }
+
+    public override string localizedMessage {
+        get { return m_data.Msg; }
+    }
+
+    public override string message {
+        get { return m_data.Msg; }
+    }
+
+    public override void printStackTrace__() {    
+    }
+
+    public override void printStackTrace__java_io_PrintStream(java.io.PrintStream arg) {
+    }
+
+    public override void printStackTrace__java_io_PrintWriter(java.io.PrintWriter arg) {
+    }
+
+    public override StackTraceElement[] stackTrace {
+        get { return m_data.Trace; }
+        set { }
+    }
+
+    public override string ToString() {
+        return base.ToString() + "; msg: " + m_data.Msg;
+    }
+}
+
+
+}
+
+</pre></td></tr>
+</table>
+<p><b>Step 5: use the exception</b>
+<p>To access the exception, use the wrapped class <code>CustomEx</code>, which is automatically generated by the compiler.
+<p>
+<table border="1" summary="">
+<tr><td><pre>
+
+    try {
+        ....
+        service.fail();
+	....
+    } catch (CustomEx je) {
+        // extract exception from wrapper
+        CustomException ce = je.value;
+
+        ....
+        Console.WriteLine("Java-side exception: {0}\nReason: {1}", ce.message, ce.reason);
+    }
+
+</pre></td></tr>
+</table>
+  <!-- content end -->
+  </TD>
+  <TD BGCOLOR="#000000"></TD>
+  <TD COLSPAN="2" ROWSPAN="3" STYLE="padding-top: 15px; padding-right: 8 px; padding-left: 8px" width="208">
+  <!-- about begin -->
+<H2 class="ABOUT">About this project</H2>
+<p>
+<B>This project</B> is maintained by <A target="_blank" class="textLink" href="http://www.elca.ch">Elca Informatique SA</A> and
+ was developed in collaboration with
+the <A target="_blank" class="textLink" href="http://www.cs.inf.ethz.ch/gutknecht/index.html">Programming Languages and Runtime Systems Research Group</A> of the ETH-Zurich
+as part of Dominic Ullmann's diploma thesis.
+<p>
+<A target="_blank" href="http://www.elca.ch"><img src="images/iiop_logo_elca.gif" border="0" alt=""></A>
+<A target="_blank" href="http://www.ethz.ch"><img src="images/iiop_logo_eth.gif" border="0" alt=""></A>
+<H2 class="ABOUT">News</H2>
+<p>
+<IFRAME src="newsFeed.html" width="208px" height="100%">
+</IFRAME>
+  <!-- about end -->
+  </TD>
+  <TD BGCOLOR="#CCCC99" colspan="2" rowspan="2" height="585" valign="top" STYLE="vertical-align: top;"><IMG align="top" src="images/iiop_border_right.gif" alt=""></TD>
+  </TR>
+<!--Line 6 -->
+<TR>
+  <TD width="0" height="323"></TD>
+  <TD BGCOLOR="#CC3300"></TD>
+  <TD></TD>
+  <!-- rowspan -->
+  <!-- rowspan -->
+  <TD BGCOLOR="#000000"></TD>
+  <!-- rowspan -->
+  <!-- rowspan -->
+  <!-- rowspan -->
+  <!-- rowspan -->
+  <!--TD BGCOLOR="#CCCC99"></TD-->
+  <!--TD BGCOLOR="#CCCC99" height="323px" valign="top"><IMG src="images/iiop_border_right2.gif" alt=""></TD-->
+</TR>
+<!--Line 7: extension row -->
+<TR>
+  <TD width="0"></TD>
+  <TD BGCOLOR="#CC3300"></TD>
+  <TD>&nbsp;</TD>
+  <!-- rowspan -->
+  <!-- rowspan -->
+  <TD BGCOLOR="#000000"></TD>
+  <!-- rowspan -->
+  <!-- rowspan -->
+  <TD BGCOLOR="#CCCC99"></TD>
+  <TD BGCOLOR="#CCCC99"></TD>
+</TR>
+<!--Line 8 -->
+<TR>
+  <TD width="0" height="60"></TD>
+  <TD BGCOLOR="#CC3300"></TD>
+  <TD></TD>
+  <TD COLSPAN="2" STYLE="padding-top: 20px;">
+<!-- Disclaimer -->
+&copy; 2003-2004 ELCA All Rights Reserved
+<!-- Disclaimer -->
+  </TD>
+  <TD COLSPAN="3"></TD>
+  <TD BGCOLOR="#CCCC99"></TD>
+  <TD BGCOLOR="#CCCC99" height="60px"></TD>
+</TR>
+</TABLE>
+</BODY>
+</HTML>
