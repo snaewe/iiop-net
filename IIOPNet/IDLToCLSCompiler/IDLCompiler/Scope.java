@@ -35,6 +35,8 @@ import java.util.Hashtable;
 import java.util.LinkedList;
 import java.util.Stack;
 
+import Ch.Elca.Iiop.Idl.IdlNaming;
+
 /**
  * 
  * @version 
@@ -167,19 +169,24 @@ public class Scope {
      * This method checks if the symbol is present in the Scope and throws an error if not
      */
     public String getFullyQualifiedNameForSymbol(String symbolName) {
-        if (getSymbol(symbolName) == null) { throw new RuntimeException("error in scope " + this + ", symbol with name: " + symbolName + " not found"); }
+        if (getSymbol(symbolName) == null) { 
+            throw new RuntimeException("error in scope " + this + ", symbol with name: " + symbolName + " not found"); 
+        }
         String namespaceName = getFullyQualifiedScopeName();
         String fullyQualName = namespaceName;
-        if (fullyQualName.length() > 0) { fullyQualName += "."; }
-        fullyQualName += symbolName;
+        if (fullyQualName.length() > 0) { 
+            fullyQualName += "."; 
+        }
+        fullyQualName += IdlNaming.MapIdlNameToClsName(symbolName);
         return fullyQualName;
     }
 
-
     /** returns the fully qualified name of this scope */
-    /** @return an array of all scope names. At index 0 the outermost scope name is present */
+    /** @return the fully qualified scope name in CLS */
     public String getFullyQualifiedScopeName() {
-        if (getParentScope() == null) { return ""; }
+        if (getParentScope() == null) { 
+            return ""; 
+        }
         Stack scopeStack = new Stack();
         scopeStack.push(m_scopeName);
         Scope parent = getParentScope();
@@ -191,8 +198,10 @@ public class Scope {
         String result = "";
         int stackSize = scopeStack.size();
         for (int i = 0; i < stackSize; i++) {
-            if (i > 0) { result += "."; }
-            result += scopeStack.pop();
+            if (i > 0) { 
+                result += "."; 
+            }
+            result += IdlNaming.MapIdlNameToClsName((String)scopeStack.pop());
         }
         return result;
     }
