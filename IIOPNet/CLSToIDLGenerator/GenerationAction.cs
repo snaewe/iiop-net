@@ -1,4 +1,4 @@
-/* DependencyManager.cs
+/* GenerationAction.cs
  * 
  * Project: IIOP.NET
  * CLSToIDLGenerator
@@ -55,7 +55,7 @@ namespace Ch.Elca.Iiop.Idl {
         /// <summary>the dependency information for the type mapped</summary>
         private DependencyInformation m_depInfo;
         /// <summary>the written fwd references </summary>
-        private ArrayList m_writtenFwdReferences;
+        private IList m_writtenFwdReferences;
 
         /// <summary>generates the IDL for referenced types</summary>
         private GenerationActionReference m_refMapper = new GenerationActionReference();
@@ -179,15 +179,15 @@ namespace Ch.Elca.Iiop.Idl {
         /// </summary>
         private void BeforeTypeDefinition() {
             Debug.WriteLine("before type definition, type: " + m_depInfo.ForType);
-            ArrayList mapBefore = m_depManager.GetTypesToMapBeforeType(m_depInfo);
+            IList mapBefore = m_depInfo.GetTypesToMapBeforeType();
             // map them
             MapTypes(mapBefore);
             // write forward references
-            ArrayList fwdRefs = m_depManager.GetNeededForwardRefs(m_depInfo);
+            IList fwdRefs = m_depInfo.GetNeededForwardRefs();
             WriteForwardDecls(fwdRefs);
             m_writtenFwdReferences = fwdRefs;
             // write includes
-            ArrayList includesBefore = m_depManager.GetTypesToIncludeBeforeType(m_depInfo);
+            IList includesBefore = m_depInfo.GetTypesToIncludeBeforeType();
             WriteIncludeBeforeType(includesBefore);
         }
 
@@ -200,7 +200,7 @@ namespace Ch.Elca.Iiop.Idl {
         }
 
         /// <summary>map all the types in the list typesToMap (if not already mapped)</summary>
-        private void MapTypes(ArrayList typesToMap) {
+        private void MapTypes(IList typesToMap) {
             IEnumerator enumerator = typesToMap.GetEnumerator();
             while (enumerator.MoveNext()) {
                 MapTypeInfo info = (MapTypeInfo) enumerator.Current;
@@ -210,10 +210,9 @@ namespace Ch.Elca.Iiop.Idl {
                 }
             }
         }
-
         
         /// <summary>writes forward declarations</summary>
-        private void WriteForwardDecls(ArrayList forwardDeclTypes) {
+        private void WriteForwardDecls(IList forwardDeclTypes) {
             GenerationActionWriteFwdDeclarations fwdWriteAction = new GenerationActionWriteFwdDeclarations(m_currentOutputStream);
             IEnumerator enumerator = forwardDeclTypes.GetEnumerator();
             while (enumerator.MoveNext()) {
@@ -225,7 +224,7 @@ namespace Ch.Elca.Iiop.Idl {
 
         /// <summary> writes the includes before the type definition starts </summary>
         /// <param name="mappedBeforeType"></param>
-        private void WriteIncludeBeforeType(ArrayList mappedBeforeType) {
+        private void WriteIncludeBeforeType(IList mappedBeforeType) {
             // write default includes for this modules
             m_currentOutputStream.WriteLine("#include \"orb.idl\"");
             m_currentOutputStream.WriteLine("#include \"Predef.idl\"");
@@ -234,13 +233,13 @@ namespace Ch.Elca.Iiop.Idl {
             WriteIncludes(mappedBeforeType);
         }
 
-        private void WriteIncludesAfterType(ArrayList typesMappedAfter) {
+        private void WriteIncludesAfterType(IList typesMappedAfter) {
             m_currentOutputStream.WriteLine("");
             WriteIncludes(typesMappedAfter);
         }
 
         /// <summary>write include statements for all types in the list</summary>
-        private void WriteIncludes(ArrayList forTypes) {
+        private void WriteIncludes(IList forTypes) {
             GenerationActionWriteInclude includeWriteAction = 
                 new GenerationActionWriteInclude(m_currentOutputStream, m_depManager);
             IEnumerator enumerator = forTypes.GetEnumerator();
@@ -274,22 +273,6 @@ namespace Ch.Elca.Iiop.Idl {
             m_currentOutputStream.WriteLine("");
         }
         
-        /// <summary>checks, if the cls method is overloaded seen from type inType</summary>
-        private bool IsClsMethodOverloaded(MethodInfo method, Type inType) {
-            MethodInfo[] methods = inType.GetMethods(BindingFlags.Instance | BindingFlags.Public);
-        	int nrOfOverloads = 0;
-        	foreach (MethodInfo methodFound in methods) {
-        		if (methodFound.Name.Equals(method.Name)) {
-        		    nrOfOverloads++;
-        		}
-        	}
-        	if (nrOfOverloads > 1) {
-        		return true;
-        	} else {
-        		return false;
-        	}
-        }
-
         /// <summary>maps a method to IDL</summary>
         /// <param name="shouldThrowException">if true, generate a raise clause for method: GenericUserException</param>
         private void MapMethod(MethodInfo methodToMap, Type declaringType, bool shouldThrowException) {
@@ -317,7 +300,7 @@ namespace Ch.Elca.Iiop.Idl {
                                                                   m_refMapper);
             m_currentOutputStream.Write(returnTypeMapped + " ");
             
-            bool isOverloaded = IsClsMethodOverloaded(methodToMap, declaringType);
+            bool isOverloaded = ReflectionHelper.IsMethodOverloaded(methodToMap, declaringType);
             string mappedMethodName = IdlNaming.MapClsMethodNameToIdlName(methodToMap, isOverloaded);
             m_currentOutputStream.Write(mappedMethodName + "(");
             
@@ -352,80 +335,10 @@ namespace Ch.Elca.Iiop.Idl {
             foreach (MethodInfo info in methods) { 
                 // private methods are not exposed
                 // specialName-methods are not mapped, e.g. property accessor methods are such methods
-                if ((!info.IsPrivate) && (!CheckIsMethodInInterfaceOrBase(typToMap, info, flags)) && (!info.IsSpecialName)) { 
+                if ((!info.IsPrivate) && (!ReflectionHelper.CheckIsMethodInInterfaceOrBase(typToMap, info, flags)) && (!info.IsSpecialName)) { 
                     MapMethod(info, typToMap, shouldThrowException);
                 }
             }
-        }
-
-        /// <summary>
-        /// checks, if the mehtod is already defined in a base class or an interface. If so, don't map it again
-        /// </summary>
-        /// <returns>true, if contained in a base class or interface, else returns false</returns>
-        private bool CheckIsMethodInInterfaceOrBase(Type typeToMap, MethodInfo method, BindingFlags flags) {
-            bool result = false;
-            Type baseType = typeToMap.BaseType;
-            if (baseType != null) {
-                result = IsMethodInType(baseType, method, flags);
-            }
-            Type[] interfaces = typeToMap.GetInterfaces();
-            for (int i = 0; i < interfaces.Length; i++) {
-                result = result || IsMethodInType(interfaces[i], method, flags);
-            }
-            return result;
-        }
-
-        /// <summary>
-        /// checks, if the property is already defined in a base class or an interface. If so, don't map it again
-        /// </summary>
-        /// <returns>true, if contained in a base class or interface, else returns false</returns>
-        private bool CheckIsPropertyInInterfaceOrBase(Type typeToMap, PropertyInfo prop, BindingFlags flags) {
-            bool result = false;
-            Type baseType = typeToMap.BaseType;
-            if (baseType != null) {
-                result = IsPropertyInType(baseType, prop, flags);
-            }
-            Type[] interfaces = typeToMap.GetInterfaces();
-            for (int i = 0; i < interfaces.Length; i++) {
-                result = result || IsPropertyInType(interfaces[i], prop, flags);
-            }
-            return result;
-        }
-
-        /// <summary>
-        /// checks if a method with the same signature and name as method is in type
-        /// </summary>
-        private bool IsMethodInType(Type type, MethodInfo method, BindingFlags flags) {
-            MethodInfo typeMethod = type.GetMethod(method.Name, flags, null,
-                                                   ExtractParamTypesFromParamInfoArray(method.GetParameters()),
-                                                   null);
-            if (typeMethod != null) {
-                return true;
-            } else {
-                return false;    
-            }
-        }
-
-        /// <summary>
-        /// checks if a method with the same signature and name as method is in type
-        /// </summary>
-        private bool IsPropertyInType(Type type, PropertyInfo prop, BindingFlags flags) {
-            
-            PropertyInfo typeProp = type.GetProperty(prop.Name, flags);
-            if (typeProp != null) {
-                return true;
-            } else {
-                return false;    
-            }
-        }
-
-        /// <summary>extract the paramterTypes out of a ParameterInfo-Array</summary>
-        private Type[] ExtractParamTypesFromParamInfoArray(ParameterInfo[] paramArray) {
-            Type[] result = new Type[paramArray.Length];
-            for (int i = 0; i < paramArray.Length; i++) {
-                result[i] = paramArray[i].ParameterType;
-            }
-            return result;
         }
 
         private void WriteParamDirection(ParameterInfo info) {
@@ -453,7 +366,7 @@ namespace Ch.Elca.Iiop.Idl {
         private void MapProperties(Type typeToMap, BindingFlags flags) {
             PropertyInfo[] properties = typeToMap.GetProperties(flags);
             foreach (PropertyInfo info in properties) {
-               if (!CheckIsPropertyInInterfaceOrBase(typeToMap, info, flags)) {
+               if (!ReflectionHelper.CheckIsPropertyInInterfaceOrBase(typeToMap, info, flags)) {
                    MapProperty(info, typeToMap);
                }
             }

@@ -41,16 +41,18 @@ namespace Ch.Elca.Iiop.Idl {
 
         private Type m_type;
         private AttributeExtCollection m_attributes;
+        private bool m_isFwdDeclPossible;
 
         #endregion IFields
         #region IConstructors
         
-        public MapTypeInfo(Type type, Util.AttributeExtCollection attributes) {
+        public MapTypeInfo(Type type, Util.AttributeExtCollection attributes, bool isFwdDeclPossible) {
             if ((type == null) || (attributes == null)) {
                 throw new ArgumentException("type and attributes must be != null");
             }
             m_type = type;
             m_attributes = attributes;            
+            m_isFwdDeclPossible = isFwdDeclPossible;
         }
         
         #endregion IConstructors
@@ -68,9 +70,15 @@ namespace Ch.Elca.Iiop.Idl {
             }
         }
         
+        public bool IsForwardDeclPossible {
+            get {
+                return m_isFwdDeclPossible;
+            }
+        }
+        
         #endregion IProperties
         #region IMethods
-        
+               
         public void RemoveAttributeOfType(Type attrType) {
             Attribute found;
             m_attributes = m_attributes.RemoveAttributeOfType(attrType, out found);
