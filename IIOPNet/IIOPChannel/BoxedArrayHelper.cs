@@ -79,8 +79,11 @@ namespace Ch.Elca.Iiop.Idl {
                 boxContent = Array.CreateInstance(boxed.GetElementType(), array.Length);
                 for (int i = 0; i < array.Length; i++) {
                     // box array elements of the array of array
-                    object boxedElementContent = BoxOneDimArray(boxed.GetElementType(), (Array)array.GetValue(i));
-                    object boxedElement = Activator.CreateInstance(boxed.GetElementType(), new object[] { boxedElementContent });
+                    object boxedElement = null;
+                    if ((Array)array.GetValue(i) != null) {
+                        object boxedElementContent = BoxOneDimArray(boxed.GetElementType(), (Array)array.GetValue(i));
+                        boxedElement = Activator.CreateInstance(boxed.GetElementType(), new object[] { boxedElementContent });
+                    }                    
                     ((Array)boxContent).SetValue(boxedElement, i);
                 }
             } else if (!boxed.GetElementType().IsSubclassOf(typeof(BoxedValueBase))) {

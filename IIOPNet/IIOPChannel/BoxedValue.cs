@@ -88,7 +88,10 @@ namespace Ch.Elca.Iiop.Idl {
                     
                     Array unboxed = Array.CreateInstance(boxedType, length);
                     for (int i = 0; i < length; i++) {
-                        object unboxedElem = ((BoxedValueBase)((Array)val).GetValue(i)).Unbox(); // recursive unbox up to the non-boxed type
+                        object unboxedElem = null;
+                        if (((Array)val).GetValue(i) != null) {
+                            unboxedElem = ((BoxedValueBase)((Array)val).GetValue(i)).Unbox(); // recursive unbox up to the non-boxed type
+                        }
                         unboxed.SetValue(unboxedElem, i);
                     }
                     return unboxed;
