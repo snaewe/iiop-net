@@ -3,6 +3,9 @@
  * Project: IIOP.NET
  * Examples
  * 
+ * WHEN      RESPONSIBLE
+ * 25.05.03  Patrik Reali (PRR), patrik.reali -at- elca.ch
+ * 
  * Copyright 2003 ELCA Informatique SA
  * Av. de la Harpe 22-24, 1000 Lausanne 13, Switzerland
  * www.elca.ch

@@ -6,7 +6,7 @@
  * IDLToCLSCompiler
  * 
  * WHEN      RESPONSIBLE
- * 14.02.03  Dominic Ullmann (DUL), dul@elca.ch
+ * 14.02.03  Dominic Ullmann (DUL), dominic.ullmann -at- elca.ch
  *  
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public

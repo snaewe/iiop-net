@@ -4,7 +4,7 @@
  * IIOPChannel
  * 
  * WHEN      RESPONSIBLE
- * 18.05.03  Dominic Ullmann (DUL), dul@elca.ch
+ * 18.05.03  Dominic Ullmann (DUL), dominic.ullmann -at- elca.ch
  * 
  * Copyright 2003 Dominic Ullmann
  *

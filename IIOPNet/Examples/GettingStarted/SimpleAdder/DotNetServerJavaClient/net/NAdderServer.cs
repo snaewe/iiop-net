@@ -4,7 +4,7 @@
  * IIOPChannel Tutorial
  * 
  * WHEN      RESPONSIBLE
- * 23.04.03  Dominic Ullmann (DUL), dul@elca.ch
+ * 23.04.03  Dominic Ullmann (DUL), dominic.ullmann -at- elca.ch
  * 
  * Copyright 2003 Dominic Ullmann
  *
