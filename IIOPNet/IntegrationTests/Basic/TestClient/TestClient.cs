@@ -47,8 +47,9 @@ namespace Ch.Elca.Iiop.IntegrationTests {
 
         private TestService m_testService;
         private TestExceptionService m_testExService;
-        private TestWellKnownService m_svcSingleCall;
-        private TestWellKnownService m_svcSingletonCall;
+        private ISimpleTestInterface m_svcSingleCall;
+        private ISimpleTestInterface m_svcSingletonCall;
+        private ISimpleTestInterface m_contextBound;
 
 
         #endregion IFields
@@ -72,9 +73,11 @@ namespace Ch.Elca.Iiop.IntegrationTests {
             m_testExService = (TestExceptionService)RemotingServices.Connect(typeof(TestExceptionService), "corbaloc:iiop:1.2@localhost:8087/testExService");
 
             m_svcSingleCall = 
-                (TestWellKnownService)RemotingServices.Connect(typeof(TestWellKnownService), "corbaloc:iiop:1.2@localhost:8087/testSingleCall");
+                (ISimpleTestInterface)RemotingServices.Connect(typeof(ISimpleTestInterface), "corbaloc:iiop:1.2@localhost:8087/testSingleCall");
             m_svcSingletonCall = 
-                (TestWellKnownService)RemotingServices.Connect(typeof(TestWellKnownService), "corbaloc:iiop:1.2@localhost:8087/testSingletonCall");
+                (ISimpleTestInterface)RemotingServices.Connect(typeof(ISimpleTestInterface), "corbaloc:iiop:1.2@localhost:8087/testSingletonCall");
+            m_contextBound = 
+                (ISimpleTestInterface)RemotingServices.Connect(typeof(ISimpleTestInterface), "corbaloc:iiop:1.2@localhost:8087/testContextBound");
         }
 
         [TearDown]
@@ -939,7 +942,12 @@ namespace Ch.Elca.Iiop.IntegrationTests {
             CheckWellKnownService(m_svcSingleCall, false);
         }
 
-        private void CheckWellKnownService(TestWellKnownService svcToCheck, bool stateShouldBeKept) {
+        [Test]
+        public void TestContextBoundServiceType() {
+            CheckWellKnownService(m_contextBound, true);
+        }
+
+        private void CheckWellKnownService(ISimpleTestInterface svcToCheck, bool stateShouldBeKept) {
             Int32 arg1 = 1;
             Int32 arg2 = 2;
             Assertion.AssertEquals(arg1 + arg2, svcToCheck.Add(arg1, arg2));

@@ -1,4 +1,4 @@
-/* TestWellKnownService.cs
+/* TestContextBoundService.cs
  *
  * Project: IIOP.NET
  * IntegrationTests
@@ -31,9 +31,11 @@ using Ch.Elca.Iiop.Idl;
 
 namespace Ch.Elca.Iiop.IntegrationTests {
 
-    /// <summary>will be published as well known single call remoting object or well known singleton remoting object</summary>
+    
+
+    /// <summary>a context bound object</summary>
     [SupportedInterfaceAttribute(typeof(ISimpleTestInterface))]
-    public class TestWellKnownService : MarshalByRefObject, ISimpleTestInterface {
+    public class TestContextBoundService : ContextBoundObject, ISimpleTestInterface {
 
         private const Int32 INITIAL_VAL = 2;
 
@@ -58,6 +60,11 @@ namespace Ch.Elca.Iiop.IntegrationTests {
         /// <summary>used to check, that a call works as expected</summary>
         public Int32 Add(Int32 arg1, Int32 arg2) {
             return arg1 + arg2;
+        }
+
+        public override object InitializeLifetimeService() {
+            // live forever
+            return null;
         }
 
     }

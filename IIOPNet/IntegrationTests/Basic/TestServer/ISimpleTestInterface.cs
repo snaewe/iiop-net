@@ -1,4 +1,4 @@
-/* TestWellKnownService.cs
+/* ISimpleTestInterface.cs
  *
  * Project: IIOP.NET
  * IntegrationTests
@@ -30,35 +30,24 @@ using System;
 using Ch.Elca.Iiop.Idl;
 
 namespace Ch.Elca.Iiop.IntegrationTests {
+    
 
-    /// <summary>will be published as well known single call remoting object or well known singleton remoting object</summary>
-    [SupportedInterfaceAttribute(typeof(ISimpleTestInterface))]
-    public class TestWellKnownService : MarshalByRefObject, ISimpleTestInterface {
+    /// <summary>a simple interface to test remote object</summary>
+    public interface ISimpleTestInterface {
 
-        private const Int32 INITIAL_VAL = 2;
-
-        private System.Int32 m_val = INITIAL_VAL;
 
         /// <summary>used to check, if values are conserved or not</summary>
-        public System.Int32 TestValue {
-            get {
-                return m_val;
-            }
-            set {
-                m_val = value;
-            }
+        System.Int32 TestValue {
+            get;                
+            set;
         }
 
-        public System.Int32 InitialValue {
-            get {
-                return INITIAL_VAL;
-            }
+        System.Int32 InitialValue {
+            get;                
         }
 
         /// <summary>used to check, that a call works as expected</summary>
-        public Int32 Add(Int32 arg1, Int32 arg2) {
-            return arg1 + arg2;
-        }
+        Int32 Add(Int32 arg1, Int32 arg2);
 
     }
 

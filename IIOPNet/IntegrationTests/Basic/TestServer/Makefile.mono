@@ -9,7 +9,7 @@ build: build-idl
 
 build-server: $(bin)TestServer.exe
 
-build-idl: IDL/Ch/Elca/Iiop/IntegrationTests/TestService.idl IDL/Ch/Elca/Iiop/IntegrationTests/TestWellKnownService.idl
+build-idl: IDL/Ch/Elca/Iiop/IntegrationTests/TestService.idl IDL/Ch/Elca/Iiop/IntegrationTests/ISimpleTestInterface.idl
 
 $(bin)IIOPChannel.dll: $(IIOPCHANNEL)
     [ -d $(bin) ] || mkdir $(bin)
@@ -26,8 +26,8 @@ IDL/Ch/Elca/Iiop/IntegrationTests/TestService.idl: $(bin)TestServer.exe
     mono ../../../CLSToIDLGenerator/bin/CLSIDLGenerator.exe -o IDL Ch.Elca.Iiop.IntegrationTests.TestService $(bin)TestServer.exe
     cp TestExceptionService.idl IDL/Ch/Elca/Iiop/IntegrationTests/ 
 
-IDL/Ch/Elca/Iiop/IntegrationTests/TestWellKnownService.idl: $(bin)TestServer.exe
-    mono ../../../CLSToIDLGenerator/bin/CLSIDLGenerator.exe -o IDL Ch.Elca.Iiop.IntegrationTests.TestWellKnownService $(bin)TestServer.exe
+IDL/Ch/Elca/Iiop/IntegrationTests/ISimpleTestInterface.idl: $(bin)TestServer.exe
+    mono ../../../CLSToIDLGenerator/bin/CLSIDLGenerator.exe -o IDL Ch.Elca.Iiop.IntegrationTests.ISimpleTestInterface $(bin)TestServer.exe
 
 
 start-server:

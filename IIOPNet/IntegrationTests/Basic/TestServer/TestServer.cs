@@ -58,6 +58,8 @@ namespace Ch.Elca.Iiop.IntegrationTests {
                                                                "testSingletonCall",
                                                                WellKnownObjectMode.Singleton 
                                                               );
+            TestContextBoundService contextBound = new TestContextBoundService();
+            RemotingServices.Marshal(contextBound, "testContextBound");            
 
             Console.WriteLine("server running");
             Thread.Sleep(Timeout.Infinite);
