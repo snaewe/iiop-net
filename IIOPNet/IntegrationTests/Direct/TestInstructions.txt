@@ -18,6 +18,6 @@ Running the test
 
 - The test can be run using the NUnit GUI or the NUnit Console runner
   Running the test with console launcher:
-  - change to directory TestClient\bin
+  - change to directory TestClient
   - launch LaunchTest.bat
 

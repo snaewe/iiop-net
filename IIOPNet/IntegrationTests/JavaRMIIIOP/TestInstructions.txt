@@ -18,5 +18,5 @@ Running the test
   launch start java -Djava.naming.factory.initial=com.sun.jndi.cosnaming.CNCtxFactory -Djava.naming.provider.url=iiop://localhost:1050 -cp . TestServer
 - The test can be run using the NUnit GUI or the NUnit Console runner
   Running the test with console launcher:
-  - change to directory TestClient\bin
+  - change to directory TestClient
   - launch LaunchTest.bat
