@@ -84,6 +84,37 @@ namespace omg.org.CosNaming {
         #endregion IProperties
 
     }
+    
+        
+    [IdlEnumAttribute()]
+    public enum BindingType {
+        nobject, ncontext
+    }
+    
+    [Serializable]
+    [IdlStructAttribute]
+    [RepositoryIDAttribute("IDL:omg.org/CosNaming/Binding:1.0")]
+    public struct Binding : IIdlEntity {
+
+        #region IFields
+        
+        [IdlSequenceAttribute] 
+        public NameComponent[] binding_name;
+        public BindingType binding_type;                                  
+        
+        #endregion IFields
+        
+    }
+    
+
+    [RepositoryIDAttribute("IDL:omg.org/CosNaming/BindingIterator:1.0")]
+    [InterfaceTypeAttribute(IdlTypeInterface.ConcreteInterface)]
+    public interface BindingIterator : IIdlEntity {
+        bool next_one(out Binding b);
+        bool next_n(int how_many, [IdlSequenceAttribute()] out Binding[] bl);
+        void destroy();
+    }
+
  
     /// <summary>
     /// the interface of the namingcontext
@@ -112,6 +143,8 @@ namespace omg.org.CosNaming {
         NamingContext bind_new_context([IdlSequenceAttribute] NameComponent[] nameComponents);
         
         void destroy();
+        
+        void list (int how_many, [IdlSequenceAttribute()] out Binding[] bl, out BindingIterator bi);
 
         #endregion IMethods
 
@@ -124,16 +157,16 @@ namespace omg.org.CosNaming {
     [RepositoryIDAttribute("IDL:omg.org/CosNaming/NamingContextExt:1.0")]
     [InterfaceTypeAttribute(IdlTypeInterface.ConcreteInterface)]
     public interface NamingContextExt : NamingContext {
-    	
+
         MarshalByRefObject resolve_str([StringValue][WideChar(false)] string name);
-    	
+
         [return: StringValue]
         [return: WideChar(false)]
         string  to_string([IdlSequence]NameComponent[] name);
         
         [return: IdlSequence]
         NameComponent[] to_name([StringValue][WideChar(false)] string name);
-    	
+
     }
     
     
@@ -278,6 +311,10 @@ namespace omg.org.CosNaming {
         }
 
         public NamingContext bind_new_context([IdlSequenceAttribute] NameComponent[] nameComponents) {
+            throw new NO_IMPLEMENT(0, CompletionStatus.Completed_MayBe);
+        }
+        
+        public void list (int how_many, [IdlSequenceAttribute()] out Binding[] bl, out BindingIterator bi) {
             throw new NO_IMPLEMENT(0, CompletionStatus.Completed_MayBe);
         }
 
