@@ -1,0 +1,216 @@
+<a name="NET1.1"></a>
+<H2 class="about">Does IIOP.NET work with Microsoft's .NET 1.1?</H2>
+
+<p>
+Yes, it does. This is in fact the platform it was developed on.
+
+<a name="mono"></a>
+<H2 class="about">Does IIOP.NET work with mono?</H2>
+
+<p>
+Currently (mono 0.26) not, but only few features are missing. 
+We are regularly testing IIOP.NET against the mono CVS and reporting the problems we find to the mono team. 
+
+<p>We expect IIOP.NET to work on Mono pretty soon.
+
+<a name="WebLogic6"></a>
+<H2 class="about">Can IIOP.NET interoperate with BEA WebLogic 6.1?</H2>
+
+<p>
+Yes, it can.
+Some hints are provided in the <a href="ejbInterop.html">EJB example tutorial</a> and in 
+the <a href="weblogic6_1.html">WebLogic 6.1 interoperation howto</a>.
+
+<a name="WebLogic8"></a>
+<H2 class="about">Can IIOP.NET interoperate with BEA WebLogic 8.1?</H2>
+
+<p>
+Yes, it can.
+Some hints are provided in the <a href="weblogic8_1.html">Weblogic 8.1 interoperation howto</a>.
+
+<a name="Websphere4"></a>
+<H2 class="about">Can IIOP.NET interoperate with IBM Websphere 4?</H2>
+
+<p>
+Yes, it can.
+Some hints are provided in the <a href="websphere4.html">Websphere 4 interoperation howto</a>.
+
+<a name="Websphere5"></a>
+<H2 class="about">Can IIOP.NET interoperate with IBM Websphere 5?</H2>
+
+<p>
+Yes, it can.
+Some hints are provided in the <a href="websphere5.html">Websphere 5 interoperation howto</a>.
+
+<a name="JBoss32"></a>
+<H2 class="about">Can IIOP.NET interoperate with JBoss 3.2?</H2>
+
+<p>
+Yes, it can.
+Some hints are provided in the <a href="jboss3_2.html">JBoss 3.2 interoperation howto</a>.
+
+<a name="mainConfig"></a>
+<H2 class="about">Can the IIOP.NET sources be compiled without any configuration?</H2>
+<p>
+To compile the tutorials, you must copy the files <em>ir.idl</em> and <em>orb.idl</em>
+in the <em>./IDL</em> directory before compiling the tutorials. You will find 
+these two files as part of your Java SDK in the <em>%JAVA_HOME%\lib</em> directory.
+
+<p>
+To compile parts of the project, the makefile requires some 
+environment variables to be set:
+<table>
+	<tr>
+		<td>WAS_HOME</td>
+		<td>WebSphere 5 application server path<br>
+			used by Examples\EBJChatRoom\WebSphere_5\
+			and the IntegrationTests
+		</td>
+	</tr>
+	<tr>
+		<td>JBOSS_HOME</td>
+		<td>	JBoss 3.2.1 application server path<br>
+			used by Examples\EBJChatRoom\JBoss3.2.1\
+			and the IntegrationTests
+		</td>
+	</tr>
+	<tr>
+		<td>NUNITV2_HOME</td>
+		<td>	NUnit V2 path<br>
+			used by IIOPChannel unit tests and for 
+			the IntegrationTests
+		</td>
+	</tr>
+	<tr>
+		<td>JUNIT_HOME</td>
+		<td>	JUnit path<br>
+			used by the IntegrationTests
+		</td>
+	</tr>
+</table>
+
+<a name="fileConfig"></a>
+<H2 class="about">Can the IIOP.NET channel be configured with a config-file?</H2>
+<p>
+Yes, it can. <BR> <BR>
+Example:
+<BR>
+
+The following config file 
+
+<pre>
+    &lt;configuration&gt;
+      &lt;system.runtime.remoting&gt;
+        &lt;application&gt;
+          &lt;channels&gt;
+            &lt;channel type="Ch.Elca.Iiop.IiopChannel,IiopChannel" port="8087"/&gt;
+          &lt;/channels&gt;
+        &lt;/application&gt;
+      &lt;/system.runtime.remoting&gt;
+    &lt;/configuration&gt;
+</pre>
+<p/>
+
+is equivalent to the following:
+
+<pre>
+    // register the channel
+    IiopChannel chan = new IiopChannel(8087);
+    ChannelServices.RegisterChannel(chan);
+
+</pre>
+<p/>
+
+The config file is processed with: <BR>
+<pre>
+    RemotingConfiguration.Configure(configFile);
+</pre>
+
+<a name="#NUnit2Config"></a>
+<H2 class="about">How do I configure NUnit V2.0 to use the .NET Framework 1.1?</H2>
+
+<p>
+Add the following configuration lines in the files <code>%NUnit2%\bin\nunit-console.exe.config</code> and <code>%NUnit2%\bin\nunit-gui.exe.config</code>:
+
+<pre>
+  &lt;startup&gt; 
+    &lt;supportedRuntime version="v1.1.4322" /&gt; 
+  &lt;/startup&gt; 
+</pre>
+
+<a name="#stringifiedIOR"></a>
+<H2 class="about">How can I access an object using its stringified IOR?</H2>
+
+<p>
+The following Code reads an stringified IOR from the file iorfile and creates a proxy for
+the remote object represented by the IOR:
+
+<pre>
+    StreamReader stream = new StreamReader(iorfile);
+    String ior = stream.ReadLine();
+    MyRemoteObjectIF remoteObject = (MyRemoteObjectIF)RemotingServices.Connect(typeof(MyRemoteObjectIF),
+                                                                               ior);
+</pre>
+
+<a name="#corbaLocIIOP"></a>
+<H2 class="about">How can I access an object using its corbaloc:iiop address?</H2>
+
+<p>
+The following code creates a proxy for the remote object represented by the given corbaloc:
+
+<pre>
+    string loc = "corbaloc::localhost:3528/myobject";
+    MyRemoteObjectIF remoteObject = (MyRemoteObjectIF)RemotingServices.Connect(typeof(MyRemoteObjectIF), 
+                                                                               loc);
+</pre>
+
+Note: This feature is only available in IIOP.NET 1.4.0 and above.
+
+
+
+<a name="#callback"></a>
+<H2 class="about">How do I implement a callback?</H2>
+
+IIOP.NET contains two examples using callbacks:
+<ul>
+<dl>
+	<dt><pre>Examples\Callback\ChatroomInterDN</pre></dt>
+	<dd>shows using a callback in a scenario with an IIOP.NET client and an IIOP.NET server</dd>
+
+	<dt><pre>Examples\EJBChatRoom</pre></dt>
+	<dd>contains a similar example with an IIOP.NET client and various J2EE application servers; this example is explained in detail in the <a href="http://www.codeproject.com/">Code Project</a>'s article <a href="http://www.codeproject.com/useritems/iiop_net_and_EJB.asp">Accessing an EJB from .NET Using IIOP.NET: an Example</a></dd>
+
+</dl>
+</ul>
+
+For each callback, ensure that the following points are fullfilled:
+<ul>
+	<li>The callback implementation class must inherhit from <em>MarshalByRefObject</em>
+	<li>The callback implementation class must implement the callback interface
+	<li>The callback implementation class must have the <em>SupportedInterfaceAttribute</em>:
+<pre>
+  [SupportedInterfac(typeof(CallbackInterface)]
+  public class CallbackImpl : CallbackInterface {
+       // ...
+  }
+</pre>
+<li>Use an <em>IiopChannel</em> to allow the client to receive the server's messages (using only an <em>IIOPClientChannel</em> won't work):
+<pre>
+  int callbackPort = 0; // automatic assignement
+  IiopChannel chan = new IiopChannel(callbackPort);
+  ChannelServices.RegisterChannel(chan);
+  </pre>
+</ul> 
+
+
+<a name="#PInvokeException"></a>
+<H2 class="about">Exception: Invalid PInvoke metadata format</H2>
+
+<p>This is usually caused by the some backward incompatibility between the .NET framework 1.0 and 1.1:  the error occurs, when you run an application built for .NET framework 1.0 on the .NET framework 1.1.
+
+<p>A detailed description of the problem and possible solutions can be found here:
+<a href="http://msdn.microsoft.com/library/default.asp?url=/library/en-us/dnnetdep/html/sidexsidenet.asp">http://msdn.microsoft.com/library/default.asp?url=/library/en-us/dnnetdep/html/sidexsidenet.asp</a>
+
+
+
+

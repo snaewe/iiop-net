@@ -1,152 +1,39 @@
-<H2 class="contentPart">FAQ</H2>
-
-<H3>Compatibility</H3>
+<H2 class="contentPart">FAQ: Compatibility</H2>
 
 <ol>
-    <li><a href="#NET1.1">Does IIOP.NET work with Microsoft's .NET 1.1?</a></li>
-    <li><a href="#mono">Does IIOP.NET work with mono?</a></li>        
+    <li><a href="faq2.html#NET1.1">Does IIOP.NET work with Microsoft's .NET 1.1?</a></li>
+    <li><a href="faq2.html#mono">Does IIOP.NET work with mono?</a></li>        
 </ol>
 
-<H3>ORB Compatibility</H3>
+<H2 class="contentPart">FAQ: ORB Compatibility</H2>
 
 <ol START="3">
-    <li><a href="#WebLogic6">Can IIOP.NET interoperate with BEA WebLogic 6.1?</a></li>
-    <li><a href="#WebLogic8">Can IIOP.NET interoperate with BEA WebLogic 8.1?</a></li>
-    <li><a href="#Websphere4">Can IIOP.NET interoperate with IBM Websphere 4.0?</a></li>
-    <li><a href="#Websphere5">Can IIOP.NET interoperate with IBM Websphere 5.0?</a></li>
-    <li><a href="#JBoss32">Can IIOP.NET interoperate with JBoss 3.2?</a></li>
+    <li><a href="faq2.html#WebLogic6">Can IIOP.NET interoperate with BEA WebLogic 6.1?</a></li>
+    <li><a href="faq2.html#WebLogic8">Can IIOP.NET interoperate with BEA WebLogic 8.1?</a></li>
+    <li><a href="faq2.html#Websphere4">Can IIOP.NET interoperate with IBM Websphere 4.0?</a></li>
+    <li><a href="faq2.html#Websphere5">Can IIOP.NET interoperate with IBM Websphere 5.0?</a></li>
+    <li><a href="faq2.html#JBoss32">Can IIOP.NET interoperate with JBoss 3.2?</a></li>
 </ol>
 
-<H3>Configuration</H3>
+<H2 class="contentPart">FAQ: Configuration</H2>
 
 <ol START="8">
-    <li><a href="#fileConfig">Can the IIOP.NET channel be configured with a config-file?</a></li>
-    <li><a href="#NUnit2Config">How do I configure NUnit V2.0 to use the .NET Framework 1.1?</a></li>
+    <li><a href="faq2.html#mainConfig">Can the IIOP.NET sources be compiled without any configuration?</a></li>
+    <li><a href="faq2.html#fileConfig">Can the IIOP.NET channel be configured with a config-file?</a></li>
+    <li><a href="faq2.html#NUnit2Config">How do I configure NUnit V2.0 to use the .NET Framework 1.1?</a></li>
 </ol>
 
-<H3>Accessing CORBA objects from IIOP.NET</H3>
+<H2 class="contentPart">FAQ: Accessing CORBA objects from IIOP.NET</H2>
 
-<ol START="10">
-    <li><a href="#stringifiedIOR">How can I access an object using its stringified IOR?</a></li>
-    <li><a href="#corbaLocIIOP">How can I access an object using its corbaloc:iiop address?</a></li>
+<ol START="11">
+    <li><a href="faq2.html#stringifiedIOR">How can I access an object using its stringified IOR?</a></li>
+    <li><a href="faq2.html#corbaLocIIOP">How can I access an object using its corbaloc:iiop address?</a></li>
+    <li><a href="faq2.html#callback">How do I implement a callback?</a></li>
 </ol>
 
+<H2 class="contentPart">FAQ: Frequent Errors (Troubleshooting)</H2>
 
-<a name="NET1.1"></a>
-<H3>Does IIOP.NET work with Microsoft's .NET 1.1?</H3>
-
-Yes, it does. This is in fact the platform it was developed on.
-
-<a name="mono"></a>
-<H3>Does IIOP.NET work with mono?</H3>
-
-Currently (mono 0.24) not. This is due to the incomplete remoting implementation of mono. We hope this will change in the future.
-
-
-<a name="WebLogic6"></a>
-<H3>Can IIOP.NET interoperate with BEA WebLogic 6.1?</H3>
-
-Yes, it can.
-Some hints are provided in the <a href="ejbInterop.html">EJB example tutorial</a> and in 
-the <a href="weblogic6_1.html">WebLogic 6.1 interoperation howto</a>.
-
-<a name="WebLogic8"></a>
-<H3>Can IIOP.NET interoperate with BEA WebLogic 8.1?</H3>
-
-Yes, it can.
-Some hints are provided in the <a href="weblogic8_1.html">Weblogic 8.1 interoperation howto</a>.
-
-<a name="Websphere4"></a>
-<H3>Can IIOP.NET interoperate with IBM Websphere 4?</H3>
-
-Yes, it can.
-Some hints are provided in the <a href="websphere4.html">Websphere 4 interoperation howto</a>.
-
-<a name="Websphere5"></a>
-<H3>Can IIOP.NET interoperate with IBM Websphere 5?</H3>
-
-Yes, it can.
-Some hints are provided in the <a href="websphere5.html">Websphere 5 interoperation howto</a>.
-
-<a name="JBoss32"></a>
-<H3>Can IIOP.NET interoperate with JBoss 3.2?</H3>
-
-Yes, it can.
-Some hints are provided in the <a href="jboss3_2.html">JBoss 3.2 interoperation howto</a>.
-
-<a name="fileConfig"></a>
-<H3>Can the IIOP.NET channel be configured with a config-file?</H3>
-Yes, it can. <BR> <BR>
-Example:
-<BR>
-
-The following config file 
-
-<pre>
-    &lt;configuration&gt;
-      &lt;system.runtime.remoting&gt;
-        &lt;application&gt;
-          &lt;channels&gt;
-            &lt;channel type="Ch.Elca.Iiop.IiopChannel,IiopChannel" port="8087"/&gt;
-          &lt;/channels&gt;
-        &lt;/application&gt;
-      &lt;/system.runtime.remoting&gt;
-    &lt;/configuration&gt;
-</pre>
-<p/>
-
-is equivalent to the following:
-
-<pre>
-    // register the channel
-    IiopChannel chan = new IiopChannel(8087);
-    ChannelServices.RegisterChannel(chan);
-
-</pre>
-<p/>
-
-The config file is processed with: <BR>
-<pre>
-    RemotingConfiguration.Configure(configFile);
-</pre>
-
-<a name="#NUnit2Config"></a>
-<H3>How do I configure NUnit V2.0 to use the .NET Framework 1.1?</H3>
-
-Add the following configuration lines in the files <code>%NUnit2%\bin\nunit-console.exe.config</code> and <code>%NUnit2%\bin\nunit-gui.exe.config</code>:
-
-<pre>
-  &lt;startup&gt; 
-    &lt;supportedRuntime version="v1.1.4322" /&gt; 
-  &lt;/startup&gt; 
-</pre>
-
-<a name="#stringifiedIOR"></a>
-<H3>How can I access an object using its stringified IOR?</H3>
-
-The following Code reads an stringified IOR from the file iorfile and creates a proxy for
-the remote object represented by the IOR:
-
-<pre>
-    StreamReader stream = new StreamReader(iorfile);
-    String ior = stream.ReadLine();
-    MyRemoteObjectIF remoteObject = (MyRemoteObjectIF)RemotingServices.Connect(typeof(MyRemoteObjectIF),
-                                                                               ior);
-</pre>
-
-<a name="#corbaLocIIOP"></a>
-<H3>How can I access an object using its corbaloc:iiop address?</H3>
-
-The following code creates a proxy for the remote object represented by the given corbaloc:
-
-<pre>
-    string loc = "corbaloc::localhost:3528/myobject";
-    MyRemoteObjectIF remoteObject = (MyRemoteObjectIF)RemotingServices.Connect(typeof(MyRemoteObjectIF), 
-                                                                               loc);
-</pre>
-
-Note: This feature is only available in IIOP.NET 1.4.0 and above.
-
-
-
+<ol START="14">
+    <li><a href="faq2.html#PInvokeException">Exception: Invalid PInvoke metadata format</a></li>
+</ol>
 
