@@ -45,6 +45,8 @@ namespace Ch.Elca.Iiop.Util {
         private static Type s_idlEnumAttributeType = typeof(IdlEnumAttribute);
         private static Type s_implClassAttributeType = typeof(ImplClassAttribute);
         private static Type s_idlSequenceAttributeType = typeof(IdlSequenceAttribute);
+        private static Type s_idlStructAttrType = typeof(IdlStructAttribute);
+        private static Type s_idlUnionAttrType = typeof(IdlUnionAttribute);
         private static Type s_fromIdlNameAttributeType = typeof(FromIdlNameAttribute);
                 
         private static Type s_stringType = typeof(string);
@@ -84,6 +86,21 @@ namespace Ch.Elca.Iiop.Util {
                 return s_idlSequenceAttributeType;
             }
         }
+        
+        /// <summary>caches typeof(IdlStructAttribute)</summary>        
+        public static Type IdlStructAttributeType {
+            get {
+                return s_idlStructAttrType;
+            }
+        }
+        
+        /// <summary>caches typeof(IdlUnionAttribute)</summary>
+        public static Type IdlUnionAttributeType {
+            get {
+                return s_idlUnionAttrType;
+            }
+        }
+        
         
         /// <summary>caches typeof(FromIdlNameAttribute)</summary>        
         public static Type FromIdlNameAttributeType {

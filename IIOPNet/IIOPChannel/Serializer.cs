@@ -723,7 +723,7 @@ namespace Ch.Elca.Iiop.Marshalling {
                 // check if actual parameter is an IDL-struct: 
                 // this is an illegal parameter for IDL-abstract value parameters
                 AttributeExtCollection attrs = ReflectionHelper.GetCustomAttributesForType(actual.GetType(), true);
-                if (attrs.IsInCollection(typeof(IdlStructAttribute))) {
+                if (attrs.IsInCollection(ReflectionHelper.IdlStructAttributeType)) {
                     // IDL-struct illegal parameter for formal type abstract value (actual type: actual.GetType() )
                     throw new MARSHAL(20011, CompletionStatus.Completed_MayBe);
                 }

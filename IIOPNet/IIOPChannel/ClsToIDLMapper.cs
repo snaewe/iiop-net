@@ -175,8 +175,6 @@ namespace Ch.Elca.Iiop.Idl {
 
         private static Type s_boxedValBaseType = typeof(BoxedValueBase);
 
-        private static Type s_idlStructAttrType = typeof(IdlStructAttribute);
-        private static Type s_idlUnionAttrType = typeof(IdlUnionAttribute);
         private static Type s_boxedValAttrType = typeof(BoxedValueAttribute);
         private static Type s_widecharAttrType = typeof(WideCharAttribute);
         private static Type s_stringValueAttrType = typeof(StringValueAttribute);
@@ -277,21 +275,13 @@ namespace Ch.Elca.Iiop.Idl {
         /// <summary>determines, if the CLS-type is mapped to an IDL-struct</summary>
         public static bool IsMarshalledAsStruct(Type clsType) {
             AttributeExtCollection attrs = ReflectionHelper.GetCustomAttributesForType(clsType, true);
-            if (attrs.IsInCollection(s_idlStructAttrType)) {
-                return true;
-            } else {
-                return false;
-            }
+            return attrs.IsInCollection(ReflectionHelper.IdlStructAttributeType);
         }
 
         /// <summary>determines, if the CLS-type is mapped to an IDL-union</summary>
         public static bool IsMarshalledAsUnion(Type clsType) {
             AttributeExtCollection attrs = ReflectionHelper.GetCustomAttributesForType(clsType, true);
-            if (attrs.IsInCollection(s_idlUnionAttrType)) {
-                return true;
-            } else {
-                return false;
-            }
+            return attrs.IsInCollection(ReflectionHelper.IdlUnionAttributeType);
         }
 
         
