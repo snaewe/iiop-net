@@ -62,14 +62,27 @@ namespace Ch.Elca.Iiop {
         /// Remove the current connection context
         /// </summary>
         internal static void RemoveCurrentConnectionContext() {
-            CallContext.FreeNamedDataSlot(CONNECTION_CONTEXT_KEY);
+            if (CallContext.GetData(CONNECTION_CONTEXT_KEY) != null) {
+                Stack contexts = (Stack)CallContext.GetData(CONNECTION_CONTEXT_KEY);
+                contexts.Pop(); // remove active context (=topmost context)
+                if (contexts.Count == 0) {
+                    CallContext.FreeNamedDataSlot(CONNECTION_CONTEXT_KEY);
+                }
+            }
         }
 
         /// <summary>
         /// sets the active connection context
         /// </summary>
         internal static void SetCurrentConnectionContext(GiopConnectionContext context) {
-            CallContext.SetData(CONNECTION_CONTEXT_KEY, context);
+            if (CallContext.GetData(CONNECTION_CONTEXT_KEY) != null) {
+                Stack contexts = (Stack)CallContext.GetData(CONNECTION_CONTEXT_KEY);
+                contexts.Push(context);
+            } else {
+                Stack contexts = new Stack();
+                contexts.Push(context);
+                CallContext.SetData(CONNECTION_CONTEXT_KEY, contexts);
+            }
         }
 
         /// <summary>
@@ -80,7 +93,16 @@ namespace Ch.Elca.Iiop {
         /// </remarks>
         /// <returns></returns>
         public static GiopConnectionContext GetCurrentConnectionContext() {
-            return (GiopConnectionContext)CallContext.GetData(CONNECTION_CONTEXT_KEY);
+            if (CallContext.GetData(CONNECTION_CONTEXT_KEY) != null) {
+                Stack contexts = (Stack)CallContext.GetData(CONNECTION_CONTEXT_KEY);
+                if (!(contexts.Count == 0)) {
+                    return (GiopConnectionContext)contexts.Peek(); // active=top elem
+                } else {
+                    throw new INTERNAL(111, CompletionStatus.Completed_MayBe);
+                }
+            } else {
+                throw new INTERNAL(111, CompletionStatus.Completed_MayBe); 
+            }
         }
 
         #endregion IMethods
