@@ -43,7 +43,7 @@ namespace Ch.Elca.Iiop {
 
 
     /// <summary>this class manages outgoing client side connections</summary>
-    internal class GiopClientConnectionManager {
+    internal class GiopClientConnectionManager : IDisposable {
         
         #region Types 
         
@@ -122,13 +122,22 @@ namespace Ch.Elca.Iiop {
         #endregion IConstructors
         
         ~GiopClientConnectionManager() {
-            if (m_destroyTimer != null) { 
-                m_destroyTimer.Dispose(); 
-                m_destroyTimer = null;
-            }
+            CleanUp();
         }
         
         #region IMethods
+        
+        public void Dispose() {
+            CleanUp();    
+            GC.SuppressFinalize(this);
+        }
+        
+        private void CleanUp() {
+            if (m_destroyTimer != null) {
+                m_destroyTimer.Dispose(); 
+                m_destroyTimer = null;
+            }            
+        }
         
         /// <summary>checks, if availabe connections contain one, which is usable</summary>
         /// <returns>the connection, if found, otherwise null.</returns>
