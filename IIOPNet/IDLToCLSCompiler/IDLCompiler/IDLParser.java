@@ -25,8 +25,8 @@ public class IDLParser/*@bgen(jjtree)*/implements IDLParserTreeConstants, IDLPar
 /* handling of pragma id outside of a type definition */
   final public void pragmaID() throws ParseException {
   String ident = ""; String val = "";
-    jj_consume_token(8);
-    jj_consume_token(9);
+    jj_consume_token(12);
+    jj_consume_token(13);
     ident = identifier();
     val = string_literal();
                 Scope currentScope = m_symbolTable.getCurrentScope();
@@ -42,8 +42,8 @@ public class IDLParser/*@bgen(jjtree)*/implements IDLParserTreeConstants, IDLPar
 /* handling of pragma id inside a type definition */
   final public void pragmaIDInside() throws ParseException {
   String ident = ""; String val = "";
-    jj_consume_token(8);
-    jj_consume_token(9);
+    jj_consume_token(12);
+    jj_consume_token(13);
     ident = identifier();
     val = string_literal();
                 Scope currentScope = m_symbolTable.getCurrentScope();
@@ -60,8 +60,8 @@ public class IDLParser/*@bgen(jjtree)*/implements IDLParserTreeConstants, IDLPar
 /* handling of pragma prefix */
   final public void pragmaPrefix() throws ParseException {
   String val = "";
-    jj_consume_token(8);
-    jj_consume_token(10);
+    jj_consume_token(12);
+    jj_consume_token(14);
     val = string_literal();
                 val = val.trim();
                 if (m_lastPrefix.equals(val)) { {if (true) return;} } // same pragma prefix, nothing to do
@@ -102,19 +102,19 @@ public class IDLParser/*@bgen(jjtree)*/implements IDLParserTreeConstants, IDLPar
   jjtree.openNodeScope(jjtn000);
     try {
       switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
-      case 8:
       case 12:
-      case 15:
       case 16:
+      case 19:
       case 20:
-      case 21:
-      case 30:
-      case 45:
-      case 46:
-      case 58:
-      case 59:
+      case 24:
+      case 25:
+      case 34:
+      case 49:
+      case 50:
+      case 62:
       case 63:
-      case 73:
+      case 67:
+      case 77:
         label_1:
         while (true) {
           if (jj_2_1(2)) {
@@ -126,19 +126,19 @@ public class IDLParser/*@bgen(jjtree)*/implements IDLParserTreeConstants, IDLPar
             throw new ParseException();
           }
           switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
-          case 8:
           case 12:
-          case 15:
           case 16:
+          case 19:
           case 20:
-          case 21:
-          case 30:
-          case 45:
-          case 46:
-          case 58:
-          case 59:
+          case 24:
+          case 25:
+          case 34:
+          case 49:
+          case 50:
+          case 62:
           case 63:
-          case 73:
+          case 67:
+          case 77:
             ;
             break;
           default:
@@ -195,32 +195,32 @@ public class IDLParser/*@bgen(jjtree)*/implements IDLParserTreeConstants, IDLPar
   jjtree.openNodeScope(jjtn000);
     try {
       switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
-      case 45:
-      case 46:
-      case 58:
-      case 59:
+      case 49:
+      case 50:
+      case 62:
       case 63:
+      case 67:
         type_dcl();
-        jj_consume_token(11);
+        jj_consume_token(15);
         break;
-      case 30:
+      case 34:
         const_dcl();
-        jj_consume_token(11);
+        jj_consume_token(15);
         break;
-      case 73:
+      case 77:
         except_dcl();
-        jj_consume_token(11);
+        jj_consume_token(15);
         break;
       default:
         jj_la1[2] = jj_gen;
         if (jj_2_3(2)) {
           interfacex();
-          jj_consume_token(11);
+          jj_consume_token(15);
         } else {
           switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
-          case 12:
+          case 16:
             module();
-            jj_consume_token(11);
+            jj_consume_token(15);
             break;
           default:
             jj_la1[3] = jj_gen;
@@ -228,7 +228,7 @@ public class IDLParser/*@bgen(jjtree)*/implements IDLParserTreeConstants, IDLPar
               value();
             } else {
               switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
-              case 8:
+              case 12:
                 pragmaID();
                 break;
               default:
@@ -268,27 +268,27 @@ public class IDLParser/*@bgen(jjtree)*/implements IDLParserTreeConstants, IDLPar
   boolean jjtc000 = true;
   jjtree.openNodeScope(jjtn000);String ident = "";
     try {
-      jj_consume_token(12);
+      jj_consume_token(16);
       ident = identifier();
                                   m_symbolTable.openScope(ident);
-      jj_consume_token(13);
+      jj_consume_token(17);
       label_2:
       while (true) {
         definition();
         switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
-        case 8:
         case 12:
-        case 15:
         case 16:
+        case 19:
         case 20:
-        case 21:
-        case 30:
-        case 45:
-        case 46:
-        case 58:
-        case 59:
+        case 24:
+        case 25:
+        case 34:
+        case 49:
+        case 50:
+        case 62:
         case 63:
-        case 73:
+        case 67:
+        case 77:
           ;
           break;
         default:
@@ -296,7 +296,7 @@ public class IDLParser/*@bgen(jjtree)*/implements IDLParserTreeConstants, IDLPar
           break label_2;
         }
       }
-      jj_consume_token(14);
+      jj_consume_token(18);
     jjtree.closeNodeScope(jjtn000, true);
     jjtc000 = false;
         jjtn000.setIdent(ident);
@@ -374,9 +374,9 @@ public class IDLParser/*@bgen(jjtree)*/implements IDLParserTreeConstants, IDLPar
         currentScope.addSymbol(header.getIdent());
         m_symbolTable.openScope(header.getIdent()); // open a scope for type declaration inside the interface
 
-      jj_consume_token(13);
+      jj_consume_token(17);
       interface_body();
-      jj_consume_token(14);
+      jj_consume_token(18);
      jjtree.closeNodeScope(jjtn000, true);
      jjtc000 = false;
         m_symbolTable.closeScope(); // close the scope for type declarations inside the interface
@@ -411,15 +411,15 @@ public class IDLParser/*@bgen(jjtree)*/implements IDLParserTreeConstants, IDLPar
   boolean isAbstract = false;
     try {
       switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
-      case 15:
-        jj_consume_token(15);
+      case 19:
+        jj_consume_token(19);
                  isAbstract = true;
         break;
       default:
         jj_la1[6] = jj_gen;
         ;
       }
-      jj_consume_token(16);
+      jj_consume_token(20);
       ident = identifier();
     jjtree.closeNodeScope(jjtn000, true);
     jjtc000 = false;
@@ -457,18 +457,18 @@ public class IDLParser/*@bgen(jjtree)*/implements IDLParserTreeConstants, IDLPar
   boolean isAbstract = false;
     try {
       switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
-      case 15:
-        jj_consume_token(15);
+      case 19:
+        jj_consume_token(19);
                  isAbstract = true;
         break;
       default:
         jj_la1[7] = jj_gen;
         ;
       }
-      jj_consume_token(16);
+      jj_consume_token(20);
       ident = identifier();
       switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
-      case 17:
+      case 21:
         interface_inheritance_spec();
         break;
       default:
@@ -509,13 +509,9 @@ public class IDLParser/*@bgen(jjtree)*/implements IDLParserTreeConstants, IDLPar
       label_3:
       while (true) {
         switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
-        case 8:
-        case 19:
-        case 30:
-        case 45:
-        case 46:
-        case 47:
-        case 48:
+        case 12:
+        case 23:
+        case 34:
         case 49:
         case 50:
         case 51:
@@ -527,15 +523,19 @@ public class IDLParser/*@bgen(jjtree)*/implements IDLParserTreeConstants, IDLPar
         case 57:
         case 58:
         case 59:
+        case 60:
+        case 61:
+        case 62:
         case 63:
         case 67:
-        case 68:
         case 71:
         case 72:
-        case 73:
-        case 74:
         case 75:
-        case 81:
+        case 76:
+        case 77:
+        case 78:
+        case 79:
+        case 85:
         case ID:
           ;
           break;
@@ -574,32 +574,28 @@ public class IDLParser/*@bgen(jjtree)*/implements IDLParserTreeConstants, IDLPar
   jjtree.openNodeScope(jjtn000);
     try {
       switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
-      case 45:
-      case 46:
-      case 58:
-      case 59:
-      case 63:
-        type_dcl();
-        jj_consume_token(11);
-        break;
-      case 30:
-        const_dcl();
-        jj_consume_token(11);
-        break;
-      case 73:
-        except_dcl();
-        jj_consume_token(11);
-        break;
-      case 71:
-      case 72:
-        attr_dcl();
-        jj_consume_token(11);
-        break;
-      case 19:
-      case 47:
-      case 48:
       case 49:
       case 50:
+      case 62:
+      case 63:
+      case 67:
+        type_dcl();
+        jj_consume_token(15);
+        break;
+      case 34:
+        const_dcl();
+        jj_consume_token(15);
+        break;
+      case 77:
+        except_dcl();
+        jj_consume_token(15);
+        break;
+      case 75:
+      case 76:
+        attr_dcl();
+        jj_consume_token(15);
+        break;
+      case 23:
       case 51:
       case 52:
       case 53:
@@ -607,16 +603,20 @@ public class IDLParser/*@bgen(jjtree)*/implements IDLParserTreeConstants, IDLPar
       case 55:
       case 56:
       case 57:
-      case 67:
-      case 68:
-      case 74:
-      case 75:
-      case 81:
+      case 58:
+      case 59:
+      case 60:
+      case 61:
+      case 71:
+      case 72:
+      case 78:
+      case 79:
+      case 85:
       case ID:
         op_dcl();
-        jj_consume_token(11);
+        jj_consume_token(15);
         break;
-      case 8:
+      case 12:
         pragmaIDInside();
         break;
       default:
@@ -652,19 +652,19 @@ public class IDLParser/*@bgen(jjtree)*/implements IDLParserTreeConstants, IDLPar
   boolean jjtc000 = true;
   jjtree.openNodeScope(jjtn000);
     try {
-      jj_consume_token(17);
+      jj_consume_token(21);
       interface_name();
       label_4:
       while (true) {
         switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
-        case 18:
+        case 22:
           ;
           break;
         default:
           jj_la1[11] = jj_gen;
           break label_4;
         }
-        jj_consume_token(18);
+        jj_consume_token(22);
         interface_name();
       }
     } catch (Throwable jjte000) {
@@ -726,8 +726,8 @@ public class IDLParser/*@bgen(jjtree)*/implements IDLParserTreeConstants, IDLPar
   String fullScopedName = "";
     try {
       switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
-      case 19:
-        jj_consume_token(19);
+      case 23:
+        jj_consume_token(23);
              fullScopedName = "::"; jjtn000.setHasFileScope(true);
         break;
       default:
@@ -739,14 +739,14 @@ public class IDLParser/*@bgen(jjtree)*/implements IDLParserTreeConstants, IDLPar
       label_5:
       while (true) {
         switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
-        case 19:
+        case 23:
           ;
           break;
         default:
           jj_la1[13] = jj_gen;
           break label_5;
         }
-        jj_consume_token(19);
+        jj_consume_token(23);
         part = identifier();
                                                                                                                                                                                 fullScopedName += ("::" + part); jjtn000.addNamePart(part);
       }
@@ -823,17 +823,17 @@ public class IDLParser/*@bgen(jjtree)*/implements IDLParserTreeConstants, IDLPar
   boolean isAbstract = false;
     try {
       switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
-      case 15:
-        jj_consume_token(15);
+      case 19:
+        jj_consume_token(19);
                       isAbstract = true;
         break;
       default:
         jj_la1[14] = jj_gen;
         ;
       }
-      jj_consume_token(20);
+      jj_consume_token(24);
       ident = identifier();
-      jj_consume_token(11);
+      jj_consume_token(15);
           jjtree.closeNodeScope(jjtn000, true);
           jjtc000 = false;
           jjtn000.setIdent(ident);
@@ -868,10 +868,10 @@ public class IDLParser/*@bgen(jjtree)*/implements IDLParserTreeConstants, IDLPar
   boolean jjtc000 = true;
   jjtree.openNodeScope(jjtn000);String ident = "";
     try {
-      jj_consume_token(20);
+      jj_consume_token(24);
       ident = identifier();
       type_spec();
-      jj_consume_token(11);
+      jj_consume_token(15);
           jjtree.closeNodeScope(jjtn000, true);
           jjtc000 = false;
                 jjtn000.setIdent(ident);
@@ -906,11 +906,11 @@ public class IDLParser/*@bgen(jjtree)*/implements IDLParserTreeConstants, IDLPar
   boolean jjtc000 = true;
   jjtree.openNodeScope(jjtn000);String ident = "";
     try {
-      jj_consume_token(15);
-      jj_consume_token(20);
+      jj_consume_token(19);
+      jj_consume_token(24);
       ident = identifier();
       switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
-      case 17:
+      case 21:
         value_base_inheritance_spec();
         break;
       default:
@@ -918,24 +918,20 @@ public class IDLParser/*@bgen(jjtree)*/implements IDLParserTreeConstants, IDLPar
         ;
       }
       switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
-      case 23:
+      case 27:
         value_support_inheritance_spec();
         break;
       default:
         jj_la1[16] = jj_gen;
         ;
       }
-      jj_consume_token(13);
+      jj_consume_token(17);
       label_6:
       while (true) {
         switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
-        case 8:
-        case 19:
-        case 30:
-        case 45:
-        case 46:
-        case 47:
-        case 48:
+        case 12:
+        case 23:
+        case 34:
         case 49:
         case 50:
         case 51:
@@ -947,15 +943,19 @@ public class IDLParser/*@bgen(jjtree)*/implements IDLParserTreeConstants, IDLPar
         case 57:
         case 58:
         case 59:
+        case 60:
+        case 61:
+        case 62:
         case 63:
         case 67:
-        case 68:
         case 71:
         case 72:
-        case 73:
-        case 74:
         case 75:
-        case 81:
+        case 76:
+        case 77:
+        case 78:
+        case 79:
+        case 85:
         case ID:
           ;
           break;
@@ -965,8 +965,8 @@ public class IDLParser/*@bgen(jjtree)*/implements IDLParserTreeConstants, IDLPar
         }
         export();
       }
-      jj_consume_token(14);
-      jj_consume_token(11);
+      jj_consume_token(18);
+      jj_consume_token(15);
           jjtree.closeNodeScope(jjtn000, true);
           jjtc000 = false;
         jjtn000.setIdent(ident);
@@ -1008,20 +1008,16 @@ public class IDLParser/*@bgen(jjtree)*/implements IDLParserTreeConstants, IDLPar
             currentScope.addSymbol(header.getIdent());
             m_symbolTable.openScope(header.getIdent()); // open a scope for type declaration inside this concrete value type
 
-      jj_consume_token(13);
+      jj_consume_token(17);
       label_7:
       while (true) {
         switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
-        case 8:
-        case 19:
-        case 24:
-        case 25:
-        case 26:
+        case 12:
+        case 23:
+        case 28:
+        case 29:
         case 30:
-        case 45:
-        case 46:
-        case 47:
-        case 48:
+        case 34:
         case 49:
         case 50:
         case 51:
@@ -1033,15 +1029,19 @@ public class IDLParser/*@bgen(jjtree)*/implements IDLParserTreeConstants, IDLPar
         case 57:
         case 58:
         case 59:
+        case 60:
+        case 61:
+        case 62:
         case 63:
         case 67:
-        case 68:
         case 71:
         case 72:
-        case 73:
-        case 74:
         case 75:
-        case 81:
+        case 76:
+        case 77:
+        case 78:
+        case 79:
+        case 85:
         case ID:
           ;
           break;
@@ -1051,8 +1051,8 @@ public class IDLParser/*@bgen(jjtree)*/implements IDLParserTreeConstants, IDLPar
         }
         value_element();
       }
-      jj_consume_token(14);
-      jj_consume_token(11);
+      jj_consume_token(18);
+      jj_consume_token(15);
           jjtree.closeNodeScope(jjtn000, true);
           jjtc000 = false;
             m_symbolTable.closeScope();
@@ -1086,18 +1086,18 @@ public class IDLParser/*@bgen(jjtree)*/implements IDLParserTreeConstants, IDLPar
   boolean isCustom = false;
     try {
       switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
-      case 21:
-        jj_consume_token(21);
+      case 25:
+        jj_consume_token(25);
                      isCustom = true;
         break;
       default:
         jj_la1[19] = jj_gen;
         ;
       }
-      jj_consume_token(20);
+      jj_consume_token(24);
       ident = identifier();
       switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
-      case 17:
+      case 21:
         value_base_inheritance_spec();
         break;
       default:
@@ -1105,7 +1105,7 @@ public class IDLParser/*@bgen(jjtree)*/implements IDLParserTreeConstants, IDLPar
         ;
       }
       switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
-      case 23:
+      case 27:
         value_support_inheritance_spec();
         break;
       default:
@@ -1143,10 +1143,10 @@ public class IDLParser/*@bgen(jjtree)*/implements IDLParserTreeConstants, IDLPar
   boolean jjtc000 = true;
   jjtree.openNodeScope(jjtn000);
     try {
-      jj_consume_token(17);
+      jj_consume_token(21);
       switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
-      case 22:
-        jj_consume_token(22);
+      case 26:
+        jj_consume_token(26);
         break;
       default:
         jj_la1[22] = jj_gen;
@@ -1156,14 +1156,14 @@ public class IDLParser/*@bgen(jjtree)*/implements IDLParserTreeConstants, IDLPar
       label_8:
       while (true) {
         switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
-        case 18:
+        case 22:
           ;
           break;
         default:
           jj_la1[23] = jj_gen;
           break label_8;
         }
-        jj_consume_token(18);
+        jj_consume_token(22);
         value_name();
       }
     } catch (Throwable jjte000) {
@@ -1193,19 +1193,19 @@ public class IDLParser/*@bgen(jjtree)*/implements IDLParserTreeConstants, IDLPar
   boolean jjtc000 = true;
   jjtree.openNodeScope(jjtn000);
     try {
-      jj_consume_token(23);
+      jj_consume_token(27);
       interface_name();
       label_9:
       while (true) {
         switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
-        case 18:
+        case 22:
           ;
           break;
         default:
           jj_la1[24] = jj_gen;
           break label_9;
         }
-        jj_consume_token(18);
+        jj_consume_token(22);
         interface_name();
       }
     } catch (Throwable jjte000) {
@@ -1266,13 +1266,9 @@ public class IDLParser/*@bgen(jjtree)*/implements IDLParserTreeConstants, IDLPar
   jjtree.openNodeScope(jjtn000);
     try {
       switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
-      case 8:
-      case 19:
-      case 30:
-      case 45:
-      case 46:
-      case 47:
-      case 48:
+      case 12:
+      case 23:
+      case 34:
       case 49:
       case 50:
       case 51:
@@ -1284,23 +1280,27 @@ public class IDLParser/*@bgen(jjtree)*/implements IDLParserTreeConstants, IDLPar
       case 57:
       case 58:
       case 59:
+      case 60:
+      case 61:
+      case 62:
       case 63:
       case 67:
-      case 68:
       case 71:
       case 72:
-      case 73:
-      case 74:
       case 75:
-      case 81:
+      case 76:
+      case 77:
+      case 78:
+      case 79:
+      case 85:
       case ID:
         export();
         break;
-      case 24:
-      case 25:
+      case 28:
+      case 29:
         state_member();
         break;
-      case 26:
+      case 30:
         init_decl();
         break;
       default:
@@ -1337,12 +1337,12 @@ public class IDLParser/*@bgen(jjtree)*/implements IDLParserTreeConstants, IDLPar
   jjtree.openNodeScope(jjtn000);
     try {
       switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
-      case 24:
-        jj_consume_token(24);
+      case 28:
+        jj_consume_token(28);
                      jjtn000.setIsPrivate(false);
         break;
-      case 25:
-        jj_consume_token(25);
+      case 29:
+        jj_consume_token(29);
                                                                   jjtn000.setIsPrivate(true);
         break;
       default:
@@ -1352,7 +1352,7 @@ public class IDLParser/*@bgen(jjtree)*/implements IDLParserTreeConstants, IDLPar
       }
       type_spec();
       declarators();
-      jj_consume_token(11);
+      jj_consume_token(15);
     } catch (Throwable jjte000) {
           if (jjtc000) {
             jjtree.clearNodeScope(jjtn000);
@@ -1381,19 +1381,19 @@ public class IDLParser/*@bgen(jjtree)*/implements IDLParserTreeConstants, IDLPar
   boolean jjtc000 = true;
   jjtree.openNodeScope(jjtn000);String ident = "";
     try {
-      jj_consume_token(26);
+      jj_consume_token(30);
       ident = identifier();
-      jj_consume_token(27);
+      jj_consume_token(31);
       switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
-      case 29:
+      case 33:
         init_param_delcs();
         break;
       default:
         jj_la1[27] = jj_gen;
         ;
       }
-      jj_consume_token(28);
-      jj_consume_token(11);
+      jj_consume_token(32);
+      jj_consume_token(15);
                                                                             jjtree.closeNodeScope(jjtn000, true);
                                                                             jjtc000 = false;
                                                                             jjtn000.setIdent(ident);
@@ -1429,14 +1429,14 @@ public class IDLParser/*@bgen(jjtree)*/implements IDLParserTreeConstants, IDLPar
       label_10:
       while (true) {
         switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
-        case 18:
+        case 22:
           ;
           break;
         default:
           jj_la1[28] = jj_gen;
           break label_10;
         }
-        jj_consume_token(18);
+        jj_consume_token(22);
         init_param_decl();
       }
     } catch (Throwable jjte000) {
@@ -1498,7 +1498,7 @@ public class IDLParser/*@bgen(jjtree)*/implements IDLParserTreeConstants, IDLPar
   boolean jjtc000 = true;
   jjtree.openNodeScope(jjtn000);
     try {
-      jj_consume_token(29);
+      jj_consume_token(33);
     } finally {
           if (jjtc000) {
             jjtree.closeNodeScope(jjtn000, true);
@@ -1513,10 +1513,10 @@ public class IDLParser/*@bgen(jjtree)*/implements IDLParserTreeConstants, IDLPar
   boolean jjtc000 = true;
   jjtree.openNodeScope(jjtn000);String ident = "";
     try {
-      jj_consume_token(30);
+      jj_consume_token(34);
       const_type();
       ident = identifier();
-      jj_consume_token(31);
+      jj_consume_token(35);
       const_exp();
                                                               jjtree.closeNodeScope(jjtn000, true);
                                                               jjtc000 = false;
@@ -1553,34 +1553,34 @@ public class IDLParser/*@bgen(jjtree)*/implements IDLParserTreeConstants, IDLPar
         integer_type();
       } else {
         switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
-        case 52:
+        case 56:
           char_type();
           break;
-        case 53:
+        case 57:
           wide_char_type();
           break;
-        case 54:
+        case 58:
           boolean_type();
           break;
-        case 47:
-        case 48:
-        case 49:
+        case 51:
+        case 52:
+        case 53:
           floating_pt_type();
           break;
-        case 67:
+        case 71:
           string_type();
           break;
-        case 68:
+        case 72:
           wide_string_type();
           break;
-        case 80:
+        case 84:
           fixed_pt_const_type();
           break;
-        case 19:
+        case 23:
         case ID:
           scoped_name();
           break;
-        case 55:
+        case 59:
           octet_type();
           break;
         default:
@@ -1650,14 +1650,14 @@ public class IDLParser/*@bgen(jjtree)*/implements IDLParserTreeConstants, IDLPar
       label_11:
       while (true) {
         switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
-        case 32:
+        case 36:
           ;
           break;
         default:
           jj_la1[30] = jj_gen;
           break label_11;
         }
-        jj_consume_token(32);
+        jj_consume_token(36);
         xor_expr();
       }
     } catch (Throwable jjte000) {
@@ -1692,14 +1692,14 @@ public class IDLParser/*@bgen(jjtree)*/implements IDLParserTreeConstants, IDLPar
       label_12:
       while (true) {
         switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
-        case 33:
+        case 37:
           ;
           break;
         default:
           jj_la1[31] = jj_gen;
           break label_12;
         }
-        jj_consume_token(33);
+        jj_consume_token(37);
         and_expr();
       }
     } catch (Throwable jjte000) {
@@ -1734,14 +1734,14 @@ public class IDLParser/*@bgen(jjtree)*/implements IDLParserTreeConstants, IDLPar
       label_13:
       while (true) {
         switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
-        case 34:
+        case 38:
           ;
           break;
         default:
           jj_la1[32] = jj_gen;
           break label_13;
         }
-        jj_consume_token(34);
+        jj_consume_token(38);
         shift_expr();
       }
     } catch (Throwable jjte000) {
@@ -1776,8 +1776,8 @@ public class IDLParser/*@bgen(jjtree)*/implements IDLParserTreeConstants, IDLPar
       label_14:
       while (true) {
         switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
-        case 35:
-        case 36:
+        case 39:
+        case 40:
           ;
           break;
         default:
@@ -1785,11 +1785,11 @@ public class IDLParser/*@bgen(jjtree)*/implements IDLParserTreeConstants, IDLPar
           break label_14;
         }
         switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
-        case 35:
-          jj_consume_token(35);
+        case 39:
+          jj_consume_token(39);
           break;
-        case 36:
-          jj_consume_token(36);
+        case 40:
+          jj_consume_token(40);
           break;
         default:
           jj_la1[34] = jj_gen;
@@ -1830,8 +1830,8 @@ public class IDLParser/*@bgen(jjtree)*/implements IDLParserTreeConstants, IDLPar
       label_15:
       while (true) {
         switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
-        case 37:
-        case 38:
+        case 41:
+        case 42:
           ;
           break;
         default:
@@ -1839,11 +1839,11 @@ public class IDLParser/*@bgen(jjtree)*/implements IDLParserTreeConstants, IDLPar
           break label_15;
         }
         switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
-        case 37:
-          jj_consume_token(37);
+        case 41:
+          jj_consume_token(41);
           break;
-        case 38:
-          jj_consume_token(38);
+        case 42:
+          jj_consume_token(42);
           break;
         default:
           jj_la1[36] = jj_gen;
@@ -1884,9 +1884,9 @@ public class IDLParser/*@bgen(jjtree)*/implements IDLParserTreeConstants, IDLPar
       label_16:
       while (true) {
         switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
-        case 39:
-        case 40:
-        case 41:
+        case 43:
+        case 44:
+        case 45:
           ;
           break;
         default:
@@ -1894,14 +1894,14 @@ public class IDLParser/*@bgen(jjtree)*/implements IDLParserTreeConstants, IDLPar
           break label_16;
         }
         switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
-        case 39:
-          jj_consume_token(39);
+        case 43:
+          jj_consume_token(43);
           break;
-        case 40:
-          jj_consume_token(40);
+        case 44:
+          jj_consume_token(44);
           break;
-        case 41:
-          jj_consume_token(41);
+        case 45:
+          jj_consume_token(45);
           break;
         default:
           jj_la1[38] = jj_gen;
@@ -1939,9 +1939,9 @@ public class IDLParser/*@bgen(jjtree)*/implements IDLParserTreeConstants, IDLPar
   jjtree.openNodeScope(jjtn000);int unary_op = ASTunary_expr.UNARY_NONE;
     try {
       switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
-      case 37:
-      case 38:
+      case 41:
       case 42:
+      case 46:
         unary_op = unary_operator();
         break;
       default:
@@ -1973,16 +1973,16 @@ public class IDLParser/*@bgen(jjtree)*/implements IDLParserTreeConstants, IDLPar
 /* Production 37 chapter 3.4 corba 2.3.1 */
   final public int unary_operator() throws ParseException {
     switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
-    case 38:
-      jj_consume_token(38);
-        {if (true) return ASTunary_expr.UNARY_MINUS;}
-      break;
-    case 37:
-      jj_consume_token(37);
-        {if (true) return ASTunary_expr.UNARY_PLUS;}
-      break;
     case 42:
       jj_consume_token(42);
+        {if (true) return ASTunary_expr.UNARY_MINUS;}
+      break;
+    case 41:
+      jj_consume_token(41);
+        {if (true) return ASTunary_expr.UNARY_PLUS;}
+      break;
+    case 46:
+      jj_consume_token(46);
         {if (true) return ASTunary_expr.UNARY_NEGATE;}
       break;
     default:
@@ -2001,14 +2001,14 @@ public class IDLParser/*@bgen(jjtree)*/implements IDLParserTreeConstants, IDLPar
   jjtree.openNodeScope(jjtn000);
     try {
       switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
-      case 19:
+      case 23:
       case ID:
         scoped_name();
         break;
-      case 43:
-      case 44:
-      case 82:
-      case 83:
+      case 47:
+      case 48:
+      case 86:
+      case 87:
       case OCTALINT:
       case DECIMALINT:
       case HEXADECIMALINT:
@@ -2019,10 +2019,10 @@ public class IDLParser/*@bgen(jjtree)*/implements IDLParserTreeConstants, IDLPar
       case FIXED:
         literal();
         break;
-      case 27:
-        jj_consume_token(27);
+      case 31:
+        jj_consume_token(31);
         const_exp();
-        jj_consume_token(28);
+        jj_consume_token(32);
         break;
       default:
         jj_la1[41] = jj_gen;
@@ -2081,7 +2081,7 @@ public class IDLParser/*@bgen(jjtree)*/implements IDLParserTreeConstants, IDLPar
               litVal = wide_character_literal();
             } else {
               switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
-              case 83:
+              case 87:
               case FIXED:
                 litVal = fixed_pt_literal();
                 break;
@@ -2089,8 +2089,8 @@ public class IDLParser/*@bgen(jjtree)*/implements IDLParserTreeConstants, IDLPar
               case FLOATTWO:
                 litVal = floating_pt_literal();
                 break;
-              case 43:
-              case 44:
+              case 47:
+              case 48:
                 litVal = boolean_literal();
                 break;
               default:
@@ -2129,12 +2129,12 @@ public class IDLParser/*@bgen(jjtree)*/implements IDLParserTreeConstants, IDLPar
 /* Production 40, chapter 3.4 corba 2.3.1 */
   final public Boolean boolean_literal() throws ParseException {
     switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
-    case 43:
-      jj_consume_token(43);
+    case 47:
+      jj_consume_token(47);
            {if (true) return new Boolean(true);}
       break;
-    case 44:
-      jj_consume_token(44);
+    case 48:
+      jj_consume_token(48);
             {if (true) return new Boolean(false);}
       break;
     default:
@@ -2182,21 +2182,21 @@ public class IDLParser/*@bgen(jjtree)*/implements IDLParserTreeConstants, IDLPar
   jjtree.openNodeScope(jjtn000);
     try {
       switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
-      case 45:
-        jj_consume_token(45);
+      case 49:
+        jj_consume_token(49);
         type_declarator();
         break;
-      case 58:
+      case 62:
         struct_type();
         break;
-      case 59:
+      case 63:
         union_type();
         break;
-      case 63:
+      case 67:
         enum_type();
         break;
-      case 46:
-        jj_consume_token(46);
+      case 50:
+        jj_consume_token(50);
         simple_declarator();
         break;
       default:
@@ -2274,11 +2274,7 @@ public class IDLParser/*@bgen(jjtree)*/implements IDLParserTreeConstants, IDLPar
   jjtree.openNodeScope(jjtn000);
     try {
       switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
-      case 19:
-      case 47:
-      case 48:
-      case 49:
-      case 50:
+      case 23:
       case 51:
       case 52:
       case 53:
@@ -2286,17 +2282,21 @@ public class IDLParser/*@bgen(jjtree)*/implements IDLParserTreeConstants, IDLPar
       case 55:
       case 56:
       case 57:
-      case 64:
-      case 67:
+      case 58:
+      case 59:
+      case 60:
+      case 61:
       case 68:
-      case 80:
-      case 81:
+      case 71:
+      case 72:
+      case 84:
+      case 85:
       case ID:
         simple_type_spec();
         break;
-      case 58:
-      case 59:
+      case 62:
       case 63:
+      case 67:
         constr_type_spec();
         break;
       default:
@@ -2333,10 +2333,6 @@ public class IDLParser/*@bgen(jjtree)*/implements IDLParserTreeConstants, IDLPar
   jjtree.openNodeScope(jjtn000);
     try {
       switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
-      case 47:
-      case 48:
-      case 49:
-      case 50:
       case 51:
       case 52:
       case 53:
@@ -2344,16 +2340,20 @@ public class IDLParser/*@bgen(jjtree)*/implements IDLParserTreeConstants, IDLPar
       case 55:
       case 56:
       case 57:
-      case 81:
+      case 58:
+      case 59:
+      case 60:
+      case 61:
+      case 85:
         base_type_spec();
         break;
-      case 64:
-      case 67:
       case 68:
-      case 80:
+      case 71:
+      case 72:
+      case 84:
         template_type_spec();
         break;
-      case 19:
+      case 23:
       case ID:
         scoped_name();
         break;
@@ -2394,30 +2394,30 @@ public class IDLParser/*@bgen(jjtree)*/implements IDLParserTreeConstants, IDLPar
         floating_pt_type();
       } else {
         switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
-        case 49:
-        case 50:
-        case 51:
+        case 53:
+        case 54:
+        case 55:
           integer_type();
           break;
-        case 52:
+        case 56:
           char_type();
           break;
-        case 53:
+        case 57:
           wide_char_type();
           break;
-        case 54:
+        case 58:
           boolean_type();
           break;
-        case 55:
+        case 59:
           octet_type();
           break;
-        case 56:
+        case 60:
           any_type();
           break;
-        case 57:
+        case 61:
           object_type();
           break;
-        case 81:
+        case 85:
           value_base_type();
           break;
         default:
@@ -2455,16 +2455,16 @@ public class IDLParser/*@bgen(jjtree)*/implements IDLParserTreeConstants, IDLPar
   jjtree.openNodeScope(jjtn000);
     try {
       switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
-      case 64:
+      case 68:
         sequence_type();
         break;
-      case 67:
+      case 71:
         string_type();
         break;
-      case 68:
+      case 72:
         wide_string_type();
         break;
-      case 80:
+      case 84:
         fixed_pt_type();
         break;
       default:
@@ -2501,13 +2501,13 @@ public class IDLParser/*@bgen(jjtree)*/implements IDLParserTreeConstants, IDLPar
   jjtree.openNodeScope(jjtn000);
     try {
       switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
-      case 58:
+      case 62:
         struct_type();
         break;
-      case 59:
+      case 63:
         union_type();
         break;
-      case 63:
+      case 67:
         enum_type();
         break;
       default:
@@ -2547,14 +2547,14 @@ public class IDLParser/*@bgen(jjtree)*/implements IDLParserTreeConstants, IDLPar
       label_17:
       while (true) {
         switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
-        case 18:
+        case 22:
           ;
           break;
         default:
           jj_la1[52] = jj_gen;
           break label_17;
         }
-        jj_consume_token(18);
+        jj_consume_token(22);
         declarator();
       }
     } catch (Throwable jjte000) {
@@ -2688,13 +2688,13 @@ public class IDLParser/*@bgen(jjtree)*/implements IDLParserTreeConstants, IDLPar
   jjtree.openNodeScope(jjtn000);
     try {
       switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
-      case 49:
+      case 53:
         floating_pt_type_longdouble();
         break;
-      case 47:
+      case 51:
         floating_pt_type_float();
         break;
-      case 48:
+      case 52:
         floating_pt_type_double();
         break;
       default:
@@ -2730,7 +2730,7 @@ public class IDLParser/*@bgen(jjtree)*/implements IDLParserTreeConstants, IDLPar
   boolean jjtc000 = true;
   jjtree.openNodeScope(jjtn000);
     try {
-      jj_consume_token(47);
+      jj_consume_token(51);
     } finally {
     if (jjtc000) {
       jjtree.closeNodeScope(jjtn000, true);
@@ -2745,7 +2745,7 @@ public class IDLParser/*@bgen(jjtree)*/implements IDLParserTreeConstants, IDLPar
   boolean jjtc000 = true;
   jjtree.openNodeScope(jjtn000);
     try {
-      jj_consume_token(48);
+      jj_consume_token(52);
     } finally {
     if (jjtc000) {
       jjtree.closeNodeScope(jjtn000, true);
@@ -2760,8 +2760,8 @@ public class IDLParser/*@bgen(jjtree)*/implements IDLParserTreeConstants, IDLPar
   boolean jjtc000 = true;
   jjtree.openNodeScope(jjtn000);
     try {
-      jj_consume_token(49);
-      jj_consume_token(48);
+      jj_consume_token(53);
+      jj_consume_token(52);
     } finally {
     if (jjtc000) {
       jjtree.closeNodeScope(jjtn000, true);
@@ -2777,11 +2777,11 @@ public class IDLParser/*@bgen(jjtree)*/implements IDLParserTreeConstants, IDLPar
   jjtree.openNodeScope(jjtn000);
     try {
       switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
-      case 49:
-      case 50:
+      case 53:
+      case 54:
         signed_int();
         break;
-      case 51:
+      case 55:
         unsigned_int();
         break;
       default:
@@ -2823,7 +2823,7 @@ public class IDLParser/*@bgen(jjtree)*/implements IDLParserTreeConstants, IDLPar
         signed_long_int();
       } else {
         switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
-        case 50:
+        case 54:
           signed_short_int();
           break;
         default:
@@ -2860,7 +2860,7 @@ public class IDLParser/*@bgen(jjtree)*/implements IDLParserTreeConstants, IDLPar
   boolean jjtc000 = true;
   jjtree.openNodeScope(jjtn000);
     try {
-      jj_consume_token(50);
+      jj_consume_token(54);
     } finally {
     if (jjtc000) {
       jjtree.closeNodeScope(jjtn000, true);
@@ -2875,7 +2875,7 @@ public class IDLParser/*@bgen(jjtree)*/implements IDLParserTreeConstants, IDLPar
   boolean jjtc000 = true;
   jjtree.openNodeScope(jjtn000);
     try {
-      jj_consume_token(49);
+      jj_consume_token(53);
     } finally {
     if (jjtc000) {
       jjtree.closeNodeScope(jjtn000, true);
@@ -2890,8 +2890,8 @@ public class IDLParser/*@bgen(jjtree)*/implements IDLParserTreeConstants, IDLPar
   boolean jjtc000 = true;
   jjtree.openNodeScope(jjtn000);
     try {
-      jj_consume_token(49);
-      jj_consume_token(49);
+      jj_consume_token(53);
+      jj_consume_token(53);
     } finally {
     if (jjtc000) {
       jjtree.closeNodeScope(jjtn000, true);
@@ -2912,7 +2912,7 @@ public class IDLParser/*@bgen(jjtree)*/implements IDLParserTreeConstants, IDLPar
         unsigned_long_int();
       } else {
         switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
-        case 51:
+        case 55:
           unsigned_short_int();
           break;
         default:
@@ -2949,8 +2949,8 @@ public class IDLParser/*@bgen(jjtree)*/implements IDLParserTreeConstants, IDLPar
   boolean jjtc000 = true;
   jjtree.openNodeScope(jjtn000);
     try {
-      jj_consume_token(51);
-      jj_consume_token(50);
+      jj_consume_token(55);
+      jj_consume_token(54);
     } finally {
     if (jjtc000) {
       jjtree.closeNodeScope(jjtn000, true);
@@ -2965,8 +2965,8 @@ public class IDLParser/*@bgen(jjtree)*/implements IDLParserTreeConstants, IDLPar
   boolean jjtc000 = true;
   jjtree.openNodeScope(jjtn000);
     try {
-      jj_consume_token(51);
-      jj_consume_token(49);
+      jj_consume_token(55);
+      jj_consume_token(53);
     } finally {
     if (jjtc000) {
       jjtree.closeNodeScope(jjtn000, true);
@@ -2981,9 +2981,9 @@ public class IDLParser/*@bgen(jjtree)*/implements IDLParserTreeConstants, IDLPar
   boolean jjtc000 = true;
   jjtree.openNodeScope(jjtn000);
     try {
-      jj_consume_token(51);
-      jj_consume_token(49);
-      jj_consume_token(49);
+      jj_consume_token(55);
+      jj_consume_token(53);
+      jj_consume_token(53);
     } finally {
     if (jjtc000) {
       jjtree.closeNodeScope(jjtn000, true);
@@ -2998,7 +2998,7 @@ public class IDLParser/*@bgen(jjtree)*/implements IDLParserTreeConstants, IDLPar
   boolean jjtc000 = true;
   jjtree.openNodeScope(jjtn000);
     try {
-      jj_consume_token(52);
+      jj_consume_token(56);
     } finally {
     if (jjtc000) {
       jjtree.closeNodeScope(jjtn000, true);
@@ -3013,7 +3013,7 @@ public class IDLParser/*@bgen(jjtree)*/implements IDLParserTreeConstants, IDLPar
   boolean jjtc000 = true;
   jjtree.openNodeScope(jjtn000);
     try {
-      jj_consume_token(53);
+      jj_consume_token(57);
     } finally {
     if (jjtc000) {
       jjtree.closeNodeScope(jjtn000, true);
@@ -3028,7 +3028,7 @@ public class IDLParser/*@bgen(jjtree)*/implements IDLParserTreeConstants, IDLPar
   boolean jjtc000 = true;
   jjtree.openNodeScope(jjtn000);
     try {
-      jj_consume_token(54);
+      jj_consume_token(58);
     } finally {
     if (jjtc000) {
       jjtree.closeNodeScope(jjtn000, true);
@@ -3043,7 +3043,7 @@ public class IDLParser/*@bgen(jjtree)*/implements IDLParserTreeConstants, IDLPar
   boolean jjtc000 = true;
   jjtree.openNodeScope(jjtn000);
     try {
-      jj_consume_token(55);
+      jj_consume_token(59);
     } finally {
     if (jjtc000) {
       jjtree.closeNodeScope(jjtn000, true);
@@ -3058,7 +3058,7 @@ public class IDLParser/*@bgen(jjtree)*/implements IDLParserTreeConstants, IDLPar
   boolean jjtc000 = true;
   jjtree.openNodeScope(jjtn000);
     try {
-      jj_consume_token(56);
+      jj_consume_token(60);
     } finally {
     if (jjtc000) {
       jjtree.closeNodeScope(jjtn000, true);
@@ -3073,7 +3073,7 @@ public class IDLParser/*@bgen(jjtree)*/implements IDLParserTreeConstants, IDLPar
   boolean jjtc000 = true;
   jjtree.openNodeScope(jjtn000);
     try {
-      jj_consume_token(57);
+      jj_consume_token(61);
     } finally {
     if (jjtc000) {
       jjtree.closeNodeScope(jjtn000, true);
@@ -3088,14 +3088,14 @@ public class IDLParser/*@bgen(jjtree)*/implements IDLParserTreeConstants, IDLPar
   boolean jjtc000 = true;
   jjtree.openNodeScope(jjtn000);String ident = "";
     try {
-      jj_consume_token(58);
+      jj_consume_token(62);
       ident = identifier();
         // recursive definition using a sequence is permitted --> publish symbol already here
         Scope currentScope = m_symbolTable.getCurrentScope();
         currentScope.addSymbol(ident);
-      jj_consume_token(13);
+      jj_consume_token(17);
       member_list();
-      jj_consume_token(14);
+      jj_consume_token(18);
                           jjtree.closeNodeScope(jjtn000, true);
                           jjtc000 = false;
                           jjtn000.setIdent(ident);
@@ -3131,11 +3131,7 @@ public class IDLParser/*@bgen(jjtree)*/implements IDLParserTreeConstants, IDLPar
       while (true) {
         member();
         switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
-        case 19:
-        case 47:
-        case 48:
-        case 49:
-        case 50:
+        case 23:
         case 51:
         case 52:
         case 53:
@@ -3145,12 +3141,16 @@ public class IDLParser/*@bgen(jjtree)*/implements IDLParserTreeConstants, IDLPar
         case 57:
         case 58:
         case 59:
+        case 60:
+        case 61:
+        case 62:
         case 63:
-        case 64:
         case 67:
         case 68:
-        case 80:
-        case 81:
+        case 71:
+        case 72:
+        case 84:
+        case 85:
         case ID:
           ;
           break;
@@ -3189,7 +3189,7 @@ public class IDLParser/*@bgen(jjtree)*/implements IDLParserTreeConstants, IDLPar
     try {
       type_spec();
       declarators();
-      jj_consume_token(11);
+      jj_consume_token(15);
     } catch (Throwable jjte000) {
     if (jjtc000) {
       jjtree.clearNodeScope(jjtn000);
@@ -3218,15 +3218,15 @@ public class IDLParser/*@bgen(jjtree)*/implements IDLParserTreeConstants, IDLPar
   boolean jjtc000 = true;
   jjtree.openNodeScope(jjtn000);String ident = "";
     try {
-      jj_consume_token(59);
+      jj_consume_token(63);
       ident = identifier();
-      jj_consume_token(60);
-      jj_consume_token(27);
+      jj_consume_token(64);
+      jj_consume_token(31);
       switch_type_spec();
-      jj_consume_token(28);
-      jj_consume_token(13);
+      jj_consume_token(32);
+      jj_consume_token(17);
       switch_body();
-      jj_consume_token(14);
+      jj_consume_token(18);
                                                                                            jjtree.closeNodeScope(jjtn000, true);
                                                                                            jjtc000 = false;
                                                                                            jjtn000.setIdent(ident);
@@ -3259,21 +3259,21 @@ public class IDLParser/*@bgen(jjtree)*/implements IDLParserTreeConstants, IDLPar
   jjtree.openNodeScope(jjtn000);
     try {
       switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
-      case 49:
-      case 50:
-      case 51:
+      case 53:
+      case 54:
+      case 55:
         integer_type();
         break;
-      case 52:
+      case 56:
         char_type();
         break;
-      case 54:
+      case 58:
         boolean_type();
         break;
-      case 63:
+      case 67:
         enum_type();
         break;
-      case 19:
+      case 23:
       case ID:
         scoped_name();
         break;
@@ -3314,8 +3314,8 @@ public class IDLParser/*@bgen(jjtree)*/implements IDLParserTreeConstants, IDLPar
       while (true) {
         casex();
         switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
-        case 61:
-        case 62:
+        case 65:
+        case 66:
           ;
           break;
         default:
@@ -3355,8 +3355,8 @@ public class IDLParser/*@bgen(jjtree)*/implements IDLParserTreeConstants, IDLPar
       while (true) {
         case_label();
         switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
-        case 61:
-        case 62:
+        case 65:
+        case 66:
           ;
           break;
         default:
@@ -3365,7 +3365,7 @@ public class IDLParser/*@bgen(jjtree)*/implements IDLParserTreeConstants, IDLPar
         }
       }
       element_spec();
-      jj_consume_token(11);
+      jj_consume_token(15);
     } catch (Throwable jjte000) {
     if (jjtc000) {
       jjtree.clearNodeScope(jjtn000);
@@ -3395,14 +3395,14 @@ public class IDLParser/*@bgen(jjtree)*/implements IDLParserTreeConstants, IDLPar
   jjtree.openNodeScope(jjtn000);
     try {
       switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
-      case 61:
-        jj_consume_token(61);
+      case 65:
+        jj_consume_token(65);
         const_exp();
-        jj_consume_token(17);
+        jj_consume_token(21);
         break;
-      case 62:
-        jj_consume_token(62);
-        jj_consume_token(17);
+      case 66:
+        jj_consume_token(66);
+        jj_consume_token(21);
         break;
       default:
         jj_la1[62] = jj_gen;
@@ -3467,24 +3467,24 @@ public class IDLParser/*@bgen(jjtree)*/implements IDLParserTreeConstants, IDLPar
   boolean jjtc000 = true;
   jjtree.openNodeScope(jjtn000);String ident = "";
     try {
-      jj_consume_token(63);
+      jj_consume_token(67);
       ident = identifier();
-      jj_consume_token(13);
+      jj_consume_token(17);
       enumerator();
       label_21:
       while (true) {
         switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
-        case 18:
+        case 22:
           ;
           break;
         default:
           jj_la1[63] = jj_gen;
           break label_21;
         }
-        jj_consume_token(18);
+        jj_consume_token(22);
         enumerator();
       }
-      jj_consume_token(14);
+      jj_consume_token(18);
     jjtree.closeNodeScope(jjtn000, true);
     jjtc000 = false;
         jjtn000.setIdent(ident);
@@ -3550,19 +3550,19 @@ public class IDLParser/*@bgen(jjtree)*/implements IDLParserTreeConstants, IDLPar
   boolean jjtc000 = true;
   jjtree.openNodeScope(jjtn000);
     try {
-      jj_consume_token(64);
-      jj_consume_token(65);
+      jj_consume_token(68);
+      jj_consume_token(69);
       simple_type_spec();
       switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
-      case 18:
-        jj_consume_token(18);
+      case 22:
+        jj_consume_token(22);
         positive_int_const();
         break;
       default:
         jj_la1[64] = jj_gen;
         ;
       }
-      jj_consume_token(66);
+      jj_consume_token(70);
     } catch (Throwable jjte000) {
     if (jjtc000) {
       jjtree.clearNodeScope(jjtn000);
@@ -3591,12 +3591,12 @@ public class IDLParser/*@bgen(jjtree)*/implements IDLParserTreeConstants, IDLPar
   boolean jjtc000 = true;
   jjtree.openNodeScope(jjtn000);
     try {
-      jj_consume_token(67);
+      jj_consume_token(71);
       switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
-      case 65:
-        jj_consume_token(65);
+      case 69:
+        jj_consume_token(69);
         positive_int_const();
-        jj_consume_token(66);
+        jj_consume_token(70);
         break;
       default:
         jj_la1[65] = jj_gen;
@@ -3630,12 +3630,12 @@ public class IDLParser/*@bgen(jjtree)*/implements IDLParserTreeConstants, IDLPar
   boolean jjtc000 = true;
   jjtree.openNodeScope(jjtn000);
     try {
-      jj_consume_token(68);
+      jj_consume_token(72);
       switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
-      case 65:
-        jj_consume_token(65);
+      case 69:
+        jj_consume_token(69);
         positive_int_const();
-        jj_consume_token(66);
+        jj_consume_token(70);
         break;
       default:
         jj_la1[66] = jj_gen;
@@ -3674,7 +3674,7 @@ public class IDLParser/*@bgen(jjtree)*/implements IDLParserTreeConstants, IDLPar
       while (true) {
         fixed_array_size();
         switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
-        case 69:
+        case 73:
           ;
           break;
         default:
@@ -3713,9 +3713,9 @@ public class IDLParser/*@bgen(jjtree)*/implements IDLParserTreeConstants, IDLPar
   boolean jjtc000 = true;
   jjtree.openNodeScope(jjtn000);
     try {
-      jj_consume_token(69);
+      jj_consume_token(73);
       positive_int_const();
-      jj_consume_token(70);
+      jj_consume_token(74);
     } catch (Throwable jjte000) {
     if (jjtc000) {
       jjtree.clearNodeScope(jjtn000);
@@ -3745,28 +3745,28 @@ public class IDLParser/*@bgen(jjtree)*/implements IDLParserTreeConstants, IDLPar
   jjtree.openNodeScope(jjtn000);boolean isReadOnly = false;
     try {
       switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
-      case 71:
-        jj_consume_token(71);
+      case 75:
+        jj_consume_token(75);
                  isReadOnly = true;
         break;
       default:
         jj_la1[68] = jj_gen;
         ;
       }
-      jj_consume_token(72);
+      jj_consume_token(76);
       param_type_spec();
       simple_declarator();
       label_23:
       while (true) {
         switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
-        case 18:
+        case 22:
           ;
           break;
         default:
           jj_la1[69] = jj_gen;
           break label_23;
         }
-        jj_consume_token(18);
+        jj_consume_token(22);
         simple_declarator();
       }
     jjtree.closeNodeScope(jjtn000, true);
@@ -3800,17 +3800,13 @@ public class IDLParser/*@bgen(jjtree)*/implements IDLParserTreeConstants, IDLPar
   boolean jjtc000 = true;
   jjtree.openNodeScope(jjtn000);String ident = "";
     try {
-      jj_consume_token(73);
+      jj_consume_token(77);
       ident = identifier();
-      jj_consume_token(13);
+      jj_consume_token(17);
       label_24:
       while (true) {
         switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
-        case 19:
-        case 47:
-        case 48:
-        case 49:
-        case 50:
+        case 23:
         case 51:
         case 52:
         case 53:
@@ -3820,12 +3816,16 @@ public class IDLParser/*@bgen(jjtree)*/implements IDLParserTreeConstants, IDLPar
         case 57:
         case 58:
         case 59:
+        case 60:
+        case 61:
+        case 62:
         case 63:
-        case 64:
         case 67:
         case 68:
-        case 80:
-        case 81:
+        case 71:
+        case 72:
+        case 84:
+        case 85:
         case ID:
           ;
           break;
@@ -3835,7 +3835,7 @@ public class IDLParser/*@bgen(jjtree)*/implements IDLParserTreeConstants, IDLPar
         }
         member();
       }
-      jj_consume_token(14);
+      jj_consume_token(18);
      jjtree.closeNodeScope(jjtn000, true);
      jjtc000 = false;
         jjtn000.setIdent(ident);
@@ -3871,7 +3871,7 @@ public class IDLParser/*@bgen(jjtree)*/implements IDLParserTreeConstants, IDLPar
   int opAttr = ASTop_dcl.OP_Attr_NONE;
     try {
       switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
-      case 74:
+      case 78:
         opAttr = op_attribute();
         break;
       default:
@@ -3882,7 +3882,7 @@ public class IDLParser/*@bgen(jjtree)*/implements IDLParserTreeConstants, IDLPar
       ident = identifier();
       parameter_dcls();
       switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
-      case 78:
+      case 82:
         raises_expr();
         break;
       default:
@@ -3890,7 +3890,7 @@ public class IDLParser/*@bgen(jjtree)*/implements IDLParserTreeConstants, IDLPar
         ;
       }
       switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
-      case 79:
+      case 83:
         context_expr();
         break;
       default:
@@ -3924,7 +3924,7 @@ public class IDLParser/*@bgen(jjtree)*/implements IDLParserTreeConstants, IDLPar
 
 /* Production 88, chapter 3.4, corba 2.3.1 */
   final public int op_attribute() throws ParseException {
-    jj_consume_token(74);
+    jj_consume_token(78);
              {if (true) return ASTop_dcl.OP_Attr_ONEWAY;}
     throw new Error("Missing return statement in function");
   }
@@ -3937,11 +3937,7 @@ public class IDLParser/*@bgen(jjtree)*/implements IDLParserTreeConstants, IDLPar
   jjtree.openNodeScope(jjtn000);
     try {
       switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
-      case 19:
-      case 47:
-      case 48:
-      case 49:
-      case 50:
+      case 23:
       case 51:
       case 52:
       case 53:
@@ -3949,14 +3945,18 @@ public class IDLParser/*@bgen(jjtree)*/implements IDLParserTreeConstants, IDLPar
       case 55:
       case 56:
       case 57:
-      case 67:
-      case 68:
-      case 81:
+      case 58:
+      case 59:
+      case 60:
+      case 61:
+      case 71:
+      case 72:
+      case 85:
       case ID:
         param_type_spec();
         break;
-      case 75:
-        jj_consume_token(75);
+      case 79:
+        jj_consume_token(79);
         break;
       default:
         jj_la1[74] = jj_gen;
@@ -3991,23 +3991,23 @@ public class IDLParser/*@bgen(jjtree)*/implements IDLParserTreeConstants, IDLPar
   boolean jjtc000 = true;
   jjtree.openNodeScope(jjtn000);
     try {
-      jj_consume_token(27);
+      jj_consume_token(31);
       switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
-      case 29:
-      case 76:
-      case 77:
+      case 33:
+      case 80:
+      case 81:
         param_dcl();
         label_25:
         while (true) {
           switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
-          case 18:
+          case 22:
             ;
             break;
           default:
             jj_la1[75] = jj_gen;
             break label_25;
           }
-          jj_consume_token(18);
+          jj_consume_token(22);
           param_dcl();
         }
         break;
@@ -4015,7 +4015,7 @@ public class IDLParser/*@bgen(jjtree)*/implements IDLParserTreeConstants, IDLPar
         jj_la1[76] = jj_gen;
         ;
       }
-      jj_consume_token(28);
+      jj_consume_token(32);
     } catch (Throwable jjte000) {
     if (jjtc000) {
       jjtree.clearNodeScope(jjtn000);
@@ -4076,20 +4076,20 @@ public class IDLParser/*@bgen(jjtree)*/implements IDLParserTreeConstants, IDLPar
   jjtree.openNodeScope(jjtn000);
     try {
       switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
-      case 29:
-        jj_consume_token(29);
+      case 33:
+        jj_consume_token(33);
          jjtree.closeNodeScope(jjtn000, true);
          jjtc000 = false;
          jjtn000.setParamDir(ASTparam_attribute.ParamDir_IN);
         break;
-      case 76:
-        jj_consume_token(76);
+      case 80:
+        jj_consume_token(80);
           jjtree.closeNodeScope(jjtn000, true);
           jjtc000 = false;
           jjtn000.setParamDir(ASTparam_attribute.ParamDir_OUT);
         break;
-      case 77:
-        jj_consume_token(77);
+      case 81:
+        jj_consume_token(81);
             jjtree.closeNodeScope(jjtn000, true);
             jjtc000 = false;
             jjtn000.setParamDir(ASTparam_attribute.ParamDir_INOUT);
@@ -4113,23 +4113,23 @@ public class IDLParser/*@bgen(jjtree)*/implements IDLParserTreeConstants, IDLPar
   boolean jjtc000 = true;
   jjtree.openNodeScope(jjtn000);
     try {
-      jj_consume_token(78);
-      jj_consume_token(27);
+      jj_consume_token(82);
+      jj_consume_token(31);
       scoped_name();
       label_26:
       while (true) {
         switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
-        case 18:
+        case 22:
           ;
           break;
         default:
           jj_la1[78] = jj_gen;
           break label_26;
         }
-        jj_consume_token(18);
+        jj_consume_token(22);
         scoped_name();
       }
-      jj_consume_token(28);
+      jj_consume_token(32);
     } catch (Throwable jjte000) {
     if (jjtc000) {
       jjtree.clearNodeScope(jjtn000);
@@ -4158,25 +4158,25 @@ public class IDLParser/*@bgen(jjtree)*/implements IDLParserTreeConstants, IDLPar
   boolean jjtc000 = true;
   jjtree.openNodeScope(jjtn000);String contElem = "";
     try {
-      jj_consume_token(79);
-      jj_consume_token(27);
+      jj_consume_token(83);
+      jj_consume_token(31);
       contElem = string_literal();
                                               jjtn000.addContextElement(contElem);
       label_27:
       while (true) {
         switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
-        case 18:
+        case 22:
           ;
           break;
         default:
           jj_la1[79] = jj_gen;
           break label_27;
         }
-        jj_consume_token(18);
+        jj_consume_token(22);
         contElem = string_literal();
                                       jjtn000.addContextElement(contElem);
       }
-      jj_consume_token(28);
+      jj_consume_token(32);
     } catch (Throwable jjte000) {
     if (jjtc000) {
       jjtree.clearNodeScope(jjtn000);
@@ -4206,10 +4206,6 @@ public class IDLParser/*@bgen(jjtree)*/implements IDLParserTreeConstants, IDLPar
   jjtree.openNodeScope(jjtn000);
     try {
       switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
-      case 47:
-      case 48:
-      case 49:
-      case 50:
       case 51:
       case 52:
       case 53:
@@ -4217,16 +4213,20 @@ public class IDLParser/*@bgen(jjtree)*/implements IDLParserTreeConstants, IDLPar
       case 55:
       case 56:
       case 57:
-      case 81:
+      case 58:
+      case 59:
+      case 60:
+      case 61:
+      case 85:
         base_type_spec();
         break;
-      case 67:
+      case 71:
         string_type();
         break;
-      case 68:
+      case 72:
         wide_string_type();
         break;
-      case 19:
+      case 23:
       case ID:
         scoped_name();
         break;
@@ -4263,12 +4263,12 @@ public class IDLParser/*@bgen(jjtree)*/implements IDLParserTreeConstants, IDLPar
   boolean jjtc000 = true;
   jjtree.openNodeScope(jjtn000);
     try {
-      jj_consume_token(80);
-      jj_consume_token(65);
+      jj_consume_token(84);
+      jj_consume_token(69);
       positive_int_const();
-      jj_consume_token(18);
+      jj_consume_token(22);
       positive_int_const();
-      jj_consume_token(66);
+      jj_consume_token(70);
     } catch (Throwable jjte000) {
           if (jjtc000) {
             jjtree.clearNodeScope(jjtn000);
@@ -4297,7 +4297,7 @@ public class IDLParser/*@bgen(jjtree)*/implements IDLParserTreeConstants, IDLPar
   boolean jjtc000 = true;
   jjtree.openNodeScope(jjtn000);
     try {
-      jj_consume_token(80);
+      jj_consume_token(84);
     } finally {
           if (jjtc000) {
             jjtree.closeNodeScope(jjtn000, true);
@@ -4312,7 +4312,7 @@ public class IDLParser/*@bgen(jjtree)*/implements IDLParserTreeConstants, IDLPar
   boolean jjtc000 = true;
   jjtree.openNodeScope(jjtn000);
     try {
-      jj_consume_token(81);
+      jj_consume_token(85);
     } finally {
           if (jjtc000) {
             jjtree.closeNodeScope(jjtn000, true);
@@ -4381,7 +4381,7 @@ public class IDLParser/*@bgen(jjtree)*/implements IDLParserTreeConstants, IDLPar
 
   final public String wide_string_literal() throws ParseException {
   Token stringToken;
-    jj_consume_token(82);
+    jj_consume_token(86);
     stringToken = jj_consume_token(STRING);
                                                                         String result = stringToken.image;
                                                                         // remove "" around the literal
@@ -4400,7 +4400,7 @@ public class IDLParser/*@bgen(jjtree)*/implements IDLParserTreeConstants, IDLPar
 
   final public Character wide_character_literal() throws ParseException {
   Token charToken;
-    jj_consume_token(82);
+    jj_consume_token(86);
     charToken = jj_consume_token(CHARACTER);
                                                                  // TBD: not correct: escaped chars
                                                                  char val = charToken.image.charAt(1);
@@ -4434,7 +4434,7 @@ public class IDLParser/*@bgen(jjtree)*/implements IDLParserTreeConstants, IDLPar
   Token fixedLiteral;
     if (jj_2_20(2147483647)) {
       fixedLiteral = jj_consume_token(FIXED);
-      jj_consume_token(83);
+      jj_consume_token(87);
       switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
       case FIXED:
         jj_consume_token(FIXED);
@@ -4444,11 +4444,11 @@ public class IDLParser/*@bgen(jjtree)*/implements IDLParserTreeConstants, IDLPar
         ;
       }
       switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
-      case 84:
-        jj_consume_token(84);
+      case 88:
+        jj_consume_token(88);
         break;
-      case 85:
-        jj_consume_token(85);
+      case 89:
+        jj_consume_token(89);
         break;
       default:
         jj_la1[84] = jj_gen;
@@ -4457,15 +4457,15 @@ public class IDLParser/*@bgen(jjtree)*/implements IDLParserTreeConstants, IDLPar
       }
     } else {
       switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
-      case 83:
-        fixedLiteral = jj_consume_token(83);
+      case 87:
+        fixedLiteral = jj_consume_token(87);
         jj_consume_token(FIXED);
         switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
-        case 84:
-          jj_consume_token(84);
+        case 88:
+          jj_consume_token(88);
           break;
-        case 85:
-          jj_consume_token(85);
+        case 89:
+          jj_consume_token(89);
           break;
         default:
           jj_la1[85] = jj_gen;
@@ -4476,11 +4476,11 @@ public class IDLParser/*@bgen(jjtree)*/implements IDLParserTreeConstants, IDLPar
       case FIXED:
         fixedLiteral = jj_consume_token(FIXED);
         switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
-        case 84:
-          jj_consume_token(84);
+        case 88:
+          jj_consume_token(88);
           break;
-        case 85:
-          jj_consume_token(85);
+        case 89:
+          jj_consume_token(89);
           break;
         default:
           jj_la1[86] = jj_gen;
@@ -4642,87 +4642,8 @@ public class IDLParser/*@bgen(jjtree)*/implements IDLParserTreeConstants, IDLPar
     return retval;
   }
 
-  final private boolean jj_3R_156() {
-    if (jj_3R_171()) return true;
-    if (jj_la == 0 && jj_scanpos == jj_lastpos) return false;
-    return false;
-  }
-
-  final private boolean jj_3R_35() {
-    if (jj_scan_token(15)) return true;
-    if (jj_la == 0 && jj_scanpos == jj_lastpos) return false;
-    if (jj_scan_token(20)) return true;
-    if (jj_la == 0 && jj_scanpos == jj_lastpos) return false;
-    if (jj_3R_55()) return true;
-    if (jj_la == 0 && jj_scanpos == jj_lastpos) return false;
-    Token xsp;
-    xsp = jj_scanpos;
-    if (jj_3R_58()) jj_scanpos = xsp;
-    else if (jj_la == 0 && jj_scanpos == jj_lastpos) return false;
-    xsp = jj_scanpos;
-    if (jj_3R_59()) jj_scanpos = xsp;
-    else if (jj_la == 0 && jj_scanpos == jj_lastpos) return false;
-    if (jj_scan_token(13)) return true;
-    if (jj_la == 0 && jj_scanpos == jj_lastpos) return false;
-    return false;
-  }
-
-  final private boolean jj_3R_148() {
-    Token xsp;
-    xsp = jj_scanpos;
-    if (jj_3R_156()) jj_scanpos = xsp;
-    else if (jj_la == 0 && jj_scanpos == jj_lastpos) return false;
-    if (jj_3R_157()) return true;
-    if (jj_la == 0 && jj_scanpos == jj_lastpos) return false;
-    return false;
-  }
-
-  final private boolean jj_3R_136() {
-    if (jj_3R_109()) return true;
-    if (jj_la == 0 && jj_scanpos == jj_lastpos) return false;
-    return false;
-  }
-
-  final private boolean jj_3R_135() {
-    if (jj_3R_108()) return true;
-    if (jj_la == 0 && jj_scanpos == jj_lastpos) return false;
-    return false;
-  }
-
-  final private boolean jj_3R_102() {
-    Token xsp;
-    xsp = jj_scanpos;
-    if (jj_3R_134()) {
-    jj_scanpos = xsp;
-    if (jj_3R_135()) {
-    jj_scanpos = xsp;
-    if (jj_3R_136()) return true;
-    if (jj_la == 0 && jj_scanpos == jj_lastpos) return false;
-    } else if (jj_la == 0 && jj_scanpos == jj_lastpos) return false;
-    } else if (jj_la == 0 && jj_scanpos == jj_lastpos) return false;
-    return false;
-  }
-
-  final private boolean jj_3R_134() {
-    if (jj_3R_107()) return true;
-    if (jj_la == 0 && jj_scanpos == jj_lastpos) return false;
-    return false;
-  }
-
-  final private boolean jj_3R_36() {
-    if (jj_scan_token(20)) return true;
-    if (jj_la == 0 && jj_scanpos == jj_lastpos) return false;
-    if (jj_3R_55()) return true;
-    if (jj_la == 0 && jj_scanpos == jj_lastpos) return false;
-    if (jj_3R_60()) return true;
-    if (jj_la == 0 && jj_scanpos == jj_lastpos) return false;
-    if (jj_scan_token(11)) return true;
-    if (jj_la == 0 && jj_scanpos == jj_lastpos) return false;
-    return false;
-  }
-
   final private boolean jj_3R_70() {
-    if (jj_scan_token(73)) return true;
+    if (jj_scan_token(77)) return true;
     if (jj_la == 0 && jj_scanpos == jj_lastpos) return false;
     if (jj_3R_55()) return true;
     if (jj_la == 0 && jj_scanpos == jj_lastpos) return false;
@@ -4754,7 +4675,7 @@ public class IDLParser/*@bgen(jjtree)*/implements IDLParserTreeConstants, IDLPar
   }
 
   final private boolean jj_3R_155() {
-    if (jj_scan_token(71)) return true;
+    if (jj_scan_token(75)) return true;
     if (jj_la == 0 && jj_scanpos == jj_lastpos) return false;
     return false;
   }
@@ -4787,13 +4708,13 @@ public class IDLParser/*@bgen(jjtree)*/implements IDLParserTreeConstants, IDLPar
     xsp = jj_scanpos;
     if (jj_3R_155()) jj_scanpos = xsp;
     else if (jj_la == 0 && jj_scanpos == jj_lastpos) return false;
-    if (jj_scan_token(72)) return true;
+    if (jj_scan_token(76)) return true;
     if (jj_la == 0 && jj_scanpos == jj_lastpos) return false;
     return false;
   }
 
   final private boolean jj_3R_61() {
-    if (jj_scan_token(15)) return true;
+    if (jj_scan_token(19)) return true;
     if (jj_la == 0 && jj_scanpos == jj_lastpos) return false;
     return false;
   }
@@ -4803,11 +4724,11 @@ public class IDLParser/*@bgen(jjtree)*/implements IDLParserTreeConstants, IDLPar
     xsp = jj_scanpos;
     if (jj_3R_61()) jj_scanpos = xsp;
     else if (jj_la == 0 && jj_scanpos == jj_lastpos) return false;
-    if (jj_scan_token(20)) return true;
+    if (jj_scan_token(24)) return true;
     if (jj_la == 0 && jj_scanpos == jj_lastpos) return false;
     if (jj_3R_55()) return true;
     if (jj_la == 0 && jj_scanpos == jj_lastpos) return false;
-    if (jj_scan_token(11)) return true;
+    if (jj_scan_token(15)) return true;
     if (jj_la == 0 && jj_scanpos == jj_lastpos) return false;
     return false;
   }
@@ -4819,7 +4740,7 @@ public class IDLParser/*@bgen(jjtree)*/implements IDLParserTreeConstants, IDLPar
   }
 
   final private boolean jj_3R_105() {
-    if (jj_scan_token(69)) return true;
+    if (jj_scan_token(73)) return true;
     if (jj_la == 0 && jj_scanpos == jj_lastpos) return false;
     return false;
   }
@@ -4837,7 +4758,7 @@ public class IDLParser/*@bgen(jjtree)*/implements IDLParserTreeConstants, IDLPar
   }
 
   final private boolean jj_3R_181() {
-    if (jj_scan_token(65)) return true;
+    if (jj_scan_token(69)) return true;
     if (jj_la == 0 && jj_scanpos == jj_lastpos) return false;
     return false;
   }
@@ -4893,7 +4814,7 @@ public class IDLParser/*@bgen(jjtree)*/implements IDLParserTreeConstants, IDLPar
   }
 
   final private boolean jj_3R_180() {
-    if (jj_scan_token(65)) return true;
+    if (jj_scan_token(69)) return true;
     if (jj_la == 0 && jj_scanpos == jj_lastpos) return false;
     return false;
   }
@@ -4978,7 +4899,7 @@ public class IDLParser/*@bgen(jjtree)*/implements IDLParserTreeConstants, IDLPar
   }
 
   final private boolean jj_3R_143() {
-    if (jj_scan_token(68)) return true;
+    if (jj_scan_token(72)) return true;
     if (jj_la == 0 && jj_scanpos == jj_lastpos) return false;
     Token xsp;
     xsp = jj_scanpos;
@@ -4994,7 +4915,7 @@ public class IDLParser/*@bgen(jjtree)*/implements IDLParserTreeConstants, IDLPar
   }
 
   final private boolean jj_3R_142() {
-    if (jj_scan_token(67)) return true;
+    if (jj_scan_token(71)) return true;
     if (jj_la == 0 && jj_scanpos == jj_lastpos) return false;
     Token xsp;
     xsp = jj_scanpos;
@@ -5030,15 +4951,15 @@ public class IDLParser/*@bgen(jjtree)*/implements IDLParserTreeConstants, IDLPar
   }
 
   final private boolean jj_3R_154() {
-    if (jj_scan_token(19)) return true;
+    if (jj_scan_token(23)) return true;
     if (jj_la == 0 && jj_scanpos == jj_lastpos) return false;
     return false;
   }
 
   final private boolean jj_3R_177() {
-    if (jj_scan_token(64)) return true;
+    if (jj_scan_token(68)) return true;
     if (jj_la == 0 && jj_scanpos == jj_lastpos) return false;
-    if (jj_scan_token(65)) return true;
+    if (jj_scan_token(69)) return true;
     if (jj_la == 0 && jj_scanpos == jj_lastpos) return false;
     return false;
   }
@@ -5088,7 +5009,7 @@ public class IDLParser/*@bgen(jjtree)*/implements IDLParserTreeConstants, IDLPar
   }
 
   final private boolean jj_3R_96() {
-    if (jj_scan_token(17)) return true;
+    if (jj_scan_token(21)) return true;
     if (jj_la == 0 && jj_scanpos == jj_lastpos) return false;
     if (jj_3R_120()) return true;
     if (jj_la == 0 && jj_scanpos == jj_lastpos) return false;
@@ -5096,7 +5017,7 @@ public class IDLParser/*@bgen(jjtree)*/implements IDLParserTreeConstants, IDLPar
   }
 
   final private boolean jj_3R_109() {
-    if (jj_scan_token(63)) return true;
+    if (jj_scan_token(67)) return true;
     if (jj_la == 0 && jj_scanpos == jj_lastpos) return false;
     if (jj_3R_55()) return true;
     if (jj_la == 0 && jj_scanpos == jj_lastpos) return false;
@@ -5122,7 +5043,7 @@ public class IDLParser/*@bgen(jjtree)*/implements IDLParserTreeConstants, IDLPar
   }
 
   final private boolean jj_3R_94() {
-    if (jj_scan_token(46)) return true;
+    if (jj_scan_token(50)) return true;
     if (jj_la == 0 && jj_scanpos == jj_lastpos) return false;
     if (jj_3R_110()) return true;
     if (jj_la == 0 && jj_scanpos == jj_lastpos) return false;
@@ -5215,7 +5136,7 @@ public class IDLParser/*@bgen(jjtree)*/implements IDLParserTreeConstants, IDLPar
   }
 
   final private boolean jj_3R_90() {
-    if (jj_scan_token(45)) return true;
+    if (jj_scan_token(49)) return true;
     if (jj_la == 0 && jj_scanpos == jj_lastpos) return false;
     if (jj_3R_106()) return true;
     if (jj_la == 0 && jj_scanpos == jj_lastpos) return false;
@@ -5239,7 +5160,7 @@ public class IDLParser/*@bgen(jjtree)*/implements IDLParserTreeConstants, IDLPar
   }
 
   final private boolean jj_3R_73() {
-    if (jj_scan_token(15)) return true;
+    if (jj_scan_token(19)) return true;
     if (jj_la == 0 && jj_scanpos == jj_lastpos) return false;
     return false;
   }
@@ -5249,7 +5170,7 @@ public class IDLParser/*@bgen(jjtree)*/implements IDLParserTreeConstants, IDLPar
     xsp = jj_scanpos;
     if (jj_3R_73()) jj_scanpos = xsp;
     else if (jj_la == 0 && jj_scanpos == jj_lastpos) return false;
-    if (jj_scan_token(16)) return true;
+    if (jj_scan_token(20)) return true;
     if (jj_la == 0 && jj_scanpos == jj_lastpos) return false;
     if (jj_3R_55()) return true;
     if (jj_la == 0 && jj_scanpos == jj_lastpos) return false;
@@ -5260,7 +5181,7 @@ public class IDLParser/*@bgen(jjtree)*/implements IDLParserTreeConstants, IDLPar
   }
 
   final private boolean jj_3R_54() {
-    if (jj_scan_token(15)) return true;
+    if (jj_scan_token(19)) return true;
     if (jj_la == 0 && jj_scanpos == jj_lastpos) return false;
     return false;
   }
@@ -5270,7 +5191,7 @@ public class IDLParser/*@bgen(jjtree)*/implements IDLParserTreeConstants, IDLPar
     xsp = jj_scanpos;
     if (jj_3R_54()) jj_scanpos = xsp;
     else if (jj_la == 0 && jj_scanpos == jj_lastpos) return false;
-    if (jj_scan_token(16)) return true;
+    if (jj_scan_token(20)) return true;
     if (jj_la == 0 && jj_scanpos == jj_lastpos) return false;
     if (jj_3R_55()) return true;
     if (jj_la == 0 && jj_scanpos == jj_lastpos) return false;
@@ -5290,7 +5211,7 @@ public class IDLParser/*@bgen(jjtree)*/implements IDLParserTreeConstants, IDLPar
   }
 
   final private boolean jj_3R_108() {
-    if (jj_scan_token(59)) return true;
+    if (jj_scan_token(63)) return true;
     if (jj_la == 0 && jj_scanpos == jj_lastpos) return false;
     if (jj_3R_55()) return true;
     if (jj_la == 0 && jj_scanpos == jj_lastpos) return false;
@@ -5300,7 +5221,7 @@ public class IDLParser/*@bgen(jjtree)*/implements IDLParserTreeConstants, IDLPar
   final private boolean jj_3_20() {
     if (jj_scan_token(FIXED)) return true;
     if (jj_la == 0 && jj_scanpos == jj_lastpos) return false;
-    if (jj_scan_token(83)) return true;
+    if (jj_scan_token(87)) return true;
     if (jj_la == 0 && jj_scanpos == jj_lastpos) return false;
     return false;
   }
@@ -5308,11 +5229,11 @@ public class IDLParser/*@bgen(jjtree)*/implements IDLParserTreeConstants, IDLPar
   final private boolean jj_3R_32() {
     if (jj_3R_52()) return true;
     if (jj_la == 0 && jj_scanpos == jj_lastpos) return false;
-    if (jj_scan_token(13)) return true;
+    if (jj_scan_token(17)) return true;
     if (jj_la == 0 && jj_scanpos == jj_lastpos) return false;
     if (jj_3R_53()) return true;
     if (jj_la == 0 && jj_scanpos == jj_lastpos) return false;
-    if (jj_scan_token(14)) return true;
+    if (jj_scan_token(18)) return true;
     if (jj_la == 0 && jj_scanpos == jj_lastpos) return false;
     return false;
   }
@@ -5341,7 +5262,7 @@ public class IDLParser/*@bgen(jjtree)*/implements IDLParserTreeConstants, IDLPar
   }
 
   final private boolean jj_3R_107() {
-    if (jj_scan_token(58)) return true;
+    if (jj_scan_token(62)) return true;
     if (jj_la == 0 && jj_scanpos == jj_lastpos) return false;
     if (jj_3R_55()) return true;
     if (jj_la == 0 && jj_scanpos == jj_lastpos) return false;
@@ -5349,13 +5270,13 @@ public class IDLParser/*@bgen(jjtree)*/implements IDLParserTreeConstants, IDLPar
   }
 
   final private boolean jj_3R_175() {
-    if (jj_scan_token(57)) return true;
+    if (jj_scan_token(61)) return true;
     if (jj_la == 0 && jj_scanpos == jj_lastpos) return false;
     return false;
   }
 
   final private boolean jj_3R_71() {
-    if (jj_scan_token(12)) return true;
+    if (jj_scan_token(16)) return true;
     if (jj_la == 0 && jj_scanpos == jj_lastpos) return false;
     if (jj_3R_55()) return true;
     if (jj_la == 0 && jj_scanpos == jj_lastpos) return false;
@@ -5363,7 +5284,7 @@ public class IDLParser/*@bgen(jjtree)*/implements IDLParserTreeConstants, IDLPar
   }
 
   final private boolean jj_3R_174() {
-    if (jj_scan_token(56)) return true;
+    if (jj_scan_token(60)) return true;
     if (jj_la == 0 && jj_scanpos == jj_lastpos) return false;
     return false;
   }
@@ -5381,7 +5302,7 @@ public class IDLParser/*@bgen(jjtree)*/implements IDLParserTreeConstants, IDLPar
   }
 
   final private boolean jj_3R_40() {
-    if (jj_scan_token(82)) return true;
+    if (jj_scan_token(86)) return true;
     if (jj_la == 0 && jj_scanpos == jj_lastpos) return false;
     if (jj_scan_token(CHARACTER)) return true;
     if (jj_la == 0 && jj_scanpos == jj_lastpos) return false;
@@ -5389,7 +5310,7 @@ public class IDLParser/*@bgen(jjtree)*/implements IDLParserTreeConstants, IDLPar
   }
 
   final private boolean jj_3R_146() {
-    if (jj_scan_token(55)) return true;
+    if (jj_scan_token(59)) return true;
     if (jj_la == 0 && jj_scanpos == jj_lastpos) return false;
     return false;
   }
@@ -5419,7 +5340,7 @@ public class IDLParser/*@bgen(jjtree)*/implements IDLParserTreeConstants, IDLPar
   }
 
   final private boolean jj_3R_141() {
-    if (jj_scan_token(54)) return true;
+    if (jj_scan_token(58)) return true;
     if (jj_la == 0 && jj_scanpos == jj_lastpos) return false;
     return false;
   }
@@ -5457,13 +5378,13 @@ public class IDLParser/*@bgen(jjtree)*/implements IDLParserTreeConstants, IDLPar
   }
 
   final private boolean jj_3R_140() {
-    if (jj_scan_token(53)) return true;
+    if (jj_scan_token(57)) return true;
     if (jj_la == 0 && jj_scanpos == jj_lastpos) return false;
     return false;
   }
 
   final private boolean jj_3R_39() {
-    if (jj_scan_token(82)) return true;
+    if (jj_scan_token(86)) return true;
     if (jj_la == 0 && jj_scanpos == jj_lastpos) return false;
     if (jj_scan_token(STRING)) return true;
     if (jj_la == 0 && jj_scanpos == jj_lastpos) return false;
@@ -5483,25 +5404,25 @@ public class IDLParser/*@bgen(jjtree)*/implements IDLParserTreeConstants, IDLPar
   }
 
   final private boolean jj_3R_139() {
-    if (jj_scan_token(52)) return true;
+    if (jj_scan_token(56)) return true;
     if (jj_la == 0 && jj_scanpos == jj_lastpos) return false;
     return false;
   }
 
   final private boolean jj_3R_45() {
-    if (jj_scan_token(51)) return true;
+    if (jj_scan_token(55)) return true;
     if (jj_la == 0 && jj_scanpos == jj_lastpos) return false;
-    if (jj_scan_token(49)) return true;
+    if (jj_scan_token(53)) return true;
     if (jj_la == 0 && jj_scanpos == jj_lastpos) return false;
-    if (jj_scan_token(49)) return true;
+    if (jj_scan_token(53)) return true;
     if (jj_la == 0 && jj_scanpos == jj_lastpos) return false;
     return false;
   }
 
   final private boolean jj_3R_46() {
-    if (jj_scan_token(51)) return true;
+    if (jj_scan_token(55)) return true;
     if (jj_la == 0 && jj_scanpos == jj_lastpos) return false;
-    if (jj_scan_token(49)) return true;
+    if (jj_scan_token(53)) return true;
     if (jj_la == 0 && jj_scanpos == jj_lastpos) return false;
     return false;
   }
@@ -5525,9 +5446,9 @@ public class IDLParser/*@bgen(jjtree)*/implements IDLParserTreeConstants, IDLPar
   }
 
   final private boolean jj_3R_138() {
-    if (jj_scan_token(51)) return true;
+    if (jj_scan_token(55)) return true;
     if (jj_la == 0 && jj_scanpos == jj_lastpos) return false;
-    if (jj_scan_token(50)) return true;
+    if (jj_scan_token(54)) return true;
     if (jj_la == 0 && jj_scanpos == jj_lastpos) return false;
     return false;
   }
@@ -5575,7 +5496,7 @@ public class IDLParser/*@bgen(jjtree)*/implements IDLParserTreeConstants, IDLPar
   }
 
   final private boolean jj_3R_151() {
-    if (jj_scan_token(25)) return true;
+    if (jj_scan_token(29)) return true;
     if (jj_la == 0 && jj_scanpos == jj_lastpos) return false;
     return false;
   }
@@ -5654,9 +5575,9 @@ public class IDLParser/*@bgen(jjtree)*/implements IDLParserTreeConstants, IDLPar
   }
 
   final private boolean jj_3R_29() {
-    if (jj_scan_token(8)) return true;
+    if (jj_scan_token(12)) return true;
     if (jj_la == 0 && jj_scanpos == jj_lastpos) return false;
-    if (jj_scan_token(10)) return true;
+    if (jj_scan_token(14)) return true;
     if (jj_la == 0 && jj_scanpos == jj_lastpos) return false;
     return false;
   }
@@ -5668,7 +5589,7 @@ public class IDLParser/*@bgen(jjtree)*/implements IDLParserTreeConstants, IDLPar
   }
 
   final private boolean jj_3R_69() {
-    if (jj_scan_token(30)) return true;
+    if (jj_scan_token(34)) return true;
     if (jj_la == 0 && jj_scanpos == jj_lastpos) return false;
     if (jj_3R_95()) return true;
     if (jj_la == 0 && jj_scanpos == jj_lastpos) return false;
@@ -5676,15 +5597,15 @@ public class IDLParser/*@bgen(jjtree)*/implements IDLParserTreeConstants, IDLPar
   }
 
   final private boolean jj_3R_43() {
-    if (jj_scan_token(49)) return true;
+    if (jj_scan_token(53)) return true;
     if (jj_la == 0 && jj_scanpos == jj_lastpos) return false;
-    if (jj_scan_token(49)) return true;
+    if (jj_scan_token(53)) return true;
     if (jj_la == 0 && jj_scanpos == jj_lastpos) return false;
     return false;
   }
 
   final private boolean jj_3R_176() {
-    if (jj_scan_token(81)) return true;
+    if (jj_scan_token(85)) return true;
     if (jj_la == 0 && jj_scanpos == jj_lastpos) return false;
     return false;
   }
@@ -5696,39 +5617,39 @@ public class IDLParser/*@bgen(jjtree)*/implements IDLParserTreeConstants, IDLPar
   }
 
   final private boolean jj_3R_44() {
-    if (jj_scan_token(49)) return true;
+    if (jj_scan_token(53)) return true;
     if (jj_la == 0 && jj_scanpos == jj_lastpos) return false;
     return false;
   }
 
   final private boolean jj_3R_144() {
-    if (jj_scan_token(80)) return true;
+    if (jj_scan_token(84)) return true;
     if (jj_la == 0 && jj_scanpos == jj_lastpos) return false;
     return false;
   }
 
   final private boolean jj_3R_149() {
-    if (jj_scan_token(8)) return true;
+    if (jj_scan_token(12)) return true;
     if (jj_la == 0 && jj_scanpos == jj_lastpos) return false;
     return false;
   }
 
   final private boolean jj_3R_137() {
-    if (jj_scan_token(50)) return true;
+    if (jj_scan_token(54)) return true;
     if (jj_la == 0 && jj_scanpos == jj_lastpos) return false;
     return false;
   }
 
   final private boolean jj_3R_178() {
-    if (jj_scan_token(80)) return true;
+    if (jj_scan_token(84)) return true;
     if (jj_la == 0 && jj_scanpos == jj_lastpos) return false;
-    if (jj_scan_token(65)) return true;
+    if (jj_scan_token(69)) return true;
     if (jj_la == 0 && jj_scanpos == jj_lastpos) return false;
     return false;
   }
 
   final private boolean jj_3R_130() {
-    if (jj_scan_token(26)) return true;
+    if (jj_scan_token(30)) return true;
     if (jj_la == 0 && jj_scanpos == jj_lastpos) return false;
     return false;
   }
@@ -5746,7 +5667,7 @@ public class IDLParser/*@bgen(jjtree)*/implements IDLParserTreeConstants, IDLPar
   }
 
   final private boolean jj_3R_170() {
-    if (jj_scan_token(19)) return true;
+    if (jj_scan_token(23)) return true;
     if (jj_la == 0 && jj_scanpos == jj_lastpos) return false;
     return false;
   }
@@ -5758,7 +5679,7 @@ public class IDLParser/*@bgen(jjtree)*/implements IDLParserTreeConstants, IDLPar
   }
 
   final private boolean jj_3R_150() {
-    if (jj_scan_token(24)) return true;
+    if (jj_scan_token(28)) return true;
     if (jj_la == 0 && jj_scanpos == jj_lastpos) return false;
     return false;
   }
@@ -5770,9 +5691,9 @@ public class IDLParser/*@bgen(jjtree)*/implements IDLParserTreeConstants, IDLPar
   }
 
   final private boolean jj_3R_72() {
-    if (jj_scan_token(8)) return true;
+    if (jj_scan_token(12)) return true;
     if (jj_la == 0 && jj_scanpos == jj_lastpos) return false;
-    if (jj_scan_token(9)) return true;
+    if (jj_scan_token(13)) return true;
     if (jj_la == 0 && jj_scanpos == jj_lastpos) return false;
     return false;
   }
@@ -5899,9 +5820,9 @@ public class IDLParser/*@bgen(jjtree)*/implements IDLParserTreeConstants, IDLPar
   }
 
   final private boolean jj_3R_86() {
-    if (jj_scan_token(49)) return true;
+    if (jj_scan_token(53)) return true;
     if (jj_la == 0 && jj_scanpos == jj_lastpos) return false;
-    if (jj_scan_token(48)) return true;
+    if (jj_scan_token(52)) return true;
     if (jj_la == 0 && jj_scanpos == jj_lastpos) return false;
     return false;
   }
@@ -5913,13 +5834,13 @@ public class IDLParser/*@bgen(jjtree)*/implements IDLParserTreeConstants, IDLPar
   }
 
   final private boolean jj_3R_88() {
-    if (jj_scan_token(48)) return true;
+    if (jj_scan_token(52)) return true;
     if (jj_la == 0 && jj_scanpos == jj_lastpos) return false;
     return false;
   }
 
   final private boolean jj_3R_81() {
-    if (jj_scan_token(23)) return true;
+    if (jj_scan_token(27)) return true;
     if (jj_la == 0 && jj_scanpos == jj_lastpos) return false;
     if (jj_3R_120()) return true;
     if (jj_la == 0 && jj_scanpos == jj_lastpos) return false;
@@ -5927,13 +5848,13 @@ public class IDLParser/*@bgen(jjtree)*/implements IDLParserTreeConstants, IDLPar
   }
 
   final private boolean jj_3R_127() {
-    if (jj_scan_token(22)) return true;
+    if (jj_scan_token(26)) return true;
     if (jj_la == 0 && jj_scanpos == jj_lastpos) return false;
     return false;
   }
 
   final private boolean jj_3R_87() {
-    if (jj_scan_token(47)) return true;
+    if (jj_scan_token(51)) return true;
     if (jj_la == 0 && jj_scanpos == jj_lastpos) return false;
     return false;
   }
@@ -5945,7 +5866,7 @@ public class IDLParser/*@bgen(jjtree)*/implements IDLParserTreeConstants, IDLPar
   }
 
   final private boolean jj_3R_80() {
-    if (jj_scan_token(17)) return true;
+    if (jj_scan_token(21)) return true;
     if (jj_la == 0 && jj_scanpos == jj_lastpos) return false;
     Token xsp;
     xsp = jj_scanpos;
@@ -5969,7 +5890,7 @@ public class IDLParser/*@bgen(jjtree)*/implements IDLParserTreeConstants, IDLPar
   }
 
   final private boolean jj_3R_76() {
-    if (jj_scan_token(21)) return true;
+    if (jj_scan_token(25)) return true;
     if (jj_la == 0 && jj_scanpos == jj_lastpos) return false;
     return false;
   }
@@ -5999,7 +5920,7 @@ public class IDLParser/*@bgen(jjtree)*/implements IDLParserTreeConstants, IDLPar
     xsp = jj_scanpos;
     if (jj_3R_76()) jj_scanpos = xsp;
     else if (jj_la == 0 && jj_scanpos == jj_lastpos) return false;
-    if (jj_scan_token(20)) return true;
+    if (jj_scan_token(24)) return true;
     if (jj_la == 0 && jj_scanpos == jj_lastpos) return false;
     if (jj_3R_55()) return true;
     if (jj_la == 0 && jj_scanpos == jj_lastpos) return false;
@@ -6031,7 +5952,7 @@ public class IDLParser/*@bgen(jjtree)*/implements IDLParserTreeConstants, IDLPar
   }
 
   final private boolean jj_3R_173() {
-    if (jj_scan_token(75)) return true;
+    if (jj_scan_token(79)) return true;
     if (jj_la == 0 && jj_scanpos == jj_lastpos) return false;
     return false;
   }
@@ -6056,7 +5977,7 @@ public class IDLParser/*@bgen(jjtree)*/implements IDLParserTreeConstants, IDLPar
   final private boolean jj_3R_34() {
     if (jj_3R_56()) return true;
     if (jj_la == 0 && jj_scanpos == jj_lastpos) return false;
-    if (jj_scan_token(13)) return true;
+    if (jj_scan_token(17)) return true;
     if (jj_la == 0 && jj_scanpos == jj_lastpos) return false;
     Token xsp;
     while (true) {
@@ -6064,19 +5985,98 @@ public class IDLParser/*@bgen(jjtree)*/implements IDLParserTreeConstants, IDLPar
       if (jj_3R_57()) { jj_scanpos = xsp; break; }
       if (jj_la == 0 && jj_scanpos == jj_lastpos) return false;
     }
-    if (jj_scan_token(14)) return true;
+    if (jj_scan_token(18)) return true;
     if (jj_la == 0 && jj_scanpos == jj_lastpos) return false;
     return false;
   }
 
   final private boolean jj_3R_171() {
-    if (jj_scan_token(74)) return true;
+    if (jj_scan_token(78)) return true;
     if (jj_la == 0 && jj_scanpos == jj_lastpos) return false;
     return false;
   }
 
   final private boolean jj_3_15() {
     if (jj_3R_42()) return true;
+    if (jj_la == 0 && jj_scanpos == jj_lastpos) return false;
+    return false;
+  }
+
+  final private boolean jj_3R_156() {
+    if (jj_3R_171()) return true;
+    if (jj_la == 0 && jj_scanpos == jj_lastpos) return false;
+    return false;
+  }
+
+  final private boolean jj_3R_35() {
+    if (jj_scan_token(19)) return true;
+    if (jj_la == 0 && jj_scanpos == jj_lastpos) return false;
+    if (jj_scan_token(24)) return true;
+    if (jj_la == 0 && jj_scanpos == jj_lastpos) return false;
+    if (jj_3R_55()) return true;
+    if (jj_la == 0 && jj_scanpos == jj_lastpos) return false;
+    Token xsp;
+    xsp = jj_scanpos;
+    if (jj_3R_58()) jj_scanpos = xsp;
+    else if (jj_la == 0 && jj_scanpos == jj_lastpos) return false;
+    xsp = jj_scanpos;
+    if (jj_3R_59()) jj_scanpos = xsp;
+    else if (jj_la == 0 && jj_scanpos == jj_lastpos) return false;
+    if (jj_scan_token(17)) return true;
+    if (jj_la == 0 && jj_scanpos == jj_lastpos) return false;
+    return false;
+  }
+
+  final private boolean jj_3R_148() {
+    Token xsp;
+    xsp = jj_scanpos;
+    if (jj_3R_156()) jj_scanpos = xsp;
+    else if (jj_la == 0 && jj_scanpos == jj_lastpos) return false;
+    if (jj_3R_157()) return true;
+    if (jj_la == 0 && jj_scanpos == jj_lastpos) return false;
+    return false;
+  }
+
+  final private boolean jj_3R_136() {
+    if (jj_3R_109()) return true;
+    if (jj_la == 0 && jj_scanpos == jj_lastpos) return false;
+    return false;
+  }
+
+  final private boolean jj_3R_135() {
+    if (jj_3R_108()) return true;
+    if (jj_la == 0 && jj_scanpos == jj_lastpos) return false;
+    return false;
+  }
+
+  final private boolean jj_3R_102() {
+    Token xsp;
+    xsp = jj_scanpos;
+    if (jj_3R_134()) {
+    jj_scanpos = xsp;
+    if (jj_3R_135()) {
+    jj_scanpos = xsp;
+    if (jj_3R_136()) return true;
+    if (jj_la == 0 && jj_scanpos == jj_lastpos) return false;
+    } else if (jj_la == 0 && jj_scanpos == jj_lastpos) return false;
+    } else if (jj_la == 0 && jj_scanpos == jj_lastpos) return false;
+    return false;
+  }
+
+  final private boolean jj_3R_134() {
+    if (jj_3R_107()) return true;
+    if (jj_la == 0 && jj_scanpos == jj_lastpos) return false;
+    return false;
+  }
+
+  final private boolean jj_3R_36() {
+    if (jj_scan_token(24)) return true;
+    if (jj_la == 0 && jj_scanpos == jj_lastpos) return false;
+    if (jj_3R_55()) return true;
+    if (jj_la == 0 && jj_scanpos == jj_lastpos) return false;
+    if (jj_3R_60()) return true;
+    if (jj_la == 0 && jj_scanpos == jj_lastpos) return false;
+    if (jj_scan_token(15)) return true;
     if (jj_la == 0 && jj_scanpos == jj_lastpos) return false;
     return false;
   }
@@ -6091,9 +6091,10 @@ public class IDLParser/*@bgen(jjtree)*/implements IDLParserTreeConstants, IDLPar
   private boolean jj_semLA;
   private int jj_gen;
   final private int[] jj_la1 = new int[88];
-  final private int[] jj_la1_0 = {0x40319100,0x40319101,0x40000000,0x1000,0x100,0x40319100,0x8000,0x8000,0x20000,0x40080100,0x40080100,0x40000,0x80000,0x80000,0x8000,0x20000,0x800000,0x40080100,0x47080100,0x200000,0x20000,0x800000,0x400000,0x40000,0x40000,0x47080100,0x3000000,0x20000000,0x40000,0x80000,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x8080000,0x0,0x0,0x0,0x0,0x0,0x80000,0x80000,0x0,0x0,0x0,0x40000,0x0,0x0,0x0,0x0,0x0,0x80000,0x80000,0x0,0x0,0x0,0x40000,0x40000,0x0,0x0,0x0,0x0,0x40000,0x80000,0x0,0x0,0x0,0x80000,0x40000,0x20000000,0x20000000,0x40000,0x40000,0x80000,0x0,0x0,0x0,0x0,0x0,0x0,0x0,};
-  final private int[] jj_la1_1 = {0x8c006000,0x8c006000,0x8c006000,0x0,0x0,0x8c006000,0x0,0x0,0x0,0x8fffe000,0x8fffe000,0x0,0x0,0x0,0x0,0x0,0x0,0x8fffe000,0x8fffe000,0x0,0x0,0x0,0x0,0x0,0x0,0x8fffe000,0x0,0x0,0x0,0xf38000,0x1,0x2,0x4,0x18,0x18,0x60,0x60,0x380,0x380,0x460,0x460,0x1800,0x0,0x0,0x1800,0x1800,0x8c006000,0x8fff8000,0x3ff8000,0x3fe0000,0x0,0x8c000000,0x0,0x0,0x38000,0xe0000,0x40000,0x80000,0x8fff8000,0x805e0000,0x60000000,0x60000000,0x60000000,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x8fff8000,0x0,0x0,0x0,0x3ff8000,0x0,0x0,0x0,0x0,0x0,0x3ff8000,0x0,0x0,0x0,0x0,0x0,0x0,0x0,};
-  final private int[] jj_la1_2 = {0x200,0x200,0x200,0x0,0x0,0x200,0x0,0x0,0x0,0x420f98,0x420f98,0x0,0x0,0x0,0x0,0x0,0x0,0x420f98,0x420f98,0x0,0x0,0x0,0x0,0x0,0x0,0x420f98,0x0,0x0,0x0,0x410018,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x7fcc0000,0x23800000,0x10000000,0x4c080000,0x0,0x0,0x430019,0x430019,0x20000,0x10019,0x0,0x0,0x400000,0x0,0x0,0x0,0x0,0x430019,0x400000,0x0,0x0,0x0,0x0,0x0,0x2,0x2,0x20,0x80,0x0,0x430019,0x400,0x4000,0x8000,0x420818,0x0,0x3000,0x3000,0x0,0x0,0x420018,0x3800000,0xc000000,0x40000000,0x300000,0x300000,0x300000,0x40080000,};
+  final private int[] jj_la1_0 = {0x3191000,0x3191001,0x0,0x10000,0x1000,0x3191000,0x80000,0x80000,0x200000,0x801000,0x801000,0x400000,0x800000,0x800000,0x80000,0x200000,0x8000000,0x801000,0x70801000,0x2000000,0x200000,0x8000000,0x4000000,0x400000,0x400000,0x70801000,0x30000000,0x0,0x400000,0x800000,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x80800000,0x0,0x0,0x0,0x0,0x0,0x800000,0x800000,0x0,0x0,0x0,0x400000,0x0,0x0,0x0,0x0,0x0,0x800000,0x800000,0x0,0x0,0x0,0x400000,0x400000,0x0,0x0,0x0,0x0,0x400000,0x800000,0x0,0x0,0x0,0x800000,0x400000,0x0,0x0,0x400000,0x400000,0x800000,0x0,0x0,0x0,0x0,0x0,0x0,0x0,};
+  final private int[] jj_la1_1 = {0xc0060004,0xc0060004,0xc0060004,0x0,0x0,0xc0060004,0x0,0x0,0x0,0xfffe0004,0xfffe0004,0x0,0x0,0x0,0x0,0x0,0x0,0xfffe0004,0xfffe0004,0x0,0x0,0x0,0x0,0x0,0x0,0xfffe0004,0x0,0x2,0x0,0xf380000,0x10,0x20,0x40,0x180,0x180,0x600,0x600,0x3800,0x3800,0x4600,0x4600,0x18000,0x0,0x0,0x18000,0x18000,0xc0060000,0xfff80000,0x3ff80000,0x3fe00000,0x0,0xc0000000,0x0,0x0,0x380000,0xe00000,0x400000,0x800000,0xfff80000,0x5e00000,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0xfff80000,0x0,0x0,0x0,0x3ff80000,0x0,0x2,0x2,0x0,0x0,0x3ff80000,0x0,0x0,0x0,0x0,0x0,0x0,0x0,};
+  final private int[] jj_la1_2 = {0x2008,0x2008,0x2008,0x0,0x0,0x2008,0x0,0x0,0x0,0x420f988,0x420f988,0x0,0x0,0x0,0x0,0x0,0x0,0x420f988,0x420f988,0x0,0x0,0x0,0x0,0x0,0x0,0x420f988,0x0,0x0,0x0,0x4100180,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0xfcc00000,0x38000000,0x0,0xc0800000,0x0,0x8,0x4300198,0x4300190,0x200000,0x100190,0x8,0x0,0x4000000,0x0,0x0,0x0,0x0,0x4300198,0x4000008,0x6,0x6,0x6,0x0,0x0,0x20,0x20,0x200,0x800,0x0,0x4300198,0x4000,0x40000,0x80000,0x4208180,0x0,0x30000,0x30000,0x0,0x0,0x4200180,0x38000000,0xc0000000,0x0,0x3000000,0x3000000,0x3000000,0x800000,};
+  final private int[] jj_la1_3 = {0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x7,0x2,0x1,0x4,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x4,0x0,0x0,0x0,0x4,};
   final private JJCalls[] jj_2_rtns = new JJCalls[20];
   private boolean jj_rescan = false;
   private int jj_gc = 0;
@@ -6262,8 +6263,8 @@ public class IDLParser/*@bgen(jjtree)*/implements IDLParserTreeConstants, IDLPar
 
   final public ParseException generateParseException() {
     jj_expentries.removeAllElements();
-    boolean[] la1tokens = new boolean[95];
-    for (int i = 0; i < 95; i++) {
+    boolean[] la1tokens = new boolean[99];
+    for (int i = 0; i < 99; i++) {
       la1tokens[i] = false;
     }
     if (jj_kind >= 0) {
@@ -6282,10 +6283,13 @@ public class IDLParser/*@bgen(jjtree)*/implements IDLParserTreeConstants, IDLPar
           if ((jj_la1_2[i] & (1<<j)) != 0) {
             la1tokens[64+j] = true;
           }
+          if ((jj_la1_3[i] & (1<<j)) != 0) {
+            la1tokens[96+j] = true;
+          }
         }
       }
     }
-    for (int i = 0; i < 95; i++) {
+    for (int i = 0; i < 99; i++) {
       if (la1tokens[i]) {
         jj_expentry = new int[1];
         jj_expentry[0] = i;

@@ -4,17 +4,19 @@ package parser;
 public interface IDLParserConstants {
 
   int EOF = 0;
-  int ID = 86;
-  int OCTALINT = 87;
-  int DECIMALINT = 88;
-  int HEXADECIMALINT = 89;
-  int FLOATONE = 90;
-  int FLOATTWO = 91;
-  int CHARACTER = 92;
-  int STRING = 93;
-  int FIXED = 94;
+  int ID = 90;
+  int OCTALINT = 91;
+  int DECIMALINT = 92;
+  int HEXADECIMALINT = 93;
+  int FLOATONE = 94;
+  int FLOATTWO = 95;
+  int CHARACTER = 96;
+  int STRING = 97;
+  int FIXED = 98;
 
   int DEFAULT = 0;
+  int IN_LINE_COMMENT = 1;
+  int IN_COMMENT = 2;
 
   String[] tokenImage = {
     "<EOF>",
@@ -22,9 +24,13 @@ public interface IDLParserConstants {
     "\"\\t\"",
     "\"\\n\"",
     "\"\\r\"",
-    "<token of kind 5>",
-    "<token of kind 6>",
+    "\"//\"",
+    "\"/*\"",
     "<token of kind 7>",
+    "\"\\n\"",
+    "<token of kind 9>",
+    "\"*/\"",
+    "<token of kind 11>",
     "\"#pragma\"",
     "\"ID\"",
     "\"prefix\"",
