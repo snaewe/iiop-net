@@ -52,7 +52,7 @@ namespace Ch.Elca.Iiop.Idl {
         private AssemblyBuilder m_asmBuilder;
         private ModuleBuilder m_modBuilder;
 
-        private Hashtable m_createdTypes = Hashtable.Synchronized(new Hashtable());
+        private Hashtable m_createdTypes = new Hashtable();
 
         #endregion IFields
         #region IConstructors
@@ -82,24 +82,28 @@ namespace Ch.Elca.Iiop.Idl {
         /// <summar>check if the type with the name fullname is defined among the generated boxed value
         /// type. If so, return the type</summary>
         internal Type RetrieveType(string fullname) {
-            return m_asmBuilder.GetType(fullname);
+            lock(this) {
+                return m_asmBuilder.GetType(fullname);
+            }
         }
 
         /// <summary>get or create the boxed value type(s) for a .NET arrayType</summary>
         internal Type GetOrCreateBoxedTypeForArray(Type arrayType) {
-            if (!arrayType.IsArray) { 
-                // an array-type is required for calling GetOrCreateBoxedTypeForArray
-                throw new INTERNAL(10050, CompletionStatus.Completed_MayBe);
-                
-            }
-            if (m_createdTypes.Contains(arrayType)) {
-                return (Type)m_createdTypes[arrayType];
-            } else {
-                // create the boxed value type(s) for the array
-                TypeBuilder resultBuild = m_boxedValGen.CreateBoxedTypeForArray(arrayType, m_modBuilder, this);
-                Type result = resultBuild.CreateType();
-                m_createdTypes.Add(arrayType, result); // register created type for arrayType
-                return result;
+            lock(this) {
+                if (!arrayType.IsArray) { 
+                    // an array-type is required for calling GetOrCreateBoxedTypeForArray
+                    throw new INTERNAL(10050, CompletionStatus.Completed_MayBe);
+                    
+                }
+                if (m_createdTypes.Contains(arrayType)) {
+                    return (Type)m_createdTypes[arrayType];
+                } else {
+                    // create the boxed value type(s) for the array
+                    TypeBuilder resultBuild = m_boxedValGen.CreateBoxedTypeForArray(arrayType, m_modBuilder, this);
+                    Type result = resultBuild.CreateType();
+                    m_createdTypes.Add(arrayType, result); // register created type for arrayType
+                    return result;
+                }
             }
         }
 
@@ -128,7 +132,6 @@ namespace Ch.Elca.Iiop.Idl {
                                                            TypeAttributes.Class | TypeAttributes.Public,
                                                            typeof(BoxedValueBase));
             DefineBoxedType(boxBuilder, toBox, attrsOnBoxedType);
-            // finally create the type
             return boxBuilder;
         }
         
