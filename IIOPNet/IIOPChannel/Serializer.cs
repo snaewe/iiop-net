@@ -332,9 +332,19 @@ namespace Ch.Elca.Iiop.Marshalling {
             }
             Debug.WriteLine("connection information for objRef, host: " + host + ", port: " +
                             port + ", objKey-length: " + objectKey.Length); 
-            // get the repository id for the type of this MarshalByRefObject
-            string repositoryID = Repository.GetRepositoryID(actual.GetType());
-            if (actual.GetType().Equals(typeof(MarshalByRefObject))) { 
+
+            // get the repository id for the type of this MarshalByRef object
+            Type actualType = actual.GetType();
+            if (RemotingServices.IsTransparentProxy(actual) && 
+                actualType.Equals(typeof(MarshalByRefObject)) &&
+                formal.IsInterface && formal.IsInstanceOfType(actual)) {
+                    // when marshalling a proxy, without having adequate type information from an IOR
+                    // and formal is an interface, use interface type instead of MarshalByRef to
+                    // prevent problems on server
+                    actualType = formal;			
+            }
+            string repositoryID = Repository.GetRepositoryID(actualType);
+            if (actualType.Equals(typeof(MarshalByRefObject))) { 
                 repositoryID = ""; 
             } // CORBA::Object has "" repository id
             // now create an IOR with the above information
