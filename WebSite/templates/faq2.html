@@ -243,6 +243,18 @@ the remote object represented by the IOR:
                                                                                ior);
 </pre>
 
+<a name="#getIOR"></a>
+<H2 class="about">How can I get the stringified IOR from a proxy object?</H2>
+
+<p>
+The following Code returns the stringified IOR of a remote object, given its local proxy:
+
+<pre>
+    String ior = RemotingServices.GetObjectUri(proxy);
+</pre>
+
+<p>This won't obviously work, when the proxy is created manually with RemotingServices.Connect using a .NET URI or a corbaloc URI. In this case the above call will return the URI used in Connect.
+
 <a name="#corbaLocIIOP"></a>
 <H2 class="about">How can I access an object using its corbaloc:iiop address?</H2>
 
