@@ -1,0 +1,13 @@
+The integration tests test the functionality of IIOP.NET.
+
+For tests are written using NUnit V2. For building the tests, you need to set a varaible NUNITV2_HOME to the 
+home directory of NUNIT V2.
+
+Building the tests:
+- call nmake in this directory.
+
+
+Running the tests:
+- check the instructions in the test-directories.
+
+
