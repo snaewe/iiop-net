@@ -8,6 +8,7 @@ build-examples:
 build-base:
 	$(MAKE) -C IIOPChannel -f Makefile.mono build
 	$(MAKE) -C CLSToIDLGenerator -f Makefile.mono build
+	$(MAKE) -C IDLToCLSCompiler -f Makefile.mono build
 
 
 build-tests: build-base
@@ -17,4 +18,5 @@ build-tests: build-base
 clean:
 	$(MAKE) -C IIOPChannel -f Makefile.mono clean
 	$(MAKE) -C CLSToIDLGenerator -f Makefile.mono clean
+	$(MAKE) -C IDLToCLSCompiler -f Makefile.mono clean
 	$(MAKE) -C Examples -f Makefile.mono clean
