@@ -217,5 +217,8 @@ public class TestServiceImpl extends PortableRemoteObject implements TestService
         return arg;
     }
 
+    public CustomMappedSerializable echoCustomMappedSer(CustomMappedSerializable arg) throws RemoteException {
+        return arg;
+    }
         
 }

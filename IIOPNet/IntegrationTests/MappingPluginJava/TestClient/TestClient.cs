@@ -68,6 +68,7 @@ namespace Ch.Elca.Iiop.IntegrationTests.MappingPlugin {
             try {
                CustomMapperRegistry reg = CustomMapperRegistry.GetSingleton();
                reg.AddMappingsFromFile(new FileInfo("customMapping.xml"));
+               reg.AddMappingsFromFile(new FileInfo("customMappingTest.xml"));
             } catch (Exception e) {
                 Console.WriteLine("custom mapper not loadable: " + e);
                 throw e;
@@ -371,8 +372,17 @@ namespace Ch.Elca.Iiop.IntegrationTests.MappingPlugin {
             Assertion.AssertEquals("current date (seconds) not echoed correctly", arg.Second, result.Second);
             Assertion.AssertEquals("current date (milliseconds) not echoed correctly", arg.Millisecond, result.Millisecond);            
         }
+        
+        [Test]
+        public void TestCustomMappedSerializable() {
+            CustomMappedSerializableCls arg = new CustomMappedSerializableCls("Test");
+            CustomMappedSerializableCls result = m_testService.echoCustomMappedSer(arg);
+            Assertion.AssertNotNull(result);
+            Assertion.AssertEquals(arg.Message, result.Message);
+        }        
 
         
     }
+
 
 }

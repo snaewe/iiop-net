@@ -1,0 +1,11 @@
+<?xml version='1.0'?>
+<mappings>
+
+    <mapping>
+        <idlTypeName>Ch.Elca.Iiop.IntegrationTests.MappingPlugin.CustomMappedSerializable</idlTypeName>
+        <idlTypeAssembly>client</idlTypeAssembly> <!-- ignored by idl to cls compiler, only needed for channel -->
+        <clsType>Ch.Elca.Iiop.IntegrationTests.MappingPlugin.CustomMappedSerializableCls,CustomMapped</clsType>
+        <customMapper>Ch.Elca.Iiop.IntegrationTests.MappingPlugin.CustomMappedSerializableMapper,ClientTest</customMapper> <!-- ignored by idl to cls compiler, only needed for channel -->
+    </mapping>
+
+</mappings>

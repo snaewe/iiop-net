@@ -27,6 +27,8 @@ build-idl:
     cd bin
     rmic -d ..\$(IDL) -idl Ch.Elca.Iiop.IntegrationTests.MappingPlugin.TestServiceImpl
     rmic -d ..\$(IDL) -idl Ch.Elca.Iiop.IntegrationTests.MappingPlugin.TestSerializableClassB1
+    rmic -d ..\$(IDL) -idl Ch.Elca.Iiop.IntegrationTests.MappingPlugin.CustomMappedSerializable    
+
     cd ..
 
 start-server:

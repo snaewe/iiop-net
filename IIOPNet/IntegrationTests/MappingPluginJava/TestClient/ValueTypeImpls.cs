@@ -26,6 +26,7 @@
  */
 
 using System;
+using Ch.Elca.Iiop.Idl;
 
 namespace Ch.Elca.Iiop.IntegrationTests.MappingPlugin {
 
@@ -46,6 +47,46 @@ namespace Ch.Elca.Iiop.IntegrationTests.MappingPlugin {
         }
 
     
+    }
+    
+           
+    /// <summary>implementation for the corba value type</summary>
+    [Serializable]
+    public class CustomMappedSerializableImpl : CustomMappedSerializable {        
+
+        public CustomMappedSerializableImpl() {
+        }
+        
+        public CustomMappedSerializableImpl(string msg) : this() {
+            m_msg = msg;
+        }
+
+        public override String msg {
+            get {
+                return m_msg;
+            }
+            set { 
+                m_msg = value;
+            }
+        }
+
+    }
+
+    
+    /// <summary>instance mapper for CustomSerializable (java) <-> CustomSerializableCls (.NET)
+    public class CustomMappedSerializableMapper : ICustomMapper {
+                    
+        public object CreateClsForIdlInstance(object idlInstance) {
+            CustomMappedSerializable source = (CustomMappedSerializable)idlInstance;
+            return new CustomMappedSerializableCls(source.msg);
+        }
+        
+        public object CreateIdlForClsInstance(object clsInstance) {
+            CustomMappedSerializableCls source = (CustomMappedSerializableCls)clsInstance;
+            return new CustomMappedSerializableImpl(source.Message);
+        }
+        
+        
     }
 
 
