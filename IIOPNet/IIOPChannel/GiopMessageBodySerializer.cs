@@ -39,6 +39,7 @@ using Ch.Elca.Iiop.Marshalling;
 using Ch.Elca.Iiop.Services;
 using Ch.Elca.Iiop.Idl;
 using Ch.Elca.Iiop.Util;
+using Ch.Elca.Iiop.CorbaObjRef;
 using omg.org.CORBA;
 
 namespace Ch.Elca.Iiop.MessageHandling {
@@ -322,16 +323,10 @@ namespace Ch.Elca.Iiop.MessageHandling {
         /// <param name="reqId">the request-id to use</param>
         public void SerialiseRequest(IMethodCallMessage methodCall,
                                      CdrOutputStream targetStream, 
-                                     GiopVersion version, uint reqId) {
-
-            string uri = methodCall.Uri;
-            // method-call uri is normally a full url, but can also be only the object-uri part
-            if (IiopUrlUtil.IsUrl(uri)) {
-                IiopUrlUtil.ParseUrl(uri, out uri);                
-            } 
-            byte[] objectKey = IiopUrlUtil.GetObjectKeyForObjUri(uri);
+                                     Ior targetIor, uint reqId) {                         
             Debug.WriteLine("serializing request for id: " + reqId);
-            Debug.WriteLine("uri: " + uri);
+            Debug.WriteLine("uri: " + methodCall.Uri);
+            GiopVersion version = targetIor.Version;
 
             ServiceContextCollection cntxColl = CosServices.GetSingleton().
                                                     InformInterceptorsRequestToSend();
@@ -354,7 +349,7 @@ namespace Ch.Elca.Iiop.MessageHandling {
             targetStream.WriteOctet(responseFlags); 
                         
             targetStream.WritePadding(3); // reserved bytes
-            WriteTarget(targetStream, objectKey, version); // write the target-info
+            WriteTarget(targetStream, targetIor.ObjectKey, version); // write the target-info
             targetStream.WriteString(IdlNaming.MapClsMethodNameToIdlName(methodCall.MethodName,
                                                                          Type.GetType(methodCall.TypeName))); // write the method name
             

@@ -36,6 +36,7 @@ using System.Diagnostics;
 using Ch.Elca.Iiop.Cdr;
 using Ch.Elca.Iiop.Services;
 using Ch.Elca.Iiop.Util;
+using Ch.Elca.Iiop.CorbaObjRef;
 
 namespace Ch.Elca.Iiop.MessageHandling {
 
@@ -98,8 +99,9 @@ namespace Ch.Elca.Iiop.MessageHandling {
                 // not supported in CORBA, TBD: replace through do nothing instead of exception
                 throw new NotSupportedException("client activated objects are not supported with this channel");
             } else if (msg is IMethodCallMessage) {
-                // extract the GIOP-version out of the message-target
-                GiopVersion version = ExtractGiopVersion(msg as IMethodCallMessage);
+                // extract IOR out of the target addr
+                Ior ior = IiopUrlUtil.CreateIorForUrl((msg as IMethodCallMessage).Uri, "");
+                GiopVersion version = ior.Version;
                 // write a CORBA request message into the stream targetStream
                 GiopHeader header = new GiopHeader(version.Major, version.Minor,
                                                    0, GiopMsgTypes.Request);
@@ -110,23 +112,12 @@ namespace Ch.Elca.Iiop.MessageHandling {
                 msg.Properties[SimpleGiopMsg.REQUEST_ID_KEY] = requestId; // set request-id
                 ser.SerialiseRequest(msg as IMethodCallMessage, 
                                      msgOutput.GetMessageContentWritingStream(),
-                                     version, requestId);
+                                     ior, requestId);
                 msgOutput.CloseStream();
             } else {
                 throw new NotImplementedException("handling for this type of .NET message is not implemented at the moment, type: " +
                                                   msg.GetType());
             }
-        }
-
-        /// <summary>extracts the GIOP-version out of the target information</summary>
-        private GiopVersion ExtractGiopVersion(IMethodCallMessage msg) {
-            GiopVersion result;
-            string objectURI = msg.Uri;
-            if (IiopUrlUtil.IsUrl(msg.Uri)) {
-                IiopUrlUtil.ParseUrl(msg.Uri, out objectURI);
-            }
-            IiopUrlUtil.GetObjectInfoForObjUri(objectURI, out result);
-            return result;
         }
 
         /// <summary>serialises an outgoing .NET reply Message on server side</summary>
