@@ -119,7 +119,7 @@ namespace Ch.Elca.Iiop.Util {
         public override int ReadByte() {
             int result = ReadOrPeekByte();
             if (result < 0) { 
-                throw new IOException("underlaying stream not enough data"); 
+                throw new IOException("underlying stream has not enough data"); 
             }
             return result;
         }
