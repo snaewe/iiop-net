@@ -1,3 +1,24 @@
+version 1.7.1 rc0 (20 february 2005)
+------------------------------------
+
+bugs fixed:
+- IIOPChannel: connection not closed correctly, if the remote call returned an exception (bug #1103264)
+- IDLToCLSCompiler: CORBA::AbstractBase is now handled correctly
+
+changes:
+- mapping of constants: 
+  if possible the field ConstVal inside the class for the constant is now a real contant field 
+  and no longer only a final static field
+- interfaces inside any:
+  on deserialisation, if type of interface is unknown, no longer create a dummy type out of the typecode,
+  but use a generic type.
+
+new features:
+- support for idl arrays
+- CLSToIDLGenerator: added support for mapping struct with IdlStruct attribute from CLS to IDL
+- IDLToCLSCompiler: allow to set version number of generated assembly with -asmVersion option
+
+
 version 1.7.0 final (31 December 2004)
 --------------------------------------
 
