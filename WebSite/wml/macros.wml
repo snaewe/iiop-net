@@ -61,6 +61,7 @@
 :#FAQINDEX#}
 
 {#FAQENTRIES#:
+	<p>
 	<FAQ-ENTRY-HEADER><a name="faq<get-var __SECCNT>_<get-var __FAQCNT>"><get-var __SECCNT>.<get-var __FAQCNT> <get-var question></a></FAQ-ENTRY-HEADER>
 	%body
 	<br><br><br>

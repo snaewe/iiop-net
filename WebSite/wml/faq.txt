@@ -2,13 +2,12 @@
 
 <FAQ question="Does IIOP.NET work with Microsoft's .NET 1.1?">
 
-<p>
-Yes, it does. This is in fact the platform it was developed on.
+<p> Yes, it does. This is in fact the platform it was developed on.
 </FAQ>
 
 <FAQ question="Does IIOP.NET work with Microsoft's Windows CE .NET (Compact Framework)?">
 
-<p>No, because Windows CE .NET has no remoting support at all.</p>
+<p> No, because Windows CE .NET has no remoting support at all.</p>
 </FAQ>
 
 <FAQ question="Does IIOP.NET support Visual Studio's Intellisense?">
@@ -128,7 +127,7 @@ The following config file
 </pre>
 <p/>
 
-is equivalent to the following:
+<p>is equivalent to the following:
 
 <pre>
     // register the channel
@@ -136,9 +135,7 @@ is equivalent to the following:
     ChannelServices.RegisterChannel(chan);
 
 </pre>
-<p/>
-
-The config file is processed with: <BR>
+<p> The config file is processed with: <BR>
 <pre>
     RemotingConfiguration.Configure(configFile);
 </pre>
@@ -164,21 +161,22 @@ Add the following configuration lines in the files <code>%NUnit2%\bin\nunit-cons
 <p>The IDLToCLSCompiler creates the .NET proxies for one or more IDL files.
 
 <pre>
-IDLToCLSCompiler [options] target_assembly idl-files...
-
-target_assembly   is the name of the target assembly without .dll
-idl-files         one or more idl files containg OMG IDL definitions
-
-options are
--h               help
--r assembly      assemblies to check for types in, instead of generating them
--c xmlfile       specifies custom mappings
--d define        defines a preprocessor symbol
--idir directory  directory containing idl files (multiple -idir allowed)
+  IDLToCLSCompiler [options] target_assembly idl-files...
+  
+  target_assembly   is the name of the target assembly without .dll
+  idl-files         one or more idl files containg OMG IDL definitions
+  
+  options are
+  -h               help
+  -r assembly      assemblies to check for types in, instead of generating them
+  -c xmlfile       specifies custom mappings
+  -d define        defines a preprocessor symbol
+  -idir directory  directory containing idl files (multiple -idir allowed)
 </pre>
 
-<h4>Examples:</h4>
+<p><strong>Examples:</strong>
 
+<ul>
 <dl>
 <dt>
 <pre>IDLToCLSCompiler proxy def.idl</pre>
@@ -206,8 +204,9 @@ generate <code>proxy.dll</code> from <code>def.idl</code> in the directory <code
 generate <code>proxy.dll</code> from <code>def.idl</code> in the current directory; the symbol "IIOPNet" is defined for the IDL preprocessor
 </dd>
 </dl>
+</ul>
 
-<h4>Notes:</h4>
+<p><strong>Notes:</strong>
 
 <p>The compiler will warn you that you must provide the implementation for the classes implementing the CORBA valuetypes. The article <a href="http://www.codeproject.com/csharp/iiop_net_and_EJB.asp">Accessing an EJB from .NET Using IIOP.NET: an Example</a> contains a detailed explanation and example (see step 4).
 
@@ -244,8 +243,8 @@ the remote object represented by the IOR:
 <pre>
     StreamReader stream = new StreamReader(iorfile);
     String ior = stream.ReadLine();
-    MyRemoteObjectIF remoteObject = (MyRemoteObjectIF)RemotingServices.Connect(typeof(MyRemoteObjectIF),
-                                                                               ior);
+    MyRemoteObjectIF remoteObject = 
+        (MyRemoteObjectIF)RemotingServices.Connect(typeof(MyRemoteObjectIF), ior);
 </pre>
 
 </FAQ>
@@ -268,18 +267,18 @@ The following code creates a proxy for the remote object represented by the give
 
 <pre>
     string loc = "corbaloc::localhost:3528/myobject";
-    MyRemoteObjectIF remoteObject = (MyRemoteObjectIF)RemotingServices.Connect(typeof(MyRemoteObjectIF), 
-                                                                               loc);
+    MyRemoteObjectIF remoteObject = 
+        (MyRemoteObjectIF)RemotingServices.Connect(typeof(MyRemoteObjectIF), loc);
 </pre>
 
-Note: This feature is only available in IIOP.NET 1.4.0 and above.
+<p> Note: This feature is only available in IIOP.NET 1.4.0 and above.
 
 
 
 </FAQ>
 <FAQ question="How do I implement a callback?">
 
-IIOP.NET contains two examples using callbacks:
+<p> IIOP.NET contains two examples using callbacks:
 <ul>
 <dl>
 	<dt><pre>Examples\Callback\ChatroomInterDN</pre></dt>
@@ -291,7 +290,7 @@ IIOP.NET contains two examples using callbacks:
 </dl>
 </ul>
 
-For each callback, ensure that the following points are fullfilled:
+<p> For each callback, ensure that the following points are fullfilled:
 <ul>
 	<li>The callback implementation class must inherhit from <em>MarshalByRefObject</em>
 	<li>The callback implementation class must implement the callback interface
@@ -398,7 +397,7 @@ The persistency must be handled by the servant implementation, which should stor
 </FAQ>
 
 
-<FAQ question="CORBA Exception: No_Implement (minor-code = 1)">
+<FAQ question="omg.org.CORBA.NO_IMPLEMENT: CORBA system exception, completed: Completed_MayBe minor: 1">
 
 <p>The marshaller on the .NET-side cannot find the class implementing the valuetype.
 
@@ -414,7 +413,7 @@ The persistency must be handled by the servant implementation, which should stor
 </ul>
 
 </FAQ>
-<FAQ question="CORBA system exception, completed: Completed_MayBe minor: 1414">
+<FAQ question="omg.org.CORBA.INTF_REPOS: CORBA system exception, completed: Completed_MayBe minor: 1414">
 
 <P>This exception is thrown by IIOP.NET whenever it receives an object reference of an unknown type.
 The most common errors are:
@@ -426,7 +425,7 @@ The most common errors are:
 </FAQ>
 <FAQ question="omg.org.CORBA.CODESET_INCOMPATIBLE: CORBA system exception, completed: Completed_No minor: 9501">
 
-Currently, IIOP.NET does only support a limited set of codesets:
+<p> Currently, IIOP.NET does only support a limited set of codesets:
 <ul>
 	<li> Character Sets:
 	<ul>
@@ -442,15 +441,8 @@ Currently, IIOP.NET does only support a limited set of codesets:
 </li>
 </ul>
 
-If possible, you sould use UTF8, Latin1 or UTF16.
+<p> If possible, you sould use UTF8, Latin1 or UTF16.
 
 </FAQ>
 
-<FAQ question="'Unknown Host' executing nameService.resolve">
-
-<p>Please check the address you gave in your configuration. You can check whether the machine is alive using the command-line command 'ping <i>address</i>'. If you use callbacks, make also sure that the machine you want to connect to can reach you local machine (this may be a problem with firewalls and intranets that use private addresses).
-
-<p>A user reported that even when connecting to '127.0.0.1' or 'localhost', the .NET Framework tries to acquire the host name with a DNS query: if your machine is not registered to the DNS server, this causes the query to fail and the exception 'Unknown Host'.
-
-</FAQ>
 </FAQ-SECTION>
