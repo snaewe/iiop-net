@@ -206,7 +206,7 @@ namespace Ch.Elca.Iiop.Idl {
         /// <summary>
         /// checks, if the type is MarshalByRefObject or a subclass
         /// </summary>
-        public static bool IsMarshalByRef(Type type) {
+        private static bool IsMarshalByRef(Type type) {
             return type.IsMarshalByRef;
         }
 
@@ -317,6 +317,15 @@ namespace Ch.Elca.Iiop.Idl {
         		MappingToResult.IdlAbstractIf;
         }
         
+        public static bool IsMappedToLocalInterface(Type clsType) {
+        	return IsMappedToLocalInterface(clsType, AttributeExtCollection.EmptyCollection);
+        }        
+        
+        public static bool IsMappedToLocalInterface(Type clsType, AttributeExtCollection attributes) {
+            return (MappingToResult) s_singleton.MapClsType(clsType, attributes, s_mappingToAction) ==
+        		MappingToResult.IdlLocalIf;
+        }        
+        
         public static bool IsMappedToBoxedValueType(Type clsType) {
         	return IsMappedToBoxedValueType(clsType, AttributeExtCollection.EmptyCollection);
         }        
@@ -334,6 +343,46 @@ namespace Ch.Elca.Iiop.Idl {
                 return true; 
             }
             return false;
+        }
+        
+        /// <summary>
+        /// checks, if the interface impelemntation relation can be mapped from CLS to IDL. 
+        /// </summary>
+        /// <param name="interfaceType">the CLS interface to check for</param>
+        /// <param name="implementorType">the CLS class/interface, which implements the interface</param>
+        /// <returns></returns>
+        public static bool MapInheritanceFromInterfaceToIdl(Type interfaceType, Type implementorType) {
+        	if (!interfaceType.IsInterface) {
+        		return false;
+        	}
+        	if (ClsToIdlMapper.IsMappedToAbstractInterface(implementorType)) {
+        	    // an abstract interface child can only inherit from an abstract interface parent
+        	    return ClsToIdlMapper.IsMappedToAbstractInterface(interfaceType);
+        	}
+        	if (ClsToIdlMapper.IsMappedToConcreteInterface(implementorType)) {
+        	    // a concrete interface may inherit from abstract and concrete interfaces
+        		return ClsToIdlMapper.IsMappedToAbstractInterface(interfaceType) ||
+        	           ClsToIdlMapper.IsMappedToConcreteInterface(interfaceType);
+        	}
+        	if (ClsToIdlMapper.IsMappedToLocalInterface(implementorType)) {
+        		// a local interface may inherit from local, abstract and concrete interfaces
+        	    return ClsToIdlMapper.IsMappedToAbstractInterface(interfaceType) ||
+        	           ClsToIdlMapper.IsMappedToConcreteInterface(interfaceType) ||
+        	           ClsToIdlMapper.IsMappedToLocalInterface(interfaceType);
+        	}
+        	if (ClsToIdlMapper.IsMappedToAbstractValueType(implementorType)) {
+        	    // a abstract value type may inherit from local, abstract and concrete interfaces
+        		return ClsToIdlMapper.IsMappedToAbstractInterface(interfaceType) ||
+        	           ClsToIdlMapper.IsMappedToConcreteInterface(interfaceType) ||
+        	           ClsToIdlMapper.IsMappedToLocalInterface(interfaceType);        		
+        	}
+        	if (ClsToIdlMapper.IsMappedToConcreteValueType(implementorType)) {
+        	    // a abstract value type may inherit from local, abstract and concrete interfaces
+        		return ClsToIdlMapper.IsMappedToAbstractInterface(interfaceType) ||
+        	           ClsToIdlMapper.IsMappedToConcreteInterface(interfaceType) ||
+        	           ClsToIdlMapper.IsMappedToLocalInterface(interfaceType);        		
+        	}
+        	return false;
         }
 
         #endregion SMethods

@@ -227,10 +227,12 @@ namespace Ch.Elca.Iiop.Idl {
         /// </summary>
         public bool IsForwardDeclPossible(Type forType, AttributeExtCollection attributes) {
             // boxed value types can't have forward declaration --> be sure to not include boxed value types here
-            return ((ClsToIdlMapper.IsMappedToConcreteValueType(forType) || 
+            // CORBA 2.3: only concrete/abstract value types and concrete/abstract/local interface can be fwd declared.
+            return ((ClsToIdlMapper.IsMappedToConcreteValueType(forType) ||
                      ClsToIdlMapper.IsMappedToAbstractValueType(forType, attributes) ||
-                     ClsToIdlMapper.IsMarshalByRef(forType)) && 
-                    (!(forType.IsSubclassOf(ReflectionHelper.BoxedValueBaseType))) &&
+                     ClsToIdlMapper.IsMappedToConcreteInterface(forType) ||
+                     ClsToIdlMapper.IsMappedToAbstractInterface(forType) ||
+                     ClsToIdlMapper.IsMappedToLocalInterface(forType)) &&
                     (!IsMappedBeforeGeneration(forType)));
             // don't create fwd references for entities, which are mapped before generation run
         }
@@ -328,15 +330,19 @@ namespace Ch.Elca.Iiop.Idl {
                 depList.Add(info);
             }
         }
+        
 
         /// <summary>determines the non-default types, this type depends on</summary>
         private void DetermineInheritanceDependencies() {
             m_dependenciesInheritance = new ArrayList();
 
             // for the following types the base classes must be mapped
-            if ((ClsToIdlMapper.IsMappedToConcreteValueType(m_forType) || 
-                 ClsToIdlMapper.IsMarshalByRef(m_forType)) &&
-                (!(m_forType.IsSubclassOf(typeof(BoxedValueBase))))) {
+            if (m_forType.IsClass && 
+                (ClsToIdlMapper.IsMappedToConcreteValueType(m_forType) ||
+                 ClsToIdlMapper.IsMappedToAbstractValueType(m_forType) || 
+                 ClsToIdlMapper.IsMappedToConcreteInterface(m_forType) ||
+                 ClsToIdlMapper.IsMappedToAbstractInterface(m_forType) ||
+                 ClsToIdlMapper.IsMappedToLocalInterface(m_forType))) {
                 // boxed value types are excluded here, because they do not have inheritance dependencies
                 Type baseType = m_forType.BaseType;
                 if (!((baseType.Equals(typeof(System.Object))) || (baseType.Equals(typeof(System.ValueType))) ||
@@ -346,22 +352,22 @@ namespace Ch.Elca.Iiop.Idl {
                                  CreateMapTypeInfo(baseType, AttributeExtCollection.EmptyCollection),
                                  true);
                 }
-                foreach (Type ifType in m_forType.GetInterfaces()) {
-                    AddToDepList(m_dependenciesInheritance, 
-                                 CreateMapTypeInfo(ifType, AttributeExtCollection.EmptyCollection),
-                                 true);
-                }
             }
 
             // for the following types, implemented interfaces must be considered
-            if ((ClsToIdlMapper.IsInterface(m_forType)) ||
-                (ClsToIdlMapper.IsMappedToConcreteValueType(m_forType) || ClsToIdlMapper.IsMarshalByRef(m_forType)) &&
-                (!(m_forType.IsSubclassOf(typeof(BoxedValueBase))))) {
+            if (ClsToIdlMapper.IsMappedToAbstractValueType(m_forType) ||
+                ClsToIdlMapper.IsMappedToConcreteValueType(m_forType) || 
+                ClsToIdlMapper.IsMappedToConcreteInterface(m_forType) ||
+                ClsToIdlMapper.IsMappedToAbstractInterface(m_forType) ||
+                ClsToIdlMapper.IsMappedToLocalInterface(m_forType)) {
                 Type[] implementedIF = m_forType.GetInterfaces();
                 for (int i = 0; i < implementedIF.Length; i++) {
-                    AddToDepList(m_dependenciesInheritance, 
+                	// don't map to IDL, if not legal to inherit from
+                	if (ClsToIdlMapper.MapInheritanceFromInterfaceToIdl(implementedIF[i], m_forType)) {
+                		AddToDepList(m_dependenciesInheritance,
                                  CreateMapTypeInfo(implementedIF[i], AttributeExtCollection.EmptyCollection),
                                  true);
+                	}
                 }
             }
         }
@@ -371,8 +377,10 @@ namespace Ch.Elca.Iiop.Idl {
 
             // for the following types methods and properties must be considered
             if (ClsToIdlMapper.IsMappedToConcreteValueType(m_forType) ||
-                ClsToIdlMapper.IsMarshalByRef(m_forType) ||
-                ClsToIdlMapper.IsInterface(m_forType)) {
+                ClsToIdlMapper.IsMappedToAbstractValueType(m_forType) ||
+                ClsToIdlMapper.IsMappedToConcreteInterface(m_forType) ||
+                ClsToIdlMapper.IsMappedToAbstractInterface(m_forType) ||
+                ClsToIdlMapper.IsMappedToLocalInterface(m_forType)) {
                 // check the methods
                 DetermineContentDependenciesFromMethods();
                 // check the properties

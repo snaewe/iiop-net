@@ -441,11 +441,18 @@ namespace Ch.Elca.Iiop.Idl {
         /// <summary>write the inherited interfaces</summary>
         private void MapInterfaces(Type forType) {
             Type[] interfaces = forType.GetInterfaces();
+            bool alreadyMappedAnInterface = false;
             for (int i = 0; i < interfaces.Length; i++) {
-                if (i > 0) { m_currentOutputStream.Write(", "); }
-                Type interf = interfaces[i];
-                string ifMapped = (string)m_mapper.MapClsType(interf, AttributeExtCollection.EmptyCollection, m_refMapperNoAnonSeq);
-                m_currentOutputStream.Write(ifMapped);
+            	// only map, if legal
+            	if (ClsToIdlMapper.MapInheritanceFromInterfaceToIdl(interfaces[i], forType)) {
+                	if (alreadyMappedAnInterface) { 
+            			m_currentOutputStream.Write(", "); 
+            		}
+                	Type interf = interfaces[i];
+                	string ifMapped = (string)m_mapper.MapClsType(interf, AttributeExtCollection.EmptyCollection, m_refMapperNoAnonSeq);
+                	m_currentOutputStream.Write(ifMapped);
+                	alreadyMappedAnInterface = true;
+            	}
             }
         }
 

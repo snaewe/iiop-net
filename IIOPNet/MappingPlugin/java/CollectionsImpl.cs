@@ -88,7 +88,7 @@ namespace java.util {
             for (int i = 0; i < size; i++) {
                 bool isByRef = false;
                 if (m_elements[i] != null) {
-                    isByRef = ClsToIdlMapper.IsMarshalByRef(m_elements[i].GetType());
+                    isByRef = ClsToIdlMapper.IsMappedToConcreteInterface(m_elements[i].GetType());
                 }
                 arg.write_boolean(isByRef);
                 if (!isByRef) {
@@ -369,7 +369,7 @@ namespace java.util {
         private void WriteObject(object val, Corba.DataOutputStream target) {
             bool isByRef = false;
             if (val != null) {
-                isByRef = ClsToIdlMapper.IsMarshalByRef(val.GetType());
+                isByRef = ClsToIdlMapper.IsMappedToConcreteInterface(val.GetType());
             }
             target.write_boolean(isByRef);
             if (!isByRef) {

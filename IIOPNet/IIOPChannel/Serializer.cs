@@ -1400,7 +1400,7 @@ namespace Ch.Elca.Iiop.Marshalling {
         internal override void Serialise(Type formal, object actual, AttributeExtCollection attributes,
                                        CdrOutputStream targetStream) {
             // if actual is null it shall be encoded as a valuetype: 15.3.7
-            if ((actual != null) && (ClsToIdlMapper.IsMarshalByRef(actual.GetType()))) {
+            if ((actual != null) && (ClsToIdlMapper.IsMappedToConcreteInterface(actual.GetType()))) {
                 targetStream.WriteBool(true); // an obj-ref is serialized
                 m_objRefSer.Serialise(formal, actual, attributes, targetStream);
             } else if ((actual == null) || (ClsToIdlMapper.IsMappedToConcreteValueType(actual.GetType()))) {
