@@ -52,7 +52,7 @@ namespace Ch.Elca.Iiop.CodeSet {
         public CodeSetConversionRegistry() { 
             // add the non-endian dependant encodings here
             AddEncoding(CodeSetService.LATIN1_SET, new Latin1Encoding());
-            AddEncoding(CodeSetService.ISO646IECSingle, new ASCIIEncoding());
+            AddEncoding(CodeSetService.ISO646IEC_SINGLE, new ASCIIEncoding());
         }
 
         #endregion IConstructors
@@ -93,8 +93,10 @@ namespace Ch.Elca.Iiop.CodeSet {
         #region IConstructors
 
         private CodeSetConversionRegistryBigEndian() {
-            AddEncoding(CodeSetService.UTF16_SET, new UnicodeEncodingExt(true, false)); // use big endian encoding here, put no unicode byte order mark
-            AddEncoding(CodeSetService.ISO646IECMulti, new UnicodeEncodingExt(true, false));
+            AddEncoding(CodeSetService.UTF16_SET, 
+                        new UnicodeEncodingExt(true, false)); // use big endian encoding here, put no unicode byte order mark
+            AddEncoding(CodeSetService.ISO646IEC_MULTI,
+                        new UnicodeEncodingExt(true, false));
         }
 
         #endregion IConsturctors
@@ -122,7 +124,8 @@ namespace Ch.Elca.Iiop.CodeSet {
             return count;
         }
 
-        public override int GetBytes(char[] chars, int charIndex, int charCount, byte[] bytes, int byteIndex) {
+        public override int GetBytes(char[] chars, int charIndex, int charCount,
+                                     byte[] bytes, int byteIndex) {
             if ((bytes.Length - byteIndex) < charCount) { 
                 throw new ArgumentException("bytes array is too small"); 
             }
@@ -234,10 +237,12 @@ namespace Ch.Elca.Iiop.CodeSet {
                     bytes[byteIndex] = 255;
                     bytes[byteIndex+1] = 254;
                 }
-                int result = base.GetBytes(chars, charIndex, charCount, bytes, byteIndex+2);
+                int result = base.GetBytes(chars, charIndex, charCount,
+                                           bytes, byteIndex+2);
                 return result + 2;
             } else {
-                return base.GetBytes(chars, charIndex, charCount, bytes, byteIndex);
+                return base.GetBytes(chars, charIndex, charCount,
+                                     bytes, byteIndex);
             }
         }
 
@@ -273,7 +278,8 @@ namespace Ch.Elca.Iiop.CodeSet {
             // check if big/little endian tag in byte array
             if (bytes[byteIndex] == 254 && (bytes[byteIndex+1] == 255)) {
                 if (m_bigEndian) {
-                    return base.GetChars(bytes, byteIndex+2, byteCount-2, chars, charIndex);
+                    return base.GetChars(bytes, byteIndex+2, byteCount-2,
+                                         chars, charIndex);
                 } else {
                     throw new Exception("little endian not supported, if big endian specified");
                 }
@@ -281,10 +287,12 @@ namespace Ch.Elca.Iiop.CodeSet {
                 if (m_bigEndian) {
                     throw new Exception("big endian not supported, if little endian specified");
                 } else {
-                    return base.GetChars(bytes, byteIndex+2, byteCount-2, chars, charIndex);
+                    return base.GetChars(bytes, byteIndex+2, byteCount-2,
+                                         chars, charIndex);
                 }
             } else {
-                return base.GetChars(bytes, byteIndex, byteCount, chars, charIndex);
+                return base.GetChars(bytes, byteIndex, byteCount,
+                                     chars, charIndex);
             }
         }
 

@@ -38,7 +38,8 @@ namespace Ch.Elca.Iiop {
     /// This class is able to handle urls, object uris for the IIOP-channel
     /// </summary>
     /// <remarks>
-    /// This class is used to parse url's, parse object uri's, ... This is a helper class for the IIOP-channel
+    /// This class is used to parse url's, parse object uri's, ... 
+    /// This is a helper class for the IIOP-channel
     /// </remarks>
     public class IiopUrlUtil {
 
@@ -53,7 +54,7 @@ namespace Ch.Elca.Iiop {
         #endregion Constants
         #region SFields
 
-        private static byte[] nonStringifyTag = new byte[] { 44, 115, 116, 114, 61, 102 };
+        private static byte[] s_nonStringifyTag = new byte[] { 44, 115, 116, 114, 61, 102 };
 
         #endregion SFields
         #region IConstructors
@@ -70,7 +71,8 @@ namespace Ch.Elca.Iiop {
         /// <param name="uri"></param>
         /// <param name="hostname"></param>
         /// <param name="port"></param>
-        public static void ParseChanUri(string uri, out string hostname, out int port) {
+        public static void ParseChanUri(string uri, out string hostname,
+                                        out int port) {
             hostname = null;
             port = 0;
             if (uri == null) { return; }
@@ -96,7 +98,8 @@ namespace Ch.Elca.Iiop {
         }
         
         /// <summary>
-        /// This method parses an url for the IIOP channel. It extracts the channel URI and the objectURI
+        /// This method parses an url for the IIOP channel. 
+        /// It extracts the channel URI and the objectURI
         /// </summary>
         /// <param name="url">the url to parse</param>
         /// <param name="objectURI">the objectURI</param>
@@ -135,9 +138,12 @@ namespace Ch.Elca.Iiop {
             return "iiop://" + host + ":" + port + "/" + objectUri;
         }
 
-        /// <summary>takes an objectURI and extracts the information needed for CORBA call out of it</summary>
+        /// <summary>takes an objectURI and extracts the information needed
+        /// for CORBA call out of it
+        /// </summary>
         /// <returns>the CORBA object key</returns>
-        public static byte[] GetObjectInfoForObjUri(string objectUri, out GiopVersion version) {
+        public static byte[] GetObjectInfoForObjUri(string objectUri,
+                                                    out GiopVersion version) {
             version = new GiopVersion(DEFAULT_GIOP_MAJOR, DEFAULT_GIOP_MINOR);
             if (objectUri == null) { 
                 return null; 
@@ -149,15 +155,18 @@ namespace Ch.Elca.Iiop {
                 objectId = objectUri.Substring(0, objectUri.IndexOf(",")); 
             }
             if (objectUri.IndexOf(STRINGIFIED_ID) > 0) {
-                string isStr = objectUri.Substring(objectUri.IndexOf(STRINGIFIED_ID) + STRINGIFIED_ID.Length, 2);
+                string isStr = objectUri.Substring(objectUri.IndexOf(STRINGIFIED_ID) +
+                                                   STRINGIFIED_ID.Length, 2);
                 if (isStr.StartsWith("=t")) { 
                     stringified = true; 
                 }
             }
             if (objectUri.IndexOf(GIOP_ID) > 0) {
-                string versionStr = objectUri.Substring(objectUri.IndexOf(GIOP_ID) + GIOP_ID.Length, 4);
+                string versionStr = objectUri.Substring(objectUri.IndexOf(GIOP_ID) +
+                                                        GIOP_ID.Length, 4);
                 if (!(versionStr.StartsWith("="))) { 
-                    throw new ArgumentException("uri contains malfromed giop-version-info: " + versionStr); 
+                    throw new ArgumentException("uri contains malfromed giop-version-info: " +
+                                                versionStr);
                 }
                 byte giopMajor = Convert.ToByte(versionStr.Substring(1, 1));
                 byte giopMinor = Convert.ToByte(versionStr.Substring(3, 1));
@@ -180,7 +189,8 @@ namespace Ch.Elca.Iiop {
         private static byte[] AppendNonStringifyTag(byte[] objKey) {
             byte[] extObjKey = new byte[objKey.Length + 6];
             Array.Copy((Array)objKey, 0, (Array)extObjKey, 0, objKey.Length);
-            Array.Copy((Array)nonStringifyTag, 0, (Array)extObjKey, extObjKey.Length-6, nonStringifyTag.Length);
+            Array.Copy((Array)s_nonStringifyTag, 0, (Array)extObjKey,
+                       extObjKey.Length-6, s_nonStringifyTag.Length);
             return extObjKey;
         }
 
@@ -194,7 +204,7 @@ namespace Ch.Elca.Iiop {
         private static bool CheckNonStringifyTag(byte[] objectKey) {
             if (objectKey.Length < 6) { return false; }
             for (int i = 0; i < 6; i++) {
-                if (objectKey[objectKey.Length-6+i] != nonStringifyTag[i]) { 
+                if (objectKey[objectKey.Length-6+i] != s_nonStringifyTag[i]) { 
                     return false; 
                 }
             }
@@ -206,12 +216,14 @@ namespace Ch.Elca.Iiop {
         /// </summary>
         /// <param name="objectKey"></param>
         /// <returns></returns>
-        public static string GetObjUriForObjectInfo(byte[] objectKey, GiopVersion version) {
+        public static string GetObjUriForObjectInfo(byte[] objectKey, 
+                                                    GiopVersion version) {
             if (CheckNonStringifyTag(objectKey)) {
                 // an URI pointing to a native .NET remoting framework object, therefore the .NET URI must be
                 // reproduced from which this objectKey was created
                 byte[] objectId = new byte[objectKey.Length-6];
-                Array.Copy((Array)objectKey, 0, (Array)objectId, 0, objectId.Length);
+                Array.Copy((Array)objectKey, 0, (Array)objectId, 0, 
+                           objectId.Length);
                 return StringUtil.GetStringFromWideChar(objectId);
             } else {
                 // stringify it

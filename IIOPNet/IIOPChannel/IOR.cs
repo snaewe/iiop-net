@@ -367,7 +367,10 @@ namespace Ch.Elca.Iiop.CorbaObjRef {
             // set the default tagged components
             m_taggedComponents = new TaggedComponent[1];
             // default codesetComponent
-            m_taggedComponents[0] = new CodeSetComponent(Services.CodeSetService.DEFAULT_CHAR_SET, new uint[] {Services.CodeSetService.ISO646IECSingle }, Services.CodeSetService.DEFAULT_WCHAR_SET, new uint[] { Services.CodeSetService.ISO646IECMulti });
+            m_taggedComponents[0] = new CodeSetComponent(Services.CodeSetService.DEFAULT_CHAR_SET,
+                                                         new uint[] {Services.CodeSetService.ISO646IEC_SINGLE },
+                                                         Services.CodeSetService.DEFAULT_WCHAR_SET,
+                                                         new uint[] { Services.CodeSetService.ISO646IEC_MULTI });
         }
 
         /// <summary>

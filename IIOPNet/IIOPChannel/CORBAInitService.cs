@@ -66,7 +66,7 @@ namespace Ch.Elca.Iiop.Services {
 
         private static CORBAInitServiceImpl s_CORBAInitServie;
 
-        private static object m_lockObject = new Object();
+        private static object s_lockObject = new Object();
 
         #endregion SFields
         #region IConstructors
@@ -78,7 +78,7 @@ namespace Ch.Elca.Iiop.Services {
         #region SMethods
         
         public static void Publish() {
-            lock(m_lockObject) {
+            lock(s_lockObject) {
                 if (s_CORBAInitServie == null) {    
                     s_CORBAInitServie = new CORBAInitServiceImpl();
                     RemotingServices.Marshal(s_CORBAInitServie, 

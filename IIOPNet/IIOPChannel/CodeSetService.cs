@@ -40,13 +40,13 @@ namespace Ch.Elca.Iiop.Services {
 
         #region Constants
 
-        public const uint ServiceId = 1;
+        public const uint SERVICE_ID = 1;
 
         internal const uint UTF16_SET = 0x10109;
         internal const uint LATIN1_SET = 0x10001;
 
-        internal const uint ISO646IECMulti = 0x10100; // compatible with UTF-16
-        internal const uint ISO646IECSingle = 0x10020; // compatible with ASCII
+        internal const uint ISO646IEC_MULTI = 0x10100; // compatible with UTF-16
+        internal const uint ISO646IEC_SINGLE = 0x10020; // compatible with ASCII
 
         public const uint DEFAULT_CHAR_SET = LATIN1_SET;
         public const uint DEFAULT_WCHAR_SET = UTF16_SET;
@@ -62,7 +62,7 @@ namespace Ch.Elca.Iiop.Services {
         #region IMethods
 
         public override uint GetServiceId() {
-            return ServiceId;
+            return SERVICE_ID;
         }
 
         public override ServiceContext DeserialiseContext(CdrEncapsulationInputStream encap) {
@@ -81,10 +81,10 @@ namespace Ch.Elca.Iiop.Services {
             uint wcharSet = ((CodeSetServiceContext) context).WCharSet;
 
             // check if acceptable: at the moment, the code-set establishment algorithm is not implemented
-            if ((charSet != LATIN1_SET) && (charSet != ISO646IECSingle)) { 
+            if ((charSet != LATIN1_SET) && (charSet != ISO646IEC_SINGLE)) { 
                 throw new omg.org.CORBA.CODESET_INCOMPATIBLE(0, omg.org.CORBA.CompletionStatus.Completed_No); 
             }
-            if ((wcharSet != UTF16_SET) && (wcharSet != ISO646IECMulti)) { 
+            if ((wcharSet != UTF16_SET) && (wcharSet != ISO646IEC_MULTI)) { 
                 throw new omg.org.CORBA.CODESET_INCOMPATIBLE(0, omg.org.CORBA.CompletionStatus.Completed_No); 
             }
             // TODO: implement code set establishment-alg
@@ -115,7 +115,7 @@ namespace Ch.Elca.Iiop.Services {
         
         #region Constants
         
-        private const uint SERVICE_ID = CodeSetService.ServiceId;
+        private const uint SERVICE_ID = CodeSetService.SERVICE_ID;
 
         #endregion Constants
         #region IFields
@@ -154,7 +154,8 @@ namespace Ch.Elca.Iiop.Services {
         #region IMethods
 
         public override string ToString() {
-            return "CodeSetService: charset: " + m_charSet + ", wcharset: " + m_wcharSet;
+            return "CodeSetService: charset: " + m_charSet +
+                   ", wcharset: " + m_wcharSet;
         }
 
         public override void Serialize(CdrOutputStream stream) {

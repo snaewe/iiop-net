@@ -50,8 +50,8 @@ namespace Ch.Elca.Iiop.Idl {
             
             #region IFields
 
-            private Type place1 = null;
-            private Type place2 = null;
+            private Type m_place1 = null;
+            private Type m_place2 = null;
 
             #endregion IFields
             #region IConstructors
@@ -64,20 +64,20 @@ namespace Ch.Elca.Iiop.Idl {
 
             public void Cache(Type type) {
                 lock(this) {
-                    place2 = place1;
-                    place1 = type;
+                    m_place2 = m_place1;
+                    m_place1 = type;
                 }
             }
 
             public Type GetType(string clsName) {
                 lock(this) {
-                    if ((place1 != null) && (place1.FullName.Equals(clsName))) { 
-                        return place1; 
+                    if ((m_place1 != null) && (m_place1.FullName.Equals(clsName))) { 
+                        return m_place1; 
                     }
-                    if ((place2 != null) && (place2.FullName.Equals(clsName))) { 
-                        Type result = place2;
-                        place2 = place1;
-                        place1 = result;
+                    if ((m_place2 != null) && (m_place2.FullName.Equals(clsName))) { 
+                        Type result = m_place2;
+                        m_place2 = m_place1;
+                        m_place1 = result;
                         return result; 
                     }
                 }

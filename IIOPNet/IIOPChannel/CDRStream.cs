@@ -262,7 +262,7 @@ namespace Ch.Elca.Iiop.Cdr {
         public CdrMessageOutputStream(Stream stream, GiopHeader header) {
             m_stream = new CdrOutputStreamImpl(stream, header.GiopFlags, header.Version);
             m_buffer = new MemoryStream();
-            m_contentStream = new CdrOutputStreamImpl(m_buffer, header.GiopFlags, header.Version, GiopHeader.HeaderLength);
+            m_contentStream = new CdrOutputStreamImpl(m_buffer, header.GiopFlags, header.Version, GiopHeader.HEADER_LENGTH);
             m_header = header;
         }
 

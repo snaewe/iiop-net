@@ -80,7 +80,7 @@ namespace Ch.Elca.Iiop {
         #region Constants
         
         /// <summary>the length of the header in bytes</summary>
-        internal const int HeaderLength = 12;
+        internal const int HEADER_LENGTH = 12;
         
         #endregion Constants
         #region IFields
