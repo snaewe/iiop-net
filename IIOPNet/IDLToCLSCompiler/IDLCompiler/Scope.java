@@ -44,6 +44,25 @@ import java.util.Stack;
  */
 public class Scope {
 
+    #region IFields
+    
+    /** the unqualified name of this scope */
+    private String m_scopeName;
+
+    /** the parent scope of this scope */
+    private Scope m_parentScope;
+
+    /** the child scopes of this scope */
+    private Hashtable m_childScopes = new Hashtable();
+
+    // fields and methods for handling symbols in scope
+    private Hashtable m_symbols = new Hashtable();
+
+    private Hashtable m_pragmas = new Hashtable();
+
+    #endregion IFields
+    #region IConstructors
+
     public Scope(String name, Scope parentScope) {
         m_scopeName = name;
         m_parentScope = parentScope;
@@ -51,19 +70,13 @@ public class Scope {
             m_parentScope.addChildScope(this);
         }
     }
+
+    #endregion IConstructors
+    #region IMethods
     
-    /** the unqualified name of this scope */
-    private String m_scopeName;
     public String getScopeName() {
         return m_scopeName;
-    }
-    
-    /** the parent scope of this scope */
-    private Scope m_parentScope;
-    
-    /** the child scopes of this scope */
-    private Hashtable m_childScopes = new Hashtable();
-    
+    }    
     
     public Scope getParentScope() {
         return m_parentScope;
@@ -100,10 +113,7 @@ public class Scope {
     
     public Enumeration getChildScopeEnumeration() {
         return m_childScopes.elements();
-    }
-    
-    // fields and methods for handling symbols in scope
-    private Hashtable m_symbols = new Hashtable();
+    }    
     
     /** add a full defined symbol. This method is not intended for forwardDeclarations */
     public void addSymbol(String symbolName) throws ScopeException {
@@ -142,9 +152,7 @@ public class Scope {
     public Enumeration getSymbolEnum() {
         return m_symbols.elements();
     }
-
-    
-    private Hashtable m_pragmas = new Hashtable();
+        
     /** adds a pragma id to this scope */
     public void addPragmaID(String id, String value) {
         if (m_pragmas.containsKey(id)) { throw new RuntimeException("pragma id error, id already defined: " + id); }
@@ -154,8 +162,6 @@ public class Scope {
     public String getRepositoryIdFor(String unqualTypeName) {
         return (String)m_pragmas.get(unqualTypeName);
     }
-
-
 
     /** gets the fully qualified name for the symbol with the symbolName
      * This method checks if the symbol is present in the Scope and throws an error if not
@@ -210,5 +216,7 @@ public class Scope {
         result += ("scope ends");
         return result;
     }
+
+    #endregion IMethods
 
 }

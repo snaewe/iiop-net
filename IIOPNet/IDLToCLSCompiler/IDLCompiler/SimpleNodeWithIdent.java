@@ -38,6 +38,13 @@ package parser;
  */
 public abstract class SimpleNodeWithIdent extends SimpleNode {
 
+    #region IFields
+    
+    private String m_ident;
+
+    #endregion IFields
+    #region IConstructors
+
     /**
      * Constructor for ASTNodeWithIdent.
      * @param i
@@ -54,13 +61,17 @@ public abstract class SimpleNodeWithIdent extends SimpleNode {
     public SimpleNodeWithIdent(IDLParser p, int i) {
         super(p, i);
     }
+
+    #endregion IConstructors
+    #region IMethods    
     
-    private String m_ident;
     public String getIdent() {
         return m_ident;
     }
     public void setIdent(String ident) {
         m_ident = ident;
     }
+
+    #endregion IMethods
 
 }

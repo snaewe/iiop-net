@@ -36,9 +36,15 @@ import java.util.Stack;
  * represents a scope which is constructed because of a #pragma prefix directive
  */
 public class PragmaScope extends Scope {
+
+    #region IConstructors
+
     public PragmaScope(String name, Scope parentScope) {
         super(name, parentScope);
     }
+
+    #endregion IConstructors
+    #region SMethods
 
     /** returns a Stack of all scope names from a child scope of the pragma scope up to the pragmascope itself
      */
@@ -54,4 +60,6 @@ public class PragmaScope extends Scope {
         }
         return result;
     }
+
+    #endregion SMethods
 }
