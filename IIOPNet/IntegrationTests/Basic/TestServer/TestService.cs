@@ -272,9 +272,9 @@ namespace Ch.Elca.Iiop.IntegrationTests {
             return arg;
         }
 
-        [return: IdlSequence(0L, 10)]
+        [return: IdlSequence(0L, 10L)]
         [return: IdlSequence(1L)]
-        public System.Int32[][] EchoIdlLongSequenceOfBoundedSequence([IdlSequence(0L, 10)] [IdlSequence(1L)] System.Int32[][] arg) {
+        public System.Int32[][] EchoIdlLongSequenceOfBoundedSequence([IdlSequence(0L, 10L)] [IdlSequence(1L)] System.Int32[][] arg) {
             return arg;
         }
 
@@ -320,7 +320,7 @@ namespace Ch.Elca.Iiop.IntegrationTests {
         }
 
         [return: IdlArray(0L, 5)]
-        public System.Int32[] EchoIdlLongArrayFixedSize5([IdlArray(0, 5)] System.Int32[] arg) {
+        public System.Int32[] EchoIdlLongArrayFixedSize5([IdlArray(0L, 5)] System.Int32[] arg) {
             return arg;
         }
 
@@ -557,7 +557,7 @@ namespace Ch.Elca.Iiop.IntegrationTests {
             }
         }
 
-        public void TestDuplicateSeqOfSeqInOut([IdlSequence(0)] ref SSensi[] arg) {
+        public void TestDuplicateSeqOfSeqInOut([IdlSequence(0L)] ref SSensi[] arg) {
             if (arg != null) {
                SSensi[] result = new SSensi[arg.Length * 2];
                for (int i = 0; i < arg.Length; i++) {
