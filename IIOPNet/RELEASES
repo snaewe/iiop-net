@@ -1,3 +1,29 @@
+version 1.6.2 final (08 June 2004)
+----------------------------------
+
+bugs fixed:
+- IDL2CLS Compiler: base interface scope problem (bug #965325)
+- IIOPChannel: serialisation code ignores some parameter attrs on interface (bug #803645): 
+  fix works now also for properties on interface property getters/setters, e.g. for string properties.
+- IDLToCLSCompiler: valuetype skel. gen: duplicate methods (bug #950833)
+- IIOPChannel: Exception thrown by .NET server + raise clause (bug #968428)
+- IIOPChannel: client doesn't directly connect by ip address (bug #968455)
+- fixed some problems with custom mapping
+
+changes:
+- object id's sent by .NET server in IOR's are now better usable to create e.g. a corbaloc from it,
+  see also faq http://iiop-net.sourceforge.net/faq.html#faq6_1
+- idl attributes are now mapped to CLS properties with CLS compliant getter/setter methods
+
+new features:
+- added a custom mapping for java.util.Date <-> System.DateTime
+
+new tests:
+- simple benchmark
+- more MICO tests
+
+
+
 version 1.6.1 final (04 May 2004)
 ---------------------------------
 
@@ -8,6 +34,7 @@ bugs fixed:
 - IIOPChannel: wrong loc. forward deserialisation (Giop1.2) (bug #945954) 
 - IIOPChannel: bug reading target address in a request (bug #928555)
 - IIOPChannel: Any cannot be deserialized if it contains a typedef value (bug #857050)
+- IIOPChannel: Indirections in marshal stream (bug #935468)
 - IDLToCLSCompiler: ignoring unknown #pragma directives now instead of exception (needed for Borland Enterprise Server interop)
 
 new features:

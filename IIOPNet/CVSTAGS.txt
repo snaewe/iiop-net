@@ -1,3 +1,4 @@
+08.06.2004    iiop-net-1-6-2-final
 04.05.2004    iiop-net-1-6-1-final
 21.03.2004    iiop-net-1-6-0-final
 22.01.2004    iiop-net-1-6-0-rc0
