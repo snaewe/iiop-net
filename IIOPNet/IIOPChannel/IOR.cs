@@ -234,6 +234,8 @@ namespace Ch.Elca.Iiop.CorbaObjRef {
                     IorProfile result = new InternetIiopProfile(encapStream);
                     AssignDefaultFromProfile(result);
                     return result;
+                case 1:
+                    return new MultipleComponentsProfile(encapStream);
                 default: 
                     // unparsable profile: profileType
                     throw new INV_OBJREF(9403, CompletionStatus.Completed_MayBe);
@@ -474,6 +476,104 @@ namespace Ch.Elca.Iiop.CorbaObjRef {
 
         #endregion IMethods
 
+    }
+
+    /// <summary>
+    /// The multiple component profile.    
+    /// </summary>
+    /// <remarks>
+    /// not fully implemented:
+    /// At the moment the only tagged component supported is CodeSetComponent.
+    /// </remarks>
+    public class MultipleComponentsProfile : IorProfile {
+    
+        #region IFields
+
+        /// <summary>the tagged components in this profile</summary>
+        private TaggedComponent[] m_taggedComponents;
+
+        #endregion IFields
+        #region IConstructors
+
+        public MultipleComponentsProfile() : base(new GiopVersion(1,2), null, 0, null) {
+            // set the default tagged components
+            m_taggedComponents = new TaggedComponent[1];
+            // default codesetComponent
+            m_taggedComponents[0] = new CodeSetComponent(Services.CodeSetService.DEFAULT_CHAR_SET,
+                                                         new uint[] {Services.CodeSetService.ISO646IEC_SINGLE },
+                                                         Services.CodeSetService.DEFAULT_WCHAR_SET,
+                                                         new uint[] { Services.CodeSetService.ISO646IEC_MULTI });
+        }
+
+        /// <summary>
+        /// reads a multiple component profile from an encapsulation (created with the method readEncapsulation in
+        /// CDRStream) // not very nice, to change
+        /// </summary>
+        /// <param name="encapsulation"></param>
+        public MultipleComponentsProfile(CdrEncapsulationInputStream encapsulation) : base(encapsulation) {            
+        }
+
+        #endregion IConstructors
+        #region IProperties
+
+        /// <summary>the tagged components in this profile</summary>
+        internal TaggedComponent[] TaggedComponents {
+            get { 
+                return m_taggedComponents; 
+            }
+            set {
+                m_taggedComponents = value; 
+            }
+        }
+
+        /// <summary>returns the profile-id for this profile</summary>
+        public override ulong ProfileId {
+            get { 
+                return 1; 
+            }
+        }
+
+        #endregion IProperties
+        #region IMethods
+
+        protected override void ReadFromEncapsulation(CdrEncapsulationInputStream encapsulation) {
+            Debug.WriteLine("parse Multiple component Profile");
+            uint nrOfComponents = encapsulation.ReadULong();
+            Debug.WriteLine("nr of components following: " + nrOfComponents);
+
+            m_taggedComponents = new TaggedComponent[nrOfComponents];
+            for (int i = 0; i < nrOfComponents; i++) {
+                uint id = encapsulation.ReadULong();
+                TaggedComponentSerializer ser = TaggedComponentSerRegistry.GetSerializer(id);
+                m_taggedComponents[i] = ser.ReadFromStream(encapsulation);
+            }
+            
+            Debug.WriteLine("parsing multiple components profile completed");
+        }
+
+        /// <summary>
+        /// writes this profile to the cdrStream
+        /// </summary>
+        /// <param name="cdrStream"></param>
+        /// <remarks>
+        public override void WriteToStream(CdrOutputStream cdrStream) {
+            // write the profile id of this profile
+            cdrStream.WriteULong((uint)ProfileId);
+            
+            byte flags = 0;
+            CdrEncapsulationOutputStream encapStream = new CdrEncapsulationOutputStream(flags);
+            // the tagged components
+            encapStream.WriteULong((uint)m_taggedComponents.Length);
+            foreach (TaggedComponent comp in m_taggedComponents) {
+                TaggedComponentSerializer ser = TaggedComponentSerRegistry.GetSerializer(comp.GetId());
+                ser.WriteToStream(comp, encapStream);
+            }
+            // write the whole encapsulation to the stream
+            cdrStream.WriteEncapsulation(encapStream);
+        }
+
+        #endregion IMethods
+    
     }
 
 
