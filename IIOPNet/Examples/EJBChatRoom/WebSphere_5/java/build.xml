@@ -1,0 +1,73 @@
+<?xml version="1.0"?>
+
+
+<project name="WAS5EJBChatroom" default="all">
+
+  <property name="name" value="EJBChatroom (WAS5)" />
+  <property name="jarfile" value="bin/WAS5EJBChatroom.jar" />
+  <property name="earfile" value="bin/WAS5EJBChatroom.ear" />
+  <property name="package" value="ch/elca/iiop/demo/ejbChatroom" />
+
+  <target name="all" depends="buildApp, buildIdl"/>
+
+  <target name="buildApp" depends="init, removeLast, compile, makejar, makeear"/>
+  <!--target name="buildApp" depends="init, removeLast, compile, makejar, makeear"/ -->
+
+  <target name="init">
+    <tstamp/>
+    <echo message="${name}: build initialization..."/>
+    <mkdir dir="bin"/>
+  </target>
+
+  <target name="removeLast">
+    <tstamp/>
+    <delete file="${jarfile}"/>
+    <delete file="${earfile}"/>
+  </target>
+
+  <target name="compile">
+    <tstamp/>
+    <echo message="${name}: compiling..."/>
+    <javac srcdir="." destdir="bin" deprecation="true" debug="on" classpath="${prereq.classpath}" failonerror="${failonerror}"/>
+  </target>
+
+  <target name="makejar" depends="compile">
+    <tstamp/>
+    <echo message="${name}: creating jar file..."/>
+    <jar jarfile="${jarfile}">
+       <fileset dir="bin/" includes="**/${package}/*.class"/>
+       <zipfileset dir="JAR-META-INF" prefix="META-INF"/>
+    </jar>
+  </target>
+
+  <target name="makeear" depends="makejar">
+    <tstamp/>
+    <echo message="${name}: creating ear file..."/>
+    <ear earfile="${earfile}" appxml="APP-META-INF/application.xml">
+    	<fileset dir="bin/" includes="WAS5EJBChatroom.jar" />
+    </ear>
+  </target>
+
+
+  <target name="buildIdl" depends="compile">
+    <tstamp/>
+    <echo message="${name}: creating IDL files..."/>
+    <mkdir dir="IDL"/>
+    <rmic base="bin/" 
+          includes="${package}/ChatroomHome.class,${package}/Chatroom.class,${package}/MessageListener.class"
+          classpath="${prereq.classpath}" idl="true"/>
+    <copy todir="IDL/">
+      <fileset dir="bin/" includes="**/*.idl"/>
+    </copy>
+    <delete includeEmptyDirs="true">
+      <fileset dir="bin/" includes="**/*.idl,**/*."/>
+    </delete>
+    <delete includeEmptyDirs="true">
+      <fileset dir="bin/javax"/>
+      <fileset dir="bin/org"/>
+      <fileset dir="bin/java"/>
+    </delete>
+  </target>
+
+
+</project>
