@@ -1141,6 +1141,93 @@ namespace Ch.Elca.Iiop.Marshalling {
 
     }
 
+
+    /// <summary>serialises IDL-arrays</summary>
+    internal class IdlArraySerialiser : Serialiser {
+
+        #region IFields
+        
+        private int[] m_dimensions;
+        
+        #endregion IFields
+        #region IConstructors
+        
+        public IdlArraySerialiser(int[] dimensions) {
+            m_dimensions = dimensions;    
+        }
+        
+        #endregion IConstructors
+        #region IMethods
+
+        private void CheckInstance(Array array) {
+            if (m_dimensions.Length != array.Rank) {
+                throw new BAD_PARAM(3436, CompletionStatus.Completed_MayBe);
+            }
+            for (int i = 0; i < array.Rank; i++) {
+                if (m_dimensions[i] != array.GetLength(i)) {
+                    throw new BAD_PARAM(3437, CompletionStatus.Completed_MayBe);
+                }
+            }
+        } 
+
+
+        private void SerialiseDimension(Array array, MarshallerForType marshaller, CdrOutputStream targetStream,
+                                        int[] indices, int currentDimension) {
+            if (currentDimension == array.Rank) {
+                object value = array.GetValue(indices);
+                marshaller.Marshal(value, targetStream);
+            } else {
+                // the first dimension index in the array is increased slower than the second and so on ...
+                for (int j = 0; j < array.GetLength(currentDimension); j++) {
+                    indices[currentDimension] = j;                    
+                    SerialiseDimension(array, marshaller, targetStream, indices, currentDimension + 1);
+                }
+            }
+        }
+        
+        internal override void Serialise(Type formal, object actual, AttributeExtCollection attributes,
+                                         CdrOutputStream targetStream) {
+            Array array = (Array) actual;
+            if (array == null) {
+                // not allowed for an idl array:
+                throw new BAD_PARAM(3433, CompletionStatus.Completed_MayBe);
+            }
+            CheckInstance(array);
+            // get marshaller for elemtype
+            Type elemType = formal.GetElementType();
+            MarshallerForType marshaller = new MarshallerForType(elemType, attributes);
+            SerialiseDimension(array, marshaller, targetStream, new int[array.Rank], 0);
+        }
+
+        private void DeserialiseDimension(Array array, MarshallerForType marshaller, CdrInputStream sourceStream,
+                                          int[] indices, int currentDimension) {
+            if (currentDimension == array.Rank) {
+                object entry = marshaller.Unmarshal(sourceStream);
+                array.SetValue(entry, indices);
+            } else {
+                // the first dimension index in the array is increased slower than the second and so on ...
+                for (int j = 0; j < array.GetLength(currentDimension); j++) {                    
+                    indices[currentDimension] = j;                    
+                    DeserialiseDimension(array, marshaller, sourceStream, indices, currentDimension + 1);
+                }
+            }            
+        }
+
+        internal override object Deserialise(Type formal, AttributeExtCollection attributes,
+                                           CdrInputStream sourceStream) {
+           
+            Array result = Array.CreateInstance(formal.GetElementType(), m_dimensions);
+            // get marshaller for array element type
+            Type elemType = formal.GetElementType();
+            MarshallerForType marshaller = new MarshallerForType(elemType, attributes);
+            DeserialiseDimension(result, marshaller, sourceStream, new int[result.Rank], 0);
+            return result;
+        }
+
+        #endregion IMethods        
+
+    }
+
     /// <summary>serializes an instance as IDL-any</summary>
     internal class AnySerializer : Serialiser {
 
