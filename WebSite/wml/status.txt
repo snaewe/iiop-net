@@ -1,0 +1,65 @@
+<define-tag reports endtag=required>
+	<ul>
+	<table border="0" cellspacing="6">
+	<!--tr><th>Software</th><th>Version</th><th>Report</th></tr-->
+	%body
+	</table>
+	</ul>
+</define-tag>
+
+<define-tag software endtag=required>
+	<preserve name>
+	<set-var %attributes>
+	%body
+	<restore name>
+</define-tag>
+
+<define-tag report endtag=required>
+	<preserve version>
+	<set-var %attributes>
+	<tr><td><get-var name></td><td><get-var version></td><td>%body</td></tr>
+	<restore version>
+</define-tag>
+
+
+<p>
+Interoperation with the following ORBs has been reported:
+<reports>
+<software name="SUN JDK">
+	<report version="1.4">OK</report>
+</software>
+
+<software name="MICO">
+	<report version="2.3.10">OK</report>
+</software>
+
+<software name="TAO">
+	<report version"N.A.">in progress</report>
+</software>
+
+<software name="OmniORB">
+	<report version="4.0.2">wide-char not supported</report>
+	<report version="4.0.3">wide-char not supported</report>
+</software>
+</reports>
+
+<p/>
+Interoperation with J2EE applications is reported for the following application servers:
+<reports>
+<software name="IBM Websphere">
+	<report version="4.0">ok</report>
+	<report version="5.0">ok</report>
+</software>
+<software name="JBoss">
+	<report version="3.0.6">in progress</report>
+	<report version="3.2.1">ok</report>
+	<report version="3.2.2">no (JBoss bug #<a href="http://sourceforge.net/tracker/index.php?func=detail&aid=829734&group_id=22866&atid=376685">829734</a>)</report>
+	<report version="3.2.3">ok</report>
+</software>
+<software name="BEA Weblogic">
+	<report version="6.1">array mapping problems</report>
+	<report version="8.1">ok</report>
+</software>
+</reports>
+
+
