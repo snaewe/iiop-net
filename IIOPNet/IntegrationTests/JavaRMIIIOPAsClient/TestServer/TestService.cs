@@ -71,7 +71,11 @@ namespace Ch.Elca.Iiop.IntegrationTests {
         public TestSerializableClassB1 val1;
         public TestSerializableClassB1 val2;
     }
-
+    
+    [Serializable]
+    public class TestSerializableClassE {
+        public TestSerializableClassE[] RecArrEntry;
+    }
 
     public class Adder : MarshalByRefObject {
         public System.Int32 Add(System.Int32 sum1, System.Int32 sum2) {
@@ -265,6 +269,10 @@ namespace Ch.Elca.Iiop.IntegrationTests {
             arg.val1.Msg = newMessage;
             return arg;
         }
+        
+        public TestSerializableClassE TestEchoSerializableE(TestSerializableClassE arg) {
+            return arg;
+        }
 
         public TestEchoInterface RetrieveEchoInterfaceImplementor() {
             return new TestAbstrInterfaceImplByMarshalByRef();
@@ -288,7 +296,7 @@ namespace Ch.Elca.Iiop.IntegrationTests {
 
         /// <summary>checks, if inherited parameter attributes are considered correctly</summary>
         public System.String CheckParamAttrs(System.String arg) {
-       	    return arg;
+            return arg;
         }
 
         
@@ -296,11 +304,11 @@ namespace Ch.Elca.Iiop.IntegrationTests {
         /// used to check, if a reference passed is equal to this object itself.
         /// </summary>
         public bool CheckEqualityWithService(MarshalByRefObject toCheck) {
-        	return toCheck.Equals(this);
+            return toCheck.Equals(this);
         }
         
         public bool CheckEqualityWithServiceV2(TestService toCheck) {
-        	return toCheck.Equals(this);
+            return toCheck.Equals(this);
         }
         
         public override object InitializeLifetimeService() {
@@ -373,6 +381,8 @@ namespace Ch.Elca.Iiop.IntegrationTests {
         TestNonSerializableBaseClass TestAbstractValueTypeEcho(TestNonSerializableBaseClass arg);
 
         TestSerializableClassD TestChangeSerilizableD(TestSerializableClassD arg, System.String newMessage);
+
+        TestSerializableClassE TestEchoSerializableE(TestSerializableClassE arg);
 
         TestEchoInterface RetrieveEchoInterfaceImplementor();
 

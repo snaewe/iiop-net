@@ -67,5 +67,9 @@ namespace Ch.Elca.Iiop.IntegrationTests {
         }
 
     }
+    
+    [Serializable]
+    public class TestSerializableClassEImpl : TestSerializableClassE {
+    }
 
 }

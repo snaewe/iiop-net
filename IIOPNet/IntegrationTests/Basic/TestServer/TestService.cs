@@ -261,9 +261,9 @@ namespace Ch.Elca.Iiop.IntegrationTests {
             return arg;
         }
         
-//        public TestSerializableClassE TestEchoSerializableE(TestSerializableClassE arg) {
-//            return arg;
-//        }
+        public TestSerializableClassE TestEchoSerializableE(TestSerializableClassE arg) {
+            return arg;
+        }
         
         
         public TestNonSerializableBaseClass TestAbstractValueTypeEcho(TestNonSerializableBaseClass arg) {

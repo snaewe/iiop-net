@@ -243,6 +243,21 @@ public class TestClient extends TestCase {
         assertEquals(newDetail, result.DetailedMsg);
         assertEquals(arg.Msg, result.Msg);
     }
+    
+    /// <summary>
+    /// checks, if recursive values are serialised using an indirection
+    /// </summary>
+    public void testRecursiveValueType() throws Exception {
+        TestSerializableClassE arg = new TestSerializableClassEImpl();
+        arg.RecArrEntry = new TestSerializableClassE[1];
+        arg.RecArrEntry[0] = arg;
+        TestSerializableClassE result = m_testService.TestEchoSerializableE(arg);
+        assertNotNull(result);
+        assertNotNull(result.RecArrEntry);
+        assertEquals(arg.RecArrEntry.length, result.RecArrEntry.length);
+        assertTrue("invalid entry in recArrEntry", (result == result.RecArrEntry[0]));            
+    }
+
 
 /* java has problems with the following two tests, because it can't serialise Impl  */
 
@@ -312,11 +327,11 @@ public class TestClient extends TestCase {
         assertEquals(arg, result);
     }
     
-	public void testCheckParamAttrs() throws Exception {
-		String arg = "testArg";
-		String result = m_testService.CheckParamAttrs(arg);
-		assertEquals(arg, result);
-	}
+    public void testCheckParamAttrs() throws Exception {
+        String arg = "testArg";
+        String result = m_testService.CheckParamAttrs(arg);
+        assertEquals(arg, result);
+    }
 
 
 
