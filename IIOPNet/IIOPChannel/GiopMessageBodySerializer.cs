@@ -614,6 +614,7 @@ namespace Ch.Elca.Iiop.MessageHandling {
             targetStream.WriteULong(requestId);
 
             if (msg.Exception == null) { 
+                Trace.WriteLine("sending normal response to client");
                 targetStream.WriteULong(0); // reply status ok
                 
                 if (!((version.Major == 1) && (version.Minor <= 1))) { // for GIOP 1.2 and later, service context is here
@@ -621,6 +622,7 @@ namespace Ch.Elca.Iiop.MessageHandling {
                 }
                 // serialize a response to a successful request
                 SerialiseResponseOk(targetStream, msg, version);
+                Trace.WriteLine("reply body serialised");
             } else {
                 Trace.WriteLine("sending exceptin to client: " + msg.Exception.GetType());
                 if (SerialiseAsSystemException(msg.Exception)) {
@@ -633,6 +635,7 @@ namespace Ch.Elca.Iiop.MessageHandling {
                     SerialiseContext(targetStream, cntxColl); // serialize the context                
                 }
                 SerialiseResponseException(targetStream, msg, version);
+                Trace.WriteLine("exception reply serialised");
             }
         }
 
