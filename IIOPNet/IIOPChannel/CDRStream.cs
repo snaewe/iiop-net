@@ -71,18 +71,19 @@ namespace Ch.Elca.Iiop.Cdr {
     /// stores information about indirections; indirections are used in value type and typecode 
     /// encodings.
     /// </summary>
+    [CLSCompliant(false)]
     public class IndirectionInfo {
         
         #region IFields
         
-        private ulong m_streamPos;
+        private uint m_streamPos;
         private IndirectionType m_indirType;
         private IndirectionUsage m_indirUsage;
 
         #endregion IFields
         #region IConstructors
         
-        internal IndirectionInfo(ulong streamPos, IndirectionType indirType,
+        internal IndirectionInfo(uint streamPos, IndirectionType indirType,
                                  IndirectionUsage indirUsage) {
             m_streamPos = streamPos;
             m_indirType = indirType;
@@ -92,7 +93,7 @@ namespace Ch.Elca.Iiop.Cdr {
         #endregion IConstructors
         #region IProperties
 
-        public ulong StreamPos {
+        public uint StreamPos {
             get { 
                 return m_streamPos; 
             }
@@ -139,7 +140,7 @@ namespace Ch.Elca.Iiop.Cdr {
         
         private IDictionary m_indirections = new Hashtable();
         
-        private ulong m_lastEncapsulationBoundry = 0;
+        private uint m_lastEncapsulationBoundry = 0;
         
         #endregion IFields
         #region IConstructors
@@ -160,12 +161,12 @@ namespace Ch.Elca.Iiop.Cdr {
         #region IMethods
         
         /// <summary>is the specified position before the last encapsulation boundry</summary>
-        internal bool IsEncapBoundryCrossed(ulong position) {
+        internal bool IsEncapBoundryCrossed(uint position) {
             return position < m_lastEncapsulationBoundry;
         }
         
         /// <summary>sets the last encapsulation boundry position</summary>
-        internal void SetLastEncapBoundry(ulong position) {
+        internal void SetLastEncapBoundry(uint position) {
             m_lastEncapsulationBoundry = position;
         }
         
@@ -263,12 +264,13 @@ namespace Ch.Elca.Iiop.Cdr {
     /// <summary>
     /// this class is a helper class, which holds stream positions
     /// </summary>
+    [CLSCompliant(false)]
     public class StreamPosition {
      
         #region IFields
  
-        private ulong m_position = 0;        
-        private ulong m_globalOffset = 0;
+        private uint m_position = 0;        
+        private uint m_globalOffset = 0;
  
         #endregion IFields
         #region IConstructors
@@ -282,7 +284,7 @@ namespace Ch.Elca.Iiop.Cdr {
         /// <param name="stream">the stream to get positon from</param>
         /// <param name="offsetFromCurrent">the offset to add to the current position</param>
         /// <param name="isNegativeOffset">specifies, if the offset should be in positive or negative direction</param>
-        public StreamPosition(CdrStreamBase stream, ulong offsetFromCurrent, bool isNegativeOffset) {
+        public StreamPosition(CdrStreamBase stream, uint offsetFromCurrent, bool isNegativeOffset) {
             m_globalOffset = stream.GetGlobalOffset();            
             m_position = stream.GetPosition();
             if (isNegativeOffset) {
@@ -299,7 +301,7 @@ namespace Ch.Elca.Iiop.Cdr {
         /// returns the position relative to the beginning of the stream used to create the postion.
         /// </summary>
         /// <value></value>
-        public ulong LocalPosition {
+        public uint LocalPosition {
             get { 
                 return m_position; 
             }
@@ -308,7 +310,7 @@ namespace Ch.Elca.Iiop.Cdr {
         /// <summary>
         /// returns the global position (i.e. relative to the outermost stream)
         /// </summary>       
-        public ulong GlobalPosition {
+        public uint GlobalPosition {
             get {
                 return m_globalOffset + m_position;
             }
@@ -319,24 +321,22 @@ namespace Ch.Elca.Iiop.Cdr {
     }
 
     /// <summary>base interface for cdr input and output streams</summary>    
+    [CLSCompliant(false)]
     public interface CdrStreamBase {
         
         /// <summary>
         /// the current position in the stream relative to the beginning of the stream;        
         /// </summary>
-        ulong GetPosition();
+        uint GetPosition();
         
         /// <summary>for the outermost (the marshal stream) this returns 0. 
         /// For streams embedded in othter streams, this returns the position of the current stream
         /// relative to the outermost stream beginning; e.g. used together with encapsulations</summary>
-        ulong GetGlobalOffset();
+        uint GetGlobalOffset();
 
         /// <summary>gets the next aligned position in the stream</summary>
-        ulong GetNextAlignedPosition(Aligns align);
-        
-//        /// <summary>stores the aligned position reached by next read/write call in StreamPosition</summary>
-//        void MarkNextAlignedPosition(StreamPosition streamPos);                        
-        
+        uint GetNextAlignedPosition(Aligns align);
+
     }
     
 
@@ -346,6 +346,7 @@ namespace Ch.Elca.Iiop.Cdr {
     /// <remarks>
     /// this interface is not intended for CDR-stream users
     /// </remarks>
+    [CLSCompliant(false)]
     public interface CdrEndianDepInputStreamOp {
     
         #region IMethods
@@ -381,18 +382,19 @@ namespace Ch.Elca.Iiop.Cdr {
     /// <summary>
     /// this interface describes the mehtods, which are available on streams containing CDR-data for reading
     /// </summary>
+    [CLSCompliant(false)]
     public interface CdrInputStream : CdrEndianDepInputStreamOp, CdrStreamBase {
         
         #region IProperties
 
         /// <summary>the charset to use</summary>
-        uint CharSet {
+        int CharSet {
             get;
             set;
         }
         
         /// <summary>the wcharset to use</summary>
-        uint WCharSet {
+        int WCharSet {
             get; 
             set;
         }        
@@ -413,7 +415,7 @@ namespace Ch.Elca.Iiop.Cdr {
 
         void ReadBytes(byte[] buf, int offset, int count);
 
-        void ReadPadding(ulong nrOfBytes);
+        void ReadPadding(uint nrOfBytes);
 
         /// <summary>
         /// forces the alignement on a boundary. Is for example useful in IIOP 1.2, where a request/response body
@@ -488,6 +490,7 @@ namespace Ch.Elca.Iiop.Cdr {
     /// <remarks>
     /// this interface is not intended for CDR-stream users
     /// </remarks>
+    [CLSCompliant(false)]
     public interface CdrEndianDepOutputStreamOp {
         
         #region IMethods
@@ -525,18 +528,19 @@ namespace Ch.Elca.Iiop.Cdr {
     /// <summary>
     /// this interface describes the methods, which are available on streams containing CDR-data for writeing
     /// </summary>
+    [CLSCompliant(false)]
     public interface CdrOutputStream : CdrEndianDepOutputStreamOp, CdrStreamBase {
         
         #region IProperties
 
         /// <summary>the charset to use</summary>
-        uint CharSet {
+        int CharSet {
             get;
             set;
         }
         
         /// <summary>the wcharset to use</summary>
-        uint WCharSet {
+        int WCharSet {
             get; 
             set;
         }
@@ -566,7 +570,7 @@ namespace Ch.Elca.Iiop.Cdr {
         void ForceWriteAlign(Aligns align);
 
         /// <summary>writes a nr of padding bytes</summary>
-        void WritePadding(ulong nrOfBytes);
+        void WritePadding(uint nrOfBytes);
 
         /// <summary>writes an encapsulation to this stream</summary>
         void WriteEncapsulation(CdrEncapsulationOutputStream encap);
@@ -614,7 +618,7 @@ namespace Ch.Elca.Iiop.Cdr {
     /// <summary>
     /// this class represents a stream for writing a message to an underlaying stream
     /// </summary>
-    public class CdrMessageOutputStream {
+    internal class CdrMessageOutputStream {
 
         #region IFields
         
@@ -626,7 +630,7 @@ namespace Ch.Elca.Iiop.Cdr {
         #endregion IFields
         #region IConstructors
         
-        public CdrMessageOutputStream(Stream stream, GiopHeader header) {
+        internal CdrMessageOutputStream(Stream stream, GiopHeader header) {
             m_stream = new CdrOutputStreamImpl(stream, header.GiopFlags, header.Version);
             m_buffer = new MemoryStream();
             m_contentStream = new CdrOutputStreamImpl(m_buffer, header.GiopFlags, header.Version, GiopHeader.HEADER_LENGTH);
@@ -637,7 +641,7 @@ namespace Ch.Elca.Iiop.Cdr {
         #region IMethods
 
         /// <summary>get a CDROutputStream for writing the content of the message</summary>
-        public CdrOutputStream GetMessageContentWritingStream() {
+        internal CdrOutputStream GetMessageContentWritingStream() {
             return m_contentStream;
         }
 
@@ -646,7 +650,7 @@ namespace Ch.Elca.Iiop.Cdr {
         /// to the underlaying stream.
         /// After this operation, the stream is not further usable.
         /// </summary>
-        public void CloseStream() {
+        internal void CloseStream() {
             m_buffer.Seek(0, SeekOrigin.Begin);
             // write header
             m_header.WriteToStream(m_stream, (uint)m_buffer.Length);
@@ -663,7 +667,7 @@ namespace Ch.Elca.Iiop.Cdr {
     /// <summary>
     /// this class represents a stream for reading a message from an underlaying stream
     /// </summary>    
-    public class CdrMessageInputStream {
+    internal class CdrMessageInputStream {
 
         #region IFields
 
@@ -673,7 +677,7 @@ namespace Ch.Elca.Iiop.Cdr {
         #endregion IFields
         #region IConstructors
         
-        public CdrMessageInputStream(Stream stream) {
+        internal CdrMessageInputStream(Stream stream) {
             m_inputStream = new CdrInputStreamImpl(stream);
             // read the header, this sets the big/little endian implementation and bytesToFollow
             m_header = new GiopHeader(m_inputStream);
@@ -682,7 +686,7 @@ namespace Ch.Elca.Iiop.Cdr {
         #endregion IConstructors
         #region IProperties
         
-        public GiopHeader Header {
+        internal GiopHeader Header {
             get { 
                 return m_header; 
             }
@@ -695,7 +699,7 @@ namespace Ch.Elca.Iiop.Cdr {
         /// get a CDRInputStream for reading the content of the message
         /// </summary>
         /// <returns></returns>
-        public CdrInputStream GetMessageContentReadingStream() {
+        internal CdrInputStream GetMessageContentReadingStream() {
             return m_inputStream;
         }
 
@@ -706,6 +710,7 @@ namespace Ch.Elca.Iiop.Cdr {
     /// <summary>
     /// this class provide some helper methods to CDRStream implementation
     /// </summary>
+    [CLSCompliant(false)]
     public abstract class CdrStreamHelper : CdrStreamBase {
         
         #region Constants
@@ -720,10 +725,10 @@ namespace Ch.Elca.Iiop.Cdr {
         /// <summary>the underlying stream</summary>
         private Stream m_stream;                
 
-        private ulong m_index = 0;
+        private uint m_index = 0;
 
-        protected uint m_charSet = CodeSetService.DEFAULT_CHAR_SET;
-        protected uint m_wcharSet = CodeSetService.DEFAULT_WCHAR_SET;
+        protected int m_charSet = CodeSetService.DEFAULT_CHAR_SET;
+        protected int m_wcharSet = CodeSetService.DEFAULT_WCHAR_SET;
         
         #endregion IFields
         #region IConstructors
@@ -754,15 +759,15 @@ namespace Ch.Elca.Iiop.Cdr {
         }
 
         /// <summary>gets the nr of bytes which are missing to next aligned position</summary>
-        protected ulong GetAlignBytes(byte requiredAlignement) {
-            ulong alignBytes = GetAlignedBytesInternal(requiredAlignement);            
+        protected uint GetAlignBytes(byte requiredAlignement) {
+            uint alignBytes = GetAlignedBytesInternal(requiredAlignement);            
             return alignBytes;
         }                
         
-        private ulong GetAlignedBytesInternal(byte requiredAlignement) {
+        private uint GetAlignedBytesInternal(byte requiredAlignement) {
             // nr of bytes the index is after the last aligned index
-            ulong afterLastAlign = m_index % requiredAlignement;
-            ulong alignBytes = 0;
+            uint afterLastAlign = m_index % requiredAlignement;
+            uint alignBytes = 0;
             if (afterLastAlign != 0) {
                 alignBytes = (requiredAlignement - afterLastAlign);
             }
@@ -771,22 +776,22 @@ namespace Ch.Elca.Iiop.Cdr {
 
         /// <summary>update the bookkeeping</summary>
         /// <param name="bytes"></param>
-        protected void IncrementPosition(ulong bytes) {            
+        protected void IncrementPosition(uint bytes) {            
             m_index += bytes;
         }
-        public ulong GetPosition() {
+        public uint GetPosition() {
             return m_index;
         }
         
-        public virtual ulong GetGlobalOffset() {
+        public virtual uint GetGlobalOffset() {
             return 0;
         }
 
-        public ulong GetNextAlignedPosition(Aligns align) {
+        public uint GetNextAlignedPosition(Aligns align) {
             return GetPosition() + GetAlignedBytesInternal((byte)align);
         }
 
-        protected void SetPosition(ulong position) {
+        protected void SetPosition(uint position) {
             m_index = position;
         }
 
@@ -805,14 +810,14 @@ namespace Ch.Elca.Iiop.Cdr {
         /// <summary>
         /// get the char encoding to use for this stream
         /// </summary>
-        internal static Encoding GetCharEncoding(uint charSet, CodeSetConversionRegistry regToUse) {
+        internal static Encoding GetCharEncoding(int charSet, CodeSetConversionRegistry regToUse) {
             return regToUse.GetEncoding(charSet); // get Encoding for charSet
         }
         
         /// <summary>
         /// get the wchar encoding to use for this stream
         /// </summary>
-        internal static Encoding GetWCharEncoding(uint wcharSet, CodeSetConversionRegistry regToUse) {
+        internal static Encoding GetWCharEncoding(int wcharSet, CodeSetConversionRegistry regToUse) {
             return regToUse.GetEncoding(wcharSet); // get Encoding for wcharSet
         }
         
@@ -825,11 +830,11 @@ namespace Ch.Elca.Iiop.Cdr {
         #region IFields
 
         /// <summary>the starting position in the stream</summary>
-        private ulong m_streamStartPos;
+        private uint m_streamStartPos;
         /// <summary>the stream, this chunk is in</summary>
         private CdrInputStreamImpl m_stream;
 
-        private ulong m_chunkLength;
+        private uint m_chunkLength;
         private bool m_continuationExpected;
         private bool m_finished = false;
 
@@ -838,8 +843,8 @@ namespace Ch.Elca.Iiop.Cdr {
 
         /// <param name="length">the length of the chunk</param>
         /// <param name="inStream">the stream this chunk is in</param>
-        public ChunkInfo(int length, CdrInputStreamImpl inStream) {
-            m_chunkLength = (ulong)length;
+        internal ChunkInfo(uint length, CdrInputStreamImpl inStream) {
+            m_chunkLength = length;
             m_stream = inStream;
             m_streamStartPos = inStream.GetPosition();
         }
@@ -850,9 +855,9 @@ namespace Ch.Elca.Iiop.Cdr {
         /// <summary>
         /// the length of this chunk
         /// </summary>
-        public int ChunkLength {
+        internal uint ChunkLength {
             get {
-                return (int)m_chunkLength;
+                return m_chunkLength;
             }
         }
 
@@ -884,12 +889,12 @@ namespace Ch.Elca.Iiop.Cdr {
         #region IMethods
 
         /// <summary>after reading a continuation chunk begin, this method is used to set the chunk length</summary>
-        public void SetContinuationLength(int length) {
-            m_chunkLength = (ulong)length;
+        internal void SetContinuationLength(uint length) {
+            m_chunkLength = length;
             m_streamStartPos = m_stream.GetPosition();
         }
 
-        public bool IsDataAvailable() {
+        internal bool IsDataAvailable() {
             if (m_streamStartPos + m_chunkLength > m_stream.GetPosition()) {
                 return true;
             } else {
@@ -897,20 +902,20 @@ namespace Ch.Elca.Iiop.Cdr {
             }
         }
 
-        public bool IsBorderCrossed() {
+        internal bool IsBorderCrossed() {
             return (GetBytesAvailable() < 0);
         }
 
-        public bool WillBorderBeCrossed(int nrOfBytesToRead) {
+        internal bool WillBorderBeCrossed(int nrOfBytesToRead) {
             return ((GetBytesAvailable() - nrOfBytesToRead) < 0);
         }
 
-        public bool IsBorderReached() {
+        internal bool IsBorderReached() {
             return (GetBytesAvailable() == 0);
         }
 
-        public int GetBytesAvailable() {
-            return (int)(m_streamStartPos + m_chunkLength - m_stream.GetPosition());
+        internal uint GetBytesAvailable() {
+            return (m_streamStartPos + m_chunkLength - m_stream.GetPosition());
         }
 
         #endregion IMethods
@@ -918,6 +923,7 @@ namespace Ch.Elca.Iiop.Cdr {
     }
 
     /// <summary>the base class for streams, reading CDR data</summary>
+    [CLSCompliant(false)]
     public class CdrInputStreamImpl : CdrStreamHelper, CdrInputStream {
         
         #region SFields
@@ -931,11 +937,11 @@ namespace Ch.Elca.Iiop.Cdr {
         private CdrEndianDepInputStreamOp m_endianOp = s_endianNotSpec;
 
         private bool m_bytesToFollowSet = false;
-        private ulong m_bytesToFollow = 0;
+        private uint m_bytesToFollow = 0;
         /// <summary>this is the position, when bytes to follow was set</summary>
-        private ulong m_indexForBytesToF = 0;
+        private uint m_indexForBytesToF = 0;
 
-        private ulong m_startPeekPosition = 0;
+        private uint m_startPeekPosition = 0;
         
         private Stream m_backingStream = null;
         
@@ -967,7 +973,7 @@ namespace Ch.Elca.Iiop.Cdr {
         #endregion IConstructors
         #region IProperties
 
-        public uint CharSet {
+        public int CharSet {
             get { 
                 return m_charSet;
             }
@@ -976,7 +982,7 @@ namespace Ch.Elca.Iiop.Cdr {
             }
         }
 
-        public uint WCharSet {
+        public int WCharSet {
             get {
                 return m_wcharSet;
             }
@@ -1050,7 +1056,7 @@ namespace Ch.Elca.Iiop.Cdr {
         /// After this method is called, it's not possible to read more then bytesToFollow
         /// </summary>
         /// <param name="streamLength"></param>
-        public void SetMaxLength(ulong bytesToFollow) {
+        public void SetMaxLength(uint bytesToFollow) {
             m_indexForBytesToF = GetPosition();
             m_bytesToFollow = bytesToFollow;
             m_bytesToFollowSet = true;
@@ -1080,7 +1086,7 @@ namespace Ch.Elca.Iiop.Cdr {
         /// <summary>
         /// gets the bytes to follow in the stream. If this is not set, an exception is thrown.
         /// </summary>
-        protected ulong GetBytesToFollow() {
+        protected uint GetBytesToFollow() {
             if (m_bytesToFollowSet) {
                 return m_indexForBytesToF + m_bytesToFollow - GetPosition();
             } else {
@@ -1094,7 +1100,7 @@ namespace Ch.Elca.Iiop.Cdr {
         /// check also reading over chunk border
         /// </summary>
         /// <param name="bytesToRead"></param>
-        private void CheckStreamPosition(ulong bytesToRead) {            
+        private void CheckStreamPosition(uint bytesToRead) {            
             if (m_bytesToFollowSet) {
                 if (GetPosition() + bytesToRead > m_indexForBytesToF + m_bytesToFollow) {
                     // no more bytes readable in this message
@@ -1115,7 +1121,7 @@ namespace Ch.Elca.Iiop.Cdr {
             UpdateAndCheckChunking(0); 
 
             // nr of bytes the index is after the last aligned index
-            ulong align = GetAlignBytes(requiredAlignment);
+            uint align = GetAlignBytes(requiredAlignment);
             if (align != 0) {
                 // go to the next aligned position
                 ReadPadding(align);
@@ -1123,8 +1129,8 @@ namespace Ch.Elca.Iiop.Cdr {
         }
 
         /// <summary>reads a nr of padding bytes</summary>
-        public void ReadPadding(ulong nrOfBytes) {
-            for (ulong i = 0; i < nrOfBytes; i++) { 
+        public void ReadPadding(uint nrOfBytes) {
+            for (uint i = 0; i < nrOfBytes; i++) { 
                 ReadOctet();
             }
         }
@@ -1216,17 +1222,17 @@ namespace Ch.Elca.Iiop.Cdr {
         }
 
         public byte[] ReadOpaque(int nrOfBytes) {
-            CheckStreamPosition((ulong)nrOfBytes);
+            CheckStreamPosition((uint)nrOfBytes);
             byte[] data = new byte[nrOfBytes];
             BaseStream.Read(data, 0, nrOfBytes);
-            IncrementPosition((ulong)nrOfBytes);
+            IncrementPosition((uint)nrOfBytes);
             return data;
         }
 
         public void ReadBytes(byte[] buf, int offset, int count) {
-            CheckStreamPosition((ulong)count);
+            CheckStreamPosition((uint)count);
             BaseStream.Read(buf, offset, count);
-            IncrementPosition((ulong)count);
+            IncrementPosition((uint)count);
         }
 
         public void ForceReadAlign(Aligns align) {
@@ -1254,7 +1260,7 @@ namespace Ch.Elca.Iiop.Cdr {
 
         #region ValueTypeHandling
 
-        private void UpdateAndCheckChunking(ulong nrOfBytesToRead) {
+        private void UpdateAndCheckChunking(uint nrOfBytesToRead) {
             // only do something, if chunking is active            
             // ignore chunking, if in peeking mode or if chunking check deactivated while in this method
             if ((IsChunkActive()) && !IsPeeking() && !m_skipChunkCheck) {
@@ -1270,7 +1276,7 @@ namespace Ch.Elca.Iiop.Cdr {
                             ReadLong();
                             chunkInfo.IsContinuationExpected = false;
                             // set chunk to start after tag and contains tag bytes
-                            chunkInfo.SetContinuationLength(tagOrChunkLength);
+                            chunkInfo.SetContinuationLength((uint)tagOrChunkLength);
                         } else if ((tagOrChunkLength >= MIN_VALUE_TAG) && 
                                    (tagOrChunkLength <= MAX_VALUE_TAG)) {
                             // a value type starting here -> current chunk is deactived while nested val type is read
@@ -1389,9 +1395,9 @@ namespace Ch.Elca.Iiop.Cdr {
         /// <summary>read the unread data bytes of the chunk here</summary>
         /// <param name="chunk"></param>
         private void FinishChunk(ChunkInfo chunk) {
-            int toRead = chunk.GetBytesAvailable();
+            uint toRead = chunk.GetBytesAvailable();
             if (toRead > 0) {
-                ReadPadding((ulong)toRead);
+                ReadPadding(toRead);
             }
         }
 
@@ -1399,26 +1405,6 @@ namespace Ch.Elca.Iiop.Cdr {
                 
         #region Indirection Handling
         
-//        
-//                
-//
-//        public bool IsIndirectionResolvable(long indirectionOffset, bool allowEncapBoundryCross,
-//                                            IndirectionType indirType,
-//                                            IndirectionUsage indirUsage) {
-//            
-//            // indirection-offset is negative --> therefore add to stream-position; -4, because indirectionoffset itself doesn't count --> stream-pos too high
-//            IndirectionInfo info = new IndirectionInfo(CalculateIndirectionPos(indirectionOffset),
-//                                                       indirType, indirUsage);
-//            return m_indirections.IsIndirectionResolvable(info, allowEncapBoundryCross);
-//        }
-//                
-//        private ulong CalculateIndirectionPos(long indirectionOffset) {
-//            // indirection-offset is negative --> therefore add to stream-position; -4, because indirectionoffset itself doesn't count --> stream-pos too high
-//            long streamPosition = (long)GetPosition();
-//            streamPosition += (long)GetGlobalOffset();
-//            return (ulong)(streamPosition + indirectionOffset - 4);
-//        }        
-
         public uint ReadInstanceOrIndirectionTag(out StreamPosition instanceStartPosition,
                                                  out bool isIndirection) {
 
@@ -1476,6 +1462,7 @@ namespace Ch.Elca.Iiop.Cdr {
 
 
     /// <summary>the base class for streams, writing CDR data</summary>    
+    [CLSCompliant(false)]
     public class CdrOutputStreamImpl : CdrStreamHelper, CdrOutputStream {
         
         #region SFields
@@ -1516,14 +1503,14 @@ namespace Ch.Elca.Iiop.Cdr {
         /// <param name="stream"></param>
         /// <param name="flags"></param>
         /// <param name="initialOffset"></param>
-        internal CdrOutputStreamImpl(Stream stream, byte flags, GiopVersion version, ulong initialOffset) : this(stream, flags, version) {
+        internal CdrOutputStreamImpl(Stream stream, byte flags, GiopVersion version, uint initialOffset) : this(stream, flags, version) {
             IncrementPosition(initialOffset);
         }
 
         #endregion IConstructors
         #region IProperties
 
-        public uint CharSet {
+        public int CharSet {
             get { 
                 return m_charSet;
             }
@@ -1532,7 +1519,7 @@ namespace Ch.Elca.Iiop.Cdr {
             }
         }
 
-        public uint WCharSet {
+        public int WCharSet {
             get {
                 return m_wcharSet;
             }
@@ -1555,7 +1542,7 @@ namespace Ch.Elca.Iiop.Cdr {
         /// <summary>write padding for an aligned write with the requiredAlignement</summary>
         /// <param name="requiredAlignment">align to which size</param>
         protected void AlignWrite(byte requiredAlignment) {
-            ulong align = GetAlignBytes(requiredAlignment);
+            uint align = GetAlignBytes(requiredAlignment);
             if (align != 0) {
                 // go to the next aligned position
                 WritePadding(align);
@@ -1563,8 +1550,8 @@ namespace Ch.Elca.Iiop.Cdr {
         }
 
         /// <summary>wirtes a nr of padding bytes</summary>
-        public void WritePadding(ulong nrOfBytes) {
-            for (ulong i = 0; i < nrOfBytes; i++) {
+        public void WritePadding(uint nrOfBytes) {
+            for (uint i = 0; i < nrOfBytes; i++) {
                 WriteOctet(0);
             }
         }
@@ -1651,7 +1638,7 @@ namespace Ch.Elca.Iiop.Cdr {
                 return; 
             }
             BaseStream.Write(data, offset, count);
-            IncrementPosition((ulong)count);
+            IncrementPosition((uint)count);
         }
 
         public void ForceWriteAlign(Aligns align) {
@@ -1740,12 +1727,12 @@ namespace Ch.Elca.Iiop.Cdr {
         
     }
 
-
+    [CLSCompliant(false)]
     public class CdrEncapsulationInputStream : CdrInputStreamImpl {
         
         #region IFields
         
-        private ulong m_globalOffset;
+        private uint m_globalOffset;
         
         #endregion IFields
         #region IConstructor
@@ -1754,7 +1741,7 @@ namespace Ch.Elca.Iiop.Cdr {
                                              IndirectionStoreIndirKey indirStore) : base(indirStore) {
             Stream baseStream = new MemoryStream();                        
             // read the encapsulation from the input stream
-            ulong encapsLength = stream.ReadULong();
+            uint encapsLength = stream.ReadULong();
             StreamPosition streamPos = new StreamPosition(stream); // also include encaps length in global offset, because not in GetPosition() considered
             m_globalOffset = streamPos.GlobalPosition;  // global position of this stream beginning (GetPosition() on this stream doesn't consider length field read -> global offset is just after lenght)
             byte[] data = stream.ReadOpaque((int)encapsLength);
@@ -1775,7 +1762,7 @@ namespace Ch.Elca.Iiop.Cdr {
             return ReadOpaque((int)GetBytesToFollow());
         }
         
-        public override ulong GetGlobalOffset() {
+        public override uint GetGlobalOffset() {
             return m_globalOffset;
         }
 
@@ -1790,13 +1777,14 @@ namespace Ch.Elca.Iiop.Cdr {
     /// when writing to the CDR encapsulation, it's not needed to write anything else than the
     /// encapsulation content
     /// </remarks>
+    [CLSCompliant(false)]
     public class CdrEncapsulationOutputStream : CdrOutputStreamImpl {
         
         #region IFields
         
         private CdrOutputStream m_targetStream;
-        private ulong m_targetPosition = 0;
-        private ulong m_indirectionOffsetPosition = 0;
+        private uint m_targetPosition = 0;
+        private uint m_indirectionOffsetPosition = 0;
         
         #endregion IFields        
         #region IConstructors
@@ -1861,7 +1849,7 @@ namespace Ch.Elca.Iiop.Cdr {
             return new INTERNAL(856, CompletionStatus.Completed_MayBe);
         }
         
-        public override ulong GetGlobalOffset() {
+        public override uint GetGlobalOffset() {
             return m_indirectionOffsetPosition;
         }
                

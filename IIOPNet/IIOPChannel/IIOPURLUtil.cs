@@ -88,8 +88,8 @@ namespace Ch.Elca.Iiop.Util {
                 // now create an IOR with the above information
                 InternetIiopProfile profile = new InternetIiopProfile(iiopLoc.Version, 
                                                                       iiopLoc.ChannelUri.Host,                                                                      
-                                                                     (ushort)iiopLoc.ChannelUri.Port, 
-                                                                     iiopLoc.GetKeyAsByteArray());
+                                                                      (short)iiopLoc.ChannelUri.Port, 
+                                                                      iiopLoc.GetKeyAsByteArray());
                 ior = new Ior(repositoryId, new IorProfile[] { profile });
             } else if (url.StartsWith("corbaloc")) {
                 Corbaloc loc = new Corbaloc(url);
@@ -99,7 +99,7 @@ namespace Ch.Elca.Iiop.Util {
                 }
                 byte[] objectKey = loc.GetKeyAsByteArray();
                 InternetIiopProfile profile = new InternetIiopProfile(addr.Version, addr.Host,
-                                                                     (ushort)addr.Port, objectKey);                
+                                                                      (short)addr.Port, objectKey);                
                 ior = new Ior(repositoryId, new IorProfile[] { profile });
             } else {
                 throw new INV_OBJREF(1963, CompletionStatus.Completed_MayBe);
@@ -337,7 +337,7 @@ namespace Ch.Elca.Iiop.Util {
                 }
                 // this server support GIOP 1.2 --> create an GIOP 1.2 profile
                 InternetIiopProfile profile = new InternetIiopProfile(new GiopVersion(1, 2), host,
-                                                                      (ushort)port, objectKey);
+                                                                      (short)port, objectKey);
                 // add additional tagged components according to the channel options, e.g. for SSL
                 profile.AddTaggedComponents(serverData.AdditionalTaggedComponents);
                 

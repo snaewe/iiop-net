@@ -70,11 +70,11 @@ namespace Ch.Elca.Iiop.CodeSet {
         #region IMethods
 
 
-        protected void AddEncoding(uint id, Encoding encoding) {
+        protected void AddEncoding(int id, Encoding encoding) {
             m_knownCodeSets.Add(id, encoding);    
         }
 
-        public Encoding GetEncoding(uint id) {
+        public Encoding GetEncoding(int id) {
             return (Encoding)m_knownCodeSets[id];
         }
     

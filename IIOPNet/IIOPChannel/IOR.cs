@@ -52,7 +52,7 @@ namespace Ch.Elca.Iiop.CorbaObjRef {
         
         #region IProperties
         
-        uint Id { 
+        int Id { 
             get; 
         }
         
@@ -83,7 +83,7 @@ namespace Ch.Elca.Iiop.CorbaObjRef {
         private GiopVersion m_version;
         private string m_typId;
         private string m_hostName;
-        private ushort m_port;
+        private short m_port;
         
         #endregion IFields
         #region IConstructors
@@ -108,13 +108,14 @@ namespace Ch.Elca.Iiop.CorbaObjRef {
         /// <summary>
         /// parses an IOR embedded in a GIOP message
         /// </summary>
-        public Ior(CdrInputStream cdrStream) {
+        internal Ior(CdrInputStream cdrStream) {
             ParseIOR(cdrStream);
         }
 
         /// <summary>
         /// creates an IOR from the typeName and the profiles
         /// </summary>
+        [CLSCompliant(false)]
         public Ior(string typeName, IorProfile[] profiles) {
             if (profiles == null) { 
                 profiles = new IorProfile[0]; 
@@ -126,8 +127,8 @@ namespace Ch.Elca.Iiop.CorbaObjRef {
                 IorProfile profile = SearchInternetIIOPProfile(profiles);
                 if (profile == null) { 
                     // no InternetIIOPProfile found in the IORProfiles; 
-                	// other profiles are not usable with this implementation
-                	throw new INV_OBJREF(9402, CompletionStatus.Completed_No);
+                    // other profiles are not usable with this implementation
+                    throw new INV_OBJREF(9402, CompletionStatus.Completed_No);
                 }
                 AssignDefaultFromProfile(profile);
             }
@@ -136,6 +137,7 @@ namespace Ch.Elca.Iiop.CorbaObjRef {
         #endregion IConstructors
         #region IProperties
 
+        [CLSCompliant(false)]
         public IorProfile[] Profiles {
             get { 
                 return m_profiles; 
@@ -158,9 +160,9 @@ namespace Ch.Elca.Iiop.CorbaObjRef {
         
         /// <summary>the type represented by typeid</summary>
         public Type Type {
-        	get {
+            get {
                 return Repository.GetTypeForId(m_typId);
-        	}
+            }
         }
 
         /// <summary>the hostname of the default InternetIIOPProfile</summary>
@@ -171,7 +173,7 @@ namespace Ch.Elca.Iiop.CorbaObjRef {
         }
 
         /// <summary>the port of the default InternetIIOPProfile</summary>
-        public ushort Port {
+        public short Port {
             get { 
                 return m_port; 
             }
@@ -236,7 +238,7 @@ namespace Ch.Elca.Iiop.CorbaObjRef {
         /// <param name="cdrStream"></param>
         /// <returns></returns>
         private IorProfile ParseProfile(CdrInputStream cdrStream) {
-            uint profileType = cdrStream.ReadULong();             
+            int profileType = (int)cdrStream.ReadULong();             
             switch (profileType) {
                 case 0: 
                     IorProfile result = new InternetIiopProfile(cdrStream);
@@ -269,7 +271,7 @@ namespace Ch.Elca.Iiop.CorbaObjRef {
         /// <summary>
         /// write this IOR to a CDR-Stream in non-strignified form
         /// </summary>
-        public void WriteToStream(CdrOutputStream cdrStream) {
+        internal void WriteToStream(CdrOutputStream cdrStream) {
             cdrStream.WriteString(m_typId);
             cdrStream.WriteULong((uint)m_profiles.Length); // nr of profiles
             for (int i = 0; i < m_profiles.Length; i++) {
@@ -282,7 +284,8 @@ namespace Ch.Elca.Iiop.CorbaObjRef {
     }
 
 
-    /// <summary>This class represents a profile in a CORBA-IOR</summary>
+    /// <summary>This class represents a profile in a CORBA-IOR</summary>    
+    [CLSCompliant(false)]
     public abstract class IorProfile {
         
         #region IFields
@@ -290,7 +293,7 @@ namespace Ch.Elca.Iiop.CorbaObjRef {
         protected GiopVersion m_giopVersion;
 
         protected string m_hostName;
-        protected ushort m_port;
+        protected short m_port;
 
         protected byte[] m_objectKey;
         
@@ -304,6 +307,7 @@ namespace Ch.Elca.Iiop.CorbaObjRef {
         /// creates an IOR from the data in a stream
         /// </summary>
         /// <param name="stream">the stream containing the profile data</param>
+        [CLSCompliant(false)]
         protected IorProfile(CdrInputStream stream) {
             ReadDataFromStream(stream);
         }
@@ -311,7 +315,7 @@ namespace Ch.Elca.Iiop.CorbaObjRef {
         /// <summary>
         /// creates a profile from the standard data needed
         /// </summary>
-        public IorProfile(GiopVersion version, string hostName, ushort port, byte[] objectKey) {
+        public IorProfile(GiopVersion version, string hostName, short port, byte[] objectKey) {
             m_giopVersion = version;
             m_hostName = hostName;
             m_port = port;
@@ -333,7 +337,7 @@ namespace Ch.Elca.Iiop.CorbaObjRef {
             }
         }
 
-        public ushort Port {
+        public short Port {
             get { 
                 return m_port; 
             }
@@ -355,7 +359,7 @@ namespace Ch.Elca.Iiop.CorbaObjRef {
         /// <summary>
         /// the id of the profile
         /// </summary>
-        public abstract uint ProfileId {
+        public abstract int ProfileId {
             get;
         }
 
@@ -381,11 +385,12 @@ namespace Ch.Elca.Iiop.CorbaObjRef {
     /// <summary>
     /// the profile for IIOP connections
     /// </summary>
+    [CLSCompliant(false)]
     public class InternetIiopProfile : IorProfile {
         
         #region IConstructors
 
-        public InternetIiopProfile(GiopVersion version, string hostName, ushort port, byte[] objectKey) : base(version, hostName, port, objectKey) {
+        public InternetIiopProfile(GiopVersion version, string hostName, short port, byte[] objectKey) : base(version, hostName, port, objectKey) {
             // default codesetComponent
             TaggedComponents.Add(new TaggedComponent(TaggedComponentIds.CODESET_COMPONENT_ID, 
                                                      new CodeSetComponentData(Services.CodeSetService.DEFAULT_CHAR_SET,
@@ -406,7 +411,7 @@ namespace Ch.Elca.Iiop.CorbaObjRef {
         #region IProperties
 
         /// <summary>returns the profile-id for this profile</summary>
-        public override uint ProfileId {
+        public override int ProfileId {
             get { 
                 return 0; 
             }
@@ -426,7 +431,7 @@ namespace Ch.Elca.Iiop.CorbaObjRef {
             Debug.WriteLine("giop-verion: " + m_giopVersion);
             m_hostName = encapsulation.ReadString();
             Debug.WriteLine("hostname: " + m_hostName);
-            m_port = encapsulation.ReadUShort();
+            m_port = (short)encapsulation.ReadUShort();
             Debug.WriteLine("port: " + m_port);
             uint objectKeyLength = encapsulation.ReadULong();
             m_objectKey = new byte[objectKeyLength];
@@ -441,7 +446,7 @@ namespace Ch.Elca.Iiop.CorbaObjRef {
                 uint nrOfComponent = encapsulation.ReadULong();
                 Debug.WriteLine("nr of tagged-components in this profile: " + nrOfComponent);                
                 for (int i = 0; i < nrOfComponent; i++) {
-                    uint id = encapsulation.ReadULong();
+                    int id = (int)encapsulation.ReadULong();
                     TaggedComponentSerializer ser = TaggedComponentSerRegistry.GetSerializer(id);
                     TaggedComponents.Add(ser.ReadFromStream(encapsulation));
                 }
@@ -464,7 +469,7 @@ namespace Ch.Elca.Iiop.CorbaObjRef {
             encapStream.WriteOctet(m_giopVersion.Major);
             encapStream.WriteOctet(m_giopVersion.Minor);
             encapStream.WriteString(m_hostName);
-            encapStream.WriteUShort(m_port);
+            encapStream.WriteUShort((ushort)m_port);
             encapStream.WriteULong((uint)m_objectKey.Length);
             encapStream.WriteOpaque(m_objectKey);
             // the tagged components            
@@ -490,6 +495,7 @@ namespace Ch.Elca.Iiop.CorbaObjRef {
     /// not fully implemented:
     /// At the moment the only tagged component supported is CodeSetComponent.
     /// </remarks>
+    [CLSCompliant(false)]
     public class MultipleComponentsProfile : IorProfile {
     
         #region IConstructors
@@ -514,7 +520,7 @@ namespace Ch.Elca.Iiop.CorbaObjRef {
         #region IProperties
 
         /// <summary>returns the profile-id for this profile</summary>
-        public override uint ProfileId {
+        public override int ProfileId {
             get { 
                 return 1; 
             }
@@ -532,7 +538,7 @@ namespace Ch.Elca.Iiop.CorbaObjRef {
             Debug.WriteLine("nr of components following: " + nrOfComponents);
             
             for (int i = 0; i < nrOfComponents; i++) {
-                uint id = encapsulation.ReadULong();
+                int id = (int)encapsulation.ReadULong();
                 TaggedComponentSerializer ser = TaggedComponentSerRegistry.GetSerializer(id);
                 TaggedComponents.Add(ser.ReadFromStream(encapsulation));
             }
@@ -568,11 +574,12 @@ namespace Ch.Elca.Iiop.CorbaObjRef {
     /// <summary>
     /// used to store information about an unsupported profile
     /// </summary>
+    [CLSCompliant(false)]
     public class UnsupportedIorProfile : IorProfile {
         
         #region IFields
         
-        private uint m_profileId;       
+        private int m_profileId;       
         private byte[] m_data;
                
         #endregion IFields
@@ -583,7 +590,7 @@ namespace Ch.Elca.Iiop.CorbaObjRef {
         /// CDRStream) 
         /// </summary>
         /// <param name="encapsulation"></param>
-        public UnsupportedIorProfile(CdrInputStream inputStream, uint profileId) : base(inputStream) {                
+        public UnsupportedIorProfile(CdrInputStream inputStream, int profileId) : base(inputStream) {                
             m_profileId = profileId;
         }
         
@@ -591,7 +598,7 @@ namespace Ch.Elca.Iiop.CorbaObjRef {
         #region IProperties
 
         /// <summary>returns the profile-id for this profile</summary>
-        public override uint ProfileId {
+        public override int ProfileId {
             get { 
                 return m_profileId; 
             }
@@ -653,13 +660,13 @@ namespace Ch.Elca.Iiop.CorbaObjRef {
         
         #region IFields
         
-        private uint m_id;
+        private int m_id;
         private ITaggedComponentData m_componentData;
 
         #endregion IFields
         #region IConstructors
 
-        public TaggedComponent(uint id, ITaggedComponentData data) {
+        public TaggedComponent(int id, ITaggedComponentData data) {
             m_id = id;
             m_componentData = data;            
         }
@@ -667,7 +674,7 @@ namespace Ch.Elca.Iiop.CorbaObjRef {
         #endregion IConstructors
         #region IProperties
 
-        public uint Id {
+        public int Id {
             get {
                 return m_id;
             }
@@ -721,7 +728,7 @@ namespace Ch.Elca.Iiop.CorbaObjRef {
 
         #region IFields
         
-        private uint m_id;
+        private int m_id;
         private Type m_taggedComponentDataType;
         
         private MarshallerForType m_componentDataMarshaller;
@@ -731,7 +738,7 @@ namespace Ch.Elca.Iiop.CorbaObjRef {
         #endregion IFields
         #region IConstructors
         
-        public TaggedComponentSerializer(uint taggedComponentId, Type taggedComponentDataType,
+        public TaggedComponentSerializer(int taggedComponentId, Type taggedComponentDataType,
                                          TaggedComponentEncodingRules encodingRules) {
             if ((taggedComponentDataType == null) || (encodingRules == null)) {
                 throw new INTERNAL(113, CompletionStatus.Completed_MayBe);
@@ -745,7 +752,7 @@ namespace Ch.Elca.Iiop.CorbaObjRef {
         }
         
         /// <summary>used to create efficiently a clone for another id</summary>
-        private TaggedComponentSerializer(uint taggedComponentId, Type taggedComponentDataType,
+        private TaggedComponentSerializer(int taggedComponentId, Type taggedComponentDataType,
                                           TaggedComponentEncodingRules encodingRules,
                                           MarshallerForType componentDataMarshaller) {
             m_id = taggedComponentId;
@@ -757,7 +764,7 @@ namespace Ch.Elca.Iiop.CorbaObjRef {
         #endregion IConstructors        
         #region IProperties
         
-        public uint Id {
+        public int Id {
             get {
                 return m_id;
             }
@@ -779,7 +786,7 @@ namespace Ch.Elca.Iiop.CorbaObjRef {
             if (!m_taggedComponentDataType.IsInstanceOfType(toSer.ComponentData)) {
                 throw new MARSHAL(119, CompletionStatus.Completed_MayBe);
             }
-            cdrStream.WriteULong(m_id);
+            cdrStream.WriteULong((uint)m_id);
             if (m_encodingRules.IsEncapsulated) {
                 // marshal tagged component data to an encapsulation
                 CdrEncapsulationOutputStream encap = new CdrEncapsulationOutputStream(0);
@@ -809,7 +816,7 @@ namespace Ch.Elca.Iiop.CorbaObjRef {
         #region SMethods
         
         internal static TaggedComponentSerializer GetCloneForId(TaggedComponentSerializer prototype, 
-                                                                uint newId) {
+                                                                int newId) {
             return new TaggedComponentSerializer(newId, prototype.m_taggedComponentDataType,
                                                  prototype.m_encodingRules, prototype.m_componentDataMarshaller);
         }
@@ -823,8 +830,8 @@ namespace Ch.Elca.Iiop.CorbaObjRef {
     
         #region Constants
         
-        public const uint CODESET_COMPONENT_ID = 1;
-        public const uint TAG_SSL_SEC_TRANS = 20;        
+        public const int CODESET_COMPONENT_ID = 1;
+        public const int TAG_SSL_SEC_TRANS = 20;        
         
         #endregion Constants
         #region IConstructors
@@ -867,7 +874,7 @@ namespace Ch.Elca.Iiop.CorbaObjRef {
             s_taggedComponetsSer.Add(ser.Id, ser);
         }
 
-        public static TaggedComponentSerializer GetSerializer(uint id) {
+        public static TaggedComponentSerializer GetSerializer(int id) {
             TaggedComponentSerializer ser = (TaggedComponentSerializer)s_taggedComponetsSer[id];
             if (ser == null) {
                 // more efficient to clone a generic prototype, because of type mapping costs
@@ -886,7 +893,7 @@ namespace Ch.Elca.Iiop.CorbaObjRef {
 #if UnitTest
 
 namespace Ch.Elca.Iiop.Tests {
-	
+    
     using NUnit.Framework;
     using Ch.Elca.Iiop.CorbaObjRef;
     

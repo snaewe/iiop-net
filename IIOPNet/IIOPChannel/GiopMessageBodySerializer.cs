@@ -76,8 +76,8 @@ namespace Ch.Elca.Iiop.MessageHandling {
         public const string METHODNAME_KEY = "__MethodName";
         /// <summary>the key used to access the argument-property in messages</summary>
         public const string ARGS_KEY = "__Args";
-    	/// <summary>the key used to access the method-signature property in messages</summary>
-    	public const string METHOD_SIG_KEY = "__MethodSignature";
+        /// <summary>the key used to access the method-signature property in messages</summary>
+        public const string METHOD_SIG_KEY = "__MethodSignature";
 
         #endregion Constants
         #region IFields
@@ -220,7 +220,7 @@ namespace Ch.Elca.Iiop.MessageHandling {
             uint nrOfContexts = sourceStream.ReadULong();
             for (uint i = 0; i < nrOfContexts; i++) {
                 uint serviceId = sourceStream.ReadULong();
-                CorbaService service = services.GetForServiceId(serviceId);
+                CorbaService service = services.GetForServiceId((int)serviceId);
                 CdrEncapsulationInputStream serviceData = sourceStream.ReadEncapsulation();
                 ServiceContext cntx = service.DeserialiseContext(serviceData);
                 // add the service context if not already present. 
@@ -388,12 +388,12 @@ namespace Ch.Elca.Iiop.MessageHandling {
         
         /// <summary>generate the signature info for the method</summary>
         private Type[] GenerateSigForMethod(MethodInfo method) {
-        	ParameterInfo[] parameters = method.GetParameters();
-        	Type[] result = new Type[parameters.Length];
-        	for (int i = 0; i < parameters.Length; i++) {        		        	  
+            ParameterInfo[] parameters = method.GetParameters();
+            Type[] result = new Type[parameters.Length];
+            for (int i = 0; i < parameters.Length; i++) {                             
                 result[i] = parameters[i].ParameterType;
-        	}
-        	return result;
+            }
+            return result;
         }
         
         /// <summary>determines method called and adds this information to the message</summary>
@@ -406,7 +406,7 @@ namespace Ch.Elca.Iiop.MessageHandling {
             bool regularOp;
             string directedUri = objectUri;                                
             Type serverType = RemotingServices.GetServerTypeForUri(objectUri);                        
-                                	            
+                                                
             string internalMethodName; // the implementation method name
             if (!StandardCorbaOps.CheckIfStandardOp(methodName)) {
                 regularOp = true; // non-pseude op
@@ -418,7 +418,7 @@ namespace Ch.Elca.Iiop.MessageHandling {
                 internalMethodName = callForMethod.Name;
                 // to handle overloads correctly, add signature info:
                 Type[] sig = GenerateSigForMethod(callForMethod);
-            	toMessage.Properties.Add(SimpleGiopMsg.METHOD_SIG_KEY, sig);
+                toMessage.Properties.Add(SimpleGiopMsg.METHOD_SIG_KEY, sig);
             } else {
                 regularOp = false; // pseude-object op
                 // handle standard corba-ops like _is_a
@@ -435,7 +435,7 @@ namespace Ch.Elca.Iiop.MessageHandling {
             toMessage.Properties.Add(SimpleGiopMsg.URI_KEY, directedUri);
             toMessage.Properties.Add(SimpleGiopMsg.TYPENAME_KEY, serverType.FullName);
             toMessage.Properties.Add(SimpleGiopMsg.METHODNAME_KEY, internalMethodName);     
-                                	
+                                    
             // deserialse method arguments
             object[] args = DeserialiseRequestBody(cdrStream, callForMethod,     
                                                    !regularOp, objectUri, version);
@@ -556,8 +556,8 @@ namespace Ch.Elca.Iiop.MessageHandling {
                 // request header deserialised
 
                 Type serverType = RemotingServices.GetServerTypeForUri(objectUri);
-            	DecodeCall(msg, objectUri, methodName, 
-            	           cdrStream, version);            	
+                DecodeCall(msg, objectUri, methodName, 
+                           cdrStream, version);             
                                 
                 MethodCall methodCallInfo = new MethodCall(msg);
                 return methodCallInfo;

@@ -77,18 +77,19 @@ namespace Ch.Elca.Iiop.Services {
     /// <summary>
     /// This service handles code-set conversion.
     /// </summary>
+    [CLSCompliant(false)]
     public class CodeSetService : CorbaService {
 
         #region Constants
 
-        public const uint SERVICE_ID = 1;
+        public const int SERVICE_ID = 1;
 
-        internal const int UTF16_SET = 0x10109;
-        internal const int LATIN1_SET = 0x10001;
-        internal const int UTF8_SET = 0x5010001;
+        public const int UTF16_SET = 0x10109;
+        public const int LATIN1_SET = 0x10001;
+        public const int UTF8_SET = 0x5010001;
 
-        internal const int ISO646IEC_MULTI = 0x10100; // compatible with UTF-16
-        internal const int ISO646IEC_SINGLE = 0x10020; // compatible with ASCII
+        public const int ISO646IEC_MULTI = 0x10100; // compatible with UTF-16
+        public const int ISO646IEC_SINGLE = 0x10020; // compatible with ASCII
 
         public const int DEFAULT_CHAR_SET = LATIN1_SET;
         public const int DEFAULT_WCHAR_SET = UTF16_SET;
@@ -103,7 +104,7 @@ namespace Ch.Elca.Iiop.Services {
         #endregion IConstructors
         #region IMethods
 
-        public override uint GetServiceId() {
+        public override int GetServiceId() {
             return SERVICE_ID;
         }
 
@@ -147,7 +148,7 @@ namespace Ch.Elca.Iiop.Services {
                 IList components = profile.TaggedComponents;
                 foreach (ITaggedComponent taggedComp in components) {
                     if (taggedComp.Id == TaggedComponentIds.CODESET_COMPONENT_ID) {
-                    	return taggedComp;
+                        return taggedComp;
                     }
                 }
             }
@@ -159,9 +160,9 @@ namespace Ch.Elca.Iiop.Services {
             if (context == null) { 
                 return; 
             }
-            uint charSet = ((CodeSetServiceContext) context).CharSet;
-            uint wcharSet = ((CodeSetServiceContext) context).WCharSet;
-            CheckCodeSetCompatible((int)charSet, (int)wcharSet);
+            int charSet = ((CodeSetServiceContext) context).CharSet;
+            int wcharSet = ((CodeSetServiceContext) context).WCharSet;
+            CheckCodeSetCompatible(charSet, wcharSet);
 
             // TODO: implement code set establishment-alg
             conDesc.CharSet = charSet;
@@ -235,9 +236,9 @@ namespace Ch.Elca.Iiop.Services {
             }
             
             // TODO: check for already established
-            conDesc.CharSet = (uint)charSet;
-            conDesc.WCharSet = (uint)wcharSet;
-            return new CodeSetServiceContext((uint)charSet, (uint)wcharSet);
+            conDesc.CharSet = charSet;
+            conDesc.WCharSet = wcharSet;
+            return new CodeSetServiceContext(charSet, wcharSet);
         }
 
         #endregion IMethods
@@ -248,6 +249,7 @@ namespace Ch.Elca.Iiop.Services {
     /// <summary>
     /// the service context for the code set service
     /// </summary>
+    [CLSCompliant(false)]
     public class CodeSetServiceContext : ServiceContext {
         
         #region Constants
@@ -257,31 +259,31 @@ namespace Ch.Elca.Iiop.Services {
         #endregion Constants
         #region IFields
         
-        private uint m_charSet;
-        private uint m_wcharSet;
+        private int m_charSet;
+        private int m_wcharSet;
 
         #endregion IFields
         #region IConstructors
 
-        public CodeSetServiceContext(uint charSet, uint wcharSet) : base(SERVICE_ID) {
+        public CodeSetServiceContext(int charSet, int wcharSet) : base((int)SERVICE_ID) {
             m_charSet = charSet;
             m_wcharSet = wcharSet;    
         }
 
-        public CodeSetServiceContext(CdrEncapsulationInputStream encap) : base(encap, SERVICE_ID) {
+        public CodeSetServiceContext(CdrEncapsulationInputStream encap) : base(encap, (int)SERVICE_ID) {
         }
 
 
         #endregion IConstructors
         #region IProperties
         
-        public uint CharSet {
+        public int CharSet {
             get {
                 return m_charSet;
             }
         }
 
-        public uint WCharSet {
+        public int WCharSet {
             get {
                 return m_wcharSet;
             }
@@ -298,14 +300,14 @@ namespace Ch.Elca.Iiop.Services {
         public override void Serialize(CdrOutputStream stream) {
             stream.WriteULong(SERVICE_ID);
             CdrEncapsulationOutputStream encapStream = new CdrEncapsulationOutputStream(0);
-            encapStream.WriteULong(m_charSet);
-            encapStream.WriteULong(m_wcharSet);
+            encapStream.WriteULong((uint)m_charSet);
+            encapStream.WriteULong((uint)m_wcharSet);
             stream.WriteEncapsulation(encapStream);
         }
 
         public override void Deserialize(CdrEncapsulationInputStream encap) {
-            m_charSet = encap.ReadULong();
-            m_wcharSet = encap.ReadULong();
+            m_charSet = (int)encap.ReadULong();
+            m_wcharSet = (int)encap.ReadULong();
         }
 
         #endregion IMethods

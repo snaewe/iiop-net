@@ -39,7 +39,7 @@ namespace Ch.Elca.Iiop.Services {
     /// <summary>
     /// This class represents the collection of service contexts in request / response messages
     /// </summary>
-    public class ServiceContextCollection {
+    internal class ServiceContextCollection {
         
         #region IFields
 
@@ -48,36 +48,36 @@ namespace Ch.Elca.Iiop.Services {
         #endregion IFields
         #region IConstructors
 
-        public ServiceContextCollection() {
+        internal ServiceContextCollection() {
         }
 
         #endregion IConstructors
         #region IProperties
 
         /// <summary>the nr of service contexts</summary>
-        public ulong Count {
+        internal uint Count {
             get {
-                return (ulong)m_contexts.Count;
+                return (uint)m_contexts.Count;
             }
         }
 
         #endregion IProperties
         #region IMethods
 
-        public void AddServiceContext(ServiceContext context) {
+        internal void AddServiceContext(ServiceContext context) {
             m_contexts.Add(context.ServiceID, context);
         }
 
-        public ServiceContext GetContext(uint serviceId) {
+        internal ServiceContext GetContext(int serviceId) {
             return (ServiceContext)m_contexts[serviceId];
         }
         
-        public bool ContainsContextForService(uint serviceId) {
+        internal bool ContainsContextForService(int serviceId) {
             return (GetContext(serviceId) != null);
         }
 
         /// <summary>enumarate over the service contexts</summary>
-        public IEnumerator GetEnumerator() {
+        internal IEnumerator GetEnumerator() {
             return m_contexts.Values.GetEnumerator();
         }
 
@@ -98,20 +98,21 @@ namespace Ch.Elca.Iiop.Services {
     /// <summary>
     /// this class represents a service context
     /// </summary>
+    [CLSCompliant(false)]
     public class ServiceContext {
 
         #region IFields
         
-        private uint m_serviceId;
+        private int m_serviceId;
         private byte[] m_contextData;
 
         #endregion IFields
         #region IConstructors
 
-        protected ServiceContext(uint serviceId) : this(serviceId, new byte[0]) {
+        protected ServiceContext(int serviceId) : this(serviceId, new byte[0]) {
         }
 
-        public ServiceContext(uint serviceId, byte[] contextData) {
+        public ServiceContext(int serviceId, byte[] contextData) {
             m_serviceId = serviceId;
             m_contextData = contextData;
             if (m_contextData == null) { 
@@ -119,7 +120,7 @@ namespace Ch.Elca.Iiop.Services {
             }
         }
 
-        public ServiceContext(CdrEncapsulationInputStream encap, uint serviceId) {
+        public ServiceContext(CdrEncapsulationInputStream encap, int serviceId) {
             m_serviceId = serviceId;
             Deserialize(encap);
         }
@@ -128,7 +129,7 @@ namespace Ch.Elca.Iiop.Services {
         #region IProperties
 
         /// <summary>the service id for this context</summary>
-        public uint ServiceID {
+        public int ServiceID {
             get { 
                 return m_serviceId; 
             }
@@ -152,7 +153,7 @@ namespace Ch.Elca.Iiop.Services {
         }
 
         public virtual void Serialize(CdrOutputStream stream) {
-            stream.WriteULong(m_serviceId);
+            stream.WriteULong((uint)m_serviceId);
             CdrEncapsulationOutputStream encapStream = new CdrEncapsulationOutputStream(0);
             stream.WriteOpaque(m_contextData);
             stream.WriteEncapsulation(encapStream);
@@ -170,6 +171,7 @@ namespace Ch.Elca.Iiop.Services {
     /// <summary>
     /// this class is a base class for a CORBA service
     /// </summary>
+    [CLSCompliant(false)]
     public abstract class CorbaService {
         
         #region IMethods
@@ -177,7 +179,7 @@ namespace Ch.Elca.Iiop.Services {
         /// <summary>
         /// get the servie id for this service
         /// </summary>
-        public abstract uint GetServiceId();
+        public abstract int GetServiceId();
 
         /// <summary>
         /// Deserialises the ServiceContext from the encapsulated service context data
@@ -218,18 +220,19 @@ namespace Ch.Elca.Iiop.Services {
     
     /// <summary>
     /// this class represents an unknown service
-    /// </summary>    
+    /// </summary>        
+    [CLSCompliant(false)]
     public class UnknownService : CorbaService {
         
         #region IFields
 
-        private uint m_serviceId;
+        private int m_serviceId;
         private ServiceContext m_context;
 
         #endregion IFields
         #region IConsturctors
 
-        public UnknownService(uint serviceId) {
+        public UnknownService(int serviceId) {
             m_serviceId = serviceId;
             m_context = new ServiceContext(serviceId, new byte[0]);
         }
@@ -238,6 +241,7 @@ namespace Ch.Elca.Iiop.Services {
         #region IMethods
         
         
+        [CLSCompliant(false)]
         public override ServiceContext DeserialiseContext(CdrEncapsulationInputStream encap) {
             ServiceContext cntx = new ServiceContext(encap, m_serviceId);
             return cntx;
@@ -264,7 +268,7 @@ namespace Ch.Elca.Iiop.Services {
             return null;
         }
         
-        public override uint GetServiceId() {
+        public override int GetServiceId() {
             return m_serviceId;
         }
 
@@ -275,7 +279,8 @@ namespace Ch.Elca.Iiop.Services {
         
     /// <summary>
     /// This class provides supporting functionality for Corba Object services
-    /// </summary>
+    /// </summary>    
+    [CLSCompliant(false)]
     public class CosServices {
         
         #region IFields
@@ -329,7 +334,7 @@ namespace Ch.Elca.Iiop.Services {
         /// <summary>
         /// get the serive for the service-id
         /// </summary>
-        public CorbaService GetForServiceId(uint serviceId) {
+        public CorbaService GetForServiceId(int serviceId) {
             CorbaService result = null;
             lock (m_services.SyncRoot) {
                 result = (CorbaService)m_services[serviceId];

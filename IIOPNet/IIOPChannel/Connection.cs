@@ -52,10 +52,10 @@ namespace Ch.Elca.Iiop {
         #endregion Constants
         #region IFields
 
-        private uint m_charSetChosen = CodeSetService.DEFAULT_CHAR_SET;
-        private uint m_wcharSetChosen = CodeSetService.DEFAULT_WCHAR_SET;
-    	
-    	private Hashtable m_items = new Hashtable();                
+        private int m_charSetChosen = CodeSetService.DEFAULT_CHAR_SET;
+        private int m_wcharSetChosen = CodeSetService.DEFAULT_WCHAR_SET;
+        
+        private Hashtable m_items = new Hashtable();                
         
         private bool m_messagesExchanged = false;
 
@@ -68,7 +68,7 @@ namespace Ch.Elca.Iiop {
         #endregion IConstructors
         #region IProperties
 
-        public uint CharSet {
+        public int CharSet {
             get {
                 return m_charSetChosen;
             }
@@ -77,7 +77,7 @@ namespace Ch.Elca.Iiop {
             }
         }
 
-        public uint WCharSet {
+        public int WCharSet {
             get {
                 return m_wcharSetChosen;
             }
@@ -87,9 +87,9 @@ namespace Ch.Elca.Iiop {
         }
         
         public IDictionary Items {
-        	get {
-        		return m_items;
-        	}
+            get {
+                return m_items;
+            }
         }
         
         /// <summary>
@@ -111,22 +111,22 @@ namespace Ch.Elca.Iiop {
     
     /// <summary>the connection context for the client side</summary>
     internal class GiopClientConnectionDesc : GiopConnectionDesc {
-		
-		#region IFields
-		
-		private GiopRequestNumberGenerator m_reqNumGen = 
-		            new GiopRequestNumberGenerator();
-    	
-    	#endregion IFields
-    	#region IProperties 
-    	
-    	internal GiopRequestNumberGenerator ReqNumberGen {
+        
+        #region IFields
+        
+        private GiopRequestNumberGenerator m_reqNumGen = 
+                    new GiopRequestNumberGenerator();
+        
+        #endregion IFields
+        #region IProperties 
+        
+        internal GiopRequestNumberGenerator ReqNumberGen {
             get {
                 return m_reqNumGen;
             }
         }
-            	
-    	#endregion IProporties
+                
+        #endregion IProporties
     }
 
     /// <summary>
