@@ -1,3 +1,29 @@
+version 1.6.0 final (21 March 2003)
+-----------------------------------
+
+bugs fixed:
+
+- IDLToCLSCompiler: ParseException: wstring constant literals (bug #906401)
+- IDLToCLSCompiler: OverflowException for long long constant value -9.223.372.036.854.775.808: the smallest allowed long long (bug #909562)
+- value type impl source generator: missing inherited properties / methods fixed.
+
+new features:
+- IDLToCLSCompiler: now supports also octet integral constants
+- IDLToCLSCompiler: now able to generate strong name assemblies (feature request #901013) 
+- IIOPChannel: added list operation to NamingContext interface
+- Custom mapping mechanism: added support for java.lang.Long in ArrayLists / Hashmaps
+
+examples:
+- added EJB command pattern example in directory Examples\EJBCommandPattern\Jboss3.2
+
+
+documentation:
+- added the whole website as documentation (directory Doc)
+
+new tests:
+- multi-threading test
+
+
 version 1.6.0 rc0 (22 January 2003)
 -----------------------------------
 
