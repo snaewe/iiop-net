@@ -187,7 +187,7 @@ namespace Ch.Elca.Iiop {
                         break;
             		default:
                         Trace.WriteLine("unsupported GIOP-msg received: " + msgHeader.GiopType);
-                        throw new COMM_FAILURE(155, CompletionStatus.Completed_MayBe);
+                        throw new INTERNAL(155, CompletionStatus.Completed_MayBe);
             	}
             	
             } // end while (!fullyRead)
