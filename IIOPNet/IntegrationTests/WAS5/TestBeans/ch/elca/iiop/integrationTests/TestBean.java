@@ -181,7 +181,7 @@ public class TestBean implements SessionBean {
         IntAdder result = null;
         try {
             InitialContext ic = new InitialContext();
-            Object obj = ic.lookup("WAS5Inegration/intadder");
+            Object obj = ic.lookup("IntegrationTest/intadder");
             IntAdderHome home = (IntAdderHome) PortableRemoteObject.narrow(obj, IntAdderHome.class);
             result = home.create();
             

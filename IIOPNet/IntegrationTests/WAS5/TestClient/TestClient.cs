@@ -60,7 +60,7 @@ namespace ch.elca.iiop.integrationTests {
             // access COS nameing service
             RmiIiopInit init = new RmiIiopInit("localhost", 2809);
             m_nameService = (NamingContext)init.GetService("NameServiceServerRoot");
-            NameComponent[] name = new NameComponent[] { new NameComponent("WAS5Inegration", ""), new NameComponent("test", "") };
+            NameComponent[] name = new NameComponent[] { new NameComponent("IntegrationTest", ""), new NameComponent("test", "") };
             // get the reference to the test-home
             TestHome testhome = (TestHome) m_nameService.resolve(name);
             m_test = testhome.create();
@@ -277,7 +277,7 @@ namespace ch.elca.iiop.integrationTests {
 
         [Test]
         public void TestSendRefOfAProxy() {
-            NameComponent[] name = new NameComponent[] { new NameComponent("WAS5Inegration", ""), new NameComponent("intadder", "") };
+            NameComponent[] name = new NameComponent[] { new NameComponent("IntegrationTest", ""), new NameComponent("intadder", "") };
             // get the reference to the intadder-home
             IntAdderHome adderhome = (IntAdderHome) m_nameService.resolve(name);
             Assertion.AssertNotNull("int adder bean home not found!", adderhome);
