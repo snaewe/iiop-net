@@ -5,3 +5,4 @@ This directory is structured in the following way:
   it's work.
 - IDLPreporcessor subdirectory contains the IDL preprocessor
 - IDLParser subdirectory contains the javaCC file for generating the IDL-Parser.
+- IDL subdirectory contains the orb.idl, which should be used together with the IDLToCompiler
