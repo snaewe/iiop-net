@@ -222,7 +222,7 @@ namespace Ch.Elca.Iiop.IntegrationTests {
 
         [Test]
         public void TestJaggedArraysWithNullElems() {
-	    System.Int32[][] arg1 = null;
+        System.Int32[][] arg1 = null;
             System.Int32[][] result1 = m_testService.EchoJaggedIntArray(arg1);
             Assertion.AssertEquals(arg1, result1);
 
@@ -367,6 +367,12 @@ namespace Ch.Elca.Iiop.IntegrationTests {
             object result = m_testService.GetDoubleAsAny(arg);
             Assertion.AssertEquals(result.GetType().FullName, "java.lang._Double");
         }
+        
+        public void TestStringAsAny() {
+            string arg = "TestArg";
+            string result = (string) m_testService.EchoAnything(arg);
+            Assertion.AssertEquals(arg, result);
+        }
 
         [Test]
         public void TestPassingForFormalParamObjectComplexTypes() {           
@@ -429,18 +435,18 @@ namespace Ch.Elca.Iiop.IntegrationTests {
         /// if other checks don't work</summary>
         [Test]
         public void TestInterfaceCompMbrDeser() {
-	    TestSimpleInterface1 proxy1 = (TestSimpleInterface1)m_testService.GetSimpleService1();
+        TestSimpleInterface1 proxy1 = (TestSimpleInterface1)m_testService.GetSimpleService1();
             Assertion.AssertNotNull("testSimpleService1 ref not received", proxy1);
             Assertion.AssertEquals(true, proxy1.ReturnTrue());
 
-	    TestSimpleInterface2 proxy2 = (TestSimpleInterface2)m_testService.GetSimpleService2();
+        TestSimpleInterface2 proxy2 = (TestSimpleInterface2)m_testService.GetSimpleService2();
             Assertion.AssertNotNull("testSimpleService2 ref not received", proxy2);
             Assertion.AssertEquals(false, proxy2.ReturnFalse());                        
         }
 
         [Test]
         public void TestIsACall() {
-	    omg.org.CORBA.IObject proxy1 = (omg.org.CORBA.IObject)m_testService.GetSimpleService1();
+        omg.org.CORBA.IObject proxy1 = (omg.org.CORBA.IObject)m_testService.GetSimpleService1();
             Assertion.AssertNotNull("testSimpleService1 ref not received", proxy1);            
             Assertion.AssertEquals(true, proxy1._is_a("RMI:Ch.Elca.Iiop.IntegrationTests.TestSimpleInterface1:0000000000000000"));
             
