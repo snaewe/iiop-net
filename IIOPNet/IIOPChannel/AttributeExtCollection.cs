@@ -38,7 +38,7 @@ namespace Ch.Elca.Iiop.Util {
     /// <summary>
     /// A more powerful Attribute collection than AttributeCollection.
     /// </summary>
-    public class AttributeExtCollection : ICollection {
+    public class AttributeExtCollection : ICollection, ICloneable {
         
         #region SFields
         
@@ -198,6 +198,14 @@ namespace Ch.Elca.Iiop.Util {
         }
 
         #endregion Implementation of IEnumerable
+        
+        /// <summary>creates a copy of AttributeExtCollection; 
+        /// does not create a copy of the Attributes</summary>
+        public virtual object Clone() {
+            AttributeExtCollection copy = new AttributeExtCollection();
+            copy.m_attributes = (ArrayList)m_attributes.Clone();
+            return copy;
+        }
 
         #endregion IMethods
         

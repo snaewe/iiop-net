@@ -54,6 +54,9 @@ namespace Ch.Elca.Iiop.Idl {
         public TypeContainer(Type clsType, CustomAttributeBuilder[] attrs) {
             m_clsType = clsType;
             m_separatedClsType = null;
+            if (attrs == null) {
+                throw new ArgumentException("TypeContainer; attrs must be != null"); 
+            }
             m_compactTypeAttrs = attrs;
             m_separatedAttrs = null;
         }

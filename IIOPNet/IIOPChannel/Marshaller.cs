@@ -217,11 +217,15 @@ namespace Ch.Elca.Iiop.Marshalling {
         #region IMethods
 
         public void Marshal(object actual, CdrOutputStream targetStream) {
-            base.Marshal(m_formalToSer, m_attributes, m_ser, actual, targetStream);
+            base.Marshal(m_formalToSer, 
+                         (AttributeExtCollection)m_attributes.Clone(),
+                         m_ser, actual, targetStream);
         }
 
         public object Unmarshal(CdrInputStream sourceStream) {
-            return base.Unmarshal(m_formalToSer, m_formal, m_attributes, m_ser, sourceStream);
+            return base.Unmarshal(m_formalToSer, m_formal, 
+                                  (AttributeExtCollection)m_attributes.Clone(),
+                                  m_ser, sourceStream);
         }
 
         #endregion IMethods

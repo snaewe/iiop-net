@@ -2012,8 +2012,22 @@ public class MetaDataGenerator : IDLParserVisitor {
         }
         
         Debug.WriteLine("created array type: " + arrayType);        
-        TypeContainer result = new TypeContainer(arrayType, 
-                                                 new CustomAttributeBuilder[] { new IdlSequenceAttribute().CreateAttributeBuilder() } );
+        // determine the needed attributes: IdlSequence is required by the sequence itself; 
+        // combine with the attribute from the element type
+        // possible are: IdlSequence (for sequence of sequence), ObjectIdlType,
+        // WideChar, StringValue
+        // invariant: boxed value attribute is not among them, because elem type 
+        // is in the compact form        
+        CustomAttributeBuilder[] customAttrs = 
+            new CustomAttributeBuilder[1 + elemType.GetCompactTypeAttrs().Length];
+        customAttrs[0] = new IdlSequenceAttribute().CreateAttributeBuilder();
+        if (elemType.GetCompactTypeAttrs().Length > 0) {
+            Array.Copy((Array)(elemType.GetCompactTypeAttrs()), 0,
+                       (Array)customAttrs, 1, 
+                       elemType.GetCompactTypeAttrs().Length );
+        }        
+        TypeContainer result = new TypeContainer(arrayType,
+                                                 customAttrs );
         return result;
     }
 
