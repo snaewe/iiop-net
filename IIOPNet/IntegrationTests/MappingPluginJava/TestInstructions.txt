@@ -1,0 +1,22 @@
+Prerequisites
+-------------
+
+For running this integration test, you need NUnit V2.0 or newer.
+
+Building the test
+-----------------
+
+- set NUNITV2_HOME to your NUnit V2.0 home directory, e.g. C:\Programme\NUnitV2
+- use nmake to build the testserver and the integration test.
+
+Running the test
+----------------
+
+- before starting the test, start the server:
+  change to directory TestServer\bin
+  launch start orbd -ORBInitialPort 1050
+  launch start java -Djava.naming.factory.initial=com.sun.jndi.cosnaming.CNCtxFactory -Djava.naming.provider.url=iiop://localhost:1050 -cp . TestServer
+- The test can be run using the NUnit GUI or the NUnit Console runner
+  Running the test with console launcher:
+  - change to directory TestClient
+  - launch LaunchTest.bat

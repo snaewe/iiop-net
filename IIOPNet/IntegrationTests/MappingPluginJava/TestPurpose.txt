@@ -1,0 +1,6 @@
+This integration test tests the mapping plugin with java collections.
+
+The TestService provided methods returing or taking different java collections,
+e.g. java.util.ArrayList.
+
+
