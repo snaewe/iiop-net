@@ -666,10 +666,20 @@ namespace Ch.Elca.Iiop.MessageHandling {
             AlignBodyIfNeeded(targetStream, version);
             MethodBase throwingMethod = msg.MethodBase;
             Exception exceptionToThrow = msg.Exception;
-            if (ReflectionHelper.IIdlEntityType.IsAssignableFrom(throwingMethod.DeclaringType)) {
-                exceptionToThrow = DetermineIdlExceptionToThrow(msg.Exception,
-                                                                throwingMethod);
-            }            
+            if (throwingMethod != null) {
+                if (ReflectionHelper.IIdlEntityType.IsAssignableFrom(throwingMethod.DeclaringType)) {
+                    exceptionToThrow = DetermineIdlExceptionToThrow(msg.Exception,
+                                                                    throwingMethod);
+                }
+            } else {
+                // throwingMethod == null means here, that the target method was not determined,
+                // i.e. the request deserialisation was not ok
+                Debug.WriteLine("exception encountered before remote method call target determined: " + 
+                                msg.Exception);
+                if (!SerialiseAsSystemException(msg.Exception)) {
+                    exceptionToThrow = new UNKNOWN(201, CompletionStatus.Completed_No);
+                }
+            }
             // marshal the exception, TBD distinguish some cases here
             if (SerialiseAsSystemException(exceptionToThrow)) {
                 SerialiseSystemException(targetStream, exceptionToThrow);
