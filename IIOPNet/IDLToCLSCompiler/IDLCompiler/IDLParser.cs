@@ -155,6 +155,7 @@ public class IDLParser{/*@bgen(jjtree)*/
           default:
             jj_la1[0] = jj_gen;
             goto label_1;
+            break;
           }
         }
         label_1: ;
