@@ -467,26 +467,7 @@ namespace Ch.Elca.Iiop.IdlCompiler.Action {
         public void UnpublishTypeForSequenceRecursion() {
             m_sequenceRecursionAllowedType = null;
         }
-               
-        
-//        /// <summary>
-//        /// creates a typename for a nested type, which is not nestable
-//        /// directly in containing type.
-//        /// These types are defined in a special namespace.
-//        /// </summary>
-//        private string GetFullTypeNameForNestedNotInOuterType(Symbol forSymbol) {
-//            Scope declIn = forSymbol.getDeclaredIn();
-//            return declIn.getFullyQualifiedNameForNested(forSymbol.getSymbolName());
-//        }
-//        
-//        /// <summary>
-//        /// is the type represented by forSymbol nested in another type?
-//        /// </summary>
-//        private bool IsNestedType(Symbol forSymbol) {
-//            Scope parentScope = forSymbol.getDeclaredIn();
-//            return parentScope.IsTypeScope();
-//        }
-        
+                
         #endregion IMethods                     
 
     }

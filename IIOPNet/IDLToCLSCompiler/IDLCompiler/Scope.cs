@@ -210,31 +210,6 @@ public class Scope {
         return getScopeName() + "_package";     
     }
     
-//    /// <summary>
-//    /// gets the fully qualified symbol name, if the current scope should be
-//    /// considered as a nested Scope.
-//    /// </summary>
-//    /// <remarks>
-//    /// This method does not update the symbol table, if no nested scope is
-//    /// associated to the current scope (unlike getScopeForNested()).
-//    /// </remarks>
-//    public String getFullyQualifiedNameForNested(String symbolName) {
-//         if (getSymbol(symbolName) == null) { 
-//            throw new InternalCompilerException("error in scope " + this + ", symbol with name: " + symbolName + " not found"); 
-//        }        
-//        String outerScopeName = "";
-//        if (getParentScope() != null) {
-//            outerScopeName = getParentScope().getFullyQualifiedScopeName();
-//        }        
-//        if (outerScopeName.Length > 0) {
-//            outerScopeName += ".";
-//        }
-//        String nestedScopeName = IdlNaming.MapIdlNameToClsName(getNestedScopeNameForScope());
-//        String result = outerScopeName + nestedScopeName + "." +
-//                        IdlNaming.MapIdlNameToClsName(symbolName);
-//        return result;
-//    }
-
 	private String getTypeScopeName() {
         // for a type scope, the nested name must be used, because types are always nested in a special namespace    
 	    if (!IsTypeScope()) {
@@ -281,23 +256,6 @@ public class Scope {
             }                                              
         }
     }
-
-//    /// <summary>
-//    /// create or retrieve a Scope for nested IDL-types, which may not be nested inside the mapped CLS type of the container scope.
-//    /// </summary>
-//    /// <param name="cratedFor">the Symbol for which the nested scope should be created / retrieved</param>
-//    public Scope GetScopeForNested(Symbol createdFor) {
-//        Scope parentOfContainer = getParentScope();
-//        String nestedScopeName = getNestedScopeNameForScope();
-//        if (!(parentOfContainer.containsChildScope(nestedScopeName))) {
-//            parentOfContainer.addChildScope(new Scope(nestedScopeName, parentOfContainer, false));
-//        }
-//        Scope nestedScope = parentOfContainer.getChildScope(nestedScopeName);
-//        // To CHECK: Is the following problematic, because a Symboldefinition is added 
-//        // and not e.g. a SymbolValue for constants?
-//        nestedScope.addSymbol(createdFor.getSymbolName());        
-//        return nestedScope;
-//    }
     
     /// <summary>
     /// adds an inherited scope (e.g. interface A : B leads to A inheriting scope B)
