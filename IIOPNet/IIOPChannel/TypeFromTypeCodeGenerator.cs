@@ -81,7 +81,7 @@ namespace Ch.Elca.Iiop.Idl {
         /// If so, return the type
         /// </summary>
         internal Type RetrieveType(string fullname) {
-            return m_asmBuilder.GetType(fullname);
+            return m_modBuilder.GetType(fullname);
         }
 
         /// <summary>
