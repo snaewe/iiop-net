@@ -363,6 +363,22 @@ namespace Ch.Elca.Iiop.IntegrationTests {
             System.Int32 newVal = m_testService.testProp;
             Assertion.AssertEquals(arg, newVal);
         }
+
+        [Test]
+        public void TestFragments() {
+            // use a really big argument to force fragmentation at server side
+            int size = 16000;
+            byte[] hugeArg = new byte[size];
+            for (int i = 0; i < size; i++) {
+                hugeArg[i] = (byte)(i % 256);
+            }
+            
+            byte[] result = m_testService.TestAppendElementToByteArray(hugeArg, (byte)(size % 256));
+            Assertion.AssertEquals(result.Length, size + 1);
+            for (int i = 0; i < size + 1; i++) {
+                Assertion.AssertEquals((byte)(i % 256), result[i]);
+            }
+        }
         
     }
 
