@@ -810,8 +810,12 @@ void type_declarator() :
             ASTdeclarator decl = (ASTdeclarator) declaratorNodes.jjtGetChild(i);
             if (decl.jjtGetChild(0) is ASTsimple_declarator) {
                 String ident = ((SimpleNodeWithIdent) decl.jjtGetChild(0)).getIdent();
-                    currentScope.addTypeDef(ident);
-                    }
+                currentScope.addTypeDef(ident);
+            } else if (decl.jjtGetChild(0) is ASTcomplex_declarator) {
+                /* complex_declarator contains an array_declarator */                
+                String ident = ((SimpleNodeWithIdent) decl.jjtGetChild(0).jjtGetChild(0)).getIdent();
+                currentScope.addTypeDef(ident);
+            }
         }
   }
 }
