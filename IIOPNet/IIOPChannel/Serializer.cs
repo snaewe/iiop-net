@@ -839,6 +839,10 @@ namespace Ch.Elca.Iiop.Marshalling {
                 // mapped from an IDL-sequence or CLS to IDL mapping
                 attributes.RemoveAttributeOfType(typeof(IdlSequenceAttribute)); // this attribute is handled --> remove it
                 Array array = (Array) actual;
+                if (array == null) {
+                    // not allowed for a sequence:
+                    throw new MARSHAL(3433, CompletionStatus.Completed_MayBe);
+                }
                 targetStream.WriteULong((uint)array.Length);
                 // get marshaller for elemtype
                 Type elemType = formal.GetElementType();
