@@ -293,8 +293,14 @@ namespace Ch.Elca.Iiop.Idl {
         /// loading a type from an assembly with asm.GetType is a fast operation
         /// </remarks>
         private static void CreateAssemblyCache() {
+            MethodInfo curMethod = (MethodInfo)MethodBase.GetCurrentMethod();
+            Assembly curAsm = curMethod.DeclaringType.Assembly; // the channel assembly
+            s_asmCache.Add(curAsm); // add channel assembly to the asm cache
+            
+            // search for other assemblies
             AppDomain curAppDomain = AppDomain.CurrentDomain;
             DirectoryInfo dir = new DirectoryInfo(curAppDomain.BaseDirectory); // search appdomain directory for assemblies
+            
             CacheAssembliesFromDir(dir, s_asmCache);
             DirectoryInfo[] subdirs = dir.GetDirectories();    // search subdirectories for assemblies
             for (int i = 0; i < subdirs.Length; i++) {
@@ -316,7 +322,9 @@ namespace Ch.Elca.Iiop.Idl {
             for (int i = 0; i < asms.Length; i++) {
                 try {
                     Assembly asm = Assembly.LoadFrom(asms[i].FullName);
-                    asmCache.Add(asm); // add assembly to cache
+                    if (!asmCache.Contains(asm)) {
+                        asmCache.Add(asm); // add assembly to cache
+                    }
                 } catch (Exception e) {
                     Debug.WriteLine("invalid asm found, exception: " + e);
                 }
