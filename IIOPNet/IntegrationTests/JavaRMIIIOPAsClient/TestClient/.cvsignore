@@ -1,2 +1,6 @@
 bin
 IDL
+org
+Ch
+*.class
+
