@@ -202,6 +202,13 @@ namespace Ch.Elca.Iiop.IntegrationTests {
             return result;
         }
 
+        public System.String[] CreateTwoElemStringArray(System.String arg1, System.String arg2) {
+            System.String[] result = new System.String[2];
+            result[0] = arg1;
+            result[1] = arg2;
+            return result;
+        }
+
         public Adder RetrieveAdder() {
             return new Adder();
         }

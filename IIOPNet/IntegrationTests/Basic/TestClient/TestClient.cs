@@ -183,11 +183,17 @@ namespace Ch.Elca.Iiop.IntegrationTests {
         }
 
         [Test]
-        public void TestStringArray() {
+        public void TestStringArray() {            
+            System.String arg1 = "abc";
+            System.String arg2 = "def";
+            System.String[] result = m_testService.CreateTwoElemStringArray(arg1, arg2);
+            Assertion.AssertEquals(arg1, result[0]);
+            Assertion.AssertEquals(arg2, result[1]);
+            
             System.String[] arg = new System.String[1];
             arg[0] = "abc";
             System.String toAppend = "def";
-            System.String[] result = m_testService.TestAppendElementToStringArray(arg, toAppend);
+            result = m_testService.TestAppendElementToStringArray(arg, toAppend);
             Assertion.AssertEquals(2, result.Length);
             Assertion.AssertEquals("abc", result[0]);
             Assertion.AssertEquals("def", result[1]);
