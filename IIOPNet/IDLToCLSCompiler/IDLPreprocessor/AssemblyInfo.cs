@@ -27,6 +27,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
+using System;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 
@@ -52,7 +53,8 @@ using System.Runtime.CompilerServices;
 // You can specify all values by your own or you can build default build and revision
 // numbers with the '*' character (the default):
 
-[assembly: AssemblyVersion("1.0.7000.0")]
+[assembly: AssemblyVersion("1.7.0000.0")]
+[assembly: CLSCompliant(true)]
 
 // The following attributes specify the key for the sign of your assembly. See the
 // .NET Framework documentation for more information about signing.

@@ -1,3 +1,34 @@
+/* AssemblyInfo.cs
+ * 
+ * Project: IIOP.NET
+ * SSLPlugin
+ * 
+ * WHEN      RESPONSIBLE
+ * 29.04.04  Dominic Ullmann (DUL), dominic.ullmann -at- elca.ch
+ * 
+ * Copyright 2004 Dominic Ullmann
+ *
+ * Copyright 2003 ELCA Informatique SA
+ * Av. de la Harpe 22-24, 1000 Lausanne 13, Switzerland
+ * www.elca.ch
+ * 
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ */
+
+
+using System;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 
@@ -10,9 +41,9 @@ using System.Runtime.CompilerServices;
 [assembly: AssemblyTitle("")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("")]
-[assembly: AssemblyProduct("")]
-[assembly: AssemblyCopyright("")]
+[assembly: AssemblyCompany("ELCA")]
+[assembly: AssemblyProduct("IIOP.NET")]
+[assembly: AssemblyCopyright("2003")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
@@ -23,7 +54,8 @@ using System.Runtime.CompilerServices;
 // You can specify all values by your own or you can build default build and revision
 // numbers with the '*' character (the default):
 
-[assembly: AssemblyVersion("1.0.*")]
+[assembly: AssemblyVersion("1.7.0000.0")]
+[assembly: CLSCompliant(true)]
 
 // The following attributes specify the key for the sign of your assembly. See the
 // .NET Framework documentation for more information about signing.

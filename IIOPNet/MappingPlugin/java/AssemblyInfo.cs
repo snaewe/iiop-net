@@ -1,10 +1,10 @@
 /* AssemblyInfo.cs
  * 
  * Project: IIOP.NET
- * IDLToCLSCompiler
+ * MappingPlugin
  * 
  * WHEN      RESPONSIBLE
- * 14.02.03  Dominic Ullmann (DUL), dul@elca.ch
+ * 17.08.03  Dominic Ullmann (DUL), dominic.ullmann -at- elca.ch
  * 
  * Copyright 2003 Dominic Ullmann
  *
@@ -27,7 +27,6 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
-
 using System;
 using System.Reflection;
 using System.Runtime.CompilerServices;
@@ -44,7 +43,7 @@ using System.Runtime.CompilerServices;
 [assembly: AssemblyProduct("IIOP.NET")]
 [assembly: AssemblyCopyright("2003")]
 [assembly: AssemblyTrademark("")]
-[assembly: AssemblyCulture("")]
+[assembly: AssemblyCulture("")]            
 
 //
 // Version information for an assembly consists of the following four values:
@@ -54,8 +53,8 @@ using System.Runtime.CompilerServices;
 //      Build Number
 //      Revision
 //
-// You can specify all the values or you can default the Revision and Build
-// Numbers by using the '*' as shown below:
+// You can specify all the values or you can default the Revision and Build Numbers 
+// by using the '*' as shown below:
 
 [assembly: AssemblyVersion("1.7.0000.0")]
 [assembly: CLSCompliant(true)]
@@ -78,12 +77,12 @@ using System.Runtime.CompilerServices;
 //           in the KeyFile is installed into the CSP and used.
 //   (*) In order to create a KeyFile, you can use the sn.exe (Strong Name) utility.
 //       When specifying the KeyFile, the location of the KeyFile should be
-//       relative to the project directory. For example, if your KeyFile is
-//       located in the project directory itself, you would specify the
-//       AssemblyKeyFile attribute as @assembly AssemblyKeyFile("mykey.snk")
+//       relative to the project output directory which is
+//       %Project Directory%\obj\<configuration>. For example, if your KeyFile is
+//       located in the project directory, you would specify the AssemblyKeyFile 
+//       attribute as [assembly: AssemblyKeyFile("..\\..\\mykey.snk")]
 //   (*) Delay Signing is an advanced option - see the Microsoft .NET Framework
 //       documentation for more information on this.
 //
-
 [assembly: AssemblyDelaySign(false)]
 [assembly: AssemblyKeyName("")]
