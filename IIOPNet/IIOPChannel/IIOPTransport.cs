@@ -417,11 +417,13 @@ namespace Ch.Elca.Iiop {
                 new GiopTransportServerMsgHandler(inStream, m_transportSink);
             while (connected) {
                 try {
-                    m_transportSink.Process(inStream, serverMsgHandler);
-                    
-                    // check connected:
-                    // TODO
-                    
+                    bool okToReceiveMore = 
+                        m_transportSink.Process(inStream, serverMsgHandler);
+                    if (!okToReceiveMore) {
+                        // close connection
+                        m_client.Close();
+                        connected = false;
+                    }                    
                 } catch (IOException ie) {
                     if (!(typeof(SocketException).IsInstanceOfType(ie.InnerException))) {
                         Debug.WriteLine("unexpected Exception in handle-requests: " + ie);
