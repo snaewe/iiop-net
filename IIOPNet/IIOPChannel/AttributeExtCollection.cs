@@ -154,6 +154,14 @@ namespace Ch.Elca.Iiop.Util {
             m_attributes.Insert(0, attr);
         }
 
+        public void AddMissingAttributes(object[] toAdd) {
+            foreach (Attribute attr in toAdd) {
+                if (!Contains(attr)) {
+                    InsertAttribute(attr);
+                }
+            }
+        }
+
         public override bool Equals(object obj) {
             if (obj == null) { return false; }
             if (!(obj.GetType().Equals(typeof(AttributeExtCollection)))) { return false; }

@@ -36,6 +36,110 @@ using Ch.Elca.Iiop.Util;
 
 namespace Ch.Elca.Iiop.Marshalling {
 
+    
+    internal class ReflectionHelper {
+
+        /// <summary>
+        /// collects the custom attributes on the current parameter and from
+        /// the paramters from inherited methods.
+        /// </summary>
+        /// <param name="paramInfo">the parameter to check</param>
+        /// <returns>a collection of attributes</returns>
+        public static AttributeExtCollection CollectParameterAttributes(ParameterInfo paramInfo, MethodInfo paramInMethod) {
+            AttributeExtCollection result = AttributeExtCollection.ConvertToAttributeCollection(
+                                                                        paramInfo.GetCustomAttributes(true));
+            if (!paramInMethod.IsVirtual) {
+                return result;
+            }
+
+            MethodInfo baseDecl = paramInMethod.GetBaseDefinition();
+            if (!baseDecl.Equals(paramInMethod)) {
+                // add param attributes from base definition if not already present
+                ParameterInfo[] baseParams = baseDecl.GetParameters();
+                ParameterInfo baseParamToConsider = baseParams[paramInfo.Position];
+                result.AddMissingAttributes(baseParamToConsider.GetCustomAttributes(true));
+            }
+            
+            Type declaringType = paramInMethod.DeclaringType;
+            // search interfaces for method definition
+            Type[] interfaces = declaringType.GetInterfaces();
+            foreach (Type interf in interfaces) {
+                MethodInfo found = IsMethodDefinedInInterface(paramInMethod, interf);
+                if (found != null) {
+                    // add param attributes from interface definition if not already present
+                    ParameterInfo[] ifParams = found.GetParameters();
+                    ParameterInfo ifParamToConsider = ifParams[paramInfo.Position];
+                    result.AddMissingAttributes(ifParamToConsider.GetCustomAttributes(true));
+                }
+            }
+
+            return result;
+        }
+
+
+        /// <summary>
+        /// collects the custom attributes on the return parameter and from
+        /// the return paramters from inherited methods.
+        /// </summary>
+        /// <returns>a collection of attributes</returns>
+        public static AttributeExtCollection CollectReturnParameterAttributes(MethodInfo method) {
+            AttributeExtCollection result = AttributeExtCollection.ConvertToAttributeCollection(
+                                                method.ReturnTypeCustomAttributes.GetCustomAttributes(true));
+
+            if (!method.IsVirtual) {
+                return result;
+            }
+            
+            MethodInfo baseDecl = method.GetBaseDefinition();
+            if (!baseDecl.Equals(method)) {
+                // add return param attributes from base definition if not already present               
+                result.AddMissingAttributes(baseDecl.ReturnTypeCustomAttributes.GetCustomAttributes(true));
+            }
+            
+            Type declaringType = method.DeclaringType;
+            // search interfaces for method definition
+            Type[] interfaces = declaringType.GetInterfaces();
+            foreach (Type interf in interfaces) {
+                MethodInfo found = IsMethodDefinedInInterface(method, interf);
+                if (found != null) {
+                    // add return param attributes from interface definition if not already present
+                    result.AddMissingAttributes(found.ReturnTypeCustomAttributes.GetCustomAttributes(true));
+                }
+            }
+
+            return result;
+
+                                
+        }
+
+        /// <summary>
+        /// checks, if a similar method is defined in the interface specified;
+        /// returns its MethodInfo if true, else returns null;
+        /// </summary>
+        /// <param name="method"></param>
+        /// <param name="ifType"></param>
+        /// <returns></returns>
+        private static MethodInfo IsMethodDefinedInInterface(MethodInfo method, Type ifType) {            
+            try {
+                MethodInfo found = ifType.GetMethod(method.Name, ExtractMethodTypes(method));
+                return found;
+            } catch (Exception) {
+                return null;
+            }
+        }
+
+        private static Type[] ExtractMethodTypes(MethodInfo method) {
+            ParameterInfo[] parameters = method.GetParameters();
+            Type[] result = new Type[parameters.Length];
+            for (int i = 0; i < parameters.Length; i++) {
+                result[i] = parameters[i].ParameterType;
+            }
+            return result;
+        }
+
+    }
+    
+    
     /// <summary>
     /// Marshalles and Unmarshalles method parameters
     /// </summary>
@@ -61,19 +165,7 @@ namespace Ch.Elca.Iiop.Marshalling {
         }
 
         #endregion SMethods
-        #region IMethods
-
-        /// <summary>
-        /// marshals a parameter
-        /// </summary>
-        /// <param name="paramInfo">The parameter reflection data</param>
-        /// <param name="actual">the value, which should be marshalled for the parameter</param>
-        private void Marshal(ParameterInfo paramInfo, object actual, CdrOutputStream targetStream) {
-            Marshal(paramInfo.ParameterType, 
-                    AttributeExtCollection.ConvertToAttributeCollection(
-                                                paramInfo.GetCustomAttributes(true)),
-                    actual, targetStream);
-        }
+        #region IMethods        
 
         /// <summary>
         /// marshals an intem
@@ -86,19 +178,6 @@ namespace Ch.Elca.Iiop.Marshalling {
                              CdrOutputStream targetStream) {
             Marshaller marshal = Marshaller.GetSingleton();
             marshal.Marshal(type, attributes, actual, targetStream);
-        }
-
-        /// <summary>
-        /// unmarshals a parameter
-        /// </summary>
-        /// <param name="paramInfo"></param>
-        /// <param name="sourceStream"></param>
-        /// <returns></returns>
-        private object Unmarshal(ParameterInfo paramInfo, CdrInputStream sourceStream) {
-            return Unmarshal(paramInfo.ParameterType, 
-                             AttributeExtCollection.ConvertToAttributeCollection(
-                                    paramInfo.GetCustomAttributes(true)),
-                             sourceStream);
         }
 
         /// <summary>
@@ -142,7 +221,10 @@ namespace Ch.Elca.Iiop.Marshalling {
             foreach (ParameterInfo paramInfo in parameters) {
                 // iterate through the parameters, nonOut and nonRetval params are serialised for a request
                 if (IsInParam(paramInfo) || IsRefParam(paramInfo)) {
-                    Marshal(paramInfo, actual[actualParamNr], targetStream);                    
+                    AttributeExtCollection paramAttrs = ReflectionHelper.CollectParameterAttributes(paramInfo, 
+                                                                                                    method);                    
+                    Marshal(paramInfo.ParameterType, paramAttrs, 
+                            actual[actualParamNr], targetStream);
                     actualParamNr++;
                 }
             }
@@ -161,7 +243,10 @@ namespace Ch.Elca.Iiop.Marshalling {
             
             foreach (ParameterInfo paramInfo in parameters) {
                 if (IsInParam(paramInfo) || IsRefParam(paramInfo)) {
-                    object unmarshalledParam = Unmarshal(paramInfo, sourceStream);
+                    AttributeExtCollection paramAttrs = ReflectionHelper.CollectParameterAttributes(paramInfo, 
+                                                                                                    method);
+                    object unmarshalledParam = Unmarshal(paramInfo.ParameterType, paramAttrs,
+                                                         sourceStream);
                     demarshalled.Add(unmarshalledParam);
                 } else if (IsOutParam(paramInfo)) {
                     // add null for an out parameter
@@ -201,8 +286,7 @@ namespace Ch.Elca.Iiop.Marshalling {
             ParameterInfo[] parameters = method.GetParameters();
             // first serialise the return value, 
             if (!method.ReturnType.Equals(s_voidType)) {
-                AttributeExtCollection returnAttr = AttributeExtCollection.ConvertToAttributeCollection(
-                                                        method.ReturnTypeCustomAttributes.GetCustomAttributes(true));
+                AttributeExtCollection returnAttr = ReflectionHelper.CollectReturnParameterAttributes(method);
                 Marshal(method.ReturnType, returnAttr, retValue, targetStream);
             }
             // ... then the out/ref args
@@ -210,7 +294,9 @@ namespace Ch.Elca.Iiop.Marshalling {
             foreach (ParameterInfo paramInfo in parameters) {
                 // iterate through the parameters, out/ref parameters are serialised
                 if (IsOutParam(paramInfo) || IsRefParam(paramInfo)) {
-                    Marshal(paramInfo, outArgs[outParamNr], targetStream);
+                    AttributeExtCollection paramAttrs = ReflectionHelper.CollectParameterAttributes(paramInfo, 
+                                                                                                    method);
+                    Marshal(paramInfo.ParameterType, paramAttrs, outArgs[outParamNr], targetStream);
                     outParamNr++;
                 }
             }
@@ -249,8 +335,7 @@ namespace Ch.Elca.Iiop.Marshalling {
             // demarshal first the return value, 
             object retValue = null;
             if (!method.ReturnType.Equals(s_voidType)) {
-                AttributeExtCollection returnAttr = AttributeExtCollection.ConvertToAttributeCollection(
-                                                        method.ReturnTypeCustomAttributes.GetCustomAttributes(true));
+                AttributeExtCollection returnAttr = ReflectionHelper.CollectReturnParameterAttributes(method);
                 retValue = Unmarshal(method.ReturnType, returnAttr, sourceStream);
             }
             
@@ -259,7 +344,10 @@ namespace Ch.Elca.Iiop.Marshalling {
             bool outArgFound = false;
             foreach (ParameterInfo paramInfo in parameters) {
                 if (IsOutParam(paramInfo) || IsRefParam(paramInfo)) {
-                    object unmarshalledParam = Unmarshal(paramInfo, sourceStream);
+                    AttributeExtCollection paramAttrs = ReflectionHelper.CollectParameterAttributes(paramInfo, 
+                                                                                                    method);
+                    object unmarshalledParam = Unmarshal(paramInfo.ParameterType, paramAttrs, 
+                                                         sourceStream);
                     demarshalledOutArgs.Add(unmarshalledParam);
                     outArgFound = true;
                 } else {
