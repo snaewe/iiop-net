@@ -1622,7 +1622,9 @@ public class MetaDataGenerator : IDLParserVisitor {
         
         TypeBuilder structToCreate = null;
         BuildInfo thisTypeInfo = null;
-        TypeAttributes typeAttrs = TypeAttributes.Class | TypeAttributes.Public | TypeAttributes.Serializable | TypeAttributes.BeforeFieldInit | TypeAttributes.SequentialLayout | TypeAttributes.Sealed;
+        // layout-sequential causes problem, if member of array type is not fully defined (TypeLoadException) -> use autolayout instead
+        TypeAttributes typeAttrs = TypeAttributes.Class | TypeAttributes.Public | TypeAttributes.Serializable | TypeAttributes.BeforeFieldInit | 
+                                   /* TypeAttributes.SequentialLayout | */ TypeAttributes.Sealed;
         if (buildInfo.GetContainterType() == null) {
             // independent dcl
             String fullyQualName = buildInfo.GetBuildScope().getFullyQualifiedNameForSymbol(forSymbol.getSymbolName());
