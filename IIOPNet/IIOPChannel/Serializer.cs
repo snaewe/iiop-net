@@ -740,6 +740,11 @@ namespace Ch.Elca.Iiop.Marshalling {
     /// <summary>serializes an instance as IDL-any</summary>
     public class AnySerializer : Serialiser {
 
+        #region SFields
+
+        private static Type s_supInterfaceAttrType = typeof(SupportedInterfaceAttribute);
+
+        #endregion SFields
         #region IFields
         
         private TypeCodeSerializer m_typeCodeSer = new TypeCodeSerializer();
@@ -747,17 +752,44 @@ namespace Ch.Elca.Iiop.Marshalling {
         #endregion IFields
         #region IMethods
 
+        /// <summary>
+        /// get the type to use for serialisation.        
+        /// </summary>
+        /// <remarks>
+        /// If a supported-interface attr is present on a MarshalByRefObject, then, the serialisation
+        /// must be done for the interface type and not for the implementation type of the MarshalByRefObject,
+        /// because otherwise the deserialisation would result into a problem, because only the sup-if type
+        /// is know at deser.
+        /// </remarks>
+        /// <param name="actual"></param>
+        /// <returns></returns>
+        private Type DetermineTypeToUse(object actual) {
+            if (actual == null) {
+                return null;
+            }
+            Type result = actual.GetType();
+            object[] attr = actual.GetType().GetCustomAttributes(s_supInterfaceAttrType, true);
+            if (attr != null && attr.Length > 0) {
+                SupportedInterfaceAttribute ifType = (SupportedInterfaceAttribute) attr[0];
+                result = ifType.FromType;
+            }
+            return result;
+        }
+        
+        
         public override void Serialise(Type formal, object actual, AttributeExtCollection attributes,
                                        CdrOutputStream targetStream) {
             TypeCodeImpl typeCode = new NullTC();
+            Type actualType = null;            
             if (actual != null) {
-                typeCode = Repository.CreateTypeCodeForType(actual.GetType(), attributes);
+                actualType = DetermineTypeToUse(actual);
+                typeCode = Repository.CreateTypeCodeForType(actualType, attributes);
             }
             typeCode.WriteToStream(targetStream);
             if (actual != null) {
                 Marshaller marshaller = Marshaller.GetSingleton();
                 attributes.RemoveAttributeOfType(typeof(ObjectIdlTypeAttribute));
-                marshaller.Marshal(actual.GetType(), attributes, actual, targetStream);
+                marshaller.Marshal(actualType, attributes, actual, targetStream);
             }
         }
 
