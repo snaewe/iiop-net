@@ -32,6 +32,10 @@ build: nunit-var junit-var
 	@if not defined WAS_HOME echo WAS_HOME not set, skipping WAS5 integration test
 	@if defined WAS_HOME $(MAKE) build
 	cd ..
+	cd WAS5_1
+	@if not defined WAS5_1_HOME echo WAS5_1_HOME not set, skipping WAS5_1 integration test
+	@if defined WAS5_1_HOME $(MAKE) build
+	cd ..
 	cd MICO
 	@if not defined MICO_HOME echo MICO_HOME not set, skipping MICO integration test
 	@if defined MICO_HOME $(MAKE) /F Makefile.Win32 /C build
@@ -40,6 +44,11 @@ build: nunit-var junit-var
 	@if not defined OMNIORB_HOME echo OMNIORB_HOME not set, skipping OmniORB integration test
 	@if defined OMNIORB_HOME $(MAKE) /C build
 	cd ..
+#	cd JacORB
+#	@if not defined JACORB_HOME echo JACORB_HOME not set, skipping JACORB integration test
+#	@if defined JACORB_HOME $(MAKE) /C build
+#	cd ..
+
 
 
 nunit-var:        
@@ -80,6 +89,10 @@ test: nunit-var junit-var
 	cd WAS5
 	@if not defined WAS_HOME echo WAS_HOME not set, skipping WAS5 integration test
 	@if defined WAS_HOME $(MAKE) test
+	cd ..
+	cd WAS5_1
+	@if not defined WAS5_1_HOME echo WAS5_1_HOME not set, skipping WAS5_1 integration test
+	@if defined WAS5_1_HOME $(MAKE) test
 	cd ..
 	cd MICO
 	@if not defined MICO_HOME echo MICO_HOME not set, skipping MICO integration test
@@ -122,9 +135,16 @@ clean:
 	cd WAS5
 	$(MAKE) clean
 	cd ..
+	cd WAS5_1
+	$(MAKE) clean
+	cd ..
 	cd MICO
 	$(MAKE) /F Makefile.Win32 /C clean
 	cd ..
 	cd OmniORB
 	$(MAKE) /C clean
 	cd ..
+#	cd JacORB
+#	$(MAKE) /C clean
+#	cd ..
+

@@ -1,0 +1,31 @@
+Prerequisites
+-------------
+
+For running this integration test, you need NUnit V2.0 or newer and Websphere 5.1.
+
+Building the test
+-----------------
+
+- set WAS5_1_HOME to the AppServer directory of your websphere application server, e.g. C:\Websphere5\AppServer
+- set NUNITV2_HOME to your NUNIT V2.0 home directory, e.g. C:\Programme\NUnitV2
+- use nmake to build the application and the integration test
+
+Deploying the test application containing the test beans
+--------------------------------------------------------
+
+- use deployDefault.bat or deploy.bat NODE_NAME in the directory TestBeans to deploy the application to WAS.
+
+Undeploying the test application containing the test beans
+----------------------------------------------------------
+
+- use undeploy.bat to undeploy the application.
+
+Running the test
+----------------
+
+- start your websphere application server.
+
+- The test can be run using the NUnit GUI or the NUnit Console runner
+  Running the test with console launcher:
+  - change to directory TestClient
+  - launch LaunchTest.bat

@@ -1,0 +1,67 @@
+<?xml version="1.0"?>
+
+
+<project name="WAS5IntegrationTest" default="all">
+
+  <target name="all" depends="buildApp, buildIdl"/>
+
+  <target name="buildApp" depends="init, removeLast, compile, makejar, makeear"/>
+
+  <target name="init">
+    <tstamp/>
+    <echo message="Building WAS5 integration test..."/>
+    <mkdir dir="bin"/>
+  </target>
+
+  <target name="removeLast">
+    <tstamp/>
+    <delete file="bin/WAS5Integration.jar"/>
+    <delete file="bin/WAS5Integration.ear"/>
+  </target>
+
+  <target name="compile">
+    <tstamp/>
+    <echo message="WAS5 integration test compiling..."/>
+    <javac srcdir="." destdir="bin" deprecation="true" debug="on" classpath="${prereq.classpath}" failonerror="${failonerror}"/>
+  </target>
+
+  <target name="makejar" depends="compile">
+    <tstamp/>
+    <echo message="Creating the WAS5Integration.jar file..."/>
+    <jar jarfile="bin/WAS5Integration.jar">
+       <fileset dir="bin/" includes="**/ch/elca/iiop/integrationTests/*.class"/>
+       <zipfileset dir="JAR-META-INF" prefix="META-INF"/>
+    </jar>
+  </target>
+
+  <target name="makeear" depends="makejar">
+    <tstamp/>
+    <echo message="Creating the WAS5Integration.ear file..."/>
+    <ear earfile="bin/WAS5Integration.ear" appxml="APP-META-INF/application.xml">
+      <fileset dir="bin" includes="WAS5Integration.jar"/>
+    </ear>
+  </target>
+
+
+  <target name="buildIdl" depends="compile">
+    <tstamp/>
+    <echo message="Building Idl"/>
+    <mkdir dir="IDL"/>
+    <rmic base="bin/" 
+          includes="ch/elca/iiop/integrationTests/TestHome.class,ch/elca/iiop/integrationTests/Test.class,ch/elca/iiop/integrationTests/IntAdderHome.class,ch/elca/iiop/integrationTests/IntAdder.class"
+          classpath="${prereq.classpath}" idl="true"/>
+    <copy todir="IDL/">
+      <fileset dir="bin/" includes="**/*.idl"/>
+    </copy>
+    <delete includeEmptyDirs="true">
+      <fileset dir="bin/" includes="**/*.idl,**/*."/>
+    </delete>
+    <delete includeEmptyDirs="true">
+      <fileset dir="bin/javax"/>
+      <fileset dir="bin/org"/>
+      <fileset dir="bin/java"/>
+    </delete>
+  </target>
+
+
+</project>
