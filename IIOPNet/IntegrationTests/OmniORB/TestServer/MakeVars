@@ -3,14 +3,14 @@
 #
 DIR_CPPFLAGS   = -I. -I$(OMNIORB_HOME)\include
 #
-# omniDynamic402_rt.lib is the runtime DLL to support the CORBA dynamic
+# omniDynamic???_rt.lib is the runtime DLL to support the CORBA dynamic
 # interfaces, such as Anys, typecodes, DSI and DII.
-OMNI_DYNAMIC_LIB = omniDynamic402_rt.lib
+OMNI_DYNAMIC_LIB = omniDynamic$(OMNIORB_VERSION)_rt.lib
 
 
 CORBA_CPPFLAGS = -D__WIN32__ -D_WIN32_WINNT=0x0400 -D__x86__ -D__NT__ \
                  -D__OSVERSION__=4
-CORBA_LIB      = omniORB402_rt.lib omnithread30_rt.lib \
+CORBA_LIB      = omniORB$(OMNIORB_VERSION)_rt.lib omnithread30_rt.lib \
                  $(OMNI_DYNAMIC_LIB) \
                  ws2_32.lib mswsock.lib advapi32.lib \
                  -libpath:$(OMNIORB_HOME)\lib\x86_win32
