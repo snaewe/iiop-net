@@ -35,6 +35,7 @@ using System.Reflection;
 using System.Text;
 using System.CodeDom;
 using System.CodeDom.Compiler;
+using Microsoft.CSharp;
 using parser;
 using Ch.Elca.Iiop.IdlCompiler.Action;
 using Ch.Elca.Iiop.IdlPreprocessor;
@@ -47,11 +48,7 @@ namespace Ch.Elca.Iiop.IdlCompiler {
 /// </summary>
 public class IDLToCLS {
 
-    #region Constants
-    
-    private const string DEFAULT_CODE_PROVIDER_NAME = 
-        "Microsoft.CSharp.CSharpCodeProvider,System,Version=1.0.5000.0,Culture=neutral,PublicKeyToken=b77a5c561934e089";
-    
+    #region Constants    
     #endregion Constants
     #region IFields
     
@@ -61,7 +58,7 @@ public class IDLToCLS {
 
     private ArrayList m_refAssemblies = new ArrayList();
     
-    private CodeDomProvider m_vtSkelcodeDomProvider = null;
+    private CodeDomProvider m_vtSkelcodeDomProvider = new CSharpCodeProvider();
     private DirectoryInfo m_vtSkelTd = new DirectoryInfo(".");
     private bool m_vtSkelOverwrite = false;
     private bool m_vtSkelEnable = false;
@@ -193,18 +190,7 @@ public class IDLToCLS {
         i++;
         
         m_inputFileNames = new String[args.Length - i];
-        Array.Copy(args, i, m_inputFileNames, 0, m_inputFileNames.Length);
-        
-        if (m_vtSkelEnable && (m_vtSkelcodeDomProvider == null)) {
-            // load default provider
-            Type defaultCodeDomProvType = Type.GetType(DEFAULT_CODE_PROVIDER_NAME ,false);
-            if (defaultCodeDomProvType == null) {
-                Error(String.Format("Default CodeDom Provider {0} not found!",
-                                    DEFAULT_CODE_PROVIDER_NAME));
-            }
-            m_vtSkelcodeDomProvider = 
-                (CodeDomProvider) Activator.CreateInstance(defaultCodeDomProvType);
-        }
+        Array.Copy(args, i, m_inputFileNames, 0, m_inputFileNames.Length);                
         
     }
     
