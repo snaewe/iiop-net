@@ -157,6 +157,32 @@ namespace Ch.Elca.Iiop.IntegrationTests {
             }
         }
 
+        [Test]
+        public void TestSeqOfWStringSeq() {
+            int nrOfOuterElems = 2;
+            int nrOfInnerElems = 5;
+            string elem = "seqElem";
+            string[][] arg = new string[nrOfOuterElems][];
+            for (int i = 0; i < arg.Length; i++) {
+                arg[i] = new string[nrOfInnerElems];
+                for (int j = 0; j < nrOfInnerElems; j++) {
+                    arg[i][j] = elem;
+                }
+            }
+            string[][] result = m_testService.EchoSeqOfWStringSeq(arg);
+            Assertion.AssertNotNull(result);
+            Assertion.AssertEquals(arg.Length, result.Length);
+            for (int i = 0; i < nrOfOuterElems; i++) {
+                Assertion.AssertNotNull(result[i]);
+                Assertion.AssertEquals(arg[i].Length, result[i].Length);
+                for (int j = 0; j < nrOfInnerElems; j++) {
+                    Assertion.AssertEquals(arg[i][j], result[i][j]);
+                }
+            }
+            
+        }
+
+
 
     }
 

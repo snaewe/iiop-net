@@ -2,6 +2,7 @@ NUNIT=$(NUNITV2_HOME)\bin\nunit.framework.dll
 IIOPCHANNEL = ..\..\..\IIOPChannel\bin\IIOPChannel.dll 
 IIOPCHANNELPDB = ..\..\..\IIOPChannel\bin\IIOPChannel.pdb 
 bin         = bin\ 
+IDL         = IDL\ 
 
 build: compile-idl build-client
 
@@ -17,8 +18,14 @@ build-client: $(bin)IIOPChannel.dll *.cs
 	csc $(CSFLAGS) /t:library /r:$(NUNIT) /r:bin\IIOPChannel.dll /r:bin\Client.dll /out:bin\ClientTest.dll TestClient.cs
 
 
-compile-idl:
-	cd IDL 
+copy-idl: $(IDL)service.idl
+
+
+$(IDL)service.idl: ..\TestServer\service.idl
+        copy ..\TestServer\service.idl $(IDL)
+
+compile-idl: copy-idl
+	cd $(IDL) 
 	..\..\..\..\IDLToCLSCompiler\IDLCompiler\bin\IDLToCLSCompiler.exe -o ..\bin client service.idl
 	cd ..
 

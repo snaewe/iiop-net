@@ -19,14 +19,18 @@ union TestUnionE switch(TestEnumForU) {
 
 typedef sequence<wstring> wstringSeq;
 
+typedef sequence<wstringSeq> seqOfWStringSeq;
+
 interface TestService {
     TestUnion EchoTestUnion(in TestUnion arg);
     TestUnionE EchoTestUnionE(in TestUnionE arg);   
     any EchoAny(in any arg);
     any RetrieveUnknownUnion();
+
     // test for forum bug report: idl wstring sequences
     wstringSeq RetrieveWstringSeq(in wstring val, in long nrOfElems);
     wstringSeq EchoWstringSeq(in wstringSeq arg);
+    seqOfWStringSeq EchoSeqOfWStringSeq(in seqOfWStringSeq arg);
 }; 
 
 

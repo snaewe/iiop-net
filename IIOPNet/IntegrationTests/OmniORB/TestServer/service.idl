@@ -17,20 +17,9 @@ union TestUnionE switch(TestEnumForU) {
     case C: TestEnumForU valE1;
 };
 
-enum TestEnumForU2 {
-    A1, B1, C1
-};
-
-
-union TestUnionE2 switch(TestEnumForU2) {
-    case A1: short valE0;
-    case B1:
-    case C1: long valE1;
-    // omniorb does use indirection to serialise typecode, if the following is used: TestEnumForU2 valE1;
-    // this is not supported by IIOP.NET at the moment
-};
-
 typedef sequence<wstring> wstringSeq;
+
+typedef sequence<wstringSeq> seqOfWStringSeq;
 
 interface TestService {
     TestUnion EchoTestUnion(in TestUnion arg);
@@ -41,6 +30,7 @@ interface TestService {
     // test for forum bug report: idl wstring sequences
     wstringSeq RetrieveWstringSeq(in wstring val, in long nrOfElems);
     wstringSeq EchoWstringSeq(in wstringSeq arg);
+    seqOfWStringSeq EchoSeqOfWStringSeq(in seqOfWStringSeq arg);
 }; 
 
 

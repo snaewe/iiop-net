@@ -3,6 +3,7 @@
  */
 
 #include "service.hh"
+#include "unknownByClient.hh"
 #include <iostream>
 
 using namespace std;
@@ -22,6 +23,7 @@ public:
   CORBA::Any* EchoAny(const CORBA::Any& arg);
   ::wstringSeq* RetrieveWstringSeq(const CORBA::WChar * val, CORBA::Long nrOrElems);
   ::wstringSeq* EchoWstringSeq(const ::wstringSeq& arg);
+  ::seqOfWStringSeq* EchoSeqOfWStringSeq(const ::seqOfWStringSeq& arg);
 };
 
 ::TestUnion
@@ -65,7 +67,10 @@ TestService_impl::EchoWstringSeq(const ::wstringSeq& arg) {
   return new ::wstringSeq(arg);
 }
 
-
+::seqOfWStringSeq* 
+TestService_impl::EchoSeqOfWStringSeq(const ::seqOfWStringSeq& arg) {
+  return new ::seqOfWStringSeq(arg);
+}
 
 int
 main (int argc, char *argv[])
@@ -119,7 +124,6 @@ main (int argc, char *argv[])
 
   if (CORBA::is_nil (nc)) {
     cerr << "oops, I cannot access the Naming Service!" << endl;
-    exit (1);
     return 1;
   }
 

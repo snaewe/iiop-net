@@ -11,12 +11,15 @@ omniorb_home_var:
     @IF NOT DEFINED OMNIORB_HOME echo define OMNIORB_HOME first
     @IF NOT DEFINED OMNIORB_HOME exit 2
     
-server.exe: service.hh serviceSK.obj server.obj serviceDynSK.obj
-	$(LD) $(LDFLAGS) /OUT:$@ serviceSK.obj serviceDynSK.obj server.obj $(LDLIBS)
+server.exe: unknownByClient.hh unknownByClientSK.obj unknownByClientDynSK.obj service.hh serviceSK.obj server.obj serviceDynSK.obj 
+	$(LD) $(LDFLAGS) /OUT:$@ unknownByClientSK.obj unknownByClientDynSK.obj serviceSK.obj serviceDynSK.obj server.obj $(LDLIBS)
 
 
 service.hh serviceSK.cc serviceDynSK.cc : service.idl $(IDLGEN)
 	$(IDL) -Wba service.idl
+
+unknownByClient.hh unknownByClientSK.cc unknownByClientDynSK.cc : unknownByClient.idl $(IDLGEN)
+	$(IDL) -Wba unknownByClient.idl
 
 start-server: omniorb_home_var
         IF EXIST omninames* del /q omninames*
