@@ -32,6 +32,7 @@
  using System.CodeDom;
  using System.CodeDom.Compiler;
  using System.Reflection;
+ using Ch.Elca.Iiop.Idl;
  
  
  namespace Ch.Elca.Iiop.IdlCompiler.Action {
@@ -148,6 +149,21 @@
                  }
              }
              
+             
+             Type investigatedType = forValueType;
+             while (typeof(IIdlEntity).IsAssignableFrom(investigatedType)) {
+                 AddDeclaredMethods(investigatedType, valTypeImpl, targetNamespace);
+                 AddDeclaredProperties(investigatedType, valTypeImpl, targetNamespace);
+                 investigatedType = investigatedType.BaseType;
+             }
+                                 
+         }
+         
+         /// <summary>adds skleton implementation for all the methods directly declared by the given type</summary>
+         private void AddDeclaredMethods(Type forValueType,
+                                         CodeTypeDeclaration valTypeImpl,
+                                         CodeNamespace targetNamespace) {
+
              MethodInfo[] valTypeMethods =
                  forValueType.GetMethods(BindingFlags.Public |
                                          BindingFlags.Instance |
@@ -157,8 +173,14 @@
                  if (!method.IsSpecialName) {
                      AddMethod(valTypeImpl, targetNamespace, method);
                  }
-             }
-             
+             }                                                          
+                                             
+         }
+         
+         /// <summary>adds skleton implementation for all the properties directly declared by the given type</summary>
+         private void AddDeclaredProperties(Type forValueType,
+                                            CodeTypeDeclaration valTypeImpl,
+                                            CodeNamespace targetNamespace) {
              PropertyInfo[] valTypeProperties =
                  forValueType.GetProperties(BindingFlags.Public |
                                             BindingFlags.Instance |
@@ -166,8 +188,7 @@
              foreach (PropertyInfo prop in valTypeProperties) {
                  AddProperty(valTypeImpl, targetNamespace, prop);
              }
-                                 
-         }
+         }                                                              
          
          private void AddConstructor(CodeTypeDeclaration valTypeImpl,
                                      CodeNamespace valTypeNamespace,
