@@ -146,8 +146,7 @@ namespace Ch.Elca.Iiop.Services {
                 CORBAInitService initService = null;
                 string key = host + ":" + port;
                 if (!m_initalServices.ContainsKey(key)) {
-                    string objectURI = IiopUrlUtil.GetObjUriForObjectInfo(CORBAInitServiceImpl.s_corbaObjKey,
-                                                                          new GiopVersion(1, 0));
+                    string objectURI = GetInitServiceUri();
                     string url = IiopUrlUtil.GetUrl(host, port, objectURI);
                     initService = (CORBAInitService)RemotingServices.Connect(typeof(CORBAInitService), url);
                     m_initalServices.Add(key, initService);
@@ -156,6 +155,15 @@ namespace Ch.Elca.Iiop.Services {
                 }
                 return initService;
             }
+        }
+
+        /// <summary>
+        /// get the obj-uri for the CORBA init service
+        /// </summary>
+        /// <returns></returns>
+        public static string GetInitServiceUri() {
+            return IiopUrlUtil.GetObjUriForObjectInfo(CORBAInitServiceImpl.s_corbaObjKey,
+                                                      new GiopVersion(1, 0));
         }
 
         #endregion IMethods

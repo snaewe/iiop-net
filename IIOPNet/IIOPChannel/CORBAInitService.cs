@@ -40,7 +40,7 @@ namespace Ch.Elca.Iiop.Services {
     /// specifies the operation on the INIT-object
     /// </summary>
     [InterfaceTypeAttribute(IdlTypeInterface.ConcreteInterface)]
-    internal interface CORBAInitService : IIdlEntity {
+    public interface CORBAInitService : IIdlEntity {
 
         #region IMethods
 
