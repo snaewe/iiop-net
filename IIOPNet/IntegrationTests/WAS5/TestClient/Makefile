@@ -14,7 +14,7 @@ $(bin)IIOPChannel.dll: $(bin) $(IIOPCHANNEL)
         if exist $(IIOPCHANNELPDB) copy /y $(IIOPCHANNELPDB) $(bin)IIOPChannel.pdb
 
 build-client: $(bin) $(bin)IIOPChannel.dll *.cs
-	csc $(CSFLAGS) /t:library /r:$(NUNIT) /r:bin\IIOPChannel.dll /r:bin\Client.dll /out:bin\ClientTest.dll TestClient.cs ValueTypeImpls.cs ExceptionImpl.cs IbmNaming.cs
+	csc $(CSFLAGS) /t:library /r:$(NUNIT) /r:bin\IIOPChannel.dll /r:bin\Client.dll /out:bin\ClientTest.dll TestClient.cs ValueTypeImpls.cs ExceptionImpl.cs
 
 copy-idl:
     if not exist IDL\nul mkdir IDL
