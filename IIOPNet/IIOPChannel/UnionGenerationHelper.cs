@@ -299,7 +299,12 @@ namespace Ch.Elca.Iiop.Idl {
         public Type FinalizeType() {
             AddOwnDefaultCaseIfNeeded();
             GenerateSerialisationHelpers();
-            return m_builder.CreateType();
+            try {
+                Type t = m_builder.CreateType();
+                return t;
+            } catch(Exception e) {
+                throw new NotSupportedException("Error in union " + m_builder.AssemblyQualifiedName, e);
+            }
         }
 
         public void GenerateSwitchCase(TypeContainer elemType, string elemDeclIdent, object[] discriminatorValues) {
