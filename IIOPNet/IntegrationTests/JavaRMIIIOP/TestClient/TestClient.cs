@@ -365,7 +365,7 @@ namespace Ch.Elca.Iiop.IntegrationTests {
         public void TestReceivingSimpleTypesAsAny() {
             System.Double arg = 1.23;
             object result = m_testService.GetDoubleAsAny(arg);
-            Assertion.AssertEquals(result.GetType().FullName, "java.lang.Double");
+            Assertion.AssertEquals(result.GetType().FullName, "java.lang._Double");
         }
 
         [Test]

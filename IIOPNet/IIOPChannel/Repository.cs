@@ -162,7 +162,7 @@ namespace Ch.Elca.Iiop.Idl {
             idlID = idlID.Substring(4);
             if (idlID.IndexOf(":") < 0) { 
                 // invalid repository id: idlID
-                throw new INV_IDENT(10001, CompletionStatus.Completed_MayBe);
+                throw new INV_IDENT(9901, CompletionStatus.Completed_MayBe);
             }
             string typeName = idlID.Substring(0, idlID.IndexOf(":"));
             typeName = IdlNaming.MapIdlRepIdTypePartToClsName(typeName, assumeMappedFromIdl);
@@ -192,9 +192,7 @@ namespace Ch.Elca.Iiop.Idl {
                 // parse the elem-type, which is in RMI-ID format
                 string elemNameSpace;
                 string unqualElemType = ParseRMIArrayElemType(elemType, out elemNameSpace);
-                unqualElemType = IdlNaming.MapRmiNameToClsName(unqualElemType);
                 if (elemNameSpace.Length > 0) { 
-                    elemNameSpace = IdlNaming.MapRmiNameToClsName(elemNameSpace);
                     elemNameSpace = "." + elemNameSpace; 
                 } 
                 // determine name of boxed value type
@@ -251,7 +249,11 @@ namespace Ch.Elca.Iiop.Idl {
                         // special case: map to CORBA.WStringValue
                         elemNamespace = "CORBA";
                         unqualName = "WStringValue";
-                    }                    
+                    } else {
+                        // map rmi name to cls name, handle e.g. clashes with cls keywords
+                        unqualName = IdlNaming.MapRmiNameToClsName(unqualName);
+                        elemNamespace = IdlNaming.MapRmiNameToClsName(elemNamespace);
+                    }
                     return unqualName;
                 default:
                     // invalid element type identifier in RMI array repository id: firstChar
