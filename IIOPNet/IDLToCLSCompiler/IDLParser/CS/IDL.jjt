@@ -1516,15 +1516,8 @@ System.Double floating_pt_literal() #void :
 System.Decimal fixed_pt_literal() #void :
 { Token fixedLiteral; string unaryOp = ""; }
 {
-    [ "+" | "-" { unaryOp = "-"; } ]
-(
-       LOOKAHEAD(<FIXED> ".")
-       fixedLiteral = <FIXED> "." [ <FIXED> ] ( "d" | "D" ) 
-    |
-       fixedLiteral = "." <FIXED> ( "d" | "D" ) 
-    |
-       fixedLiteral = <FIXED> ( "d" | "D" )
-) {
+    [ "+" | "-" { unaryOp = "-"; } ] fixedLiteral = <FIXED>
+{
     String fixedVal = unaryOp + fixedLiteral.image;
     if (fixedVal.EndsWith("d") || fixedVal.EndsWith("D")) {
         fixedVal = fixedVal.Substring(0, fixedVal.Length - 1);
@@ -1622,5 +1615,7 @@ TOKEN :
    )*
    "\"" >
 |
-  <  FIXED : [ "1" - "9" ]  (["0" - "9"])* >
+  <  FIXED : ( (["0"-"9"])+ "." (["0"-"9"])* | (["0"-"9"])* "." (["0"-"9"])+ | (["0"-"9"])+ )
+               (["d","D"]) >
+
 }

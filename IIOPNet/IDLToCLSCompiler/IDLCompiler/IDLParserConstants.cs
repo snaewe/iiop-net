@@ -4,21 +4,21 @@ using System;
 public class IDLParserConstants {
 
   int EOF = 0;
-  public const int PRAGMA = 89;
-  public const int PRAGMAID = 90;
-  public const int PRAGMAPREFIX = 91;
-  public const int ID = 92;
-  public const int OCTALINT = 93;
-  public const int DECIMALINT = 94;
-  public const int HEXADECIMALINT = 95;
-  public const int FLOATONE = 96;
-  public const int FLOATTWO = 97;
-  public const int CHARACTER = 98;
-  public const int WIDECHARACTER = 99;
-  public const int STRING = 100;
-  public const int WIDESTRING = 101;
-  public const int REPIDVAL_STRING = 102;
-  public const int FIXED = 103;
+  public const int PRAGMA = 86;
+  public const int PRAGMAID = 87;
+  public const int PRAGMAPREFIX = 88;
+  public const int ID = 89;
+  public const int OCTALINT = 90;
+  public const int DECIMALINT = 91;
+  public const int HEXADECIMALINT = 92;
+  public const int FLOATONE = 93;
+  public const int FLOATTWO = 94;
+  public const int CHARACTER = 95;
+  public const int WIDECHARACTER = 96;
+  public const int STRING = 97;
+  public const int WIDESTRING = 98;
+  public const int REPIDVAL_STRING = 99;
+  public const int FIXED = 100;
 
   public const int DEFAULT = 0;
   public const int PRAGMA_DIRECTIVE = 1;
@@ -112,9 +112,6 @@ public class IDLParserConstants {
     "\"fixed\"",
     "\"ValueBase\"",
     "\"Infinity\"",
-    "\".\"",
-    "\"d\"",
-    "\"D\"",
     "\"#pragma\"",
     "\"ID\"",
     "\"prefix\"",
