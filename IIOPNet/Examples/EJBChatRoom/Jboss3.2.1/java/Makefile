@@ -11,7 +11,7 @@ copy-meta-data: $(BIN)
         if not exist bin\META-INF mkdir bin\META-INF
 	if exist *.xml copy *.xml bin\META-INF
 
-build-classes: $(Chatroom)Chatroom.java $(Chatroom)ChatroomHome.java $(Chatroom)ChatroomBean.java $(Chatroom)ChatroomClients.java $(Chatroom)Message.java $(Chatroom)MessageListener.java $(Chatroom)NotRegisteredException.java $(Chatroom)AlreadyRegisteredException.java
+build-classes: $(Chatroom)Chatroom.java $(Chatroom)ChatroomHome.java $(Chatroom)ChatroomBean.java $(Chatroom)ChatroomServer.java $(Chatroom)Message.java $(Chatroom)MessageListener.java $(Chatroom)NotRegisteredException.java $(Chatroom)AlreadyRegisteredException.java
 	javac -classpath $(JBOSS_CLP) -d bin $?
 
 build-stubs: $(Chatroom)MessageListener.java
