@@ -178,19 +178,18 @@ namespace Ch.Elca.Iiop.Idl {
         }
         
         /// <summary>
-        /// adds special mappings from a config file
+        /// adds special mappings from a config stream
         /// </summary>
-        public void AddMappingsFromFile(FileInfo configFile) {
+        public void AddMappingFromStream(Stream configStream) {
             // check schema ok
             if (m_mappingPluginSchema == null) {
+                configStream.Close();
                 throw new Exception("schema loading problem");
             }
-            // load the xml-file
             XmlDocument doc = new XmlDocument();
-            FileStream stream = new FileStream(configFile.FullName, FileMode.Open);
-            XmlTextReader textReader = new XmlTextReader(stream);            
+            XmlTextReader textReader = new XmlTextReader(configStream);            
             XmlValidatingReader validatingReader = new XmlValidatingReader(textReader);
-            try {
+        	try {
                 validatingReader.Schemas.Add(m_mappingPluginSchema);
                 doc.Load(validatingReader);
                 // process the file
@@ -216,6 +215,16 @@ namespace Ch.Elca.Iiop.Idl {
             } finally {
                 validatingReader.Close();
             }
+
+        }
+        
+        /// <summary>
+        /// adds special mappings from a config file
+        /// </summary>
+        public void AddMappingsFromFile(FileInfo configFile) {
+            // load the xml-file
+            FileStream stream = new FileStream(configFile.FullName, FileMode.Open);
+        	AddMappingFromStream(stream);
         }
 
         /// <summary>
