@@ -842,7 +842,7 @@ namespace Ch.Elca.Iiop.Cdr {
                     string codeBaseURL = ReadString();    
                     // add codebase url to indirection table
                     m_indirectionTable.Add(new IndirectionInfo(indirPos.Position, 
-                                                               IndirectionType.IndirRepId),
+                                                               IndirectionType.CodeBaseUrl),
                                            codeBaseURL);
                 }
             }
