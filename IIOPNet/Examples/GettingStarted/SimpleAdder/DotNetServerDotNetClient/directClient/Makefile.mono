@@ -1,0 +1,23 @@
+COMMONASMSOURCE = ../server/bin/Adder.dll
+IIOPCHANNEL = ../../../../../IIOPChannel/bin/IIOPChannel.dll
+BIN=bin/
+COMMONASMTARGET = $(BIN)Adder.dll
+
+build: copy-common build-client
+
+$(BIN)IIOPChannel.dll: $(IIOPCHANNEL)
+	cp $(IIOPCHANNEL) $(BIN)IIOPChannel.dll
+
+$(BIN):
+	[ -d $@ ] || mkdir $@
+
+copy-common: $(BIN) $(COMMONASMTARGET)
+
+$(COMMONASMTARGET): $(BIN)
+	cp $(COMMONASMSOURCE) $(BIN)
+
+build-client: $(COMMONASMTARGET) $(BIN)IIOPChannel.dll NClient.cs
+	mcs /r:$(COMMONASMTARGET) /r:$(BIN)IIOPChannel.dll /out:$(BIN)NClient.exe NClient.cs
+
+clean:
+	rm -fr $(BIN)

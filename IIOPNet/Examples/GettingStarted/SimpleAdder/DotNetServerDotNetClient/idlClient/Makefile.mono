@@ -1,0 +1,28 @@
+IDLSource=../server/IDL/Ch/Elca/Iiop/Tutorial/GettingStarted/*.idl
+Adder=Ch/Elca/Iiop/Tutorial/GettingStarted/
+IDLToCLS=mono ../../../../../../IDLToCLSCompiler/IDLCompiler/bin/IDLToCLSCompiler.exe
+TARGETASM=Adder
+IIOPCHANNEL = ../../../../../IIOPChannel/bin/IIOPChannel.dll
+BIN=bin/
+IDL=IDL/
+
+build: build-idl build-client
+
+$(BIN)IIOPChannel.dll: $(IIOPCHANNEL)
+	cp $(IIOPCHANNEL) $(BIN)IIOPChannel.dll
+
+$(BIN) $(IDL):
+	[ -d $@ ] || mkdir $@
+
+build-idl: $(IDL)
+	cp ../../../../../IDLToCLSCompiler/IDL/*.idl $(IDL)
+	cp -r ../server/IDL/* $(IDL)
+	cd $(IDL); $(IDLToCLS) -o ../$(BIN) $(TARGETASM) $(Adder)Adder.idl
+
+build-client: $(BIN)$(TARGETASM).dll $(BIN)IIOPChannel.dll NClient.cs
+	mcs /r:$(BIN)$(TARGETASM).dll /r:$(BIN)IIOPChannel.dll /out:$(BIN)NClient.exe NClient.cs
+
+clean:
+	rm -rf $(IDL)
+	rm -rf $(BIN)
+

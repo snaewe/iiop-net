@@ -1,0 +1,5 @@
+build:
+	$(MAKE) -C DotNetServerDotNetClient -f Makefile.mono build
+
+clean:
+	$(MAKE) -C DotNetServerDotNetClient -f Makefile.mono clean

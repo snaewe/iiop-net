@@ -1,0 +1,5 @@
+build:
+	$(MAKE) -C SimpleAdder -f Makefile.mono build
+
+clean:
+	$(MAKE) -C SimpleAdder -f Makefile.mono clean

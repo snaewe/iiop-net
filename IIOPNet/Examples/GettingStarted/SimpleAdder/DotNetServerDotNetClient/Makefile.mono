@@ -1,0 +1,9 @@
+build:
+	$(MAKE) -C server -f Makefile.mono build
+	$(MAKE) -C directClient -f Makefile.mono build
+	$(MAKE) -C idlClient -f Makefile.mono build
+
+clean:
+	$(MAKE) -C server -f Makefile.mono clean
+	$(MAKE) -C directClient -f Makefile.mono clean
+	$(MAKE) -C idlClient -f Makefile.mono clean
