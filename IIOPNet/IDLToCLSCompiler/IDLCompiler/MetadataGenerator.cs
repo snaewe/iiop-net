@@ -117,6 +117,43 @@ public class MetaDataGenerator : IDLParserVisitor {
         #endregion IMethods
 
     }
+    
+    /// <summary>
+    /// helper class to pass information for valuetype-visitor methods
+    /// </summary>    
+    private class ConcreteValTypeBuildInfo : BuildInfo {
+        
+        #region IFields
+        
+        private ConstructorBuilder m_defaultConstr;
+        
+        #endregion IFields
+        #region IConstructors
+                
+        public ConcreteValTypeBuildInfo(Scope buildScope,
+                                        TypeBuilder containerType,
+                                        Symbol containerSymbol,
+                                        ConstructorBuilder defConstr) :
+                                            base(buildScope, containerType,
+                                                 containerSymbol) {
+            m_defaultConstr = defConstr;
+        }
+        
+        #endregion IConstructors        
+        #region IProperties
+        
+        /// <summary>
+        /// the default constructor for the value type class
+        /// </summary>        
+        public ConstructorBuilder DefaultConstructor {
+            get {
+                return m_defaultConstr;
+            }
+        }
+        
+        #endregion IProperties
+        
+    }
 
     #endregion Types
     #region IFields
@@ -828,10 +865,15 @@ public class MetaDataGenerator : IDLParserVisitor {
         valueToBuild.SetCustomAttribute(new ImplClassAttribute(fullyQualName + "Impl").CreateAttributeBuilder());
         // add serializable attribute
         AddSerializableAttribute(valueToBuild);
+        
+        // make sure, every value type has a default constructor
+        ConstructorBuilder defConstr = 
+            valueToBuild.DefineDefaultConstructor(MethodAttributes.Public);
 
         // generate elements
-        BuildInfo buildInfo = new BuildInfo(enclosingScope.getChildScope(forSymbol.getSymbolName()), 
-                                            valueToBuild, forSymbol);
+        BuildInfo buildInfo = 
+            new ConcreteValTypeBuildInfo(enclosingScope.getChildScope(forSymbol.getSymbolName()),
+                                         valueToBuild, forSymbol, defConstr);
         for (int i = 1; i < node.jjtGetNumChildren(); i++) { // for all value_element children
             ASTvalue_element elem = (ASTvalue_element)node.jjtGetChild(i);
             elem.jjtAccept(this, buildInfo);    
@@ -1007,7 +1049,28 @@ public class MetaDataGenerator : IDLParserVisitor {
      * @see parser.IDLParserVisitor#visit(ASTinit_decl, Object)
      */
     public Object visit(ASTinit_decl node, Object data) {
-        // at the moment do nothing
+        CheckParameterForBuildInfo(data, node);
+        ConcreteValTypeBuildInfo info = (ConcreteValTypeBuildInfo) data;
+        TypeBuilder builder = info.GetContainterType();                
+        
+        // ConstructorInfo defConstr = builder.GetConstructor(Type.EmptyTypes);
+                
+        if (node.jjtGetNumChildren() > 0) {
+            // non-default constructor
+            ParameterSpec[] parameters =
+                (ParameterSpec[])node.jjtGetChild(0).jjtAccept(this, info);
+            
+            ConstructorBuilder constr = 
+                m_ilEmitHelper.AddConstructor(builder, parameters,
+                                              MethodAttributes.Family);
+            ILGenerator gen = constr.GetILGenerator();
+            // call default constructor of class
+            gen.Emit(OpCodes.Ldarg_0);
+            gen.Emit(OpCodes.Call, info.DefaultConstructor);
+            gen.Emit(OpCodes.Ret);
+            
+        } 
+        
         return null;
     }
 
@@ -1015,24 +1078,41 @@ public class MetaDataGenerator : IDLParserVisitor {
      * @see parser.IDLParserVisitor#visit(ASTinit_param_attribute, Object)
      */
     public Object visit(ASTinit_param_attribute node, Object data) {
-        // at the moment do nothing
-        return null;
+        // always in
+        return ParameterSpec.ParameterDirection.s_in;
     }
 
     /**
      * @see parser.IDLParserVisitor#visit(ASTinit_param_decl, Object)
      */
     public Object visit(ASTinit_param_decl node, Object data) {
-        // at the moment do nothing
-        return null;
+        // direction always in
+        ParameterSpec.ParameterDirection direction = (ParameterSpec.ParameterDirection)
+            node.jjtGetChild(0).jjtAccept(this, data);
+        // determine name and type
+        TypeContainer paramType = (TypeContainer)node.jjtGetChild(1).jjtAccept(this, data);
+        if (paramType == null) {
+            throw new InvalidIdlException(String.Format("init parameter type {0} not (yet) defined for {1}", 
+                                                        ((SimpleNode)node.jjtGetChild(1)).GetIdentification(),
+                                                        node.GetIdentification()));
+        }
+        paramType = ReplaceByCustomMappedIfNeeded(paramType);
+        String paramName = IdlNaming.MapIdlNameToClsName(((ASTsimple_declarator)node.jjtGetChild(2)).getIdent());
+        
+        ParameterSpec result = new ParameterSpec(paramName, paramType, direction);
+        return result;
     }
 
     /**
      * @see parser.IDLParserVisitor#visit(ASTinit_param_delcs, Object)
      */
     public Object visit(ASTinit_param_delcs node, Object data) {
-        // at the moment do nothing
-        return null;
+        // visit all init parameters
+        ParameterSpec[] parameters = new ParameterSpec[node.jjtGetNumChildren()];
+        for (int i = 0; i < node.jjtGetNumChildren(); i++) {
+            parameters[i] = (ParameterSpec) node.jjtGetChild(i).jjtAccept(this, data);
+        }
+        return parameters;
     }
     #endregion
 

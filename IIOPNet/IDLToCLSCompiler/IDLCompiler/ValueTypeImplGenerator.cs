@@ -138,10 +138,14 @@
 
              ConstructorInfo[] valTypeConstrs =
                  forValueType.GetConstructors(BindingFlags.Public |
+                                              BindingFlags.NonPublic | 
                                               BindingFlags.Instance |
                                               BindingFlags.DeclaredOnly);
              foreach (ConstructorInfo constr in valTypeConstrs) {
-                 AddConstructor(valTypeImpl, targetNamespace, constr);
+                 if (((constr.Attributes & MethodAttributes.Public) > 0) ||
+                     ((constr.Attributes & MethodAttributes.Family) > 0)) {
+                     AddConstructor(valTypeImpl, targetNamespace, constr);
+                 }
              }
              
              MethodInfo[] valTypeMethods =

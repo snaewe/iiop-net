@@ -233,6 +233,37 @@ namespace Ch.Elca.Iiop.Idl {
             return methodBuild;
         }
         
+        /// <summary>adds a constructor to a type, setting the attributes on the parameters</summary>
+        /// <remarks>forgeign method: should be better on TypeBuilder, but not possible</remarks>
+        /// <returns>the ConstructorBuilder for the method created</returns>
+        public ConstructorBuilder AddConstructor(TypeBuilder builder, ParameterSpec[] parameters, 
+                                                 MethodAttributes attrs) {
+        
+            Type[] paramTypes = new Type[parameters.Length];
+            for (int i = 0; i < parameters.Length; i++) { 
+                paramTypes[i] = parameters[i].GetParamTypeMergedDirection();
+            }
+        
+            ConstructorBuilder constrBuild = 
+                builder.DefineConstructor(attrs, CallingConventions.Standard,
+                                          paramTypes);
+            // define the paramter-names / attributes
+            for (int i = 0; i < parameters.Length; i++) {
+                ParameterAttributes paramAttr = ParameterAttributes.None;
+                ParameterBuilder paramBuild = 
+                    constrBuild.DefineParameter(i + 1, paramAttr, 
+                                                parameters[i].GetPramName());
+                // custom attribute spec
+                TypeContainer specType = parameters[i].GetParamType();
+                for (int j = 0; j < specType.GetSeparatedAttrs().Length; j++) {
+                    paramBuild.SetCustomAttribute(specType.GetSeparatedAttrs()[j]);    
+                }                
+            }
+            
+            return constrBuild;
+        }
+
+        
         /// <summary>adds a field to a type, including the custom attributes needed</summary>
         /// <remarks>forgeign method: should be better on TypeBuilder, but not possible</remarks>
         /// <returns>the FieldBuilder for the field created</returns>
