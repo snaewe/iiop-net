@@ -32,6 +32,7 @@ using System;
 using System.Text;
 using System.Runtime.Remoting;
 using System.Diagnostics;
+using System.Globalization;
 using omg.org.CORBA;
 using Ch.Elca.Iiop.CorbaObjRef;
 
@@ -253,8 +254,12 @@ namespace Ch.Elca.Iiop.Util {
                         potentialEscapeChar.Remove(0, potentialEscapeChar.Length);
                     } else if (potentialEscapeChar.Length == 6) {
                         // it's an escape char in form \uQRST
-                        char unescaped = Convert.ToChar(potentialEscapeChar.ToString().Substring(2));
+                        int charNr = Int32.Parse(potentialEscapeChar.ToString().Substring(2),
+                                                 NumberStyles.HexNumber);
+                        char unescaped = Convert.ToChar(charNr);
                         result.Append(unescaped);
+                        // chars are handled, remove
+                        potentialEscapeChar.Remove(0, potentialEscapeChar.Length);
                     }
                 }                
             }
