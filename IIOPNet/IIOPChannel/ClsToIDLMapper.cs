@@ -182,6 +182,7 @@ namespace Ch.Elca.Iiop.Idl {
         private static Type s_idlEntityType = typeof(IIdlEntity);
 
         private static Type s_corbaTypeCodeImplType = typeof(TypeCodeImpl);
+        private static Type s_corbaTypeCodeType = typeof(omg.org.CORBA.TypeCode);
 
         #endregion SFields
         #region IConstructors
@@ -327,7 +328,7 @@ namespace Ch.Elca.Iiop.Idl {
                 }
                 clsType = boxed; // transformation
                 return action.MapToIdlBoxedValueType(boxed, attributes, false);
-            } else if (IsInterface(clsType)) {
+            } else if (IsInterface(clsType) && !(clsType.Equals(s_corbaTypeCodeType))) {
                 return CallActionForDNInterface(ref clsType, action);
             } else if (IsMarshalByRef(clsType)) {
                 return action.MapToIdlConcreteInterface(clsType);
@@ -346,7 +347,8 @@ namespace Ch.Elca.Iiop.Idl {
                 return action.MapException(clsType);
             } else if (clsType.Equals(s_typeType) || clsType.IsSubclassOf(s_typeType)) {
                 return action.MapToTypeDesc(clsType);
-            } else if (clsType.Equals(s_corbaTypeCodeImplType) || clsType.IsSubclassOf(s_corbaTypeCodeImplType)) {
+            } else if (clsType.Equals(s_corbaTypeCodeImplType) || clsType.IsSubclassOf(s_corbaTypeCodeImplType) ||
+                       clsType.Equals(s_corbaTypeCodeType)) {
                 return action.MapToTypeCode(clsType);
             } else if (IsMarshalledAsStruct(clsType)) {
                  return action.MapToIdlStruct(clsType);
@@ -1063,6 +1065,50 @@ namespace Ch.Elca.Iiop.Tests {
                                                                            new AttributeExtCollection(new Attribute[] { new InterfaceTypeAttribute(IdlTypeInterface.AbstractInterface) }),
                                                                            s_testAction);
             Assertion.AssertEquals(MappingToResult.IdlAbstractIf, mapResult);
+        }
+        
+        public void TestMapToIdlException() {
+            ClsToIdlMapper mapper = ClsToIdlMapper.GetSingleton();
+            MappingToResult mapResult = (MappingToResult)mapper.MapClsType(typeof(Exception), 
+                                                                           new AttributeExtCollection(),
+                                                                           s_testAction);
+            Assertion.AssertEquals(MappingToResult.IdlException, mapResult);
+        }
+        
+        public void TestMapToIdlAbstractBase() {
+            ClsToIdlMapper mapper = ClsToIdlMapper.GetSingleton();
+            MappingToResult mapResult = (MappingToResult)mapper.MapClsType(typeof(object), 
+                                                                           new AttributeExtCollection(new Attribute[] { new ObjectIdlTypeAttribute(IdlTypeObject.AbstractBase) }),
+                                                                           s_testAction);
+            Assertion.AssertEquals(MappingToResult.IdlAbstractBase, mapResult);
+        }
+        
+        public void TestMapToIdlValueBase() {
+            ClsToIdlMapper mapper = ClsToIdlMapper.GetSingleton();
+            MappingToResult mapResult = (MappingToResult)mapper.MapClsType(typeof(object), 
+                                                                           new AttributeExtCollection(new Attribute[] { new ObjectIdlTypeAttribute(IdlTypeObject.ValueBase) }),
+                                                                           s_testAction);
+            Assertion.AssertEquals(MappingToResult.IdlValueBase, mapResult);
+        }
+        
+        public void TestMapToIdlTypeDesc() {
+            ClsToIdlMapper mapper = ClsToIdlMapper.GetSingleton();
+            MappingToResult mapResult = (MappingToResult)mapper.MapClsType(typeof(Type), 
+                                                                           new AttributeExtCollection(),
+                                                                           s_testAction);
+            Assertion.AssertEquals(MappingToResult.IdlTypeDesc, mapResult);
+        }
+        
+        public void TestMapToIdlTypeCode() {
+            ClsToIdlMapper mapper = ClsToIdlMapper.GetSingleton();
+            MappingToResult mapResult = (MappingToResult)mapper.MapClsType(typeof(TypeCodeImpl), 
+                                                                           new AttributeExtCollection(),
+                                                                           s_testAction);
+            Assertion.AssertEquals(MappingToResult.IdlTypeCode, mapResult);
+            mapResult = (MappingToResult)mapper.MapClsType(typeof(omg.org.CORBA.TypeCode), 
+                                                           new AttributeExtCollection(),
+                                                           s_testAction);
+            Assertion.AssertEquals(MappingToResult.IdlTypeCode, mapResult);            
         }
         
     }
