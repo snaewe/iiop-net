@@ -20,7 +20,7 @@ build-base:
     cd ..
 
 build-base-debug:
-    set CSFLAGS=/debug+ /d:DEBUG /d:TRACE
+    set CSFLAGS=/debug+ /d:DEBUG /d:TRACE /d:DEBUG_LOGFILE
     $(MAKE) build-base
     
 build-ssl: build-base

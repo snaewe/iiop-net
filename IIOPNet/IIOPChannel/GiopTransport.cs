@@ -131,7 +131,7 @@ namespace Ch.Elca.Iiop {
         /// </summary>
         private void SendRequestMessage(Stream msgStream) {            
             
-#if TRACE            
+#if DEBUG            
             msgStream.Seek(0, SeekOrigin.Begin); // go to the beginning of the stream
             byte[] data = new byte[msgStream.Length];
             msgStream.Read(data, 0, (int)msgStream.Length);
@@ -216,7 +216,7 @@ namespace Ch.Elca.Iiop {
             } // end while (!fullyRead)
 
                       
-#if TRACE            
+#if DEBUG            
             responseStream.Seek(0, SeekOrigin.Begin); // assure stream is read from beginning
             byte[] data = new byte[responseStream.Length];
             responseStream.Read(data, 0, (int)responseStream.Length);
@@ -307,7 +307,7 @@ namespace Ch.Elca.Iiop {
             
             Debug.WriteLine("Send response message at server side");
             
-#if TRACE            
+#if DEBUG            
             msgStream.Seek(0, SeekOrigin.Begin); // go to the beginning of the stream
             byte[] data = new byte[msgStream.Length];
             msgStream.Read(data, 0, (int)msgStream.Length);
@@ -329,8 +329,8 @@ namespace Ch.Elca.Iiop {
         /// </summary>
         private HandlingResult ProcessLocateRequest(Stream msgStream) {                        
             
-            Debug.WriteLine("Process Locate request");
-#if TRACE
+            Trace.WriteLine("Process Locate request");
+#if DEBUG
             msgStream.Seek(0, SeekOrigin.Begin); // assure stream is read from beginning in formatter
             byte[] data = new byte[msgStream.Length];
             msgStream.Read(data, 0, (int)msgStream.Length);
@@ -343,7 +343,7 @@ namespace Ch.Elca.Iiop {
             Stream resultMsgStream = handler.HandleIncomingLocateRequestMessage(msgStream);
             SendResponseMessage(resultMsgStream);
             
-            Debug.WriteLine("Locate request processed");
+            Trace.WriteLine("Locate request processed");
             return HandlingResult.ReplyOk;
         }
         
@@ -353,7 +353,7 @@ namespace Ch.Elca.Iiop {
         /// <param name="msgStream">the request msg</param>        
         private HandlingResult ProcessRequest(Stream msgStream) {
 
-#if TRACE
+#if DEBUG
             msgStream.Seek(0, SeekOrigin.Begin); // assure stream is read from beginning in formatter
             byte[] data = new byte[msgStream.Length];
             msgStream.Read(data, 0, (int)msgStream.Length);

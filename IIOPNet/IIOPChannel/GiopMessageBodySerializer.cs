@@ -455,8 +455,8 @@ namespace Ch.Elca.Iiop.MessageHandling {
                                      CdrOutputStream targetStream, 
                                      Ior targetIor, uint reqId,
                                      GiopConnectionDesc conDesc) {
-            Debug.WriteLine("serializing request for id: " + reqId);
-            Debug.WriteLine("uri: " + methodCall.Uri);
+            Trace.WriteLine(String.Format("serializing request for method {0}; uri {1}; id {2}", 
+                                          methodCall.MethodBase, methodCall.Uri, reqId));
             GiopVersion version = targetIor.Version;
 
             ServiceContextCollection cntxColl = CosServices.GetSingleton().
@@ -767,6 +767,7 @@ namespace Ch.Elca.Iiop.MessageHandling {
             try {
                 switch (responseStatus) {
                     case 0 : 
+                        Trace.WriteLine("deserializing normal reply for methodCall: " + methodCall.MethodBase);
                         response = DeserialiseNormal(cdrStream, version, methodCall); break;
                     case 1 : 
                         throw DeserialiseUserException(cdrStream, version); // the error .NET message for this exception is created in the formatter
@@ -782,7 +783,8 @@ namespace Ch.Elca.Iiop.MessageHandling {
                         // the error .NET message for this exception is created in the formatter
                         throw new MARSHAL(2401, CompletionStatus.Completed_MayBe);
                 }
-            } catch (Exception) {
+            } catch (Exception e) {
+	            Debug.WriteLine("exception while deserialising reply: " + e);
                 // do not corrupt stream --> skip
                 cdrStream.SkipRest();
                 throw;

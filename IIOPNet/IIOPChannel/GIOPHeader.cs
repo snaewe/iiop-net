@@ -161,7 +161,7 @@ namespace Ch.Elca.Iiop {
         /// <param name="stream">the stream to write to</param>
         /// <param name="msgLength">the length of the msg content</param>
         internal void WriteToStream(CdrOutputStream stream, uint msgLength) {
-            Trace.WriteLine("\nGIOP-message header starting: ");
+            Debug.WriteLine("\nGIOP-message header starting: ");
             // write magic
             for (int i = 0; i < m_giop_magic.Length; i++) {
                 Debug.Write(m_giop_magic[i] + " ");    

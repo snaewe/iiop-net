@@ -11,7 +11,7 @@ build-base:
 	$(MAKE) -C IDLToCLSCompiler -f Makefile.mono build
 
 build-base-debug:
-	$(MAKE) CSFLAGS='/debug+ /d:DEBUG /d:TRACE' -f Makefile.mono build-base
+	$(MAKE) CSFLAGS='/debug+ /d:DEBUG /d:TRACE /d:DEBUG_LOGFILE' -f Makefile.mono build-base
 
 build-tests: build-base
 	$(MAKE) -C IIOPChannel -f Makefile.mono build-unit-tests

@@ -41,7 +41,7 @@ using System.Text;
 using Ch.Elca.Iiop.Util;
 using Ch.Elca.Iiop.CorbaObjRef;
 
-#if TRACE
+#if DEBUG_LOGFILE
 using System.IO;
 #endif
 
@@ -264,7 +264,7 @@ namespace Ch.Elca.Iiop {
         #endregion IFields
         #region SConstructor
 
-        #if TRACE
+        #if DEBUG_LOGFILE
         static IiopClientChannel() {
             Stream log = File.Create("IIOPNET_DebugOutputClientChannel_"+
                              DateTime.Now.ToString("yyyyMMdd_HHmmss")+
@@ -495,7 +495,7 @@ namespace Ch.Elca.Iiop {
         #endregion IFields
         #region SConstructor
 
-        #if TRACE
+        #if DEBUG_LOGFILE
         static IiopServerChannel() {
             Stream log = File.Create("IIOPNET_DebugOutputServerChannel_"+
                                      DateTime.Now.ToString("yyyyMMdd_HHmmss")+

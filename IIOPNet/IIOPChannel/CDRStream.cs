@@ -233,7 +233,7 @@ namespace Ch.Elca.Iiop.Cdr {
                 }
                 return false;
             } else {
-                Trace.WriteLine("indirection resolved, streamPos: " + indirInfo.StreamPos +
+                Debug.WriteLine("indirection resolved, streamPos: " + indirInfo.StreamPos +
                                 ", type: " + indirInfo.IndirType +
                                 ", usage: " + indirInfo.IndirUsage);
                 if ((!allowEncapBoundryCross) && (IsEncapBoundryCrossed(indirInfo.StreamPos))) {
