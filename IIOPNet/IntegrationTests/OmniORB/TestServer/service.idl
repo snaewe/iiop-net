@@ -1,3 +1,9 @@
+module CCE {
+
+    interface Assembly {
+    };
+
+};
 
 
 union TestUnion switch (long) {
@@ -114,10 +120,11 @@ interface TestService {
     BlobData EchoBlobData(in BlobData data);    
     intList EchoIntList5(in intList arg);  
     int2Dim EchoInt2Dim2x2(in int2Dim arg);  
-    stringList EchoStringList5(in stringList arg);
+    stringList EchoStringList5(in stringList arg);    
+
+    CCE::Assembly CreateAsm();
 
 }; 
-
 
 
 

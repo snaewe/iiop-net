@@ -476,7 +476,14 @@ namespace Ch.Elca.Iiop.IntegrationTests {
             }            
         }
         
+        [Test]
+        public void TestMBRTypesWithReservedNameCollisions() {
+            CCE._Assembly asm = m_testService.CreateAsm();
+            Assertion.AssertNotNull("asm not created", asm);
 
+/*            CCE.N_Assembly _asm = m_testService.Create_Asm();
+            Assertion.AssertNotNull("_asm not created", _asm); */
+        }
 
     }
 
