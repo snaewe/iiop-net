@@ -27,6 +27,7 @@ public:
   ::wstringSeq* EchoWstringSeq(const ::wstringSeq& arg);
   ::seqOfWStringSeq* EchoSeqOfWStringSeq(const ::seqOfWStringSeq& arg);
   TestService::InnerStruct EchoInnerStruct(const TestService::InnerStruct& arg);
+  ::RecStruct* EchoRecStruct(const RecStruct& arg);
 };
 
 CORBA::WChar 
@@ -99,6 +100,11 @@ TestService_impl::EchoSeqOfWStringSeq(const ::seqOfWStringSeq& arg) {
 TestService::InnerStruct 
 TestService_impl::EchoInnerStruct(const TestService::InnerStruct& arg) {
   return arg;
+}
+
+::RecStruct *
+TestService_impl::EchoRecStruct(const RecStruct& arg) {
+  return new ::RecStruct(arg);
 }
 
 int

@@ -17,6 +17,11 @@ union TestUnionE switch(TestEnumForU) {
     case C: TestEnumForU valE1;
 };
 
+struct RecStruct {
+    sequence<RecStruct> seq;
+};
+
+
 typedef sequence<wstring> wstringSeq;
 
 typedef sequence<wstringSeq> seqOfWStringSeq;
@@ -42,6 +47,8 @@ interface TestService {
     seqOfWStringSeq EchoSeqOfWStringSeq(in seqOfWStringSeq arg);
 
     InnerStruct EchoInnerStruct(in InnerStruct arg);
+
+    RecStruct EchoRecStruct(in RecStruct arg);
 }; 
 
 

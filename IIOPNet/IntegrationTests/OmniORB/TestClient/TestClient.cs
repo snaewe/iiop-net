@@ -213,6 +213,19 @@ namespace Ch.Elca.Iiop.IntegrationTests {
         }
 
         [Test]
+        public void TestRecStruct() {
+            RecStruct arg = new RecStruct();
+            arg.seq = new RecStruct[1];
+            arg.seq[0].seq = new RecStruct[0]; // a null sequence is not allowed
+            RecStruct result = m_testService.EchoRecStruct(arg);
+            Assertion.AssertNotNull(result);
+            Assertion.AssertNotNull(result.seq);
+            Assertion.AssertEquals(arg.seq.Length, result.seq.Length);
+            Assertion.AssertNotNull(result.seq[0]);
+        }
+
+
+        [Test]
         public void TestWChar() {
             char arg = 'a';
             char result = m_testService.EchoWChar(arg);
