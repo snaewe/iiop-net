@@ -32,11 +32,8 @@ package symboltable;
 import java.util.Stack;
 
 /**
- * 
- * @version 
- * @author dul
- * 
- *
+ * This class stores the scope information encountered during parsing
+ * of an IDL file
  */
 public class SymbolTable {
 
@@ -46,8 +43,6 @@ public class SymbolTable {
     private Scope m_currentScope;
     /** the top scope for this symboltable */
     private Scope m_topScope;
-
-
 
     #endregion IFields
     #region IConstructors
