@@ -564,6 +564,8 @@ namespace Ch.Elca.Iiop {
         public void StartMsgHandling() {
             ThreadStart start = new ThreadStart(this.HandleRequests);
             Thread handleThread = new Thread(start);
+            // do not prevent main thread from exiting on app end:
+            handleThread.IsBackground = true;
             handleThread.Start();
         }
 
