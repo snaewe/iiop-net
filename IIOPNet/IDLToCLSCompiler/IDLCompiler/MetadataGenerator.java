@@ -275,7 +275,7 @@ public class MetaDataGenerator implements IDLParserVisitor {
             return false; 
         } // already known in this run, do checks if this is a redefinition error
 
-        if (m_typeManager.checkInBuildModulesForType(forSymbol)) { // safe to skip, because type is already fully declared in a previous run
+        if (m_typeManager.CheckInBuildModulesForType(forSymbol)) { // safe to skip, because type is already fully declared in a previous run
             return true;
         }
         return false;
@@ -284,7 +284,7 @@ public class MetaDataGenerator implements IDLParserVisitor {
     /** register a skipped type 
      *  this method is used to support runs over more than one parse tree */
     private void registerSkipped(Symbol forSymbol, boolean fwdDecl) {
-        m_typeManager.registerTypeFromBuildModule(forSymbol, fwdDecl);
+        m_typeManager.RegisterTypeFromBuildModule(forSymbol, fwdDecl);
         // register nested types too, if present
         if (!fwdDecl) { 
             Scope typeScope = forSymbol.getDeclaredIn().getChildScope(forSymbol.getSymbolName());
@@ -305,7 +305,7 @@ public class MetaDataGenerator implements IDLParserVisitor {
                 // the already defined type in a previous run can be found in the correct build-module
                 Scope nested = getScopeForNested(nesterScope, current);
                 Symbol newSymbol = nested.getSymbol(current.getSymbolName());
-                Type defined = m_typeManager.getTypeFromBuildModule(newSymbol);
+                Type defined = m_typeManager.GetTypeFromBuildModule(newSymbol);
                 // the Type resolution will work with the normal symbol --> therefore add type for this
                 if (defined == null) { 
                     throw new RuntimeException("internal exception, while adding nested type for a type from a previous run: " + current.getSymbolName()); 

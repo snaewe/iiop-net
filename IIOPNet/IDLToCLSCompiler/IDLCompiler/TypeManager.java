@@ -104,7 +104,7 @@ public class TypeManager {
     }
 
     #region methods for supporting generation for more than one parse result    
-    public Type getTypeFromBuildModule(Symbol forSymbol) {
+    public Type GetTypeFromBuildModule(Symbol forSymbol) {
         Scope declIn = null;
         declIn = forSymbol.getDeclaredIn();
         ModuleBuilder modBuilder = m_manager.GetModuleBuilderFor(declIn);
@@ -119,8 +119,8 @@ public class TypeManager {
     }
     
     /** checks, if a type is already defined in a previous run */
-    public boolean checkInBuildModulesForType(Symbol forSymbol) {
-        if (getTypeFromBuildModule(forSymbol) != null) {
+    public boolean CheckInBuildModulesForType(Symbol forSymbol) {
+        if (GetTypeFromBuildModule(forSymbol) != null) {
             return true;
         } else {
             return false;
@@ -130,8 +130,8 @@ public class TypeManager {
     /** register the type from a previous run in the current type table. This is used to check
      * if current file is legal or not. 
      * @param fwdDecl tells, if this action is triggered by a fwd declaration or a full declaration */
-    public void registerTypeFromBuildModule(Symbol forSymbol, boolean fwdDecl) {
-        Type toReg = getTypeFromBuildModule(forSymbol);
+    public void RegisterTypeFromBuildModule(Symbol forSymbol, boolean fwdDecl) {
+        Type toReg = GetTypeFromBuildModule(forSymbol);
         if (toReg == null) { 
             throw new RuntimeException("internal error, illegal argument for registerTypeFromBuildModule: " +
                                        forSymbol); 
