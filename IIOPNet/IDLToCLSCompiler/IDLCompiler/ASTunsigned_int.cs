@@ -16,6 +16,10 @@ public class ASTunsigned_int : SimpleNode {
   public override Object jjtAccept(IDLParserVisitor visitor, Object data) {
     return visitor.visit(this, data);
   }
+  
+  public override string GetIdentification() {
+    return ((SimpleNode)jjtGetChild(0)).GetIdentification();
+  }
 }
 
 

@@ -16,6 +16,11 @@ public class ASTfloating_pt_type_longdouble : SimpleNode {
   public override Object jjtAccept(IDLParserVisitor visitor, Object data) {
     return visitor.visit(this, data);
   }
+  
+  public override string GetIdentification() {
+    return "long double";
+  }
+
 }
 
 

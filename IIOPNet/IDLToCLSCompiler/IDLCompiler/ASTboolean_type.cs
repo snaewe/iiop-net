@@ -16,6 +16,11 @@ public class ASTboolean_type : SimpleNode {
   public override Object jjtAccept(IDLParserVisitor visitor, Object data) {
     return visitor.visit(this, data);
   }
+  
+  public override string GetIdentification() {
+    return "boolean";
+  }
+  
 }
 
 
