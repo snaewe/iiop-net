@@ -782,6 +782,20 @@ namespace Ch.Elca.Iiop.IntegrationTests {
         }
 
         [Test]
+        public void TestConstValueAndSwitch() {
+            // check, if switch is possbile with constant values
+            int testValue = A_LONG_CONST.ConstVal;
+            switch(testValue) {
+                case A_LONG_CONST.ConstVal:
+                    // ok
+                    break;
+                default:
+                    Assertion.Fail("wrong value: " + testValue + "; should be: " + A_LONG_CONST.ConstVal);
+                    break;
+            }            
+        }
+
+        [Test]
         public void TestPassingUnionsAsAny() {
             TestUnion arg = new TestUnion();
             short case0Val = 11;
