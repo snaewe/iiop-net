@@ -1,3 +1,14 @@
+version 1.7.1 rc1 (20 march 2005)
+---------------------------------
+
+bugs fixed:
+- IIOPChannel: fixed connection close.
+- IDL to CLS compiler: Type not found problem when referencing strong named assemblies with the /r option. This
+  is corrected by strong naming the IIOP.NET core assemblies.
+
+changes:
+- core assemblies are now strong named. For this, a sign key is generated when building IIOP.NET the first time.
+
 version 1.7.1 rc0 (20 february 2005)
 ------------------------------------
 
