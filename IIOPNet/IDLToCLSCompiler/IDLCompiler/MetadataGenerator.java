@@ -294,7 +294,7 @@ public class MetaDataGenerator implements IDLParserVisitor {
         }
     }
 
-        /** if a type, which contains nested types is skipped, the nested types must be also added to the type-table*/
+    /** if a type, which contains nested types is skipped, the nested types must be also added to the type-table*/
     private void RegisterSkippedNestedTypes(Scope nesterScope, Symbol nesterSymbol) {
                 
         // symbolDefinition : fetch type and add
@@ -372,6 +372,13 @@ public class MetaDataGenerator implements IDLParserVisitor {
             throw new RuntimeException("precondition violation in visitor for node" + visitedNode.GetType() +
                                        ", " + data.GetType() + " but expected BuildInfo"); 
         }
+    }
+
+    /** need this, because define-parameter prevent creating a parameterbuilder for param-0, the ret param.
+     *  For defining custom attributes on the ret-param, a parambuilder is however needed
+     *  TBD: search nicer solution for this */
+    private ParameterBuilder CreateParamBuilderForRetParam(MethodBuilder forMethod) {
+        return (ParameterBuilder) m_paramBuildConstr.Invoke(new Object[] { forMethod, (System.Int32) 0, ParameterAttributes.Retval, "" } );
     }
 
     /**
@@ -684,12 +691,12 @@ public class MetaDataGenerator implements IDLParserVisitor {
             if (parent != null) { valueToBuild.SetParent(parent); }
         }
         // add abstract methods for all interface methods, a class inherit from (only if valueToBuild is a class an not an interface)
-        addMethodAbstractDeclToClassForIf(valueToBuild, interfaces);
+        AddMethodAbstractDeclToClassForIf(valueToBuild, interfaces);
         return valueToBuild;
     }
 
     /** add abstract methods for all implemented interfaces to the abstract class */
-    private void addMethodAbstractDeclToClassForIf(TypeBuilder classBuilder, System.Type[] interfaces) {
+    private void AddMethodAbstractDeclToClassForIf(TypeBuilder classBuilder, System.Type[] interfaces) {
         if (!(classBuilder.get_IsClass())) { return; } // only needed for classes
         for (int i = 0; i < interfaces.length; i++) {
             Type ifType = interfaces[i];    
@@ -705,12 +712,12 @@ public class MetaDataGenerator implements IDLParserVisitor {
                                                                  MethodAttributes.Abstract | MethodAttributes.Public | MethodAttributes.Virtual | MethodAttributes.HideBySig, 
                                                                  methods[j].get_ReturnType(), paramTypes);
                 for (int k = 0; k < params.length; k++) {
-                    copyParamAttrs(method, params[k]);
+                    SetParamAttrs(method, params[k]);
                 }
                 // return parameter
                 Object[] retAttrs = methods[j].get_ReturnTypeCustomAttributes().GetCustomAttributes(false);
                 // add custom attributes for the return type
-                ParameterBuilder paramBuild = createParamBuilderForRetParam(method);
+                ParameterBuilder paramBuild = CreateParamBuilderForRetParam(method);
                 for (int k = 0; k < retAttrs.length; k++) {
                     if (retAttrs[i] instanceof IIdlAttribute) {
                         CustomAttributeBuilder attrBuilder = ((IIdlAttribute) retAttrs[i]).CreateAttributeBuilder();
@@ -720,10 +727,13 @@ public class MetaDataGenerator implements IDLParserVisitor {
             }
         }
     }
-
-    private void copyParamAttrs(MethodBuilder methodBuild, ParameterInfo info) {
+    
+    /** Defines the parameter-attributes for a method parameter (inclusive custom attributes) */
+    private void SetParamAttrs(MethodBuilder methodBuild, ParameterInfo info) {
         ParameterAttributes paramAttr = ParameterAttributes.None;
-        if (info.get_IsOut()) { paramAttr = paramAttr | ParameterAttributes.Out; }
+        if (info.get_IsOut()) { 
+            paramAttr = paramAttr | ParameterAttributes.Out; 
+        }
         ParameterBuilder paramBuild = methodBuild.DefineParameter(info.get_Position() + 1, 
                                                                   paramAttr, info.get_Name());
         // custom attributes
@@ -1770,13 +1780,6 @@ public class MetaDataGenerator implements IDLParserVisitor {
     }
     #endregion
 
-    /** need this, because define-parameter prevent creating a parameterbuilder for param-0, the ret param.
-     *  For defining custom attributes on the ret-param, a parambuilder is however needed
-     *  TBD: search nicer solution for this */
-    private ParameterBuilder createParamBuilderForRetParam(MethodBuilder forMethod) {
-        return (ParameterBuilder) m_paramBuildConstr.Invoke(new Object[] { forMethod, (System.Int32) 0, ParameterAttributes.Retval, "" } );
-    }
-
     /**
      * @see parser.IDLParserVisitor#visit(ASTattr_dcl, Object)
      * @param data the buildinfo of the type, which declares this attribute
@@ -1809,7 +1812,7 @@ public class MetaDataGenerator implements IDLParserVisitor {
                 propBuild.SetSetMethod(setAccessor);
             }
             
-            ParameterBuilder retParamGet = createParamBuilderForRetParam(getAccessor);
+            ParameterBuilder retParamGet = CreateParamBuilderForRetParam(getAccessor);
             ParameterBuilder valParam = null;
             if (setAccessor != null) { 
                 valParam = setAccessor.DefineParameter(1, ParameterAttributes.None, "value"); 
@@ -1874,7 +1877,7 @@ public class MetaDataGenerator implements IDLParserVisitor {
             }
             thisTypeInfo = new BuildInfo(buildInfo.GetBuildScope(), exceptToCreate);
         }
-        String repId = getRepIdForException(forSymbol);
+        String repId = GetRepIdForException(forSymbol);
         AddRepIdAttribute(exceptToCreate, repId);
 
         // add fileds ...
@@ -1889,7 +1892,7 @@ public class MetaDataGenerator implements IDLParserVisitor {
 
     /** generates a rep-id for a CLS exception class
      *  @param forSymbol the symbol of the exception */
-    private String getRepIdForException(Symbol forSymbol) {
+    private String GetRepIdForException(Symbol forSymbol) {
         java.util.Stack scopeStack = new java.util.Stack();
         Scope currentScope = forSymbol.getDeclaredIn();
         while (currentScope != null) {
@@ -1938,7 +1941,7 @@ public class MetaDataGenerator implements IDLParserVisitor {
             defineParamter(methodBuild, params[i], i+1);
         }
         // add custom attributes for the return type
-        ParameterBuilder paramBuild = createParamBuilderForRetParam(methodBuild);
+        ParameterBuilder paramBuild = CreateParamBuilderForRetParam(methodBuild);
         for (int i = 0; i < returnType.getAttrs().length; i++) {
             paramBuild.SetCustomAttribute(returnType.getAttrs()[i]);
         }
