@@ -55,20 +55,18 @@ namespace Ch.Elca.Iiop {
         // empty property table
         private IDictionary m_properties = new Hashtable();
 
-        // the host to connect to
-        private string m_hostName;
-        // the port to connect to
-        private int m_port;
+        private Uri         m_target;
 
         #endregion IFields
         #region IConstructors
 
         public IiopClientTransportSink(string url, object channelData) {
             Trace.WriteLine("create transport sink for URL: " + url);
+            
             string objectURI;
-            string chanURI = IiopUrlUtil.ParseUrl(url, out objectURI);
-            IiopUrlUtil.ParseChanUri(chanURI, out m_hostName, out m_port);
-            Trace.WriteLine("client transport, host: " + m_hostName + ", port :" + m_port);
+            m_target = IiopUrlUtil.ParseUrl(url, out objectURI);
+
+            Trace.WriteLine("client transport, host: " + m_target.Host + ", port :" + m_target.Port);
         }
 
         #endregion IConstructors
@@ -97,7 +95,7 @@ namespace Ch.Elca.Iiop {
             IiopClientConnectionManager conManager = IiopClientConnectionManager.GetManager();
             IiopClientConnection con = conManager.GetConnectionFor(msg);
             if (!con.CheckConnected()) {
-                con.ConnectTo(m_hostName, m_port);
+                con.ConnectTo(m_target.Host, m_target.Port);
                 return con.ClientSocket;
             } else {
                 return con.ClientSocket;

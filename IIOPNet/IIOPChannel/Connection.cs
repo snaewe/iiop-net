@@ -118,7 +118,7 @@ namespace Ch.Elca.Iiop {
 
         private GiopClientConnectionContext m_assocContext;
 
-        private string m_chanUri;
+        private Uri m_chanUri;
 
         private TcpClient m_socket;
         private string m_host;
@@ -127,7 +127,7 @@ namespace Ch.Elca.Iiop {
         #endregion IFields
         #region IConstructors
 
-        public IiopClientConnection(string chanUri) {
+        public IiopClientConnection(Uri chanUri) {
             m_chanUri = chanUri;
         	m_assocContext = new GiopClientConnectionContext();
         }
@@ -143,7 +143,7 @@ namespace Ch.Elca.Iiop {
 
         internal string ChanUri {
             get {
-                return m_chanUri;
+                return m_chanUri.ToString();
             }
         }
 

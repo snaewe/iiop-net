@@ -294,7 +294,7 @@ namespace Ch.Elca.Iiop {
         public IMessageSink CreateMessageSink(string url, object remoteChannelData, out string objectURI) {
             objectURI = null;
             if (url != null) {
-                string chanURI = IiopUrlUtil.ParseUrl(url, out objectURI);
+                Uri chanURI = IiopUrlUtil.ParseUrl(url, out objectURI);
                 if (chanURI == null) { return null; }
             } else {
                 // check remoteChannelData
@@ -313,7 +313,7 @@ namespace Ch.Elca.Iiop {
         #region Implementation of IChannel
         public string Parse(string url, out string objectURI) {
             objectURI = null;
-            return IiopUrlUtil.ParseUrl(url, out objectURI);
+            return IiopUrlUtil.ParseUrl(url, out objectURI).ToString();
         }
 
         #endregion Implementation of IChannel
@@ -540,7 +540,7 @@ namespace Ch.Elca.Iiop {
             
         public string Parse(string url, out string objectURI) {
             objectURI = null;
-            return IiopUrlUtil.ParseUrl(url, out objectURI);
+            return IiopUrlUtil.ParseUrl(url, out objectURI).ToString();
         }
 
         #endregion Implementation of IChannel

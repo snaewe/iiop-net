@@ -265,9 +265,9 @@ namespace Ch.Elca.Iiop {
         	lock(this) {
         	    if ((targetUri != null) && (IiopUrlUtil.IsUrl(targetUri))) {
                     string objectUri;
-                    string chanUri = IiopUrlUtil.ParseUrl(targetUri, out objectUri);
+                    Uri chanUri = IiopUrlUtil.ParseUrl(targetUri, out objectUri);
                         
-                    ArrayList avConnections = (ArrayList) m_availableclientConnections[chanUri];
+                    ArrayList avConnections = (ArrayList) m_availableclientConnections[chanUri.ToString()];
                     if ((avConnections != null) && (avConnections.Count > 0)) { // lock not needed for avConnections, because all using methods exclusive
                         // connection must not be available for other clients if used by this one
                         ConnectionUsageDescription connectionDesc = (ConnectionUsageDescription) avConnections[0];

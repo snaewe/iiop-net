@@ -65,36 +65,9 @@ namespace Ch.Elca.Iiop.Util {
         #endregion IConstructors
         #region SMethods
         
-        /// <summary>
-        /// extract port and hostname out of an channel uri
-        /// </summary>
-        /// <param name="uri"></param>
-        /// <param name="hostname"></param>
-        /// <param name="port"></param>
-        public static void ParseChanUri(string uri, out string hostname,
-                                        out int port) {
-            hostname = null;
-            port = 0;
-            if (uri == null) { return; }
-            if (uri.StartsWith("iiop:")) {
-                // parse URL
-                uri = uri.Substring(7); // cut of iiop://
-                if (uri.IndexOf(":") > 0) {
-                    hostname = uri.Substring(0, uri.IndexOf(":"));
-                    port = Convert.ToInt32(uri.Substring(uri.IndexOf(":")+1));
-                } else {
-                    hostname = uri;
-                }
-            }
-        }
-        
         /// <summary>checks if data is an URL for the IIOP-channel </summary>
         public static bool IsUrl(string data) {
-            if ((data.StartsWith("iiop")) || (data.StartsWith("IOR"))) {
-                return true;
-            } else {
-                return false;
-            }
+            return (data.StartsWith("iiop") || data.StartsWith("IOR"));
         }
         
         /// <summary>creates an IOR for the object described by the Url url</summary>
@@ -106,15 +79,13 @@ namespace Ch.Elca.Iiop.Util {
                 ior = new Ior(url);                    
             } else if (url.StartsWith("iiop")) {
                 string objectURI;
-                string host;
-                int port;
                 GiopVersion version;
-                string chanURI = IiopUrlUtil.ParseUrl(url, out objectURI);
-                IiopUrlUtil.ParseChanUri(chanURI, out host, out port);
+
+                Uri chanUri = IiopUrlUtil.ParseUrl(url, out objectURI);
                 byte[] objectKey = IiopUrlUtil.GetObjectInfoForObjUri(objectURI, out version);
                 // now create an IOR with the above information
-                InternetIiopProfile profile = new InternetIiopProfile(version, host,
-                                                                     (ushort)port, objectKey);
+                InternetIiopProfile profile = new InternetIiopProfile(version, chanUri.Host,
+                                                                     (ushort)chanUri.Port, objectKey);
                 ior = new Ior(repositoryId, new IorProfile[] { profile });
         	} else {
         	    throw new INV_OBJREF(1963, CompletionStatus.Completed_MayBe);
@@ -129,31 +100,22 @@ namespace Ch.Elca.Iiop.Util {
         /// <param name="url">the url to parse</param>
         /// <param name="objectURI">the objectURI</param>
         /// <returns>the channel-Uri</returns>
-        public static string ParseUrl(string url, out string objectUri) {
-            string channelUri = null;
-            objectUri = null;
-            if (url == null) { 
-                return null; 
-            }
-
+        public static Uri ParseUrl(string url, out string objectUri) {
+            Uri uri = null;
             if (url.StartsWith("iiop:")) {
-                // parse URL
-                url = url.Substring(7); // cut of iiop://
-                if (url.IndexOf("/") >= 0) {
-                    channelUri = "iiop://" + url.Substring(0, url.IndexOf("/"));
-                    objectUri = url.Substring(url.IndexOf("/")+1);
-                } else {
-                    channelUri = url;
-                }
+                // skip
+                uri = new Uri(url);
+                objectUri = uri.PathAndQuery;
             } else if (url.StartsWith("IOR:")) {
-                // parse IOR
                 Ior ior = new Ior(url);
-                channelUri = "iiop://" + ior.HostName + ":" + ior.Port;
+                uri = new Uri("iiop://"+ior.HostName+":"+ior.Port);
                 objectUri = GetObjUriForObjectInfo(ior.ObjectKey, ior.Version);
             } else {
                 // not possible
+                uri = null;
+                objectUri = null;
             }
-            return channelUri;
+            return uri;
         }
 
         /// <summary>
