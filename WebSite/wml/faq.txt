@@ -445,6 +445,20 @@ int PerformAddition(int val1, int val2) {
 </pre>
 </FAQ>
 
+<FAQ question="How do I force IIOP.NET to use a given IP address for callbacks?">
+<p>When your machine hangs on multiple networks, or when the communication goes through a NAT, you may need to specify the IP address sent to the CORBA peer to ensure that the peer can find the local machine.
+
+<p>The following code snippet specifies "192.9.200.180" as the local IP address sent to the peer:
+<pre>
+  IDictionary props = new Hashtable();
+  props[IiopServerChannel.PORT_KEY] = 0;
+  props[IiopServerChannel.MACHINE_NAME_KEY] = "192.9.200.180";
+  IIOPChannel chan = new IIOPChannel(props);
+</pre>
+
+<p>You can also use <code>props[IiopServerChannel.BIND_TO_KEY]</code> to additionally restrict the channel to listening to a particular IP address only instead of listening to any.
+
+</FAQ>
 </FAQ-SECTION>
 
 <FAQ-SECTION name="Accessing .NET Objects from CORBA with IIOP.NET">
@@ -571,6 +585,11 @@ jacorb.interop.chunk_custom_rmi_valuetypes=off
 ">
 <p>This exception happens when trying to call a callback function, but only an IIOPClientChannel was registered (i.e. only outgoing connections are possible).
 <p>Register an IIOPChannel with an explicit port for listening for callbacks; IIOPChannel with no ports only creates a client channel.
+</FAQ>
+
+<FAQ question="IIOP.NET sends the wrong IP address">
+<p>You can explicitely specify the local IP address used in the IIOP messages. See <a href="#faq5_9">How do I force IIOP.NET to use a given IP address for callbacks?</a>.
+
 </FAQ>
 </FAQ-SECTION>
 
