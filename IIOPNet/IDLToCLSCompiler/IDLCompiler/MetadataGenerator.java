@@ -269,7 +269,7 @@ public class MetaDataGenerator implements IDLParserVisitor {
     
     /** checks if a type generation can be skipped, because type is already defined in a previous run over a parse tree 
      * this method is used to support runs over more than one parse tree */
-    private boolean checkSkip(Symbol forSymbol) {
+    private boolean CheckSkip(Symbol forSymbol) {
         // do skip, if type is not known (or only fwd declared) in current run over a parse tree, but is known from a previous run
         if (m_typeManager.IsTypeFullyDeclarded(forSymbol)) { 
             return false; 
@@ -283,19 +283,19 @@ public class MetaDataGenerator implements IDLParserVisitor {
 
     /** register a skipped type 
      *  this method is used to support runs over more than one parse tree */
-    private void registerSkipped(Symbol forSymbol, boolean fwdDecl) {
+    private void RegisterSkipped(Symbol forSymbol, boolean fwdDecl) {
         m_typeManager.RegisterTypeFromBuildModule(forSymbol, fwdDecl);
         // register nested types too, if present
         if (!fwdDecl) { 
             Scope typeScope = forSymbol.getDeclaredIn().getChildScope(forSymbol.getSymbolName());
             if (typeScope != null) {  // e.g boxed value types doesn't open a scope for it's member
-                registerSkippedNestedTypes(typeScope, forSymbol); 
+                RegisterSkippedNestedTypes(typeScope, forSymbol); 
             }
         }
     }
 
         /** if a type, which contains nested types is skipped, the nested types must be also added to the type-table*/
-    private void registerSkippedNestedTypes(Scope nesterScope, Symbol nesterSymbol) {
+    private void RegisterSkippedNestedTypes(Scope nesterScope, Symbol nesterSymbol) {
                 
         // symbolDefinition : fetch type and add
         java.util.Enumeration symEnum = nesterScope.getSymbolEnum();
@@ -409,7 +409,9 @@ public class MetaDataGenerator implements IDLParserVisitor {
                                                      null, interfaces);
             // add InterfaceTypeAttribute
             IdlTypeInterface ifType = IdlTypeInterface.ConcreteInterface;
-            if (isAbstract) { ifType = IdlTypeInterface.AbstractInterface; }
+            if (isAbstract) { 
+                ifType = IdlTypeInterface.AbstractInterface; 
+            }
             // add interface type
             CustomAttributeBuilder interfaceTypeAttrBuilder = new InterfaceTypeAttribute(ifType).CreateAttributeBuilder();
             interfaceToBuild.SetCustomAttribute(interfaceTypeAttrBuilder);
@@ -446,8 +448,8 @@ public class MetaDataGenerator implements IDLParserVisitor {
         ASTinterface_header header = (ASTinterface_header)node.jjtGetChild(0);
         Symbol forSymbol = enclosingScope.getSymbol(header.getIdent());
         // check if a type declaration exists from a previous run
-        if (checkSkip(forSymbol)) { 
-            registerSkipped(forSymbol, false); 
+        if (CheckSkip(forSymbol)) { 
+            RegisterSkipped(forSymbol, false); 
             return null; 
         }
 
@@ -481,8 +483,8 @@ public class MetaDataGenerator implements IDLParserVisitor {
         // create only the type-builder, but don't call createType()
         Symbol forSymbol = enclosingScope.getSymbol(node.getIdent());
         // check if type is known from a previous run over a parse tree --> if so: skip
-        if (checkSkip(forSymbol)) { 
-            registerSkipped(forSymbol, true); 
+        if (CheckSkip(forSymbol)) { 
+            RegisterSkipped(forSymbol, true); 
             return null; 
         }
         
@@ -740,7 +742,10 @@ public class MetaDataGenerator implements IDLParserVisitor {
         
         Symbol forSymbol = enclosingScope.getSymbol(header.getIdent());
         // check if type is known from a previous run over a parse tree --> if so: skip
-        if (checkSkip(forSymbol)) { registerSkipped(forSymbol, false); return null; }
+        if (CheckSkip(forSymbol)) { 
+            RegisterSkipped(forSymbol, false); 
+            return null; 
+        }
         
         // retrieve first types for the inherited
         System.Type[] inheritFrom = (System.Type[])header.jjtAccept(this, data);
@@ -798,7 +803,10 @@ public class MetaDataGenerator implements IDLParserVisitor {
         
         Symbol forSymbol = enclosingScope.getSymbol(node.getIdent());
         // check if type is known from a previous run over a parse tree --> if so: skip
-        if (checkSkip(forSymbol)) { registerSkipped(forSymbol, false); return null; }
+        if (CheckSkip(forSymbol)) { 
+            RegisterSkipped(forSymbol, false); 
+            return null; 
+        }
 
         Type[] interfaces = parseValueInheritSpec(node, (BuildInfo) data);
         if ((interfaces.length > 0) && (interfaces[0].get_IsClass())) { 
@@ -841,8 +849,8 @@ public class MetaDataGenerator implements IDLParserVisitor {
         Scope enclosingScope = ((BuildInfo) data).GetBuildScope();
         Symbol forSymbol = enclosingScope.getSymbol(node.getIdent());
         // check if type is known from a previous run over a parse tree --> if so: skip
-        if (checkSkip(forSymbol)) { 
-            registerSkipped(forSymbol, false); 
+        if (CheckSkip(forSymbol)) { 
+            RegisterSkipped(forSymbol, false); 
             return null;
         }
         
@@ -872,7 +880,10 @@ public class MetaDataGenerator implements IDLParserVisitor {
         Scope enclosingScope = ((BuildInfo) data).GetBuildScope();
         Symbol forSymbol = enclosingScope.getSymbol(node.getIdent());
         // check if type is known from a previous run over a parse tree --> if so: skip
-        if (checkSkip(forSymbol)) { registerSkipped(forSymbol, true); return null; }
+        if (CheckSkip(forSymbol)) { 
+            RegisterSkipped(forSymbol, true); 
+            return null; 
+        }
         
         // create only the type-builder, but don't call createType()
         String fullyQualName = enclosingScope.getFullyQualifiedNameForSymbol(node.getIdent());
@@ -1494,7 +1505,10 @@ public class MetaDataGenerator implements IDLParserVisitor {
         BuildInfo buildInfo = (BuildInfo) data;
         Symbol forSymbol = buildInfo.GetBuildScope().getSymbol(node.getIdent());
         // check if type is known from a previous run over a parse tree --> if so: skip
-        if (checkSkip(forSymbol)) { registerSkipped(forSymbol, false); return null; }
+        if (CheckSkip(forSymbol)) { 
+            RegisterSkipped(forSymbol, false); 
+            return null; 
+        }
         
         TypeBuilder structToCreate = null;
         BuildInfo thisTypeInfo = null;
@@ -1625,7 +1639,10 @@ public class MetaDataGenerator implements IDLParserVisitor {
         BuildInfo buildInfo = (BuildInfo) data;
         Symbol forSymbol = buildInfo.GetBuildScope().getSymbol(node.getIdent());
         // check if type is known from a previous run over a parse tree --> if so: skip
-        if (checkSkip(forSymbol)) { registerSkipped(forSymbol, false); return null; }
+        if (CheckSkip(forSymbol)) { 
+            RegisterSkipped(forSymbol, false); 
+            return null; 
+        }
 
         TypeBuilder enumToCreate = null;
         TypeAttributes typeAttrs = TypeAttributes.Class | TypeAttributes.Public | TypeAttributes.Sealed |
@@ -1815,7 +1832,10 @@ public class MetaDataGenerator implements IDLParserVisitor {
         BuildInfo buildInfo = (BuildInfo) data;
         Symbol forSymbol = buildInfo.GetBuildScope().getSymbol(node.getIdent());
         // check if type is known from a previous run over a parse tree --> if so: skip
-        if (checkSkip(forSymbol)) { registerSkipped(forSymbol, false); return null; }
+        if (CheckSkip(forSymbol)) { 
+            RegisterSkipped(forSymbol, false); 
+            return null; 
+        }
 
         TypeBuilder exceptToCreate = null;
         BuildInfo thisTypeInfo = null;
