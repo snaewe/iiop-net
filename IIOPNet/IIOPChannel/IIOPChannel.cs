@@ -229,7 +229,7 @@ namespace Ch.Elca.Iiop {
         #region IConstructors
         
         public IiopClientChannel() {
-            InitChannel(new TcpClientTransportFactory());
+            InitChannel(new TcpTransportFactory());
         }
 
         /// <summary>the constructor used by the config file</summary>
@@ -256,7 +256,7 @@ namespace Ch.Elca.Iiop {
                 }
             }
 
-            InitChannel(new TcpClientTransportFactory());
+            InitChannel(new TcpTransportFactory());
         }
 
         #endregion IConstructors
@@ -398,7 +398,7 @@ namespace Ch.Elca.Iiop {
 
         public IiopServerChannel(int port) {
             m_port = port;
-            InitChannel(new TcpConnectionListener());
+            InitChannel(new TcpTransportFactory());
         }
 
         /// <summary>Constructor used by configuration</summary>
@@ -432,7 +432,7 @@ namespace Ch.Elca.Iiop {
                     }
                 }
             }
-            InitChannel(new TcpConnectionListener());
+            InitChannel(new TcpTransportFactory());
         }
         
         #endregion IConstructors
@@ -477,11 +477,12 @@ namespace Ch.Elca.Iiop {
         }
         
         /// <summary>initalize the channel</summary>
-        private void InitChannel(IServerConnectionListener connectionListener) {            
+        private void InitChannel(IServerTransportFactory transportFactory) {            
             if (m_port < 0) {
                 throw new ArgumentException("illegal port to listen on: " + m_port); 
             }
-            m_connectionListener = connectionListener;
+            m_connectionListener = 
+                transportFactory.CreateConnectionListener(new ClientAccepted(this.ProcessClientMessages));
             SetupChannelData(m_port);
             // create the default provider chain, if no chain specified
             if (m_providerChain == null) {
@@ -516,10 +517,6 @@ namespace Ch.Elca.Iiop {
 
         #region Implementation of IChannelReceiver
         public void StartListening(object data) {
-            
-            if (!m_connectionListener.IsInitalized()) {
-                m_connectionListener.Setup(new ClientAccepted(this.ProcessClientMessages));
-            }
             // start Listening
             if (!m_connectionListener.IsListening()) {
                 int listeningPort = m_connectionListener.StartListening(m_port);

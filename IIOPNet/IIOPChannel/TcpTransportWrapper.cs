@@ -152,9 +152,9 @@ namespace Ch.Elca.Iiop {
     }        
     
     /// <summary>
-    /// creates TCP client transports
+    /// creates TCP transports
     /// </summary>
-    internal class TcpClientTransportFactory : IClientTransportFactory {
+    internal class TcpTransportFactory : ITransportFactory {
         
         /// <summary><see cref="Ch.Elca.Iiop.IClientTransportFactory.CreateTransport(Ior)"/></summary>
         public IClientTransport CreateTransport(Ior target) {
@@ -164,6 +164,13 @@ namespace Ch.Elca.Iiop {
         /// <summary><see cref="Ch.Elca.Iiop.IClientTransportFactory.GetEndpointKey(Ior)"/></summary>
         public string GetEndpointKey(Ior target) {
             return "iiop://"+target.HostName+":"+target.Port;
+        }
+        
+        /// <summary><see cref="Ch.Elca.Iiop.IServerTransportFactory.CreateConnectionListener"/></summary>
+        public IServerConnectionListener CreateConnectionListener(ClientAccepted clientAcceptCallBack) {
+            IServerConnectionListener result = new TcpConnectionListener();
+            result.Setup(clientAcceptCallBack);
+            return result;
         }
                 
     }

@@ -38,7 +38,7 @@ namespace Ch.Elca.Iiop {
 
     /// <summary>specifies the interface, which must be implemented 
     /// by every tranport-wrapper</summary>
-    internal interface ITransport {
+    public interface ITransport {
         
         #region IProperties
         
@@ -62,7 +62,7 @@ namespace Ch.Elca.Iiop {
     
     
     /// <summary>the interface to implement by a client side transport wrapper</summary>
-    internal interface IClientTransport : ITransport {
+    public interface IClientTransport : ITransport {
         
         /// <summary>opens a connection to the target, if not already open (when open do nothing)</summary>
         void OpenConnection();
@@ -78,7 +78,7 @@ namespace Ch.Elca.Iiop {
     
     
     /// <summary>the interfce to implement by a server side transport wrapper</summary>
-    internal interface IServerTransport : ITransport {
+    public interface IServerTransport : ITransport {
                 
         /// <summary>Results the given exception from a connection close on client side</summary>
         bool IsConnectionCloseException(Exception e);
@@ -89,7 +89,7 @@ namespace Ch.Elca.Iiop {
     /// <summary>
     /// creates client transports
     /// </summary>
-    internal interface IClientTransportFactory {
+    public interface IClientTransportFactory {
         
         /// <summary>creates a client transport to the target</summary>
         IClientTransport CreateTransport(Ior target);
@@ -100,14 +100,24 @@ namespace Ch.Elca.Iiop {
                 
     }
     
+    /// <summary>creates server transports</summary>
+    public interface IServerTransportFactory {
+        
+        /// <summary>creates a connecton listener, which notifies about new clients 
+        /// using clientAcceptCallback</summary>
+        IServerConnectionListener CreateConnectionListener(ClientAccepted clientAcceptCallBack);
+    }
     
+    /// <summary>creates client and server transports</summary>
+    public interface ITransportFactory : IClientTransportFactory, IServerTransportFactory {        
+    }        
     
     /// <summary>delegate to a method, which should be called, when a client connection is accepted</summary>
-    delegate void ClientAccepted(IServerTransport acceptedTransport);
+    public delegate void ClientAccepted(IServerTransport acceptedTransport);
     
     /// <summary>implementers wait for and accept client connections on their supported transport mechanism.
     /// </summary>
-    interface IServerConnectionListener {
+    public interface IServerConnectionListener {
         
         #region IMethods
         
