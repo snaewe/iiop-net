@@ -881,7 +881,11 @@ namespace Ch.Elca.Iiop.Idl {
             return IdlNaming.MapFullTypeNameToIdlScoped(dotNetType);
         }
         public object MapToIdlConcreteInterface(System.Type dotNetType) {
-            return IdlNaming.MapFullTypeNameToIdlScoped(dotNetType);
+            if (!dotNetType.Equals(typeof(MarshalByRefObject))) {
+                return IdlNaming.MapFullTypeNameToIdlScoped(dotNetType);
+            } else {
+            	return "Object";
+            }
         }
         public object MapToIdlConcreateValueType(System.Type dotNetType) {
             return IdlNaming.MapFullTypeNameToIdlScoped(dotNetType);

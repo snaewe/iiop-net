@@ -82,6 +82,7 @@ namespace Ch.Elca.Iiop.Idl {
             m_defaultMappedTypes.Add(typeof(System.Type));
             m_defaultMappedTypes.Add(typeof(omg.org.CORBA.TypeCode));
             m_defaultMappedTypes.Add(typeof(GenericUserException));
+            m_defaultMappedTypes.Add(typeof(MarshalByRefObject));
         }
         
         /// <summary>
