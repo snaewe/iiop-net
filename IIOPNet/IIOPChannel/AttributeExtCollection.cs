@@ -31,6 +31,7 @@
 using System;
 using System.ComponentModel;
 using System.Collections;
+using System.Diagnostics;
 using Ch.Elca.Iiop.Idl;
 
 namespace Ch.Elca.Iiop.Util {
@@ -52,11 +53,11 @@ namespace Ch.Elca.Iiop.Util {
         #endregion IFields
         #region IConstructors
 
-        public AttributeExtCollection() : this(s_emptyAttrArray) {
+        public AttributeExtCollection() {
         }
         
-        public AttributeExtCollection(Attribute[] attrs) {
-            m_attributes = new ArrayList(attrs);
+        public AttributeExtCollection(Attribute[] attrs) : this() {
+            m_attributes.AddRange(attrs);
         }
 
         #endregion IConstructors
@@ -167,7 +168,9 @@ namespace Ch.Elca.Iiop.Util {
         /// insert the attribute in the collection at the first position
         /// </summary>
         public void InsertAttribute(Attribute attr) {
+            Debug.WriteLine("insert into attribute collection attribute of type: " + attr.GetType().FullName+" size:"+m_attributes.Count);
             m_attributes.Insert(0, attr);
+            Debug.WriteLine("attr inserted");
         }
         
         /// <summary>
