@@ -1002,12 +1002,16 @@ namespace omg.org.CORBA {
 
 
         public SequenceTC(TypeCode seqType, int length) : base(TCKind.tk_sequence) {
-            m_seqType = seqType;    
-            m_length = length;
+            Initalize(seqType, length);
         }
 
         #endregion IConstructors
         #region IMethods
+        
+        private void Initalize(TypeCode seqType, int length) {
+            m_seqType = seqType;    
+            m_length = length;            
+        }
 
         public override int length() {
             return m_length;
@@ -1086,14 +1090,19 @@ namespace omg.org.CORBA {
         }     
 
         public BaseStructTC(string repositoryID, string name, StructMember[] members, TCKind kind) : base(kind) {
-            m_id = repositoryID;
-            m_name = name;
-            m_members = members;
-            if (m_members == null) { m_members = new StructMember[0]; }
+            Initalize(repositoryID, name, members);
         }
 
         #endregion IConstructors
         #region IMethods
+        
+        public void Initalize(string repositoryID, string name, StructMember[] members) {
+            m_id = repositoryID;
+            m_name = name;
+            m_members = members;
+            if (m_members == null) { m_members = new StructMember[0]; }            
+        }
+        
 
         [return:StringValueAttribute()]
         public override string id() {
@@ -1154,7 +1163,7 @@ namespace omg.org.CORBA {
             }
             return result;
 
-        }
+        }                
 
         #endregion IMethods
 
@@ -1231,15 +1240,23 @@ namespace omg.org.CORBA {
         public UnionTC(string repositoryID, string name, 
                        omg.org.CORBA.TypeCode discriminatorType, int defaultCase,
                        UnionSwitchCase[] switchCases) : base(TCKind.tk_union) {
-            m_id = repositoryID;
-            m_name = name;
-            m_discriminatorType = discriminatorType;
-            m_defaultCase = defaultCase;
-            m_members = switchCases;
+            Initalize(repositoryID, name, discriminatorType, defaultCase,
+                      switchCases);
         }
 
         #endregion IConstructors
         #region IMethods
+        
+        public void Initalize(string repositoryID, string name,
+                              omg.org.CORBA.TypeCode discriminatorType, int defaultCase,
+                              UnionSwitchCase[] switchCases) {
+            m_id = repositoryID;
+            m_name = name;
+            m_discriminatorType = discriminatorType;
+            m_defaultCase = defaultCase;
+            m_members = switchCases;                                      
+        }
+                              
 
         [return:StringValueAttribute()]
         public override string id() {
@@ -1441,16 +1458,21 @@ namespace omg.org.CORBA {
         }     
 
         public ValueTypeTC(string repositoryID, string name, ValueTypeMember[] members, TypeCode baseClass, short typeMod) : base(TCKind.tk_value) {
+            Initalize(repositoryID, name, members, baseClass, typeMod);
+        }
+
+        #endregion IConstructors
+        #region IMethods
+        
+        public void Initalize(string repositoryID, string name, ValueTypeMember[] members, TypeCode baseClass, short typeMod) {
             m_id = repositoryID;
             m_name = name;
             m_members = members;
             if (m_members == null) { m_members = new ValueTypeMember[0]; }
             m_baseClass = baseClass;
-            m_typeMod = typeMod;
+            m_typeMod = typeMod;            
         }
-
-        #endregion IConstructors
-        #region IMethods
+        
 
         [return:StringValueAttribute()]
         public override string id() {

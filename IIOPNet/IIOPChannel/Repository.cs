@@ -408,9 +408,16 @@ namespace Ch.Elca.Iiop.Idl {
         /// creates a CORBA type code for a CLS type
         /// </summary>
         /// <returns>the typecode for the CLS type</returns>
-        internal static TypeCodeImpl CreateTypeCodeForType(Type forType, AttributeExtCollection attributes) {
+        internal static TypeCodeImpl CreateTypeCodeForType(Type forType,  
+                                                          AttributeExtCollection attributes) {
+            return CreateTypeCodeForTypeInternal(forType, attributes, new TypeCodeCreater());
+        }
+        
+        /// <summary>used by type code creating methods</summary>
+        internal static TypeCodeImpl CreateTypeCodeForTypeInternal(Type forType, AttributeExtCollection attributes,
+                                                                   TypeCodeCreater typeCodeCreator) {
             ClsToIdlMapper mapper = ClsToIdlMapper.GetSingleton();
-            return (TypeCodeImpl)mapper.MapClsType(forType, attributes, new TypeCodeCreater());
+            return (TypeCodeImpl)mapper.MapClsType(forType, attributes, typeCodeCreator);
         }
 
         /// <summary>gets the CLS type for the Typecode</summary>
@@ -438,6 +445,64 @@ namespace Ch.Elca.Iiop.Idl {
     /// create a type-code for the cls-Type mapped to the specified IDL-type
     /// </summary>
     internal class TypeCodeCreater : MappingAction {
+        
+        #region Types
+        
+        private class TypecodeForTypeKey {
+        
+            #region IFields
+            
+            private Type m_type;
+            private AttributeExtCollection m_attributes;
+            
+            #endregion IFields
+            #region IConstructors
+        
+            public TypecodeForTypeKey(Type forType, AttributeExtCollection
+                                      attrs) {
+                if ((forType == null) || (attrs == null)) {
+                    throw new INTERNAL(801, CompletionStatus.Completed_MayBe);
+                }
+                m_type = forType;
+                m_attributes = attrs;
+            }
+        
+            #endregion IConstructors
+            #region IProperties
+            
+            public Type ForType {
+                get {
+                    return m_type;                    
+                }
+            }
+            
+            public AttributeExtCollection Attributes {
+                get {
+                    return m_attributes;
+                }
+            }
+            
+            #endregion IProperties
+            #region IMethods
+        
+            public override bool Equals(object other) {
+                if (!(other is TypecodeForTypeKey)) {
+                    return false;
+                }
+                return (m_type.Equals(((TypecodeForTypeKey)other).m_type) &&
+                        m_attributes.Equals(((TypecodeForTypeKey)other).m_attributes));
+            }
+            
+            public override int GetHashCode() {
+                return m_type.GetHashCode() ^ 
+                       m_attributes.GetHashCode();
+            }
+            
+            #endregion IMethods
+        
+        }
+        
+        #endregion Types
 
         #region Constants
 
@@ -448,32 +513,63 @@ namespace Ch.Elca.Iiop.Idl {
         private const short VISIBILITY_PUBLIC = 1;
 
         #endregion Constants
+        #region IFields
+        
+        private IDictionary m_alreadyCreatedTypeCodes = new Hashtable();
+        
+        #endregion IFields
         #region IMethods
+        
+        private TypeCodeImpl CreateOrGetTypeCodeForType(Type forType,
+                                                        AttributeExtCollection attributes) {
+            if (m_alreadyCreatedTypeCodes[new TypecodeForTypeKey(forType, attributes)] == null) {
+                return Repository.CreateTypeCodeForTypeInternal(forType, attributes, this);
+            } else {
+                return (TypeCodeImpl)m_alreadyCreatedTypeCodes[new TypecodeForTypeKey(forType, attributes)];
+            }
+        }
+        
+        private void RegisterCreatedTypeCodeForType(Type forType,
+                                                    AttributeExtCollection attributes,
+                                                    TypeCodeImpl typeCode) {
+            m_alreadyCreatedTypeCodes[new TypecodeForTypeKey(forType, attributes)] = typeCode;
+        }
+        
         #region Implementation of MappingAction
         public object MapToIdlStruct(Type clsType) {
+            StructTC result = new StructTC();
+            RegisterCreatedTypeCodeForType(clsType, new AttributeExtCollection(),
+                                           result);
+            
             FieldInfo[] members = clsType.GetFields(BindingFlags.Instance | BindingFlags.DeclaredOnly |
                                                     BindingFlags.Public | BindingFlags.NonPublic);
             StructMember[] structMembers = new StructMember[members.Length];
             for (int i = 0; i < members.Length; i++) {                
-                omg.org.CORBA.TypeCode memberType = Repository.CreateTypeCodeForType(members[i].FieldType, 
-                                                        AttributeExtCollection.ConvertToAttributeCollection(
+                omg.org.CORBA.TypeCode memberType = 
+                    CreateOrGetTypeCodeForType(members[i].FieldType,
+                                              AttributeExtCollection.ConvertToAttributeCollection(
                                                             members[i].GetCustomAttributes(true)));
                 structMembers[i] = new StructMember(members[i].Name, memberType);
             }
-            return new StructTC(Repository.GetRepositoryID(clsType), 
-                                IdlNaming.ReverseIdlToClsNameMapping(clsType.Name),
-                                structMembers);
+            result.Initalize(Repository.GetRepositoryID(clsType), 
+                             IdlNaming.ReverseIdlToClsNameMapping(clsType.Name),
+                             structMembers);
+            return result;
         }
         public object MapToIdlUnion(Type clsType) {
+            UnionTC result = new UnionTC();            
+            RegisterCreatedTypeCodeForType(clsType, new AttributeExtCollection(),
+                                           result);
+            
             // first get discriminator type
             FieldInfo discriminator = clsType.GetField(UnionGenerationHelper.DISCR_FIELD_NAME, 
                                                        BindingFlags.Instance | 
                                                        BindingFlags.DeclaredOnly |
                                                        BindingFlags.NonPublic);
             omg.org.CORBA.TypeCode discrTypeCode = 
-                Repository.CreateTypeCodeForType(discriminator.FieldType, 
-                                                 AttributeExtCollection.ConvertToAttributeCollection(
-                                                     discriminator.GetCustomAttributes(true)));
+                CreateOrGetTypeCodeForType(discriminator.FieldType, 
+                                           AttributeExtCollection.ConvertToAttributeCollection(
+                                           discriminator.GetCustomAttributes(true)));
 
             // get the methods used for typecode creation
             MethodInfo getCoveredDiscrMethod = clsType.GetMethod(UnionGenerationHelper.GET_COVERED_DISCR_VALUES,
@@ -499,9 +595,9 @@ namespace Ch.Elca.Iiop.Idl {
             if (defaultField != null) {
                 cases = new UnionSwitchCase[coveredDiscrs.Length + 1];
                 omg.org.CORBA.TypeCode elemType = 
-                    Repository.CreateTypeCodeForType(defaultField.FieldType, 
-                                                     AttributeExtCollection.ConvertToAttributeCollection(
-                                                         defaultField.GetCustomAttributes(true)));
+                    CreateOrGetTypeCodeForType(defaultField.FieldType, 
+                                               AttributeExtCollection.ConvertToAttributeCollection(
+                                                   defaultField.GetCustomAttributes(true)));
                 // create a default value of type discriminiator type, because of possible discriminator types, this 
                 // is possible with Activator.CreateInstance ...
                 object dummyValue = null;
@@ -524,29 +620,43 @@ namespace Ch.Elca.Iiop.Idl {
                     throw new INTERNAL(898, CompletionStatus.Completed_MayBe);
                 }
                 omg.org.CORBA.TypeCode elemType = 
-                    Repository.CreateTypeCodeForType(caseField.FieldType, 
-                                                     AttributeExtCollection.ConvertToAttributeCollection(
-                                                         caseField.GetCustomAttributes(true)));
+                    CreateOrGetTypeCodeForType(caseField.FieldType, 
+                                               AttributeExtCollection.ConvertToAttributeCollection(
+                                                   caseField.GetCustomAttributes(true)));
                 // extract name of element field: strip m_
                 UnionSwitchCase switchCase = new UnionSwitchCase(coveredDiscrs[i], caseField.Name.Substring(2),
                                                                  elemType);
                 cases[i] = switchCase;
             }                                                                                                
-            return new UnionTC(Repository.GetRepositoryID(clsType), 
-                               IdlNaming.ReverseIdlToClsNameMapping(clsType.Name),
-                               discrTypeCode, defaultCaseNumber, cases);
+            result.Initalize(Repository.GetRepositoryID(clsType),            
+                             IdlNaming.ReverseIdlToClsNameMapping(clsType.Name),
+                             discrTypeCode, defaultCaseNumber, cases);
+            return result;
         }
+        
         public object MapToIdlAbstractInterface(Type clsType) {
-            return new AbstractIfTC(Repository.GetRepositoryID(clsType), 
-                                    IdlNaming.ReverseIdlToClsNameMapping(clsType.Name));
+            AbstractIfTC result =
+                new AbstractIfTC(Repository.GetRepositoryID(clsType), 
+                                 IdlNaming.ReverseIdlToClsNameMapping(clsType.Name));
+            RegisterCreatedTypeCodeForType(clsType, new AttributeExtCollection(),
+                                           result);
+            return result;
+            
         }
         public object MapToIdlLocalInterface(Type clsType) {
-            return new LocalIfTC(Repository.GetRepositoryID(clsType), 
-                                 IdlNaming.ReverseIdlToClsNameMapping(clsType.Name));
+            LocalIfTC result = new LocalIfTC(Repository.GetRepositoryID(clsType), 
+                                             IdlNaming.ReverseIdlToClsNameMapping(clsType.Name));
+            RegisterCreatedTypeCodeForType(clsType, new AttributeExtCollection(),
+                                           result);
+            return result;            
         }
+        
         public object MapToIdlConcreteInterface(Type clsType) {
-            return new ObjRefTC(Repository.GetRepositoryID(clsType),
-                                IdlNaming.ReverseIdlToClsNameMapping(clsType.Name));
+            ObjRefTC result = new ObjRefTC(Repository.GetRepositoryID(clsType),
+                                           IdlNaming.ReverseIdlToClsNameMapping(clsType.Name));
+            RegisterCreatedTypeCodeForType(clsType, new AttributeExtCollection(),
+                                           result);
+            return result;            
         }
         public object MapToIdlConcreateValueType(Type clsType) {
             omg.org.CORBA.TypeCode baseTypeCode;
@@ -554,15 +664,19 @@ namespace Ch.Elca.Iiop.Idl {
                 clsType.BaseType.Equals(typeof(System.ComponentModel.MarshalByValueComponent))) {
                 baseTypeCode = new NullTC();
             } else {
-                baseTypeCode = Repository.CreateTypeCodeForType(clsType.BaseType, 
-                                                            new AttributeExtCollection(new Attribute[0]));
+                baseTypeCode = CreateOrGetTypeCodeForType(clsType.BaseType, 
+                                                          new AttributeExtCollection(new Attribute[0]));
             }
+            ValueTypeTC result = new ValueTypeTC();
+            RegisterCreatedTypeCodeForType(clsType, new AttributeExtCollection(),
+                                           result);                        
+            
             // create the TypeCodes for the members
             FieldInfo[] members = clsType.GetFields(BindingFlags.Instance | BindingFlags.DeclaredOnly |
                                                     BindingFlags.Public | BindingFlags.NonPublic);
             ValueTypeMember[] valueMembers = new ValueTypeMember[members.Length];
             for (int i = 0; i < members.Length; i++) {
-                omg.org.CORBA.TypeCode memberType = Repository.CreateTypeCodeForType(members[i].FieldType, 
+                omg.org.CORBA.TypeCode memberType = CreateOrGetTypeCodeForType(members[i].FieldType, 
                                                         AttributeExtCollection.ConvertToAttributeCollection(
                                                             members[i].GetCustomAttributes(true)));
                 short visibility;
@@ -573,23 +687,28 @@ namespace Ch.Elca.Iiop.Idl {
                 }
                 valueMembers[i] = new ValueTypeMember(members[i].Name, memberType, visibility);
             }
-            return new ValueTypeTC(Repository.GetRepositoryID(clsType), 
-                                   IdlNaming.ReverseIdlToClsNameMapping(clsType.Name),
-                                   valueMembers, baseTypeCode, CONCRETE_VALUE_MOD);
+            result.Initalize(Repository.GetRepositoryID(clsType),
+                             IdlNaming.ReverseIdlToClsNameMapping(clsType.Name),
+                             valueMembers, baseTypeCode, CONCRETE_VALUE_MOD);
+            return result;
         }
-        public object MapToIdlAbstractValueType(Type clsType) {
+        public object MapToIdlAbstractValueType(Type clsType) {                       
             omg.org.CORBA.TypeCode baseTypeCode;
             if (clsType.BaseType.Equals(typeof(System.Object)) || 
                 clsType.BaseType.Equals(typeof(System.ComponentModel.MarshalByValueComponent))) {
                 baseTypeCode = new NullTC();
             } else {
-                baseTypeCode = Repository.CreateTypeCodeForType(clsType.BaseType, 
+                baseTypeCode = CreateOrGetTypeCodeForType(clsType.BaseType, 
                                    new AttributeExtCollection(new Attribute[0]));
             }
-            return new ValueTypeTC(Repository.GetRepositoryID(clsType),
-                                   IdlNaming.ReverseIdlToClsNameMapping(clsType.Name), 
-                                   new ValueTypeMember[0],
-                                   baseTypeCode, ABSTRACT_VALUE_MOD);
+            ValueTypeTC result = new ValueTypeTC();            
+            RegisterCreatedTypeCodeForType(clsType, new AttributeExtCollection(),
+                                           result);
+            result.Initalize(Repository.GetRepositoryID(clsType),
+                             IdlNaming.ReverseIdlToClsNameMapping(clsType.Name), 
+                             new ValueTypeMember[0],
+                             baseTypeCode, ABSTRACT_VALUE_MOD);
+            return result;
         }
         
         public object MapToIdlBoxedValueType(Type clsType, AttributeExtCollection attributes, bool isAlreadyBoxed) {
@@ -620,15 +739,18 @@ namespace Ch.Elca.Iiop.Idl {
                 throw new INTERNAL(1930, CompletionStatus.Completed_MayBe);
             }
             
-            omg.org.CORBA.TypeCode boxed = Repository.CreateTypeCodeForType(boxedType, 
-                                                                            AttributeExtCollection.ConvertToAttributeCollection(attributesOnBoxed));
+            omg.org.CORBA.TypeCode boxed = CreateOrGetTypeCodeForType(boxedType, 
+                                                                      AttributeExtCollection.ConvertToAttributeCollection(attributesOnBoxed));
             
-            return new ValueBoxTC(Repository.GetRepositoryID(clsType), 
-                                  IdlNaming.ReverseIdlToClsNameMapping(clsType.Name),
-                                  boxed);
+            ValueBoxTC result = new ValueBoxTC(Repository.GetRepositoryID(clsType), 
+                                               IdlNaming.ReverseIdlToClsNameMapping(clsType.Name),
+                                               boxed);
+            RegisterCreatedTypeCodeForType(clsType, attributes, result);            
+            return result;
         }
-        public object MapToIdlSequence(Type clsType, int bound) {
-            omg.org.CORBA.TypeCode elementTC = Repository.CreateTypeCodeForType(clsType.GetElementType(),
+        public object MapToIdlSequence(Type clsType, int bound) {            
+            // sequence should not contain itself! -> do not register typecode
+            omg.org.CORBA.TypeCode elementTC = CreateOrGetTypeCodeForType(clsType.GetElementType(),
                                                    new AttributeExtCollection(new Attribute[0]));
             return new SequenceTC(elementTC, bound);
         }
@@ -650,24 +772,33 @@ namespace Ch.Elca.Iiop.Idl {
             return MapToIdlBoxedValueType(clsType, new AttributeExtCollection(), false);
         }
         public object MapException(Type clsType) {
+            ExceptTC result = new ExceptTC();
+            RegisterCreatedTypeCodeForType(clsType, new AttributeExtCollection(),
+                                           result);
+            
             FieldInfo[] members = clsType.GetFields(BindingFlags.Instance | BindingFlags.DeclaredOnly |
-                                                       BindingFlags.Public | BindingFlags.NonPublic);
+                                                    BindingFlags.Public | BindingFlags.NonPublic);
             StructMember[] exMembers = new StructMember[members.Length];
             for (int i = 0; i < members.Length; i++) {                
-                omg.org.CORBA.TypeCode memberType = Repository.CreateTypeCodeForType(members[i].FieldType,
+                omg.org.CORBA.TypeCode memberType = CreateOrGetTypeCodeForType(members[i].FieldType,
                                                         AttributeExtCollection.ConvertToAttributeCollection(
                                                             members[i].GetCustomAttributes(true)));
                 exMembers[i] = new StructMember(members[i].Name, memberType);
             }
-            return new ExceptTC(Repository.GetRepositoryID(clsType), 
-                                IdlNaming.ReverseIdlToClsNameMapping(clsType.Name),
-                                exMembers);
+            result.Initalize(Repository.GetRepositoryID(clsType), 
+                             IdlNaming.ReverseIdlToClsNameMapping(clsType.Name),
+                             exMembers);
+            return result;
         }
-        public object MapToIdlEnum(Type clsType) {
+        public object MapToIdlEnum(Type clsType) {                        
             string[] names = Enum.GetNames(clsType);
-            return new EnumTC(Repository.GetRepositoryID(clsType), 
-                              IdlNaming.ReverseIdlToClsNameMapping(clsType.Name),
-                              names);
+            EnumTC result = new EnumTC(Repository.GetRepositoryID(clsType), 
+                                       IdlNaming.ReverseIdlToClsNameMapping(clsType.Name),
+                                       names);
+            RegisterCreatedTypeCodeForType(clsType, new AttributeExtCollection(),
+                                           result);                        
+            return result;
+
         }
         public object MapToIdlBoolean(Type clsType) {
             return new BooleanTC();
@@ -720,7 +851,7 @@ namespace Ch.Elca.Iiop.Idl {
             omg.org.CORBA.TypeCode baseTypeCode = new NullTC();
             // create the TypeCodes for the member
             ValueTypeMember[] valueMembers = new ValueTypeMember[1];
-            omg.org.CORBA.TypeCode memberType = Repository.CreateTypeCodeForType(typeof(System.String), 
+            omg.org.CORBA.TypeCode memberType = CreateOrGetTypeCodeForType(typeof(System.String), 
                                                     new AttributeExtCollection(new Attribute[] { 
                                                         new WideCharAttribute(false), new StringValueAttribute() } ));
             short visibility = VISIBILITY_PUBLIC;
