@@ -58,6 +58,11 @@ public class ASTvalue_forward_decl : SimpleNodeWithIdent {
         m_isAbstract = isAbstract;
     }
     
+    public override string GetIdentification() {
+        return "forward value " + getIdent() + "(in " + 
+            ((SimpleNode)jjtGetParent()).GetEmbedderDesc() + ")";
+    }
+    
     #endregion IMethods
     
 }

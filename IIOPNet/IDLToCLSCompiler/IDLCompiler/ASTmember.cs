@@ -16,6 +16,16 @@ public class ASTmember : SimpleNode {
   public override Object jjtAccept(IDLParserVisitor visitor, Object data) {
     return visitor.visit(this, data);
   }
+  
+  public override string GetIdentification() {
+    string memberNameList =
+      ((SimpleNode)jjtGetChild(1)).GetIdentification();
+        
+    return "member(s) " + memberNameList +
+           " defined in " +
+           ((SimpleNode)jjtGetParent()).GetEmbedderDesc();    
+  }
+  
 }
 
 

@@ -39,6 +39,12 @@ public class ASTvalue_abs_decl : SimpleNodeWithIdent {
   public override Object jjtAccept(IDLParserVisitor visitor, Object data) {
     return visitor.visit(this, data);
   }
+  
+  public override string GetIdentification() {
+    return "abstract value type " + getIdent() + "(in " + 
+            ((SimpleNode)jjtGetParent()).GetEmbedderDesc() + ")";
+  }
+
 }
 
 

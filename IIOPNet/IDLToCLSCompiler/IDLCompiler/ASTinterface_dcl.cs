@@ -18,8 +18,13 @@ public class ASTinterface_dcl : SimpleNode {
   }
   
   public override string GetIdentification() {
-      return ((SimpleNode)jjtGetChild(0)).GetIdentification() + 
-          " (in " + ((SimpleNode)jjtGetParent()).GetIdentification() + ")";
+    return ((SimpleNode)jjtGetChild(0)).GetIdentification() + 
+        " (in " + ((SimpleNode)jjtGetParent()).GetEmbedderDesc() + ")";
+  }
+  
+  public override string GetEmbedderDesc() {
+    return ((SimpleNodeWithIdent)jjtGetChild(0)).getIdent() + 
+        " (in " + ((SimpleNode)jjtGetParent()).GetEmbedderDesc() + ")";
   }
 
 }

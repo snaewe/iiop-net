@@ -16,6 +16,11 @@ public class ASTvalue_element : SimpleNode {
   public override Object jjtAccept(IDLParserVisitor visitor, Object data) {
     return visitor.visit(this, data);
   }
+  
+  public override string GetEmbedderDesc() {
+    return ((SimpleNode)jjtGetParent()).GetEmbedderDesc();
+  }
+
 }
 
 

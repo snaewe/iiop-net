@@ -57,6 +57,10 @@ public class ASTvalue_header : SimpleNodeWithIdent {
         m_isCustom = isCustom;
     }
     
+    public override string GetIdentification() {
+        return getIdent();
+    }
+    
     #endregion IMethods
     
 }

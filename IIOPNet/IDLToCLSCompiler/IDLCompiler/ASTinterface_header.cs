@@ -71,7 +71,11 @@ public class ASTinterface_header : SimpleNodeWithIdent {
     }
     
     public override string GetIdentification() {
-      return "interface " + getIdent();
+        return "interface " + getIdent();
+    }
+    
+    public override string GetEmbedderDesc() {
+        return ((SimpleNode)jjtGetParent()).GetEmbedderDesc();
     }
     
     #endregion IMethods

@@ -18,7 +18,8 @@ public class ASTsequence_type : SimpleNode {
   }
   
   public override string GetIdentification() {      
-      return ((SimpleNode)jjtGetChild(0)).GetIdentification();
+    return "sequence with element type " + 
+      ((SimpleNode)jjtGetChild(0)).GetIdentification();
   }
   
 }

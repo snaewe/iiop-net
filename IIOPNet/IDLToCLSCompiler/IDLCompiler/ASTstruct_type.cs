@@ -39,6 +39,17 @@ public class ASTstruct_type : SimpleNodeWithIdent {
   public override Object jjtAccept(IDLParserVisitor visitor, Object data) {
     return visitor.visit(this, data);
   }
+  
+  public override string GetIdentification() {
+    return "struct " + getIdent() + "(in " + 
+            ((SimpleNode)jjtGetParent()).GetEmbedderDesc() + ")";
+  }
+  
+  public override string GetEmbedderDesc() {
+    return "struct " + getIdent() + "(in " + 
+           ((SimpleNode)jjtGetParent()).GetEmbedderDesc() + ")";
+  }
+  
 }
 
 

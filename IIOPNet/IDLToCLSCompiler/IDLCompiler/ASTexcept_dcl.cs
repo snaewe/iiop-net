@@ -39,5 +39,11 @@ public class ASTexcept_dcl : SimpleNodeWithIdent {
   public override Object jjtAccept(IDLParserVisitor visitor, Object data) {
     return visitor.visit(this, data);
   }
+  
+  public override string GetIdentification() {
+    return "exception " + getIdent() + "(in " +
+      ((SimpleNode)jjtGetParent()).GetEmbedderDesc() + ")";
+  }
+  
 }
 }

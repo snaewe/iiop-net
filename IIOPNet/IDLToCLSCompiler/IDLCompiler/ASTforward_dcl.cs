@@ -68,6 +68,12 @@ public class ASTforward_dcl : SimpleNodeWithIdent {
         m_isLocal = true;
     }
     
+    public override string GetIdentification() {
+        return "fwd interface decl " + getIdent() + 
+            " (in " + ((SimpleNode)jjtGetParent()).GetEmbedderDesc() + ")";
+    }
+
+    
     #endregion IMethods
     
 }

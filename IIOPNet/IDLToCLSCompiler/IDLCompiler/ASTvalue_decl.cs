@@ -16,6 +16,18 @@ public class ASTvalue_decl : SimpleNode {
   public override Object jjtAccept(IDLParserVisitor visitor, Object data) {
     return visitor.visit(this, data);
   }
+  
+  public override string GetIdentification() {
+    return "value " + ((SimpleNode)jjtGetChild(0)).GetIdentification() + "(in " + 
+            ((SimpleNode)jjtGetParent()).GetEmbedderDesc() + ")";
+  }    
+  
+  public override string GetEmbedderDesc() {
+    return ((SimpleNodeWithIdent)jjtGetChild(0)).getIdent() + 
+        " (in " + ((SimpleNode)jjtGetParent()).GetEmbedderDesc() + ")";
+  }
+
+  
 }
 
 

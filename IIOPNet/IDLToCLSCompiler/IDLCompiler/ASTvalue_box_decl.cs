@@ -40,6 +40,12 @@ public class ASTvalue_box_decl : SimpleNodeWithIdent {
   public override Object jjtAccept(IDLParserVisitor visitor, Object data) {
     return visitor.visit(this, data);
   }
+  
+  public override string GetIdentification() {
+      return getIdent() + 
+          " (in " + ((SimpleNode)jjtGetParent()).GetEmbedderDesc() + ")";
+  }
+  
 }
 
 

@@ -39,6 +39,12 @@ public class ASTenum_type : SimpleNodeWithIdent {
   public override Object jjtAccept(IDLParserVisitor visitor, Object data) {
     return visitor.visit(this, data);
   }
+  
+  public override string GetIdentification() {
+    return "enum " + getIdent() + "(in " + 
+      ((SimpleNode)jjtGetParent()).GetEmbedderDesc() + ")";
+  }
+  
 }
 
 
