@@ -2,6 +2,7 @@ Prerequisites
 -------------
 
 For running this integration test, you need NUnit V2.0 or newer.
+Additionally, you need java 1.4.
 
 Building the test
 -----------------
