@@ -41,37 +41,37 @@ namespace Ch.Elca.Iiop.Idl {
         #region SFields
         
         private static AssemblyCache s_asmCache = new AssemblyCache();
-    	
-    	#endregion SFields
-    	#region IFields                
+        
+        #endregion SFields
+        #region IFields                
         
         /// <summary>the cached assemblies</summary>
         private ArrayList m_asmCache = new ArrayList();
-    	/// <summary>the cached assemblies as an array</summary>
-    	private Assembly[] m_cachedAssemblies = new Assembly[0];
-    	
-    	#endregion IFields
-    	#region IConsturctors
-    	
-    	private AssemblyCache() {
-    		CreateAssemblyCache();
-    	}
-    	
-    	#endregion IConstructors    	
-    	#region IProperties
+        /// <summary>the cached assemblies as an array</summary>
+        private Assembly[] m_cachedAssemblies = new Assembly[0];
+        
+        #endregion IFields
+        #region IConsturctors
+        
+        private AssemblyCache() {
+            CreateAssemblyCache();
+        }
+        
+        #endregion IConstructors        
+        #region IProperties
 
         /// <summary>the assemblies cached by this cache</summary>
         public Assembly[] CachedAssemblies {
-        	get {
-        		return m_cachedAssemblies;
-        	}
+            get {
+                return m_cachedAssemblies;
+            }
         }
-    	
-    	#endregion IProperties
+        
+        #endregion IProperties
         #region SMethods
         
         public static AssemblyCache GetSingleton() {
-        	return s_asmCache;
+            return s_asmCache;
         }
         
         #endregion SMethods        
@@ -91,21 +91,53 @@ namespace Ch.Elca.Iiop.Idl {
             
             // search for other assemblies
             AppDomain curAppDomain = AppDomain.CurrentDomain;
-            DirectoryInfo dir = new DirectoryInfo(curAppDomain.BaseDirectory); // search appdomain directory for assemblies
-            
-            CacheAssembliesFromDir(dir);
-        	
-        	// cache assemblies in private bin path
-        	
-        	// cache assemblies in module subdirectories (*.dll file + *.netmodule files)
-        	
-            DirectoryInfo[] subdirs = dir.GetDirectories();    // search subdirectories for assemblies
-            for (int i = 0; i < subdirs.Length; i++) {
-                CacheAssembliesFromDir(subdirs[i]);
+
+            DirectoryInfo[] asmDirs = DetermineAssemblyDirs(curAppDomain);
+            foreach (DirectoryInfo asmDir in asmDirs) {
+                CacheAssembliesFromDir(asmDir);
             }
-            
+                                            
             // create array from arraylist for safe access without Enumerator
             m_cachedAssemblies = (Assembly[])m_asmCache.ToArray(typeof(Assembly));
+        }
+        
+        /// <summary>
+        /// determines the directories to search for assemblies
+        /// </summary>
+        private DirectoryInfo[] DetermineAssemblyDirs(AppDomain forAppDomain) {
+            ArrayList dirs = new ArrayList();
+            
+            DirectoryInfo baseDir = new DirectoryInfo(forAppDomain.BaseDirectory); // search appdomain directory for assemblies
+            dirs.Add(baseDir);
+            
+            // cache assemblies in private bin path
+            string relativePath = forAppDomain.RelativeSearchPath;
+            string[] pathes = new string[0];
+            if (relativePath != null) {
+                pathes = relativePath.Split(Path.PathSeparator);
+            }
+            foreach (string path in pathes) {
+                string fullPath = Path.Combine(baseDir.FullName, path);
+                DirectoryInfo dir = new DirectoryInfo(fullPath);
+                if (!dirs.Contains(dir)) {
+                    dirs.Add(dir);
+                }
+            }
+            
+            DirectoryInfo[] asmDirs = (DirectoryInfo[])dirs.ToArray(typeof(DirectoryInfo));
+            // check subdirs of every directory in asmDirs for module directories (contains .netmodule + dll)
+            // cause: VS.NET creates for multimodule assemblies an own directory
+            foreach (DirectoryInfo candidateParent in asmDirs) {
+                DirectoryInfo[] subdirs = candidateParent.GetDirectories();
+                foreach (DirectoryInfo candidate in subdirs) {
+                    FileInfo[] moduleFiles = (candidate.GetFiles("*.netmodule"));
+                    if ((moduleFiles != null) && (moduleFiles.Length > 0)) {
+                        dirs.Add(candidate);
+                    }
+                }
+            }
+            // return directories
+            return (DirectoryInfo[])dirs.ToArray(typeof(DirectoryInfo));
         }
 
         /// <summary>searches for assemblies in the specified directory, loads them and adds them to the cache</summary>
@@ -135,5 +167,5 @@ namespace Ch.Elca.Iiop.Idl {
     
     }
 
-	
+    
 }
