@@ -572,6 +572,7 @@ jacorb.interop.chunk_custom_rmi_valuetypes=off
 <li>David Bellette
 <li>Blazej Budzynski
 <li>Stefano Delli Ponti
+<li>Steven Hartland
 <li>Tina Hofmann
 <li>Dennis Homann
 <li>Aitor Illarramendi
@@ -583,6 +584,7 @@ jacorb.interop.chunk_custom_rmi_valuetypes=off
 <li>SangHyun Park
 <li>Bill Petheram
 <li>Dirk O. Siebnich
+<li>Arne Sostack
 <li>Andrew S. Townley 
 <li>David Tzur
 <li>Christopher Vijith
@@ -590,4 +592,7 @@ jacorb.interop.chunk_custom_rmi_valuetypes=off
 
 </FAQ>
 
+<FAQ question="How can I submit a patch?">
+<p>You can send your patches to "patches -at- iiop -dot- net" (subsitute -at- and -dot- with the according symbols).
+</FAQ>
 </FAQ-SECTION>
