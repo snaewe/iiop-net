@@ -242,13 +242,21 @@ namespace Ch.Elca.Iiop.Idl {
             string[] parts = rmiName.Split('.');
             string result = "";
             foreach (string part in parts) {                
-                // a type mapped from IDL to CLS -> map type name to CLS too
-                result = result + "." + MapIdlNameToClsName(part);
+                // a type mapped from IDL to CLS -> map type name to CLS too                                
+                result = result + "." + MapIdlNameToClsName(ApplyRmiIdlClashEscape(part));
             }
             if (result.StartsWith(".")) {
                 result = result.Substring(1);
             }
             return result;
+        }
+        
+        internal static string ApplyRmiIdlClashEscape(string rmiIdPart) {
+            if (!NameClashesWithIdlKeyWord(rmiIdPart)) {
+                return rmiIdPart;
+            } else {
+                return "_" + rmiIdPart; // escaping rule of rmi-id's
+            }
         }
 
         /// <summary>
