@@ -49,8 +49,8 @@ namespace Ch.Elca.Iiop.Idl {
 
         private static IComparer s_keyWordComparer = new CaseInsensitiveComparer();
         
-        /// <summary>used as helper to map type names to idl for Cls types</summary>
-        private static GenerationActionReference s_genIdlNameforClsType = new GenerationActionReference();
+        /// <summary>used as helper to map type names to idl for Cls types; used inside method name mapping for overloaded methods and inside name construction for sequences typedef</summary>
+        private static GenerationActionReference s_genIdlNameforClsTypeNoAnonSeq = new GenerationActionReference(false);
         
         #endregion SFields
         #region SConstructor
@@ -148,7 +148,7 @@ namespace Ch.Elca.Iiop.Idl {
                 foreach (ParameterInfo parameter in parameters) {
                     string mappedTypeName = (string)mapper.MapClsType(parameter.ParameterType,
                                                                       ReflectionHelper.CollectParameterAttributes(parameter, method),
-                                                                      s_genIdlNameforClsType);
+                                                                      s_genIdlNameforClsTypeNoAnonSeq);
                     mappedTypeName.Replace(" ", "_");
                     mappedTypeName.Replace("::", "__");
                     methodName = methodName + "__" + mappedTypeName;
@@ -310,7 +310,15 @@ namespace Ch.Elca.Iiop.Idl {
         /// <param name="separator">separator between module parts, e.g. / or ::</param>        
         private static string MapNamespaceToIdl(Type forType, string separator, 
                                                 bool isMappedFromIdlToCls) {
-            string namespaceName = forType.Namespace;
+        	return MapNamespaceNameToIdl(forType.Namespace, separator, isMappedFromIdlToCls);
+        }
+        
+        /// <summary>
+        /// maps a namespace name to an IDL name
+        /// </summary>
+        /// <param name="separator">separator between module parts, e.g. / or ::</param>        
+        private static string MapNamespaceNameToIdl(string namespaceName, string separator, 
+                                                bool isMappedFromIdlToCls) {            
             string result = "";
             if (namespaceName == null) { 
                 return result;
@@ -332,7 +340,14 @@ namespace Ch.Elca.Iiop.Idl {
         /// </summary>
         // used for generator
         public static string[] MapNamespaceToIdlModules(Type forType) {
-            string clsNamespace = forType.Namespace;
+            return MapNamespaceNameToIdlModules(forType.Namespace);
+        }
+        
+        /// <summary>
+        /// maps a CLS namespace to a module hirarchy
+        /// </summary>
+        // used for generator
+        public static string[] MapNamespaceNameToIdlModules(string clsNamespace) {            
             string[] modules;
             if ((clsNamespace != null) && (!clsNamespace.Trim().Equals(""))) {
                 modules = clsNamespace.Split(new char[] { Char.Parse(".") } );
@@ -343,6 +358,38 @@ namespace Ch.Elca.Iiop.Idl {
                 modules[i] = MapClsNameToIdlName(modules[i]);
             }
             return modules;
+        }        
+        
+        /// <summary>
+        /// return the fully qualified name of typedef for the idl sequence
+        /// </summary>
+        public static string GetFullyQualifiedIdlTypeDefAliasForSequenceType(Type seqType, int bound, AttributeExtCollection elemTypeAttributes) {
+        	string namespaceName;
+        	string elemTypeFullQualName;
+        	string typedefName = GetTypeDefAliasForSequenceType(seqType, bound, elemTypeAttributes, out namespaceName, out elemTypeFullQualName);
+        	        	
+            string result = MapNamespaceNameToIdl(namespaceName, "::", false);
+            if (result.Length > 0) { 
+                result += "::"; 
+            }
+            result = "::" + result;
+            result += typedefName;
+			return result;
+        }
+        
+        /// <summary>
+        /// return the short type name of typedef for the idl sequence
+        /// </summary>
+        public static string GetTypeDefAliasForSequenceType(Type seqType, int bound, AttributeExtCollection elemTypeAttributes, out string namespaceName, out string elemTypeFullQualName) {
+        	elemTypeFullQualName = (string)ClsToIdlMapper.GetSingleton().MapClsType(seqType.GetElementType(), elemTypeAttributes,
+        																			s_genIdlNameforClsTypeNoAnonSeq);
+        	
+        	string elemTypeNameId = elemTypeFullQualName.Replace(":", "_");
+        	elemTypeNameId = elemTypeNameId.Replace(" ", "_");
+        	string typedefName = "seqTd" + bound + "_" + elemTypeNameId;
+        	
+        	namespaceName = "org.omg.seqTypeDef";
+        	return typedefName;
         }
         
         private static void InitMapClsToIdlSpecial() {
@@ -607,8 +654,16 @@ namespace Ch.Elca.Iiop.Idl {
         #region IFields
 
         private ClsToIdlMapper m_mapper = ClsToIdlMapper.GetSingleton();
+        private bool m_useAnonymousSequences;
 
         #endregion IFields
+        #region IConstructors
+        
+        public GenerationActionReference(bool useAnonymousSequences) {
+        	m_useAnonymousSequences = useAnonymousSequences;	
+        }
+        
+        #endregion IConstructors
         #region IMethods
 
         #region Implementation of MappingAction
@@ -695,11 +750,16 @@ namespace Ch.Elca.Iiop.Idl {
         public object MapToIdlAbstractValueType(System.Type dotNetType) {
             return IdlNaming.MapFullTypeNameToIdlScoped(dotNetType);
         }
-        public object MapToIdlSequence(System.Type dotNetType, int bound) {
-            string refToElemType = (string)m_mapper.MapClsType(dotNetType.GetElementType(), Util.AttributeExtCollection.EmptyCollection, this);
-            return "sequence<" + refToElemType + ">";
+        public object MapToIdlSequence(System.Type dotNetType, int bound, AttributeExtCollection allAttributes, AttributeExtCollection elemTypeAttributes) {
+        	if (m_useAnonymousSequences) {
+	            string refToElemType = (string)m_mapper.MapClsType(dotNetType.GetElementType(), elemTypeAttributes, this);
+    	        return "sequence<" + refToElemType + ">";
+        	} else {
+        		// use a typedef for non-anonymous sequence
+        		return IdlNaming.GetFullyQualifiedIdlTypeDefAliasForSequenceType(dotNetType, bound, elemTypeAttributes);
+        	}
         }
-        public object MapToIdlBoxedValueType(System.Type dotNetType, AttributeExtCollection attributes, bool isAlreadyBoxed) {
+        public object MapToIdlBoxedValueType(System.Type dotNetType, bool isAlreadyBoxed) {
             // the dotNetType is a subclass of BoxedValueBase representing the boxed value type
             return IdlNaming.MapFullTypeNameToIdlScoped(dotNetType);
         }

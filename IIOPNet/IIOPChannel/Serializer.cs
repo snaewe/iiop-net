@@ -238,32 +238,26 @@ namespace Ch.Elca.Iiop.Marshalling {
 
     }
 
-    internal abstract class CharStringBaseSer : Serialiser {
-
-        #region IMethods 
-
-        protected bool UseWideOk(AttributeExtCollection attributes) {
-            bool useWide = true;
-            WideCharAttribute wideAttr = (WideCharAttribute)attributes.GetAttributeForType(ReflectionHelper.WideCharAttributeType);
-            if (wideAttr != null) {
-                useWide = wideAttr.IsAllowed;
-            }
-            return useWide;
-        }
-
-        #endregion IMethods
-
-    }
-
     /// <summary>serializes instances of System.Char</summary>
-    internal class CharSerialiser : CharStringBaseSer {
+    internal class CharSerialiser : Serialiser {
 
-        #region IMethods
+        #region IFields
+        
+        private bool m_useWide;
+        
+        #endregion IFields
+        #region IConstructors
+        
+        public CharSerialiser(bool useWide) {
+        	m_useWide = useWide;
+        }
+        
+        #endregion IConstructors
+    	#region IMethods
 
         internal override void Serialise(Type formal, object actual, AttributeExtCollection attributes,
-                                       CdrOutputStream targetStream) {
-            bool useWide = UseWideOk(attributes);
-            if (useWide) {
+                                       CdrOutputStream targetStream) {            
+            if (m_useWide) {
                 targetStream.WriteWChar((char)actual);
             } else {
                 // the high 8 bits of the character is cut off
@@ -272,10 +266,9 @@ namespace Ch.Elca.Iiop.Marshalling {
         }
 
         internal override object Deserialise(Type formal, AttributeExtCollection attributes,
-                                           CdrInputStream sourceStream) {
-            bool useWide = UseWideOk(attributes);
+                                           CdrInputStream sourceStream) {            
             char result;
-            if (useWide) {
+            if (m_useWide) {
                 result = sourceStream.ReadWChar();
             } else {
                 result = sourceStream.ReadChar();
@@ -288,18 +281,29 @@ namespace Ch.Elca.Iiop.Marshalling {
     }
 
     /// <summary>serializes instances of System.String which are serialized as string values</summary>
-    internal class StringSerialiser : CharStringBaseSer {
+    internal class StringSerialiser : Serialiser {
 
-        #region IMethods
+        #region IFields
+        
+        private bool m_useWide;
+        
+        #endregion IFields
+        #region IConstructors
+        
+        public StringSerialiser(bool useWide) {
+        	m_useWide = useWide;
+        }
+        
+        #endregion IConstructors
+    	#region IMethods
 
         internal override void Serialise(Type formal, object actual, AttributeExtCollection attributes,
-                                       CdrOutputStream targetStream) {
-            bool useWide = UseWideOk(attributes);
+                                       CdrOutputStream targetStream) {            
             if (actual == null) { 
                 // string may not be null, if StringValueAttriubte is set"
                 throw new BAD_PARAM(10040, CompletionStatus.Completed_MayBe);
             }
-            if (useWide) {
+            if (m_useWide) {
                 targetStream.WriteWString((string)actual);
             } else {
                 // encode with selected encoder, this can throw an exception, if an illegal character is encountered
@@ -309,9 +313,8 @@ namespace Ch.Elca.Iiop.Marshalling {
 
         internal override object Deserialise(Type formal, AttributeExtCollection attributes,
                                            CdrInputStream sourceStream) {
-            bool useWide = UseWideOk(attributes);
             object result = "";
-            if (useWide) {
+            if (m_useWide) {
                 result = sourceStream.ReadWString();
             } else {
                 result = sourceStream.ReadString();
@@ -1074,75 +1077,64 @@ namespace Ch.Elca.Iiop.Marshalling {
 
     /// <summary>serializes idl sequences</summary>
     internal class IdlSequenceSerializer : Serialiser {
-
-        #region IMethods
+        
+    	#region IFields
+    	
+    	private int m_bound;
+    	
+        #endregion IFields
+    	#region IConstructors
+        
+        public IdlSequenceSerializer(int bound) {
+        	m_bound = bound;	
+        }
+        
+        #endregion IConstructors
+    	#region IMethods
 
         /// <summary>
         /// checks, if parameter to serialise does not contain more elements than allowed
         /// </summary>
-        private void CheckBound(uint sequenceLength, IdlSequenceAttribute seqAttr) {
-            if (seqAttr.IsBounded() && (sequenceLength > seqAttr.Bound)) {
+        private void CheckBound(uint sequenceLength) {
+        	if (IdlSequenceAttribute.IsBounded(m_bound) && (sequenceLength > m_bound)) {
                 throw new BAD_PARAM(3434, CompletionStatus.Completed_MayBe);
             }
         }
         
         internal override void Serialise(Type formal, object actual, AttributeExtCollection attributes,
                                        CdrOutputStream targetStream) {
-            if (attributes.IsInCollection(ReflectionHelper.IdlSequenceAttributeType)) {                
-                // mapped from an IDL-sequence or CLS to IDL mapping
-                Attribute seqAttr;
-                attributes = attributes.RemoveAttributeOfType(ReflectionHelper.IdlSequenceAttributeType, 
-                                                              out seqAttr); // this attribute is handled --> remove it
-
-                Array array = (Array) actual;
-                if (array == null) {
-                    // not allowed for a sequence:
-                    throw new BAD_PARAM(3433, CompletionStatus.Completed_MayBe);
-                }
-                CheckBound((uint)array.Length, (IdlSequenceAttribute)seqAttr);
-                targetStream.WriteULong((uint)array.Length);
-                // get marshaller for elemtype
-                Type elemType = formal.GetElementType();
-                MarshallerForType marshaller = new MarshallerForType(elemType, attributes);
-                for (int i = 0; i < array.Length; i++) {
-                    // it's more efficient to not determine serialise for each element; instead use cached ser
-                    marshaller.Marshal(array.GetValue(i), targetStream);
-                }
-            } else {
-                // attribute is missing: IDLSequnce, IDLSequenceSerializer can only
-                // serialize IDLSequences, no general CLS-arrays, use boxedValueser
-                // instead
-                throw new INTERNAL(10040, CompletionStatus.Completed_MayBe);
-            }
+        	Array array = (Array) actual;
+        	if (array == null) {
+        		// not allowed for a sequence:
+        		throw new BAD_PARAM(3433, CompletionStatus.Completed_MayBe);
+        	}
+        	CheckBound((uint)array.Length);
+        	targetStream.WriteULong((uint)array.Length);
+        	// get marshaller for elemtype
+        	Type elemType = formal.GetElementType();
+        	MarshallerForType marshaller = new MarshallerForType(elemType, attributes);
+        	for (int i = 0; i < array.Length; i++) {
+        		// it's more efficient to not determine serialise for each element; instead use cached ser
+        		marshaller.Marshal(array.GetValue(i), targetStream);
+        	}
         }
 
         internal override object Deserialise(Type formal, AttributeExtCollection attributes,
                                            CdrInputStream sourceStream) {
-            if (attributes.IsInCollection(ReflectionHelper.IdlSequenceAttributeType)) {
-                // mapped from an IDL-sequence
-                Attribute seqAttr; 
-                    attributes = attributes.RemoveAttributeOfType(ReflectionHelper.IdlSequenceAttributeType,
-                                                                  out seqAttr);
-                uint nrOfElements = sourceStream.ReadULong();
-                CheckBound(nrOfElements, (IdlSequenceAttribute)seqAttr);
-                
-                Array result = Array.CreateInstance(formal.GetElementType(), (int)nrOfElements);                
-                // get marshaller for array element type
-                Type elemType = formal.GetElementType();
-                MarshallerForType marshaller = new MarshallerForType(elemType, attributes);
-                for (int i = 0; i < nrOfElements; i++) {
-                    // it's more efficient to not determine serialise for each element; instead use cached ser
-                    object entry = marshaller.Unmarshal(sourceStream);
-                    result.SetValue(entry, i);
-                }
-                return result;
-            } else {
-                // attribute is missing: IDLSequnce, IDLSequenceSerializer can
-                // only serialize IDLSequences,
-                // no general CLS-arrays, use boxedValueser instead
-                throw new INTERNAL(10040, CompletionStatus.Completed_MayBe);
-                
-            }
+        	// mapped from an IDL-sequence
+        	uint nrOfElements = sourceStream.ReadULong();
+        	CheckBound(nrOfElements);
+        	
+        	Array result = Array.CreateInstance(formal.GetElementType(), (int)nrOfElements);
+        	// get marshaller for array element type
+        	Type elemType = formal.GetElementType();
+        	MarshallerForType marshaller = new MarshallerForType(elemType, attributes);
+        	for (int i = 0; i < nrOfElements; i++) {
+        		// it's more efficient to not determine serialise for each element; instead use cached ser
+        		object entry = marshaller.Unmarshal(sourceStream);
+        		result.SetValue(entry, i);
+        	}
+        	return result;
         }
 
         #endregion IMethods
@@ -1212,12 +1204,9 @@ namespace Ch.Elca.Iiop.Marshalling {
             }
             m_typeCodeSer.Serialise(ReflectionHelper.CorbaTypeCodeType, typeCode, attributes, targetStream);
             if (actual != null) {               
-                Marshaller marshaller = Marshaller.GetSingleton();
-                Attribute attr;
-                attributes = attributes.RemoveAttributeOfType(typeof(ObjectIdlTypeAttribute), out attr);
-                AttributeExtCollection typeAttributes = Repository.GetAttrsForTypeCode(typeCode);
-                attributes = attributes.MergeAttributeCollections(typeAttributes); // add the attributes belonging to the typecode
-                marshaller.Marshal(actualType, attributes, actual, targetStream);
+                Marshaller marshaller = Marshaller.GetSingleton();               
+                AttributeExtCollection typeAttributes = Repository.GetAttrsForTypeCode(typeCode);                
+                marshaller.Marshal(actualType, typeAttributes, actual, targetStream);
             }
         }
 

@@ -240,6 +240,58 @@ namespace Ch.Elca.Iiop.IntegrationTests {
             return arg;
         }
 
+        [return: IdlSequence(0)]
+        public System.Int32[] EchoIdlLongSequence([IdlSequence(0)] System.Int32[] arg) {
+            return arg;
+        }
+
+        [return: IdlSequence(0, 10)]
+        [return: IdlSequence(1)]
+        public System.Int32[][] EchoIdlLongSequenceOfBoundedSequence([IdlSequence(0, 10)] [IdlSequence(1)] System.Int32[][] arg) {
+            return arg;
+        }
+
+        [return: IdlSequence(0)]
+        [return: IdlSequence(1)]
+        public System.Int32[][] EchoIdlLongSequenceOfSequence([IdlSequence(0)] [IdlSequence(1)] System.Int32[][] arg) {
+            return arg;
+        }
+
+        [return: IdlSequence(0)]
+        public System.Int32[] AppendToIdlLongSequence([IdlSequence(0)] System.Int32[] arg, System.Int32 toAppend) {
+            System.Int32[] result = new System.Int32[arg.Length + 1]; // arg is not null, because not allowed for idl seq
+            Array.Copy(arg, 0, result, 0, arg.Length);
+            result[arg.Length] = toAppend;
+            return result;
+            
+        }
+
+        [return: IdlSequence(0)]
+        [return: StringValue()]
+        [return: WideChar(false)]
+        public System.String[] EchoIdlStringSequence([IdlSequence(0)] [StringValue()] [WideChar(false)] System.String[] arg) {
+            return arg;
+        }
+
+        [return: IdlSequence(0)]
+        [return: StringValue()]
+        [return: WideChar(true)]
+        public System.String[] EchoIdlWStringSequence([IdlSequence(0)] [StringValue()] [WideChar(true)] System.String[] arg) {
+            return arg;
+        }
+
+        [return: IdlSequence(0)]
+        [return: StringValue()]
+        [return: WideChar(false)]
+        public System.String[] AppendToIdlStringSequence([IdlSequence(0)] [StringValue()] [WideChar(false)] System.String[] arg, 
+                                                         [StringValue()] [WideChar(false)] System.String toAppend) {
+            System.String[] result = new System.String[arg.Length + 1]; // arg is not null, because not allowed for idl seq
+            Array.Copy(arg, 0, result, 0, arg.Length);
+            result[arg.Length] = toAppend;
+            return result;
+            
+        }
+
         public Adder RetrieveAdder() {
             return new Adder();
         }

@@ -92,11 +92,12 @@ namespace Ch.Elca.Iiop.Marshalling {
                             CdrOutputStream targetStream) {
             Debug.WriteLine("marshal, formal: " + formal);
             // determine the serialiser
-            Serialiser serialiser = DetermineSerialiser(ref formal, attributes);
+            Serialiser serialiser = DetermineSerialiser(ref formal, ref attributes);
             Marshal(formal, attributes, serialiser, actual, targetStream);
         }
 
         /// <summary>marshals a paramter/field, using the specified serialiser</summary>
+        /// <param name="attributes">the attributes used for further processing; the ones used to determine the serialiser are not part of the collection</param>
         /// <remarks>this method is available for efficieny reason; normally other overloaded method is used</remarks>
         protected void Marshal(Type formal, AttributeExtCollection attributes, Serialiser serialiser,
                                object actual, CdrOutputStream targetStream) {
@@ -124,8 +125,8 @@ namespace Ch.Elca.Iiop.Marshalling {
         /// <param name="formal">The formal type. If formal is modified through mapper, result is returned in this parameter</param>
         /// <param name="attributes">the parameter/field attributes</param>
         /// <returns></returns>
-        protected Serialiser DetermineSerialiser(ref Type formal, AttributeExtCollection attributes) {
-            Serialiser serialiser = (Serialiser)s_mapper.MapClsTypeWithTransform(ref formal, attributes, s_serDetermination); // formal can be transformed
+        protected Serialiser DetermineSerialiser(ref Type formal, ref AttributeExtCollection attributes) {
+            Serialiser serialiser = (Serialiser)s_mapper.MapClsTypeWithTransform(ref formal, ref attributes, s_serDetermination); // formal can be transformed
             if (serialiser == null) {
                 // no serializer present for Type: formal
                 Trace.WriteLine("no serialiser for Type: " + formal);
@@ -152,7 +153,7 @@ namespace Ch.Elca.Iiop.Marshalling {
             Debug.WriteLine("unmarshal, formal: " + formal);
             Type formalNew = formal;
             // determine the serialiser
-            Serialiser serialiser = DetermineSerialiser(ref formalNew, attributes);
+            Serialiser serialiser = DetermineSerialiser(ref formalNew, ref attributes);
             return Unmarshal(formalNew, formal, attributes, serialiser, sourceStream);
         }
 
@@ -160,6 +161,7 @@ namespace Ch.Elca.Iiop.Marshalling {
         /// <param name="formalSer">the type to unmarshal determined by mapper</param>
         /// <param name="formalSig">the type in signature/field declaration/...</param>
         /// <param name="serializer">the seriliazer to use</param>
+        /// <param name="attributes">the attributes used for further processing; the ones used to determine the serialiser are not part of the collection</param>
         /// <remarks>this method is available for efficieny reason; normally other overloaded method is used</remarks>
         protected object Unmarshal(Type formalSer, Type formalSig, AttributeExtCollection attributes,
                                    Serialiser serialiser, CdrInputStream sourceStream) {
@@ -208,9 +210,9 @@ namespace Ch.Elca.Iiop.Marshalling {
 
         internal MarshallerForType(Type formal, AttributeExtCollection attributes) {
             m_formal = formal;
-            m_formalToSer = formal;
-            m_attributes = attributes;
-            m_ser = DetermineSerialiser(ref m_formalToSer, attributes);
+            m_formalToSer = formal;            
+            m_ser = DetermineSerialiser(ref m_formalToSer, ref attributes);
+            m_attributes = attributes; // the attributes passed, without the ones considered for the serialiser determination
         }
 
         #endregion IConstructors
@@ -247,39 +249,34 @@ namespace Ch.Elca.Iiop.Marshalling {
         private Serialiser m_marshalByValSer = new ValueObjectSerializer();
         private Serialiser m_boxedValueSer = new BoxedValueSerializer();
         private Serialiser m_enumSer = new EnumSerializer();
-        private Serialiser m_seqSer = new IdlSequenceSerializer();
+        private Serialiser m_seqSer_unbounded = new IdlSequenceSerializer(0);
         private Serialiser m_structSer = new IdlStructSerializer();
         private Serialiser m_unionSer = new IdlUnionSerializer();
         private Serialiser m_exceptSer = new ExceptionSerializer();
 
-        /// <summary>stores the mapping for base types</summary>
-        private Hashtable m_baseTypeSerializer = new Hashtable();
-
+        // base type serialiser
+        private Serialiser m_wideCharSer = new CharSerialiser(true);
+        private Serialiser m_nonWideCharSer = new CharSerialiser(false);
+        
+        private Serialiser m_wideStringSer = new StringSerialiser(true);
+        private Serialiser m_nonWideStringSer = new StringSerialiser(false);        
+        
+        private Serialiser m_byteSer = new ByteSerialiser();
+        private Serialiser m_boolSer = new BooleanSerialiser();
+        private Serialiser m_int16Ser = new Int16Serialiser();
+        private Serialiser m_int32Ser = new Int32Serialiser();
+        private Serialiser m_int64Ser = new Int64Serialiser();
+        private Serialiser m_singleSer = new SingleSerialiser();
+		private Serialiser m_doubleSer = new DoubleSerialiser();
+        
         #endregion IFields
         #region IConstructors
 
         public SerializerDetermination() {
-            CreateBaseTypeSerializer();
         }
 
         #endregion IConstructors
         #region IMethods
-
-        /// <summary>
-        /// create the default serializer
-        /// </summary>
-        private void CreateBaseTypeSerializer() {
-            // for primitive types
-            m_baseTypeSerializer.Add(ReflectionHelper.ByteType, new ByteSerialiser());
-            m_baseTypeSerializer.Add(ReflectionHelper.BooleanType, new BooleanSerialiser());
-            m_baseTypeSerializer.Add(ReflectionHelper.Int16Type, new Int16Serialiser());
-            m_baseTypeSerializer.Add(ReflectionHelper.Int32Type, new Int32Serialiser());
-            m_baseTypeSerializer.Add(ReflectionHelper.Int64Type, new Int64Serialiser());
-            m_baseTypeSerializer.Add(ReflectionHelper.SingleType, new SingleSerialiser());
-            m_baseTypeSerializer.Add(ReflectionHelper.DoubleType, new DoubleSerialiser());
-            m_baseTypeSerializer.Add(ReflectionHelper.CharType, new CharSerialiser());
-            m_baseTypeSerializer.Add(ReflectionHelper.StringType, new StringSerialiser());
-        }
         
         #region Implementation of MappingAction
         public object MapToIdlStruct(System.Type clsType) {
@@ -304,7 +301,7 @@ namespace Ch.Elca.Iiop.Marshalling {
         public object MapToIdlAbstractValueType(System.Type clsType) {
             return m_abstrValueSer;
         }
-        public object MapToIdlBoxedValueType(System.Type clsType, AttributeExtCollection attributes, bool isAlreadyBoxed) {
+        public object MapToIdlBoxedValueType(System.Type clsType, bool isAlreadyBoxed) {
             if (!isAlreadyBoxed) {
                 // need boxing / unboxing of values
                 return m_boxedValueSer;
@@ -313,8 +310,12 @@ namespace Ch.Elca.Iiop.Marshalling {
                 return m_marshalByValSer;
             }
         }
-        public object MapToIdlSequence(System.Type clsType, int bound) {
-            return m_seqSer; // IDLSequnceSerializer
+        public object MapToIdlSequence(System.Type clsType, int bound, AttributeExtCollection allAttributes, AttributeExtCollection elemTypeAttributes) {
+        	if (bound == 0) {
+        		return m_seqSer_unbounded;
+        	} else {
+        		return new IdlSequenceSerializer(bound);
+        	}        	
         }
         public object MapToIdlAny(System.Type clsType) {
             return m_anySer;
@@ -344,53 +345,53 @@ namespace Ch.Elca.Iiop.Marshalling {
             return m_typeCodeSer;
         }
         public object MapToIdlBoolean(System.Type clsType) {
-            return m_baseTypeSerializer[clsType];
+            return m_boolSer;
         }
         public object MapToIdlFloat(System.Type clsType) {
-            return m_baseTypeSerializer[clsType];
+            return m_singleSer;
         }
         public object MapToIdlDouble(System.Type clsType) {
-            return m_baseTypeSerializer[clsType];
+            return m_doubleSer;
         }
         public object MapToIdlShort(System.Type clsType) {
-            return m_baseTypeSerializer[clsType];
+            return m_int16Ser;
         }
         public object MapToIdlUShort(System.Type clsType) {
             // no CLS type is mapped to UShort
             throw new INTERNAL(8702, CompletionStatus.Completed_MayBe);
         }
         public object MapToIdlLong(System.Type clsType) {
-            return m_baseTypeSerializer[clsType];
+            return m_int32Ser;
         }
         public object MapToIdlULong(System.Type clsType) {
             // no CLS type is mapped to ULong
             throw new INTERNAL(8703, CompletionStatus.Completed_MayBe);
         }
         public object MapToIdlLongLong(System.Type clsType) {
-            return m_baseTypeSerializer[clsType];
+            return m_int64Ser;
         }
         public object MapToIdlULongLong(System.Type clsType) {
             // no CLS type is mapped to ULongLong
             throw new INTERNAL(8703, CompletionStatus.Completed_MayBe);
         }
         public object MapToIdlOctet(System.Type clsType) {
-            return m_baseTypeSerializer[clsType];
+            return m_byteSer;
         }
         public object MapToIdlVoid(System.Type clsType) {
             // void is not serializable
             throw new INTERNAL(8704, CompletionStatus.Completed_MayBe);
         }
         public object MapToIdlWChar(System.Type clsType) {
-            return m_baseTypeSerializer[clsType];
+            return m_wideCharSer;
         }
         public object MapToIdlWString(System.Type clsType) {
-            return m_baseTypeSerializer[clsType];
+            return m_wideStringSer;
         }
         public object MapToIdlChar(System.Type clsType) {
-            return m_baseTypeSerializer[clsType];
+            return m_nonWideCharSer;
         }
         public object MapToIdlString(System.Type clsType) {
-            return m_baseTypeSerializer[clsType];
+            return m_nonWideStringSer;
         }
     
         #endregion Implementation of MappingAction

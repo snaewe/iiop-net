@@ -45,7 +45,7 @@ namespace Ch.Elca.Iiop.Idl {
         private Hashtable m_filesForMappedTypes = new Hashtable();
 
         /// <summary>contains the types, which are already mapped during generation</summary>
-        private ArrayList m_alreadyMappedTypes = new ArrayList();
+        private ArrayList /* MapTypeInfo */ m_alreadyMappedTypes = new ArrayList();
 
         /// <summary>contains all the default mapped types</summary>
         private ArrayList m_defaultMappedTypes = new ArrayList();
@@ -115,8 +115,27 @@ namespace Ch.Elca.Iiop.Idl {
         /// </summary>
         /// <param name="mapped"></param>
         /// <param name="idlFile">the filename of the idlFile containing the mapped type. The filename is relative to the output-directory, does not include the full path</param>
+        public void RegisterMappedType(Type mapped, AttributeExtCollection attributes, string idlFile) {
+        	RegisterMappedType(CreateMapTypeInfo(mapped, attributes), idlFile);
+        }        
+        
+        /// <summary>
+        /// register a type that is mapped. The idl-definition of this type is stored in the file idlFile
+        /// </summary>
+        /// <param name="mapped"></param>
+        /// <param name="idlFile">the filename of the idlFile containing the mapped type. The filename is relative to the output-directory, does not include the full path</param>
         public void RegisterMappedType(Type mapped, string idlFile) {
-            if (m_alreadyMappedTypes.Contains(mapped) || IsDefaultMapped(mapped)) {
+        	RegisterMappedType(mapped, AttributeExtCollection.EmptyCollection, idlFile);
+        }        
+
+        
+        /// <summary>
+        /// register a type that is mapped. The idl-definition of this type is stored in the file idlFile
+        /// </summary>
+        /// <param name="mapped"></param>
+        /// <param name="idlFile">the filename of the idlFile containing the mapped type. The filename is relative to the output-directory, does not include the full path</param>
+        private void RegisterMappedType(MapTypeInfo mapped, string idlFile) {
+            if (m_alreadyMappedTypes.Contains(mapped) || IsDefaultMapped(mapped.Type)) {
                 throw new Exception("reregister of mapped type not possible, already mapped: " + mapped); 
             }
             m_alreadyMappedTypes.Add(mapped);
@@ -125,25 +144,43 @@ namespace Ch.Elca.Iiop.Idl {
 
         /// <summary>get the name of the idl-file for the mapped type</summary>
         public string GetIdlFileForMappedType(Type mapped) {
-            if (!IsCustomMappedToIdlType(mapped)) { 
+        	return GetIdlFileForMappedType(mapped, AttributeExtCollection.EmptyCollection);
+        }        
+        
+        /// <summary>get the name of the idl-file for the mapped type</summary>
+        public string GetIdlFileForMappedType(Type mapped, AttributeExtCollection attributes) {
+        	return GetIdlFileForMappedType(CreateMapTypeInfo(mapped, attributes));
+        }                
+        
+        /// <summary>get the name of the idl-file for the mapped type</summary>
+        public string GetIdlFileForMappedType(MapTypeInfo mapped) {
+            if (!IsCustomMappedToIdlType(mapped.Type)) { 
                 object res = m_filesForMappedTypes[mapped];
                 return (string) res;
             } else {
                 GeneratorMappingPlugin mappingPlugin = GeneratorMappingPlugin.GetSingleton();
-                GeneratorCustomMappingDesc mappingDesc = mappingPlugin.GetMappingForIdlTarget(mapped);
+                GeneratorCustomMappingDesc mappingDesc = mappingPlugin.GetMappingForIdlTarget(mapped.Type);
                 return mappingDesc.IdlFileName;
             }
         }
 
         /// <summary>checks if a type is already mapped</summary>
         /// <returns>true, if mapped, else false</returns>
-        public bool CheckMapped(Type toMap) {
-            if (m_alreadyMappedTypes.Contains(toMap) || 
-                IsMappedBeforeGeneration(toMap)){
-                return true; 
-            } else {
-                return false;
-            }
+        public bool CheckMapped(MapTypeInfo toMap) {
+            return (m_alreadyMappedTypes.Contains(toMap) || 
+        	        IsMappedBeforeGeneration(toMap.Type));
+        }
+        
+        /// <summary>checks if a type is already mapped</summary>
+        /// <returns>true, if mapped, else false</returns>
+        public bool CheckMappedType(Type toMap) {
+        	return CheckMappedType(toMap, AttributeExtCollection.EmptyCollection);
+        }        
+
+        // <summary>checks if a type is already mapped</summary>
+        /// <returns>true, if mapped, else false</returns>
+        public bool CheckMappedType(Type toMap, AttributeExtCollection attributes) {
+        	return CheckMapped(CreateMapTypeInfo(toMap, attributes));
         }
         
         public bool IsMappedBeforeGeneration(Type toMap) {
@@ -153,9 +190,11 @@ namespace Ch.Elca.Iiop.Idl {
         }
 
         /// <summary>returns the dependency information for Type forType</summary>
+        /// <param name="forType">the type to determine the dependencies of</param>
+        /// <param name="attributesAfterMap">the attributes staying after removeing the ones used to map to forType</param>
         /// <returns>all the non-default types references in forType</returns>
-        public DependencyInformation GetDependencyInformation(Type forType) {            
-            return new DependencyInformation(forType, this);
+        public DependencyInformation GetDependencyInformation(Type forType, AttributeExtCollection attributesAfterMap) {            
+            return new DependencyInformation(forType, attributesAfterMap, this);
         }
 
         
@@ -169,7 +208,7 @@ namespace Ch.Elca.Iiop.Idl {
         
         /// <summary>stores the dependant types, which are not already mapped</summary>
         /// <param name="deps"></param>
-        private void StoreToMapNext(IList deps) {
+        private void StoreToMapNext(IList /* MapTypeInfo */ deps) {
             IEnumerator enumerator = deps.GetEnumerator();
             while (enumerator.MoveNext()) {
                 MapTypeInfo info = (MapTypeInfo) enumerator.Current;        
@@ -177,7 +216,7 @@ namespace Ch.Elca.Iiop.Idl {
 
                 // check if already mapped
                 // CheckMapped for custom mapped types is ture, because in info target type is stored.
-                if (!(CheckMapped(info.Type) || m_toMap.Contains(info))) {
+                if (!(CheckMapped(info) || m_toMap.Contains(info))) {
                     m_toMap.Enqueue(info);
                 }
             }
@@ -205,7 +244,7 @@ namespace Ch.Elca.Iiop.Idl {
             
             while (m_toMap.Count > 0) {
                 MapTypeInfo candidate = (MapTypeInfo) m_toMap.Dequeue();
-                if (!CheckMapped(candidate.Type)) {
+                if (!CheckMapped(candidate)) {
                     result = candidate;
                     break;
                 }
@@ -213,6 +252,10 @@ namespace Ch.Elca.Iiop.Idl {
             return result;
         }
 
+        public MapTypeInfo CreateMapTypeInfo(Type type, AttributeExtCollection attributes) {
+            return new MapTypeInfo(type, attributes, IsForwardDeclPossible(type, attributes));
+        }        
+        
         #endregion IMethods
     
     }
@@ -232,11 +275,11 @@ namespace Ch.Elca.Iiop.Idl {
         #endregion IFields
         #region IConstructors
 
-        internal DependencyInformation(Type forType, DependencyManager manager) {
+        internal DependencyInformation(Type forType, AttributeExtCollection attributesAfterMap, DependencyManager manager) {
             m_forType = forType;
             m_manager = manager;
             DetermineInheritanceDependencies();
-            DetermineContentDependencies();
+            DetermineContentDependencies(attributesAfterMap);            
         }
 
         #endregion IConstructors
@@ -264,20 +307,19 @@ namespace Ch.Elca.Iiop.Idl {
         #region IMethods
         
         private MapTypeInfo CreateMapTypeInfo(Type type, AttributeExtCollection attributes) {
-            return new MapTypeInfo(type, attributes, m_manager.IsForwardDeclPossible(type, attributes));
-        }
-                
-        private void AddToDepList(ArrayList depList, MapTypeInfo info) {            
+        	return m_manager.CreateMapTypeInfo(type, attributes);
+        }        
+                        
+        private void AddToDepList(ArrayList depList, MapTypeInfo info, bool useAnanymousSequences) {            
             if (info.Type.IsByRef) {
                 info = CreateMapTypeInfo(info.Type.GetElementType(), 
                                          info.Attributes);
             }
             
-            if (info.Attributes.IsInCollection(typeof(IdlSequenceAttribute))) {
-                // for an IDL-sequence: add dep for sequence element and not for sequence itself,
+            if (useAnanymousSequences && info.Attributes.IsInCollection(typeof(IdlSequenceAttribute))) {
+                // for anonymous IDL-sequence: add dep for sequence element and not for sequence itself,
                 // because the sequence type itself will never be mapped to a type on it's own.
-                // remark: there are no sequences of sequences because of the CLS to IDL mapping,
-                // only sequences of boxed sequences!
+				// remark: non-anonymous sequences are mapped to a type-def
                 info.RemoveAttributeOfType(ReflectionHelper.IdlSequenceAttributeType);
                 Type elemType = info.Type.GetElementType();
                 info = CreateMapTypeInfo(elemType, info.Attributes);
@@ -302,11 +344,13 @@ namespace Ch.Elca.Iiop.Idl {
                      (baseType.Equals(typeof(System.ComponentModel.MarshalByValueComponent))) ||
                      (baseType.Equals(typeof(System.MarshalByRefObject))))) {
                     AddToDepList(m_dependenciesInheritance, 
-                                 CreateMapTypeInfo(baseType, AttributeExtCollection.EmptyCollection));
+                                 CreateMapTypeInfo(baseType, AttributeExtCollection.EmptyCollection),
+                                 true);
                 }
                 foreach (Type ifType in m_forType.GetInterfaces()) {
                     AddToDepList(m_dependenciesInheritance, 
-                                 CreateMapTypeInfo(ifType, AttributeExtCollection.EmptyCollection));
+                                 CreateMapTypeInfo(ifType, AttributeExtCollection.EmptyCollection),
+                                 true);
                 }
             }
 
@@ -317,12 +361,13 @@ namespace Ch.Elca.Iiop.Idl {
                 Type[] implementedIF = m_forType.GetInterfaces();
                 for (int i = 0; i < implementedIF.Length; i++) {
                     AddToDepList(m_dependenciesInheritance, 
-                                 CreateMapTypeInfo(implementedIF[i], AttributeExtCollection.EmptyCollection));
+                                 CreateMapTypeInfo(implementedIF[i], AttributeExtCollection.EmptyCollection),
+                                 true);
                 }
             }
         }
 
-        private void DetermineContentDependencies() {
+        private void DetermineContentDependencies(AttributeExtCollection attributesAfterMap) {
             m_dependenciesContent = new ArrayList();
 
             // for the following types methods and properties must be considered
@@ -339,6 +384,9 @@ namespace Ch.Elca.Iiop.Idl {
             if (ClsToIdlMapper.IsDefaultMarshalByVal(m_forType)) {
                 DetermineContentDependenciesFromFields();
             }
+            if (ClsToIdlMapper.IsArray(m_forType)) {
+            	DetermineContentDependenciesFromElementType(attributesAfterMap);
+            }
         }
 
         private void DetermineContentDependenciesFromMethods() {
@@ -351,7 +399,8 @@ namespace Ch.Elca.Iiop.Idl {
                 Type returnType = info.ReturnType;
                 if (!m_manager.IsDefaultMapped(returnType) && !returnType.Equals(m_forType)) {                 	
                     AddToDepList(m_dependenciesContent, CreateMapTypeInfo(returnType, 
-                                                               ReflectionHelper.CollectReturnParameterAttributes(info)));
+                                                               ReflectionHelper.CollectReturnParameterAttributes(info)),
+                                 false);
                 }
                 
                 ParameterInfo[] methodParams = info.GetParameters();
@@ -359,7 +408,8 @@ namespace Ch.Elca.Iiop.Idl {
                     if (!m_manager.IsDefaultMapped(paramInfo.ParameterType) && !paramInfo.ParameterType.Equals(m_forType)) {
                         // only add to dependencies, if not default mapped and not the same as type which is checked
                         AddToDepList(m_dependenciesContent, CreateMapTypeInfo(paramInfo.ParameterType, 
-                                                                   ReflectionHelper.CollectParameterAttributes(paramInfo, info)));
+                                                                   ReflectionHelper.CollectParameterAttributes(paramInfo, info)),
+                                     false);
                     }
                 }
             }
@@ -373,7 +423,8 @@ namespace Ch.Elca.Iiop.Idl {
                 if (!m_manager.IsDefaultMapped(info.PropertyType) && !info.PropertyType.Equals(m_forType)) {
                     // only add to dependencies, if not default mapped
                     AddToDepList(m_dependenciesContent, 
-                                 CreateMapTypeInfo(info.PropertyType, AttributeExtCollection.ConvertToAttributeCollection(info.GetCustomAttributes(true))));
+                                 CreateMapTypeInfo(info.PropertyType, AttributeExtCollection.ConvertToAttributeCollection(info.GetCustomAttributes(true))),
+                                 false);
                 }
             }
         }
@@ -386,9 +437,21 @@ namespace Ch.Elca.Iiop.Idl {
                 if (!m_manager.IsDefaultMapped(info.FieldType) && !info.FieldType.Equals(m_forType)) {
                     // only add to dependencies, if not default mapped
                     AddToDepList(m_dependenciesContent, 
-                                 CreateMapTypeInfo(info.FieldType, AttributeExtCollection.ConvertToAttributeCollection(info.GetCustomAttributes(true))));
+                                 CreateMapTypeInfo(info.FieldType, AttributeExtCollection.ConvertToAttributeCollection(info.GetCustomAttributes(true))),
+                                 true);
                 }
             }
+        }
+        
+        private void DetermineContentDependenciesFromElementType(AttributeExtCollection attributesAfterMap) {
+        	Type elemType = m_forType.GetElementType();
+        	if (elemType != null) {
+        		if (!m_manager.IsDefaultMapped(elemType) && !elemType.Equals(m_forType)) {
+        			AddToDepList(m_dependenciesContent,
+        			             CreateMapTypeInfo(elemType, attributesAfterMap),
+        			             false); // for sequence of sequence, don't use anonymous seq for element type
+        		}
+        	} // else: should not happen
         }
         
         /// <summary>
@@ -404,7 +467,7 @@ namespace Ch.Elca.Iiop.Idl {
             // insert all already mapped types, this type depends on            
             foreach (MapTypeInfo info in m_dependenciesContent) {            
                 Debug.WriteLine("getTypesToIncludeBefore-content: " + ForType + 
-                                ", pot include: " + info.Type + ", already mapped: " + m_manager.CheckMapped(info.Type) +
+                                ", pot include: " + info.Type + ", already mapped: " + m_manager.CheckMapped(info) +
                                 ", is fwd ref possible: " + info.IsForwardDeclPossible);
                 if (!info.IsForwardDeclPossible && (!m_manager.IsDefaultMapped(info.Type))) {
                     // need to add an include, if no forward declaration is possible
@@ -425,8 +488,8 @@ namespace Ch.Elca.Iiop.Idl {
         private void InsertInheritanceTypesBefore(bool check, ArrayList target) {            
             foreach (MapTypeInfo info in m_dependenciesInheritance) {                
                 Debug.WriteLine("getTypesBefore-inh: " + ForType + ", " + check + 
-                                ", pot include: " + info.Type + ", already mapped: " + m_manager.CheckMapped(info.Type));
-                if ((!check) || (!m_manager.CheckMapped(info.Type))) {
+                                ", pot include: " + info.Type + ", already mapped: " + m_manager.CheckMapped(info));
+                if ((!check) || (!m_manager.CheckMapped(info))) {
                     target.Add(info);
                     Debug.WriteLine("add it");
                 }
@@ -443,9 +506,9 @@ namespace Ch.Elca.Iiop.Idl {
             // all non-interface and non-value types must be mapped before the type (also boxed value types)            
             foreach (MapTypeInfo info in m_dependenciesContent) {                
                 Debug.WriteLine("getTypesBefore-content: " + ForType + ", pot include: " +
-                                info.Type + ", already mapped: " + m_manager.CheckMapped(info.Type));
+                                info.Type + ", already mapped: " + m_manager.CheckMapped(info));
                 // every type, which can't be fwd declared must be mapped before (e.g. boxed value types)
-                if ((!info.IsForwardDeclPossible) && (!m_manager.CheckMapped(info.Type))) { 
+                if ((!info.IsForwardDeclPossible) && (!m_manager.CheckMapped(info))) { 
                     // needs to be mapped before current type can be mapped
                     Debug.WriteLine("add it");
                     result.Add(info);

@@ -33,6 +33,8 @@ using System.Reflection;
 using System.IO;
 using System.Diagnostics;
 
+using Ch.Elca.Iiop.Util;
+
 namespace Ch.Elca.Iiop.Idl {
 
     /// <summary>
@@ -100,15 +102,19 @@ namespace Ch.Elca.Iiop.Idl {
         /// </summary>
         [STAThread]
         public static void Main(string[] args) {
-            Type typeToMap = ParseArgs(args);
+        	try {
+	        	Type typeToMap = ParseArgs(args);
 
-            Console.WriteLine("emitting Predef.idl");
-            EmitPredefIdl();
-            Console.WriteLine("generating IDL for type: " + typeToMap.FullName);
-            Console.WriteLine("destination: " + s_destination);
-            ClsToIdlMapper mapper = ClsToIdlMapper.GetSingleton();
-            mapper.MapClsType(typeToMap, 
-                new Util.AttributeExtCollection(new Attribute[0]), new GenerationActionDefineTypes(s_destination));
+    	        Console.WriteLine("emitting Predef.idl");
+        	    EmitPredefIdl();
+            	Console.WriteLine("generating IDL for type: " + typeToMap.FullName);
+            	Console.WriteLine("destination: " + s_destination);
+            	ClsToIdlMapper mapper = ClsToIdlMapper.GetSingleton();
+            	mapper.MapClsType(typeToMap, 
+                	AttributeExtCollection.EmptyCollection, new GenerationActionDefineTypes(s_destination));
+        	} catch (Exception e) {
+        		Console.WriteLine("error while running generator: " + e);
+        	}
         }
 
         public static void HowTo() {

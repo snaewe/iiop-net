@@ -406,7 +406,7 @@ namespace Ch.Elca.Iiop.Idl {
         /// </summary>
         /// <returns>bounded or not</returns>
         public bool IsBounded() {
-            return (m_bound > 0);
+        	return IsBounded(m_bound);
         }
 
         #endregion IMethods
@@ -421,6 +421,12 @@ namespace Ch.Elca.Iiop.Idl {
             }
         }
 
+        /// <summary>
+        /// checks, if the bound does limit the sequence size or not; returns false for unbounded seqeuences
+        /// </summary>
+        public static bool IsBounded(long bound) {
+        	return bound > 0;
+        }
         
         #endregion SMethods
 

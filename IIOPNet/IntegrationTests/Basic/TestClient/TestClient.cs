@@ -313,6 +313,105 @@ namespace Ch.Elca.Iiop.IntegrationTests {
             Assertion.AssertEquals(arg1[1][0], result1[1][0]);
         }
 
+
+        [Test]
+        public void TestEchoIdlLongSequence() {
+            int[] arg = new int[] { 1, 2, 3};
+            int[] result = m_testService.EchoIdlLongSequence(arg);
+            Assertion.AssertNotNull(result);
+            Assertion.AssertEquals(arg.Length, result.Length);
+            Assertion.AssertEquals(arg[0], result[0]);
+            Assertion.AssertEquals(arg[1], result[1]);
+            Assertion.AssertEquals(arg[2], result[2]);
+        }
+
+        [Test]
+        public void TestEchoIdlLongSequenceOfSequence() {
+            int[][] arg = new int[2][];
+            arg[0] = new int[] { 1, 2};
+            arg[1] = new int[] { 4};
+
+            int[][] result = m_testService.EchoIdlLongSequenceOfSequence(arg);
+            Assertion.AssertNotNull(result);
+            Assertion.AssertEquals(arg.Length, result.Length);
+            Assertion.AssertEquals(arg[0].Length, result[0].Length);
+            Assertion.AssertEquals(arg[0][0], result[0][0]);
+            Assertion.AssertEquals(arg[0][1], result[0][1]);
+            Assertion.AssertEquals(arg[1].Length, result[1].Length);
+            Assertion.AssertEquals(arg[1][0], result[1][0]);
+
+            // check with bounded
+            int[][] arg2 = new int[2][];
+            arg2[0] = new int[] { 1, 2, 3};
+            arg2[1] = new int[] { 4};
+
+            int[][] result2 = m_testService.EchoIdlLongSequenceOfBoundedSequence(arg2);
+            Assertion.AssertNotNull(result);
+            Assertion.AssertEquals(arg2.Length, result2.Length);
+            Assertion.AssertEquals(arg2[0].Length, result2[0].Length);
+            Assertion.AssertEquals(arg2[0][0], result2[0][0]);
+            Assertion.AssertEquals(arg2[0][1], result2[0][1]);
+            Assertion.AssertEquals(arg2[0][2], result2[0][2]);
+            Assertion.AssertEquals(arg2[1].Length, result2[1].Length);
+            Assertion.AssertEquals(arg2[1][0], result2[1][0]);
+
+            // over the bound
+            int[][] arg3 = new int[2][];
+            arg3[0] = new int[] { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15 };
+            arg3[1] = new int[] { 4};
+            try {
+                int[][] result3 = m_testService.EchoIdlLongSequenceOfBoundedSequence(arg3);
+                Assertion.Fail("possible to pass a too long idl sequence");
+            } catch (omg.org.CORBA.BAD_PARAM) {
+                // ok                
+            }            
+        }
+
+        [Test]
+        public void TestIdlLongSequenceAppend() {
+            int[] argSeq = new int[] { 1, 2, 3};
+            int argElem = 4;
+            int[] result = m_testService.AppendToIdlLongSequence(argSeq, argElem);
+            Assertion.AssertNotNull(result);
+            Assertion.AssertEquals(argSeq.Length + 1, result.Length);
+            Assertion.AssertEquals(argSeq[0], result[0]);
+            Assertion.AssertEquals(argSeq[1], result[1]);
+            Assertion.AssertEquals(argSeq[2], result[2]);
+            Assertion.AssertEquals(argElem, result[3]);
+        }
+
+        [Test]
+        public void TestEchoIdlStringSequence() {
+            string[] arg = new string[] { "1", "2", "3"};
+            string[] result = m_testService.EchoIdlStringSequence(arg);
+            Assertion.AssertNotNull(result);
+            Assertion.AssertEquals(arg.Length, result.Length);
+            Assertion.AssertEquals(arg[0], result[0]);
+            Assertion.AssertEquals(arg[1], result[1]);
+            Assertion.AssertEquals(arg[2], result[2]);
+
+            string[] arg2 = new string[] { "1", "2", "3", "4"};
+            string[] result2 = m_testService.EchoIdlWStringSequence(arg2);
+            Assertion.AssertNotNull(result2);
+            Assertion.AssertEquals(arg2.Length, result2.Length);
+            Assertion.AssertEquals(arg2[0], result2[0]);
+            Assertion.AssertEquals(arg2[1], result2[1]);
+            Assertion.AssertEquals(arg2[2], result2[2]);
+        }
+
+        [Test]
+        public void TestIdlStringSequenceAppend() {
+            string[] argSeq = new string[] { "1", "2", "3"};
+            string argElem = "4";
+            string[] result = m_testService.AppendToIdlStringSequence(argSeq, argElem);
+            Assertion.AssertNotNull(result);
+            Assertion.AssertEquals(argSeq.Length + 1, result.Length);
+            Assertion.AssertEquals(argSeq[0], result[0]);
+            Assertion.AssertEquals(argSeq[1], result[1]);
+            Assertion.AssertEquals(argSeq[2], result[2]);
+            Assertion.AssertEquals(argElem, result[3]);
+        }
+
         [Test]
         public void TestRemoteObjects() {
             Adder adder = m_testService.RetrieveAdder();

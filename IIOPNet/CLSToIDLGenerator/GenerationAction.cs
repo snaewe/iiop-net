@@ -58,7 +58,8 @@ namespace Ch.Elca.Iiop.Idl {
         private IList m_writtenFwdReferences;
 
         /// <summary>generates the IDL for referenced types</summary>
-        private GenerationActionReference m_refMapper = new GenerationActionReference();
+        private GenerationActionReference m_refMapperNoAnonSeq = new GenerationActionReference(false);
+        private GenerationActionReference m_refMapperAnonSeq = new GenerationActionReference(true);
 
         /// <summary>this instance knows how to map a CLS type</summary>
         private ClsToIdlMapper m_mapper = ClsToIdlMapper.GetSingleton();
@@ -89,22 +90,41 @@ namespace Ch.Elca.Iiop.Idl {
         /// </summary>
         /// <param name="dotNetType"></param>
         /// <param name="ToIdlFile"></param>
-        private void BeginType(Type dotNetType, out string[] modules, out string unqualName) {
-            // determine the dependencies for the type
-            m_depInfo = m_depManager.GetDependencyInformation(dotNetType);
+        private void BeginType(Type dotNetType, out string[] modules, out string unqualName) {            
+        	BeginType(dotNetType, AttributeExtCollection.EmptyCollection, AttributeExtCollection.EmptyCollection, out modules, out unqualName);
+        }        
+        
+        /// <summary>
+        /// Begins the the idl-file for the Type dotNetType: 
+        /// Creates the idl-file, writes the generator information header
+        /// </summary>
+        /// <param name="dotNetType"></param>
+        /// <param name="ToIdlFile"></param>
+        private void BeginType(Type dotNetType, AttributeExtCollection attributes, AttributeExtCollection attributesAfterMap, out string[] modules, out string unqualName) {
             
             // map the namespace:
-            modules = IdlNaming.MapNamespaceToIdlModules(dotNetType);
-            m_openModules = modules;
+            modules = IdlNaming.MapNamespaceToIdlModules(dotNetType);            
             unqualName = IdlNaming.MapShortTypeNameToIdl(dotNetType);
+            
+            BeginTypeWithName(dotNetType, attributes, attributesAfterMap, modules, unqualName);
 
+        }
+        
+        /// <summary>
+        /// begin a type definition for the Type dotnetType; This type is mapped to an idl type with name unqualName in the modules modules
+        /// </summary>
+        private void BeginTypeWithName(Type dotNetType, AttributeExtCollection attributes, AttributeExtCollection attributesAfterMap, string[] modules, string unqualName) {
+            // determine the dependencies for the type
+            m_depInfo = m_depManager.GetDependencyInformation(dotNetType, attributesAfterMap);
+			m_openModules = modules;
+			
             // write it
             // create output-stream
             m_toIDLFile = CreateIdlFullName(modules, unqualName);
             m_currentOutputStream = OpenFile(m_toIDLFile);
             WriteFileHeader(m_toIDLFile);
             // register this type as mapped
-            m_depManager.RegisterMappedType(dotNetType, m_toIDLFile);
+            m_depManager.RegisterMappedType(dotNetType, attributes, m_toIDLFile);
             // map types needed, write fwd references
             BeforeTypeDefinition();
 
@@ -204,7 +224,7 @@ namespace Ch.Elca.Iiop.Idl {
             IEnumerator enumerator = typesToMap.GetEnumerator();
             while (enumerator.MoveNext()) {
                 MapTypeInfo info = (MapTypeInfo) enumerator.Current;
-                if (!m_depManager.CheckMapped(info.Type)) {
+                if (!m_depManager.CheckMapped(info)) {
                     MappingAction mapAction = new GenerationActionDefineTypes(m_outputDirectory, m_depManager);
                     m_mapper.MapClsType(info.Type, info.Attributes, mapAction);
                 }
@@ -297,7 +317,7 @@ namespace Ch.Elca.Iiop.Idl {
 
             string returnTypeMapped = (string)m_mapper.MapClsType(returnType, 
                                                                   Util.ReflectionHelper.CollectReturnParameterAttributes(methodToMap),
-                                                                  m_refMapper);
+                                                                  m_refMapperNoAnonSeq);
             m_currentOutputStream.Write(returnTypeMapped + " ");
             
             bool isOverloaded = ReflectionHelper.IsMethodOverloaded(methodToMap, declaringType);
@@ -313,7 +333,7 @@ namespace Ch.Elca.Iiop.Idl {
                 Type paramType = info.ParameterType;
                 string paramTypeMapped = (string)m_mapper.MapClsType(paramType, 
                                                                      Util.ReflectionHelper.CollectParameterAttributes(info, methodToMap), 
-                                                                     m_refMapper);
+                                                                     m_refMapperNoAnonSeq);
                 m_currentOutputStream.Write(paramTypeMapped + " ");
                 // name of param
                 m_currentOutputStream.Write(info.Name); // TBD: check if no IDL-keyword ...
@@ -376,7 +396,7 @@ namespace Ch.Elca.Iiop.Idl {
             Type fieldType = fieldToMap.FieldType;
             string fieldTypeMapped = (string)m_mapper.MapClsType(fieldType, 
                                                                  Util.AttributeExtCollection.ConvertToAttributeCollection(fieldToMap.GetCustomAttributes(true)), 
-                                                                 m_refMapper);
+                                                                 m_refMapperAnonSeq);
             if (fieldToMap.IsPrivate) { 
                 m_currentOutputStream.Write("private ");
             } else {
@@ -397,7 +417,7 @@ namespace Ch.Elca.Iiop.Idl {
             m_currentOutputStream.Write("attribute ");
             string propTypeMapped = (string)m_mapper.MapClsType(propertyType, 
                                                                 Util.AttributeExtCollection.ConvertToAttributeCollection(propertyToMap.GetCustomAttributes(true)),
-                                                                m_refMapper);
+                                                                m_refMapperNoAnonSeq);
             m_currentOutputStream.Write(propTypeMapped + " ");
             m_currentOutputStream.Write(IdlNaming.MapClsNameToIdlName(propertyToMap.Name));
             m_currentOutputStream.WriteLine(";");
@@ -413,7 +433,7 @@ namespace Ch.Elca.Iiop.Idl {
                 return false;
             }
             m_currentOutputStream.Write(": ");
-            string baseTypeMapped = (string)m_mapper.MapClsType(baseType, new Util.AttributeExtCollection(), m_refMapper);
+            string baseTypeMapped = (string)m_mapper.MapClsType(baseType, AttributeExtCollection.EmptyCollection, m_refMapperNoAnonSeq);
             m_currentOutputStream.Write(baseTypeMapped);
             return true;
         }
@@ -424,7 +444,7 @@ namespace Ch.Elca.Iiop.Idl {
             for (int i = 0; i < interfaces.Length; i++) {
                 if (i > 0) { m_currentOutputStream.Write(", "); }
                 Type interf = interfaces[i];
-                string ifMapped = (string)m_mapper.MapClsType(interf, new Util.AttributeExtCollection(), m_refMapper);
+                string ifMapped = (string)m_mapper.MapClsType(interf, AttributeExtCollection.EmptyCollection, m_refMapperNoAnonSeq);
                 m_currentOutputStream.Write(ifMapped);
             }
         }
@@ -434,7 +454,7 @@ namespace Ch.Elca.Iiop.Idl {
         
 
         public object MapToIdlEnum(Type clsType) {    
-            if (m_depManager.CheckMapped(clsType)) { 
+            if (m_depManager.CheckMappedType(clsType)) { 
                 return null; 
             }
             // do a sanity check
@@ -462,7 +482,7 @@ namespace Ch.Elca.Iiop.Idl {
 
         
         public object MapToIdlAbstractInterface(Type clsType) {
-            if (m_depManager.CheckMapped(clsType)) { 
+            if (m_depManager.CheckMappedType(clsType)) { 
                 return null; 
             }
 
@@ -492,9 +512,39 @@ namespace Ch.Elca.Iiop.Idl {
             EndType();
             return null;
         }
+        
+        public object MapToIdlSequence(Type clsType, int bound, AttributeExtCollection allAttributes, AttributeExtCollection elemTypeAttributes) {
+        	// for sequences, the attributes of the element type also influence the mapped type
+        	// therefore, use attributes also to check mapped type
+        	if (m_depManager.CheckMappedType(clsType, allAttributes)) {
+        		return null; // already mapped
+			}
+        	string namespaceName;
+        	string elemTypeMapped;
+        	string typedefName =
+        		IdlNaming.GetTypeDefAliasForSequenceType(clsType, bound, elemTypeAttributes, out namespaceName, out elemTypeMapped);
+        	        	
+        	string[] modules = IdlNaming.MapNamespaceNameToIdlModules(namespaceName);
+        	BeginTypeWithName(clsType, allAttributes, elemTypeAttributes, modules, typedefName);
+        	
+            // write type dependant information
+            WriteModuleOpenings(modules);
+
+            // write typedef
+            if (bound == 0) {
+	            m_currentOutputStream.WriteLine("typedef sequence<{0}> {1} ;", elemTypeMapped, typedefName);
+            } else {
+            	m_currentOutputStream.WriteLine("typedef sequence<{0}, {1}> {2} ;", elemTypeMapped, bound, typedefName);
+            }
+        	                                            
+            m_currentOutputStream.WriteLine("");
+
+            EndType();
+            return null;
+        }        
 
         public object MapToIdlStruct(Type clsType) {
-            if (m_depManager.CheckMapped(clsType)) { 
+            if (m_depManager.CheckMappedType(clsType)) { 
                 return null; 
             }
             // normally, nothing has to be done here, therefore throw a NotSupportedException
@@ -502,7 +552,7 @@ namespace Ch.Elca.Iiop.Idl {
         }
 
         public object MapToIdlUnion(Type clsType) {
-            if (m_depManager.CheckMapped(clsType)) { 
+            if (m_depManager.CheckMappedType(clsType)) { 
                 return null; 
             }
             // normally, nothing has to be done here, therefore throw a NotSupportedException
@@ -511,7 +561,7 @@ namespace Ch.Elca.Iiop.Idl {
 
 
         public object MapToIdlConcreateValueType(Type clsType) {
-            if (m_depManager.CheckMapped(clsType)) { 
+            if (m_depManager.CheckMappedType(clsType)) { 
                 return null; 
             }
             // do the mapping
@@ -546,7 +596,7 @@ namespace Ch.Elca.Iiop.Idl {
         }
 
         public object MapToIdlConcreteInterface(Type clsType) {
-            if (m_depManager.CheckMapped(clsType)) { 
+            if (m_depManager.CheckMappedType(clsType)) { 
                 return null; 
             }
             // do the mapping
@@ -583,7 +633,7 @@ namespace Ch.Elca.Iiop.Idl {
         }
 
         public object MapToIdlAbstractValueType(Type clsType) {
-            if (m_depManager.CheckMapped(clsType)) { 
+            if (m_depManager.CheckMappedType(clsType)) { 
                 return null; 
             }
             // do the mapping
@@ -614,9 +664,8 @@ namespace Ch.Elca.Iiop.Idl {
             
         }
 
-        public object MapToIdlBoxedValueType(Type clsType, AttributeExtCollection attributes, 
-                                             bool isAlreadyBoxed) {
-            if (m_depManager.CheckMapped(clsType)) { 
+        public object MapToIdlBoxedValueType(Type clsType, bool isAlreadyBoxed) {
+            if (m_depManager.CheckMappedType(clsType)) { 
                 return null; 
             }
             // do the mapping
@@ -634,7 +683,7 @@ namespace Ch.Elca.Iiop.Idl {
             }
             // now write the found field
             Type fieldType = fields[0].FieldType;
-            string fieldTypeMapped = (string)m_mapper.MapClsType(fieldType, AttributeExtCollection.ConvertToAttributeCollection(fields[0].GetCustomAttributes(true)), m_refMapper);
+            string fieldTypeMapped = (string)m_mapper.MapClsType(fieldType, AttributeExtCollection.ConvertToAttributeCollection(fields[0].GetCustomAttributes(true)), m_refMapperAnonSeq);
             m_currentOutputStream.WriteLine(" " + fieldTypeMapped + ";");
             // write the repository ID
             WriteRepositoryID(clsType, unqualName);
@@ -647,7 +696,7 @@ namespace Ch.Elca.Iiop.Idl {
             if (clsType.IsSubclassOf(typeof(omg.org.CORBA.AbstractCORBASystemException))) { 
                 return null; 
             } // should already be mapped
-            if (m_depManager.CheckMapped(clsType)) { 
+            if (m_depManager.CheckMappedType(clsType)) { 
                 return null; 
             }
             // do the mapping
@@ -657,7 +706,7 @@ namespace Ch.Elca.Iiop.Idl {
             
             // write type dependant information
             WriteModuleOpenings(modules);
-            
+            // TODO: check mapping
             m_currentOutputStream.Write("exception " + unqualName + "{");
             
             // map the state members
@@ -666,10 +715,10 @@ namespace Ch.Elca.Iiop.Idl {
             foreach (FieldInfo fieldToMap in fields) {
                 Type fieldType = fieldToMap.FieldType;
                 string fieldTypeMapped = (string)m_mapper.MapClsType(fieldType, Util.AttributeExtCollection.ConvertToAttributeCollection(fieldToMap.GetCustomAttributes(true)),
-                                                                     m_refMapper);
+                                                                     m_refMapperAnonSeq);
                 m_currentOutputStream.Write(fieldTypeMapped + " ");
                 // name of field
-                m_currentOutputStream.Write(fieldToMap.Name); // TBD: check if no IDL-keyword ...
+                m_currentOutputStream.Write(IdlNaming.MapClsNameToIdlName(fieldToMap.Name));
                 m_currentOutputStream.WriteLine(";");
             }
 
@@ -684,7 +733,7 @@ namespace Ch.Elca.Iiop.Idl {
 
         public object MapToTypeDesc(Type clsType) {
             // nothing to do, type desc already defined
-            if (m_depManager.CheckMapped(clsType)) {
+            if (m_depManager.CheckMappedType(clsType)) {
                 return null; 
             }
             throw new Exception("Dependenciy manager error, this type should be already mapped");
@@ -755,10 +804,6 @@ namespace Ch.Elca.Iiop.Idl {
         }
         public object MapToAbstractBase(Type clsType) {
             throw new NotSupportedException("is a standard type, not redifinable");
-        }
-
-        public object MapToIdlSequence(Type clsType, int bound) {
-            throw new NotSupportedException("no type declaration possible for IDL-Sequence");
         }
 
         public object MapToIdlLocalInterface(Type clsType) {
@@ -862,7 +907,7 @@ namespace Ch.Elca.Iiop.Idl {
             return null;
         }
 
-        public object MapToIdlBoxedValueType(System.Type dotNetType, AttributeExtCollection attributes, bool isAlreadyBoxed) {
+        public object MapToIdlBoxedValueType(System.Type dotNetType, bool isAlreadyBoxed) {
             throw new NotSupportedException("a value-box can't have a forward declaration");
         }
         
@@ -948,7 +993,7 @@ namespace Ch.Elca.Iiop.Idl {
             throw new NotSupportedException("no fwd declaration possible for this IDL-type");
         }
 
-        public object MapToIdlSequence(System.Type dotNetType, int bound) {
+        public object MapToIdlSequence(System.Type dotNetType, int bound, AttributeExtCollection allAttributes, AttributeExtCollection elemTypeAttributes) {
             throw new NotSupportedException("no fwd declaration possible for this IDL-type");
         }
 
@@ -1010,13 +1055,17 @@ namespace Ch.Elca.Iiop.Idl {
         #endregion IConstructors
         #region IMethods
 
-        private void WriteInclude(Type forType) {
-            string idlFileName = m_depManager.GetIdlFileForMappedType(forType);
+        private void WriteInclude(Type forType, AttributeExtCollection attributes) {
+            string idlFileName = m_depManager.GetIdlFileForMappedType(forType, attributes);
             if (idlFileName == null) { 
                 throw new Exception("internal error in dep-manager, mapped type missing after mapped before: " + 
                                     forType);
             }
             m_writeTo.WriteLine("#include \"" + idlFileName + "\"");
+        }        
+        
+        private void WriteInclude(Type forType) {
+        	WriteInclude(forType, AttributeExtCollection.EmptyCollection);
         }        
         
         #region Implementation of MappingAction
@@ -1041,7 +1090,7 @@ namespace Ch.Elca.Iiop.Idl {
             return null;
         }
 
-        public object MapToIdlBoxedValueType(System.Type dotNetType, AttributeExtCollection attributes, bool isAlreadyBoxed) {
+        public object MapToIdlBoxedValueType(System.Type dotNetType, bool isAlreadyBoxed) {
             WriteInclude(dotNetType);
             return null;
         }
@@ -1076,8 +1125,8 @@ namespace Ch.Elca.Iiop.Idl {
             return null;            
         }
         
-        public object MapToIdlSequence(System.Type dotNetType, int bound) {
-            WriteInclude(dotNetType);
+        public object MapToIdlSequence(System.Type dotNetType, int bound, AttributeExtCollection allAttributes, AttributeExtCollection elementTypeAttributes) {
+            WriteInclude(dotNetType, allAttributes);
             return null;            
         }
         

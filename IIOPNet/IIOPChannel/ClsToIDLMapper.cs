@@ -71,12 +71,15 @@ namespace Ch.Elca.Iiop.Idl {
         object MapToIdlAbstractValueType(Type clsType);
 
         /// <returns>an optional result of the mapping, null may be possible</returns>
+        /// <param name="clsType">the .NET boxed value type type, inheriting from BoxedValueBase</param>
         /// <param name="isAlreadyBoxed">tells, if the dotNetType is boxed in a boxed value type, or if a native Boxed value type is mapped</param>
-        object MapToIdlBoxedValueType(Type clsType, AttributeExtCollection attributes, bool isAlreadyBoxed);
+        object MapToIdlBoxedValueType(Type clsType, bool isAlreadyBoxed);
 
         /// <param name="bound">for unbounded sequences: 0, else max nr of elems</param>
+        /// <param name="allAttributes">the attributes including the IdlSequenceAttributes lead to calling this map action</param>
+        /// <param name="elemTypeAttributes">the attributes of the sequence element</param>
         /// <returns>an optional result of the mapping, null may be possible</returns>
-        object MapToIdlSequence(Type clsType, int bound);
+        object MapToIdlSequence(Type clsType, int bound, AttributeExtCollection allAttributes, AttributeExtCollection elemTypeAttributes);
 
         /// <summary>map to the IDL-type any</summary>
         /// <returns>an optional result of the mapping, null may be possible</returns>
@@ -296,16 +299,17 @@ namespace Ch.Elca.Iiop.Idl {
         /// <param name="action">the action to take for the determined mapping</param>
         /// <param name="attributes">the attributes on the param, field, return value</param>
         public object MapClsType(Type clsType, AttributeExtCollection attributes, MappingAction action) {
-            return MapClsTypeWithTransform(ref clsType, attributes, action);
+            return MapClsTypeWithTransform(ref clsType, ref attributes, action);
         }
         
         /// <summary>uses MappingAction action while mapping a CLS-type to an IDL-type</summary>
         /// <param name="clsType">the type to map. The mapper can decide to transform the type during the mapping, the result of the transformation is returned. Transformation occurs, for example because of attributes</param>
         /// <param name="action">the action to take for the determined mapping</param>
-        /// <param name="attributes">the attributes on the param, field, return value</param>
-        public object MapClsTypeWithTransform(ref Type clsType, AttributeExtCollection attributes, MappingAction action) {
-            // handle out, ref types correctly: no other action needs to be taken than for in-types
-            if (clsType.IsByRef) { 
+        /// <param name="attributes">the attributes on the param, field, return value; a new collection without the considered attributes is returned</param>
+        public object MapClsTypeWithTransform(ref Type clsType, ref AttributeExtCollection attributes, MappingAction action) {            
+        	// handle out, ref types correctly: no other action needs to be taken than for in-types
+            AttributeExtCollection originalAttributes = attributes; // used to save reference to the passed in attributes
+        	if (clsType.IsByRef) {
                 clsType = clsType.GetElementType(); 
             }
             
@@ -316,29 +320,30 @@ namespace Ch.Elca.Iiop.Idl {
             }
 
             // check some standard cases
-            if (attributes.IsInCollection(s_boxedValAttrType)) { 
+            Attribute boxedValAttr;
+            attributes = originalAttributes.RemoveAttributeOfType(s_boxedValAttrType, out boxedValAttr);
+            if (boxedValAttr != null) { 
                 // load the boxed value-type for this attribute
-                Type boxed = Repository.GetBoxedValueType((BoxedValueAttribute)
-                                                          attributes.GetAttributeForType(s_boxedValAttrType));
+                Type boxed = Repository.GetBoxedValueType((BoxedValueAttribute)boxedValAttr);
                 if (boxed == null) { 
                     Trace.WriteLine("boxed type not found for boxed value attribute"); 
                     throw new NO_IMPLEMENT(10001, CompletionStatus.Completed_MayBe);
                 }
                 clsType = boxed; // transformation
-                return action.MapToIdlBoxedValueType(boxed, attributes, false);
+                return action.MapToIdlBoxedValueType(boxed, false);
             } else if (IsInterface(clsType) && !(clsType.Equals(ReflectionHelper.CorbaTypeCodeType))) {
                 return CallActionForDNInterface(ref clsType, action);
             } else if (IsMarshalByRef(clsType)) {
                 return action.MapToIdlConcreteInterface(clsType);
             } else if (IsMappablePrimitiveType(clsType)) {
-                return CallActionForDNPrimitveType(ref clsType, attributes, action);
+                return CallActionForDNPrimitveType(ref clsType, ref attributes, action);
             } else if (IsEnum(clsType)) { 
                 return action.MapToIdlEnum(clsType);
             } else if (IsArray(clsType)) { 
-                return CallActionForDNArray(ref clsType, attributes, action);
+                return CallActionForDNArray(ref clsType, ref attributes, originalAttributes, action);
             } else if (clsType.IsSubclassOf(ReflectionHelper.BoxedValueBaseType)) {
                 // a boxed value type, which needs not to be boxed/unboxed but should be handled like a normal value type
-                return action.MapToIdlBoxedValueType(clsType, attributes, true);
+                return action.MapToIdlBoxedValueType(clsType, true);
             } else if (clsType.IsSubclassOf(s_exceptType) || clsType.Equals(s_exceptType)) {
                 return action.MapException(clsType);
             } else if (IsMarshalledAsStruct(clsType)) {
@@ -346,7 +351,7 @@ namespace Ch.Elca.Iiop.Idl {
             } else if (IsMarshalledAsUnion(clsType)) {
                 return action.MapToIdlUnion(clsType);
             } else if (clsType.Equals(ReflectionHelper.ObjectType)) {
-                return CallActionForDNObject(ref clsType, attributes, action);
+                return CallActionForDNObject(ref clsType, ref attributes, action);
             } else if (clsType.Equals(s_anyType)) {
                 return action.MapToIdlAny(clsType);
             } else if (clsType.Equals(ReflectionHelper.TypeType) || clsType.IsSubclassOf(ReflectionHelper.TypeType)) {
@@ -366,7 +371,7 @@ namespace Ch.Elca.Iiop.Idl {
         }
 
         /// <summary>determines the mapping for primitive types</summary>
-        private object CallActionForDNPrimitveType(ref Type clsType, AttributeExtCollection attributes, MappingAction action) {
+        private object CallActionForDNPrimitveType(ref Type clsType, ref AttributeExtCollection modifiedAttributes, MappingAction action) {
             if (clsType.Equals(ReflectionHelper.Int16Type)) {
                 return action.MapToIdlShort(clsType);
             } else if (clsType.Equals(ReflectionHelper.Int32Type)) {
@@ -379,10 +384,10 @@ namespace Ch.Elca.Iiop.Idl {
                 return action.MapToIdlOctet(clsType);
             } else if (clsType.Equals(ReflectionHelper.StringType)) {
                 // distinguish cases
-                return CallActionForDNString(ref clsType, attributes, action);
+                return CallActionForDNString(ref clsType, ref modifiedAttributes, action);
             } else if (clsType.Equals(ReflectionHelper.CharType)) {
                 // distinguish cases
-                bool useWide = UseWideOk(attributes);
+                bool useWide = UseWideOk(ref modifiedAttributes);
                 if (useWide) {
                     return action.MapToIdlWChar(clsType);
                 } else {
@@ -401,25 +406,28 @@ namespace Ch.Elca.Iiop.Idl {
         }
 
         /// <summary>
-        /// helper for string/char mapping
+        /// helper for string/char mapping; removes the wchar attribute if present
         /// </summary>
-        private bool UseWideOk(AttributeExtCollection attributes) {
-            bool useWide = true;
-            WideCharAttribute wideAttr = (WideCharAttribute)attributes.GetAttributeForType(ReflectionHelper.WideCharAttributeType);
+        private bool UseWideOk(ref AttributeExtCollection modifiedAttributes) {
+            bool useWide = true;            
+            Attribute wideAttr;
+            modifiedAttributes = modifiedAttributes.RemoveAttributeOfType(ReflectionHelper.WideCharAttributeType, out wideAttr);
             if (wideAttr != null) {
-                useWide = wideAttr.IsAllowed;
+            	useWide = ((WideCharAttribute)wideAttr).IsAllowed;
             }
             return useWide;
         }
 
         /// <summary>helper to determine if the string is mapped as a normal primitive value or as boxed value type</summary>
-        private bool MapStringAsValueType(AttributeExtCollection attributes) {
-            return attributes.IsInCollection(ReflectionHelper.StringValueAttributeType);
+        private bool MapStringAsValueType(ref AttributeExtCollection modifiedAttributes) {
+            Attribute mapAsWStringValueAttr;
+            modifiedAttributes = modifiedAttributes.RemoveAttributeOfType(ReflectionHelper.StringValueAttributeType, out mapAsWStringValueAttr);
+        	return mapAsWStringValueAttr != null;
         }
 
-        private object CallActionForDNString(ref Type clsType, AttributeExtCollection attributes, MappingAction action) {
-            bool useWide = UseWideOk(attributes);
-            if (MapStringAsValueType(attributes)) {    // distinguish between mapping as IDL primitive or as IDL boxed value
+        private object CallActionForDNString(ref Type clsType, ref AttributeExtCollection modifiedAttributes, MappingAction action) {
+            bool useWide = UseWideOk(ref modifiedAttributes);
+            if (MapStringAsValueType(ref modifiedAttributes)) {    // distinguish between mapping as IDL primitive or as IDL boxed value
                 if (useWide) {
                     return action.MapToIdlWString(clsType);
                 } else {
@@ -445,13 +453,13 @@ namespace Ch.Elca.Iiop.Idl {
         /// <returns>
         /// an optional result of the mapping, some implementation of MappingAction will return null here
         /// </returns>
-        private object CallActionForDNObject(ref Type clsType, AttributeExtCollection attributes, MappingAction action) {
+        private object CallActionForDNObject(ref Type clsType, ref AttributeExtCollection modifiedAttributes, MappingAction action) {
             // distinguis the different cases here
-            ObjectIdlTypeAttribute typeAttr = (ObjectIdlTypeAttribute) attributes.GetAttributeForType(
-                                                                            s_objectIdlTypeAttrType);
+            Attribute typeAttr;
+            modifiedAttributes = modifiedAttributes.RemoveAttributeOfType(s_objectIdlTypeAttrType, out typeAttr);            	
             IdlTypeObject oType = IdlTypeObject.Any;
             if (typeAttr != null) { 
-                oType = typeAttr.IdlType; 
+            	oType = ((ObjectIdlTypeAttribute)typeAttr).IdlType;
             }
             switch (oType) {
                 case IdlTypeObject.Any: 
@@ -469,16 +477,21 @@ namespace Ch.Elca.Iiop.Idl {
         /// <summary>
         /// call the appropriate mapping action for a CLSType array
         /// </summary>
-        private object CallActionForDNArray(ref Type clsType, AttributeExtCollection attributes, MappingAction action) {
+        private object CallActionForDNArray(ref Type clsType,
+                                            ref AttributeExtCollection modifiedAttributes, 
+											AttributeExtCollection allAttributes,                                            
+                                            MappingAction action) {
             // distinguish the different cases here
-            if (attributes.IsInCollection(ReflectionHelper.IdlSequenceAttributeType)) {
+            Attribute seqAttr;
+            modifiedAttributes = modifiedAttributes.RemoveAttributeOfType(ReflectionHelper.IdlSequenceAttributeType, out seqAttr);
+            if (seqAttr != null) {
                 int bound = (int)
-                    ((IdlSequenceAttribute)attributes.GetAttributeForType(ReflectionHelper.IdlSequenceAttributeType)).Bound;
-                return action.MapToIdlSequence(clsType, bound);
+                	((IdlSequenceAttribute)seqAttr).Bound;
+                return action.MapToIdlSequence(clsType, bound, allAttributes, modifiedAttributes);
             } else {
                 Type boxed = Repository.GetBoxedArrayType(clsType);
                 clsType = boxed; // transform
-                return action.MapToIdlBoxedValueType(boxed, attributes, false);
+                return action.MapToIdlBoxedValueType(boxed, false);
             }
         }
         
@@ -542,10 +555,10 @@ namespace Ch.Elca.Iiop.Idl {
         public object MapToIdlAbstractValueType(System.Type clsType) {
             return true;
         }
-        public object MapToIdlBoxedValueType(System.Type clsType, AttributeExtCollection attributes, bool isAlreadyBoxed) {
+        public object MapToIdlBoxedValueType(System.Type clsType, bool isAlreadyBoxed) {
             return false;
         }
-        public object MapToIdlSequence(System.Type clsType, int bound) {
+        public object MapToIdlSequence(System.Type clsType, int bound, AttributeExtCollection allAttributes, AttributeExtCollection elemTypeAttributes) {
             return false;
         }
         public object MapToIdlAny(System.Type clsType) {
@@ -677,10 +690,10 @@ namespace Ch.Elca.Iiop.Tests {
         public object MapToIdlAbstractValueType(System.Type clsType) {
             return MappingToResult.IdlAbstractValue;
         }
-        public object MapToIdlBoxedValueType(System.Type clsType, AttributeExtCollection attributes, bool isAlreadyBoxed) {
+        public object MapToIdlBoxedValueType(System.Type clsType, bool isAlreadyBoxed) {
             return MappingToResult.IdlBoxedValue;
         }
-        public object MapToIdlSequence(System.Type clsType, int bound) {
+        public object MapToIdlSequence(System.Type clsType, int bound, AttributeExtCollection allAttributes, AttributeExtCollection elemTypeAttributes) {
             return MappingToResult.IdlSequence;
         }
         public object MapToIdlAny(System.Type clsType) {
