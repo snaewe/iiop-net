@@ -7,5 +7,11 @@
         <clsType>System.Collections.ArrayList,mscorlib</clsType>
         <customMapper>Ch.Elca.Iiop.JavaCollectionMappers.ArrayListMapper,customCollectionMappings</customMapper>
     </mapping>
+    <mapping>
+        <idlTypeName>java.util.HashMap</idlTypeName>
+        <idlTypeAssembly>javaCollections</idlTypeAssembly>
+        <clsType>System.Collections.Hashtable,mscorlib</clsType>
+        <customMapper>Ch.Elca.Iiop.JavaCollectionMappers.HashMapMapper,customCollectionMappings</customMapper>
+    </mapping>
 
 </mappings>

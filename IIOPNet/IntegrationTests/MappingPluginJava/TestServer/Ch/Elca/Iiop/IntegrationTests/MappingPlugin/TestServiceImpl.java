@@ -30,6 +30,7 @@ package Ch.Elca.Iiop.IntegrationTests.MappingPlugin;
 import java.rmi.RemoteException;
 import javax.rmi.PortableRemoteObject;
 import java.util.ArrayList;
+import java.util.HashMap;
     
 
 public class TestServiceImpl extends PortableRemoteObject implements TestService {
@@ -115,5 +116,84 @@ public class TestServiceImpl extends PortableRemoteObject implements TestService
     public ArrayList echoList(ArrayList arg) throws RemoteException {
         return arg;
     }
+
+    public HashMap createHashMapWithShortVals(short val, int nrOfElems) throws RemoteException {
+        HashMap result = new HashMap();
+        for (int i = 0; i < nrOfElems; i++) {
+            result.put(new Integer(i), new Short(val));
+        }
+        return result;
+    }
+
+    public HashMap createHashMapWithIntVals(int val, int nrOfElems) throws RemoteException {
+        HashMap result = new HashMap();
+        for (int i = 0; i < nrOfElems; i++) {
+            result.put(new Integer(i), new Integer(val));
+        }
+        return result;
+    }
+
+    public HashMap createHashMapWithByteVals(byte val, int nrOfElems) throws RemoteException {
+        HashMap result = new HashMap();
+        for (int i = 0; i < nrOfElems; i++) {
+            result.put(new Integer(i), new Byte(val));
+        }
+        return result;
+    }
+
+    public HashMap createHashMapWithCharVals(char val, int nrOfElems) throws RemoteException {
+        HashMap result = new HashMap();
+        for (int i = 0; i < nrOfElems; i++) {
+            result.put(new Integer(i), new Character(val));
+        }
+        return result;
+    }
+
+    public HashMap createHashMapWithBooleanVals(boolean val, int nrOfElems) throws RemoteException {
+        HashMap result = new HashMap();
+        for (int i = 0; i < nrOfElems; i++) {
+            result.put(new Integer(i), new Boolean(val));
+        }
+        return result;
+    }
+
+    public HashMap createHashMapWithFloatVals(float val, int nrOfElems) throws RemoteException {
+        HashMap result = new HashMap();
+        for (int i = 0; i < nrOfElems; i++) {
+            result.put(new Integer(i), new Float(val));
+        }
+        return result;
+    }
+
+    public HashMap createHashMapWithDoubleVals(double val, int nrOfElems) throws RemoteException {
+        HashMap result = new HashMap();
+        for (int i = 0; i < nrOfElems; i++) {
+            result.put(new Integer(i), new Double(val));
+        }
+        return result;
+    }
+
+    public HashMap createHashMapWithValTypeVals(String msg, int nrOfElems) throws RemoteException {
+        HashMap result = new HashMap();
+        for (int i = 0; i < nrOfElems; i++) {
+            TestSerializableClassB1 entry = new TestSerializableClassB1();
+            entry.Msg = msg;
+            result.put(new Integer(i), entry);
+        }
+        return result;
+    }
+
+    public HashMap createHashMapWithByRefVals(int nrOfElems) throws RemoteException {
+        HashMap result = new HashMap();
+        for (int i = 0; i < nrOfElems; i++) {
+            result.put(new Integer(i), new TestServiceImpl());
+        }
+        return result;
+    }
+
+    public HashMap echoHashMap(HashMap arg) throws RemoteException {
+        return arg;
+    }
+
         
 }

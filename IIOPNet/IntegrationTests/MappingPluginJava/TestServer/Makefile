@@ -13,7 +13,7 @@ $(bin):
         if not exist $@nul mkdir $@
 
 build-server: $(bin) *.java Ch\Elca\Iiop\IntegrationTests\MappingPlugin\*.java
-    javac -d bin Ch\Elca\Iiop\IntegrationTests\MappingPlugin\*.java
+    javac -d bin Ch\Elca\Iiop\IntegrationTests\MappingPlugin\TestServiceImpl.java
     javac -d bin TestServer.java    
     
 

@@ -255,4 +255,151 @@ namespace java.util {
 
     }
 
+    [Serializable]    
+    public class HashMapImpl : HashMap {
+
+        #region IFields
+        private float m_loadFactor;
+
+        private int m_capacity;
+        
+        
+        /// <summary>the buckets in the hashtable</summary>
+        /// <remarks>m_buckets must never be null</remarks>
+        private System.Collections.DictionaryEntry[] m_buckets;
+
+        #endregion IFields
+        #region IConstructors
+    
+        public HashMapImpl() {
+            m_loadFactor = 0.75f;
+            m_capacity = 0;
+        	m_buckets = new System.Collections.DictionaryEntry[0];        	
+        }
+
+        #endregion IConstructors
+        #region IProperties
+
+        public int Treshhold {
+            get {
+                return (int)(m_loadFactor * m_capacity);
+            }
+        }
+
+        public int Capacity {
+            get {
+                return m_capacity;
+            }
+            set {
+                m_capacity = value;
+                CheckCapacity();
+            }
+        }
+
+        public int Size {
+            get {
+                return m_buckets.Length;
+            }
+        }
+       
+        public float LoadFactor {
+            get {
+                return m_loadFactor;
+            }
+        }
+
+        #endregion IProperties
+
+        private void CheckCapacity() {
+            if (m_capacity < m_buckets.Length) {
+                    m_capacity = m_buckets.Length;
+            }
+        }
+        
+        public System.Collections.DictionaryEntry[] GetBuckets() {
+            return m_buckets;
+        }
+
+        public void SetBuckets(System.Collections.DictionaryEntry[] buckets) {
+            if (buckets != null) {
+                m_buckets = buckets;
+            } else {
+                m_buckets = new System.Collections.DictionaryEntry[0];
+            }
+            CheckCapacity();
+        }
+
+        #region methods needed by mapper
+        
+        public override void Deserialise(Corba.DataInputStream source) {
+            // skip rmi data
+            source.read_octet();
+            source.read_octet();
+            // load factor
+            m_loadFactor = source.read_float();
+            // treshhold, ignore (calculated)
+            source.read_long();
+            // capacity
+            m_capacity = source.read_long();
+            // size
+            int size = source.read_long();
+            // buckets
+            m_buckets = new System.Collections.DictionaryEntry[size];
+            for (int i = 0; i < size; i++) {                
+                object key = ReadObject(source);
+                object val = ReadObject(source);
+                m_buckets[i] = new System.Collections.DictionaryEntry(key, val);
+            }            
+        }
+
+        private object ReadObject(Corba.DataInputStream source) {
+            object result = null;
+            bool isByRefObj = source.read_boolean();
+            if (!isByRefObj) {
+                result = source.read_Value();
+                if (result is BoxedValueBase) {
+                    result = ((BoxedValueBase) result).Unbox();
+                } 
+            } else {
+                    result = source.read_Object();
+            }
+            return result;
+        }
+
+        private void WriteObject(object val, Corba.DataOutputStream target) {
+            bool isByRef = false;
+            if (val != null) {
+                isByRef = ClsToIdlMapper.IsMarshalByRef(val.GetType());
+            }
+            target.write_boolean(isByRef);
+            if (!isByRef) {
+                    target.write_ValueOfActualType(val);
+            } else {
+                    target.write_Object((MarshalByRefObject)val);
+            }
+        }
+        
+        public override void Serialize(Corba.DataOutputStream target) {
+            // rmi data
+            target.write_octet(1);
+            target.write_octet(1);
+            // load factor
+            target.write_float(m_loadFactor);
+            // treshhold, ignore (calculated)
+            target.write_long(Treshhold);
+            // capacity
+            target.write_long(m_capacity);
+            // size
+            target.write_long(m_buckets.Length);
+            // buckets            
+            for (int i = 0; i < m_buckets.Length; i++) {                
+                WriteObject(m_buckets[i].Key, target);
+                WriteObject(m_buckets[i].Value, target);
+            }            
+        }
+
+        #endregion methods needed by mapper
+
+    }
+
 }

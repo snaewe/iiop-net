@@ -166,4 +166,59 @@ namespace Ch.Elca.Iiop.JavaCollectionMappers {
 
     }
 
+
+    /// <summary>
+    /// maps instances of java.util.HashMapImpl to instances 
+    ///	of System.Collections.Hashtable and vice versa.
+    /// </summary>
+    public class HashMapMapper : CollectionMapperBase, ICustomMapper {
+     
+
+        public object CreateClsForIdlInstance(object idlInstance) {
+            java.util.HashMapImpl source = (java.util.HashMapImpl)idlInstance;
+            System.Collections.Hashtable result = new System.Collections.Hashtable();
+            
+            System.Collections.DictionaryEntry[] buckets = source.GetBuckets();
+            for (int i = 0; i < buckets.Length; i++) {                
+                object key = buckets[i].Key;
+                object val = buckets[i].Value;
+                if (IsJavaBaseTypeBox(key)) {
+                    key = UnboxBaseType(key);
+                }
+                if (IsJavaBaseTypeBox(val)) {
+                    val = UnboxBaseType(val);
+                }
+                result.Add(key, val);
+            }
+            
+            return result;
+        }
+
+        public object CreateIdlForClsInstance(object clsInstance) {
+            java.util.HashMapImpl result = new java.util.HashMapImpl();
+            System.Collections.Hashtable source = (System.Collections.Hashtable)clsInstance;
+
+            result.Capacity = (int)((source.Count + 1) / result.LoadFactor) + 1;
+            System.Collections.DictionaryEntry[] buckets = new System.Collections.DictionaryEntry[source.Count];
+            int i = 0;
+            foreach (System.Collections.DictionaryEntry entry in source) {
+                object key = entry.Key;
+                object val = entry.Value;
+                if (IsClsPrimitive(key)) {
+                    key = BoxBaseType(key);
+                }
+                if (IsClsPrimitive(val)) {
+                    val = BoxBaseType(val);
+                }
+                buckets[i] = new System.Collections.DictionaryEntry(key, val);
+                i++;
+            }
+            result.SetBuckets(buckets);
+               
+            return result;
+        }
+
+    }
+
+
 }

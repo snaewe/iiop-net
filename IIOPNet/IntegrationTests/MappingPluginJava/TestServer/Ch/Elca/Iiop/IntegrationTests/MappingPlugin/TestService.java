@@ -29,6 +29,7 @@ package Ch.Elca.Iiop.IntegrationTests.MappingPlugin;
 
 import java.rmi.RemoteException;
 import java.util.ArrayList;
+import java.util.HashMap;
     
 
 public interface TestService extends java.rmi.Remote {
@@ -52,5 +53,27 @@ public interface TestService extends java.rmi.Remote {
     public ArrayList createByRefTypeList(int nrOfElems) throws RemoteException;
 
     public ArrayList echoList(ArrayList arg) throws RemoteException;
+
+
+    public HashMap createHashMapWithShortVals(short val, int nrOfElems) throws RemoteException;
+
+    public HashMap createHashMapWithIntVals(int val, int nrOfElems) throws RemoteException;
+
+    public HashMap createHashMapWithByteVals(byte val, int nrOfElems) throws RemoteException;
+
+    public HashMap createHashMapWithCharVals(char val, int nrOfElems) throws RemoteException;
+
+    public HashMap createHashMapWithBooleanVals(boolean val, int nrOfElems) throws RemoteException;
+
+    public HashMap createHashMapWithFloatVals(float val, int nrOfElems) throws RemoteException;
+
+    public HashMap createHashMapWithDoubleVals(double val, int nrOfElems) throws RemoteException;
+
+    public HashMap createHashMapWithValTypeVals(String msg, int nrOfElems) throws RemoteException;
+
+    public HashMap createHashMapWithByRefVals(int nrOfElems) throws RemoteException;
+
+    public HashMap echoHashMap(HashMap arg) throws RemoteException;
+
 
 }

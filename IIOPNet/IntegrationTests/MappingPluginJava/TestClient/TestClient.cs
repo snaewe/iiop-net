@@ -88,6 +88,16 @@ namespace Ch.Elca.Iiop.IntegrationTests.MappingPlugin {
             }
         }
 
+        private void CheckHashtableElems(Hashtable resultTable, object expectedValues, int expectedNrOfElems) {
+            Assertion.AssertEquals(expectedNrOfElems, resultTable.Count);
+            for (int i = 0; i < expectedNrOfElems; i++) {
+                if (!resultTable.ContainsKey(i)) {
+                    Assertion.Fail("key missing in Hashtable:" + i);
+                }
+                Assertion.AssertEquals("wrong value " + resultTable[i] + " for key: " + i, expectedValues, resultTable[i]);
+            }
+        }
+
 
         [Test]
         public void TestDoubleArrayList() {
@@ -205,6 +215,129 @@ namespace Ch.Elca.Iiop.IntegrationTests.MappingPlugin {
             ArrayList result2 = m_testService.echoList(result);
             CheckArrayListElems(result2, val, nrOfElems + 1);
         }
+
+        [Test]
+        public void TestEmptyHashMap() {
+            Hashtable arg = new Hashtable();
+            Hashtable result = m_testService.echoHashMap(arg);
+            Assertion.AssertEquals(0, result.Count);
+        }
+
+        [Test]
+        public void TestHashMapWithDoubleVals() {
+            double val = 2.3;
+            int nrOfElems = 25;
+            Hashtable result = m_testService.createHashMapWithDoubleVals(val, nrOfElems);
+            CheckHashtableElems(result, val, nrOfElems);
+            result[nrOfElems] = val;
+            Hashtable result2 = m_testService.echoHashMap(result);
+            CheckHashtableElems(result2, val, nrOfElems + 1);
+            result[nrOfElems + 1] = val + 1;
+            Hashtable result3 = m_testService.echoHashMap(result);
+            Assertion.AssertEquals(val + 1, result3[nrOfElems + 1]);
+        }
+
+        [Test]
+        public void TestHashMapWithFloatVals() {
+            float val = 3.3F;
+            int nrOfElems = 1;
+            Hashtable result = m_testService.createHashMapWithFloatVals(val, nrOfElems);
+            CheckHashtableElems(result, val, nrOfElems);
+            result[nrOfElems] = val;
+            Hashtable result2 = m_testService.echoHashMap(result);
+            CheckHashtableElems(result2, val, nrOfElems + 1);
+        }
+
+        [Test]
+        public void TestHashMapWithByteVals() {
+            System.Byte val = 4;
+            int nrOfElems = 4;
+            Hashtable result = m_testService.createHashMapWithByteVals(val, nrOfElems);
+            CheckHashtableElems(result, val, nrOfElems);
+            result[nrOfElems] = val;
+            Hashtable result2 = m_testService.echoHashMap(result);
+            CheckHashtableElems(result2, val, nrOfElems + 1);
+        }
+
+
+        [Test]
+        public void TestHashMapWithInt16Vals() {
+            System.Int16 val = 8;
+            int nrOfElems = 4;
+            Hashtable result = m_testService.createHashMapWithShortVals(val, nrOfElems);
+            CheckHashtableElems(result, val, nrOfElems);
+            result[nrOfElems] = val;
+            Hashtable result2 = m_testService.echoHashMap(result);
+            CheckHashtableElems(result2, val, nrOfElems + 1);
+        }
+
+        [Test]
+        public void TestHashMapWithInt32Vals() {
+            System.Int32 val = 82997;
+            int nrOfElems = 4;
+            Hashtable result = m_testService.createHashMapWithIntVals(val, nrOfElems);
+            CheckHashtableElems(result, val, nrOfElems);
+            result[nrOfElems] = val;
+            Hashtable result2 = m_testService.echoHashMap(result);
+            CheckHashtableElems(result2, val, nrOfElems + 1);
+        }
+
+        [Test]
+        public void TestHashMapWithBooleanVals() {
+            System.Boolean val = true;
+            int nrOfElems = 24;
+            Hashtable result = m_testService.createHashMapWithBooleanVals(val, nrOfElems);
+            CheckHashtableElems(result, val, nrOfElems);
+            result[nrOfElems] = val;
+            Hashtable result2 = m_testService.echoHashMap(result);
+            CheckHashtableElems(result2, val, nrOfElems + 1);
+        }
+
+
+        [Test]
+        public void TestHashMapWithCharVals() {
+            System.Char val = 'a';
+            int nrOfElems = 40;
+            Hashtable result = m_testService.createHashMapWithCharVals(val, nrOfElems);
+            CheckHashtableElems(result, val, nrOfElems);
+            result[nrOfElems] = val;
+            Hashtable result2 = m_testService.echoHashMap(result);
+            CheckHashtableElems(result2, val, nrOfElems + 1);
+        }
+
+
+        [Test]
+        public void TestHashMapWithByRefVals() {
+            int nrOfElems = 4;
+            Hashtable result = m_testService.createHashMapWithByRefVals(nrOfElems);
+            Assertion.AssertEquals(nrOfElems, result.Count);
+            for (int i = 0; i < nrOfElems; i++) {
+                Assertion.AssertEquals(true, result[i].GetType().IsMarshalByRef);
+                Assertion.AssertEquals(true, RemotingServices.IsTransparentProxy(result[i]));
+            }
+            Hashtable result2 = m_testService.echoHashMap(result);
+            Assertion.AssertEquals(nrOfElems, result2.Count);
+            for (int i = 0; i < nrOfElems; i++) {
+                Assertion.AssertEquals(true, result2[i].GetType().IsMarshalByRef);
+                Assertion.AssertEquals(true, RemotingServices.IsTransparentProxy(result2[i]));
+            }
+        }
+
+        [Test]
+        public void TestHashMapWithValTypeVals() {
+            string msg = "msg";
+            int nrOfElems = 10;
+            TestSerializableClassB1Impl val = new TestSerializableClassB1Impl();
+            val.Msg = msg;
+            Hashtable result = m_testService.createHashMapWithValTypeVals(msg, nrOfElems);
+            CheckHashtableElems(result, val, nrOfElems);
+            result[nrOfElems] = val;
+            Hashtable result2 = m_testService.echoHashMap(result);
+            CheckHashtableElems(result2, val, nrOfElems + 1);
+        }
+
+
+
         
     }
 
