@@ -698,6 +698,8 @@ namespace Ch.Elca.Iiop.MessageHandling {
         				exceptionToThrow = new GenericUserException(thrown);
         			}
         		}
+        	} else if ((thrower is MethodInfo) && (((MethodInfo)thrower).IsSpecialName)) { // is a special method (i.e. a property accessor, ...) 
+        		exceptionToThrow = new UNKNOWN(190, CompletionStatus.Completed_Yes);
             } else {
                 // thrower == null means here, that the target method was not determined,
                 // i.e. the request deserialisation was not ok
