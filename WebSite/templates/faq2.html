@@ -4,6 +4,19 @@
 <p>
 Yes, it does. This is in fact the platform it was developed on.
 
+<a name="intellisense"></a>
+<H2 class="about">Does IIOP.NET support Visual Studio's Intellisense?</H2>
+
+<p>There is an implementation limitation in Intellisense for C#: it cannot
+extract type information from multimodule assemblies, thus you won't be able to 
+see the interfaces and proxies generated with the IDLToCLSCompiler using Intellisense
+while writing C# code.
+
+<p>This limitation is not present in Intellisense for Visual Basic. Another workaround
+is to merge the multimodule assemblies into a single assembly; we know of a commercial tool
+for this purpose called "Salamander.NET linker".
+
+
 <a name="mono"></a>
 <H2 class="about">Does IIOP.NET work with mono?</H2>
 
