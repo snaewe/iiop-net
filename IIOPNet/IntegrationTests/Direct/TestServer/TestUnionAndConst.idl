@@ -27,6 +27,33 @@ module IntegrationTests {
     const long MyConstant = 11;
 
 
+
+	// IDLToCLSCompiler regressino test:
+	// check that "big" unions are compiled without crashing
+	// fixes bug 831611
+
+	enum UnionType2 {
+		TYPE_1,
+		TYPE_2,
+		TYPE_3,
+		TYPE_4,
+		TYPE_5,
+		TYPE_6,
+		TYPE_7,
+		TYPE_8
+	};
+
+	union TestUnion2 switch(UnionType2) {
+		case TYPE_1:	wstring Field;
+		case TYPE_2:	wstring Field;
+		case TYPE_3:	wstring Field;
+		case TYPE_4:	wstring Field;
+		case TYPE_5:	wstring Field;
+		case TYPE_6:	wstring Field;
+		case TYPE_7:	wstring Field;
+		case TYPE_8:	wstring Field;
+		default: wstring Field;
+	};
 };
 };
 };
