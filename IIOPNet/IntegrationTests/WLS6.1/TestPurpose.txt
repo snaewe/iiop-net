@@ -1,0 +1,4 @@
+This integration test tests the basic interoperability of IIOP.NET with Websphere 5.
+
+
+
