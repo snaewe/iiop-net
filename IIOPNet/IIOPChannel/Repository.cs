@@ -327,6 +327,7 @@ namespace Ch.Elca.Iiop.Idl {
             if (foundType == null) { // check if accessible with Type.GetType
                 foundType = Type.GetType(clsTypeName, false);
             }
+
             if (foundType != null) {
                 s_typeCache.Cache(foundType);
             }
@@ -345,7 +346,13 @@ namespace Ch.Elca.Iiop.Idl {
                 // check if it's a dynamically created type for a CLS type which is mapped to a boxed value type
                 BoxedValueRuntimeTypeGenerator singleton = BoxedValueRuntimeTypeGenerator.GetSingleton();
                 foundType = singleton.RetrieveType(clsTypeName);
+                if (foundType == null) {
+                    // check in Types created dynamically for type-codes:
+                    TypeFromTypeCodeRuntimeGenerator typeCodeGen = TypeFromTypeCodeRuntimeGenerator.GetSingleton();
+                    foundType = typeCodeGen.RetrieveType(clsTypeName);
+                }
             }
+            
             return foundType;
         }    
 

@@ -94,7 +94,7 @@ namespace Ch.Elca.Iiop.Idl {
             lock(this) {
                 Type result = RetrieveType(fullname);
                 if (result == null) {
-                    result = forTypeCode.CreateType(m_modBuilder);
+                    result = forTypeCode.CreateType(m_modBuilder, fullname);
                 }
                 return result;
             }

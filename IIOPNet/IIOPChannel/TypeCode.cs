@@ -202,11 +202,20 @@ namespace omg.org.CORBA {
 
         internal abstract Type GetClsForTypeCode();
 
+        
+        /// <summary>
+        /// returns the CLS attributes, which descirbes the type together with cls-type
+        /// </summary>
+        /// <returns></returns>
+        internal virtual CustomAttributeBuilder[] GetAttributes() {
+            return new CustomAttributeBuilder[0];
+        }
+        
         /// <summary>
         /// for some type-codes, the type represented by the type-code must be created, if not present
         /// </summary>
         /// <returns>If overriden, the type created. Default is: Exception</returns>
-        internal virtual Type CreateType(ModuleBuilder modBuilder) {
+        internal virtual Type CreateType(ModuleBuilder modBuilder, string fullTypeName) {
             throw new INTERNAL(129, CompletionStatus.Completed_MayBe);
         }
 
@@ -819,6 +828,16 @@ namespace omg.org.CORBA {
             return result;
         }
 
+        internal override Type CreateType(ModuleBuilder modBuilder, string fullTypeName) {
+            Type boxedType = ((TypeCodeImpl) m_boxed).GetClsForTypeCode();
+            CustomAttributeBuilder[] attrs = ((TypeCodeImpl) m_boxed).GetAttributes();
+            // create the type
+            BoxedValueTypeGenerator generator = new BoxedValueTypeGenerator();
+            TypeBuilder result = generator.CreateBoxedType(boxedType, modBuilder, fullTypeName, attrs);
+            return result.CreateType();
+        }
+
+
         #endregion IMethods
 
     }
@@ -872,6 +891,11 @@ namespace omg.org.CORBA {
             Type arrayType = Array.CreateInstance(((TypeCodeImpl)m_seqType).GetClsForTypeCode(), 0).GetType();
             return arrayType;
         }
+
+        internal override CustomAttributeBuilder[] GetAttributes() {
+            return new CustomAttributeBuilder[] { new IdlSequenceAttribute().CreateAttributeBuilder() };
+        }
+
 
         #endregion IMethods
 
