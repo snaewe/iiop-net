@@ -905,7 +905,14 @@ namespace Ch.Elca.Iiop.Tests {
             Assertion.AssertEquals(1, ior.Version.Major);
             Assertion.AssertEquals(2, ior.Version.Minor);
             byte[] oid = { 0x53, 0x61, 0x79, 0x48, 0x65, 0x6C, 0x6C, 0x6F };
-            Assertion.Equals(oid, ior.ObjectKey);
+            CheckIorKey(oid, ior.ObjectKey);
+        }
+        
+        private void CheckIorKey(byte[] expected, byte[] actual) {
+            Assertion.AssertEquals("wrong id length", expected.Length, actual.Length);
+            for (int i = 0; i <expected.Length; i++) {
+                Assertion.AssertEquals("wrong element nr " + i, expected[i], actual[i]);
+            }
         }
         
         public void TestNonUsableProfileIncluded() {
