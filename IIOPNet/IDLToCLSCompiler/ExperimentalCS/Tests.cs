@@ -100,6 +100,12 @@ namespace Ch.Elca.Iiop.IDLCompiler.Tests {
                                    ifAttr.IdlType);            
         }
         
+        private void CheckIdlEnumAttributePresent(Type enumType) {
+            object[] attrs = enumType.GetCustomAttributes(typeof(IdlEnumAttribute), 
+                                                          false);
+            Assertion.AssertEquals("wrong number of IdlEnumAttribute", 1, attrs.Length);
+        }
+        
         private void CheckMethodPresent(Type testType, string methodName, 
                                         Type returnType, Type[] paramTypes) {
             MethodInfo testMethod = testType.GetMethod(methodName, 
@@ -116,6 +122,14 @@ namespace Ch.Elca.Iiop.IDLCompiler.Tests {
             Type idlEntityIf = testType.GetInterface("IIdlEntity");
             Assertion.AssertNotNull(String.Format("type {0} doesn't inherit from IIdlEntity", testType.FullName),
                                     idlEntityIf);
+        }
+        
+        private void CheckEnumField(FieldInfo field, string idlEnumValName) {
+            Type enumType = field.DeclaringType;
+            Assertion.AssertEquals("wrong enum val field type", 
+                                   enumType, field.FieldType);
+            Assertion.AssertEquals("wrong enum val field name",
+                                   idlEnumValName, field.Name);
         }
         
         private void CheckInterfaceDefinitions(string ifModifier, 
@@ -160,7 +174,41 @@ namespace Ch.Elca.Iiop.IDLCompiler.Tests {
         [Test]
         public void TestLocalInterfaces() {
             CheckInterfaceDefinitions("local", IdlTypeInterface.LocalInterface);
-        }        
+        }
+        
+        [Test]
+        public void TestEnum() {
+            MemoryStream testSource = new MemoryStream();
+            StreamWriter writer = new StreamWriter(testSource, s_latin1);
+            
+            // idl:
+            writer.WriteLine("module testmod {");
+            writer.WriteLine("    enum Test {");
+            writer.WriteLine("        A, B, C");
+            writer.WriteLine("    };");
+            writer.WriteLine("};");
+            
+            writer.Flush();
+            testSource.Seek(0, SeekOrigin.Begin);
+            Assembly result = CreateIdl(testSource);
+                       
+            // check if enum is correctly created
+            Type enumType = result.GetType("testmod.Test", true);
+            CheckIdlEnumAttributePresent(enumType);
+            
+            // check enum val
+            FieldInfo[] fields = enumType.GetFields(BindingFlags.Public | 
+                                                    BindingFlags.Static | 
+                                                    BindingFlags.DeclaredOnly);
+            Assertion.AssertEquals("wrong number of fields in enum", 
+                                   3, fields.Length);
+            
+            CheckEnumField(fields[0], "A");
+            CheckEnumField(fields[1], "B");
+            CheckEnumField(fields[2], "C");
+            
+            writer.Close();            
+        }
         
         #endregion IMethods
     
