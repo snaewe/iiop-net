@@ -215,6 +215,11 @@ namespace Ch.Elca.Iiop.IntegrationTests {
         /// <returns></returns>
         System.Int32 _echoInt(System.Int32 arg);
         
+        
+        [return: StringValue]
+        [return: WideChar(false)]
+        String CheckParamAttrs([StringValue][WideChar(false)]String arg);
+        
         /// <summary>
         /// used to check, if a reference passed is equal to this object itself.
         /// </summary>

@@ -248,6 +248,11 @@ namespace Ch.Elca.Iiop.IntegrationTests {
             return arg;
         }
         
+        /// <summary>checks, if inherited parameter attributes are considered correctly</summary>
+        public System.String CheckParamAttrs(System.String arg) {
+        	return arg;
+        }
+        
         /// <summary>
         /// used to check, if a reference passed is equal to this object itself.
         /// </summary>

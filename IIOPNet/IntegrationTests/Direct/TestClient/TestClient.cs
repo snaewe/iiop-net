@@ -575,6 +575,13 @@ namespace Ch.Elca.Iiop.IntegrationTests {
             Assertion.AssertEquals(arg, result);
         }
 
+		[Test]
+		public void TestCheckParamAttrs() {
+			System.String arg = "testArg";
+			System.String result = m_testService.CheckParamAttrs(arg);
+			Assertion.AssertEquals(arg, result);
+		}
+
     }
 
 }
