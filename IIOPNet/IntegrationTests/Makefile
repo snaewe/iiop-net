@@ -29,6 +29,10 @@ build: nunit-var junit-var
 	@if not defined WAS_HOME echo WAS_HOME not set, skipping WAS5 integration test
 	@if defined WAS_HOME $(MAKE) build
 	cd ..
+	cd MICO
+	@if not defined MICO_HOME echo MICO_HOME not set, skipping MICO integration test
+	@if defined MICO_HOME $(MAKE) /F Makefile.Win32 /C build
+	cd ..
 
 nunit-var:        
 	@if not defined NUNITV2_HOME echo Set the NUNITV2_HOME variable to the NUnit V2 home directory. Please check TestInstructions.txt.
@@ -66,6 +70,10 @@ test: nunit-var junit-var
 	@if not defined WAS_HOME echo WAS_HOME not set, skipping WAS5 integration test
 	@if defined WAS_HOME $(MAKE) test
 	cd ..
+	cd MICO
+	@if not defined MICO_HOME echo MICO_HOME not set, skipping MICO integration test
+	@if defined MICO_HOME $(MAKE) /F Makefile.Win32 /C test
+	cd ..	
 
 
 clean:
@@ -96,5 +104,7 @@ clean:
 	cd WAS5
 	$(MAKE) clean
 	cd ..
-
+	cd MICO
+	$(MAKE) /F Makefile.Win32 /C clean
+	cd ..
 
