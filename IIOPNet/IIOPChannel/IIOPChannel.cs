@@ -364,6 +364,9 @@ namespace Ch.Elca.Iiop {
                 throw new ArgumentException(
                     "IIOPServerSideFormatter provider not found in chain, this channel is only usable with the IIOPFormatters"); 
             }
+
+            m_providerChain = sinkProvider;
+
             // parse properties
             if (properties != null) {
                 foreach (DictionaryEntry entry in properties) {
