@@ -807,7 +807,7 @@ public class MetaDataGenerator : IDLParserVisitor {
             inheritFrom = newInherit;
         }
 
-        Type baseClass = null;
+        Type baseClass = ReflectionHelper.ObjectType;
         if ((inheritFrom.Length > 0) && (inheritFrom[0].IsClass)) {
             // only the first entry may be a class for a concrete value type:
             // multiple inheritance is not allowed for concrete value types, 
