@@ -37,211 +37,228 @@ using symboltable;
 
 namespace Ch.Elca.Iiop.IdlCompiler.Action {
 
-/// <summary>
-/// manages fully created and only partly created types
-/// </summary>
-public class TypeManager {
-
-    #region IFields
-
-    private Hashtable m_typesInCreation = new Hashtable();
-    private Hashtable m_typeTable = new Hashtable();
-    private Hashtable m_typedefTable = new Hashtable();
-    private ModuleBuilder m_modBuilder;
-
-    private TypesInAssemblyManager m_refAsmTypes;
-
-    #endregion IFields
-    #region IConstructors
-
-    public TypeManager(ModuleBuilder modBuilder, TypesInAssemblyManager refAsmTypes) {
-        m_modBuilder = modBuilder;
-        m_refAsmTypes = refAsmTypes;
-    }
-
-    #endregion IConstructors
-    #region IMethods
-
-    /** register a not fully created type */
-    public void RegisterTypeFwdDecl(TypeBuilder type, Symbol forSymbol) {
-        if (forSymbol == null) { 
-            throw new Exception("register error for type: " + 
-                                type.FullName + ", symbol may not be null"); 
-        }
-        if (IsTypeDeclarded(forSymbol)) {
-            throw new Exception("internal error; a type with the name " + 
-                                GetKnownType(forSymbol).GetClsType().FullName +
-                                " is already declared for symbol: " + forSymbol);
-        }
-        TypeContainer container = new TypeContainer(type, new CustomAttributeBuilder[0]);
-        m_typesInCreation[forSymbol] = container;
-    }
-
-    /** is at least a forward declaration for the type represented by the symbol present */
-    public bool IsTypeDeclarded(Symbol forSymbol) {
-        TypeContainer type = GetKnownType(forSymbol);
-        if (type == null) { 
-            return false; 
-        } else {
-            return true;
-        }
-    }
-    
-    /** is a full definitaion present for the type represented by the symbol forSymbol */
-    public bool IsTypeFullyDeclarded(Symbol forSymbol) {
-        if ((!IsFwdDeclared(forSymbol)) && (IsTypeDeclarded(forSymbol))) { 
-            return true; 
-        } else {
-            return false;    
-        }
-    }
-
-    public bool IsFwdDeclared(Symbol forSymbol) {
-        TypeContainer result = (TypeContainer)m_typesInCreation[forSymbol];
-        if (result == null) {
-            return false;
-        } else {
-            return true;
-        }
-    }
-
-    /** checks, if a type is already declared in a referenced assembly */
-    public bool IsTypeDeclaredInRefAssemblies(Symbol forSymbol) {
-        return m_refAsmTypes.GetTypeFromRefAssemblies(forSymbol) != null;
-    }
-
-    #region methods for supporting generation for more than one parse result    
-    
     /// <summary>
-    /// checks if a type is fully declared in a module of the resulting assembly.
-    /// Does only return fully defined types, others are not interesting here.
-    /// </summary>  
-    private Type GetTypeFromBuildModule(Symbol forSymbol) {
-        Scope declIn = forSymbol.getDeclaredIn();
-        String fullName = declIn.getFullyQualifiedNameForSymbol(forSymbol.getSymbolName());
-        Type result = m_modBuilder.GetType(fullName);
-        if (!(result is TypeBuilder)) {  // type is fully defined (do not return not fully defined types here)
+    /// manages fully created and only partly created types
+    /// </summary>
+    public class TypeManager {
+
+        #region IFields
+
+        private Hashtable m_typesInCreation = new Hashtable();
+        private Hashtable m_typeTable = new Hashtable();
+        private Hashtable m_typedefTable = new Hashtable();
+        private ModuleBuilder m_modBuilder;
+
+        private TypesInAssemblyManager m_refAsmTypes;
+
+        #endregion IFields
+        #region IConstructors
+
+        public TypeManager(ModuleBuilder modBuilder, TypesInAssemblyManager refAsmTypes) {
+            m_modBuilder = modBuilder;
+            m_refAsmTypes = refAsmTypes;
+        }
+
+        #endregion IConstructors
+        #region IMethods
+
+        /// <summary>
+        /// register a not fully created type
+        /// </summary>
+        public void RegisterTypeFwdDecl(TypeBuilder type, Symbol forSymbol) {
+            if (forSymbol == null) { 
+                throw new Exception("register error for type: " + 
+                                    type.FullName + ", symbol may not be null"); 
+            }
+            if (IsTypeDeclarded(forSymbol)) {
+                throw new Exception("internal error; a type with the name " + 
+                                    GetKnownType(forSymbol).GetClsType().FullName +
+                                    " is already declared for symbol: " + forSymbol);
+            }
+            TypeContainer container = new TypeContainer(type, new CustomAttributeBuilder[0]);
+            m_typesInCreation[forSymbol] = container;
+        }
+
+        /// <summary>
+        /// is at least a forward declaration for the type represented by the symbol present
+        /// </summary>
+        public bool IsTypeDeclarded(Symbol forSymbol) {
+            TypeContainer type = GetKnownType(forSymbol);
+            if (type == null) { 
+                return false; 
+            } else {
+                return true;
+            }
+        }
+        
+        /// <summary>
+        /// is a full definitaion present for the type represented by the symbol forSymbol
+        /// </summary>
+        /// <param name="forSymbol"></param>
+        /// <returns></returns>
+        public bool IsTypeFullyDeclarded(Symbol forSymbol) {
+            if ((!IsFwdDeclared(forSymbol)) && (IsTypeDeclarded(forSymbol))) { 
+                return true; 
+            } else {
+                return false;    
+            }
+        }
+
+        public bool IsFwdDeclared(Symbol forSymbol) {
+            TypeContainer result = (TypeContainer)m_typesInCreation[forSymbol];
+            if (result == null) {
+                return false;
+            } else {
+                return true;
+            }
+        }
+
+        /// <summary>
+        /// checks, if a type is already declared in a referenced assembly
+        /// </summary>
+        public bool IsTypeDeclaredInRefAssemblies(Symbol forSymbol) {
+            return m_refAsmTypes.GetTypeFromRefAssemblies(forSymbol) != null;
+        }
+
+        #region methods for supporting generation for more than one parse result    
+        
+        /// <summary>
+        /// checks if a type is fully declared in a module of the resulting assembly.
+        /// Does only return fully defined types, others are not interesting here.
+        /// </summary>  
+        private Type GetTypeFromBuildModule(Symbol forSymbol) {
+            Scope declIn = forSymbol.getDeclaredIn();
+            String fullName = declIn.getFullyQualifiedNameForSymbol(forSymbol.getSymbolName());
+            Type result = m_modBuilder.GetType(fullName);
+            if (!(result is TypeBuilder)) {  // type is fully defined (do not return not fully defined types here)
+                return result;
+            }
+            return null;
+        }
+        
+        /// <summary>
+        ///  checks, if a type is already defined in a previous run
+        /// </summary>
+        public bool CheckInBuildModulesForType(Symbol forSymbol) {
+            if (GetTypeFromBuildModule(forSymbol) != null) {
+                return true;
+            } else {
+                return false;
+            }
+        }
+
+        #endregion methods for supporting generation for more than one parse result
+
+        /// <summary> 
+        /// check, that no types not defined left; if so this is an internal error, 
+        /// because already checked during symbol table build.
+        /// </summary>
+        public void AssertAllTypesDefined() {
+            if (m_typesInCreation.Count > 0) {
+                foreach (TypeContainer container in m_typesInCreation.Values) {
+                    Console.WriteLine("internal error, only forward declared: " + 
+                                    container.GetClsType());
+                    // this should not occur, because checked by symbol table
+                }
+                throw new Exception("internal error occured, not all types fully defined");
+            }
+        }
+
+        /// <summary> 
+        /// get the full defined Type or the fwd decl
+        /// </summary>
+        public TypeContainer GetKnownType(Symbol forSymbol) {
+            TypeContainer result = (TypeContainer)m_typeTable[forSymbol];
+            if (result == null) {
+                result = (TypeContainer)m_typesInCreation[forSymbol];
+            }
+            if (result == null) {
+                Type fromBuildMod = GetTypeFromBuildModule(forSymbol);
+                if (fromBuildMod != null) {
+                    result = new TypeContainer(fromBuildMod, new CustomAttributeBuilder[0]);
+                }        
+            }
+            if (result == null) { 
+                // check in types, which are defined in referenced assemblies
+                Type fromAsm = m_refAsmTypes.GetTypeFromRefAssemblies(forSymbol);
+                if (fromAsm != null) {
+                    result = new TypeContainer(fromAsm, new CustomAttributeBuilder[0]);
+                }
+            }
             return result;
         }
-        return null;
-    }
-    
-    /** checks, if a type is already defined in a previous run */
-    public bool CheckInBuildModulesForType(Symbol forSymbol) {
-        if (GetTypeFromBuildModule(forSymbol) != null) {
-            return true;
-        } else {
-            return false;
-        }
-    }
-
-    #endregion methods for supporting generation for more than one parse result
-
-    /** check, that no types not defined left; if so this is an internal error, 
-     * because already checked during symbol table build. */
-    public void AssertAllTypesDefined() {
-        if (m_typesInCreation.Count > 0) {
-            foreach (TypeContainer container in m_typesInCreation.Values) {
-                Console.WriteLine("internal error, only forward declared: " + 
-                                  container.GetClsType());
-                // this should not occur, because checked by symbol table
+        
+        /// <summary>add a fully defined type to the known types</summary>
+        private void AddTypeDefinition(TypeContainer fullDecl, Symbol forSymbol) {
+            if (m_typesInCreation.ContainsKey(forSymbol)) { 
+                throw new Exception("type can't be registered, a fwd declaration exists");  // should not occur, check by sym table
             }
-            throw new Exception("internal error occured, not all types fully defined");
-        }
-    }
-
-    /** get the full defined Type or the fwd decl
-     */
-    public TypeContainer GetKnownType(Symbol forSymbol) {
-        TypeContainer result = (TypeContainer)m_typeTable[forSymbol];
-        if (result == null) {
-            result = (TypeContainer)m_typesInCreation[forSymbol];
-        }
-        if (result == null) {
-            Type fromBuildMod = GetTypeFromBuildModule(forSymbol);
-            if (fromBuildMod != null) {
-                result = new TypeContainer(fromBuildMod, new CustomAttributeBuilder[0]);
-            }        
-        }
-        if (result == null) { 
-            // check in types, which are defined in referenced assemblies
-            Type fromAsm = m_refAsmTypes.GetTypeFromRefAssemblies(forSymbol);
-            if (fromAsm != null) {
-                result = new TypeContainer(fromAsm, new CustomAttributeBuilder[0]);
+            if (m_typeTable.ContainsKey(forSymbol)) { 
+                throw new Exception("type already defined"); // should not occur, checked by sym table
             }
+            m_typeTable[forSymbol] = fullDecl;
         }
-        return result;
-    }
-    
-    /** add a fully defined type to the known types
-     */
-    private void AddTypeDefinition(TypeContainer fullDecl, Symbol forSymbol) {
-        if (m_typesInCreation.ContainsKey(forSymbol)) { 
-            throw new Exception("type can't be registered, a fwd declaration exists");  // should not occur, check by sym table
+        
+        /// <summary>register a full type definition (CreateType() already called)</summary>
+        public void RegisterTypeDefinition(Type fullDecl, Symbol forSymbol) {
+            TypeContainer container = new TypeContainer(fullDecl, new CustomAttributeBuilder[0]);
+            AddTypeDefinition(container, forSymbol);
         }
-        if (m_typeTable.ContainsKey(forSymbol)) { 
-            throw new Exception("type already defined"); // should not occur, checked by sym table
+
+        /// <summary>
+        /// use this to tell the type manager, that a type is now fully created.
+        /// The typemanager checks at the end, if not fully declared types exists and throw an error, if so
+        /// </summary>
+        public void ReplaceFwdDeclWithFullDecl(Type fullDecl, Symbol forSymbol) {
+            m_typesInCreation.Remove(forSymbol);
+            // add to the fully created types
+            TypeContainer container = new TypeContainer(fullDecl, new CustomAttributeBuilder[0]);
+            m_typeTable[forSymbol] = container;
         }
-        m_typeTable[forSymbol] = fullDecl;
+
+        public void RegisterTypeDef(TypeContainer fullDecl, Symbol forSymbol) {
+            AddTypeDefinition(fullDecl, forSymbol);
+        }
+
+        #endregion IMethods
+
     }
+
+    /// <summary>    
+    /// helper class to contain a .NET Type and the attributes on the param, field, ...
+    /// </summary>
+    public class TypeContainer {
     
-    /** register a full type definition (CreateType() already called)
-     */
-    public void RegisterTypeDefinition(Type fullDecl, Symbol forSymbol) {
-        TypeContainer container = new TypeContainer(fullDecl, new CustomAttributeBuilder[0]);
-        AddTypeDefinition(container, forSymbol);
-    }
+        #region IFields
 
-    /** use this to tell the type manager, that a type is now fully created.
-     *  The typemanager checks at the end, if not fully declared types exists and throw an error, if so
-     */
-    public void ReplaceFwdDeclWithFullDecl(Type fullDecl, Symbol forSymbol) {
-        m_typesInCreation.Remove(forSymbol);
-        // add to the fully created types
-        TypeContainer container = new TypeContainer(fullDecl, new CustomAttributeBuilder[0]);
-        m_typeTable[forSymbol] = container;
-    }
+        private Type m_clsType;
+        private CustomAttributeBuilder[] m_attrs;
 
-    public void RegisterTypeDef(TypeContainer fullDecl, Symbol forSymbol) {
-        AddTypeDefinition(fullDecl, forSymbol);
-    }
-
-    #endregion IMethods
-
-}
-
-/** helper class to contain a .NET Type and the attributes on the param, field, ... */
-public class TypeContainer {
+        #endregion IFields
+        #region IConstructors
     
-    #region IFields
+        public TypeContainer(Type clsType, CustomAttributeBuilder[] attrs) {
+            m_clsType = clsType;
+            m_attrs = attrs;
+        }
 
-    private Type m_clsType;
-    private CustomAttributeBuilder[] m_attrs;
+        public TypeContainer(Type clsType) : this(clsType, new CustomAttributeBuilder[0]){
+        }
 
-    #endregion IFields
-    #region IConstructors
-    
-    public TypeContainer(Type clsType, CustomAttributeBuilder[] attrs) {
-        m_clsType = clsType;
-        m_attrs = attrs;
+        #endregion IConstructors
+        #region IMethods
+
+        public Type GetClsType() {
+            return m_clsType;
+        }
+
+        public CustomAttributeBuilder[] GetAttrs() {
+            return m_attrs;
+        }
+
+        #endregion IMethods
+
     }
 
-    public TypeContainer(Type clsType) : this(clsType, new CustomAttributeBuilder[0]){
-    }
-
-    #endregion IConstructors
-    #region IMethods
-
-    public Type GetClsType() {
-        return m_clsType;
-    }
-
-    public CustomAttributeBuilder[] GetAttrs() {
-        return m_attrs;
-    }
-
-    #endregion IMethods
-
-}
 
 }
