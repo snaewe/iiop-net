@@ -1809,7 +1809,8 @@ public class MetaDataGenerator implements IDLParserVisitor {
     public Object visit(ASTsequence_type node, Object data) {
         CheckParameterForBuildInfo(data, node);
         if (node.jjtGetNumChildren() > 1) { 
-            throw new RuntimeException("sequence with a bound not supported by this compiler"); 
+//            throw new RuntimeException("sequence with a bound not supported by this compiler"); 
+            System.out.println("warning: bounded sequences are not supported by this compiler, mapping as unbounded");
         }
         Node elemTypeNode = node.jjtGetChild(0);
         Debug.WriteLine("determine element type of IDLSequence");
