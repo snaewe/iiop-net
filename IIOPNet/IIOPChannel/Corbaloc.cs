@@ -215,3 +215,112 @@ namespace Ch.Elca.Iiop.CorbaObjRef {
 }
 
 
+#if UnitTest
+
+namespace Ch.Elca.Iiop.Tests {
+	
+    using NUnit.Framework;
+    using Ch.Elca.Iiop.CorbaObjRef;
+    
+    /// <summary>
+    /// Unit-test for class Corbaloc
+    /// </summary>
+    public class CorbalocTest : TestCase {
+        
+        public CorbalocTest() {
+        }
+
+        
+        public void TestSingleCompleteCorbaLocIiop() {
+			string testCorbaLoc = "corbaloc:iiop:1.2@elca.ch:1234/test";
+        	Corbaloc parsed = new Corbaloc(testCorbaLoc);
+        	Assertion.AssertEquals("test", parsed.KeyString);
+        	Assertion.AssertEquals(1, parsed.ObjAddrs.Length);
+        	Assertion.AssertEquals(typeof(CorbaLocIiopAddr), parsed.ObjAddrs[0].GetType());
+        	CorbaLocIiopAddr addr = (CorbaLocIiopAddr)(parsed.ObjAddrs[0]);
+        	Assertion.AssertEquals(1, addr.Version.Major);
+        	Assertion.AssertEquals(2, addr.Version.Minor);
+        	Assertion.AssertEquals("elca.ch", addr.Host);
+        	Assertion.AssertEquals(1234, addr.Port);
+        }
+        
+        public void TestMultipleCompleteCorbaLocIiop() {
+        	string testCorbaLoc = "corbaloc:iiop:1.2@elca.ch:1234,:1.2@elca.ch:1235,:1.2@elca.ch:1236/test";
+        	Corbaloc parsed = new Corbaloc(testCorbaLoc);
+        	Assertion.AssertEquals("test", parsed.KeyString);
+        	Assertion.AssertEquals(3, parsed.ObjAddrs.Length);
+        	Assertion.AssertEquals(typeof(CorbaLocIiopAddr), parsed.ObjAddrs[0].GetType());
+        	Assertion.AssertEquals(typeof(CorbaLocIiopAddr), parsed.ObjAddrs[1].GetType());
+        	Assertion.AssertEquals(typeof(CorbaLocIiopAddr), parsed.ObjAddrs[2].GetType());
+        	
+        	CorbaLocIiopAddr addr = (CorbaLocIiopAddr)(parsed.ObjAddrs[0]);
+        	Assertion.AssertEquals(1, addr.Version.Major);
+        	Assertion.AssertEquals(2, addr.Version.Minor);
+        	Assertion.AssertEquals("elca.ch", addr.Host);
+        	Assertion.AssertEquals(1234, addr.Port);
+        	
+        	addr = (CorbaLocIiopAddr)(parsed.ObjAddrs[1]);
+        	Assertion.AssertEquals(1, addr.Version.Major);
+        	Assertion.AssertEquals(2, addr.Version.Minor);
+        	Assertion.AssertEquals("elca.ch", addr.Host);
+        	Assertion.AssertEquals(1235, addr.Port);
+        	
+        	addr = (CorbaLocIiopAddr)(parsed.ObjAddrs[2]);
+        	Assertion.AssertEquals(1, addr.Version.Major);
+        	Assertion.AssertEquals(2, addr.Version.Minor);
+        	Assertion.AssertEquals("elca.ch", addr.Host);
+        	Assertion.AssertEquals(1236, addr.Port);        	
+        }
+        
+        /// <summary>test corba loc with iiop addrs, check the defaults</summary>
+        public void TestIncompleteCorbaLocIiop() {
+        	string testCorbaLoc = "corbaloc::/test";
+        	Corbaloc parsed = new Corbaloc(testCorbaLoc);
+        	Assertion.AssertEquals("test", parsed.KeyString);
+        	Assertion.AssertEquals(1, parsed.ObjAddrs.Length);
+        	Assertion.AssertEquals(typeof(CorbaLocIiopAddr), parsed.ObjAddrs[0].GetType());
+        	CorbaLocIiopAddr addr = (CorbaLocIiopAddr)(parsed.ObjAddrs[0]);
+        	Assertion.AssertEquals(1, addr.Version.Major);
+        	Assertion.AssertEquals(0, addr.Version.Minor);
+        	Assertion.AssertEquals("localhost", addr.Host);
+        	Assertion.AssertEquals(2809, addr.Port);
+        	
+        	testCorbaLoc = "corbaloc::elca.ch/test";
+        	parsed = new Corbaloc(testCorbaLoc);
+        	Assertion.AssertEquals("test", parsed.KeyString);
+        	Assertion.AssertEquals(1, parsed.ObjAddrs.Length);
+        	Assertion.AssertEquals(typeof(CorbaLocIiopAddr), parsed.ObjAddrs[0].GetType());
+        	addr = (CorbaLocIiopAddr)(parsed.ObjAddrs[0]);
+        	Assertion.AssertEquals(1, addr.Version.Major);
+        	Assertion.AssertEquals(0, addr.Version.Minor);
+        	Assertion.AssertEquals("elca.ch", addr.Host);
+        	Assertion.AssertEquals(2809, addr.Port);
+        	
+        	testCorbaLoc = "corbaloc:iiop:1.2@elca.ch/test";
+        	 parsed = new Corbaloc(testCorbaLoc);
+        	Assertion.AssertEquals("test", parsed.KeyString);
+        	Assertion.AssertEquals(1, parsed.ObjAddrs.Length);
+        	Assertion.AssertEquals(typeof(CorbaLocIiopAddr), parsed.ObjAddrs[0].GetType());
+        	addr = (CorbaLocIiopAddr)(parsed.ObjAddrs[0]);
+        	Assertion.AssertEquals(1, addr.Version.Major);
+        	Assertion.AssertEquals(2, addr.Version.Minor);
+        	Assertion.AssertEquals("elca.ch", addr.Host);
+        	Assertion.AssertEquals(2809, addr.Port);
+        	
+        	testCorbaLoc = "corbaloc::elca.ch:1234/test";
+        	parsed = new Corbaloc(testCorbaLoc);
+        	Assertion.AssertEquals("test", parsed.KeyString);
+        	Assertion.AssertEquals(1, parsed.ObjAddrs.Length);
+        	Assertion.AssertEquals(typeof(CorbaLocIiopAddr), parsed.ObjAddrs[0].GetType());
+        	addr = (CorbaLocIiopAddr)(parsed.ObjAddrs[0]);
+        	Assertion.AssertEquals(1, addr.Version.Major);
+        	Assertion.AssertEquals(0, addr.Version.Minor);
+        	Assertion.AssertEquals("elca.ch", addr.Host);
+        	Assertion.AssertEquals(1234, addr.Port);
+        }
+        
+    }
+
+}
+
+#endif
