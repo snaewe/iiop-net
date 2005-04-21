@@ -660,6 +660,12 @@ namespace omg.org.CORBA {
         #region IConstructors
         
         public AliasTC() : base(TCKind.tk_alias) { }
+
+        public AliasTC(string repositoryID, string name, TypeCode aliased) : base(TCKind.tk_alias) {
+            m_id = repositoryID;
+            m_name = name;
+            m_aliased = aliased;
+        }
         
         #endregion IConstructors
         #region IMethods

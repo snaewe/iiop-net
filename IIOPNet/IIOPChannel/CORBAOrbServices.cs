@@ -64,6 +64,9 @@ namespace omg.org.CORBA {
 
         TypeCode create_array_tc (int length,
                                   TypeCode element_type);
+
+        TypeCode create_alias_tc ([StringValue] [WideChar(false)] string id, [StringValue] [WideChar(false)] string name, 
+                                  TypeCode original_type);
                 
         #endregion TypeCode creation operations
         
@@ -198,6 +201,12 @@ namespace omg.org.CORBA {
                                          TypeCode element_type) {
             return new ArrayTC(element_type, length);
         }
+
+        public TypeCode create_alias_tc ([StringValue] [WideChar(false)] string id, [StringValue] [WideChar(false)] string name, 
+                                         TypeCode original_type) {
+            return new AliasTC(id, name, original_type);
+        }
+
         
         /// <summary>takes an object an returns the typecode for it</summary>
         public TypeCode create_tc_for(object forObject) {
