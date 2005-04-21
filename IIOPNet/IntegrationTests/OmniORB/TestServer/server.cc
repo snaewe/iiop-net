@@ -33,7 +33,10 @@ public:
   CORBA::Any* RetrieveStructWithTypedefMember(CORBA::Long elemVal);
   CORBA::Any* RetrieveTypedefedSeq(CORBA::Long nrOfElems, CORBA::Long memberVal);  
   CORBA::ULong ExtractFromULongAny(const CORBA::Any& arg);
+  CORBA::Long ExtractFromLongTypeDef(const CORBA::Any& arg);
   CORBA::Any* RetrieveULongAsAny(CORBA::ULong arg);
+  CORBA::Any* RetrieveLongTypeDefAsAny(CORBA::Long arg);
+
   CORBA::WChar* ExtractFromWStringAny(const CORBA::Any& arg);
   seq_of_octect_seq* ExtractFromOctetOfOctetSeqAny(const CORBA::Any& arg);
   ::wstringSeq* RetrieveWstringSeq(const CORBA::WChar * val, CORBA::Long nrOrElems);
@@ -123,11 +126,28 @@ TestService_impl::ExtractFromULongAny(const CORBA::Any& arg) {
     return result;    
 }
 
+CORBA::Long 
+TestService_impl::ExtractFromLongTypeDef(const CORBA::Any& arg) {
+    longTD extract;
+    arg >>= extract;
+    return (CORBA::Long)extract;
+}
+
+
 CORBA::Any*
 TestService_impl::RetrieveULongAsAny(CORBA::ULong arg) {
     CORBA::Any* resultAny = new CORBA::Any;
     *resultAny <<= arg;
     return resultAny;    
+}
+
+CORBA::Any* 
+TestService_impl::RetrieveLongTypeDefAsAny(CORBA::Long arg) {
+    CORBA::Any* resultAny = new CORBA::Any;    
+    longTD insert = (longTD)arg;
+    *resultAny <<= insert;  
+    resultAny->type(_tc_longTD);
+    return resultAny;
 }
 
 CORBA::WChar* 

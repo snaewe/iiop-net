@@ -411,6 +411,21 @@ namespace Ch.Elca.Iiop.IntegrationTests {
         }
 
         [Test]
+        public void TestLongTypeDefAsAny() {
+            OrbServices orb = OrbServices.GetSingleton();
+            int arg = 74;
+            int result = (int)m_testService.RetrieveLongTypeDefAsAny(arg);
+            Assertion.AssertEquals("result of RetrieveLongTypeDefAsAny", arg, result);
+
+            int arg2 = 91;
+            omg.org.CORBA.TypeCode argTC = orb.create_tc_for(arg2);
+            omg.org.CORBA.TypeCode longTD_TC = orb.create_alias_tc("IDL:longTD:1.0", "longTD", argTC);
+            Any any = new Any(arg2, longTD_TC);
+            int result2 = m_testService.ExtractFromLongTypeDef(any);
+            Assertion.AssertEquals("result of ExtractFromLongTypeDef", arg2, result2);
+        }
+
+        [Test]
         public void TestNameserviceList() {
             NamingContext nameService = GetNameService();
 

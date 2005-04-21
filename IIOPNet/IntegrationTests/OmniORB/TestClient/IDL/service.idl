@@ -85,9 +85,11 @@ interface TestService {
 
     any RetrieveStructWithTypedefMember(in long elemVal);
     any RetrieveTypedefedSeq(in long nrOfElems, in long memberVal);
-
+    
     unsigned long ExtractFromULongAny(in any arg);
+    long ExtractFromLongTypeDef(in any arg);
     any RetrieveULongAsAny(in unsigned long arg);
+    any RetrieveLongTypeDefAsAny(in long arg);
 
     wstring ExtractFromWStringAny(in any arg);
     seq_of_octect_seq ExtractFromOctetOfOctetSeqAny(in any arg);    
