@@ -1,3 +1,14 @@
+version 1.7.1 final (24 april 2005)
+-----------------------------------
+
+bugs fixed:
+- IIOPChannel: 
+  corba boxed types, boxing a type, which is mapped to a .NET valuetype, produced a NullReferenceException;
+  e.g. valuetype boxed_struct aStruct;
+  
+new features:
+- added create_alias_tc to ORB interface to support passing typedef as any.
+
 version 1.7.1 rc2 (27 march 2005)
 ---------------------------------
 
