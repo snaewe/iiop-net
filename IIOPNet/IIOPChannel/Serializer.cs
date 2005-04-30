@@ -1298,6 +1298,7 @@ namespace Ch.Elca.Iiop.Marshalling {
         internal override void Serialise(Type formal, object actual, AttributeExtCollection attributes,
                                        CdrOutputStream targetStream) {
             TypeCodeImpl typeCode = new NullTC();
+            object actualToSerialise = actual;
             Type actualType = null;            
             if (actual != null) {
                 if (actual.GetType().Equals(s_anyType)) {
@@ -1308,7 +1309,7 @@ namespace Ch.Elca.Iiop.Marshalling {
                     }
                     // type, which should be used to serialise value is determined by typecode!
                     actualType = Repository.GetTypeForTypeCode(typeCode);
-                    actual = ((Any)actual).Value;
+                    actualToSerialise = ((Any)actual).Value;
                 } else {
                     // automatic type code creation
                     actualType = DetermineTypeToUse(actual);
@@ -1316,10 +1317,10 @@ namespace Ch.Elca.Iiop.Marshalling {
                 }
             }
             m_typeCodeSer.Serialise(ReflectionHelper.CorbaTypeCodeType, typeCode, attributes, targetStream);
-            if (actual != null) {               
+            if (actual != null) {
                 Marshaller marshaller = Marshaller.GetSingleton();               
                 AttributeExtCollection typeAttributes = Repository.GetAttrsForTypeCode(typeCode);                
-                marshaller.Marshal(actualType, typeAttributes, actual, targetStream);
+                marshaller.Marshal(actualType, typeAttributes, actualToSerialise, targetStream);
             }
         }
 

@@ -51,6 +51,9 @@ namespace omg.org.CORBA {
         string object_to_string(object obj);
         
         #region Typecode creation operations
+
+        TypeCode create_interface_tc ([StringValue] [WideChar(false)] string id,
+                                      [StringValue] [WideChar(false)] string name);
         
         TypeCode create_string_tc(int bound);
         
@@ -176,6 +179,11 @@ namespace omg.org.CORBA {
         }
         
         #region Typecode creation operations
+
+        public TypeCode create_interface_tc ([StringValue] [WideChar(false)] string id,
+                                             [StringValue] [WideChar(false)] string name) {
+            return new ObjRefTC(id, name);
+        }
         
         public TypeCode create_ulong_tc() {
             return new ULongTC();

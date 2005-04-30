@@ -426,6 +426,25 @@ namespace Ch.Elca.Iiop.IntegrationTests {
         }
 
         [Test]
+        public void TestNullAsAny() {
+            object result = m_testService.EchoAny(null);
+            Assertion.AssertNull("result not null", result);
+        }
+
+        [Test]
+        public void TestNilReferenceAsAny() {
+            OrbServices orb = OrbServices.GetSingleton();
+            omg.org.CORBA.TypeCode nilRefTC = orb.create_tc_for_type(typeof(System.MarshalByRefObject));
+            Any nilRefAny = new Any(null, nilRefTC);
+            object result = m_testService.EchoAny(nilRefAny);
+            Assertion.AssertNull("result not null", result);
+
+            Any nilRefAny2 = new Any(null, orb.create_interface_tc(String.Empty, String.Empty));
+            object result2 = m_testService.EchoAny(nilRefAny2);
+            Assertion.AssertNull("result not null", result2);
+        }
+
+        [Test]
         public void TestNameserviceList() {
             NamingContext nameService = GetNameService();
 

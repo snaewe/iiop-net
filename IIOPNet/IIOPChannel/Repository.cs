@@ -681,9 +681,14 @@ namespace Ch.Elca.Iiop.Idl {
             return result;            
         }
         
-        public object MapToIdlConcreteInterface(Type clsType) {
-            ObjRefTC result = new ObjRefTC(Repository.GetRepositoryID(clsType),
-                                           IdlNaming.ReverseIdlToClsNameMapping(clsType.Name));
+        public object MapToIdlConcreteInterface(Type clsType) {           
+            ObjRefTC result;
+            if (!clsType.Equals(ReflectionHelper.MarshalByRefObjectType)) {
+                result = new ObjRefTC(Repository.GetRepositoryID(clsType),
+                                      IdlNaming.ReverseIdlToClsNameMapping(clsType.Name));
+            } else {
+                result = new ObjRefTC(String.Empty, String.Empty);
+            }
             RegisterCreatedTypeCodeForType(clsType, AttributeExtCollection.EmptyCollection,
                                            result);
             return result;            
