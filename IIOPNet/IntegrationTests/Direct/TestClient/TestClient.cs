@@ -925,7 +925,8 @@ namespace Ch.Elca.Iiop.IntegrationTests {
             Adder adder = m_testService.CreateNewWithUserID(id);
             string marshalUrl = RemotingServices.GetObjectUri(adder);
             Ior adderIor = new Ior(marshalUrl);
-            byte[] objectKey = adderIor.ObjectKey;
+            IInternetIiopProfile prof = adderIor.FindInternetIiopProfile();
+            byte[] objectKey = prof.ObjectKey;
             ASCIIEncoding enc = new ASCIIEncoding();
             string marshalUri = new String(enc.GetChars(objectKey));
             Assertion.AssertEquals("wrong user id", id, marshalUri);
@@ -941,7 +942,8 @@ namespace Ch.Elca.Iiop.IntegrationTests {
             Adder adder = m_testService.CreateNewWithSystemID();
             string marshalUrl = RemotingServices.GetObjectUri(adder);
             Ior adderIor = new Ior(marshalUrl);
-            byte[] objectKey = adderIor.ObjectKey;
+            IInternetIiopProfile prof = adderIor.FindInternetIiopProfile();
+            byte[] objectKey = prof.ObjectKey;
             ASCIIEncoding enc = new ASCIIEncoding();
             string marshalUri = new String(enc.GetChars(objectKey));            
             if (marshalUri.StartsWith("/")) {
@@ -969,21 +971,23 @@ namespace Ch.Elca.Iiop.IntegrationTests {
             Adder adder = m_testService.CreateNewWithUserID(id);
             string iorString = orbServices.object_to_string(adder);
             Ior adderIor = new Ior(iorString);
-            Assertion.AssertEquals(8087, adderIor.Port);            
-            Assertion.AssertEquals(1, adderIor.Version.Major);
-            Assertion.AssertEquals(2, adderIor.Version.Minor);
+            IInternetIiopProfile prof = adderIor.FindInternetIiopProfile();
+            Assertion.AssertEquals(8087, prof.Port);            
+            Assertion.AssertEquals(1, prof.Version.Major);
+            Assertion.AssertEquals(2, prof.Version.Minor);
             
             byte[] oid = { 0x6d, 0x79, 0x41, 0x64, 0x64, 0x65, 0x72, 0x49, 0x64, 0x32 };
-            CheckIorKey(oid, adderIor.ObjectKey);                        
+            CheckIorKey(oid, prof.ObjectKey);                        
 
             string testServiceIorString = m_testService.GetIorStringForThisObject();
             Ior testServiceIor = new Ior(testServiceIorString);
-            Assertion.AssertEquals(8087, testServiceIor.Port);
-            Assertion.AssertEquals(1, testServiceIor.Version.Major);
-            Assertion.AssertEquals(2, testServiceIor.Version.Minor);            
+            IInternetIiopProfile profSvcIor = testServiceIor.FindInternetIiopProfile();
+            Assertion.AssertEquals(8087, profSvcIor.Port);
+            Assertion.AssertEquals(1, profSvcIor.Version.Major);
+            Assertion.AssertEquals(2, profSvcIor.Version.Minor);            
             
             byte[] oidTestService = { 0x74, 0x65, 0x73, 0x74 };
-            CheckIorKey(oidTestService, testServiceIor.ObjectKey);                        
+            CheckIorKey(oidTestService, profSvcIor.ObjectKey);                        
 
 
         }
@@ -1002,7 +1006,8 @@ namespace Ch.Elca.Iiop.IntegrationTests {
             Adder adder = m_testService.CreateNewWithUserID(id);
             string marshalUrl = RemotingServices.GetObjectUri(adder);
             Ior adderIor = new Ior(marshalUrl);
-            byte[] objectKey = adderIor.ObjectKey;
+            IInternetIiopProfile prof = adderIor.FindInternetIiopProfile();
+            byte[] objectKey = prof.ObjectKey;
             ASCIIEncoding enc = new ASCIIEncoding();
             string marshalUri = new String(enc.GetChars(objectKey));
             Assertion.AssertEquals("wrong user id", expectedMarshalledId, marshalUri);

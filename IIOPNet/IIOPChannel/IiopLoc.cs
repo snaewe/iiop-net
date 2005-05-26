@@ -33,6 +33,7 @@ using System.Text;
 using Ch.Elca.Iiop.Security.Ssl;
 using Ch.Elca.Iiop.Util;
 using omg.org.CORBA;
+using omg.org.IOP;
 
 
 namespace Ch.Elca.Iiop.CorbaObjRef {
@@ -280,10 +281,10 @@ namespace Ch.Elca.Iiop.CorbaObjRef {
         
         public override IorProfile GetProfileForAddr(byte[] objectKey) {
             InternetIiopProfile result = new InternetIiopProfile(Version, Host, 0, objectKey);
-            result.AddTaggedComponents(new ITaggedComponent[] { new TaggedComponent(TaggedComponentIds.TAG_SSL_SEC_TRANS,
-                                                                                    new SSLComponentData(SecurityAssociationOptions.EstablishTrustInClient,
-                                                                                                         SecurityAssociationOptions.EstablishTrustInTarget,
-                                                                                                         (short)Port)) });
+            result.AddTaggedComponentWithData(TAG_SSL_SEC_TRANS.ConstVal, 
+                                              new SSLComponentData(SecurityAssociationOptions.EstablishTrustInClient,
+                                                                   SecurityAssociationOptions.EstablishTrustInTarget,
+                                                                   (short)Port));
             return result;
         }        
     

@@ -1,7 +1,7 @@
 /*
  *   Mentalis.org Security Library
  * 
- *     Copyright © 2002-2004, The KPD-Team
+ *     Copyright © 2002-2005, The KPD-Team
  *     All rights reserved.
  *     http://www.mentalis.org/
  *
@@ -1119,7 +1119,7 @@ namespace Org.Mentalis.Security.Certificates {
 				//if (!((ku & (int)KeyUsage.DataEncipherment) != 0 || (ku & (int)KeyUsage.KeyEncipherment) != 0))
 				//	throw new CertificateException("This certificate is not suited for data encipherment or key encipherment.");
 				IntPtr buffer = IntPtr.Zero;
-				int provider = CAPIProvider.Handle, key = 0;
+				int provider = CAPIProvider.ContainerHandle, key = 0;
 				RSA publicKey = null;
 				try {
 /*					int flags = 0;

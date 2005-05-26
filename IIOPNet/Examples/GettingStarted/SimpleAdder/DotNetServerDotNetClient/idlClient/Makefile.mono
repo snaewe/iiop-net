@@ -1,3 +1,4 @@
+CSC=gmcs
 IDLSource=../server/IDL/Ch/Elca/Iiop/Tutorial/GettingStarted/*.idl
 Adder=Ch/Elca/Iiop/Tutorial/GettingStarted/
 IDLToCLS=mono ../../../../../../IDLToCLSCompiler/IDLCompiler/bin/IDLToCLSCompiler.exe
@@ -20,7 +21,7 @@ build-idl: $(IDL)
 	cd $(IDL); $(IDLToCLS) -o ../$(BIN) $(TARGETASM) $(Adder)Adder.idl
 
 build-client: $(BIN)$(TARGETASM).dll $(BIN)IIOPChannel.dll NClient.cs
-	mcs /r:$(BIN)$(TARGETASM).dll /r:$(BIN)IIOPChannel.dll /out:$(BIN)NClient.exe NClient.cs
+	$(CSC) /r:$(BIN)$(TARGETASM).dll /r:$(BIN)IIOPChannel.dll /out:$(BIN)NClient.exe NClient.cs
 
 clean:
 	rm -rf $(IDL)

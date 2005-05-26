@@ -68,6 +68,10 @@ public class ASTop_dcl : SimpleNodeWithIdent {
         return m_opAttr;
     }
     
+    public bool IsOneWay() {
+        return getOpAttr() == OP_Attr_ONEWAY;
+    }
+    
     public override string GetIdentification() {
         return "method " + getIdent() + " defined in " + 
                    ((SimpleNode)jjtGetParent()).GetEmbedderDesc();

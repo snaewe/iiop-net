@@ -17,11 +17,10 @@ IDL\Ch\Elca\Iiop\IntegrationTests\TestService.idl: ..\TestServer\IDL\Ch\Elca\Iio
     xcopy /s /q /y ..\..\TestServer\IDL .
     cd ..
 
-$(bin)Client.dll: IDL\Ch\Elca\Iiop\IntegrationTests\TestService.idl IDL\Ch\Elca\Iiop\IntegrationTests\TestExceptionService.idl IDL\Ch\Elca\Iiop\IntegrationTests\ISimpleTestInterface.idl
+$(bin)Client.dll: IDL\Ch\Elca\Iiop\IntegrationTests\TestService.idl IDL\Ch\Elca\Iiop\IntegrationTests\TestExceptionService.idl IDL\Ch\Elca\Iiop\IntegrationTests\ISimpleTestInterface.idl IDL\Ch\Elca\Iiop\IntegrationTests\TestBoxedValueTypeService.idl
     cd IDL 
-    ..\..\..\..\IDLToCLSCompiler\IDLCompiler\bin\IDLToCLSCompiler.exe -o ..\bin client Ch\Elca\Iiop\IntegrationTests\TestService.idl Ch\Elca\Iiop\IntegrationTests\TestExceptionService.idl Ch\Elca\Iiop\IntegrationTests\ISimpleTestInterface.idl
+    ..\..\..\..\IDLToCLSCompiler\IDLCompiler\bin\IDLToCLSCompiler.exe -o ..\bin client Ch\Elca\Iiop\IntegrationTests\TestService.idl Ch\Elca\Iiop\IntegrationTests\TestExceptionService.idl Ch\Elca\Iiop\IntegrationTests\ISimpleTestInterface.idl Ch\Elca\Iiop\IntegrationTests\TestBoxedValueTypeService.idl
     cd ..
-
 
 $(bin)IIOPChannel.dll: $(IIOPCHANNEL)
         if not exist $(bin)nul mkdir $(bin)

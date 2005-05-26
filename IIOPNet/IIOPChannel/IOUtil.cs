@@ -42,7 +42,7 @@ namespace Ch.Elca.Iiop.Util {
         /// <summary>
         /// specifies, how much should be read in one step
         /// </summary>
-        private const int READ_CHUNK_SIZE = 1024;
+        private const int READ_CHUNK_SIZE = 8192;
         
         #if UnitTest 
         

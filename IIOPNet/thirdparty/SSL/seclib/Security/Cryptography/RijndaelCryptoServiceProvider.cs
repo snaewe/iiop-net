@@ -1,7 +1,7 @@
 /*
  *   Mentalis.org Security Library
  * 
- *     Copyright © 2002-2004, The KPD-Team
+ *     Copyright © 2002-2005, The KPD-Team
  *     All rights reserved.
  *     http://www.mentalis.org/
  *
@@ -49,7 +49,13 @@ namespace Org.Mentalis.Security.Cryptography {
 		/// </summary>
 		public RijndaelCryptoServiceProvider() {
 			// acquire an AES context
-			m_Provider = CAPIProvider.Handle;
+			try {
+				m_Provider = CAPIProvider.Handle;
+				if (CAPIProvider.HandleProviderType != SecurityConstants.PROV_RSA_AES)
+					m_Provider = 0;
+			} catch {
+				m_Provider = 0;
+			}
 /*			if (SspiProvider.CryptAcquireContext(ref m_Provider, IntPtr.Zero, null, SecurityConstants.PROV_RSA_AES, 0) == 0) {
 				if (Marshal.GetLastWin32Error() == SecurityConstants.NTE_BAD_KEYSET)
 					SspiProvider.CryptAcquireContext(ref m_Provider, IntPtr.Zero, null, SecurityConstants.PROV_RSA_AES, SecurityConstants.CRYPT_NEWKEYSET);

@@ -396,7 +396,7 @@ namespace Ch.Elca.Iiop.Idl {
         }
 
         
-        public MethodBuilder AddPropertyGetterInternal(TypeBuilder builder, string propertyName,
+        private MethodBuilder AddPropertyGetterInternal(TypeBuilder builder, string propertyName,
                                                        string forIdlAttributeName, 
                                                        TypeContainer propertyType, MethodAttributes attrs) {
             Type propTypeCls = propertyType.GetSeparatedClsType();

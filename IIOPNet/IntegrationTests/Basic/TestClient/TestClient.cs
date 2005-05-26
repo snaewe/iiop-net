@@ -30,13 +30,16 @@ using System;
 using System.Reflection;
 using System.Runtime.Remoting;
 using System.Runtime.Remoting.Channels;
+using System.Runtime.Remoting.Messaging;
 using NUnit.Framework;
 using Ch.Elca.Iiop;
+using Ch.Elca.Iiop.Idl;
 using Ch.Elca.Iiop.Services;
 using omg.org.CosNaming;
 using omg.org.CORBA;
 
 namespace Ch.Elca.Iiop.IntegrationTests {
+
 
     [TestFixture]
     public class TestClient {
@@ -50,7 +53,7 @@ namespace Ch.Elca.Iiop.IntegrationTests {
         private ISimpleTestInterface m_svcSingleCall;
         private ISimpleTestInterface m_svcSingletonCall;
         private ISimpleTestInterface m_contextBound;
-
+        private TestBoxedValuetypeService m_testBoxedService;
 
         #endregion IFields
         #region IMethods
@@ -78,6 +81,7 @@ namespace Ch.Elca.Iiop.IntegrationTests {
                 (ISimpleTestInterface)RemotingServices.Connect(typeof(ISimpleTestInterface), "corbaloc:iiop:1.2@localhost:8087/testSingletonCall");
             m_contextBound = 
                 (ISimpleTestInterface)RemotingServices.Connect(typeof(ISimpleTestInterface), "corbaloc:iiop:1.2@localhost:8087/testContextBound");
+            m_testBoxedService = (TestBoxedValuetypeService)RemotingServices.Connect(typeof(TestBoxedValuetypeService), "corbaloc:iiop:1.2@localhost:8087/testBoxedService");
         }
 
         [TearDown]
@@ -813,6 +817,22 @@ namespace Ch.Elca.Iiop.IntegrationTests {
         }
 
         [Test]
+        public void TestAsyncCallInParallel() {
+            System.Boolean arg = true;
+            TestNegateBooleanDelegate nbd = new TestNegateBooleanDelegate(m_testService.TestNegateBoolean);
+            IAsyncResult[] callResults = new IAsyncResult[50];
+            // async calls
+            for (int i = 0; i < callResults.Length; i++) {
+                callResults[i] = nbd.BeginInvoke(arg, null, null);
+            }
+            // wait for responses
+            for (int i = 0; i < callResults.Length; i++) {
+                System.Boolean result = nbd.EndInvoke(callResults[i]);
+                Assertion.AssertEquals(false, result);
+            }
+        }
+
+        [Test]
         public void TestRefArgs() {
             System.Int32 argInit = 1;
             System.Int32 arg = argInit;
@@ -1133,6 +1153,33 @@ namespace Ch.Elca.Iiop.IntegrationTests {
             Assertion.AssertNotNull("_asm not created", _asm);
         }
 
+
+        [Test]
+        public void TestContextElements() {
+            string arg = "test-Arg";
+            string entryName = "element1";
+            CorbaContextElement entry = new CorbaContextElement(arg);              
+            CallContext.SetData(entryName, entry);
+            try {
+                string extractedElem = m_testService.TestContextElementPassing();
+                Assertion.AssertEquals("wrong entry extracted from callcontext", arg, extractedElem);
+            } finally {
+                CallContext.FreeNamedDataSlot(entryName);
+            }
+        }
+
+        [Test]
+        public void TestBoxedValuetypes() {
+            string arg1 = "test-Arg";
+            string result1 = m_testBoxedService.EchoBoxedString(arg1);
+            Assertion.AssertEquals("wrong boxed string returned", arg1, result1);
+
+            Test arg2 = new Test(); 
+            arg2.a = "a";
+            arg2.b = "b";
+            Test result2 = m_testBoxedService.EchoBoxedStruct(arg2);
+            Assertion.AssertEquals("wrong boxed struct returned", arg2, result2);
+        }
 
         #endregion IMethods
 

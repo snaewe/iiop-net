@@ -1,7 +1,7 @@
 /*
  *   Mentalis.org Security Library
  * 
- *     Copyright © 2002-2003, The KPD-Team
+ *     Copyright © 2002-2005, The KPD-Team
  *     All rights reserved.
  *     http://www.mentalis.org/
  *
@@ -317,8 +317,9 @@ namespace Org.Mentalis.Security.Ssl.Shared {
 				if (m_ActiveReceive != null && m_ActiveReceive.AsyncResult != null) {
 					m_ActiveReceive.AsyncResult.Notify(e);
 				}
-				if (m_ShutdownCallback != null)
+				if (m_ShutdownCallback != null) {
 					m_ShutdownCallback.Notify(e);
+				}
 				// destroy sensitive data
 				if (m_RecordLayer != null)
 					m_RecordLayer.Dispose();
@@ -336,6 +337,12 @@ namespace Org.Mentalis.Security.Ssl.Shared {
 							m_Socket.Shutdown(SocketShutdown.Send);
 					} catch {}
 				}
+				if (m_ShutdownCallback != null) {
+					AsyncResult ret = m_ShutdownCallback;
+					m_ShutdownCallback = null;
+					ret.Notify(null);
+				}
+
 			}
 		}
 		public AsyncResult BeginShutdown(AsyncCallback callback, object state) {

@@ -1,7 +1,7 @@
 /*
  *   Mentalis.org Security Library
  * 
- *     Copyright © 2002-2004, The KPD-Team
+ *     Copyright © 2002-2005, The KPD-Team
  *     All rights reserved.
  *     http://www.mentalis.org/
  *
@@ -43,13 +43,14 @@ using System.Runtime.CompilerServices;
 [assembly: AssemblyTitle("Mentalis.org Security Library")]
 [assembly: AssemblyDescription("Mentalis.org Security Library for the .NET runtime. Visit http://www.mentalis.org/ for more information.")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("The KPD-Team")]
+[assembly: AssemblyCompany("The Mentalis.org Team")]
 [assembly: AssemblyProduct("Mentalis.org Security Library")]
-[assembly: AssemblyCopyright("Copyright © 2002-2004, The KPD-Team")]
+[assembly: AssemblyCopyright("Copyright © 2002-2005, The Mentalis.org Team")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 [assembly: CLSCompliant(true)]
 [assembly: SecurityPermission(SecurityAction.RequestMinimum, UnmanagedCode=true)]
+
 
 //
 //  Thanks To
@@ -65,12 +66,14 @@ using System.Runtime.CompilerServices;
 //		Daryn Kiely			[bugfix]
 //		Kevin Knoop			[method implementation, performance optimizations, bugfix]
 //		Gabriele Zannoni	[method implementation]
+//		Stefan Bernbo		[bugfix]
+//		Martin Plante		[bugfix]
 //
 
 //
 // Version information for an assembly consists of the following four values:
 //
-[assembly: AssemblyVersion("1.0.13.707")]
+[assembly: AssemblyVersion("1.0.13.711")]
 
 // In order to sign your assembly you must specify a key to use. Refer to the 
 // Microsoft .NET Framework documentation for more information on assembly signing.

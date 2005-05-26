@@ -48,25 +48,25 @@ namespace Ch.Elca.Iiop.Util {
         #endregion
         #region IFields
         
-        private ArrayList m_attributes;
+        private object[] m_attributes;
         
         #endregion IFields
         #region IConstructors
 
         public AttributeExtCollection() {
-            m_attributes = new ArrayList();    
+            m_attributes = new object[0];
         }
         
         public AttributeExtCollection(Attribute[] attrs) {
-            m_attributes = new ArrayList();
-            m_attributes.AddRange(attrs);
+            m_attributes = new object[attrs.Length];
+            attrs.CopyTo(m_attributes, 0);
         }
 
         public AttributeExtCollection(AttributeExtCollection coll) {
-            m_attributes = (ArrayList)coll.m_attributes.Clone();
+            m_attributes = (object[])coll.m_attributes.Clone();
         }
         
-        private AttributeExtCollection(ArrayList content) {
+        private AttributeExtCollection(object[] content) {
             m_attributes = content;
         }
 
@@ -90,7 +90,7 @@ namespace Ch.Elca.Iiop.Util {
 
         public int Count {
             get {
-                return m_attributes.Count;
+                return m_attributes.Length;
             }
         }
 
@@ -114,9 +114,7 @@ namespace Ch.Elca.Iiop.Util {
         /// </summary>
         public static AttributeExtCollection ConvertToAttributeCollection(object[] attrs) {
             if ((attrs != null) && (attrs.Length > 0)) {
-                ArrayList resultList = new ArrayList();
-                resultList.AddRange(attrs);
-                return new AttributeExtCollection(resultList);
+                return new AttributeExtCollection(attrs);
             } else {
                 return EmptyCollection;
             }
@@ -126,21 +124,52 @@ namespace Ch.Elca.Iiop.Util {
         #region IMethods
     
         public bool Contains(Attribute attr) {
-            return m_attributes.Contains(attr);
+            for (int i = 0; i < m_attributes.Length; i++) {
+                if (m_attributes[i].Equals(attr)) {
+                    return true;
+                }
+            }
+            return false;
         }
 
         /// <summary>
         /// check, if an attribute of the given type is in the collection
         /// </summary>
         public bool IsInCollection(Type attrType) {
-            IEnumerator enumerator = GetEnumerator();
-            while (enumerator.MoveNext()) {
-                Attribute attr = (Attribute)enumerator.Current;
+            for (int i = 0; i < m_attributes.Length; i++) {
+                Attribute attr = (Attribute)m_attributes[i];
                 if (attr.GetType() == attrType) { 
                     return true; 
                 }
             }
             return false;
+        }
+        
+        private Attribute GetAttributeForTypeInternal(Type attrType, out int position) {
+            Attribute result = null;
+            position = -1;
+            bool isOrdered = false;
+            if (ReflectionHelper.IOrderedAttributeType.IsAssignableFrom(attrType)) {
+                isOrdered = true;
+            }
+            for (int i = 0; i < m_attributes.Length; i++) {            
+                Attribute attr = (Attribute)m_attributes[i];
+                if (attr.GetType() == attrType) { 
+                    if (!isOrdered) {
+                        result = attr;
+                        position = i;
+                        break;
+                    } else {
+                        if ((result == null) ||
+                           (((IOrderedAttribute)result).OrderNr <
+                            ((IOrderedAttribute)attr).OrderNr)) {
+                            result = attr;        
+                            position = i;
+                        }
+                    }
+                }
+            }
+            return result;            
         }
 
         /// <summary>
@@ -151,28 +180,8 @@ namespace Ch.Elca.Iiop.Util {
         /// with the highest order number
         /// </remarks>
         public Attribute GetAttributeForType(Type attrType) {
-            Attribute result = null;
-            bool isOrdered = false;
-            if (ReflectionHelper.IOrderedAttributeType.IsAssignableFrom(attrType)) {
-                isOrdered = true;
-            }
-            IEnumerator enumerator = GetEnumerator();
-            while (enumerator.MoveNext()) {
-                Attribute attr = (Attribute)enumerator.Current;
-                if (attr.GetType() == attrType) { 
-                    if (!isOrdered) {
-                        result = attr;
-                        break;
-                    } else {
-                        if ((result == null) ||
-                           (((IOrderedAttribute)result).OrderNr <
-                            ((IOrderedAttribute)attr).OrderNr)) {
-                            result = attr;        
-                        }
-                    }
-                }
-            }
-            return result;
+            int position;
+            return GetAttributeForTypeInternal(attrType, out position);
         }
 
         /// <summary>
@@ -183,9 +192,8 @@ namespace Ch.Elca.Iiop.Util {
         /// </remarks>
         public Attribute GetHighestOrderAttribute() {
             Attribute result = null;
-            IEnumerator enumerator = GetEnumerator();
-            while (enumerator.MoveNext()) {
-                Attribute attr = (Attribute)enumerator.Current;
+            for (int i = 0; i < m_attributes.Length; i++) {            
+                Attribute attr = (Attribute)m_attributes[i];
                 if ((attr is IOrderedAttribute) && 
                     ((result == null) ||
                     (((IOrderedAttribute)result).OrderNr <
@@ -197,6 +205,19 @@ namespace Ch.Elca.Iiop.Util {
         }
 
 
+        private AttributeExtCollection RemoveAttributeAtPosition(int position) {
+            object[] newCollection = new object[m_attributes.Length - 1]; // m_attributes.Length must be >= 0, because attr found
+            // copy elements before position to newCollection; don't use Array.Copy, because only few elements
+            for (int i = 0; i < position; i++) {
+                newCollection[i] = m_attributes[i];                
+            }                
+            // copy elements after position to newCollection; don't use Array.Copy, because only few elements
+            for (int i = position + 1; i < m_attributes.Length; i++) {
+                newCollection[i-1] = m_attributes[i];                
+            }
+            return new AttributeExtCollection(newCollection);            
+        }
+
         /// <summary>
         /// removes the first attribute of the given type
         /// </summary>
@@ -206,9 +227,10 @@ namespace Ch.Elca.Iiop.Util {
         /// </remarks>
         /// <returns>The removed attribute, or null if not found</returns>
         public AttributeExtCollection RemoveAttributeOfType(Type attrType, out Attribute foundAttr) {
-            foundAttr = GetAttributeForType(attrType);
+            int position;
+            foundAttr = GetAttributeForTypeInternal(attrType, out position);
             if (foundAttr != null) {
-                return RemoveAttribute(foundAttr);
+                return RemoveAttributeAtPosition(position);
             } else {
                 return this;
             }
@@ -224,31 +246,49 @@ namespace Ch.Elca.Iiop.Util {
         /// <returns>The removed attribute, or null if not found</returns>
         public AttributeExtCollection RemoveAssociatedAttributes(long associatedTo, out IList removedAttributes) {
             removedAttributes = new ArrayList();
-            ArrayList newCollection = (ArrayList)m_attributes.Clone();
-            for (int i = 0; i < m_attributes.Count; i++) {
+            for (int i = 0; i < m_attributes.Length; i++) {
                 if ((m_attributes[i] is IAssociatedAttribute) &&
                     (((IAssociatedAttribute)m_attributes[i]).AssociatedToAttributeWithKey == associatedTo)) {
                     removedAttributes.Add(m_attributes[i]); 
-                    newCollection.Remove(m_attributes[i]);
                 }
             }
-            return new AttributeExtCollection(newCollection);
+            object[] newAttributes = new object[m_attributes.Length - removedAttributes.Count];
+            int newAttributesIndex = 0;
+            for (int i = 0; i < m_attributes.Length; i++) {
+                if (!((m_attributes[i] is IAssociatedAttribute) &&
+                    (((IAssociatedAttribute)m_attributes[i]).AssociatedToAttributeWithKey == associatedTo))) {
+                    newAttributes[newAttributesIndex] = m_attributes[i];
+                    newAttributesIndex++;
+                }
+            }
+            return new AttributeExtCollection(newAttributes);
         }
-
 
         /// <summary>returns a new collection without the Attribute attribute</summary
         public AttributeExtCollection RemoveAttribute(Attribute attribute) {
-            ArrayList newCollection = (ArrayList)m_attributes.Clone();
-            newCollection.Remove(attribute);
-            return new AttributeExtCollection(newCollection);
+            int position = 0;
+            bool found = false;
+            for (int i = 0; i < m_attributes.Length; i++) {
+                if (m_attributes[i] == attribute) {
+                    position = i;
+                    found = true;
+                    break;
+                }
+            }
+            if (found) {
+                return RemoveAttributeAtPosition(position);
+            } else {
+                return this;
+            }
         }
 
         /// <summary>
         /// insert the attribute in the collection at the first position
         /// </summary>
         public AttributeExtCollection MergeAttribute(Attribute attr) {
-            ArrayList newAttributes = (ArrayList)m_attributes.Clone();            
-            newAttributes.Insert(0, attr);
+            object[] newAttributes = new object[m_attributes.Length + 1];
+            newAttributes[0] = attr;
+            m_attributes.CopyTo(newAttributes, 1);
             return new AttributeExtCollection(newAttributes);
         }
         
@@ -256,21 +296,22 @@ namespace Ch.Elca.Iiop.Util {
         /// returns an attribute collection produced by merging this collection and the argument collection.
         /// </summary>
         public AttributeExtCollection MergeAttributeCollections(AttributeExtCollection coll) {
+            object[] resultList = new object[coll.m_attributes.Length + m_attributes.Length];            
             // first the new ones
-            ArrayList resultList = (ArrayList)coll.m_attributes.Clone();
+            coll.m_attributes.CopyTo(resultList, 0);
             // append content of this collection
-            resultList.AddRange(m_attributes);
+            m_attributes.CopyTo(resultList, coll.m_attributes.Length);
             return new AttributeExtCollection(resultList);
         }
 
         public AttributeExtCollection MergeMissingAttributes(object[] toAdd) {
-            ArrayList resultList = (ArrayList)m_attributes.Clone();                        
+            ArrayList resultList = new ArrayList(m_attributes);
             foreach (Attribute attr in toAdd) {
                 if (!resultList.Contains(attr)) {
                     resultList.Insert(0, attr);
                 }
             }
-            return new AttributeExtCollection(resultList);
+            return new AttributeExtCollection(resultList.ToArray());
         }
 
         public override bool Equals(object obj) {
@@ -286,14 +327,14 @@ namespace Ch.Elca.Iiop.Util {
             enumerator = ((AttributeExtCollection)obj).GetEnumerator();
             while (enumerator.MoveNext()) {
                 Attribute attr = (Attribute) enumerator.Current;
-                if (!(m_attributes.Contains(attr))) { return false; }
+                if (!(Contains(attr))) { return false; }
             }
             return true;
         }
 
         public override int GetHashCode() {
             int result = 0;
-            for (int i = 0; i < m_attributes.Count; i++) {
+            for (int i = 0; i < m_attributes.Length; i++) {
                 result = result ^ m_attributes[i].GetHashCode();
             }
             return result;
@@ -313,8 +354,240 @@ namespace Ch.Elca.Iiop.Util {
         }
 
         #endregion Implementation of IEnumerable
-        
+
+        /// <summary>
+        /// get attribute at position index
+        /// </summary>
+        public Attribute GetAttributeAt(int index) {
+            return (Attribute)m_attributes[index];
+        }
+
         #endregion IMethods
         
     }
 }
+
+
+#if UnitTest
+
+namespace Ch.Elca.Iiop.Tests {
+    
+    using System.Reflection;
+    using System.Collections;
+    using System.IO;
+    using NUnit.Framework;
+    using Ch.Elca.Iiop;    
+    using Ch.Elca.Iiop.Util;
+    
+    internal class TestAttributeForColl : Attribute {
+        
+        private int m_val;
+
+        internal TestAttributeForColl(int val) {
+            m_val = val;
+        }
+
+        internal int Val {
+            get {
+                return m_val;
+            }
+        }        
+        
+    }
+    
+    internal class TestAttributeForCollT1 : TestAttributeForColl {
+    
+        internal TestAttributeForCollT1(int val) : base(val) {
+        }                
+        
+    }
+    
+    internal class TestAttributeForCollT2 : TestAttributeForColl {
+          
+        internal TestAttributeForCollT2(int val) : base(val) {
+        }
+                
+    }
+    
+    internal class TestAttributeForCollT3 : TestAttributeForColl {
+          
+        internal TestAttributeForCollT3(int val) : base(val) {
+        }
+                
+    }
+
+    internal class TestAttributeForCollT4 : TestAttributeForColl {
+          
+        internal TestAttributeForCollT4(int val) : base(val) {
+        }
+                
+    }
+
+    internal class TestAttributeForCollT5 : TestAttributeForColl {
+          
+        internal TestAttributeForCollT5(int val) : base(val) {
+        }
+                
+    }
+    
+
+
+    /// <summary>
+    /// Unit-tests for testing AttributeExtCollection
+    /// </summary>
+    public class AttributeExtCollectionTest : TestCase {
+        
+        [Test]
+        public void TestRemoveElement() {
+            TestAttributeForCollT1 a1 = new TestAttributeForCollT1(1);
+            TestAttributeForCollT2 a2 = new TestAttributeForCollT2(2);
+            TestAttributeForCollT3 a3 = new TestAttributeForCollT3(3);
+            TestAttributeForCollT4 a4 = new TestAttributeForCollT4(4);
+            TestAttributeForCollT5 a5 = new TestAttributeForCollT5(5);
+            
+            Attribute removed;
+            
+            AttributeExtCollection testColl1 = 
+                AttributeExtCollection.ConvertToAttributeCollection(new object[] { a1, a2, a3, a4, a5 });
+            
+            AttributeExtCollection result1 = testColl1.RemoveAttributeOfType(typeof(TestAttributeForCollT1), 
+                                                                             out removed);
+            Assertion.AssertEquals("wrong removed", a1, removed);
+            Assertion.AssertEquals("wrong removed", a2, result1.GetAttributeAt(0));
+            Assertion.AssertEquals("wrong removed", a3, result1.GetAttributeAt(1));
+            Assertion.AssertEquals("wrong removed", a4, result1.GetAttributeAt(2));
+            Assertion.AssertEquals("wrong removed", a5, result1.GetAttributeAt(3));
+            Assertion.AssertEquals("result length", 4, result1.Count);
+
+            result1 = testColl1.RemoveAttributeOfType(typeof(TestAttributeForCollT2), 
+                                                      out removed);
+            
+            Assertion.AssertEquals("wrong removed", a2, removed);
+            Assertion.AssertEquals("wrong removed", a1, result1.GetAttributeAt(0));
+            Assertion.AssertEquals("wrong removed", a3, result1.GetAttributeAt(1));
+            Assertion.AssertEquals("wrong removed", a4, result1.GetAttributeAt(2));
+            Assertion.AssertEquals("wrong removed", a5, result1.GetAttributeAt(3));
+            Assertion.AssertEquals("result length", 4, result1.Count);
+
+            result1 = testColl1.RemoveAttributeOfType(typeof(TestAttributeForCollT3), 
+                                                      out removed);
+            
+            Assertion.AssertEquals("wrong removed", a3, removed);
+            Assertion.AssertEquals("wrong removed", a1, result1.GetAttributeAt(0));
+            Assertion.AssertEquals("wrong removed", a2, result1.GetAttributeAt(1));
+            Assertion.AssertEquals("wrong removed", a4, result1.GetAttributeAt(2));
+            Assertion.AssertEquals("wrong removed", a5, result1.GetAttributeAt(3));
+            Assertion.AssertEquals("result length", 4, result1.Count);
+            
+            
+            result1 = testColl1.RemoveAttributeOfType(typeof(TestAttributeForCollT4), 
+                                                      out removed);
+            
+            Assertion.AssertEquals("wrong removed", a4, removed);
+            Assertion.AssertEquals("wrong removed", a1, result1.GetAttributeAt(0));
+            Assertion.AssertEquals("wrong removed", a2, result1.GetAttributeAt(1));
+            Assertion.AssertEquals("wrong removed", a3, result1.GetAttributeAt(2));
+            Assertion.AssertEquals("wrong removed", a5, result1.GetAttributeAt(3));
+            Assertion.AssertEquals("result length", 4, result1.Count);
+            
+            
+            result1 = testColl1.RemoveAttributeOfType(typeof(TestAttributeForCollT5), 
+                                                      out removed);
+            
+            Assertion.AssertEquals("wrong removed", a5, removed);
+            Assertion.AssertEquals("wrong removed", a1, result1.GetAttributeAt(0));
+            Assertion.AssertEquals("wrong removed", a2, result1.GetAttributeAt(1));
+            Assertion.AssertEquals("wrong removed", a3, result1.GetAttributeAt(2));
+            Assertion.AssertEquals("wrong removed", a4, result1.GetAttributeAt(3));
+            Assertion.AssertEquals("result length", 4, result1.Count);
+            
+            // start with one elem coll
+            
+            AttributeExtCollection testColl2 = 
+                AttributeExtCollection.ConvertToAttributeCollection(new object[] { a1 });
+            AttributeExtCollection result2 = testColl2.RemoveAttributeOfType(typeof(TestAttributeForCollT1), 
+                                                                             out removed);
+            Assertion.AssertEquals("wrong removed", a1, removed);
+            Assertion.AssertEquals("result length", 0, result2.Count);
+            
+            
+            // start with two elem coll
+            
+            AttributeExtCollection testColl3 =
+                AttributeExtCollection.ConvertToAttributeCollection(new object[] { a1, a2 });
+            
+            AttributeExtCollection result3 = testColl3.RemoveAttributeOfType(typeof(TestAttributeForCollT1), 
+                                                                             out removed);
+            Assertion.AssertEquals("wrong removed", a1, removed);
+            Assertion.AssertEquals("wrong removed", a2, result3.GetAttributeAt(0));
+            Assertion.AssertEquals("result length", 1, result3.Count);
+            
+            
+            result3 = testColl3.RemoveAttributeOfType(typeof(TestAttributeForCollT2), 
+                                                      out removed);
+
+            Assertion.AssertEquals("wrong removed", a2, removed);
+            Assertion.AssertEquals("wrong removed", a1, result3.GetAttributeAt(0));
+            Assertion.AssertEquals("result length", 1, result3.Count);
+
+            
+        }
+        
+        
+        public void TestMergeCollections() {
+            
+            TestAttributeForCollT1 a1 = new TestAttributeForCollT1(1);
+            TestAttributeForCollT2 a2 = new TestAttributeForCollT2(2);
+            TestAttributeForCollT3 a3 = new TestAttributeForCollT3(3);
+            TestAttributeForCollT4 a4 = new TestAttributeForCollT4(4);
+            TestAttributeForCollT5 a5 = new TestAttributeForCollT5(5);            
+            
+            AttributeExtCollection testColl1 = 
+                AttributeExtCollection.ConvertToAttributeCollection(new object[] { a1, a2 });
+            
+            AttributeExtCollection testColl2 = 
+                AttributeExtCollection.ConvertToAttributeCollection(new object[] { a3, a4, a5 });
+            
+            AttributeExtCollection merged1 = testColl1.MergeAttributeCollections(testColl2);
+            Assertion.AssertEquals("wrong merged", a3, merged1.GetAttributeAt(0));
+            Assertion.AssertEquals("wrong merged", a4, merged1.GetAttributeAt(1));
+            Assertion.AssertEquals("wrong merged", a5, merged1.GetAttributeAt(2));
+            Assertion.AssertEquals("wrong merged", a1, merged1.GetAttributeAt(3));
+            Assertion.AssertEquals("wrong merged", a2, merged1.GetAttributeAt(4));
+            Assertion.AssertEquals("result length", 5, merged1.Count);
+            
+            AttributeExtCollection merged2 = testColl2.MergeAttributeCollections(testColl1);
+            Assertion.AssertEquals("wrong merged", a1, merged2.GetAttributeAt(0));
+            Assertion.AssertEquals("wrong merged", a2, merged2.GetAttributeAt(1));
+            Assertion.AssertEquals("wrong merged", a3, merged2.GetAttributeAt(2));
+            Assertion.AssertEquals("wrong merged", a4, merged2.GetAttributeAt(3));
+            Assertion.AssertEquals("wrong merged", a5, merged2.GetAttributeAt(4));
+            Assertion.AssertEquals("result length", 5, merged2.Count);
+            
+        }
+        
+        public void TestMergeAttribute() {
+            
+            TestAttributeForCollT1 a1 = new TestAttributeForCollT1(1);
+            TestAttributeForCollT2 a2 = new TestAttributeForCollT2(2);
+            TestAttributeForCollT3 a3 = new TestAttributeForCollT3(3);
+            TestAttributeForCollT4 a4 = new TestAttributeForCollT4(4);
+            TestAttributeForCollT5 a5 = new TestAttributeForCollT5(5);            
+            
+            AttributeExtCollection testColl1 = 
+                AttributeExtCollection.ConvertToAttributeCollection(new object[] { a1, a2, a3, a4 });
+                      
+            AttributeExtCollection merged1 = testColl1.MergeAttribute(a5);
+            Assertion.AssertEquals("wrong merged", a5, merged1.GetAttributeAt(0));
+            Assertion.AssertEquals("wrong merged", a1, merged1.GetAttributeAt(1));
+            Assertion.AssertEquals("wrong merged", a2, merged1.GetAttributeAt(2));
+            Assertion.AssertEquals("wrong merged", a3, merged1.GetAttributeAt(3));
+            Assertion.AssertEquals("wrong merged", a4, merged1.GetAttributeAt(4));
+            Assertion.AssertEquals("result length", 5, merged1.Count);
+        }
+        
+    }
+
+}
+    
+#endif

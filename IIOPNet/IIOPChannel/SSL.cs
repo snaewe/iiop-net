@@ -60,11 +60,13 @@ namespace Ch.Elca.Iiop.Security.Ssl {
         
     /// <summary>the tagged component data of the TAG_SSL_SEC_TRANS component</summary>
     [IdlStruct]
-    public struct SSLComponentData : ITaggedComponentData {
+    public struct SSLComponentData {
 
         #region SFields
         
         private static Type s_assocOptionsType = typeof(SecurityAssociationOptions);
+               
+        public static Type ClassType = typeof(SSLComponentData);              
         
         #endregion SFields
         #region IFields

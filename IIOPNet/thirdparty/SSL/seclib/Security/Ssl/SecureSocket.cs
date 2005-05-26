@@ -1,7 +1,7 @@
 /*
  *   Mentalis.org Security Library
  * 
- *     Copyright © 2002-2004, The KPD-Team
+ *     Copyright © 2002-2005, The KPD-Team
  *     All rights reserved.
  *     http://www.mentalis.org/
  *
@@ -517,7 +517,7 @@ namespace Org.Mentalis.Security.Ssl {
 		/// <param name="state">An object containing state information for this request.</param>
 		/// <returns>An <see cref="IAsyncResult"/> that references the asynchronous shutdown.</returns>
 		/// <exception cref="InvalidOperationException"><see cref="BeginShutdown"/> has already been called.</exception>
-		// Thanks to Michael J. Moore for notifying us about a bug in this method.
+		// Thanks to Michael J. Moore and Stefan Bernbo for notifying us about a bug in this method.
 		public IAsyncResult BeginShutdown(AsyncCallback callback, object state) {
 			if (m_ShutdownResult != null)
 				throw new InvalidOperationException();

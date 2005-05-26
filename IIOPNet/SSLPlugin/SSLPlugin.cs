@@ -39,13 +39,21 @@ using Ch.Elca.Iiop.CorbaObjRef;
 using Org.Mentalis.Security.Ssl;
 using Org.Mentalis.Security.Certificates;
 using omg.org.CORBA;
+using omg.org.IOP;
 
 namespace Ch.Elca.Iiop.Security.Ssl {
 
 
     /// <summary>Base class for ssl transports</summary>
     public class SslTransportBase : ITransport {
-                        
+        
+        #region SFields
+
+        private static System.Reflection.PropertyInfo s_secureTcpClientClientPropertyInfo =
+            typeof(SecureTcpClient).GetProperty("Client",
+                System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+        
+        #endregion SFields                        
         #region IFields
         
         protected SecureNetworkStream m_stream;
@@ -72,13 +80,49 @@ namespace Ch.Elca.Iiop.Security.Ssl {
         /// <summary><see cref="Ch.Elca.Iiop.ITranport.CloseConnection/></summary>
         public void CloseConnection() {
             try {
+                m_socket.Close();
+            } catch (Exception) {}
+            m_socket = null;            
+            try {
                 m_stream.Close(); // close the stream and the socket.
             } catch (Exception) { }
-            try {
-                m_socket.Close(); // closes the stream too
-            } catch (Exception) {}
-            m_socket = null;
         }
+        
+        public IAsyncResult BeginRead(byte[] buffer, int offset, int size, AsyncCallback callback, object state) {
+            return m_stream.BeginRead(buffer, offset, size, callback, state);
+        }
+
+        public IAsyncResult BeginWrite(byte[] buffer, int offset, int size, AsyncCallback callback, object state) {
+            return m_stream.BeginWrite(buffer, offset, size, callback, state);
+        }
+        
+        public int EndRead(IAsyncResult asyncResult) {
+            return m_stream.EndRead(asyncResult);
+        }
+        
+        public void EndWrite(IAsyncResult asyncResult) {
+            m_stream.EndWrite(asyncResult);
+        }
+        
+        /// <summary><see cref="Ch.Elca.Iiop.ITransport.GetPeerAddress"/></summary>
+        public IPAddress GetPeerAddress() {
+            SecureSocket secureSocket = (SecureSocket)s_secureTcpClientClientPropertyInfo.GetValue(m_socket, null);
+            return ((IPEndPoint)secureSocket.RemoteEndPoint).Address;
+        }        
+        
+        /// <summary><see cref="Ch.Elca.Iiop.ITranport.IsConnectionOpen/></summary>
+        public bool IsConnectionOpen() {
+            if (m_socket == null) {
+                return false;
+            } else {
+                try {
+                    m_socket.GetStream(); // TODO, search a better way to do this
+                } catch (Exception) {
+                    return false;
+                }                                
+                return true; 
+            }
+        }        
         
         #endregion IMethods
         
@@ -157,21 +201,7 @@ namespace Ch.Elca.Iiop.Security.Ssl {
             m_socket.SendTimeout = m_sendTimeOut;            
             m_stream = m_socket.GetStream();
         }
-                
-        /// <summary><see cref="Ch.Elca.Iiop.IClientTranport.IsConnectionOpen/></summary>
-        public bool IsConnectionOpen() {
-            if (m_socket == null) {
-                return false;
-            } else {
-                try {
-                    m_socket.GetStream(); // TODO, search a better way to do this
-                } catch (Exception) {
-                    return false;
-                }                                
-                return true; 
-            }
-        }
-        
+                        
         #endregion IMethods
         
     }
@@ -182,11 +212,7 @@ namespace Ch.Elca.Iiop.Security.Ssl {
         #region SFields
         
         private static Type s_socketExType = typeof(SocketException);
-        
-        private static System.Reflection.PropertyInfo s_secureTcpClientClientPropertyInfo =
-            typeof(SecureTcpClient).GetProperty("Client",
-                System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
-        
+                
         #endregion SFields
         #region IConstructors
         
@@ -202,13 +228,7 @@ namespace Ch.Elca.Iiop.Security.Ssl {
         public bool IsConnectionCloseException(Exception e) {
             return s_socketExType.IsInstanceOfType(e.InnerException);            
         }
-        
-        /// <summary><see cref="Ch.Elca.Iiop.IServerTransport.GetClientAddress"/></summary>
-        public IPAddress GetClientAddress() {
-            SecureSocket secureSocket = (SecureSocket)s_secureTcpClientClientPropertyInfo.GetValue(m_socket, null);
-            return ((IPEndPoint)secureSocket.RemoteEndPoint).Address;
-        }
-                
+                        
         #endregion IMethods
         
     }        
@@ -246,15 +266,23 @@ namespace Ch.Elca.Iiop.Security.Ssl {
         #endregion IFields        
         
         
-        /// <summary><see cref="Ch.Elca.Iiop.IClientTransportFactory.CreateTransport(Ior)"/></summary>
-        public IClientTransport CreateTransport(Ior target) {
-            ITaggedComponent sslComponent = GetSSLComponent(target);
-            IPAddress asIpAddress = ConvertToIpAddress(target.HostName);
-            int port = ((SSLComponentData)sslComponent.ComponentData).GetPort();            
-            SecurityOptions options = CreateClientSecurityOptions((SSLComponentData)sslComponent.ComponentData);
+        /// <summary><see cref="Ch.Elca.Iiop.IClientTransportFactory.CreateTransport(IIorProfile)"/></summary>
+        public IClientTransport CreateTransport(IIorProfile profile) {
+            if (profile.ProfileId != TAG_INTERNET_IOP.ConstVal) {
+                throw new INTERNAL(734, CompletionStatus.Completed_No);
+            }
+            object sslComponentDataObject = GetSSLComponent(profile);            
+            if (sslComponentDataObject == null) {
+                throw new INTERNAL(734, CompletionStatus.Completed_No);
+            }
+            SSLComponentData sslComponent = (SSLComponentData)sslComponentDataObject;
+            IInternetIiopProfile targetProfile = (IInternetIiopProfile)profile;
+            IPAddress asIpAddress = ConvertToIpAddress(targetProfile.HostName);
+            int port = sslComponent.GetPort();
+            SecurityOptions options = CreateClientSecurityOptions(sslComponent);
             IClientTransport result;
             if (asIpAddress == null) {
-                result = new SslClientTransport(target.HostName, port, options);
+                result = new SslClientTransport(targetProfile.HostName, port, options);
             } else {
                 result = new SslClientTransport(asIpAddress, port, options);
             }
@@ -301,24 +329,60 @@ namespace Ch.Elca.Iiop.Security.Ssl {
         }
         
         /// <summary>
-        /// <see cref="Ch.Elca.Iiop.IClientTransportFactory.CanCreateTransportForIor"/>op.IClientTransportFactory.CanCreateTransportForIor"/>
+        /// <see cref="Ch.Elca.Iiop.IClientTransportFactory.CanCreateTransportForIor"/>
         /// </summary>
         public bool CanCreateTranporForIor(Ior target) {
             // check for SSL component
-            return (target.HostName != null) && (GetSSLComponent(target) != null);
-        }
-        
-        private ITaggedComponent GetSSLComponent(Ior ior) {            
-            foreach (IorProfile profile in ior.Profiles) {
-                if (profile is InternetIiopProfile) {
-                    foreach (ITaggedComponent taggedComponent in profile.TaggedComponents) {
-                        if (taggedComponent.Id == TaggedComponentIds.TAG_SSL_SEC_TRANS) {
-                            return taggedComponent;
-                        }
-                    }
+            for (int i = 0; i < target.Profiles.Length; i++) {
+                if (CanUseProfile(target.Profiles[i])) {
+                    return true;
                 }
             }
-            return null;
+            return false;
+        }
+        
+        /// <summary>
+        /// <see cref="Ch.Elca.Iiop.IClientTransportFactory.CanUseProfile"/>
+        /// </summary>
+        public bool CanUseProfile(IIorProfile profile) {
+            if (profile.ProfileId == TAG_INTERNET_IOP.ConstVal) {
+                IInternetIiopProfile iiopProf = (IInternetIiopProfile)profile;
+                return ((iiopProf.HostName != null) && HasSSLComponent(profile));
+            } else {
+                return false;
+            }
+        }
+        
+        private bool HasSSLComponent(IIorProfile profile) {            
+            if (profile.ProfileId == TAG_INTERNET_IOP.ConstVal) {
+                if (profile.TaggedComponents.ContainsTaggedComponent(TAG_SSL_SEC_TRANS.ConstVal)) {
+                    return true;
+                }
+            }
+            return false;
+        }
+        
+        private SSLComponentData GetSSLComponent(Ior ior) {            
+            object result = null;
+            for (int i = 0; i < ior.Profiles.Length; i++) {
+                result = GetSSLComponent(ior.Profiles[i]);                    
+                if (result != null) {
+                    break;
+                }
+            }
+            if (result != null) {
+                return (SSLComponentData)result;
+            } else {
+                throw new INTERNAL(734, CompletionStatus.Completed_No);
+            }
+        }
+        
+        private object GetSSLComponent(IIorProfile profile) {
+            if (profile.ProfileId == TAG_INTERNET_IOP.ConstVal) {
+                return profile.TaggedComponents.GetComponentData(TAG_SSL_SEC_TRANS.ConstVal, SSLComponentData.ClassType);
+            } else {
+                return null;
+            }            
         }
         
         /// <summary>
@@ -334,10 +398,40 @@ namespace Ch.Elca.Iiop.Security.Ssl {
             }            
         }
         
-        /// <summary><see cref="Ch.Elca.Iiop.IClientTransportFactory.GetEndpointKey(Ior)"/></summary>
-        public string GetEndpointKey(Ior target) {
-            return "iiop-ssl://"+target.HostName+":"+target.Port;
+        /// <summary><see cref="Ch.Elca.Iiop.IClientTransportFactory.GetEndpointKey(IIorProfile)"/></summary>
+        public string GetEndpointKey(IIorProfile target) {            
+            if (target.ProfileId ==  TAG_INTERNET_IOP.ConstVal) {
+                object sslComponent = GetSSLComponent(target);                
+                IInternetIiopProfile prof = (IInternetIiopProfile)target;
+                return "iiop-ssl://"+prof.HostName+":"+((SSLComponentData)sslComponent).Port;
+            } else {
+                return String.Empty;
+            }                        
         }
+        
+        /// <summary><see cref="Ch.Elca.Iiop.IClientTransportFactory.GetEndPointKeyForBidirEndpoint(object)"/></summary>
+        public string GetEndPointKeyForBidirEndpoint(object endPoint) {
+            if (endPoint is omg.org.IIOP.ListenPoint) {
+                return "iiop-ssl://"+((omg.org.IIOP.ListenPoint)endPoint).ListenHost + ":" + 
+                                 ((omg.org.IIOP.ListenPoint)endPoint).ListenPort;
+            } else {
+                return null;
+            }
+        }
+
+        /// <summary><see cref="Ch.Elca.Iiop.IServerTransportFactory.GetListenPoints(object)"/></summary>        
+        public object[] GetListenPoints(Ch.Elca.Iiop.IiopChannelData chanData) {            
+            ArrayList listenpoints = new ArrayList();            
+            for (int i = 0; i < chanData.AdditionalTaggedComponents.Length; i++) {
+                if (chanData.AdditionalTaggedComponents[i].tag == TAG_SSL_SEC_TRANS.ConstVal) {
+                    SSLComponentData sslComp = 
+                        (SSLComponentData)TaggedComponent.DeserialiseComponentData(chanData.AdditionalTaggedComponents[i],
+                                                                                   SSLComponentData.ClassType);                    
+                    listenpoints.Add(new omg.org.IIOP.ListenPoint(chanData.HostName, sslComp.Port));
+                }
+            }
+            return listenpoints.ToArray();
+        }        
         
         /// <summary><see cref="Ch.Elca.Iiop.IServerTransportFactory.CreateConnectionListener"/></summary>
         public IServerConnectionListener CreateConnectionListener(ClientAccepted clientAcceptCallBack) {
@@ -517,7 +611,7 @@ namespace Ch.Elca.Iiop.Security.Ssl {
         }
         
         /// <summary><see cref="Ch.Elca.Iiop.IServerConnectionListener.StartListening"</summary>
-        public int StartListening(IPAddress bindTo, int listeningPortSuggestion, out ITaggedComponent[] taggedComponents) {
+        public int StartListening(IPAddress bindTo, int listeningPortSuggestion, out TaggedComponent[] taggedComponents) {
             if (!m_isInitalized) {
                 throw CreateNotInitalizedException();
             }
@@ -539,11 +633,11 @@ namespace Ch.Elca.Iiop.Security.Ssl {
                 SSLComponentData sslData = new SSLComponentData(Convert.ToInt16(m_supportedOptions),
                                                                 Convert.ToInt16(m_requiredOptions),
                                                                 (short)resultPort);
-                taggedComponents = new ITaggedComponent[] { new TaggedComponent(TaggedComponentIds.TAG_SSL_SEC_TRANS, 
-                                                                                sslData) };
+                taggedComponents = new TaggedComponent[] { 
+                    TaggedComponent.CreateTaggedComponent(TAG_SSL_SEC_TRANS.ConstVal, sslData) };
                 resultPort = 0; // don't allow unsecured connections -> port is in ssl components
             } else {
-                taggedComponents = new ITaggedComponent[0];
+                taggedComponents = new TaggedComponent[0];
             }
             
             m_listenerActive = true;

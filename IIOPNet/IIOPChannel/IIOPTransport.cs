@@ -45,6 +45,13 @@ using Ch.Elca.Iiop.Util;
 namespace Ch.Elca.Iiop {   
 
     
+    /// <summary>this delegate is used to call back the ClientTransportSink, when response message is available</summary>
+    /// <param name="resultStream">the response message, if everything went ok, otherwise null</param>
+    /// <param name="resultException">the exception, if something was not ok, othersise null</param>
+    internal delegate void AsyncResponseAvailableCallBack(IClientChannelSinkStack sinkStack, GiopClientConnection con,
+                                                          Stream resultStream, Exception resultException);
+
+    
     /// <summary>
     /// this class is the client side transport sink of the IIOPChannel
     /// </summary>
@@ -74,14 +81,6 @@ namespace Ch.Elca.Iiop {
             }
         }
         
-        /// <summary>the connection manager to use for this channel; 
-        /// manages all connections opened by this channel.</summary>
-        internal GiopClientConnectionManager ConnectionManager {
-            get {
-                return m_conManager;
-            }
-        }
-
         public System.Collections.IDictionary Properties {
             get {
                 return m_properties;
@@ -110,45 +109,48 @@ namespace Ch.Elca.Iiop {
                                         ITransportHeaders headers, Stream requestStream) {
             // this is the last sink in the chain, therefore the call is not forwarded, instead the request is sent
             GiopClientConnection clientCon = GetClientConnection(msg);
-            Stream transportStream = clientCon.ClientTransport.TransportStream;                        
-            GiopTransportClientMsgHandler giopTransport =
-                new GiopTransportClientMsgHandler(transportStream, clientCon.Desc);
-
-            giopTransport.ProcessRequest(requestStream); // send the request
-            
-            // wait only for response, if not oneway!
+            GiopTransportMessageHandler handler = clientCon.TransportHandler;
+            uint reqNr = (uint)msg.Properties[SimpleGiopMsg.REQUEST_ID_KEY];
             if (!GiopMessageHandler.IsOneWayCall((IMethodCallMessage)msg)) {
-            
-                uint reqNr = (uint)msg.Properties[SimpleGiopMsg.REQUEST_ID_KEY];
-                // now initate asynchronous response listener
-                AsyncResponseWaiter waiter = new AsyncResponseWaiter(sinkStack, giopTransport, reqNr, 
-                                                                     new DataAvailableCallBack(this.AsyncResponseArrived));
-                waiter.StartWait(); // this call is non-blocking
-            }
+                handler.SendRequestMessageAsync(requestStream, reqNr, 
+                                                new AsyncResponseAvailableCallBack(this.AsyncResponseArrived),
+                                                sinkStack, clientCon);
+            } else {
+                handler.SendRequestMessageOneWay(requestStream, reqNr);
+            }                        
         }
 
         public void ProcessMessage(IMessage msg, ITransportHeaders requestHeaders, Stream requestStream,
                                    out ITransportHeaders responseHeaders, out Stream responseStream) {
             // called by the chain, chain expect response-stream and headers back
             GiopClientConnection clientCon = GetClientConnection(msg);
-            Stream transportStream = clientCon.ClientTransport.TransportStream;
-            GiopTransportClientMsgHandler giopTransport =
-                new GiopTransportClientMsgHandler(transportStream, clientCon.Desc);
-            responseStream = giopTransport.ProcessRequestSynchronous(requestStream,
-                                              (uint)msg.Properties[SimpleGiopMsg.REQUEST_ID_KEY],
-                                              out responseHeaders);
+            GiopTransportMessageHandler handler = clientCon.TransportHandler;
+            // send request and wait for response
+            responseHeaders = new TransportHeaders();
+            responseHeaders[GiopConnectionDesc.CLIENT_TR_HEADER_KEY]= clientCon.Desc; // add to response headers            
+            uint reqNr = (uint)msg.Properties[SimpleGiopMsg.REQUEST_ID_KEY];
+            responseStream = handler.SendRequestSynchronous(requestStream, reqNr);
+            responseStream.Seek(0, SeekOrigin.Begin); // assure stream is read from beginning in formatter
             // the previous sink in the chain does further process this response ...
         }
 
         /// <summary>call back to call, when the async response has arrived.</summary>
-        private void AsyncResponseArrived(GiopTransportClientMsgHandler giopTransport, 
-                                          IClientChannelSinkStack sinkStack,
-                                          uint reqNr) {
-            ITransportHeaders responseHeaders;
-            Stream responseStream =
-                giopTransport.ProcessResponse(reqNr, out responseHeaders);
+        private void AsyncResponseArrived(IClientChannelSinkStack sinkStack, GiopClientConnection con,
+                                          Stream responseStream, Exception resultException) {
+            ITransportHeaders responseHeaders = new TransportHeaders();
+            responseHeaders[GiopConnectionDesc.CLIENT_TR_HEADER_KEY]= con.Desc; // add to response headers            
+
             // forward the response
-            sinkStack.AsyncProcessResponse(responseHeaders, responseStream);
+            if ((resultException == null) && (responseStream != null)) {
+                responseStream.Seek(0, SeekOrigin.Begin); // assure stream is read from beginning in formatter
+                sinkStack.AsyncProcessResponse(responseHeaders, responseStream);
+            } else {
+                Exception toThrow = resultException;
+                if (toThrow == null) {
+                    toThrow = new omg.org.CORBA.INTERNAL(79, omg.org.CORBA.CompletionStatus.Completed_MayBe);
+                }
+                sinkStack.DispatchException(toThrow);
+            }                        
         }
 
         public void AsyncProcessResponse(System.Runtime.Remoting.Channels.IClientResponseChannelSinkStack sinkStack, object state, System.Runtime.Remoting.Channels.ITransportHeaders headers, System.IO.Stream stream) {
@@ -171,7 +173,7 @@ namespace Ch.Elca.Iiop {
     /// <summary>
     /// this class is the server side transport sink for the IIOPChannel
     /// </summary>
-    public class IiopServerTransportSink : IServerChannelSink {
+    public class IiopServerTransportSink : IServerChannelSink, IGiopRequestMessageReceiver {
 
         #region IFields
     
@@ -209,30 +211,85 @@ namespace Ch.Elca.Iiop {
         #region IMethods
         
         /// <summary>
-        /// processes an incoming request
+        /// process a giop request
         /// </summary>
-        /// <param name="giopTransportMsgHandler">
-        /// Knows, how to process Giop-Messages.
-        /// </param>
-        /// <returns>true, if more messages can be read, otherwise false</returns>
-        internal bool Process(GiopTransportServerMsgHandler giopTransportMsgHandler) {
-                                                          
-            // read in the message
-            GiopTransportServerMsgHandler.HandlingResult result = 
-                giopTransportMsgHandler.ProcessIncomingMsg();
-            if (result == GiopTransportServerMsgHandler.HandlingResult.AsyncReply) {
-               // wait for async response               
-               Debug.WriteLine("AsyncReply: wait for async response");
-               m_waitForAsyncComplete.WaitOne();
-               Debug.WriteLine("AsyncReply: response sent");
-               // now, can read next messages
-               return true;
-            } else if (result == GiopTransportServerMsgHandler.HandlingResult.ConnectionClose) {
-                return false;    
-            } else {
-                return true;
+        /// <param name="requestStream">the request stream</param>
+        /// <remarks>is called by GiopTransportMessageHandler</remarks>
+        public void ProcessRequest(Stream requestStream, GiopTransportMessageHandler transportHandler,
+                                   GiopConnectionDesc conDesc) {
+            Trace.WriteLine("Process request");
+#if DEBUG
+            requestStream.Seek(0, SeekOrigin.Begin); // assure stream is read from beginning in formatter
+            byte[] data = new byte[requestStream.Length];
+            requestStream.Read(data, 0, (int)requestStream.Length);
+            OutputHelper.DebugBuffer(data);
+#endif
+
+            requestStream.Seek(0, SeekOrigin.Begin); // assure stream is read from beginning in formatter
+            // the out params returned form later sinks
+            IMessage responseMsg;
+            ITransportHeaders responseHeaders;
+            Stream responseStream;
+            
+            // create the sink stack for async processing of message
+            ServerChannelSinkStack sinkStack = new ServerChannelSinkStack();
+            sinkStack.Push(this, transportHandler);
+            // empty transport headers for this protocol
+            ITransportHeaders requestHeaders = new TransportHeaders();
+            requestHeaders[GiopConnectionDesc.SERVER_TR_HEADER_KEY] = conDesc;
+            requestHeaders[CommonTransportKeys.IPAddress] = transportHandler.GetPeerAddress();
+            
+            // next sink will process the request-message
+            ServerProcessing result = 
+                NextChannelSink.ProcessMessage(sinkStack, null, /* no RequestMessage in transport handler */
+                                               requestHeaders, requestStream, 
+                                               out responseMsg, out responseHeaders,
+                                               out responseStream);
+            switch (result) {
+                case ServerProcessing.Complete :
+                    try { 
+                        sinkStack.Pop(this); 
+                    } catch (Exception) { }                    
+                    transportHandler.SendResponse(responseStream);
+                    break;                    
+                case ServerProcessing.Async : 
+                    sinkStack.StoreAndDispatch(this, transportHandler); // this sink wants to handle response
+                    // no reply, async
+                    break;
+                case ServerProcessing.OneWay :
+                    try { 
+                        sinkStack.Pop(this); 
+                    } catch (Exception) { }
+                    // no message to send
+                    break;
+                default:
+                    // should not arrive here
+                    throw new Exception("invalid processing state: " + result);
             }                        
         }
+        
+        /// <summary>
+        /// process a giop locate request
+        /// </summary>
+        /// <param name="requestStream">the request stream</param>
+        /// <remarks>is called by GiopTransportMessageHandler</remarks>
+        public void ProcessLocateRequest(Stream requestStream, GiopTransportMessageHandler transportHandler,
+                                         GiopConnectionDesc conDesc) {
+            Trace.WriteLine("Process Locate request");
+#if DEBUG
+            requestStream.Seek(0, SeekOrigin.Begin); // assure stream is read from beginning in formatter
+            byte[] data = new byte[requestStream.Length];
+            requestStream.Read(data, 0, (int)requestStream.Length);
+            OutputHelper.DebugBuffer(data);            
+#endif            
+            requestStream.Seek(0, SeekOrigin.Begin); // assure stream is read from beginning in GiopMessageHandler
+
+            GiopMessageHandler handler = GiopMessageHandler.GetSingleton();
+            Stream resultMsgStream = handler.HandleIncomingLocateRequestMessage(requestStream);            
+            transportHandler.SendResponse(resultMsgStream);
+            
+            Trace.WriteLine("Locate request processed");            
+        }                                        
         
         #region Implementation of IServerChannelSink
         public Stream GetResponseStream(IServerResponseChannelSinkStack sinkStack, object state,
@@ -249,11 +306,9 @@ namespace Ch.Elca.Iiop {
 
         public void AsyncProcessResponse(IServerResponseChannelSinkStack sinkStack, object state, 
                                          IMessage msg, ITransportHeaders headers, Stream stream) {
-            GiopTransportServerMsgHandler giopTransportMsgHandler =
-                 (GiopTransportServerMsgHandler) state;
-            giopTransportMsgHandler.SendResponseMessage(stream); // send the response
-            // stream is now available for processing next messages
-            m_waitForAsyncComplete.Set();
+            GiopTransportMessageHandler giopTransportMsgHandler =
+                 (GiopTransportMessageHandler) state;            
+            giopTransportMsgHandler.SendResponse(stream); // send the response
         }
 
         #endregion
@@ -310,121 +365,6 @@ namespace Ch.Elca.Iiop {
         }
 
         #endregion
-
-        #endregion IMethods
-
-    }
-
-    /// <summary>this delegate is used to call back the ClientTransportSink, when response data is available</summary>
-    internal delegate void DataAvailableCallBack(GiopTransportClientMsgHandler giopTransport, 
-                                                 IClientChannelSinkStack sinkStack,
-                                                 uint forReqId);
-    
-    /// <summary>
-    /// this class provide functionaly for waiting for an aync response
-    /// </summary>
-    internal class AsyncResponseWaiter {
-
-        #region IFields
-        
-        private GiopTransportClientMsgHandler m_giopTransport;
-        private IClientChannelSinkStack m_sinkStack;
-        private DataAvailableCallBack m_callBack;
-        private uint m_reqNr;
-
-        #endregion IFields
-        #region IConstructors
-        
-        public AsyncResponseWaiter(IClientChannelSinkStack sinkStack,
-                                   GiopTransportClientMsgHandler giopTransport,
-                                   uint reqNr, DataAvailableCallBack callBack) {
-            m_sinkStack = sinkStack;
-            m_giopTransport = giopTransport;
-            m_callBack = callBack;
-            m_reqNr = reqNr;
-        }
-
-        #endregion IConstructors
-        #region IMethods
-
-        /// <summary> waits asynchronously for data</summary>
-        internal void StartWait() {
-            ThreadStart start = new ThreadStart(this.WaitForData);
-            Thread waitForResult = new Thread(start);
-            waitForResult.Start();
-        }
-
-        /// <summary>wait for data on the stream</summary>
-        private void WaitForData() {
-            while (!(((NetworkStream)m_giopTransport.TransportStream).DataAvailable)) {
-                // let the other threads continue ...
-                Thread.Sleep(0);
-            }
-            // call back the handler
-            m_callBack(m_giopTransport, m_sinkStack, m_reqNr);
-        }
-
-        #endregion IMethods
-
-    }
-
-
-    /// <summary>
-    /// this class is responsible for reading requests out of a network-stream on the server side
-    /// </summary>
-    internal class ServerRequestHandler {
-
-        #region IFields
-        
-        private IServerTransport m_transport;
-        private IiopServerTransportSink m_transportSink;
-
-        #endregion IFields
-        #region IConstructors
-        
-        public ServerRequestHandler(IServerTransport transport, IiopServerTransportSink transportSink) {
-            m_transport = transport;
-            m_transportSink = transportSink;
-        }
-
-        #endregion IConstructors
-        #region IMethods
-
-        public void StartMsgHandling() {
-            ThreadStart start = new ThreadStart(this.HandleRequests);
-            Thread handleThread = new Thread(start);
-            // do not prevent main thread from exiting on app end:
-            handleThread.IsBackground = true;
-            handleThread.Name = "IIOPNet_ServerChannel_RequestHandler";
-            handleThread.Start();
-        }
-
-        private void HandleRequests() {
-            bool connected = true;            
-            
-            GiopTransportServerMsgHandler serverMsgHandler = 
-                new GiopTransportServerMsgHandler(m_transport, m_transportSink);
-            while (connected) {
-                try {
-                    bool okToReceiveMore = 
-                        m_transportSink.Process(serverMsgHandler);
-                    if (!okToReceiveMore) {
-                        // close connection
-                        m_transport.CloseConnection();
-                        connected = false;
-                    }                    
-                } catch (Exception e) {
-                    connected = false;
-                    if (!m_transport.IsConnectionCloseException(e)) {
-                        Debug.WriteLine("unhandled exception in handle-requests: " + e);
-                        Debug.WriteLine("inner-exception: " + e.InnerException);                    
-                        try { 
-                            m_transport.CloseConnection();
-                        } catch (Exception) { }
-                    }
-                }
-            }            
-        }
 
         #endregion IMethods
 

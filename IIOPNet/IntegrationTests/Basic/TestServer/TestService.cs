@@ -27,6 +27,7 @@
 
 
 using System;
+using System.Runtime.Remoting.Messaging;
 using Ch.Elca.Iiop.Idl;
 using omg.org.CORBA;
 
@@ -560,6 +561,18 @@ namespace Ch.Elca.Iiop.IntegrationTests {
             throw new NotSupportedException("test-ex");
         }
 
+        [ContextElement("element1")]
+        [return: StringValue()]
+        [return: WideChar(false)]
+        public string TestContextElementPassing() {
+            string result = "";
+            CorbaContextElement elem = CallContext.GetData("element1") as CorbaContextElement;
+            if (elem != null) {
+                result = elem.ElementValue;
+            }
+            return result;
+        }
+
         public bool TestPropWithGetUserException {
             get {
                 TestException testEx = new TestException();
@@ -688,6 +701,28 @@ namespace Ch.Elca.Iiop.IntegrationTests {
             this.code = code;
         }
 
+    }
+
+
+    [SupportedInterface(typeof(TestBoxedValuetypeService))]
+    public class TestBoxedValuetypeServiceImpl : MarshalByRefObject, TestBoxedValuetypeService {
+
+        
+        [return: BoxedValueAttribute("IDL:Ch.Elca.Iiop.IntegrationTests.boxed_string:1.0")]
+        public string EchoBoxedString([BoxedValueAttribute("IDL:Ch.Elca.Iiop.IntegrationTests.boxed_string:1.0")] string arg) {
+            return arg;
+        }
+
+        [return: BoxedValueAttribute("IDL:Ch.Elca.Iiop.IntegrationTests.boxed_TestStruct:1.0")]
+        public Test EchoBoxedStruct([BoxedValueAttribute("IDL:Ch.Elca.Iiop.IntegrationTests.boxed_TestStruct:1.0")] Test arg) {
+            return arg;
+        }
+        
+        public override object InitializeLifetimeService() {
+            // live forever
+            return null;
+        }
+        
     }
 
 }

@@ -39,12 +39,27 @@ namespace Ch.Elca.Iiop {
         #region IFields
 
         private uint m_last = 5;
+        
+        private uint m_increment = 1;
 
         #endregion IFields
         #region IConstructors
         
+        /// <summary>
+        /// creates sequential numbers.
+        /// </summary>
         internal GiopRequestNumberGenerator() {
         }
+        
+        /// <summary>
+        /// creates only even or non-even numbers.
+        /// </summary>        
+        internal GiopRequestNumberGenerator(bool evenOrNonEven) {
+            m_increment = 2;
+            if (evenOrNonEven) {
+                m_last = 6;
+            }
+        }        
 
         #endregion IConstructors
         #region IMethods
@@ -54,7 +69,7 @@ namespace Ch.Elca.Iiop {
         internal uint GenerateRequestId() {
             if (IsAbleToGenerateNext()) {
                 uint result = m_last;
-                m_last++;
+                m_last = m_last + m_increment;
                 return result;
             } else {
                 // overflow

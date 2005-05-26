@@ -1,7 +1,7 @@
 /*
  *   Mentalis.org Security Library
  * 
- *     Copyright © 2002-2004, The KPD-Team
+ *     Copyright © 2002-2005, The KPD-Team
  *     All rights reserved.
  *     http://www.mentalis.org/
  *
@@ -300,6 +300,7 @@ namespace Org.Mentalis.Security.Ssl {
 		/// <exception cref="ArgumentNullException"><paramref name="buffer"/> is a null reference (<b>Nothing</b> in Visual Basic).</exception>
 		/// <exception cref="ArgumentOutOfRangeException">The specified <paramref name="offset"/> or <paramref name="size"/> exceeds the size of <paramref name="buffer"/>.</exception>
 		/// <exception cref="IOException">There is a failure while writing to the network.</exception>
+		// Thanks go out to Martin Plante for notifying us about a bug in this method.
 		public override IAsyncResult BeginWrite(byte[] buffer, int offset, int size, AsyncCallback callback, object state) {
 			if (buffer == null)
 				throw new ArgumentNullException();
@@ -309,11 +310,12 @@ namespace Org.Mentalis.Security.Ssl {
 				throw new IOException();
 			if (WriteResult != null)
 				throw new IOException();
-			WriteResult = new TransferItem(new byte[size], 0, size, new AsyncResult(callback, state, null), DataType.ApplicationData);
-			Array.Copy(buffer, offset, WriteResult.Buffer, 0, size);
+			TransferItem localResult = new TransferItem(new byte[size], 0, size, new AsyncResult(callback, state, null), DataType.ApplicationData);
+			WriteResult = localResult;
+			Array.Copy(buffer, offset, localResult.Buffer, 0, size);
 			try {
-				Socket.BeginSend(WriteResult.Buffer, 0, size, SocketFlags.None, new AsyncCallback(OnBytesSent), (int)0);
-				return WriteResult.AsyncResult;
+				Socket.BeginSend(localResult.Buffer, 0, size, SocketFlags.None, new AsyncCallback(OnBytesSent), (int)0);
+				return localResult.AsyncResult;
 			} catch {
 				throw new IOException();
 			}

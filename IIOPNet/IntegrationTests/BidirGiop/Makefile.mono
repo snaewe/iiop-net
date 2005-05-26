@@ -1,0 +1,8 @@
+build:
+    $(MAKE) -C SingleThreaded build -f Makefile.mono
+
+test:
+    $(MAKE) -C SingleThreaded test -f Makefile.mono
+
+clean:
+    $(MAKE) -C SingleThreaded clean -f Makefile.mono

@@ -851,4 +851,43 @@ namespace Ch.Elca.Iiop.Idl {
 
     }
 
+
+    [AttributeUsage(AttributeTargets.Method, AllowMultiple = true)]
+    public sealed class ContextElementAttribute : Attribute, IIdlAttribute {
+
+        #region IFields
+
+        private string m_contextElementKey;
+
+        #endregion IFields
+        #region IConstructors
+
+        public ContextElementAttribute(string contextElementKey) {
+            m_contextElementKey = contextElementKey;
+        }
+
+        #endregion IConstructors
+        #region IProperties
+
+        public string ContextElementKey {
+            get {
+                return m_contextElementKey;
+            }
+        }
+
+        #endregion IProperties
+        #region IMethods
+
+        /// <summary>creates an attribute builder for this custom attribute</summary>
+        public CustomAttributeBuilder CreateAttributeBuilder() {
+            Type attrType = this.GetType();
+            ConstructorInfo attrConstr = attrType.GetConstructor(new Type[] { ReflectionHelper.StringType });
+            CustomAttributeBuilder result = new CustomAttributeBuilder(attrConstr, new Object[] { m_contextElementKey });
+            return result;
+        }
+
+        #endregion IMethods
+
+    }
+
 }

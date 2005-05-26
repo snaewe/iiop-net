@@ -388,8 +388,7 @@ namespace Ch.Elca.Iiop.Marshalling {
                 ior = IiopUrlUtil.CreateIorForObjectFromThisDomain(target);
             }
 
-            Debug.WriteLine("connection information for objRef, host: " + ior.HostName + ", port: " +
-                            ior.Port + ", objKey-length: " + ior.ObjectKey.Length); 
+            Debug.WriteLine("connection information for objRef, nr of profiles: " + ior.Profiles.Length);
 
             // now write the IOR to the stream
             ior.WriteToStream(targetStream);

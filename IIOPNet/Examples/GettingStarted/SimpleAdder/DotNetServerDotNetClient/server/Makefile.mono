@@ -1,3 +1,4 @@
+CSC=gmcs
 CLS2IDL     = mono ../../../../../CLSToIDLGenerator/bin/CLSIDLGenerator.exe
 IIOPCHANNEL = ../../../../../IIOPChannel/bin/IIOPChannel.dll
 bin         = bin/
@@ -19,10 +20,10 @@ $(bin)IIOPChannel.dll: $(IIOPCHANNEL)
 	cp $(IIOPCHANNEL) $(bin)IIOPChannel.dll
 
 $(COMMONDLL): $(bin)IIOPChannel.dll NAdder.cs
-	mcs $(CSFLAGS) /t:library /out:$@ /r:$(bin)IIOPChannel.dll NAdder.cs
+	$(CSC) $(CSFLAGS) /t:library /out:$@ /r:$(bin)IIOPChannel.dll NAdder.cs
 
 $(SERVEREXE): $(bin)IIOPChannel.dll $(COMMONDLL) NAdderServer.cs
-	mcs $(CSFLAGS) /t:exe /out:$@ /r:$(bin)IIOPChannel.dll /r:$(COMMONDLL) NAdderServer.cs
+	$(CSC) $(CSFLAGS) /t:exe /out:$@ /r:$(bin)IIOPChannel.dll /r:$(COMMONDLL) NAdderServer.cs
 
 build-idl: $(IDL) $(IDL)$(IDLPath).idl $(COMMONDLL) 
 

@@ -1,3 +1,4 @@
+CSC=gmcs
 IIOPCHANNEL = ../../../IIOPChannel/bin/IIOPChannel.dll
 LAUNCH = ../../Utils/launch.exe
 KILL = ../../Utils/kill.exe
@@ -18,10 +19,10 @@ $(bin)TestUnionNotForClient.dll: TestUnionNotPresentClient.idl
 	mono ../../../IDLToCLSCompiler/IDLCompiler/bin/IDLToCLSCompiler.exe -o $(bin) TestUnionNotForClient TestUnionNotPresentClient.idl
 
 $(bin)TestServiceCommon.dll: $(bin)IIOPChannel.dll $(bin)TestUnion.dll TestServiceCommon.cs
-	mcs $(CSFLAGS) /t:library /r:$(bin)TestUnion.dll /r:$(bin)IIOPChannel.dll /out:$(bin)TestServiceCommon.dll TestServiceCommon.cs
+	$(CSC) $(CSFLAGS) /t:library /r:$(bin)TestUnion.dll /r:$(bin)IIOPChannel.dll /out:$(bin)TestServiceCommon.dll TestServiceCommon.cs
 
 $(bin)TestServer.exe: $(bin)IIOPChannel.dll $(bin)TestServiceCommon.dll $(bin)TestUnion.dll $(bin)TestUnionNotForClient.dll TestServer.cs TestService.cs
-	mcs $(CSFLAGS) /t:exe /r:$(bin)IIOPChannel.dll /r:$(bin)TestUnion.dll /r:$(bin)TestUnionNotForClient.dll /r:$(bin)TestServiceCommon.dll /out:$(bin)TestServer.exe TestServer.cs TestService.cs
+	$(CSC) $(CSFLAGS) /t:exe /r:$(bin)IIOPChannel.dll /r:$(bin)TestUnion.dll /r:$(bin)TestUnionNotForClient.dll /r:$(bin)TestServiceCommon.dll /out:$(bin)TestServer.exe TestServer.cs TestService.cs
 
 start-server:
 	@mono $(LAUNCH) mono bin/TestServer.exe >> pid

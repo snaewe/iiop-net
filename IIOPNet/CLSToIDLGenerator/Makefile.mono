@@ -1,4 +1,5 @@
 Key=../Key.snk
+CSC=gmcs
 IIOPChannel=../IIOPChannel/bin/IIOPChannel.dll
 Dest=bin/
 
@@ -11,7 +12,8 @@ $(Dest)IIOPChannel.dll: $(IIOPChannel)
 	cp $(IIOPChannel) $@
 
 $(Dest)CLSIDLGenerator.exe: $(Dest)IIOPChannel.dll *.cs $(Key)
-	mcs $(CSFLAGS) /r:$(Dest)IIOPChannel.dll /t:exe /out:$@ *.cs 
+	$(CSC) $(CSFLAGS) /r:$(Dest)IIOPChannel.dll /t:exe /out:$@ *.cs 
+
 
 clean:
 	rm -fr $(Dest)

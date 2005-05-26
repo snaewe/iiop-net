@@ -1,0 +1,5 @@
+This integration test checks support for bidirection giop (multiple concurrent client threads).
+
+
+
+

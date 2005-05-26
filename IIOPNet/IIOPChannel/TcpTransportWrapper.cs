@@ -37,13 +37,21 @@ using System.Diagnostics;
 using System.Collections;
 using Ch.Elca.Iiop.CorbaObjRef;
 using omg.org.CORBA;
+using omg.org.IOP;
 
 namespace Ch.Elca.Iiop {
 
 
     /// <summary>Base class for tcp transports</summary>
-    internal class TcpTransportBase : ITransport {
-                        
+    internal abstract class TcpTransportBase : ITransport {
+
+        #region SFields
+        
+        private static System.Reflection.PropertyInfo s_tcpClientClientPropertyInfo =
+            typeof(TcpClient).GetProperty("Client",
+                System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+        
+        #endregion SFields
         #region IFields
         
         protected NetworkStream m_stream;
@@ -70,12 +78,53 @@ namespace Ch.Elca.Iiop {
         /// <summary><see cref="Ch.Elca.Iiop.ITranport.CloseConnection/></summary>
         public void CloseConnection() {
             try {
-                m_stream.Close(); // close the stream and the socket.
-            } catch (Exception) { }
-            try {
                 m_socket.Close();
             } catch (Exception) {}
             m_socket = null;
+            try {
+                m_stream.Close(); // close the stream and the socket.
+            } catch (Exception) { }
+        }
+        
+        public IAsyncResult BeginRead(byte[] buffer, int offset, int size, AsyncCallback callback, object state) {
+            return m_stream.BeginRead(buffer, offset, size, callback, state);
+        }
+
+        public IAsyncResult BeginWrite(byte[] buffer, int offset, int size, AsyncCallback callback, object state) {
+            return m_stream.BeginWrite(buffer, offset, size, callback, state);
+        }
+        
+        public int EndRead(IAsyncResult asyncResult) {
+            return m_stream.EndRead(asyncResult);
+        }
+        
+        public void EndWrite(IAsyncResult asyncResult) {
+            m_stream.EndWrite(asyncResult);
+        }
+        
+        /// <summary><see cref="Ch.Elca.Iiop.ITransport.GetPeerAddress"/></summary>
+        public IPAddress GetPeerAddress() {
+            if (m_socket != null) {
+                Socket socket = (Socket)s_tcpClientClientPropertyInfo.GetValue(m_socket, null);
+                return ((IPEndPoint)socket.RemoteEndPoint).Address;
+            } else {
+                // not ok to call if no connection available
+                throw new omg.org.CORBA.BAD_OPERATION(87, CompletionStatus.Completed_MayBe);
+            }
+        }
+        
+        /// <summary><see cref="Ch.Elca.Iiop.IClientTranport.IsConnectionOpen/></summary>
+        public bool IsConnectionOpen() {
+            if (m_socket == null) {
+                return false;
+            } else {
+                try {
+                    m_socket.GetStream(); // TODO, search a better way to do this
+                } catch (Exception) {
+                    return false;
+                }                                
+                return true; 
+            }
         }
         
         #endregion IMethods
@@ -157,21 +206,7 @@ namespace Ch.Elca.Iiop {
             m_socket.SendTimeout = m_sendTimeOut;
             m_stream = m_socket.GetStream();
         }
-                
-        /// <summary><see cref="Ch.Elca.Iiop.IClientTranport.IsConnectionOpen/></summary>
-        public bool IsConnectionOpen() {
-            if (m_socket == null) {
-                return false;
-            } else {
-                try {
-                    m_socket.GetStream(); // TODO, search a better way to do this
-                } catch (Exception) {
-                    return false;
-                }                                
-                return true; 
-            }
-        }                
-        
+                        
         #endregion IMethods
         
     }
@@ -182,11 +217,7 @@ namespace Ch.Elca.Iiop {
         #region SFields
         
         private static Type s_socketExType = typeof(SocketException);
-        
-        private static System.Reflection.PropertyInfo s_tcpClientClientPropertyInfo =
-            typeof(TcpClient).GetProperty("Client",
-                System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
-        
+                
         #endregion SFields
         #region IConstructors
         
@@ -202,13 +233,7 @@ namespace Ch.Elca.Iiop {
         public bool IsConnectionCloseException(Exception e) {
             return s_socketExType.IsInstanceOfType(e.InnerException);            
         }
-        
-        /// <summary><see cref="Ch.Elca.Iiop.IServerTransport.GetClientAddress"/></summary>
-        public IPAddress GetClientAddress() {
-            Socket socket = (Socket)s_tcpClientClientPropertyInfo.GetValue(m_socket, null);
-            return ((IPEndPoint)socket.RemoteEndPoint).Address;
-        }
-                
+                        
         #endregion IMethods
         
     }        
@@ -226,26 +251,50 @@ namespace Ch.Elca.Iiop {
         #endregion IFields
         #region IMethods
         
-        /// <summary><see cref="Ch.Elca.Iiop.IClientTransportFactory.CreateTransport(Ior)"/></summary>
-        public IClientTransport CreateTransport(Ior target) {
-            IPAddress asIpAddress = ConvertToIpAddress(target.HostName);
-            IClientTransport result;
-            if (asIpAddress == null) {
-                result = new TcpClientTransport(target.HostName, target.Port);
+        /// <summary><see cref="Ch.Elca.Iiop.IClientTransportFactory.CreateTransport(IIorProfile)"/></summary>
+        public IClientTransport CreateTransport(IIorProfile targetProfile) {
+            if (targetProfile.ProfileId == TAG_INTERNET_IOP.ConstVal) {
+                IInternetIiopProfile iiopProf = (IInternetIiopProfile)targetProfile;
+                IPAddress asIpAddress = ConvertToIpAddress(iiopProf.HostName);
+                IClientTransport result;
+                if (asIpAddress == null) {
+                    result = new TcpClientTransport(iiopProf.HostName, iiopProf.Port);
+                } else {
+                    result = new TcpClientTransport(asIpAddress, iiopProf.Port);
+                }
+                result.ReceiveTimeOut = m_receiveTimeOut;
+                result.SendTimeOut = m_sendTimeOut;
+                return result;            
             } else {
-                result = new TcpClientTransport(asIpAddress, target.Port);
+                throw new INTERNAL(3001, CompletionStatus.Completed_No);
             }
-            result.ReceiveTimeOut = m_receiveTimeOut;
-            result.SendTimeOut = m_sendTimeOut;
-            return result;
         }
         
         /// <summary>
-        /// <see cref="Ch.Elca.Iiop.IClientTransportFactory.CanCreateTransportForIor"/>op.IClientTransportFactory.CanCreateTransportForIor"/>
+        /// <see cref="Ch.Elca.Iiop.IClientTransportFactory.CanCreateTransportForIor"/>
         /// </summary>
         public bool CanCreateTranporForIor(Ior target) {
-            return (target.HostName != null) && (target.Port > 0);
+            for (int i = 0; i < target.Profiles.Length; i++) {
+                if (CanUseProfile(target.Profiles[i])) {
+                    return true;
+                }
+            }
+            return false;            
         }
+        
+        /// <summary>
+        /// <see cref="Ch.Elca.Iiop.IClientTransportFactory.CanUseProfile"/>
+        /// </summary>        
+        public bool CanUseProfile(IIorProfile profile) {
+            if (profile.ProfileId == TAG_INTERNET_IOP.ConstVal) {
+                IInternetIiopProfile iiopProf = (IInternetIiopProfile)profile;
+                if ((iiopProf.HostName != null) && (iiopProf.Port > 0)) {
+                    return true;
+                }
+            }
+            return false;
+        }
+
         
         /// <summary>
         /// returns the IPAddress if hostName is a valid ipAdress, otherwise returns null.
@@ -261,8 +310,30 @@ namespace Ch.Elca.Iiop {
         }        
         
         /// <summary><see cref="Ch.Elca.Iiop.IClientTransportFactory.GetEndpointKey(Ior)"/></summary>
-        public string GetEndpointKey(Ior target) {
-            return "iiop://"+target.HostName+":"+target.Port;
+        public string GetEndpointKey(IIorProfile target) {            
+            if (target.ProfileId ==  TAG_INTERNET_IOP.ConstVal) {
+                IInternetIiopProfile prof = (IInternetIiopProfile)target;
+                return "iiop://"+prof.HostName+":"+prof.Port;
+            } else {
+                return String.Empty;
+            }
+        }
+        
+        /// <summary><see cref="Ch.Elca.Iiop.IClientTransportFactory.GetEndPointKeyForBidirEndpoint(object)"/></summary>
+        public string GetEndPointKeyForBidirEndpoint(object endPoint) {
+            if (endPoint is omg.org.IIOP.ListenPoint) {
+                return "iiop://"+((omg.org.IIOP.ListenPoint)endPoint).ListenHost + ":" + 
+                                 ((omg.org.IIOP.ListenPoint)endPoint).ListenPort;
+            } else {
+                return null;
+            }
+        }
+
+        /// <summary><see cref="Ch.Elca.Iiop.IServerTransportFactory.GetListenPoints(object)"/></summary>        
+        public object[] GetListenPoints(IiopChannelData chanData) {
+            object[] result = new object[] { new omg.org.IIOP.ListenPoint(chanData.HostName,
+                                                                          (short)((ushort)chanData.Port)) };
+            return result;
         }
         
         /// <summary><see cref="Ch.Elca.Iiop.IServerTransportFactory.CreateConnectionListener"/></summary>
@@ -328,6 +399,8 @@ namespace Ch.Elca.Iiop {
                     } else {
                         Trace.WriteLine("acceptTcpClient hasn't worked");
                     }
+                } catch (ThreadAbortException) {
+                    throw;
                 } catch (Exception e) {
                     Debug.WriteLine("Exception in server listener thread: " + e);
                     if (client != null)  { 
@@ -353,14 +426,14 @@ namespace Ch.Elca.Iiop {
         }
         
         /// <summary><see cref="Ch.Elca.Iiop.IServerConnectionListener.StartListening"</summary>
-        public int StartListening(IPAddress bindTo, int listeningPortSuggestion, out ITaggedComponent[] additionalTaggedComponents) {
+        public int StartListening(IPAddress bindTo, int listeningPortSuggestion, out TaggedComponent[] additionalTaggedComponents) {
             if (!m_isInitalized) {
                 throw CreateNotInitalizedException();
             }
             if (m_listenerActive) {
                 throw CreateAlreadyListeningException();
             }
-            additionalTaggedComponents = new ITaggedComponent[0];
+            additionalTaggedComponents = new TaggedComponent[0];
             int resultPort = listeningPortSuggestion;            
             
             m_listener = new TcpListener(bindTo, listeningPortSuggestion);

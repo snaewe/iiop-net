@@ -36,6 +36,9 @@ using Ch.Elca.Iiop.Idl;
 using Ch.Elca.Iiop;
 using Ch.Elca.Iiop.CorbaObjRef;
 using Ch.Elca.Iiop.Util;
+using Ch.Elca.Iiop.Interception;
+using omg.org.PortableInterceptor;
+using omg.org.IOP;
 
 
 namespace omg.org.CORBA {
@@ -49,6 +52,12 @@ namespace omg.org.CORBA {
         
         /// <summary>takes a proxy and returns the IOR / corbaloc / ...</summary>
         string object_to_string(object obj);
+
+		
+        /// <summary>allows to access a small set of well defined local objects.></summary>
+        /// <remarks>currently supported are: CodecFactory and PICurrent.</remarks>
+        [ThrowsIdlException(typeof(omg.org.CORBA.ORB_package.InvalidName))]
+        object resolve_initial_references ([StringValue()][WideChar(false)] string identifier);
         
         #region Typecode creation operations
 
@@ -92,7 +101,7 @@ namespace omg.org.CORBA {
                 
         /// <summary>checks, if object supports the specified interface</summary>
         bool is_a(object proxy, Type type);
-        
+      
         /// <summary>checks, if object supports the specified interface</summary>
         bool is_a(object proxy, string repId);
         
@@ -100,6 +109,19 @@ namespace omg.org.CORBA {
         bool non_existent(object proxy);
         
         #endregion Pseude object operation helpers
+        #region Portable Interceptors
+	    
+        /// <summary>registers an initalizer for portable interceptors. The interceptors are
+        /// enabled by calling CompleteInterceptorRegistration.</summary>
+        void RegisterPortableInterceptorInitalizer(ORBInitalizer initalizer);
+	    
+        /// <summary>
+        /// completes registration of interceptors. 
+        /// Afterwards, the interceptors are enabled and are called during processing.
+        /// </summary>
+        void CompleteInterceptorRegistration();
+	    
+        #endregion Protable Interceptors
 
     }
     
@@ -112,9 +134,21 @@ namespace omg.org.CORBA {
         private static OrbServices s_singleton = new OrbServices();     
         
         #endregion SFields
+        #region IFields
+		
+        private IList m_orbInitalizers; 
+        private InterceptorManager m_interceptorManager;
+        private CodecFactory m_codecFactory;
+        private Ch.Elca.Iiop.Interception.PICurrentManager m_piCurrentManager;
+		
+        #endregion IFields
         #region IConstructors
         
         private OrbServices() {         
+            m_orbInitalizers = new ArrayList();
+            m_codecFactory = new CodecFactoryImpl();
+            m_piCurrentManager = new PICurrentManager();
+            m_interceptorManager = new InterceptorManager(this);
         }
         
         #endregion IConstructors
@@ -125,6 +159,45 @@ namespace omg.org.CORBA {
         }
         
         #endregion SMethods
+        #region IProperties
+		
+        /// <summary>
+        /// the manager responsible for managing the interceptors.
+        /// </summary>
+        internal InterceptorManager InterceptorManager {
+            get {
+                return m_interceptorManager;
+            }
+        }
+		
+        /// <summary>
+        /// returns the instance of the codec factory.
+        /// </summary>
+        internal CodecFactory CodecFactory {
+            get {
+                return m_codecFactory;
+            }
+        }
+		
+        /// <summary>
+        /// returns the thread-scoped instance of picurrent.
+        /// </summary>
+        internal Ch.Elca.Iiop.Interception.PICurrentImpl PICurrent {
+            get {
+                return m_piCurrentManager.GetThreadScopedCurrent();
+            }
+        }
+		
+        /// <summary>
+        /// returns the manager responsible for PICurrents.
+        /// </summary>
+        internal Ch.Elca.Iiop.Interception.PICurrentManager PICurrentManager {
+            get {
+                return m_piCurrentManager;
+            }
+        }
+		
+        #endregion IProperties
         #region IMethods
         
         
@@ -175,6 +248,19 @@ namespace omg.org.CORBA {
             } else {
                 // local object
                 return IiopUrlUtil.CreateIorForObjectFromThisDomain(mbr).ToString();
+            }
+        }
+
+        /// <summary>
+        /// <see cref="omg.org.CORBA.ORB.resolve_initial_references"/>
+        /// </summary>
+        public object resolve_initial_references ([StringValue()][WideChar(false)] string identifier) {
+            if (identifier == "CodecFactory") {
+                return CodecFactory;
+            } else if (identifier == "PICurrent") {
+                return PICurrent;
+            } else {
+                throw new omg.org.CORBA.ORB_package.InvalidName();
             }
         }
         
@@ -276,11 +362,50 @@ namespace omg.org.CORBA {
         }
         
         #endregion Pseude object operation helpers
+        #region Portable Interceptors
+	    
+        /// <summary>see <see cref="omg.org.CORBA.IOrbServices.RegisterPortableInterceptorInitalizer"</summary>
+        public void RegisterPortableInterceptorInitalizer(ORBInitalizer initalizer) {
+            lock(m_orbInitalizers.SyncRoot) {
+                m_orbInitalizers.Add(initalizer);
+            }
+        }
+	    
+        /// <summary>see <see cref="omg.org.CORBA.IOrbServices.CompleteInterceptorRegistration"</summary>
+        public void CompleteInterceptorRegistration() {
+            lock(m_orbInitalizers.SyncRoot) {
+                try {
+                    m_interceptorManager.CompleteInterceptorRegistration(m_orbInitalizers);
+                } finally {
+                    // not needed any more
+                    m_orbInitalizers.Clear();
+                }
+            }	        
+        }
+	    
+        #endregion Protable Interceptors
         
         #endregion IMethods
     
-    }
+    }        						
+
+}
+
+
+namespace omg.org.CORBA.ORB_package {
     
+    [RepositoryIDAttribute("IDL:omg.org/CORBA/ORB/InvalidName:1.0")]
+    [Serializable]
+    public class InvalidName : AbstractUserException {
+        
+        #region IConstructors
+
+        /// <summary>constructor needed for deserialisation</summary>
+        public InvalidName() { }
+
+        #endregion IConstructors
+
+    }    
     
 }
 

@@ -1,3 +1,4 @@
+CSC=gmcs
 Utils = launch.exe kill.exe delay.exe
 
 .SUFFIXES : .exe .cs
@@ -5,7 +6,7 @@ Utils = launch.exe kill.exe delay.exe
 build: $(Utils)
 
 .cs.exe:
-	mcs $(CSFLAGS) $<
+	$(CSC) $(CSFLAGS) $<
 
 clean:
 	rm -f kill.exe

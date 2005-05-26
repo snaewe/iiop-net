@@ -31,17 +31,24 @@
 using System;
 using System.Runtime.Remoting.Messaging;
 using System.Collections;
+using System.IO;
 using Ch.Elca.Iiop.Cdr;
 using Ch.Elca.Iiop.CorbaObjRef;
 using Ch.Elca.Iiop.Idl;
 using omg.org.CORBA;
+using omg.org.IOP;
 
 namespace Ch.Elca.Iiop.Services {
     
     
     [IdlStruct]
-    public struct CodeSetComponentData : ITaggedComponentData {
+    public struct CodeSetComponentData {
         
+        #region SFields
+        
+        public static Type ClassType = typeof(CodeSetComponentData);
+        
+        #endregion SFields        
         #region IFields
         
         public int NativeCharSet;
@@ -73,13 +80,11 @@ namespace Ch.Elca.Iiop.Services {
                 
     }
     
-
     /// <summary>
     /// This service handles code-set conversion.
     /// </summary>
-    [CLSCompliant(false)]
-    public class CodeSetService : CorbaService {
-
+    internal sealed class CodeSetService {
+    
         #region Constants
 
         public const int SERVICE_ID = 1;
@@ -98,26 +103,30 @@ namespace Ch.Elca.Iiop.Services {
         #endregion Constants
         #region IConstructors
         
-        public CodeSetService() {
+        private CodeSetService() {
         }
 
         #endregion IConstructors
-        #region IMethods
+        #region SMethods
+                       
+        /// <summary>
+        /// returns the code set component data or null if not found
+        /// </summary>
+        internal static object /* CodeSetComponentData */ FindCodeSetComponent(IIorProfile profile) {
+            TaggedComponentList list = profile.TaggedComponents;
+            object result = 
+                list.GetComponentData(TAG_CODE_SETS.ConstVal, CodeSetComponentData.ClassType);
+            if (result != null) {
+                return (CodeSetComponentData)result;
+            }            
+            return null;
+        }        
 
-        public override int GetServiceId() {
+        internal static int GetServiceId() {
             return SERVICE_ID;
         }
-
-        public override ServiceContext DeserialiseContext(CdrEncapsulationInputStream encap) {
-            return new CodeSetServiceContext(encap);
-        }
-
-        public override void HandleContextForReceivedReply(ServiceContext context,
-                                                           GiopConnectionDesc conDesc) {
-            // nothing to do at the moment
-        }
-
-        private void CheckCodeSetCompatible(int charSet, int wcharSet) {
+        
+        internal static void CheckCodeSetCompatible(int charSet, int wcharSet) {
             // check if acceptable: at the moment, the code-set establishment algorithm is not implemented
             if (!IsCharSetCompatible(charSet)) { 
                 throw new CODESET_INCOMPATIBLE(9501, CompletionStatus.Completed_No); 
@@ -127,7 +136,7 @@ namespace Ch.Elca.Iiop.Services {
             }            
         }
         
-        private bool IsWCharSetCompatible(int wcharSet) {
+        private static bool IsWCharSetCompatible(int wcharSet) {
             if ((wcharSet == UTF16_SET) || (wcharSet == ISO646IEC_MULTI)) { 
                 return true;
             } else {
@@ -135,7 +144,7 @@ namespace Ch.Elca.Iiop.Services {
             }
         }
         
-        private bool IsCharSetCompatible(int charSet) {
+        private static bool IsCharSetCompatible(int charSet) {
             if ((charSet == LATIN1_SET) || (charSet == ISO646IEC_SINGLE) || (charSet == UTF8_SET)) {
                 return true;
             } else {
@@ -143,33 +152,7 @@ namespace Ch.Elca.Iiop.Services {
             }
         }
         
-        private ITaggedComponent FindCodeSetComponent(IorProfile[] profiles) {
-            foreach (IorProfile profile in profiles) {
-                IList components = profile.TaggedComponents;
-                foreach (ITaggedComponent taggedComp in components) {
-                    if (taggedComp.Id == TaggedComponentIds.CODESET_COMPONENT_ID) {
-                        return taggedComp;
-                    }
-                }
-            }
-            return null;
-        }
-
-        public override void HandleContextForReceivedRequest(ServiceContext context,
-                                                             GiopConnectionDesc conDesc) {
-            if (context == null) { 
-                return; 
-            }
-            int charSet = ((CodeSetServiceContext) context).CharSet;
-            int wcharSet = ((CodeSetServiceContext) context).WCharSet;
-            CheckCodeSetCompatible(charSet, wcharSet);
-
-            // TODO: implement code set establishment-alg
-            conDesc.CharSet = charSet;
-            conDesc.WCharSet = wcharSet;
-        }
-        
-        private int ChooseCharSet(CodeSetComponentData codeSetComponent) {
+        internal static int ChooseCharSet(CodeSetComponentData codeSetComponent) {
             if (codeSetComponent.NativeCharSet == DEFAULT_CHAR_SET) {
                 // the same native char sets
                 return DEFAULT_CHAR_SET;
@@ -194,7 +177,7 @@ namespace Ch.Elca.Iiop.Services {
             throw new CODESET_INCOMPATIBLE(9501, CompletionStatus.Completed_No);
         }
         
-        private int ChooseWCharSet(CodeSetComponentData codeSetComponent) {
+        internal static int ChooseWCharSet(CodeSetComponentData codeSetComponent) {
             if (codeSetComponent.NativeWCharSet == DEFAULT_WCHAR_SET) {
                 // the same native wchar sets
                 return DEFAULT_WCHAR_SET;
@@ -217,46 +200,47 @@ namespace Ch.Elca.Iiop.Services {
                 }
             }
             throw new CODESET_INCOMPATIBLE(9502, CompletionStatus.Completed_No);
+        }        
+                        
+        /// <summary>
+        /// create a code set service context.
+        /// </summary>
+        internal static omg.org.IOP.ServiceContext CreateServiceContext(int charSet, int wcharSet) {
+            CodeSetServiceContext codeSetServiceContext = new CodeSetServiceContext(charSet, wcharSet);
+            return codeSetServiceContext.CreateServiceContext();
         }
-
-        public override ServiceContext InsertContextForReplyToSend(GiopConnectionDesc conDesc) {
-            // nothing to do ?
-            return null;
-        }
-
-        public override ServiceContext InsertContextForRequestToSend(IMethodCallMessage msg, Ior targetIor,
-                                                                     GiopConnectionDesc conDesc) {
-            int charSet = DEFAULT_CHAR_SET;
-            int wcharSet = DEFAULT_WCHAR_SET;
-            
-            ITaggedComponent codeSetComponent = FindCodeSetComponent(targetIor.Profiles);
-            if (codeSetComponent != null) {
-                charSet = ChooseCharSet((CodeSetComponentData)codeSetComponent.ComponentData);
-                wcharSet = ChooseWCharSet((CodeSetComponentData)codeSetComponent.ComponentData);
-            }
-            
-            // TODO: check for already established
-            conDesc.CharSet = charSet;
-            conDesc.WCharSet = wcharSet;
-            return new CodeSetServiceContext(charSet, wcharSet);
-        }
-
-        #endregion IMethods
         
+        /// <summary>
+        /// finds the code set service context among the collection of received service contexts.
+        /// </summary>
+        internal static CodeSetServiceContext FindCodeSetServiceContext(omg.org.IOP.ServiceContextList contexts) {                        
+            if (contexts.ContainsServiceContext(SERVICE_ID)) {
+                omg.org.IOP.ServiceContext context = contexts.GetServiceContext(SERVICE_ID);
+                return new CodeSetServiceContext(context);
+            } else {
+                return null;
+            }
+        }        
+        
+        /// <summary>
+        /// insert a codeset service context into the service context list.
+        /// </summary>
+        internal static void InsertCodeSetServiceContext(omg.org.IOP.ServiceContextList contexts,
+                                                         int charSet, int wcharSet) {
+            omg.org.IOP.ServiceContext context = CreateServiceContext(charSet, wcharSet);
+            contexts.AddServiceContext(context);
+        }                
+        
+        #endregion SMethods
+    
     }
-
+    
 
     /// <summary>
     /// the service context for the code set service
     /// </summary>
-    [CLSCompliant(false)]
-    public class CodeSetServiceContext : ServiceContext {
+    internal class CodeSetServiceContext {
         
-        #region Constants
-        
-        private const uint SERVICE_ID = CodeSetService.SERVICE_ID;
-
-        #endregion Constants
         #region IFields
         
         private int m_charSet;
@@ -265,12 +249,17 @@ namespace Ch.Elca.Iiop.Services {
         #endregion IFields
         #region IConstructors
 
-        public CodeSetServiceContext(int charSet, int wcharSet) : base((int)SERVICE_ID) {
+        internal CodeSetServiceContext(int charSet, int wcharSet) {
             m_charSet = charSet;
             m_wcharSet = wcharSet;    
         }
 
-        public CodeSetServiceContext(CdrEncapsulationInputStream encap) : base(encap, (int)SERVICE_ID) {
+        /// <summary>
+        /// create a codeSetServiceContext from the service context with the specified id.
+        /// </summary>
+        /// <param name="svcContext"></param>
+        internal CodeSetServiceContext(omg.org.IOP.ServiceContext svcContext) {
+            Deserialise(svcContext.context_data);
         }
 
 
@@ -297,15 +286,22 @@ namespace Ch.Elca.Iiop.Services {
                    ", wcharset: " + m_wcharSet;
         }
 
-        public override void Serialize(CdrOutputStream stream) {
-            stream.WriteULong(SERVICE_ID);
+        /// <summary>
+        /// create an IOP service context from the code set service context
+        /// </summary>
+        /// <returns></returns>
+        public omg.org.IOP.ServiceContext CreateServiceContext() {            
             CdrEncapsulationOutputStream encapStream = new CdrEncapsulationOutputStream(0);
             encapStream.WriteULong((uint)m_charSet);
-            encapStream.WriteULong((uint)m_wcharSet);
-            stream.WriteEncapsulation(encapStream);
+            encapStream.WriteULong((uint)m_wcharSet); 
+            return new omg.org.IOP.ServiceContext(CodeSetService.SERVICE_ID, 
+                                                  encapStream.GetEncapsulationData());            
         }
 
-        public override void Deserialize(CdrEncapsulationInputStream encap) {
+        private void Deserialise(byte[] contextData) {
+            MemoryStream inputStream = new MemoryStream(contextData);            
+            CdrEncapsulationInputStream encap = 
+                new CdrEncapsulationInputStream(contextData);
             m_charSet = (int)encap.ReadULong();
             m_wcharSet = (int)encap.ReadULong();
         }

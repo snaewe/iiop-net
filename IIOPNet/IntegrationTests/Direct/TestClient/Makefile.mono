@@ -1,3 +1,4 @@
+CSC=gmcs
 NUNIT=${NUNITV2_HOME}/bin/nunit.framework.dll
 IIOPCHANNEL = ../../../IIOPChannel/bin/IIOPChannel.dll
 TestService = ../TestServer/bin/TestServiceCommon.dll
@@ -19,7 +20,7 @@ $(bin)TestServiceCommon.dll: $(TestService)
 	cp $(TestService) $(bin)TestServiceCommon.dll
 
 $(bin)ClientTest.dll: $(bin)IIOPChannel.dll $(bin)TestUnion.dll $(bin)TestServiceCommon.dll *.cs
-	mcs $(CSFLAGS) /t:library /r:$(NUNIT) /r:$(bin)TestUnion.dll /r:$(bin)TestServiceCommon.dll /r:$(bin)IIOPChannel.dll /out:$(bin)/ClientTest.dll TestClient.cs
+	$(CSC) $(CSFLAGS) /t:library /r:$(NUNIT) /r:$(bin)TestUnion.dll /r:$(bin)TestServiceCommon.dll /r:$(bin)IIOPChannel.dll /out:$(bin)/ClientTest.dll TestClient.cs
 
 start-client:
 	@echo "Direct IntegrationTest"

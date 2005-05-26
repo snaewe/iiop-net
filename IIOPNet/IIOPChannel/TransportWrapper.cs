@@ -33,6 +33,7 @@ using System.IO;
 using System.Net;
 using System.Collections;
 using Ch.Elca.Iiop.CorbaObjRef;
+using omg.org.IOP;
 
 
 namespace Ch.Elca.Iiop {
@@ -58,7 +59,21 @@ namespace Ch.Elca.Iiop {
         /// <summary>closes the connection</summary>
         void CloseConnection();
         
-        #endregion IMethods                
+        /// <summary>is the connection to the peer open</summary>
+        bool IsConnectionOpen();        
+        
+        IAsyncResult BeginRead(byte[] buffer, int offset, int size, AsyncCallback callback, object state);
+
+        IAsyncResult BeginWrite(byte[] buffer, int offset, int size, AsyncCallback callback, object state);
+        
+        int EndRead(IAsyncResult asyncResult);
+        
+		void EndWrite(IAsyncResult asyncResult);
+		
+		/// <summary>returns the ip address of the client</summary>
+        IPAddress GetPeerAddress();
+        
+        #endregion IMethods
         
     }
     
@@ -68,10 +83,7 @@ namespace Ch.Elca.Iiop {
         
         /// <summary>opens a connection to the target, if not already open (when open do nothing)</summary>
         void OpenConnection();
-                
-        /// <summary>is the connection to the target open</summary>
-        bool IsConnectionOpen();
-        
+                        
         /// <summary>
         /// the receive timeout of the client connection (in ms); 0 means infinite timeout.
         /// </summary>
@@ -87,7 +99,6 @@ namespace Ch.Elca.Iiop {
             get;
             set;
         }
-
                 
     }
     
@@ -101,10 +112,7 @@ namespace Ch.Elca.Iiop {
                 
         /// <summary>Results the given exception from a connection close on client side</summary>
         bool IsConnectionCloseException(Exception e);
-        
-        /// <summary>returns the ip address of the client</summary>
-        IPAddress GetClientAddress();
-        
+                
     }
             
     
@@ -114,14 +122,23 @@ namespace Ch.Elca.Iiop {
     public interface IClientTransportFactory {
         
         /// <summary>creates a client transport to the target</summary>
-        IClientTransport CreateTransport(Ior target);
+        IClientTransport CreateTransport(IIorProfile target);
         
         /// <summary>creates a key identifying an endpoint; if two keys for two IORs are equal, 
         /// then the transport can be used to connect to both.</summary>
-        string GetEndpointKey(Ior target);
+        string GetEndpointKey(IIorProfile target);
+        
+        /// <summary>
+        /// creates a key identifying an endpoint received over a bidir connection; if two keys for two IORs are equal, 
+        /// then the transport can be used to connect to both.
+        /// </summary>
+        string GetEndPointKeyForBidirEndpoint(object endPoint);
         
         /// <summary>returns true, if this transport factory can create a transport for the given IOR, otherwise false</summary>
         bool CanCreateTranporForIor(Ior target);
+        
+        /// <summary>returns true, if this transport factory can connect with this profile, otherwise false.</summary>
+        bool CanUseProfile(IIorProfile profile);
         
         /// <summary>
         /// extract options, which are specific to the transport factory
@@ -148,6 +165,12 @@ namespace Ch.Elca.Iiop {
         /// extract options, which are specific to the transport factory
         /// </summary>        
         void SetupServerOptions(IDictionary options);
+        
+        /// <summary>
+        /// creates an array of listen points for the given channel data. This listen points are
+        /// sent to a foreign instance as endpoints for bidirectional connections.
+        /// </summary>
+        object[] GetListenPoints(IiopChannelData chanData);
     }
     
     /// <summary>creates client and server transports</summary>
@@ -176,7 +199,7 @@ namespace Ch.Elca.Iiop {
         /// Those additional components hold the additional information needed by clients to connect to this listener.
         /// Can contain an array with 0 elements, if default information in the IOR is enough.
         /// </param>
-        int StartListening(IPAddress bindTo, int listeningPortSuggestion, out ITaggedComponent[] additionalTaggedComponents);
+        int StartListening(IPAddress bindTo, int listeningPortSuggestion, out TaggedComponent[] additionalTaggedComponents);
         
         /// <summary>is this listener active</summary>
         bool IsListening();

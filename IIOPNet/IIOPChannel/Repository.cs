@@ -99,13 +99,6 @@ namespace Ch.Elca.Iiop.Idl {
         private static AssemblyCache s_asmCache = AssemblyCache.GetSingleton();
         private static TypeCache s_typeCache = new TypeCache();
 
-        // for efficiency reason: the evaluation of the following expressions is cached
-        private static Type s_repIdAttrType = typeof(RepositoryIDAttribute);
-        private static Type s_supInterfaceAttrType = typeof(SupportedInterfaceAttribute);
-
-
-
-
         #endregion SFields
         #region SMethods
 
@@ -314,12 +307,12 @@ namespace Ch.Elca.Iiop.Idl {
         /// <param name="type"></param>
         /// <returns></returns>
         public static string GetRepositoryID(Type type) {
-            object[] attr = type.GetCustomAttributes(s_repIdAttrType, true);    
+            object[] attr = type.GetCustomAttributes(ReflectionHelper.RepositoryIDAttributeType, true);    
             if (attr != null && attr.Length > 0) {
                 RepositoryIDAttribute repIDAttr = (RepositoryIDAttribute) attr[0];
                 return repIDAttr.Id;
             }
-            attr = type.GetCustomAttributes(s_supInterfaceAttrType, true);
+            attr = type.GetCustomAttributes(ReflectionHelper.SupportedInterfaceAttributeType, true);
             if (attr != null && attr.Length > 0) {
                 SupportedInterfaceAttribute repIDFrom = (SupportedInterfaceAttribute) attr[0];
                 Type fromType = repIDFrom.FromType;

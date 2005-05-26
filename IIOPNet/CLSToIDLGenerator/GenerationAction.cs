@@ -295,7 +295,8 @@ namespace Ch.Elca.Iiop.Idl {
         
         /// <summary>maps a method to IDL</summary>
         /// <param name="shouldThrowException">if true, generate a raise clause for method: GenericUserException</param>
-        private void MapMethod(MethodInfo methodToMap, Type declaringType, bool shouldThrowException) {
+        private void MapMethod(MethodInfo methodToMap, Type declaringType, bool shouldThrowException,
+                               bool shouldPassContext) {
             Type returnType = methodToMap.ReturnType;
 
             // check for oneway method
@@ -358,6 +359,20 @@ namespace Ch.Elca.Iiop.Idl {
 
                 m_currentOutputStream.Write(")");
             }
+            if (shouldPassContext) {
+                AttributeExtCollection contextAttributes =
+                    ReflectionHelper.GetCustomAttriutesForMethod(methodToMap, true,
+                                                                 ReflectionHelper.ContextElementAttributeType);
+                if (contextAttributes.Count > 0) {
+                    m_currentOutputStream.Write(" context (");
+                    string separator = "";
+                    foreach (ContextElementAttribute contextAttr in contextAttributes) {
+                        m_currentOutputStream.Write(separator + "\"" + contextAttr.ContextElementKey + "\"");
+                        separator = " ,";
+                    }
+                    m_currentOutputStream.Write(")");
+                }
+            }
             m_currentOutputStream.Write(";");
 
             m_currentOutputStream.WriteLine();
@@ -365,13 +380,14 @@ namespace Ch.Elca.Iiop.Idl {
 
         /// <summary>maps all the method of the Type typToMap, which are consistent with the bindingFlags</summary>
         /// <param name="shouldThrowException">if true, generate a raise clause for method: GenericUserException</param>
-        private void MapMethods(Type typToMap, bool shouldThrowException, BindingFlags flags) {
+        private void MapMethods(Type typToMap, bool shouldThrowException, bool shouldPassContext,
+                                BindingFlags flags) {
             MethodInfo[] methods = typToMap.GetMethods(flags);
             foreach (MethodInfo info in methods) { 
                 // private methods are not exposed
                 // specialName-methods are not mapped, e.g. property accessor methods are such methods
                 if ((!info.IsPrivate) && (!ReflectionHelper.CheckIsMethodInInterfaceOrBase(typToMap, info, flags)) && (!info.IsSpecialName)) { 
-                    MapMethod(info, typToMap, shouldThrowException);
+                    MapMethod(info, typToMap, shouldThrowException, shouldPassContext);
                 }
             }
         }
@@ -538,7 +554,7 @@ namespace Ch.Elca.Iiop.Idl {
             m_currentOutputStream.WriteLine(" {");
             
             // map the properties and methods
-            MapMethods(clsType, true, BindingFlags.Instance | BindingFlags.Public | BindingFlags.DeclaredOnly);
+            MapMethods(clsType, true, true, BindingFlags.Instance | BindingFlags.Public | BindingFlags.DeclaredOnly);
             MapProperties(clsType, BindingFlags.Instance | BindingFlags.Public | BindingFlags.DeclaredOnly);
             
             CloseOpenScopes(1); // close interface scope
@@ -667,7 +683,7 @@ namespace Ch.Elca.Iiop.Idl {
                                         BindingFlags.DeclaredOnly);
             
             // map the properties and methods
-            MapMethods(clsType, false, BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.DeclaredOnly);
+            MapMethods(clsType, false, false, BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.DeclaredOnly);
             MapProperties(clsType, BindingFlags.Instance | BindingFlags.Public | BindingFlags.DeclaredOnly);
 
             CloseOpenScopes(1); // close interface scope
@@ -704,7 +720,7 @@ namespace Ch.Elca.Iiop.Idl {
             m_currentOutputStream.WriteLine("");
             
             // map the properties and methods
-            MapMethods(clsType, true, BindingFlags.Instance | BindingFlags.Public | BindingFlags.DeclaredOnly);
+            MapMethods(clsType, true, true, BindingFlags.Instance | BindingFlags.Public | BindingFlags.DeclaredOnly);
             MapProperties(clsType, BindingFlags.Instance | BindingFlags.Public | BindingFlags.DeclaredOnly);
 
             CloseOpenScopes(1); // close interface scope
@@ -735,7 +751,7 @@ namespace Ch.Elca.Iiop.Idl {
             }
             m_currentOutputStream.WriteLine(" {");
             m_currentOutputStream.WriteLine("");
-            MapMethods(clsType, false, BindingFlags.Instance | BindingFlags.Public | 
+            MapMethods(clsType, false, false, BindingFlags.Instance | BindingFlags.Public | 
                            BindingFlags.NonPublic | BindingFlags.DeclaredOnly);
             
             CloseOpenScopes(1); // close interface scope

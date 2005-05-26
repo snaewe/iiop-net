@@ -1,0 +1,6 @@
+IDL
+*.class
+Callback*.java
+TestService*.java
+_*.java
+

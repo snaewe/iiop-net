@@ -1,0 +1,28 @@
+
+
+interface CallBack {
+
+  void call_back(in string mesg);
+
+};
+
+interface CallbackIntIncrementer {
+
+  long TestIncInt32(in long arg);
+
+};
+
+interface TestService {
+
+    octet TestIncByte(in octet arg);
+
+    void RegisterCallbackIntIncrementer(in CallbackIntIncrementer incrementer);
+    long IncrementWithCallbackIncrementer(in long arg);
+
+    void string_callback(in CallBack cb, in string mesg);
+
+}; 
+
+
+
+

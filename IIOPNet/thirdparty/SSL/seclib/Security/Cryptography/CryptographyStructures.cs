@@ -1,7 +1,7 @@
 /*
  *   Mentalis.org Security Library
  * 
- *     Copyright © 2002-2004, The KPD-Team
+ *     Copyright © 2002-2005, The KPD-Team
  *     All rights reserved.
  *     http://www.mentalis.org/
  *
@@ -44,6 +44,12 @@ namespace Org.Mentalis.Security.Cryptography {
 				return m_Provider.m_Handle;
 			}
 		}
+		public static int HandleProviderType {
+			get {
+				m_Provider.CreateInternalHandle(ref m_Provider.m_Handle, null);
+				return m_Provider.m_HandleProviderType;
+			}
+		}
 		public static int ContainerHandle {
 			get {
 				m_Provider.CreateInternalHandle(ref m_Provider.m_ContainerHandle, SecurityConstants.KEY_CONTAINER);
@@ -54,20 +60,33 @@ namespace Org.Mentalis.Security.Cryptography {
 			if (handle == 0) {
 				lock(this) {
 					if (handle == 0 && !m_Error) {
-						int flags = 0;
-						if (!Environment.UserInteractive && Environment.OSVersion.Platform == PlatformID.Win32NT && Environment.OSVersion.Version.Major >= 5)
-							flags = SecurityConstants.CRYPT_SILENT | SecurityConstants.CRYPT_MACHINE_KEYSET;
+						int flags, fs = 0, fmk = 0;
+						if (!Environment.UserInteractive && Environment.OSVersion.Platform == PlatformID.Win32NT && Environment.OSVersion.Version.Major >= 5) {
+							fs = SecurityConstants.CRYPT_SILENT;
+							fmk = SecurityConstants.CRYPT_MACHINE_KEYSET;
+						}
 						for(int i = 0; i < m_Providers.Length; i++) {
+							flags = fs | fmk;
+							m_HandleProviderType = m_Providers[i];
 							if (SspiProvider.CryptAcquireContext(ref handle, container, null, m_Providers[i], flags) == 0) {
 								if (Marshal.GetLastWin32Error() == SecurityConstants.NTE_BAD_KEYSET) {
 									SspiProvider.CryptAcquireContext(ref handle, container, null, m_Providers[i], flags | SecurityConstants.CRYPT_NEWKEYSET);
+								} else if(fmk != 0) {
+									flags = fs;
+									if (SspiProvider.CryptAcquireContext(ref handle, container, null, m_Providers[i], flags) == 0) {
+										if (Marshal.GetLastWin32Error() == SecurityConstants.NTE_BAD_KEYSET) {
+											SspiProvider.CryptAcquireContext(ref handle, container, null, m_Providers[i], flags | SecurityConstants.CRYPT_NEWKEYSET);
+										}
+									}
 								}
 							}
 							if (handle != 0)
 								break;
 						}
-						if (handle == 0)
+						if (handle == 0) {
 							m_Error = true;
+							m_HandleProviderType = 0;
+						}
 					}
 					if (m_Error)
 						throw new CryptographicException("Couldn't acquire crypto service provider context.");
@@ -83,6 +102,7 @@ namespace Org.Mentalis.Security.Cryptography {
 		private int m_Handle = 0;
 		private int m_ContainerHandle = 0;
 		private bool m_Error = false;
+		private int m_HandleProviderType = 0;
 		private static int[] m_Providers = new int[] {SecurityConstants.PROV_RSA_AES, SecurityConstants.PROV_RSA_FULL};
 		private static CAPIProvider m_Provider = new CAPIProvider();
 	}

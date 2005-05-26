@@ -28,41 +28,69 @@
  */
 
 
+using System;
 using System.Collections;
 using System.IO;
+using System.Diagnostics;
 using Ch.Elca.Iiop.Cdr;
 using Ch.Elca.Iiop.Util;
 
 namespace Ch.Elca.Iiop {
-
-    /// <summary>
-    /// this class manages and assembles fragmented 
-    /// messages for one connection
-    /// </summary>
-    internal sealed class FragmentedMsgAssembler {
     
+    
+    
+    /// <summary>
+    /// this class manages and assembles fragmented messages 
+    /// for one connection.
+    /// </summary>
+    internal sealed class FragmentedMessageAssembler {
+    
+
         #region Types
         
         private class FragmentedMsgDesc {
             
             #region IFields 
             
+            private Stream m_target;
+            /// <summary>
+            /// the header of the first msg fragment
+            /// </summary>
             private GiopHeader m_header;
-            private Stream m_target = new MemoryStream();
+            /// <summary>
+            /// the combined header for the whole message
+            /// </summary>
+            private GiopHeader m_newHeader;
             
             #endregion IFields
             #region IConstructors
             
-            internal FragmentedMsgDesc(GiopHeader header) {
-                m_header = header;    
+            internal FragmentedMsgDesc(CdrInputStreamImpl firstFragment, int nrOfBytesFromCurrentPos, 
+                                       GiopHeader header, uint reqId) {
+                m_target = new MemoryStream();
+                m_header = header;
+                CdrOutputStream outputStream = 
+                    header.WriteToStream(m_target, (uint)nrOfBytesFromCurrentPos); // place-holder header
+                outputStream.WriteULong(reqId); // add req-id, because already read
+                AddFragment(firstFragment, nrOfBytesFromCurrentPos);
+                
             }
             
             #endregion IConstructors
             #region IProperties
             
-            internal GiopHeader Header {
+            private GiopHeader Header {
                 get { 
                     return m_header;
+                }
+            }
+            
+            /// <summary>
+            /// the header for the whole message
+            /// </summary>
+            internal GiopHeader CombinedHeader {
+                get {
+                    return m_newHeader;
                 }
             }
             
@@ -73,163 +101,132 @@ namespace Ch.Elca.Iiop {
             }
             
             #endregion IProperties
+            #region IMethods
+            
+            internal void AddLastFragment(CdrInputStreamImpl fragmentToAdd, int nrOfBytesFromCurrentPos) {
+                AddFragment(fragmentToAdd, nrOfBytesFromCurrentPos);
+                // write adapted header
+                m_target.Seek(0, SeekOrigin.Begin);
+                m_newHeader = new GiopHeader(Header.Version.Major, 
+                                             Header.Version.Minor,
+                                             (byte)(Header.GiopFlags ^ GiopHeader.FRAGMENT_MASK),
+                                             Header.GiopType);
+                m_newHeader.WriteToStream(m_target, 
+                                          ((uint)m_target.Length) - GiopHeader.HEADER_LENGTH);
+                m_target.Seek(0, SeekOrigin.Begin);
+            }
+            
+            internal void AddFragment(CdrInputStreamImpl fragmentToAdd, int nrOfBytesFromCurrentPos) {
+                                
+                IoUtil.StreamCopyExactly(fragmentToAdd.BackingStream, m_target, 
+                                         nrOfBytesFromCurrentPos); // copy message body to target stream
+            }
+            
+            #endregion IMethods
             
         }
         
         #endregion Types
-        #region Constants
-    
-        // GIOP 1.1 doen't support req-id in fragments -> use instead this key to retrieve
-        // msg from Hashtable
-        private object m_giop11Key = new object();
-    
-        #endregion Constants
         #region IFields
     
         private Hashtable m_fragmentedMsgs = new Hashtable();
     
         #endregion IFields
         #region IMethods
-    
-        private void AddFragmentInternal(object key, CdrInputStreamImpl source,
-                                         uint contentLength) {
-            lock(m_fragmentedMsgs.SyncRoot) {
-                FragmentedMsgDesc fragmentDesc = (FragmentedMsgDesc) m_fragmentedMsgs[key];
-                if (fragmentDesc == null) {
-                    throw new IOException("illegal fragment");
-                }
-                // read payload of msg and copy into target stream
-                Stream target = fragmentDesc.Target;
-                IoUtil.StreamCopyExactly(source.BackingStream, target,
-                                         (int)contentLength); // copy message body from transport stream to target stream
-            }
+        
+        private void CheckGiop1_2OrLater(GiopHeader header) {
+            if (header.Version.IsBeforeGiop1_2()) {
+                // for giop 1.0 fragmentation is not allowed
+                // for giop 1.1 fragmentation is not supported by IIOP.NET, because defragmentation 
+                // is not possible without complete demarshalling
+                Debug.WriteLine("fragment using giop version " + header.Version + " not supported by IIOP.NET / not allowed");
+                throw new IOException("fragmentation not supported for 1.0/1.1");
+            }            
         }
-    
-        /// <summary>
-        /// completes the fragmented msg.
-        /// </summary>
-        /// <param name="key"></param>
-        /// <param name="source"></param>
-        /// <param name="contentLength"></param>
-        /// <param name="fullMsgHeader">returns the header of the complete msg as an out parameter</param>
-        /// <returns>the full msg as a stream</returns>
-        private Stream FinishFragmentedMsgInternal(object key,
-                                                   CdrInputStreamImpl source,
-                                                   uint contentLength, 
-                                                   out GiopHeader fullMsgHeader) {
-            lock(m_fragmentedMsgs.SyncRoot) {
-                FragmentedMsgDesc fragmentDesc = (FragmentedMsgDesc) m_fragmentedMsgs[key];
-                if (fragmentDesc == null) {
-                    throw new IOException("illegal fragment");
-                }
-                // write read of msg-content
-                Stream target = fragmentDesc.Target;
-                IoUtil.StreamCopyExactly(source.BackingStream, target, 
-                                         (int)contentLength); // copy message body from transport stream to target stream
-                // write adapted header
-                target.Seek(0, SeekOrigin.Begin);
-                GiopHeader newHeader = new GiopHeader(fragmentDesc.Header.Version.Major, 
-                                                      fragmentDesc.Header.Version.Minor,
-                                                      (byte)(fragmentDesc.Header.GiopFlags ^ GiopHeader.FRAGMENT_MASK),
-                                                      fragmentDesc.Header.GiopType);
-
-                newHeader.WriteToStream(target, 
-                                        ((uint)target.Length) - GiopHeader.HEADER_LENGTH);
-                target.Seek(0, SeekOrigin.Begin);
-                
-                // remove for unfinished msg table
-                m_fragmentedMsgs.Remove(fragmentDesc);
-                
-                // the header of the full msg
-                fullMsgHeader = newHeader;
-                // return the complete result msg
-                return target;
-            }
-        }
-    
+        
         /// <summary>Start a new fragmented msg</summary>
-        internal void StartFragment(CdrInputStreamImpl source, GiopHeader header) {
+        internal void StartFragment(Stream fragment) {
+            CdrInputStreamImpl cdrInput = new CdrInputStreamImpl(fragment);
+            GiopHeader header = new GiopHeader(cdrInput);
+            CheckGiop1_2OrLater(header);
+            
+            // GIOP 1.2 or newer: read request id from msg; for giop 1.2, the requestId follows just
+            // after the header for request, reply, locateRequest and locateReply; only those messages
+            // can be fragmented
+            uint reqId = cdrInput.ReadULong();
+            int payLoadLength = (int)(header.ContentMsgLength - 4);
             lock(m_fragmentedMsgs.SyncRoot) {
-                FragmentedMsgDesc fragmentDesc = new FragmentedMsgDesc(header);
-                Stream target = fragmentDesc.Target;
-                CdrOutputStream cdrOut = new CdrOutputStreamImpl(target, header.GiopFlags,
-                                                                 header.Version);
-                // write placeholder header (is replaced during finish)
-                header.WriteToStream(cdrOut, header.ContentMsgLength);
-                object descKey = null;
-                int contentLength = (int) header.ContentMsgLength;
+                FragmentedMsgDesc fragmentDesc = new FragmentedMsgDesc(cdrInput, payLoadLength, header, reqId);
+                m_fragmentedMsgs[reqId] = fragmentDesc;
+            }
+        }
+        
+        internal void AddFragment(Stream fragment) {            
+            AddFragmentInternal(fragment, false);
+        }
+        
+        internal Stream FinishFragmentedMsg(Stream fragment, out GiopHeader combinedHeader) {
+            FragmentedMsgDesc result = AddFragmentInternal(fragment, true);
+            combinedHeader = result.CombinedHeader;
+            return result.Target;
+        }
+        
+        /// <summary>
+        /// adds a fragment to the combined message. 
+        /// </summary>        
+        /// <returns>the fragment description for the message</returns>
+        private FragmentedMsgDesc AddFragmentInternal(Stream fragment, bool isLastFragment) {
+            CdrInputStreamImpl cdrInput = new CdrInputStreamImpl(fragment);
+            GiopHeader header = new GiopHeader(cdrInput);
+            CheckGiop1_2OrLater(header);
             
-                if ((header.Version.Major == 1) && (header.Version.Minor == 1)) {
-                    descKey = m_giop11Key;
-                } else if (!((header.Version.Major == 1) && (header.Version.Minor == 0))) {
-                    // GIOP 1.2 or newer
-                    uint reqId = source.ReadULong();
-                    cdrOut.WriteULong(reqId);
-                    descKey = reqId;
-                    contentLength -= 4;
+            // GIOP 1.2 or newer: read request id from fragment msg header
+            uint reqId = cdrInput.ReadULong();
+            int payLoadLength = (int)(header.ContentMsgLength - 4);
+            lock(m_fragmentedMsgs.SyncRoot) {
+                FragmentedMsgDesc fragmentDesc = (FragmentedMsgDesc) m_fragmentedMsgs[reqId];
+                if (fragmentDesc == null) {
+                    throw new IOException("illegal fragment; not found previous fragment for request-id: " + reqId);
+                }                
+                if (!isLastFragment) {                                    
+                    fragmentDesc.AddFragment(cdrInput, payLoadLength);
                 } else {
-                    // no fragmentation allowed        
-                    throw new IOException("fragmentation not allowed for GIOP 1.0");
+                    fragmentDesc.AddLastFragment(cdrInput, payLoadLength);
+                    // remove the desc for unfinished msg from table
+                    m_fragmentedMsgs.Remove(fragmentDesc);
                 }
+                return fragmentDesc;
+            }            
+        }
+        
+        internal void CancelFragmentsIfInProgress(uint requestId) {
+            lock(m_fragmentedMsgs.SyncRoot) {
+                m_fragmentedMsgs.Remove(requestId); // remove, if available; otherwise do nothing
+            }
+        }
                 
-                // write content to target stream
-                IoUtil.StreamCopyExactly(source.BackingStream, target,
-                                         contentLength); // copy message body to target stream
-
-                // add to unfinished message table
-                m_fragmentedMsgs[descKey] = fragmentDesc;
-            }
-            
-        }
-    
-        internal void AddFragment(CdrInputStreamImpl source, 
-                                  GiopHeader header) {
-            if ((header.Version.Major == 1) && (header.Version.Minor == 1)) {
-                AddFragmentInternal(m_giop11Key, source, 
-                                    header.ContentMsgLength);
-            } else if (!((header.Version.Major == 1) && (header.Version.Minor == 0))) {
-                // GIOP 1.2 or newer: read request id from fragment msg header
-                uint reqId = source.ReadULong();
-                AddFragmentInternal(reqId, source, header.ContentMsgLength - 4);
-            } else {
-                // no fragmentation allowed        
-                throw new IOException("fragmentation not allowed for GIOP 1.0");
-            }        
-        }
-        
-
-        internal Stream FinishFragmentedMsg(CdrInputStreamImpl source, 
-                                            GiopHeader header) {
-            return FinishFragmentedMsg(source, ref header);
-        }
-
-        /// <param name="header">
-        /// The fragment header of the last fragment. As an out parameter, the header of the complete msg is returned. 
-        /// </param>
-        internal Stream FinishFragmentedMsg(CdrInputStreamImpl source, 
-                                            ref GiopHeader header) {
-            Stream result;
-            if ((header.Version.Major == 1) && (header.Version.Minor == 1)) {
-                result = FinishFragmentedMsgInternal(m_giop11Key, source,
-                                                     header.ContentMsgLength, out header);
-            } else if (!((header.Version.Major == 1) && (header.Version.Minor == 0))) {
-                // GIOP 1.2 or newer: read request id from fragment msg header
-                uint reqId = source.ReadULong();
-                result = FinishFragmentedMsgInternal(reqId, source,
-                                                     header.ContentMsgLength - 4, out header);
-            } else {
-                // no fragmentation allowed        
-                throw new IOException("fragmentation not allowed for GIOP 1.0");
-            }
-            return result;
-        }
-        
-        internal bool IsLastFragment(GiopHeader header) {
-            bool hasMore = ((header.GiopFlags & GiopHeader.FRAGMENT_MASK) > 0);
-            return !hasMore;
-        }
-    
         #endregion IMethods
+        #region SMethods
+        
+        /// <summary>checks, if the message is only a fragment; non-legal fragmentted messages are not discovered here.
+        /// Only the fragmented or not fact is considered</summary>
+        internal static bool IsFragmentedMessage(GiopHeader header) {
+            return ((header.GiopType == GiopMsgTypes.Fragment) ||
+                    header.IsFragmentedBitSet());
+            
+        }       
+        
+        internal static bool IsStartFragment(GiopHeader header) {
+            return header.GiopType != GiopMsgTypes.Fragment;
+        }
+        
+        internal static bool IsLastFragment(GiopHeader header) {
+            return (header.GiopType == GiopMsgTypes.Fragment) && 
+                   (!header.IsFragmentedBitSet());
+        }        
+        
+        #endregion SMethods
+
         
     }
     
@@ -396,7 +393,7 @@ namespace Ch.Elca.Iiop.Tests {
             byte endianFlags = 0;
             uint reqId = 11;
             
-            uint startMsgContentBlocks = 2;
+            uint startMsgContentBlocks = 2; // make sure, that start fragment length is a multiple of 8; giop 1.2
             uint lastFragmentContentLength = 13;
             uint currentOffsetInMsg = 0; // the content offset for the next message
             CdrOutputStreamImpl cdrOut = AddStartMsg(msgStream, version, endianFlags,
@@ -408,14 +405,11 @@ namespace Ch.Elca.Iiop.Tests {
                               
             msgStream.Seek(0, SeekOrigin.Begin);
             // start fragment
-            CdrInputStreamImpl inStream = new CdrInputStreamImpl(msgStream);
-            GiopHeader msgHeader = new GiopHeader(inStream);
-            FragmentedMsgAssembler assembler = new FragmentedMsgAssembler();
-            assembler.StartFragment(inStream, msgHeader);
+            FragmentedMessageAssembler assembler = new FragmentedMessageAssembler();
+            assembler.StartFragment(msgStream);
             // finish fragment
-            inStream = new CdrInputStreamImpl(msgStream);
-            msgHeader = new GiopHeader(inStream);
-            Stream resultStream = assembler.FinishFragmentedMsg(inStream, ref msgHeader);
+            GiopHeader combinedHeader;
+            Stream resultStream = assembler.FinishFragmentedMsg(msgStream, out combinedHeader);
             
             CheckAssembledMessage(resultStream, version, endianFlags, reqId,
                                   endOffset);
@@ -427,8 +421,8 @@ namespace Ch.Elca.Iiop.Tests {
             byte endianFlags = 0;
             uint reqId = 11;
             
-            uint startMsgContentBlocks = 2;
-            uint middleMsgContentBlocks = 4;
+            uint startMsgContentBlocks = 2; // make sure, that start fragment length is a multiple of 8; giop 1.2
+            uint middleMsgContentBlocks = 4; // make sure, that middle fragment length is a multiple of 8; giop 1.2
             uint lastFragmentContentLength = 13;
             uint currentOffsetInMsg = 0; // the content offset for the next message
             CdrOutputStreamImpl cdrOut = AddStartMsg(msgStream, version, endianFlags,
@@ -445,18 +439,13 @@ namespace Ch.Elca.Iiop.Tests {
                               
             msgStream.Seek(0, SeekOrigin.Begin);
             // start fragment
-            CdrInputStreamImpl inStream = new CdrInputStreamImpl(msgStream);
-            GiopHeader msgHeader = new GiopHeader(inStream);
-            FragmentedMsgAssembler assembler = new FragmentedMsgAssembler();
-            assembler.StartFragment(inStream, msgHeader);
+            FragmentedMessageAssembler assembler = new FragmentedMessageAssembler();
+            assembler.StartFragment(msgStream);
             // middle fragment            
-            inStream = new CdrInputStreamImpl(msgStream);
-            msgHeader = new GiopHeader(inStream);
-            assembler.AddFragment(inStream, msgHeader);
+            assembler.AddFragment(msgStream);
             // finish fragment
-            inStream = new CdrInputStreamImpl(msgStream);
-            msgHeader = new GiopHeader(inStream);
-            Stream resultStream = assembler.FinishFragmentedMsg(inStream, ref msgHeader);
+            GiopHeader combinedHeader;
+            Stream resultStream = assembler.FinishFragmentedMsg(msgStream, out combinedHeader);
             
             CheckAssembledMessage(resultStream, version, endianFlags, reqId,
                                   endOffset);
@@ -475,12 +464,22 @@ namespace Ch.Elca.Iiop.Tests {
 
         [Test]        
         public void TestTwoFragmentsGiop1_1() {
-            InternalTestTwoFramgents(new GiopVersion(1, 1));            
+            try {
+                InternalTestTwoFramgents(new GiopVersion(1, 1));
+                Assertion.Fail("giop 1.1 fragment not detected as unsupported");
+            } catch (Exception) {
+                // ok, not supported
+            }
         }
         
         [Test]
         public void TestThreeFragmentsGiop1_1() {
-            InternalTestThreeFramgents(new GiopVersion(1, 1));
+            try {
+                InternalTestThreeFramgents(new GiopVersion(1, 1));
+                Assertion.Fail("giop 1.1 fragment not detected as unsupported");
+            } catch (Exception) {
+                // ok, not supported
+            }
         }
         
         

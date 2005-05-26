@@ -33,6 +33,7 @@ using System.IO;
 using System.Collections;
 using System.Threading;
 using System.Runtime.Remoting.Messaging;
+using System.Diagnostics;
 using Ch.Elca.Iiop.Services;
 
 namespace Ch.Elca.Iiop {
@@ -54,15 +55,19 @@ namespace Ch.Elca.Iiop {
 
         private int m_charSetChosen = CodeSetService.DEFAULT_CHAR_SET;
         private int m_wcharSetChosen = CodeSetService.DEFAULT_WCHAR_SET;
+               
+        private bool m_codeSetNegotiated = false;
         
-        private Hashtable m_items = new Hashtable();                
-        
-        private bool m_messagesExchanged = false;
+        private GiopClientConnectionManager m_conManager;
+        private GiopTransportMessageHandler m_transportHandler;
 
         #endregion IFields
         #region IConstructors
 
-        internal GiopConnectionDesc() {
+        internal GiopConnectionDesc(GiopClientConnectionManager conManager,
+                                   GiopTransportMessageHandler transportHandler) {
+            m_conManager = conManager;
+            m_transportHandler = transportHandler;
         }
 
         #endregion IConstructors
@@ -72,50 +77,81 @@ namespace Ch.Elca.Iiop {
             get {
                 return m_charSetChosen;
             }
-            set {
-                m_charSetChosen = value;
-            }
         }
 
         public int WCharSet {
             get {
                 return m_wcharSetChosen;
             }
-            set {
-                m_wcharSetChosen = value;
-            }
         }
         
-        public IDictionary Items {
+        /// <summary>
+        /// a client connection manager responsible for client connections (may be null).
+        /// </summary>
+        internal GiopClientConnectionManager ConnectionManager {
             get {
-                return m_items;
+                return m_conManager;
             }
         }
         
         /// <summary>
-        /// Were any messages (request/reply) already exchanged
-        /// on this connection
+        /// the transport handler responsible for the associated connection
         /// </summary>
-        public bool MessagesAlreadyExchanged {
+        internal GiopTransportMessageHandler TransportHandler {
             get {
-                return m_messagesExchanged;    
-            }
-            set {
-                m_messagesExchanged = value;
+                if (m_transportHandler != null) {
+                    return m_transportHandler;
+                } else {
+                    throw new omg.org.CORBA.BAD_INV_ORDER(998, omg.org.CORBA.CompletionStatus.Completed_MayBe);
+                }
             }
         }
-        
+                                
         #endregion IProperties
+        #region IMethods
+        
+        /// <summary>
+        /// is the codeset already negotiated?
+        /// </summary>
+        public bool IsCodeSetNegotiated() {
+            return m_codeSetNegotiated;
+        }
+
+        /// <summary>
+        /// the codeset is already negotiated.
+        /// </summary>
+        public void SetCodeSetNegotiated() {
+            m_codeSetNegotiated = true;
+        }
+        
+        public void SetNegotiatedCodeSets(int charSet, int wcharSet) {
+            m_charSetChosen = charSet;
+            m_wcharSetChosen = wcharSet;
+            SetCodeSetNegotiated();
+        }
+                
+        #endregion IMethods
 
     }
     
     /// <summary>the connection context for the client side</summary>
     internal class GiopClientConnectionDesc : GiopConnectionDesc {
         
+        #region IConstructors
+        
+        internal GiopClientConnectionDesc(GiopClientConnectionManager conManager, GiopClientConnection connection,
+                                          GiopRequestNumberGenerator reqNumberGen, 
+                                          GiopTransportMessageHandler transportHandler) : base(conManager, transportHandler) {
+            m_reqNumGen = reqNumberGen;
+            m_connection = connection;            
+        }
+        
+        #endregion IConstructors
         #region IFields
         
-        private GiopRequestNumberGenerator m_reqNumGen = 
-                    new GiopRequestNumberGenerator();
+        private GiopRequestNumberGenerator m_reqNumGen;
+        
+        private GiopClientConnection m_connection;
         
         #endregion IFields
         #region IProperties 
@@ -123,6 +159,12 @@ namespace Ch.Elca.Iiop {
         internal GiopRequestNumberGenerator ReqNumberGen {
             get {
                 return m_reqNumGen;
+            }
+        }
+        
+        internal GiopClientConnection Connection {
+            get {
+                return m_connection;
             }
         }
                 
@@ -133,7 +175,7 @@ namespace Ch.Elca.Iiop {
     /// stores the relevant information of an IIOP client side
     /// connection
     /// </summary>
-    internal class GiopClientConnection {
+    internal abstract class GiopClientConnection {
 
         #region IFields
 
@@ -141,17 +183,17 @@ namespace Ch.Elca.Iiop {
 
         private string m_connectionKey;
                 
-        private IClientTransport m_clientTransport;
-
+        protected GiopTransportMessageHandler m_transportHandler;
+        
         #endregion IFields
         #region IConstructors
-
-        internal GiopClientConnection(string connectionKey, IClientTransport transport) {
-            m_connectionKey = connectionKey;
-            m_assocDesc = new GiopClientConnectionDesc();
-            m_clientTransport = transport;
+        
+        /// <summary>
+        /// used for inheritors, calling initalize themselves.
+        /// </summary>
+        protected GiopClientConnection() {
         }
-
+                
         #endregion IConstructors
         #region IProperties
 
@@ -167,31 +209,129 @@ namespace Ch.Elca.Iiop {
             }
         }
 
-        internal IClientTransport ClientTransport {
+        internal GiopTransportMessageHandler TransportHandler {
             get {
-                return m_clientTransport;
+                return m_transportHandler;
             }
         }
 
         #endregion IProperties
         #region IMethods
 
-
-        internal void Connect() {
-            m_clientTransport.OpenConnection();
+        protected void Initalize(string connectionKey, GiopTransportMessageHandler transportHandler,
+                                 GiopClientConnectionDesc assocDesc) {
+            m_connectionKey = connectionKey;
+            m_assocDesc = assocDesc;            
+            m_transportHandler = transportHandler;            
         }
 
-        internal bool CheckConnected() {
-            return m_clientTransport.IsConnectionOpen();
+        internal bool CheckConnected() {            
+            return m_transportHandler.Transport.IsConnectionOpen();
         }
+        
+        /// <summary>
+        /// is this connection closable in client role.
+        /// </summary>        
+        internal abstract bool CanCloseConnection();
 
-        internal void CloseConnection() {
-            m_clientTransport.CloseConnection();
-        }
-
+        /// <summary>
+        /// closes the connection.
+        /// </summary>
+        /// <remarks>this method must only be called by the ConnectionManager.</remarks>
+        internal abstract void CloseConnection();
+        
+        /// <summary>
+        /// is this connection initiated in this appdomain.
+        /// </summary>
+        internal abstract bool IsInitiatedLocal();
+        
         #endregion IMethods
 
     
+    }
+    
+    
+    /// <summary>
+    /// a connection, which is initiated in the current appdomain.
+    /// </summary>
+    internal class GiopClientInitiatedConnection : GiopClientConnection {
+        
+        #region IConstructors
+
+        /// <param name="connectionKey">the key describing the connection</param>
+        /// <param name="transport">an already connected client transport</param>
+        internal GiopClientInitiatedConnection(string connectionKey, IClientTransport transport,
+                                               MessageTimeout requestTimeOut, GiopClientConnectionManager conManager,
+                                               bool supportBidir) {            
+            GiopRequestNumberGenerator reqNumberGen =
+                (!supportBidir ? new GiopRequestNumberGenerator() : new GiopRequestNumberGenerator(true));
+            GiopTransportMessageHandler handler =
+                      new GiopTransportMessageHandler(transport, requestTimeOut);
+            GiopClientConnectionDesc conDesc = new GiopClientConnectionDesc(conManager, this, reqNumberGen, handler);
+            Initalize(connectionKey, handler, conDesc);
+            handler.StartMessageReception(); // begin listening for messages
+        }                
+        
+        #endregion IConstructors
+        #region IMethods
+        
+        internal override void CloseConnection() {
+            try {
+                m_transportHandler.ForceCloseConnection();
+            } catch (Exception ex) {
+                Debug.WriteLine("exception while closing connection: " + ex);
+            }            
+        }        
+        
+        internal override bool CanCloseConnection() {
+            return true;
+        }
+        
+        internal override bool IsInitiatedLocal() {
+            return true;
+        }
+        
+        
+        #endregion IMethods
+        
+    }
+    
+    
+    /// <summary>
+    /// a connection, which is initiated in another appdomain. This connection is used in bidir mode
+    /// for callback.
+    /// </summary>    
+    internal class GiopBidirInitiatedConnection : GiopClientConnection {
+        
+        #region IConstructors
+
+        /// <param name="connectionKey">the key describing the connection</param>        
+        internal GiopBidirInitiatedConnection(string connectionKey, GiopTransportMessageHandler transportHandler, 
+                                              GiopClientConnectionManager conManager) {
+            GiopRequestNumberGenerator reqNumberGen = 
+                    new GiopRequestNumberGenerator(false); // not connection originator -> create non-even req. numbers
+            GiopClientConnectionDesc conDesc = new GiopClientConnectionDesc(conManager, this, reqNumberGen,
+                                                                            transportHandler);
+            Initalize(connectionKey, transportHandler, conDesc);
+        }                                
+        
+        #endregion IConstructors
+        #region IMethods
+        
+        internal override void CloseConnection() {
+            throw new omg.org.CORBA.BAD_OPERATION(765, omg.org.CORBA.CompletionStatus.Completed_MayBe);
+        }        
+        
+        internal override bool CanCloseConnection() {
+            return false;
+        }
+        
+        internal override bool IsInitiatedLocal() {
+            return false;
+        }        
+        
+        #endregion IMethods
+        
     }
 
 

@@ -1,3 +1,4 @@
+CSC=gmcs
 COMMONASMSOURCE = ../server/bin/Adder.dll
 IIOPCHANNEL = ../../../../../IIOPChannel/bin/IIOPChannel.dll
 BIN=bin/
@@ -17,7 +18,7 @@ $(COMMONASMTARGET): $(BIN)
 	cp $(COMMONASMSOURCE) $(BIN)
 
 build-client: $(COMMONASMTARGET) $(BIN)IIOPChannel.dll NClient.cs
-	mcs /r:$(COMMONASMTARGET) /r:$(BIN)IIOPChannel.dll /out:$(BIN)NClient.exe NClient.cs
+	$(CSC) /r:$(COMMONASMTARGET) /r:$(BIN)IIOPChannel.dll /out:$(BIN)NClient.exe NClient.cs
 
 clean:
 	rm -fr $(BIN)

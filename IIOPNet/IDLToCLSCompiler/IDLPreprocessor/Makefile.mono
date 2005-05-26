@@ -1,4 +1,5 @@
 Key = ../../Key.snk
+CSC=gmcs
 Dest = bin/
 
 build: build-dll
@@ -7,7 +8,7 @@ build-dll: $(Dest)IDLPreprocessor.dll
 
 $(Dest)IDLPreprocessor.dll: *.cs $(Key)
 	[ -d $(Dest) ] || mkdir $(Dest)
-	mcs $(CSFLAGS) /t:library /out:$(Dest)IDLPreprocessor.dll *.cs
+	$(CSC) $(CSFLAGS) /t:library /out:$(Dest)IDLPreprocessor.dll *.cs
 
 clean:
 	rm -fr $(Dest) 

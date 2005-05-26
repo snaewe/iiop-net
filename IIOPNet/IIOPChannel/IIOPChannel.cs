@@ -40,6 +40,8 @@ using System.Threading;
 using System.Text;
 using Ch.Elca.Iiop.Util;
 using Ch.Elca.Iiop.CorbaObjRef;
+using Ch.Elca.Iiop.Interception;
+using omg.org.IOP;
 
 #if DEBUG_LOGFILE
 using System.IO;
@@ -74,6 +76,11 @@ namespace Ch.Elca.Iiop {
         /// </summary>
         public const string PRIORITY_KEY = "priority";
         
+        /// <summary>
+        /// key in properties to specify, if channel should be bidirectional. Default is non-bidirectional.
+        /// </summary>
+        public const string BIDIR_KEY = "isBidirChannel";
+        
         #endregion Constants
         #region IFields
 
@@ -107,6 +114,7 @@ namespace Ch.Elca.Iiop {
             IDictionary clientProp = new Hashtable();
             IDictionary serverProp = new Hashtable();
             bool isServer = false;
+            bool isBidir = false;
             // prepare properties for client channel and server channel
             if (properties != null) {
                 foreach (DictionaryEntry entry in properties) {
@@ -140,11 +148,21 @@ namespace Ch.Elca.Iiop {
                         case IiopClientChannel.CLIENT_SEND_TIMEOUT_KEY:
                             clientProp[IiopClientChannel.CLIENT_SEND_TIMEOUT_KEY] = Convert.ToInt32(entry.Value);
                             break;
+                        case IiopClientChannel.CLIENT_REQUEST_TIMEOUT_KEY:
+                            clientProp[IiopClientChannel.CLIENT_REQUEST_TIMEOUT_KEY] = Convert.ToInt32(entry.Value);
+                            break;
+                        case IiopClientChannel.CLIENT_UNUSED_CONNECTION_KEEPALIVE_KEY:   
+                            clientProp[IiopClientChannel.CLIENT_UNUSED_CONNECTION_KEEPALIVE_KEY] = Convert.ToInt32(entry.Value);
+                            break;                             
                         case TRANSPORT_FACTORY_KEY:
                             serverProp[TRANSPORT_FACTORY_KEY] =
                                 entry.Value;
                             clientProp[TRANSPORT_FACTORY_KEY] =
                                 entry.Value;
+                            break;
+                        case BIDIR_KEY:
+                            isBidir = Convert.ToBoolean(entry.Value);
+                            clientProp[BIDIR_KEY] = isBidir;                            
                             break;
                         default: 
                             Debug.WriteLine("unknown property found for IIOP channel: " +
@@ -158,7 +176,11 @@ namespace Ch.Elca.Iiop {
             }
             m_clientChannel = new IiopClientChannel(clientProp, clientSinkProvider);
             if (isServer) { 
-                // only create server if port is specified
+                if (isBidir) {
+                    serverProp[IiopServerChannel.BIDIR_CONNECTION_MANAGER] = 
+                        m_clientChannel.ConnectionManager;
+                }
+                // only create server if port is specified                
                 m_serverChannel = new IiopServerChannel(serverProp, serverSinkProvider);
             }
         }
@@ -251,6 +273,19 @@ namespace Ch.Elca.Iiop {
         /// the send timeout in milliseconds
         /// </summary>
         public const string CLIENT_SEND_TIMEOUT_KEY = "clientSendTimeOut";
+
+        /// <summary>
+        /// the giop request timeout in milliseconds; default is infinite
+        /// </summary>
+        public const string CLIENT_REQUEST_TIMEOUT_KEY = "clientRequestTimeOut";
+
+        /// <summary>
+        /// the time in milliseconds a unused connection is kept alive on client side; default is 300000ms
+        /// </summary>
+        public const string CLIENT_UNUSED_CONNECTION_KEEPALIVE_KEY = "unusedConnectionKeepAlive";   
+        
+        private const int UNUSED_CLIENT_CONNECTION_TIMEOUT = 300000;
+                
         
         #endregion Constants
         #region IFields
@@ -282,7 +317,8 @@ namespace Ch.Elca.Iiop {
         #region IConstructors
         
         public IiopClientChannel() {
-            InitChannel(new TcpTransportFactory());
+            InitChannel(new TcpTransportFactory(), MessageTimeout.Infinite, UNUSED_CLIENT_CONNECTION_TIMEOUT, false,
+                        InterceptorManager.EmptyInterceptorOptions);
         }
         
         public IiopClientChannel(IDictionary properties) : 
@@ -300,6 +336,10 @@ namespace Ch.Elca.Iiop {
             IDictionary nonDefaultOptions = new Hashtable();
             int receiveTimeOut = 0;
             int sendTimeOut = 0;
+            MessageTimeout requestTimeOut = MessageTimeout.Infinite;
+            int unusedClientConnectionTimeout = UNUSED_CLIENT_CONNECTION_TIMEOUT;
+            bool isBidir = false;
+            ArrayList interceptionOptions = new ArrayList();
             
             if (properties != null) {
                 foreach (DictionaryEntry entry in properties) {
@@ -321,6 +361,17 @@ namespace Ch.Elca.Iiop {
                         case IiopClientChannel.CLIENT_SEND_TIMEOUT_KEY:
                             sendTimeOut = Convert.ToInt32(entry.Value);
                             break;
+                        case IiopClientChannel.CLIENT_REQUEST_TIMEOUT_KEY:
+                            int requestTimeOutMilllis = Convert.ToInt32(entry.Value);
+                            requestTimeOut = new MessageTimeout(TimeSpan.FromMilliseconds(requestTimeOutMilllis));
+                            break;
+                        case IiopClientChannel.CLIENT_UNUSED_CONNECTION_KEEPALIVE_KEY:
+                            unusedClientConnectionTimeout = Convert.ToInt32(entry.Value);
+                            break;
+                        case IiopChannel.BIDIR_KEY:
+                            isBidir = Convert.ToBoolean(entry.Value);
+                            interceptionOptions.Add(new BiDirIiopInterceptionOption());
+                            break;                            
                         default: 
                             Debug.WriteLine("non-default property found for IIOPClient channel: " + entry.Key);
                             nonDefaultOptions[entry.Key] = entry.Value;
@@ -332,7 +383,9 @@ namespace Ch.Elca.Iiop {
             // handle the options now by transport factory
             clientTransportFactory.SetClientTimeOut(receiveTimeOut, sendTimeOut);
             clientTransportFactory.SetupClientOptions(nonDefaultOptions);
-            InitChannel(clientTransportFactory);
+            InitChannel(clientTransportFactory, requestTimeOut, 
+                        unusedClientConnectionTimeout, isBidir, 
+                        (IInterceptionOption[])interceptionOptions.ToArray(typeof(IInterceptionOption)));
         }
 
         #endregion IConstructors
@@ -347,6 +400,15 @@ namespace Ch.Elca.Iiop {
         public int ChannelPriority {
             get {
                 return m_channelPriority; 
+            }
+        }
+        
+        /// <summary>
+        /// the connection manager, which is reponsible for assigning outgoing connections.
+        /// </summary>
+        internal GiopClientConnectionManager ConnectionManager {
+            get {
+                return m_conManager;
             }
         }
 
@@ -370,11 +432,33 @@ namespace Ch.Elca.Iiop {
             return false;
         }
         
+        /// <summary>
+        /// Configures the installed IIOPClientSideFormatterProivder
+        /// </summary>
+        /// <param name="interceptionOptions"></param>
+        private void ConfigureSinkProviderChain(GiopClientConnectionManager conManager,
+                                                IInterceptionOption[] interceptionOptions) {
+            IClientChannelSinkProvider prov = m_providerChain;
+            while (prov != null) {
+                if (prov is IiopClientFormatterSinkProvider) {
+                    ((IiopClientFormatterSinkProvider)prov).Configure(conManager, interceptionOptions);
+                    break;
+                }
+                prov = prov.Next;
+            }
+        }        
+        
         /// <summary>initalize this channel</summary>
-        private void InitChannel(IClientTransportFactory transportFactory) {
+        private void InitChannel(IClientTransportFactory transportFactory, MessageTimeout requestTimeOut,
+                                 int unusedClientConnectionTimeOut, bool isBidir, IInterceptionOption[] interceptionOptions) {
             
-            m_conManager = new GiopClientConnectionManager(transportFactory);
-            
+            if (!isBidir) {
+                m_conManager = new GiopClientConnectionManager(transportFactory, requestTimeOut,
+                                                               unusedClientConnectionTimeOut);
+            } else {
+                m_conManager = new GiopBidirectionalConnectionManager(transportFactory, requestTimeOut,
+                                                                      unusedClientConnectionTimeOut);
+            }
             IiopClientTransportSinkProvider transportProvider =
                 new IiopClientTransportSinkProvider(m_conManager);
             if (m_providerChain != null) {
@@ -388,6 +472,7 @@ namespace Ch.Elca.Iiop {
                 formatterProv.Next = transportProvider;
                 m_providerChain = formatterProv;
             }
+            ConfigureSinkProviderChain(m_conManager, interceptionOptions);
         }
 
         #region Implementation of IChannelSender
@@ -471,6 +556,11 @@ namespace Ch.Elca.Iiop {
         /// </summary>
         public const string MACHINE_NAME_KEY = "machineName";
         
+        /// <summary>
+        /// key used to specify the bidirectional connection manager in the server-props.
+        /// </summary>
+        internal const string BIDIR_CONNECTION_MANAGER = "bidirConnectionManager";
+        
         #endregion Constants
         #region IFields
 
@@ -490,6 +580,11 @@ namespace Ch.Elca.Iiop {
         private IiopServerTransportSink m_transportSink;
         
         private IServerConnectionListener m_connectionListener;
+        
+        private IList /* GiopClientServerMessageHandler */ m_transportHandlers = new ArrayList(); // the active transport handlers
+        
+        private GiopBidirectionalConnectionManager m_bidirConnectionManager = null;
+        private IServerTransportFactory m_transportFactory;
 
 
         #endregion IFields
@@ -517,7 +612,7 @@ namespace Ch.Elca.Iiop {
 
         public IiopServerChannel(int port) {
             m_port = port;
-            InitChannel(new TcpTransportFactory());
+            InitChannel(new TcpTransportFactory(), InterceptorManager.EmptyInterceptorOptions);
         }
         
         public IiopServerChannel(IDictionary properties) : this(properties, new IiopServerFormatterSinkProvider()) {            
@@ -534,6 +629,7 @@ namespace Ch.Elca.Iiop {
             IServerTransportFactory serverTransportFactory =
                 new TcpTransportFactory();
             IDictionary nonDefaultOptions = new Hashtable();
+            ArrayList interceptionOptions = new ArrayList();
 
             // parse properties
             if (properties != null) {
@@ -562,6 +658,10 @@ namespace Ch.Elca.Iiop {
                             serverTransportFactory = (IServerTransportFactory)
                                 Activator.CreateInstance(transportFactoryType);
                             break;
+                        case IiopServerChannel.BIDIR_CONNECTION_MANAGER:
+                            m_bidirConnectionManager = (GiopBidirectionalConnectionManager)entry.Value;
+                            interceptionOptions.Add(new BiDirIiopInterceptionOption());                            
+                            break;
                         default: 
                             Debug.WriteLine("non-default property found for IIOPServer channel: " + entry.Key);
                             nonDefaultOptions[entry.Key] = entry.Value;
@@ -571,7 +671,8 @@ namespace Ch.Elca.Iiop {
             }
             // handle non-default options now by transport factory
             serverTransportFactory.SetupServerOptions(nonDefaultOptions);
-            InitChannel(serverTransportFactory);
+            InitChannel(serverTransportFactory, 
+                        (IInterceptionOption[])interceptionOptions.ToArray(typeof(IInterceptionOption)));
         }
         
         #endregion IConstructors
@@ -615,11 +716,27 @@ namespace Ch.Elca.Iiop {
             return false;
         }
         
+        /// <summary>
+        /// Configures the installed IIOPServerSideFormatterProivder
+        /// </summary>        
+        private void ConfigureSinkProviderChain(IInterceptionOption[] interceptionOptions) {
+            IServerChannelSinkProvider prov = m_providerChain;
+            while (prov != null) {
+                if (prov is IiopServerFormatterSinkProvider) {
+                    ((IiopServerFormatterSinkProvider)prov).Configure(interceptionOptions);
+                    break;
+                }
+                prov = prov.Next;
+            }
+        }
+        
         /// <summary>initalize the channel</summary>
-        private void InitChannel(IServerTransportFactory transportFactory) {            
+        private void InitChannel(IServerTransportFactory transportFactory, IInterceptionOption[] interceptionOptions) {
             if (m_port < 0) {
                 throw new ArgumentException("illegal port to listen on: " + m_port); 
             }
+            ConfigureSinkProviderChain(interceptionOptions);
+            m_transportFactory = transportFactory;
             m_hostNameToUse = DetermineMachineNameToUse();
             SetupChannelData(m_hostNameToUse, m_port, null);
             m_connectionListener =
@@ -631,14 +748,19 @@ namespace Ch.Elca.Iiop {
             }
             
             IServerChannelSink sinkChain = ChannelServices.CreateServerChannelSinkChain(m_providerChain, this);
-            m_transportSink = new IiopServerTransportSink(sinkChain);
+            m_transportSink = new IiopServerTransportSink(sinkChain);            
 
+            if (m_bidirConnectionManager != null) {
+                // bidirectional entry point into server channel sink chain.
+                m_bidirConnectionManager.RegisterMessageReceptionHandler(m_transportSink);
+            }
+            
             // ready to wait for messages
             StartListening(null);
             // publish init-service
             Services.CORBAInitServiceImpl.Publish();
             // public the handler for generic corba operations
-            StandardCorbaOps.SetUpHandler();
+            StandardCorbaOps.SetUpHandler();                       
         }
         
         private string DetermineMachineNameToUse() {
@@ -663,7 +785,7 @@ namespace Ch.Elca.Iiop {
             return hostNameToUse;
         }
 
-        private void SetupChannelData(string hostName, int port, ITaggedComponent[] additionalComponents) {
+        private void SetupChannelData(string hostName, int port, TaggedComponent[] additionalComponents) {
             IiopChannelData newChannelData = new IiopChannelData(hostName, port);
             if ((additionalComponents != null) && (additionalComponents.Length > 0)){
                 newChannelData.AddAdditionalTaggedComponents(additionalComponents);
@@ -675,11 +797,16 @@ namespace Ch.Elca.Iiop {
         public void StartListening(object data) {
             // start Listening
             if (!m_connectionListener.IsListening()) {
-                ITaggedComponent[] additionalComponents;
+                TaggedComponent[] additionalComponents;
                 // use IPAddress.Any and not a specific ip-address, to allow connections to loopback and normal ip; but if forcedBind use the specified one
                 IPAddress bindTo = (m_forcedBind == null ? IPAddress.Any : m_forcedBind);
                 int listeningPort = m_connectionListener.StartListening(bindTo, m_port, out additionalComponents);
                 SetupChannelData(m_hostNameToUse, listeningPort, additionalComponents);
+                // register endpoints for bidirectional connections (if bidir enabled)
+                if (m_bidirConnectionManager != null) {                
+                    object[] listenPoints = m_transportFactory.GetListenPoints(m_channelData);
+                    m_bidirConnectionManager.SetOwnListenPoints(listenPoints);
+                }                
             }
         }
 
@@ -687,14 +814,54 @@ namespace Ch.Elca.Iiop {
         /// this method handles the incoming messages; it's called by the IServerListener
         /// </summary>
         private void ProcessClientMessages(IServerTransport transport) {
-            ServerRequestHandler handler =
-                new ServerRequestHandler(transport, m_transportSink);
-            handler.StartMsgHandling();
+            GiopTransportMessageHandler handler = new GiopTransportMessageHandler(transport);
+            GiopConnectionDesc conDesc = new GiopConnectionDesc(m_bidirConnectionManager, handler);            
+            handler.InstallReceiver(m_transportSink, conDesc);
+            m_transportHandlers.Add(handler);
+            handler.StartMessageReception();            
         }
             
         public void StopListening(object data) {
-            if (m_connectionListener.IsListening()) {
-                m_connectionListener.StopListening();
+            if (m_connectionListener.IsListening()) {                                
+                // don't accept new connections any more.
+                try {
+                    m_connectionListener.StopListening();
+                } catch (Exception ex) {
+                    Debug.WriteLine("exception while stopping accept: " + ex);
+                }
+                // close connections to this server endpoint
+                try {
+                    foreach (GiopTransportMessageHandler handler in m_transportHandlers) {
+                        try {
+                            try {
+                                handler.SendConnectionCloseMessage();
+                            } finally {
+                                handler.ForceCloseConnection();
+                            }
+                        } catch (Exception ex) {
+                            Debug.WriteLine("exception while trying to close connection: " + ex);
+                        }
+                    }
+                } finally {
+                    m_transportHandlers.Clear();                
+                }
+                // bidir connection data no longer usable/used -> clean up at the end
+                if (m_bidirConnectionManager != null) {
+                    try {
+                        // for bidir use case (1), no more connections initiated by a client to this server endpoint
+                        // should be used for callbacks
+                        m_bidirConnectionManager.RemoveAllBidirInitiated();
+                    } catch (Exception ex) {
+                        Debug.WriteLine("exception while trying to remove registered bidir connections: " + ex);
+                    }
+                    try {
+                        // for bidir use case (2), don't send any more listen points to server, because no longer listening -> 
+                        // server can't connect back using the bidir connections registered
+                        m_bidirConnectionManager.SetOwnListenPoints(new object[0]);
+                    } catch (Exception ex) {
+                        Debug.WriteLine("exception while trying to remove registered bidir connections: " + ex);
+                    }
+                }                
             }
         }
 
@@ -730,7 +897,7 @@ namespace Ch.Elca.Iiop {
 
         #region SFields
         
-        private Type s_taggedComponentType = typeof(ITaggedComponent);
+        private Type s_taggedComponentType = typeof(TaggedComponent);
         
         #endregion SFields
         #region IFields
@@ -756,9 +923,9 @@ namespace Ch.Elca.Iiop {
         }
         
         /// <summary>allows to add additional tagged component to an IOR marshalled over this channel.</summary>
-        public ITaggedComponent[] AdditionalTaggedComponents {
+        public TaggedComponent[] AdditionalTaggedComponents {
             get {
-                return (ITaggedComponent[])m_additionTaggedComponents.ToArray(s_taggedComponentType);
+                return (TaggedComponent[])m_additionTaggedComponents.ToArray(s_taggedComponentType);
             }
         }
 
@@ -769,24 +936,24 @@ namespace Ch.Elca.Iiop {
             StringBuilder result = new StringBuilder();
             result.Append("IIOP-channel data, hostname: " + m_hostName +
                           ", port: " + m_port);
-            foreach (ITaggedComponent taggedComp in m_additionTaggedComponents) {
-                result.Append("; tagged component with id: " + taggedComp.Id);
+            foreach (TaggedComponent taggedComp in m_additionTaggedComponents) {
+                result.Append("; tagged component with id: " + taggedComp.tag);
             }
             return result.ToString();
         }
         
         /// <summary>add passed additional tagged component to all IOR for objects hosted by this appdomain.</summary>
-        public void AddAdditionalTaggedComponent(ITaggedComponent taggedComponent) {
+        public void AddAdditionalTaggedComponent(TaggedComponent taggedComponent) {
             m_additionTaggedComponents.Add(taggedComponent);
         }
         
         /// <summary>adds passed additional tagged components to all IOR for objects hosted by this appdomain.</summary>
-        public void AddAdditionalTaggedComponents(ITaggedComponent[] newTaggedComponents) {
+        public void AddAdditionalTaggedComponents(TaggedComponent[] newTaggedComponents) {
             m_additionTaggedComponents.AddRange(newTaggedComponents);
         }
         
         /// <summary>replaces the current additional tagged components by the new ones.</summary>
-        public void ReplaceAdditionalTaggedComponents(ITaggedComponent[] newTaggedComponents) {
+        public void ReplaceAdditionalTaggedComponents(TaggedComponent[] newTaggedComponents) {
             // now add additional components to the channel data:            
             m_additionTaggedComponents.Clear();
             if (newTaggedComponents != null) {

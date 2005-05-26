@@ -59,7 +59,10 @@ namespace Ch.Elca.Iiop.Util {
         private static Type s_throwsIdlExceptionAttributeType = typeof(ThrowsIdlExceptionAttribute);
         private static Type s_oneWayAttributeType = typeof(System.Runtime.Remoting.Messaging.OneWayAttribute);
         private static Type s_iOrderedAttributeType = typeof(IOrderedAttribute);
-                
+        private static Type s_contextElementAttributeType = typeof(ContextElementAttribute);
+        private static Type s_supportedInterfaceAttributeType = typeof(SupportedInterfaceAttribute);
+        private static Type s_repositoryIdAttributeType = typeof(RepositoryIDAttribute);
+
         private static Type s_voidType = typeof(void);
         private static Type s_stringType = typeof(System.String);
         private static Type s_charType = typeof(System.Char);
@@ -211,7 +214,32 @@ namespace Ch.Elca.Iiop.Util {
                 return s_iOrderedAttributeType;
             }
         }
+
+
+        public static Type ContextElementAttributeType {
+            get {
+                return s_contextElementAttributeType;
+            }
+        }
         
+        /// <summary>
+        /// caches typeof(Ch.Elca.Iiop.Idl.SupportedInterfaceAttribute)
+        /// </summary>
+        public static Type SupportedInterfaceAttributeType {
+            get {
+                return s_supportedInterfaceAttributeType;
+            }
+        }
+        
+        /// <summary>
+        /// caches typeof(Ch.Elca.Iiop.Idl.RepositoryIDAttribute)
+        /// </summary>        
+        public static Type RepositoryIDAttributeType {
+            get {
+                return s_repositoryIdAttributeType;
+            }
+        }        
+
         /// <summary>caches typeof(void)</summary>
         public static Type VoidType {
             get {
@@ -397,13 +425,21 @@ namespace Ch.Elca.Iiop.Util {
         }
                 
         public static AttributeExtCollection GetCustomAttriutesForMethod(MethodInfo member, bool inherit) {
-            if (!inherit) {
-                object[] attributes = member.GetCustomAttributes(inherit);
-                return AttributeExtCollection.ConvertToAttributeCollection(attributes);            
+            return GetCustomAttriutesForMethod(member, inherit, null);
+        }
+
+        public static AttributeExtCollection GetCustomAttriutesForMethod(MethodInfo member, bool inherit,
+                                                                         Type attributeType) {
+            AttributeExtCollection result;
+            object[] attributes;
+            if (attributeType == null) {
+                attributes = member.GetCustomAttributes(inherit);
             } else {
+                attributes = member.GetCustomAttributes(attributeType, inherit);
+            }
+            result = AttributeExtCollection.ConvertToAttributeCollection(attributes);           
+            if (inherit) {
                 // check also for interface methods ...
-                AttributeExtCollection result = AttributeExtCollection.ConvertToAttributeCollection(
-                    member.GetCustomAttributes(true));
                 if (member.IsVirtual) {
                     // check also for attributes on interface method, if it's a implementation of an interface method
                     Type declaringType = member.DeclaringType;
@@ -413,12 +449,18 @@ namespace Ch.Elca.Iiop.Util {
                         MethodInfo found = IsMethodDefinedInInterface(member, interf);
                         if (found != null) {
                             // add attributes from interface definition if not already present                                                
-                            result = result.MergeMissingAttributes(found.GetCustomAttributes(true));
+                            object[] inheritedAttributes;
+                            if (attributeType == null) {
+                                inheritedAttributes = found.GetCustomAttributes(inherit);
+                            } else {
+                                inheritedAttributes = found.GetCustomAttributes(attributeType, inherit);
+                            }
+                            result = result.MergeMissingAttributes(inheritedAttributes);
                         }
-                    }                    
-                }    
-                return result;
+                    }
+                }
             }
+            return result;
         }
 
         /// <summary>
@@ -589,13 +631,22 @@ namespace Ch.Elca.Iiop.Util {
             foreach (Attribute attr in methodAttributes) {
                 if (ReflectionHelper.ThrowsIdlExceptionAttributeType.
                     IsAssignableFrom(attr.GetType())) {
-                    if (((ThrowsIdlExceptionAttribute)attr).ExceptionType.
-                        Equals(thrown.GetType())) {
-                        return true;
+                        if (((ThrowsIdlExceptionAttribute)attr).ExceptionType.Equals(thrown.GetType())) {
+                            return true;
+                        }
                     }
-                }
             }
             return false;
+        }    
+        
+        /// <summary>generate the signature info for the method</summary>
+        public static Type[] GenerateSigForMethod(MethodBase method) {
+            ParameterInfo[] parameters = method.GetParameters();
+            Type[] result = new Type[parameters.Length];
+            for (int i = 0; i < parameters.Length; i++) {                             
+                result[i] = parameters[i].ParameterType;
+            }
+            return result;
         }        
         
         #endregion SMethods
