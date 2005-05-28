@@ -1023,38 +1023,56 @@ namespace Ch.Elca.Iiop {
     public class GiopReceivedRequestMessageDispatcher {
         
         #region Types
-        
+               
         /// <summary>
-        /// the type of request to process
+        /// encapsulates a request message to process.
         /// </summary>
-        private enum RequestToProcessType {
-            Request, LocateRequest
-        }
-        
-        /// <summary>
-        /// encapsulates a request to process.
-        /// </summary>
-        private class RequestToProcess {
+        private abstract class MessageToProcess {
             
-            private Stream m_messageStream;
-            private RequestToProcessType m_type;
+            private Stream m_messageStream;            
             
-            internal RequestToProcess(Stream messageStream, RequestToProcessType type) {
+            protected MessageToProcess(Stream messageStream) {
                 m_messageStream = messageStream;
-                m_type = type;
             }
             
-            internal Stream MessageStream {
+            protected Stream MessageStream {
                 get {
                     return m_messageStream;
                 }
             }
             
-            internal RequestToProcessType Type {
-                get {
-                    return m_type;
-                }                    
+            /// <summary>processes this request</summary>
+            internal abstract void Process(IGiopRequestMessageReceiver receiver, 
+                                           GiopTransportMessageHandler transportHandler,
+                                           GiopConnectionDesc connectionDesc);
+            
+        }
+        
+        private class Request : MessageToProcess {
+
+            internal Request(Stream messageStream) : base(messageStream) {                
+            }
+                        
+            internal override void Process(IGiopRequestMessageReceiver receiver, 
+                                           GiopTransportMessageHandler transportHandler,
+                                           GiopConnectionDesc connectionDesc) {
+                receiver.ProcessRequest(MessageStream, transportHandler, connectionDesc);
+            }
+
+            
+        }
+        
+        private class LocateRequest : MessageToProcess {
+
+            internal LocateRequest(Stream messageStream) : base(messageStream) {                
             }            
+            
+            internal override void Process(IGiopRequestMessageReceiver receiver,
+                                           GiopTransportMessageHandler transportHandler,
+                                           GiopConnectionDesc connectionDesc) {
+                receiver.ProcessLocateRequest(MessageStream, transportHandler, connectionDesc);
+            }
+            
         }
         
         #endregion Types
@@ -1099,7 +1117,7 @@ namespace Ch.Elca.Iiop {
         /// </summary>        
         internal void EnqueueRequestMessage(Stream requestStream) {
             lock(this) {
-                RequestToProcess req = new RequestToProcess(requestStream, RequestToProcessType.Request);
+                MessageToProcess req = new Request(requestStream);
                 m_requestQueue.Enqueue(req);
             }
         }
@@ -1109,7 +1127,7 @@ namespace Ch.Elca.Iiop {
         /// </summary>                
         internal void EnqueueLocateRequestMessage(Stream requestStream) {
             lock(this) {
-                RequestToProcess req = new RequestToProcess(requestStream, RequestToProcessType.LocateRequest);
+                MessageToProcess req = new LocateRequest(requestStream);
                 m_requestQueue.Enqueue(req);
             }
         }
@@ -1137,17 +1155,17 @@ namespace Ch.Elca.Iiop {
         private void Process() {
             try {
                 while (true) {
-                    RequestToProcess req;
+                    MessageToProcess req;
                     lock(this) {
                         // get next request to process.
                         if (!(m_requestQueue.Count > 0)) {
                             m_processing = false; // use a new thread for messages arraving from now on ...
                             break; // nothing more to process
                         }
-                        req = (RequestToProcess)m_requestQueue.Dequeue();
+                        req = (MessageToProcess)m_requestQueue.Dequeue();
                     }
                     // process next request
-                    ProcessRequest(req);
+                    req.Process(m_receiver, m_msgHandler, m_conDesc );
                 }
             } catch (Exception) {
                 // unexpected exception -> processing problem on this connection, close connection...
@@ -1160,22 +1178,7 @@ namespace Ch.Elca.Iiop {
                 // connection closed -> don't set m_processing to false here
             }
         }
-        
-        private void ProcessRequest(RequestToProcess req) {
-            switch (req.Type) {
-                case RequestToProcessType.Request:
-                    m_receiver.ProcessRequest(req.MessageStream, m_msgHandler, m_conDesc);
-                    break;
-                case RequestToProcessType.LocateRequest:
-                    m_receiver.ProcessLocateRequest(req.MessageStream, m_msgHandler, m_conDesc);
-                    break;
-                default:
-                    Trace.WriteLine("unknown request type in Process: " + req.Type);
-                    // unknown, ignore
-                    break;
-            }
-        }
-                       
+                               
         #endregion IMethods
         
     }    
