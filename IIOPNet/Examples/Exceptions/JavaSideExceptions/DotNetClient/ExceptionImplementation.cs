@@ -223,7 +223,69 @@ public class ThrowableImpl : Throwable {
 }
 
 
+[Serializable]
+public class _ExceptionImpl : _Exception {
+
+    #region IFields
+
+    private ExceptionCommon m_data = new ExceptionCommon();
+
+    #endregion IFields
+
+    public _ExceptionImpl() : base() {
+    }
+            
+    public override void Deserialise(Corba.DataInputStream stream) {
+        m_data.Deserialise(stream);
+    }
+                
+    public override void Serialize(Corba.DataOutputStream stream) {
+        m_data.Serialise(stream);
+    }
+
+    public override Throwable initCause(Throwable arg) {
+        return null;
+    }
+                
+    public override string toString() {
+        return ToString();
+    }
+
+    public override Throwable fillInStackTrace() {
+        return null;
+    }
+
+    public override Throwable cause {
+        get { return m_data.Cause; }
+    }
+
+    public override string localizedMessage {
+        get { return m_data.Msg; }
+    }
+
+    public override string message {
+        get { return m_data.Msg; }
+    }
+
+    public override void printStackTrace__() {    
+    }
+
+    public override void printStackTrace__java_io_PrintStream(java.io.PrintStream arg) {
+    }
+
+    public override void printStackTrace__java_io_PrintWriter(java.io.PrintWriter arg) {
+    }
+
+    public override StackTraceElement[] stackTrace {
+        get { return m_data.Trace; }
+        set { }
+    }
+
+    public override string ToString() {
+        return base.ToString() + "; msg: " + m_data.Msg;
+    }
+
 }
 
 
-
+}
