@@ -292,7 +292,7 @@ namespace Ch.Elca.Iiop {
                 int read = m_onTransport.EndRead(ar);
                 if (read <= 0) {
                     // connection has been closed by the other end
-                    m_messageHandler.MsgReceivedConnectionClosedException(this);
+                    m_messageHandler.MsgReceivedConnectionClosedException();
                     return;
                 }
                 int offset = m_bytesRead;
@@ -316,7 +316,7 @@ namespace Ch.Elca.Iiop {
                     m_messageHandler.MsgReceivedCallback(this);
                 }
             } catch (Exception ex) {
-                m_messageHandler.MsgReceivedCallbackException(this, ex);
+                m_messageHandler.MsgReceivedCallbackException(ex);
             }
         }
                 
@@ -897,7 +897,7 @@ namespace Ch.Elca.Iiop {
             }                                    
         }                
         
-        internal void MsgReceivedCallbackException(MessageReceiveTask messageReceived, Exception ex) {
+        internal void MsgReceivedCallbackException(Exception ex) {
             try {                
                 if (ex is omg.org.CORBA.MARSHAL) {
                     // Giop header was not ok
@@ -913,7 +913,7 @@ namespace Ch.Elca.Iiop {
         /// <summary>
         /// called, when the connection has been closed while receiving a message
         /// </summary>        
-        internal void MsgReceivedConnectionClosedException(MessageReceiveTask messageReceived) {
+        internal void MsgReceivedConnectionClosedException() {
             Trace.WriteLine("connection closed while trying to read a message");
             try {
                 m_transport.CloseConnection();
