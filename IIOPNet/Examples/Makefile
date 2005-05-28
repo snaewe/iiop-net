@@ -17,8 +17,19 @@ build: idl-files
 	@if defined JBOSS_HOME $(MAKE) build
 	cd ..
 	cd ..
+	cd EJBCommandPattern
+	cd Jboss3.2
+	@if not defined JBOSS_HOME echo JBOSS_HOME not set, skipping JBOSS example
+	@if defined JBOSS_HOME $(MAKE) build
+	cd ..
+	cd ..
 	cd Callback
 	cd ChatroomInterDN
+	$(MAKE) build
+	cd ..
+	cd ..
+	cd Exceptions
+	cd JavaSideExceptions
 	$(MAKE) build
 	cd ..
 	cd ..
@@ -44,11 +55,21 @@ clean:
         @if defined WAS_HOME $(MAKE) clean
 	cd ..
 	cd Jboss3.2.1
-	nmake clean
+	@if defined JBOSS_HOME $(MAKE) clean
+	cd ..
+	cd ..
+	cd EJBCommandPattern
+	cd Jboss3.2
+	@if defined JBOSS_HOME $(MAKE) clean
 	cd ..
 	cd ..
 	cd Callback
 	cd ChatroomInterDN
+	$(MAKE) clean
+	cd ..
+	cd ..
+	cd Exceptions
+	cd JavaSideExceptions
 	$(MAKE) clean
 	cd ..
 	cd ..
