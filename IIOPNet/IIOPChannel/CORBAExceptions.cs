@@ -122,8 +122,28 @@ namespace Ch.Elca.Iiop {
         }
 
         #endregion IConstructors
-        #region IMethods
+        #region IProperties
         
+        public string ExceptionMessage {
+            get {
+                return message;
+            }
+        }
+        
+        public string ExceptionName {
+            get {
+                return name;
+            }
+        }
+        
+        public string ThrowingMethod {
+            get {
+                return throwingMethod;
+            }
+        }
+        
+        #endregion IProperties
+        #region IMethods
 
         /// <summary>
         /// recursively adds the exception details to name, message, throwingMethod fields

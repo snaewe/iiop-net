@@ -233,7 +233,7 @@ namespace Ch.Elca.Iiop.Demo.Chatroom {
                     m_constatus.Text = CONNECTED_INFO;
                 } catch (GenericUserException gue) {
                     m_listener = null;
-                    MessageBox.Show("exception: " + gue.Message);
+                    MessageBox.Show("exception: " + gue.ExceptionMessage);
                 } catch (Exception ex) {
                     m_listener = null;
                     Console.WriteLine("exception: " + ex);

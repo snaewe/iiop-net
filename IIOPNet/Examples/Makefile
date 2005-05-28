@@ -17,7 +17,11 @@ build: idl-files
 	@if defined JBOSS_HOME $(MAKE) build
 	cd ..
 	cd ..
-
+	cd Callback
+	cd ChatroomInterDN
+	$(MAKE) build
+	cd ..
+	cd ..
 	
 
 idl-files:        
@@ -41,5 +45,10 @@ clean:
 	cd ..
 	cd Jboss3.2.1
 	nmake clean
+	cd ..
+	cd ..
+	cd Callback
+	cd ChatroomInterDN
+	$(MAKE) clean
 	cd ..
 	cd ..
