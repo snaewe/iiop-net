@@ -51,7 +51,8 @@ namespace Ch.Elca.Iiop.Security.Ssl {
 
         private static System.Reflection.PropertyInfo s_secureTcpClientClientPropertyInfo =
             typeof(SecureTcpClient).GetProperty("Client",
-                System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+                System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Public |
+                System.Reflection.BindingFlags.Instance);
         
         #endregion SFields                        
         #region IFields

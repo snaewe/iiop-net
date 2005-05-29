@@ -58,7 +58,7 @@ namespace Org.Mentalis.Security.Ssl.Tls1 {
 			if (seed == null || secret == null || hash == null)
 				throw new ArgumentNullException();
 			m_Disposed = false;
-			m_HMAC = new HMAC(hash, secret);
+			m_HMAC = new Org.Mentalis.Security.Cryptography.HMAC(hash, secret);
 			m_Seed = seed;
 			m_HashSize = m_HMAC.HashSize / 8;
 			Reset();
@@ -113,7 +113,7 @@ namespace Org.Mentalis.Security.Ssl.Tls1 {
 		~ExpansionDeriveBytes() {
 			Dispose();
 		}
-		private HMAC m_HMAC;
+		private Org.Mentalis.Security.Cryptography.HMAC m_HMAC;
 		private int m_HashSize; // in bytes
 		private byte[] m_Seed;
 		private byte[] m_NextBytes;

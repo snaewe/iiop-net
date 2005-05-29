@@ -49,7 +49,8 @@ namespace Ch.Elca.Iiop {
         
         private static System.Reflection.PropertyInfo s_tcpClientClientPropertyInfo =
             typeof(TcpClient).GetProperty("Client",
-                System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+                System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Public |
+                System.Reflection.BindingFlags.Instance);
         
         #endregion SFields
         #region IFields

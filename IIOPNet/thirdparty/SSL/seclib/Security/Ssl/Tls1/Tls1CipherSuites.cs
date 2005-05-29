@@ -80,13 +80,13 @@ namespace Org.Mentalis.Security.Ssl.Tls1 {
 			if (entity == ConnectionEnd.Client) {
 				ret.Encryptor = bulk.CreateEncryptor(client_key, client_iv);
 				ret.Decryptor = bulk.CreateDecryptor(server_key, server_iv);
-				ret.LocalHasher = new HMAC((HashAlgorithm)Activator.CreateInstance(definition.HashAlgorithm), client_mac);
-				ret.RemoteHasher = new HMAC((HashAlgorithm)Activator.CreateInstance(definition.HashAlgorithm), server_mac);
+				ret.LocalHasher = new Org.Mentalis.Security.Cryptography.HMAC((HashAlgorithm)Activator.CreateInstance(definition.HashAlgorithm), client_mac);
+				ret.RemoteHasher = new Org.Mentalis.Security.Cryptography.HMAC((HashAlgorithm)Activator.CreateInstance(definition.HashAlgorithm), server_mac);
 			} else {
 				ret.Encryptor = bulk.CreateEncryptor(server_key, server_iv);
 				ret.Decryptor = bulk.CreateDecryptor(client_key, client_iv);
-				ret.LocalHasher = new HMAC((HashAlgorithm)Activator.CreateInstance(definition.HashAlgorithm), server_mac);
-				ret.RemoteHasher = new HMAC((HashAlgorithm)Activator.CreateInstance(definition.HashAlgorithm), client_mac);
+				ret.LocalHasher = new Org.Mentalis.Security.Cryptography.HMAC((HashAlgorithm)Activator.CreateInstance(definition.HashAlgorithm), server_mac);
+				ret.RemoteHasher = new Org.Mentalis.Security.Cryptography.HMAC((HashAlgorithm)Activator.CreateInstance(definition.HashAlgorithm), client_mac);
 			}
 			// clear sensitive data
 			Array.Clear(client_mac, 0, client_mac.Length);
