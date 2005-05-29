@@ -1,3 +1,34 @@
+version 1.8.0 rc0 (29 may 2005)
+-------------------------------
+
+new features:
+- bidirectional giop support
+- partial support for CORBA portable interceptors
+- possibility to set client side request timeout 
+  (client channel option: IiopClientChannel.CLIENT_REQUEST_TIMEOUT_KEY)
+- possibility to set client connection close on idle
+  (client channel option: IiopClientChannel.CLIENT_UNUSED_CONNECTION_KEEPALIVE_KEY)
+- support for context for operations (corba context keyword)
+
+changes:
+- less resources consumption: 
+  The number of allocated threads is reduced massively. 
+  The number of allocated connections (by the client) is reduced
+
+compatibility:
+- improved compatibility (only small problems remaining) with mono 1.1.7 
+  (please upgrade to 1.1.7, this IIOP.NET version doesn't work with a previous mono version)
+- works now also on .NET 2.0 beta 2 (doesn't work well on the .NET 2.0 beta 1, please upgrade)
+
+bugs fixed:
+- IDLToCLSCompiler: oneway method attribute in idl was ignored
+
+new tests:
+- portable interceptors
+- bidirectional giop (multiple)
+- callback
+- client request timeout
+
 version 1.7.1 final (24 april 2005)
 -----------------------------------
 
