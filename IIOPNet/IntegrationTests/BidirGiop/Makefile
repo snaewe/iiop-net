@@ -4,10 +4,12 @@ build: nunit-var
     $(MAKE) build
     cd ..
     cd OmniOrbServer
-    $(MAKE) build
+    @if not defined OMNIORB_HOME echo OMNIORB_HOME not set, skipping OmniORB integration test
+    @if defined OMNIORB_HOME $(MAKE) /C build
     cd ..
     cd JacOrbClient
-    $(MAKE) build
+    @if not defined JACORB_HOME echo JACORB_HOME not set, skipping JACORB integration test
+    @if defined JACORB_HOME $(MAKE) /C build
     cd ..
     cd MultiThreaded
     $(MAKE) build
@@ -23,10 +25,12 @@ test: nunit-var
     $(MAKE) test
     cd ..
     cd OmniOrbServer
-    $(MAKE) test
+    @if not defined OMNIORB_HOME echo OMNIORB_HOME not set, skipping OmniORB integration test
+    @if defined OMNIORB_HOME $(MAKE) /C test
     cd ..
     cd JacOrbClient
-    $(MAKE) test
+    @if not defined JACORB_HOME echo JACORB_HOME not set, skipping JACORB integration test
+    @if defined JACORB_HOME $(MAKE) /C test
     cd ..
     cd MultiThreaded
     $(MAKE) test
@@ -38,10 +42,10 @@ clean:
     $(MAKE) clean
     cd ..
     cd OmniOrbServer
-    $(MAKE) clean
+    @if defined OMNIORB_HOME $(MAKE) /C clean
     cd ..
     cd JacOrbClient
-    $(MAKE) clean
+    @if defined JACORB_HOME $(MAKE) /C clean
     cd ..
     cd MultiThreaded
     $(MAKE) clean
