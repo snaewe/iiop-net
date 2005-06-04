@@ -36,6 +36,9 @@ build: nunit-var junit-var
     cd MappingPluginJavaAsClient
     $(MAKE) build
     cd ..
+    cd MappingOptions
+    $(MAKE) build
+    cd ..
     cd Jboss3.2.1
     @if not defined JBOSS_HOME echo JBOSS_HOME not set, skipping JBOSS integration test
     @if defined JBOSS_HOME $(MAKE) build
@@ -112,6 +115,9 @@ test: nunit-var junit-var
     cd MappingPluginJavaAsClient
     $(MAKE) test
     cd ..
+    cd MappingOptions
+    $(MAKE) test
+    cd ..
     cd Jboss3.2.1
     @if not defined JBOSS_HOME echo JBOSS_HOME not set, skipping JBOSS integration test
     @if defined JBOSS_HOME $(MAKE) test
@@ -173,6 +179,9 @@ clean:
     $(MAKE) clean
     cd ..
     cd MappingPluginJavaAsClient
+    $(MAKE) clean
+    cd ..
+    cd MappingOptions
     $(MAKE) clean
     cd ..
     cd Jboss3.2.1

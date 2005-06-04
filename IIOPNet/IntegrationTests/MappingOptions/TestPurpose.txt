@@ -1,0 +1,5 @@
+This integration test checks the mapping options in the IDL to CLS Compiler
+
+
+
+

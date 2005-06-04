@@ -1,0 +1,23 @@
+Prerequisites
+-------------
+
+For running this integration test, you need NUnit V2.0 or newer.
+
+Building the test
+-----------------
+
+- set NUnitV2_HOME to the NUnit V2.0 home directory, e.g. C:\Programme\NUnitV2
+- use nmake to build the TestServer and the integration test
+
+Running the test
+----------------
+
+- start the server:
+  - change to directory TestServer\bin
+  - launch TestServer.exe
+
+- launch the test using the NUnit GUI or the NUnit Console runner
+  Running the test with console launcher:
+  - change to directory TestClient
+  - launch LaunchTest.bat
+
