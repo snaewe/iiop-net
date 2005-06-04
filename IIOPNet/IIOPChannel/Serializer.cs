@@ -1327,18 +1327,23 @@ namespace Ch.Elca.Iiop.Marshalling {
                                            CdrInputStream sourceStream) {
             omg.org.CORBA.TypeCode typeCode = (omg.org.CORBA.TypeCode)m_typeCodeSer.Deserialise(formal, 
                                                                                                 attributes, sourceStream);
+            object result;
             // when returning 0 in a mico-server for any, the typecode used is VoidTC
             if ((!(typeCode is NullTC)) && (!(typeCode is VoidTC))) {
                 Type dotNetType = Repository.GetTypeForTypeCode(typeCode);
                 AttributeExtCollection typeAttributes = Repository.GetAttrsForTypeCode(typeCode);
                 Marshaller marshaller = Marshaller.GetSingleton();
-                object result = marshaller.Unmarshal(dotNetType, typeAttributes, sourceStream);
+                result = marshaller.Unmarshal(dotNetType, typeAttributes, sourceStream);
                 if (result is BoxedValueBase) {
                     result = ((BoxedValueBase)result).Unbox(); // unboxing the boxed-value, because BoxedValueTypes are internal types, which should not be used by users
                 }
+            } else {
+                result = null;
+            }
+            if (!formal.Equals(s_anyType)) {
                 return result;
             } else {
-                return null;
+                return new Any(result, typeCode);
             }
         }
         

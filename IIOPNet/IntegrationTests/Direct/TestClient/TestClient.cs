@@ -513,6 +513,16 @@ namespace Ch.Elca.Iiop.IntegrationTests {
             System.Int32[] result4 = (System.Int32[]) m_testService.EchoAnything(arg4);
             Assertion.AssertEquals(arg4[0], result4[0]);
         }
+
+        [Test]
+        public void TestAnyContainer() {
+            System.String testString = "abcd";
+            OrbServices orb = OrbServices.GetSingleton();
+            omg.org.CORBA.TypeCode wstringTc = orb.create_wstring_tc(0);
+            Any any = new Any(testString, wstringTc);
+            Any result = m_testService.EchoAnythingContainer(any);
+            Assertion.AssertEquals(any.Value, result.Value);
+        }
                 
         [Test]
         public void TestEqualityServerAndProxy() {

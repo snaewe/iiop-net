@@ -215,6 +215,10 @@ namespace Ch.Elca.Iiop.IntegrationTests {
             return arg;
         }
 
+        public Any EchoAnythingContainer(Any arg) {
+            return arg;
+        }
+
         public System.Int32 TestRef(ref System.Int32 argRef) {
             argRef += 1;
             return argRef;

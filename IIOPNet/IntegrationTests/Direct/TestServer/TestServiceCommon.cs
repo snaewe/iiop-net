@@ -28,6 +28,7 @@
 
 using System;
 using Ch.Elca.Iiop.Idl;
+using omg.org.CORBA;
 
 namespace Ch.Elca.Iiop.IntegrationTests {
 
@@ -188,6 +189,8 @@ namespace Ch.Elca.Iiop.IntegrationTests {
         TestAbstrInterfaceImplByMarshalByVal RetriveTestInterfaceAImplemtorTheImpl(System.String initialMsg);
 
         object EchoAnything(object arg);
+
+        Any EchoAnythingContainer(Any arg);
 
         System.Int32 TestRef(ref System.Int32 argRef);
 
