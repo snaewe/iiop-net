@@ -80,16 +80,21 @@ namespace Ch.Elca.Iiop.IdlCompiler.Tests {
         }
         
         public Assembly CreateIdl(Stream source) {            
+            return CreateIdl(source, false);
+        }                
+        
+        public Assembly CreateIdl(Stream source, bool anyToAnyContainerMapping) {            
             IDLParser parser = new IDLParser(source);
             ASTspecification spec = parser.specification();
             // now parsed representation can be visited with the visitors
             MetaDataGenerator generator = new MetaDataGenerator(GetAssemblyName(), ".", 
                                                                 new ArrayList());
+            generator.MapAnyToAnyContainer = anyToAnyContainerMapping;
             generator.InitalizeForSource(parser.getSymbolTable());
             spec.jjtAccept(generator, null);
-            Assembly result = generator.GetResultAssembly();
-            return result;
-        }                
+            Assembly result = generator.ResultAssembly;
+            return result;            
+        }
         
         private void CheckRepId(Type testType, string expected) {
             object[] repAttrs = testType.GetCustomAttributes(typeof(RepositoryIDAttribute), 
@@ -965,7 +970,54 @@ namespace Ch.Elca.Iiop.IdlCompiler.Tests {
                                             BindingFlags.Instance | BindingFlags.DeclaredOnly,
                                 2);                        
         }
+        
+        [Test]
+        public void TestAnyToAnyContainerMapping() {
+        	MemoryStream testSource = new MemoryStream();
+            StreamWriter writer = new StreamWriter(testSource, s_latin1);
 
+            // idl:            
+            writer.WriteLine("module testmod {");
+            writer.WriteLine("    interface Test {");
+            writer.WriteLine("        any EchoAnyToContainer(in any arg);");
+            writer.WriteLine("    };");
+            writer.WriteLine("    #pragma ID Test \"IDL:testmod/Test:1.0\"");
+            writer.WriteLine("};");
+            
+            writer.Flush();
+            testSource.Seek(0, SeekOrigin.Begin);
+            Assembly result = CreateIdl(testSource, true);
+            writer.Close();
+                       
+            // check if interface is correctly created
+            Type ifType = result.GetType("testmod.Test", true);
+            CheckPublicInstanceMethodPresent(ifType, "EchoAnyToContainer", 
+                                             typeof(omg.org.CORBA.Any), new Type[] { typeof(omg.org.CORBA.Any) });
+        }
+
+        [Test]
+        public void TestAnyToObjectMapping() {
+        	MemoryStream testSource = new MemoryStream();
+            StreamWriter writer = new StreamWriter(testSource, s_latin1);
+
+            // idl:            
+            writer.WriteLine("module testmod {");
+            writer.WriteLine("    interface Test {");
+            writer.WriteLine("        any EchoAnyToContainer(in any arg);");
+            writer.WriteLine("    };");
+            writer.WriteLine("    #pragma ID Test \"IDL:testmod/Test:1.0\"");
+            writer.WriteLine("};");
+            
+            writer.Flush();
+            testSource.Seek(0, SeekOrigin.Begin);
+            Assembly result = CreateIdl(testSource, false);
+            writer.Close();
+                       
+            // check if interface is correctly created
+            Type ifType = result.GetType("testmod.Test", true);
+            CheckPublicInstanceMethodPresent(ifType, "EchoAnyToContainer", 
+                                             typeof(object), new Type[] { typeof(object) });
+        }               
 
         #endregion
         

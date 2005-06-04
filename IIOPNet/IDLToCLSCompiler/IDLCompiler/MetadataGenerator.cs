@@ -181,6 +181,8 @@ public class MetaDataGenerator : IDLParserVisitor {
     private DirectoryInfo m_valTypeImplSkelTargetDir = new DirectoryInfo(".");
     private bool m_valTypeImplSkelOverwriteWhenExist = false;
     private CodeDomProvider m_valTypeImplSkelProvider = null;
+    
+    private bool m_mapAnyToAnyContainer = false; // default is map any to object
 
     #endregion IFields
     #region IConstructors
@@ -201,7 +203,30 @@ public class MetaDataGenerator : IDLParserVisitor {
     }
 
     #endregion IConstructors
-    #region IProperties            
+    #region IProperties     
+    
+    /// <summary>
+    /// should idl any be mapped to object (false) or to the container omg.org.CORBA.Any (true)
+    /// </summary>
+    public bool MapAnyToAnyContainer {
+        get {
+            return m_mapAnyToAnyContainer;
+        }
+        set {
+            m_mapAnyToAnyContainer = value;
+        }
+    }
+    
+    #if UnitTest
+    
+    public Assembly ResultAssembly {
+        get {
+            return m_asmBuilder;
+        }
+    }
+    
+    #endif    
+    
     #endregion IProperties
     #region IMethods
     
@@ -247,14 +272,6 @@ public class MetaDataGenerator : IDLParserVisitor {
         }
     }
     
-    #if UnitTest
-    
-    public Assembly GetResultAssembly() {
-        return m_asmBuilder;
-    }
-    
-    #endif
-
     /// <summary>
     /// prints a list of value types for which an implementation must be provided.
     /// </summary>
@@ -1753,10 +1770,15 @@ public class MetaDataGenerator : IDLParserVisitor {
      * @return a TypeContainer for the any type
      */
     public Object visit(ASTany_type node, Object data) {
-        AttributeExtCollection attrs = new AttributeExtCollection(
-            new Attribute[] { new ObjectIdlTypeAttribute(IdlTypeObject.Any) });
-        TypeContainer container = new TypeContainer(typeof(System.Object), attrs);
-        return container;
+        if (!MapAnyToAnyContainer) {
+            AttributeExtCollection attrs = new AttributeExtCollection(
+                new Attribute[] { new ObjectIdlTypeAttribute(IdlTypeObject.Any) });
+            TypeContainer container = new TypeContainer(typeof(System.Object), attrs);
+            return container;
+        } else {
+            TypeContainer container = new TypeContainer(typeof(omg.org.CORBA.Any));
+            return container;
+        }
     }
 
     /**

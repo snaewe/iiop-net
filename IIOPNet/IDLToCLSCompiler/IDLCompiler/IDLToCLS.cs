@@ -124,6 +124,7 @@ public class IDLToCLS {
     private string m_keyFile;
     private bool m_delaySign = false;
     private string m_asmVersion = null;
+    private bool m_mapAnyToAnyCont = false;
     
     #endregion IFields
     #region IConstructors
@@ -176,6 +177,7 @@ public class IDLToCLS {
         Console.WriteLine("-snk            sign key file (used for generating strong named assemblies)");
         Console.WriteLine("-delaySign      delay signing of assembly (snk file contains only a pk)");
         Console.WriteLine("-asmVersion     the version of the generated assembly");
+        Console.WriteLine("-mapAnyToCont   maps idl any to the any container omg.org.CORBA.Any; if not specified, any is mapped to object");
     }
     
     public static void Error(String message) {
@@ -263,6 +265,9 @@ public class IDLToCLS {
                     Environment.Exit(3);
                 }
                 Environment.CurrentDirectory = (base_dir);
+            } else if (args[i].Equals("-mapAnyToCont")) {
+                i++;
+                m_mapAnyToAnyCont = true;
             } else {
                 Error(String.Format("Error: invalid option {0}", args[i]));
             }
@@ -376,7 +381,9 @@ public class IDLToCLS {
             generator.EnableValueTypeSkeletonGeneration(m_vtSkelcodeDomProvider,
                                                         m_vtSkelTd,
                                                         m_vtSkelOverwrite);
-        }
+        }       
+        generator.MapAnyToAnyContainer = m_mapAnyToAnyCont;
+        
         string currentDir = Directory.GetCurrentDirectory();
         for (int i = 0; i < m_inputFileNames.Length; i++) {
             Debug.WriteLine("checking file: " + m_inputFileNames[i] );

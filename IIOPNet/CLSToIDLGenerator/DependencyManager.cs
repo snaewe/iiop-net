@@ -81,6 +81,7 @@ namespace Ch.Elca.Iiop.Idl {
             m_defaultMappedTypes.Add(typeof(MarshalByRefObject));
             m_defaultMappedTypes.Add(typeof(omg.org.CORBA.WStringValue));
             m_defaultMappedTypes.Add(typeof(omg.org.CORBA.StringValue));
+            m_defaultMappedTypes.Add(typeof(omg.org.CORBA.Any));
         }
         
         /// <summary>
