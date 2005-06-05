@@ -64,27 +64,71 @@ namespace omg.org.CORBA {
         TypeCode create_interface_tc ([StringValue] [WideChar(false)] string id,
                                       [StringValue] [WideChar(false)] string name);
         
+        TypeCode create_abstract_interface_tc([StringValue] [WideChar(false)] string id,
+                                              [StringValue] [WideChar(false)] string name);
+        
+        TypeCode create_local_interface_tc([StringValue] [WideChar(false)] string id,
+                                           [StringValue] [WideChar(false)] string name);        
+        
         TypeCode create_string_tc(int bound);
         
         TypeCode create_wstring_tc(int bound);
         
-        TypeCode create_ulong_tc();
-        
-        TypeCode create_ushort_tc();
-        
-        TypeCode create_ulonglong_tc();    
-
         TypeCode create_array_tc (int length,
                                   TypeCode element_type);
 
         TypeCode create_alias_tc ([StringValue] [WideChar(false)] string id, [StringValue] [WideChar(false)] string name, 
                                   TypeCode original_type);
+        
+        TypeCode create_sequence_tc (int bound, TypeCode element_type);
+
+        TypeCode create_value_box_tc ([StringValue] [WideChar(false)] string id, 
+                                      [StringValue] [WideChar(false)] string name,
+                                      TypeCode boxed_type);
+        
+        TypeCode create_enum_tc ([StringValue] [WideChar(false)] string id, 
+                                 [StringValue] [WideChar(false)] string name,
+                                 [IdlSequence(0L)][StringValue] [WideChar(false)] string[] members);
                 
         #endregion TypeCode creation operations
         
     }
     
     public interface IOrbServices : ORB {
+        
+        /// <summary>creates the typecode NullTC</summary>
+        TypeCode create_null_tc();
+        
+        /// <summary>creates the typecode VoidTC</summary>
+        TypeCode create_void_tc();
+        
+        TypeCode create_ulong_tc();
+        
+        TypeCode create_ushort_tc();
+        
+        TypeCode create_ulonglong_tc();      
+        
+        TypeCode create_long_tc();
+        
+        TypeCode create_short_tc();
+        
+        TypeCode create_longlong_tc();
+        
+        TypeCode create_float_tc();
+        
+        TypeCode create_double_tc();
+        
+        TypeCode create_boolean_tc();
+        
+        TypeCode create_octet_tc();
+        
+        TypeCode create_char_tc();
+        
+        TypeCode create_wchar_tc();     
+        
+        TypeCode create_any_tc();
+        
+        TypeCode create_typecode_tc();       
         
         /// <summary>takes an object an returns the typecode for it</summary>
         TypeCode create_tc_for(object forObject);
@@ -265,12 +309,30 @@ namespace omg.org.CORBA {
         }
         
         #region Typecode creation operations
-
+        
+        public TypeCode create_null_tc() {
+            return new NullTC();
+        }
+        
+        public TypeCode create_void_tc() {
+            return new VoidTC();
+        }
+            
         public TypeCode create_interface_tc ([StringValue] [WideChar(false)] string id,
                                              [StringValue] [WideChar(false)] string name) {
             return new ObjRefTC(id, name);
         }
         
+        public TypeCode create_abstract_interface_tc([StringValue] [WideChar(false)] string id,
+                                                     [StringValue] [WideChar(false)] string name) {
+            return new AbstractIfTC(id, name);
+        }
+        
+        public TypeCode create_local_interface_tc([StringValue] [WideChar(false)] string id,
+                                                  [StringValue] [WideChar(false)] string name) {
+            return new LocalIfTC(id, name);
+        }
+
         public TypeCode create_ulong_tc() {
             return new ULongTC();
         }
@@ -281,6 +343,42 @@ namespace omg.org.CORBA {
         
         public TypeCode create_ulonglong_tc() {
             return new ULongLongTC();
+        }
+        
+        public TypeCode create_long_tc() {
+            return new LongTC();
+        }
+        
+        public TypeCode create_short_tc() {
+            return new ShortTC();
+        }
+        
+        public TypeCode create_longlong_tc() {
+            return new LongLongTC();
+        }
+        
+        public TypeCode create_float_tc() {
+            return new FloatTC();
+        }
+        
+        public TypeCode create_double_tc() {
+            return new DoubleTC();
+        }
+        
+        public TypeCode create_boolean_tc() {
+            return new BooleanTC();
+        }
+        
+        public TypeCode create_octet_tc() {
+            return new OctetTC();
+        }
+        
+        public TypeCode create_char_tc() {
+            return new CharTC();
+        }
+        
+        public TypeCode create_wchar_tc() {
+            return new WCharTC();
         }
         
         public TypeCode create_string_tc(int bound) {
@@ -295,13 +393,36 @@ namespace omg.org.CORBA {
                                          TypeCode element_type) {
             return new ArrayTC(element_type, length);
         }
+        
+        public TypeCode create_sequence_tc (int bound, TypeCode element_type) {
+            return new SequenceTC(element_type, bound);
+        }        
 
         public TypeCode create_alias_tc ([StringValue] [WideChar(false)] string id, [StringValue] [WideChar(false)] string name, 
                                          TypeCode original_type) {
             return new AliasTC(id, name, original_type);
         }
 
+        public TypeCode create_value_box_tc ([StringValue] [WideChar(false)] string id, 
+                                             [StringValue] [WideChar(false)] string name,
+                                             TypeCode boxed_type) {
+            return new ValueBoxTC(id, name, boxed_type);
+        }
         
+        public TypeCode create_enum_tc ([StringValue] [WideChar(false)] string id, 
+                                        [StringValue] [WideChar(false)] string name,
+                                        [IdlSequence(0L)][StringValue] [WideChar(false)] string[] members) {
+            return new EnumTC(id, name, members);
+        }
+        
+        public TypeCode create_any_tc() {
+            return new AnyTC();
+        }
+        
+        public TypeCode create_typecode_tc() {
+            return new TypeCodeTC();
+        }
+                        
         /// <summary>takes an object an returns the typecode for it</summary>
         public TypeCode create_tc_for(object forObject) {
             if (!(forObject == null)) {
