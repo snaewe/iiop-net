@@ -449,6 +449,18 @@ namespace Ch.Elca.Iiop.IntegrationTests {
             Assertion.AssertEquals(false, prop.CanWrite);
             Assertion.AssertEquals(true, prop.CanRead);
         }
+
+        [Test]
+        public void TestPassingNullForFormalParamObjectAndAny() {
+            object arg1 = null;
+            object result1 = m_testService.EchoAnything(arg1);
+            Assertion.AssertEquals(arg1, result1);
+            
+            Any any = new Any(null);
+            Any result = m_testService.EchoAnythingContainer(any);
+            Assertion.AssertEquals(any.Value, result.Value);
+        }
+
         
         /// <summary>
         /// Test passing instances, if formal parameter is System.Object
