@@ -77,12 +77,13 @@ namespace omg.org.CORBA {
 		public Any(object obj, TypeCode type) {
 			if (type == null) {
 				throw new BAD_PARAM(456, CompletionStatus.Completed_MayBe);
-			}
-			// precodition: type is an instance of TypeCodeImpl
-			Type requiredObjectType = Repository.GetTypeForTypeCode(type);
-			if ((obj != null) &&
-			     (!requiredObjectType.IsAssignableFrom(obj.GetType()))) {
-			    throw new BAD_PARAM(456, CompletionStatus.Completed_MayBe);	
+			}			
+			if (obj != null) {
+		        // precodition: type is an instance of TypeCodeImpl
+			    Type requiredObjectType = Repository.GetTypeForTypeCode(type);
+			    if (!requiredObjectType.IsAssignableFrom(obj.GetType())) {
+			        throw new BAD_PARAM(456, CompletionStatus.Completed_MayBe);	
+			    }
 			}
 			m_value = obj;
 			m_typeCode = type;

@@ -1298,7 +1298,7 @@ namespace Ch.Elca.Iiop.Marshalling {
                                        CdrOutputStream targetStream) {
             TypeCodeImpl typeCode = new NullTC();
             object actualToSerialise = actual;
-            Type actualType = null;            
+            Type actualType = null;
             if (actual != null) {
                 if (actual.GetType().Equals(s_anyType)) {
                     // use user defined type code
@@ -1306,8 +1306,10 @@ namespace Ch.Elca.Iiop.Marshalling {
                     if (typeCode == null) {
                         throw new INTERNAL(457, CompletionStatus.Completed_MayBe);
                     }
-                    // type, which should be used to serialise value is determined by typecode!
-                    actualType = Repository.GetTypeForTypeCode(typeCode);
+                    // type, which should be used to serialise value is determined by typecode!                    
+                    if ((!(typeCode is NullTC)) && (!(typeCode is VoidTC))) {
+                        actualType = Repository.GetTypeForTypeCode(typeCode); // no .NET type for null-tc, void-tc
+                    }
                     actualToSerialise = ((Any)actual).Value;
                 } else {
                     // automatic type code creation
@@ -1316,7 +1318,7 @@ namespace Ch.Elca.Iiop.Marshalling {
                 }
             }
             m_typeCodeSer.Serialise(ReflectionHelper.CorbaTypeCodeType, typeCode, attributes, targetStream);
-            if (actual != null) {
+            if (actualType != null) {
                 Marshaller marshaller = Marshaller.GetSingleton();               
                 AttributeExtCollection typeAttributes = Repository.GetAttrsForTypeCode(typeCode);                
                 marshaller.Marshal(actualType, typeAttributes, actualToSerialise, targetStream);
