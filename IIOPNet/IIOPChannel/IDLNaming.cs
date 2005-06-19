@@ -161,7 +161,6 @@ namespace Ch.Elca.Iiop.Idl {
         /// determines the method name to use in a corba request.
         /// </summary>
         public static string GetRequestMethodName(MethodInfo method, bool isOverloaded) {
-            Type targetType = method.DeclaringType;
             string methodName = method.Name;
             
             AttributeExtCollection methodAttributes = 

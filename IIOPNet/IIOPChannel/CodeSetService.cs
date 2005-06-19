@@ -299,7 +299,6 @@ namespace Ch.Elca.Iiop.Services {
         }
 
         private void Deserialise(byte[] contextData) {
-            MemoryStream inputStream = new MemoryStream(contextData);            
             CdrEncapsulationInputStream encap = 
                 new CdrEncapsulationInputStream(contextData);
             m_charSet = (int)encap.ReadULong();
