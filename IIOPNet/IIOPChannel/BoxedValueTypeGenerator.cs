@@ -445,7 +445,7 @@ namespace Ch.Elca.Iiop.Idl {
 
         /// <summary>adds an empty default constructor</summary>
         private void DefineEmptyDefaultConstr(TypeBuilder boxBuilder) {
-            ConstructorBuilder defConstrBuilder = boxBuilder.DefineDefaultConstructor(MethodAttributes.Public);
+            boxBuilder.DefineDefaultConstructor(MethodAttributes.Public);
         }
 
         /// <summary>defines the constructor, which sets the valField</summary>
@@ -481,7 +481,7 @@ namespace Ch.Elca.Iiop.Idl {
             ConstructorBuilder assignConstrBuilder = boxBuilder.DefineConstructor(MethodAttributes.Public, CallingConventions.Standard, new Type[] { arrayType } );
             ILGenerator bodyGen = assignConstrBuilder.GetILGenerator();
             // define one local variable:
-            LocalBuilder local = bodyGen.DeclareLocal(ReflectionHelper.ObjectType);
+            bodyGen.DeclareLocal(ReflectionHelper.ObjectType);
             // call the base constructor with no args
             bodyGen.Emit(OpCodes.Ldarg_0); // load this
             ConstructorInfo baseConstr = ReflectionHelper.BoxedValueBaseType.GetConstructor(Type.EmptyTypes);
