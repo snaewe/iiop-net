@@ -285,8 +285,8 @@ namespace Ch.Elca.Iiop.CorbaObjRef {
     }
     
 
-    /// <summary>This class represents a profile in a CORBA-IOR</summary>    
-    [CLSCompliant(false)]
+    /// <summary>This class represents a profile in a CORBA-IOR</summary>
+    /// <remarks>This class is non CLS compliant</remarks>    
     internal abstract class IorProfile : IIorProfile {
         
         #region SFields
@@ -315,7 +315,6 @@ namespace Ch.Elca.Iiop.CorbaObjRef {
         /// creates an IOR from the data in a stream
         /// </summary>
         /// <param name="stream">the stream containing the profile data</param>
-        [CLSCompliant(false)]
         protected IorProfile(CdrInputStream stream) {
             ReadDataFromStream(stream);
         }
@@ -414,7 +413,7 @@ namespace Ch.Elca.Iiop.CorbaObjRef {
     /// <summary>
     /// the profile for IIOP connections
     /// </summary>
-    [CLSCompliant(false)]
+    /// <remarks>This class is not CLSCompliant</remarks>
     internal sealed class InternetIiopProfile : IorProfile, IInternetIiopProfile {
         
         #region IFields
@@ -538,10 +537,8 @@ namespace Ch.Elca.Iiop.CorbaObjRef {
     /// The multiple component profile.    
     /// </summary>
     /// <remarks>
-    /// not fully implemented:
-    /// At the moment the only tagged component supported is CodeSetComponent.
+    /// This class is not CLSCompliant.
     /// </remarks>
-    [CLSCompliant(false)]
     internal sealed class MultipleComponentsProfile : IorProfile {
     
         #region IConstructors
@@ -616,7 +613,7 @@ namespace Ch.Elca.Iiop.CorbaObjRef {
     /// <summary>
     /// used to store information about an unsupported profile
     /// </summary>
-    [CLSCompliant(false)]
+    /// <remkars>This class is not CLSCompliant</remarks>
     internal sealed class UnsupportedIorProfile : IorProfile {
         
         #region IFields
