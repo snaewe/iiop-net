@@ -358,7 +358,7 @@ namespace Corba {
 
         public void write_StringValue(string val) {
             object boxed = new StringValue(val);
-            m_marshaller.Marshal(s_wstringValueType, AttributeExtCollection.EmptyCollection,
+            m_marshaller.Marshal(s_stringValueType, AttributeExtCollection.EmptyCollection,
                                  boxed, m_cdrOut);
         }
 
