@@ -256,7 +256,7 @@ namespace Ch.Elca.Iiop {
                 
                     IMessage retMsg = new ReturnMessage(e, (IMethodCallMessage) msg);
                     if (replySink != null) {
-                        replySink.SyncProcessMessage(msg); // process the return message in the reply sink chain
+                        replySink.SyncProcessMessage(retMsg); // process the return message in the reply sink chain
                     }
                 }
             }
