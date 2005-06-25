@@ -908,9 +908,8 @@ public class MetaDataGenerator : IDLParserVisitor {
         boxedType = ReplaceByCustomMappedIfNeeded(boxedType);        
 
         // do use fusioned type + attributes on fusioned type for boxed value;
-        TypeBuilder resultType = 
-            m_typeManager.StartBoxedValueTypeDefinition(forSymbol, boxedType.GetCompactClsType(),
-                                                        boxedType.GetCompactTypeAttrs());
+        m_typeManager.StartBoxedValueTypeDefinition(forSymbol, boxedType.GetCompactClsType(),
+                                                    boxedType.GetCompactTypeAttrs());
 
         m_typeManager.EndTypeDefinition(forSymbol);
         return null;
