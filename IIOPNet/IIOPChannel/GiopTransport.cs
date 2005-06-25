@@ -1000,7 +1000,7 @@ namespace Ch.Elca.Iiop {
             uint nrOfContexts = cdrIn.ReadULong();
             // Skip service contexts: not part of this test            
             for (uint i = 0; i < nrOfContexts; i++) {
-                uint contextId = cdrIn.ReadULong();
+                cdrIn.ReadULong(); // context id
                 uint lengthOfContext = cdrIn.ReadULong();
                 cdrIn.ReadPadding(lengthOfContext);
             }
