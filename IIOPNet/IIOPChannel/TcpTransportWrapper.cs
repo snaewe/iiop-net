@@ -485,11 +485,7 @@ namespace Ch.Elca.Iiop {
         private Exception CreateNotInitalizedException() {
             return new InvalidOperationException("Listener not initalized; call setup first");
         }
-        
-        private Exception CreateAlreadyInitalizedException() {
-            return new InvalidOperationException("Listener already initalized");
-        }
-        
+                
         #endregion Exceptions        
         #endregion IMethods
         
