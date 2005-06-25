@@ -263,14 +263,14 @@ namespace omg.org.CORBA {
         public object string_to_object([StringValue] string uri) {
             CheckIsValidUri(uri);
             
-            Ior ior = IiopUrlUtil.CreateIorForUrl(uri, "");
+            Ior ior = IiopUrlUtil.CreateIorForUrl(uri, String.Empty);
             // performance opt: if an ior passed in, use it
             string iorString = uri;         
             if (!IiopUrlUtil.IsIorString(uri)) {
                 iorString = ior.ToString();
             }
                 
-            return RemotingServices.Connect(ior.Type, ior.ToString());
+            return RemotingServices.Connect(ior.Type, iorString);
         }
         
         /// <summary>takes a proxy and returns the IOR / corbaloc / ...</summary>
