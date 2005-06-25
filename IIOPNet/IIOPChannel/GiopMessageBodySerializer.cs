@@ -824,7 +824,7 @@ namespace Ch.Elca.Iiop.MessageHandling {
                     cntxColl = DeserialiseContext(cdrStream); // deserialize the service contexts
                 }
                 
-                uint forRequestId = cdrStream.ReadULong();
+                cdrStream.ReadULong(); // skip request id, already handled by transport
                 uint responseStatus = cdrStream.ReadULong();
                 if (!version.IsBeforeGiop1_2()) { // for GIOP 1.2 and later, service context is here
                     cntxColl = DeserialiseContext(cdrStream); // deserialize the service contexts
@@ -901,8 +901,6 @@ namespace Ch.Elca.Iiop.MessageHandling {
                 cdrStream.SkipRest(); // skip padding, if present
             }
             ReturnMessage response = new ReturnMessage(retVal, outArgs, outArgs.Length, null, request.Request);
-            LogicalCallContext dnCntx = response.LogicalCallContext;
-            // TODO: fill in .NET context ...
             return response;
         }
 
