@@ -1474,7 +1474,6 @@ namespace Ch.Elca.Iiop.Cdr {
         
         /// <summary>responsible for implementing the endian dependant operation</summary>
         private CdrEndianDepOutputStreamOp m_endianOp = s_endianNotSpec;
-        private GiopVersion m_giopVersion;
         
         /// <summary>used to store indirections encountered in this stream</summary>
         private IndirectionStoreValueKey m_indirections = new IndirectionStoreValueKey();
@@ -1487,7 +1486,6 @@ namespace Ch.Elca.Iiop.Cdr {
         }
         
         public CdrOutputStreamImpl(Stream stream, byte flags, GiopVersion giopVersion) : base(stream) {
-            m_giopVersion = giopVersion;
             if (ParseEndianFlag(flags)) {
                 m_endianOp = new CdrStreamBigEndianWriteOP(this, giopVersion);
             } else {
