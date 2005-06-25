@@ -720,17 +720,22 @@ namespace omg.org.PortableInterceptor {
         
         #region IFields
         
-        private string m_name;
+        public string name;
         
         #endregion IFields
         #region IConstructors
         
-        /// <summary>constructor needed for deserialisation</summary>
+        /// <summary>default constructor</summary>
         public DuplicateName(string name) : base("duplicate name : " + name) {
-            m_name = name;
+            this.name = name;
+        }
+
+        /// <summary>constructor needed for deserialisation</summary>
+        public DuplicateName() {
         }
 
         #endregion IConstructors
+
     }    
     
     /// <summary>
