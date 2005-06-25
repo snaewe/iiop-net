@@ -82,7 +82,7 @@ namespace Ch.Elca.Iiop.Util {
         /// <param name="targetType">if the url contains no info about the target type, use this type</param>
         public static Ior CreateIorForUrl(string url, string repositoryId) {
             Ior ior = null;
-            if (url.StartsWith("IOR")) {
+            if (IsIorString(url)) {
                 ior = new Ior(url);
             } else if (url.StartsWith("iiop")) {
                 // iiop1.0, iiop1.1, iiop1.2 (=iiop); extract version in protocol tag
