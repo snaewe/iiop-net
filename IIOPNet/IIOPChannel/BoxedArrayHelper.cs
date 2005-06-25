@@ -115,7 +115,6 @@ namespace Ch.Elca.Iiop.Idl {
                 newLength[i - 1] = toConv.GetLength(i);
             }
             // create the type of the new array elements
-            Type partialArrayType = Array.CreateInstance(toConv.GetType().GetElementType(), newLength).GetType();
             Type resultType = CreateNestedOneDimType(toConv);
             Array convertedArray = Array.CreateInstance(resultType.GetElementType(), toConv.GetLength(0));
             // create the components, then recursive convert the components
