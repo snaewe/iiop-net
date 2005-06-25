@@ -182,8 +182,6 @@ namespace Ch.Elca.Iiop {
         
         /// <summary>the next sink after the transport sink on the server side</summary>
         private IServerChannelSink m_nextSink;
-        
-        private AutoResetEvent m_waitForAsyncComplete = new AutoResetEvent(false);
 
         #endregion IFields
         #region IConstructors
