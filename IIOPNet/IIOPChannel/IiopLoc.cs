@@ -51,11 +51,6 @@ namespace Ch.Elca.Iiop.CorbaObjRef {
         private IiopLocObjAddr m_objAddr;        
         
         #endregion IFields        
-        #region SFields
-        
-        private static ASCIIEncoding s_asciiEncoder = new ASCIIEncoding();
-        
-        #endregion SFields
         #region IConstructors
         
         /// <summary>creates the corbaloc from a corbaloc url string</summary>
