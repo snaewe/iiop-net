@@ -134,6 +134,7 @@ namespace Ch.Elca.Iiop.IdlCompiler.Action {
              }            
             
             TypeBuilder result = m_modBuilder.DefineType(fullyQualName, typeAttributes, parent, interfaces);
+            AddRepositoryIdAttribute(result, typeSymbol); // every constructed type should have a rep-id.
             // book-keeping
             TypeContainer container = new CompileTimeTypeContainer(this, result);
             m_typesInCreation[typeSymbol] = container;
@@ -216,7 +217,7 @@ namespace Ch.Elca.Iiop.IdlCompiler.Action {
             
             UnionGenerationHelper genHelper = new UnionGenerationHelper(m_modBuilder, fullyQualName,
                                                                         TypeAttributes.Public);
-            
+            AddRepositoryIdAttribute(genHelper.Builder, typeSymbol);
             // book-keeping
             TypeContainer container = new CompileTimeTypeContainer(this, genHelper.Builder);
             m_typesInCreation[typeSymbol] = container;
@@ -316,7 +317,7 @@ namespace Ch.Elca.Iiop.IdlCompiler.Action {
 
         #region respositoryIds
         
-        public void AddRepositoryIdAttribute(Symbol typeSymbol) {                        
+        private void AddRepositoryIdAttribute(Symbol typeSymbol) {                        
             TypeBuilder inCreation = GetTypeFromTypesInCreation(typeSymbol);
             AddRepositoryIdAttribute(inCreation, typeSymbol);            
         }
@@ -331,7 +332,7 @@ namespace Ch.Elca.Iiop.IdlCompiler.Action {
             AddRepositoryIdAttribute(typeBuild, repositoryId);
         }
                 
-        public void AddRepositoryIdAttribute(TypeBuilder typebuild, string repId) {
+        private void AddRepositoryIdAttribute(TypeBuilder typebuild, string repId) {
             if (repId != null) {
                 CustomAttributeBuilder repIdAttrBuilder = 
                     new RepositoryIDAttribute(repId).CreateAttributeBuilder();

@@ -469,8 +469,6 @@ public class MetaDataGenerator : IDLParserVisitor {
             // add interface type
             CustomAttributeBuilder interfaceTypeAttrBuilder = new InterfaceTypeAttribute(ifType).CreateAttributeBuilder();
             interfaceToBuild.SetCustomAttribute(interfaceTypeAttrBuilder);
-            // add repository ID
-            m_typeManager.AddRepositoryIdAttribute(forSymbol);
             interfaceToBuild.AddInterfaceImplementation(typeof(IIdlEntity));
         } else {
             // get incomplete type
@@ -652,8 +650,6 @@ public class MetaDataGenerator : IDLParserVisitor {
             }
             valueToBuild = m_typeManager.StartTypeDefinition(forSymbol, attrs, parent, interfaces, 
                                                              isForwardDecl);            
-            // add repository ID
-            m_typeManager.AddRepositoryIdAttribute(forSymbol);
             if (isAbstract) {
                 // add InterfaceTypeAttribute
                 IdlTypeInterface ifType = IdlTypeInterface.AbstractValueType;
@@ -2273,9 +2269,6 @@ public class MetaDataGenerator : IDLParserVisitor {
                                                exceptToCreate,
                                                forSymbol);
 
-        String repId = GetRepIdForException(forSymbol);
-        m_typeManager.AddRepositoryIdAttribute(exceptToCreate, repId);
-
         // add fileds ...
         node.childrenAccept(this, thisTypeInfo); // let the members add themself to the typeBuilder
         // add inheritance from IIdlEntity        
@@ -2283,27 +2276,6 @@ public class MetaDataGenerator : IDLParserVisitor {
         // create the type
         m_typeManager.EndTypeDefinition(forSymbol);
         return null;
-    }
-
-    /** generates a rep-id for a CLS exception class
-     *  @param forSymbol the symbol of the exception */
-    private String GetRepIdForException(Symbol forSymbol) {
-        System.Collections.Stack scopeStack = new System.Collections.Stack();
-        Scope currentScope = forSymbol.getDeclaredIn();
-        while (currentScope != null) {
-            if (!currentScope.getScopeName().Equals("")) {
-                scopeStack.Push(currentScope.getScopeName());
-            }
-            currentScope = currentScope.getParentScope();
-        }
-        String repId = "IDL:";
-        while (!(scopeStack.Count == 0)) {
-            String currentScopeName = (String) scopeStack.Pop();
-            repId += currentScopeName + "/";
-        }
-        repId += forSymbol.getSymbolName();
-        repId += ":1.0";
-        return repId;
     }
     
     /// <summary>
