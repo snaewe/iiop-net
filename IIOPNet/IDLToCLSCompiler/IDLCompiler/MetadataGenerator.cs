@@ -1818,8 +1818,9 @@ public class MetaDataGenerator : IDLParserVisitor {
         // add fileds
         node.childrenAccept(this, thisTypeInfo); // let the members add themself to the typeBuilder
 
-        // add IDLStruct attribute
+        // add type specific attributes
         structToCreate.SetCustomAttribute(new IdlStructAttribute().CreateAttributeBuilder());
+        AddSerializableAttribute(structToCreate);
         
         // create the type
         Type resultType = m_typeManager.EndTypeDefinition(forSymbol);
@@ -2075,8 +2076,9 @@ public class MetaDataGenerator : IDLParserVisitor {
             enumVal.SetConstant((System.Int32) i);
         }
 
-        // add IDLEnum attribute
+        // add type specific attributes
         enumToCreate.SetCustomAttribute(new IdlEnumAttribute().CreateAttributeBuilder());
+        AddSerializableAttribute(enumToCreate);
         
         // create the type
         Type resultType = m_typeManager.EndTypeDefinition(forSymbol);         
@@ -2244,6 +2246,65 @@ public class MetaDataGenerator : IDLParserVisitor {
         return null;
     }
 
+    /// <summary>
+    /// adds a GetObjectData override to the exception to create.
+    /// </summary>
+    /// <remarks>TODO: add fields to serialise</remarks>
+    private void AddExceptionGetObjectDataOverride(TypeBuilder exceptToCreate) {
+        ParameterSpec[] getObjDataParams = new ParameterSpec[] { 
+            new ParameterSpec("info", typeof(System.Runtime.Serialization.SerializationInfo)), 
+            new ParameterSpec("context", typeof(System.Runtime.Serialization.StreamingContext)) };
+        MethodBuilder getObjectDataMethod =
+            m_ilEmitHelper.AddMethod(exceptToCreate, "GetObjectData", getObjDataParams,
+                                 new TypeContainer(typeof(void)),
+                                 MethodAttributes.Virtual | MethodAttributes.Public |
+                                 MethodAttributes.HideBySig);        
+        ILGenerator body = 
+            getObjectDataMethod.GetILGenerator();
+        body.Emit(OpCodes.Ldarg_0);
+        body.Emit(OpCodes.Ldarg_1);
+        body.Emit(OpCodes.Ldarg_2);
+        body.Emit(OpCodes.Call, typeof(Exception).GetMethod("GetObjectData", BindingFlags.Public | 
+                                                                             BindingFlags.Instance));        
+        body.Emit(OpCodes.Ret);
+    }
+
+    /// <summary>
+    /// adds the constructors for deserialization.
+    /// </summary>    
+    /// <remarks>TODO: add fields to deserialise</remarks>
+    private void AddExceptionDeserializationConstructors(TypeBuilder exceptToCreate) {
+        // for ISerializable
+        ParameterSpec[] constrParams = new ParameterSpec[] {
+            new ParameterSpec("info", typeof(System.Runtime.Serialization.SerializationInfo)), 
+            new ParameterSpec("context", typeof(System.Runtime.Serialization.StreamingContext)) };
+         ConstructorBuilder constrBuilder =
+            m_ilEmitHelper.AddConstructor(exceptToCreate, constrParams,
+                                          MethodAttributes.Family);
+         ILGenerator body = constrBuilder.GetILGenerator();
+         body.Emit(OpCodes.Ldarg_0);
+         body.Emit(OpCodes.Ldarg_1);
+         body.Emit(OpCodes.Ldarg_2);
+         body.Emit(OpCodes.Call, typeof(Exception).GetConstructor(BindingFlags.Public | BindingFlags.NonPublic |
+                                                                  BindingFlags.Instance,
+                                                                  null,
+                                                                  new Type[] { typeof(System.Runtime.Serialization.SerializationInfo),
+                                                                               typeof(System.Runtime.Serialization.StreamingContext) },
+                                                                  new ParameterModifier[0]));         
+        body.Emit(OpCodes.Ret);
+        // default constructor
+        m_ilEmitHelper.AddDefaultConstructor(exceptToCreate, MethodAttributes.Public);
+    }
+     
+    private void AddExceptionRequiredSerializationCode(TypeBuilder exceptToCreate) {
+        // add type specific attributes
+        AddSerializableAttribute(exceptToCreate);
+        // GetObjectDataMethod        
+        AddExceptionGetObjectDataOverride(exceptToCreate);
+        // add deserialization constructor
+        AddExceptionDeserializationConstructors(exceptToCreate);
+    }
+     
     /**
      * @see parser.IDLParserVisitor#visit(ASTexcept_dcl, Object)
      * @param data expected is an instance of BuildInfo
@@ -2273,6 +2334,8 @@ public class MetaDataGenerator : IDLParserVisitor {
         node.childrenAccept(this, thisTypeInfo); // let the members add themself to the typeBuilder
         // add inheritance from IIdlEntity        
         exceptToCreate.AddInterfaceImplementation(typeof(IIdlEntity));
+        AddExceptionRequiredSerializationCode(exceptToCreate);
+        
         // create the type
         m_typeManager.EndTypeDefinition(forSymbol);
         return null;
