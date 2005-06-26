@@ -499,6 +499,16 @@ namespace Ch.Elca.Iiop.Idl {
             return result;
         }
 
+        /// <summary>
+        /// adds a serializable attribute to the type in construction
+        /// </summary>        
+        public void AddSerializableAttribute(TypeBuilder typebuild) {
+            Type attrType = typeof(System.SerializableAttribute);
+            ConstructorInfo attrConstr = attrType.GetConstructor(Type.EmptyTypes);
+            CustomAttributeBuilder serAttr = new CustomAttributeBuilder(attrConstr, new Object[0]);    
+            typebuild.SetCustomAttribute(serAttr);
+        }        
+        
         #endregion IMethods
     
     }

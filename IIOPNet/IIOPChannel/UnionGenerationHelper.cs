@@ -275,6 +275,7 @@ namespace Ch.Elca.Iiop.Idl {
         private void BeginType() {                        
             // add IdlUnion attribute
             m_builder.SetCustomAttribute(new IdlUnionAttribute().CreateAttributeBuilder());
+            IlEmitHelper.GetSingleton().AddSerializableAttribute(m_builder);
             
             AddTypeField();
             AddInitalizedField();

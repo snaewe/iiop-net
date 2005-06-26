@@ -369,14 +369,7 @@ public class MetaDataGenerator : IDLParserVisitor {
         
         return (System.Type[])result.ToArray(typeof(Type));
     }
-        
-    private void AddSerializableAttribute(TypeBuilder typebuild) {
-        Type attrType = typeof(System.SerializableAttribute);
-        ConstructorInfo attrConstr = attrType.GetConstructor(Type.EmptyTypes);
-        CustomAttributeBuilder serAttr = new CustomAttributeBuilder(attrConstr, new Object[0]);    
-        typebuild.SetCustomAttribute(serAttr);
-    }
-            
+
     ///<summary>check if data is an instance of buildinfo, if not throws an exception</summary>
     private void CheckParameterForBuildInfo(Object data, Node visitedNode) {
         if (!(data is BuildInfo)) { 
@@ -809,8 +802,7 @@ public class MetaDataGenerator : IDLParserVisitor {
         
         // add implementation class attribute
         valueToBuild.SetCustomAttribute(new ImplClassAttribute(valueToBuild.FullName + "Impl").CreateAttributeBuilder());
-        // add serializable attribute
-        AddSerializableAttribute(valueToBuild);
+        m_ilEmitHelper.AddSerializableAttribute(valueToBuild);
         
         // make sure, every value type has a default constructor
         ConstructorBuilder defConstr = 
@@ -1820,7 +1812,7 @@ public class MetaDataGenerator : IDLParserVisitor {
 
         // add type specific attributes
         structToCreate.SetCustomAttribute(new IdlStructAttribute().CreateAttributeBuilder());
-        AddSerializableAttribute(structToCreate);
+        m_ilEmitHelper.AddSerializableAttribute(structToCreate);
         
         // create the type
         Type resultType = m_typeManager.EndTypeDefinition(forSymbol);
@@ -2078,7 +2070,7 @@ public class MetaDataGenerator : IDLParserVisitor {
 
         // add type specific attributes
         enumToCreate.SetCustomAttribute(new IdlEnumAttribute().CreateAttributeBuilder());
-        AddSerializableAttribute(enumToCreate);
+        m_ilEmitHelper.AddSerializableAttribute(enumToCreate);
         
         // create the type
         Type resultType = m_typeManager.EndTypeDefinition(forSymbol);         
@@ -2298,7 +2290,7 @@ public class MetaDataGenerator : IDLParserVisitor {
      
     private void AddExceptionRequiredSerializationCode(TypeBuilder exceptToCreate) {
         // add type specific attributes
-        AddSerializableAttribute(exceptToCreate);
+        m_ilEmitHelper.AddSerializableAttribute(exceptToCreate);
         // GetObjectDataMethod        
         AddExceptionGetObjectDataOverride(exceptToCreate);
         // add deserialization constructor

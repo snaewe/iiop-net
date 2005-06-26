@@ -193,11 +193,8 @@ namespace Ch.Elca.Iiop.Idl {
         
         /// <summary>define the box-Type for the CLS arrayType</summary>
         private void DefineBoxedTypeForCLSArray(TypeBuilder boxBuilder, Type arrayType,
-                                                BoxedValueRuntimeTypeGenerator gen) {
-            // add serializable attribute
-            ConstructorInfo serAttrConstr = typeof(SerializableAttribute).GetConstructor(new Type[0]);
-            CustomAttributeBuilder serAttrBuilder = new CustomAttributeBuilder(serAttrConstr, new object[0]);
-            boxBuilder.SetCustomAttribute(serAttrBuilder);
+                                                BoxedValueRuntimeTypeGenerator gen) {            
+            IlEmitHelper.GetSingleton().AddSerializableAttribute(boxBuilder);
             // add the field for the boxed value content
             FieldBuilder valField = DefineBoxedField(boxBuilder, arrayType, gen);
             // define getValue method
@@ -221,10 +218,7 @@ namespace Ch.Elca.Iiop.Idl {
         /// <summary>define the box-Type for the boxed type other than a CLS array</summary>
         private void DefineBoxedType(TypeBuilder boxBuilder, Type boxedType, 
                                      CustomAttributeBuilder[] attrsOnBoxedType) {
-            // add serializable attribute
-            ConstructorInfo serAttrConstr = typeof(SerializableAttribute).GetConstructor(new Type[0]);
-            CustomAttributeBuilder serAttrBuilder = new CustomAttributeBuilder(serAttrConstr, new object[0]);
-            boxBuilder.SetCustomAttribute(serAttrBuilder);
+            IlEmitHelper.GetSingleton().AddSerializableAttribute(boxBuilder);
             // add the field for the boxed value content
             FieldBuilder valField = DefineBoxedField(boxBuilder, boxedType, attrsOnBoxedType);
             // define getValue method
