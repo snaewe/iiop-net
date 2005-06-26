@@ -143,6 +143,13 @@ namespace omg.org.IOP.Codec_package {
      
         public InvalidTypeForEncoding() {
         }
+        
+        public InvalidTypeForEncoding(string reason) : base(reason) {
+        }
+        
+        protected InvalidTypeForEncoding(System.Runtime.Serialization.SerializationInfo info,
+                                         System.Runtime.Serialization.StreamingContext context) : base(info, context) {            
+        }        
      
     }
 
@@ -156,7 +163,14 @@ namespace omg.org.IOP.Codec_package {
      
         public FormatMismatch() {
         }
-     
+
+        public FormatMismatch(string reason) : base(reason) {
+        }
+        
+        protected FormatMismatch(System.Runtime.Serialization.SerializationInfo info,
+                                 System.Runtime.Serialization.StreamingContext context) : base(info, context) {            
+        }        
+        
     }
 
      
@@ -169,7 +183,14 @@ namespace omg.org.IOP.Codec_package {
      
         public TypeMismatch() {
         }
-     
+
+        public TypeMismatch(string reason) : base(reason) {
+        }
+        
+        protected TypeMismatch(System.Runtime.Serialization.SerializationInfo info,
+                               System.Runtime.Serialization.StreamingContext context) : base(info, context) {            
+        }        
+        
     }     
      
      
@@ -185,6 +206,13 @@ namespace omg.org.IOP.CodecFactory_package {
      
         public UnknownEncoding() {
         }
+        
+        public UnknownEncoding(string reason) : base(reason) {
+        }
+        
+        protected UnknownEncoding(System.Runtime.Serialization.SerializationInfo info,
+                                  System.Runtime.Serialization.StreamingContext context) : base(info, context) {            
+        }        
          
     }
  

@@ -428,8 +428,23 @@ namespace omg.org.CosNaming.NamingContext_package {
             this.why = why;
             this.rest_of_name = restOfName;
         }
+        
+        protected NotFound(System.Runtime.Serialization.SerializationInfo info,
+                           System.Runtime.Serialization.StreamingContext context) : base(info, context) {            
+            this.why = (NotFoundReason)info.GetValue("why", typeof(NotFoundReason));
+            this.rest_of_name = (NameComponent[])info.GetValue("rest_of_name", typeof(NameComponent[]));            
+        }                
 
         #endregion IConstructors 
+        #region IMethods
+        
+        public override void GetObjectData(System.Runtime.Serialization.SerializationInfo info,
+                                           System.Runtime.Serialization.StreamingContext context) {
+            info.AddValue("why", why);
+            info.AddValue("rest_of_name", rest_of_name);
+        }        
+        
+        #endregion IMethods        
 
     } 
 
@@ -448,8 +463,23 @@ namespace omg.org.CosNaming.NamingContext_package {
 
         /// <summary>constructor needed for deserialisation</summary>
         public CannotProceed() { }
+        
+        protected CannotProceed(System.Runtime.Serialization.SerializationInfo info,
+                                System.Runtime.Serialization.StreamingContext context) : base(info, context) {            
+            this.cxt = (NamingContext)info.GetValue("context", typeof(NamingContext));
+            this.rest_of_name = (NameComponent[])info.GetValue("rest_of_name", typeof(NameComponent[]));            
+        }        
 
         #endregion IConstructors
+        #region IMethods
+        
+        public override void GetObjectData(System.Runtime.Serialization.SerializationInfo info,
+                                           System.Runtime.Serialization.StreamingContext context) {
+            info.AddValue("context", cxt);
+            info.AddValue("rest_of_name", rest_of_name);
+        }        
+        
+        #endregion IMethods        
 
     } 
 
@@ -461,6 +491,13 @@ namespace omg.org.CosNaming.NamingContext_package {
 
         /// <summary>constructor needed for deserialisation</summary>
         public InvalidName() { }
+        
+        public InvalidName(string reason) : base(reason) {
+        }
+        
+        protected InvalidName(System.Runtime.Serialization.SerializationInfo info,
+                              System.Runtime.Serialization.StreamingContext context) : base(info, context) {            
+        }                        
 
         #endregion IConstructors
 
@@ -474,6 +511,13 @@ namespace omg.org.CosNaming.NamingContext_package {
 
         /// <summary>constructor needed for deserialisation</summary>
         public AlreadyBound() { }
+        
+        public AlreadyBound(string reason) : base(reason) {
+        }
+        
+        protected AlreadyBound(System.Runtime.Serialization.SerializationInfo info,
+                               System.Runtime.Serialization.StreamingContext context) : base(info, context) {            
+        }                                
 
         #endregion IConstructors
 
@@ -487,6 +531,13 @@ namespace omg.org.CosNaming.NamingContext_package {
         
         /// <summary>constructor needed for deserialisation</summary>
         public NotEmpty() { }
+        
+        public NotEmpty(string reason) : base(reason) {
+        }
+        
+        protected NotEmpty(System.Runtime.Serialization.SerializationInfo info,
+                           System.Runtime.Serialization.StreamingContext context) : base(info, context) {            
+        }        
 
         #endregion IConstructors
     }

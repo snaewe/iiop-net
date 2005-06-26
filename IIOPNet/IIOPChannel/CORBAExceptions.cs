@@ -43,6 +43,13 @@ namespace Ch.Elca.Iiop {
 
         public UnknownSystemException(int minor, omg.org.CORBA.CompletionStatus status) : 
             base(System.Reflection.MethodInfo.GetCurrentMethod().DeclaringType.FullName, minor, status) { }
+        
+        protected UnknownSystemException(System.Runtime.Serialization.SerializationInfo info,
+                                         System.Runtime.Serialization.StreamingContext context) : base(info, context) {            
+        }
+        
+        public UnknownSystemException() {
+        }        
 
         #endregion IConstructors
     }
@@ -57,6 +64,13 @@ namespace Ch.Elca.Iiop {
 
         public UnknownUserException(string reason) : base(reason) {
         }
+        
+        protected UnknownUserException(System.Runtime.Serialization.SerializationInfo info,
+                                        System.Runtime.Serialization.StreamingContext context) : base(info, context) {            
+        }
+        
+        public UnknownUserException() {
+        }        
 
         #endregion IConstructors
 
@@ -73,7 +87,11 @@ namespace Ch.Elca.Iiop {
         /// <summary>subclasses need all a no argument constructor, to be deserialisable</summary>
         public AbstractUserException() { }
         protected AbstractUserException(string reason) : base(reason) {    }
-
+        
+        protected AbstractUserException(System.Runtime.Serialization.SerializationInfo info,
+                                        System.Runtime.Serialization.StreamingContext context) : base(info, context) {            
+        }
+        
         #endregion IConstructors
 
     }
@@ -120,7 +138,14 @@ namespace Ch.Elca.Iiop {
         public GenericUserException(Exception reason) : base(reason.Message) {
 			AddExceptionDetails(reason);
         }
-
+        
+        protected GenericUserException(System.Runtime.Serialization.SerializationInfo info,
+                                       System.Runtime.Serialization.StreamingContext context) : base(info, context) {            
+            this.name = info.GetString("name");
+            this.message = info.GetString("message");
+            this.throwingMethod = info.GetString("throwingMethod");
+        }
+        
         #endregion IConstructors
         #region IProperties
         
@@ -168,6 +193,13 @@ namespace Ch.Elca.Iiop {
         public override string ToString() {
             return "Name: " + name + "\r\nMessage: " + message + "\r\n----------------------\r\n\r\n" + base.ToString ();
         }
+        
+        public override void GetObjectData(System.Runtime.Serialization.SerializationInfo info,
+                                           System.Runtime.Serialization.StreamingContext context) {
+            info.AddValue("name", name);
+            info.AddValue("message", message);
+            info.AddValue("throwingMethod", throwingMethod);
+        }
 
         #endregion IMethods
 
@@ -197,7 +229,7 @@ namespace omg.org.CORBA {
         #endregion IFields
         #region IConstructors
 
-        public AbstractCORBASystemException() : base("CORBA system exception") {
+        public AbstractCORBASystemException() : base("CORBA system exception") {            
         }
         
         public AbstractCORBASystemException(string exceptionDesc, int minor, CompletionStatus status) : 
@@ -205,6 +237,13 @@ namespace omg.org.CORBA {
                  ", completed: " + status + " minor: " + minor) {
             m_minor = minor;
             m_status = status;
+        }
+        
+        public AbstractCORBASystemException(System.Runtime.Serialization.SerializationInfo info,
+                                            System.Runtime.Serialization.StreamingContext context) : base(info, context) {
+            m_minor = info.GetInt32("minor");
+            m_status = (CompletionStatus)
+                       info.GetValue("status", typeof(CompletionStatus));
         }
 
         #endregion IConstructors
@@ -223,6 +262,16 @@ namespace omg.org.CORBA {
         }
 
         #endregion IProperties
+        #region IMethods
+        
+        public override void GetObjectData(System.Runtime.Serialization.SerializationInfo info,
+                                           System.Runtime.Serialization.StreamingContext context) {
+            info.AddValue("minor", m_minor);
+            info.AddValue("status", m_status);
+            base.GetObjectData(info, context);
+        }
+        
+        #endregion IMethods
 
     }
 
@@ -234,6 +283,13 @@ namespace omg.org.CORBA {
 
         public UNKNOWN(int minor, CompletionStatus status) : 
             base(System.Reflection.MethodInfo.GetCurrentMethod().DeclaringType.FullName, minor, status) { }
+        
+        protected UNKNOWN(System.Runtime.Serialization.SerializationInfo info,
+                          System.Runtime.Serialization.StreamingContext context) : base(info, context) {            
+        }
+        
+        public UNKNOWN() {
+        }
 
         #endregion IConstructors
 
@@ -247,6 +303,13 @@ namespace omg.org.CORBA {
         
         public BAD_PARAM(int minor, CompletionStatus status) : 
             base(System.Reflection.MethodInfo.GetCurrentMethod().DeclaringType.FullName, minor, status) { }
+        
+        protected BAD_PARAM(System.Runtime.Serialization.SerializationInfo info,
+                            System.Runtime.Serialization.StreamingContext context) : base(info, context) {            
+        }
+
+        public BAD_PARAM() {
+        }
 
         #endregion IConstructors
 
@@ -261,6 +324,13 @@ namespace omg.org.CORBA {
         public NO_MEMORY(int minor, CompletionStatus status) : 
             base(System.Reflection.MethodInfo.GetCurrentMethod().DeclaringType.FullName, minor, status) { }
 
+        protected NO_MEMORY(System.Runtime.Serialization.SerializationInfo info,
+                            System.Runtime.Serialization.StreamingContext context) : base(info, context) {            
+        }
+
+        public NO_MEMORY() {
+        }        
+        
         #endregion IConstructors
 
     }
@@ -274,6 +344,13 @@ namespace omg.org.CORBA {
         public IMP_LIMIT(int minor, CompletionStatus status) : 
             base(System.Reflection.MethodInfo.GetCurrentMethod().DeclaringType.FullName, minor, status) { }
 
+        protected IMP_LIMIT(System.Runtime.Serialization.SerializationInfo info,
+                            System.Runtime.Serialization.StreamingContext context) : base(info, context) {            
+        }
+
+        public IMP_LIMIT() {
+        }        
+        
         #endregion IConstructors
 
     }
@@ -286,6 +363,13 @@ namespace omg.org.CORBA {
 
         public COMM_FAILURE(int minor, CompletionStatus status) : 
             base(System.Reflection.MethodInfo.GetCurrentMethod().DeclaringType.FullName, minor, status) { }
+        
+        protected COMM_FAILURE(System.Runtime.Serialization.SerializationInfo info,
+                               System.Runtime.Serialization.StreamingContext context) : base(info, context) {            
+        }
+
+        public COMM_FAILURE() {
+        }        
 
         #endregion IConstructors
 
@@ -299,6 +383,13 @@ namespace omg.org.CORBA {
 
         public INV_OBJREF(int minor, CompletionStatus status) : 
             base(System.Reflection.MethodInfo.GetCurrentMethod().DeclaringType.FullName, minor, status) { }
+        
+        protected INV_OBJREF(System.Runtime.Serialization.SerializationInfo info,
+                             System.Runtime.Serialization.StreamingContext context) : base(info, context) {            
+        }
+
+        public INV_OBJREF() {
+        }        
 
         #endregion IConstructors
 
@@ -312,6 +403,13 @@ namespace omg.org.CORBA {
 
         public NO_PERMISSION(int minor, CompletionStatus status) : 
             base(System.Reflection.MethodInfo.GetCurrentMethod().DeclaringType.FullName, minor, status) { }
+        
+        protected NO_PERMISSION(System.Runtime.Serialization.SerializationInfo info,
+                                System.Runtime.Serialization.StreamingContext context) : base(info, context) {            
+        }
+
+        public NO_PERMISSION() {
+        }        
 
         #endregion IConstructors
 
@@ -326,6 +424,13 @@ namespace omg.org.CORBA {
         public INTERNAL(int minor, CompletionStatus status) : 
             base(System.Reflection.MethodInfo.GetCurrentMethod().DeclaringType.FullName, minor, status) { }
 
+        protected INTERNAL(System.Runtime.Serialization.SerializationInfo info,
+                           System.Runtime.Serialization.StreamingContext context) : base(info, context) {            
+        }
+
+        public INTERNAL() {
+        }        
+        
         #endregion IConstructors
 
     }
@@ -338,6 +443,13 @@ namespace omg.org.CORBA {
 
         public MARSHAL(int minor, CompletionStatus status) : 
             base(System.Reflection.MethodInfo.GetCurrentMethod().DeclaringType.FullName, minor, status) { }
+        
+        protected MARSHAL(System.Runtime.Serialization.SerializationInfo info,
+                          System.Runtime.Serialization.StreamingContext context) : base(info, context) {
+        }
+
+        public MARSHAL() {
+        }        
 
         #endregion IConstructors
     }
@@ -350,6 +462,13 @@ namespace omg.org.CORBA {
 
         public INITALIZE(int minor, CompletionStatus status) : 
             base(System.Reflection.MethodInfo.GetCurrentMethod().DeclaringType.FullName, minor, status) { }
+        
+        protected INITALIZE(System.Runtime.Serialization.SerializationInfo info,
+                            System.Runtime.Serialization.StreamingContext context) : base(info, context) {
+        }
+
+        public INITALIZE() {
+        }        
 
         #endregion IConstructors
         
@@ -367,6 +486,13 @@ namespace omg.org.CORBA {
         public NO_IMPLEMENT(int minor, CompletionStatus status, string missingtype) : 
             base(System.Reflection.MethodInfo.GetCurrentMethod().DeclaringType.FullName +
 			    " ["+missingtype+"] ", minor, status) { }
+        
+        protected NO_IMPLEMENT(System.Runtime.Serialization.SerializationInfo info,
+                               System.Runtime.Serialization.StreamingContext context) : base(info, context) {
+        }
+
+        public NO_IMPLEMENT() {
+        }        
 
         #endregion IConstructors
 
@@ -381,6 +507,13 @@ namespace omg.org.CORBA {
         public BAD_TYPECODE(int minor, CompletionStatus status) : 
             base(System.Reflection.MethodInfo.GetCurrentMethod().DeclaringType.FullName, minor, status) { }
 
+        protected BAD_TYPECODE(System.Runtime.Serialization.SerializationInfo info,
+                               System.Runtime.Serialization.StreamingContext context) : base(info, context) {
+        }
+
+        public BAD_TYPECODE() {
+        }
+        
         #endregion IConstructors
 
     }
@@ -393,6 +526,13 @@ namespace omg.org.CORBA {
 
         public BAD_OPERATION(int minor, CompletionStatus status) : 
             base(System.Reflection.MethodInfo.GetCurrentMethod().DeclaringType.FullName, minor, status) { }
+        
+        protected BAD_OPERATION(System.Runtime.Serialization.SerializationInfo info,
+                                System.Runtime.Serialization.StreamingContext context) : base(info, context) {
+        }
+
+        public BAD_OPERATION() {
+        }        
 
         #endregion IConstructors
 
@@ -406,6 +546,13 @@ namespace omg.org.CORBA {
 
         public NO_RESOURCES(int minor, CompletionStatus status) : 
             base(System.Reflection.MethodInfo.GetCurrentMethod().DeclaringType.FullName, minor, status) { }
+        
+        protected NO_RESOURCES(System.Runtime.Serialization.SerializationInfo info,
+                               System.Runtime.Serialization.StreamingContext context) : base(info, context) {
+        }
+
+        public NO_RESOURCES() {
+        }        
 
         #endregion IConstructors
 
@@ -419,6 +566,13 @@ namespace omg.org.CORBA {
 
         public NO_RESPONSE(int minor, CompletionStatus status) : 
             base(System.Reflection.MethodInfo.GetCurrentMethod().DeclaringType.FullName, minor, status) { }
+        
+        protected NO_RESPONSE(System.Runtime.Serialization.SerializationInfo info,
+                              System.Runtime.Serialization.StreamingContext context) : base(info, context) {
+        }
+
+        public NO_RESPONSE() {
+        }        
 
         #endregion IConstructors
 
@@ -433,6 +587,13 @@ namespace omg.org.CORBA {
         public PERSIST_STORE(int minor, CompletionStatus status) : 
             base(System.Reflection.MethodInfo.GetCurrentMethod().DeclaringType.FullName, minor, status) { }
 
+        protected PERSIST_STORE(System.Runtime.Serialization.SerializationInfo info,
+                                System.Runtime.Serialization.StreamingContext context) : base(info, context) {
+        }
+
+        public PERSIST_STORE() {
+        }
+        
         #endregion IConstructors
 
     }
@@ -445,6 +606,13 @@ namespace omg.org.CORBA {
 
         public BAD_INV_ORDER(int minor, CompletionStatus status) : 
             base(System.Reflection.MethodInfo.GetCurrentMethod().DeclaringType.FullName, minor, status) { }
+        
+        protected BAD_INV_ORDER(System.Runtime.Serialization.SerializationInfo info,
+                                System.Runtime.Serialization.StreamingContext context) : base(info, context) {
+        }
+
+        public BAD_INV_ORDER() {
+        }        
 
         #endregion IConstructors
 
@@ -458,6 +626,13 @@ namespace omg.org.CORBA {
 
         public TRANSIENT(int minor, CompletionStatus status) : 
             base(System.Reflection.MethodInfo.GetCurrentMethod().DeclaringType.FullName, minor, status) { }
+        
+        protected TRANSIENT(System.Runtime.Serialization.SerializationInfo info,
+                            System.Runtime.Serialization.StreamingContext context) : base(info, context) {
+        }
+
+        public TRANSIENT() {
+        }        
 
         #endregion IConstructors
 
@@ -471,6 +646,13 @@ namespace omg.org.CORBA {
 
         public FREE_MEM(int minor, CompletionStatus status) : 
             base(System.Reflection.MethodInfo.GetCurrentMethod().DeclaringType.FullName, minor, status) { }
+        
+        protected FREE_MEM(System.Runtime.Serialization.SerializationInfo info,
+                           System.Runtime.Serialization.StreamingContext context) : base(info, context) {
+        }
+
+        public FREE_MEM() {
+        }        
 
         #endregion IConstructors
 
@@ -484,6 +666,13 @@ namespace omg.org.CORBA {
 
         public INV_IDENT(int minor, CompletionStatus status) : 
             base(System.Reflection.MethodInfo.GetCurrentMethod().DeclaringType.FullName, minor, status) { }
+        
+        protected INV_IDENT(System.Runtime.Serialization.SerializationInfo info,
+                            System.Runtime.Serialization.StreamingContext context) : base(info, context) {
+        }
+
+        public INV_IDENT() {
+        }        
 
         #endregion IConstructors
 
@@ -497,6 +686,13 @@ namespace omg.org.CORBA {
 
         public INV_FLAG(int minor, CompletionStatus status) : 
             base(System.Reflection.MethodInfo.GetCurrentMethod().DeclaringType.FullName, minor, status) { }
+        
+        protected INV_FLAG(System.Runtime.Serialization.SerializationInfo info,
+                           System.Runtime.Serialization.StreamingContext context) : base(info, context) {
+        }
+
+        public INV_FLAG() {
+        }        
 
         #endregion IConstructors
 
@@ -510,6 +706,13 @@ namespace omg.org.CORBA {
 
         public INTF_REPOS(int minor, CompletionStatus status) : 
             base(System.Reflection.MethodInfo.GetCurrentMethod().DeclaringType.FullName, minor, status) { }
+        
+        protected INTF_REPOS(System.Runtime.Serialization.SerializationInfo info,
+                             System.Runtime.Serialization.StreamingContext context) : base(info, context) {
+        }
+
+        public INTF_REPOS() {
+        }        
 
         #endregion IConstructors
 
@@ -523,6 +726,13 @@ namespace omg.org.CORBA {
 
         public BAD_CONTEXT(int minor, CompletionStatus status) : 
             base(System.Reflection.MethodInfo.GetCurrentMethod().DeclaringType.FullName, minor, status) { }
+        
+        protected BAD_CONTEXT(System.Runtime.Serialization.SerializationInfo info,
+                              System.Runtime.Serialization.StreamingContext context) : base(info, context) {
+        }
+
+        public BAD_CONTEXT() {
+        }        
 
         #endregion IConstructors
 
@@ -536,6 +746,13 @@ namespace omg.org.CORBA {
 
         public OBJ_ADAPTER(int minor, CompletionStatus status) : 
             base(System.Reflection.MethodInfo.GetCurrentMethod().DeclaringType.FullName, minor, status) { }
+        
+        protected OBJ_ADAPTER(System.Runtime.Serialization.SerializationInfo info,
+                              System.Runtime.Serialization.StreamingContext context) : base(info, context) {
+        }
+
+        public OBJ_ADAPTER() {
+        }                
 
         #endregion IConstructors
 
@@ -549,6 +766,13 @@ namespace omg.org.CORBA {
 
         public DATA_CONVERSION(int minor, CompletionStatus status) : 
             base(System.Reflection.MethodInfo.GetCurrentMethod().DeclaringType.FullName, minor, status) { }
+        
+        protected DATA_CONVERSION(System.Runtime.Serialization.SerializationInfo info,
+                                  System.Runtime.Serialization.StreamingContext context) : base(info, context) {
+        }
+
+        public DATA_CONVERSION() {
+        }                        
 
         #endregion IConstructors
 
@@ -562,6 +786,13 @@ namespace omg.org.CORBA {
 
         public OBJECT_NOT_EXIST(int minor, CompletionStatus status) : 
             base(System.Reflection.MethodInfo.GetCurrentMethod().DeclaringType.FullName, minor, status) { }
+        
+        protected OBJECT_NOT_EXIST(System.Runtime.Serialization.SerializationInfo info,
+                                   System.Runtime.Serialization.StreamingContext context) : base(info, context) {
+        }
+
+        public OBJECT_NOT_EXIST() {
+        }                                
 
         #endregion IConstructors
 
@@ -575,6 +806,13 @@ namespace omg.org.CORBA {
 
         public TRANSACTION_REQUIRED(int minor, CompletionStatus status) : 
             base(System.Reflection.MethodInfo.GetCurrentMethod().DeclaringType.FullName, minor, status) { }
+        
+        protected TRANSACTION_REQUIRED(System.Runtime.Serialization.SerializationInfo info,
+                                       System.Runtime.Serialization.StreamingContext context) : base(info, context) {
+        }
+
+        public TRANSACTION_REQUIRED() {
+        }                                        
 
         #endregion IConstructors
 
@@ -588,6 +826,13 @@ namespace omg.org.CORBA {
 
         public INV_POLICY(int minor, CompletionStatus status) : 
             base(System.Reflection.MethodInfo.GetCurrentMethod().DeclaringType.FullName, minor, status) { }
+        
+        protected INV_POLICY(System.Runtime.Serialization.SerializationInfo info,
+                             System.Runtime.Serialization.StreamingContext context) : base(info, context) {
+        }
+
+        public INV_POLICY() {
+        }        
 
         #endregion IConstructors
 
@@ -602,6 +847,13 @@ namespace omg.org.CORBA {
         public CODESET_INCOMPATIBLE(int minor, CompletionStatus status) : 
             base(System.Reflection.MethodInfo.GetCurrentMethod().DeclaringType.FullName, minor, status) { }
 
+        protected CODESET_INCOMPATIBLE(System.Runtime.Serialization.SerializationInfo info,
+                                       System.Runtime.Serialization.StreamingContext context) : base(info, context) {
+        }
+
+        public CODESET_INCOMPATIBLE() {
+        }                
+        
         #endregion IConstructors
 
     }
@@ -614,6 +866,13 @@ namespace omg.org.CORBA {
 
         public TRANSACTION_MODE(int minor, CompletionStatus status) : 
             base(System.Reflection.MethodInfo.GetCurrentMethod().DeclaringType.FullName, minor, status) { }
+        
+        protected TRANSACTION_MODE(System.Runtime.Serialization.SerializationInfo info,
+                                   System.Runtime.Serialization.StreamingContext context) : base(info, context) {
+        }
+
+        public TRANSACTION_MODE() {
+        }                        
 
         #endregion IConstructors
 
@@ -627,6 +886,13 @@ namespace omg.org.CORBA {
 
         public TRANSACTION_UNAVAILABLE(int minor, CompletionStatus status) : 
             base(System.Reflection.MethodInfo.GetCurrentMethod().DeclaringType.FullName, minor, status) { }
+        
+        protected TRANSACTION_UNAVAILABLE(System.Runtime.Serialization.SerializationInfo info,
+                                          System.Runtime.Serialization.StreamingContext context) : base(info, context) {
+        }
+
+        public TRANSACTION_UNAVAILABLE() {
+        }        
 
         #endregion IConstructors
 
@@ -641,6 +907,13 @@ namespace omg.org.CORBA {
         public REBIND(int minor, CompletionStatus status) : 
             base(System.Reflection.MethodInfo.GetCurrentMethod().DeclaringType.FullName, minor, status) { }
 
+        protected REBIND(System.Runtime.Serialization.SerializationInfo info,
+                         System.Runtime.Serialization.StreamingContext context) : base(info, context) {
+        }
+
+        public REBIND() {
+        }                
+
         #endregion IConstructors
 
     }
@@ -653,6 +926,13 @@ namespace omg.org.CORBA {
 
         public TIMEOUT(int minor, CompletionStatus status) : 
             base(System.Reflection.MethodInfo.GetCurrentMethod().DeclaringType.FullName, minor, status) { }
+        
+        protected TIMEOUT(System.Runtime.Serialization.SerializationInfo info,
+                          System.Runtime.Serialization.StreamingContext context) : base(info, context) {
+        }
+
+        public TIMEOUT() {
+        }        
 
         #endregion IConstructors
 
@@ -666,6 +946,13 @@ namespace omg.org.CORBA {
 
         public BAD_QOS(int minor, CompletionStatus status) : 
             base(System.Reflection.MethodInfo.GetCurrentMethod().DeclaringType.FullName, minor, status) { }
+        
+        protected BAD_QOS(System.Runtime.Serialization.SerializationInfo info,
+                          System.Runtime.Serialization.StreamingContext context) : base(info, context) {
+        }
+
+        public BAD_QOS() {
+        }                
 
         #endregion IConstructors
 

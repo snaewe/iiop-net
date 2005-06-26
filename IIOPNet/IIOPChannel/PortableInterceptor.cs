@@ -220,6 +220,13 @@ namespace omg.org.PortableInterceptor {
         public InvalidSlot() {
         }
         
+        public InvalidSlot(string reason) : base(reason) {
+        }
+        
+        protected InvalidSlot(System.Runtime.Serialization.SerializationInfo info,
+                              System.Runtime.Serialization.StreamingContext context) : base(info, context) {            
+        }                
+        
         #endregion IConstructors
     }
 
@@ -242,6 +249,11 @@ namespace omg.org.PortableInterceptor {
             m_forward = forward;
         }
         
+        protected ForwardRequest(System.Runtime.Serialization.SerializationInfo info,
+                                 System.Runtime.Serialization.StreamingContext context) : base(info, context) {            
+            this.m_forward = (MarshalByRefObject)info.GetValue("forwardTo", typeof(MarshalByRefObject));
+        }        
+        
         #endregion IConstructors
         #region IProperties
         
@@ -252,6 +264,15 @@ namespace omg.org.PortableInterceptor {
         }
         
         #endregion IProperties
+        #region IMethods
+        
+        public override void GetObjectData(System.Runtime.Serialization.SerializationInfo info,
+                                           System.Runtime.Serialization.StreamingContext context) {
+            info.AddValue("forwardTo", m_forward);
+        }        
+        
+        #endregion IMethods        
+        
     }
     
     
@@ -733,9 +754,21 @@ namespace omg.org.PortableInterceptor {
         /// <summary>constructor needed for deserialisation</summary>
         public DuplicateName() {
         }
-
+        
+        protected DuplicateName(System.Runtime.Serialization.SerializationInfo info,
+                                System.Runtime.Serialization.StreamingContext context) : base(info, context) {            
+            this.name = info.GetString("name");
+        }
+        
         #endregion IConstructors
-
+        #region IMethods
+        
+        public override void GetObjectData(System.Runtime.Serialization.SerializationInfo info,
+                                           System.Runtime.Serialization.StreamingContext context) {
+            info.AddValue("name", name);
+        }        
+        
+        #endregion IMethods
     }    
     
     /// <summary>

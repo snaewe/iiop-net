@@ -36,10 +36,23 @@ using Ch.Elca.Iiop.Util;
 
 namespace Ch.Elca.Iiop.Idl {
 
+    [Serializable]
     public class InvalidUnionDiscriminatorValue : Exception {
+        
         public InvalidUnionDiscriminatorValue(object incompatibleValue, Type expectedType) :
             base("invalid discriminator value: " + incompatibleValue + " for type: " + expectedType) {            
         }
+        
+        public InvalidUnionDiscriminatorValue() {
+        }
+        
+        protected InvalidUnionDiscriminatorValue(System.Runtime.Serialization.SerializationInfo info,
+                                                 System.Runtime.Serialization.StreamingContext context) : base(info, context) {            
+        }
+        
+        public InvalidUnionDiscriminatorValue(string reason) : base(reason) {
+        }        
+        
     } 
     
     public class UnionGenerationHelper {

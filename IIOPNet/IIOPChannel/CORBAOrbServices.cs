@@ -523,6 +523,13 @@ namespace omg.org.CORBA.ORB_package {
 
         /// <summary>constructor needed for deserialisation</summary>
         public InvalidName() { }
+        
+        protected InvalidName(System.Runtime.Serialization.SerializationInfo info,
+                              System.Runtime.Serialization.StreamingContext context) : base(info, context) {            
+        }
+        
+        public InvalidName(string reason) : base(reason) {
+        }                
 
         #endregion IConstructors
 
