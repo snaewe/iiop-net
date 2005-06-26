@@ -309,7 +309,14 @@ namespace Ch.Elca.Iiop.Idl {
             
             return constrBuild;
         }
-
+        
+        /// <summary>
+        /// add a no arg constructor, which calls the default constructor of the supertype.
+        /// </summary>
+        public void AddDefaultConstructor(TypeBuilder builder,
+                                          MethodAttributes attrs) {
+            builder.DefineDefaultConstructor(attrs);
+        }
         
         /// <summary>adds a field to a type, including the custom attributes needed</summary>
         /// <remarks>forgeign method: should be better on TypeBuilder, but not possible</remarks>
