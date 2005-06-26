@@ -49,7 +49,7 @@ namespace Ch.Elca.Iiop.Util {
     /// This class is used to parse url's, parse object uri's, ... 
     /// This is a helper class for the IIOP-channel
     /// </remarks>
-    public class IiopUrlUtil {
+    public sealed class IiopUrlUtil {
 
         #region Constants
 
