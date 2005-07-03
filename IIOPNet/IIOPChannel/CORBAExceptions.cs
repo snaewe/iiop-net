@@ -85,7 +85,7 @@ namespace Ch.Elca.Iiop {
         #region IConstructors
         
         /// <summary>subclasses need all a no argument constructor, to be deserialisable</summary>
-        public AbstractUserException() { }
+        protected AbstractUserException() { }
         protected AbstractUserException(string reason) : base(reason) {    }
         
         protected AbstractUserException(System.Runtime.Serialization.SerializationInfo info,
@@ -230,18 +230,18 @@ namespace omg.org.CORBA {
         #endregion IFields
         #region IConstructors
 
-        public AbstractCORBASystemException() : base("CORBA system exception") {            
+        protected AbstractCORBASystemException() : base("CORBA system exception") {
         }
         
-        public AbstractCORBASystemException(string exceptionDesc, int minor, CompletionStatus status) : 
+        protected AbstractCORBASystemException(string exceptionDesc, int minor, CompletionStatus status) : 
             base("CORBA system exception : " + exceptionDesc +                   
                  ", completed: " + status + " minor: " + minor) {
             m_minor = minor;
             m_status = status;
         }
         
-        public AbstractCORBASystemException(System.Runtime.Serialization.SerializationInfo info,
-                                            System.Runtime.Serialization.StreamingContext context) : base(info, context) {
+        protected AbstractCORBASystemException(System.Runtime.Serialization.SerializationInfo info,
+                                               System.Runtime.Serialization.StreamingContext context) : base(info, context) {
             m_minor = info.GetInt32("minor");
             m_status = (CompletionStatus)
                        info.GetValue("status", typeof(CompletionStatus));
