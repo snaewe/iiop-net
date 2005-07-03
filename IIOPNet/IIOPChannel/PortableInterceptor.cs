@@ -268,6 +268,7 @@ namespace omg.org.PortableInterceptor {
         
         public override void GetObjectData(System.Runtime.Serialization.SerializationInfo info,
                                            System.Runtime.Serialization.StreamingContext context) {
+            base.GetObjectData(info, context);
             info.AddValue("forwardTo", m_forward);
         }        
         
@@ -765,6 +766,7 @@ namespace omg.org.PortableInterceptor {
         
         public override void GetObjectData(System.Runtime.Serialization.SerializationInfo info,
                                            System.Runtime.Serialization.StreamingContext context) {
+            base.GetObjectData(info, context);
             info.AddValue("name", name);
         }        
         

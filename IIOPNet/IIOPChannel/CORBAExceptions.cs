@@ -196,6 +196,7 @@ namespace Ch.Elca.Iiop {
         
         public override void GetObjectData(System.Runtime.Serialization.SerializationInfo info,
                                            System.Runtime.Serialization.StreamingContext context) {
+            base.GetObjectData(info, context);
             info.AddValue("name", name);
             info.AddValue("message", message);
             info.AddValue("throwingMethod", throwingMethod);

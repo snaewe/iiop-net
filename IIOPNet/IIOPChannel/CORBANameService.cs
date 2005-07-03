@@ -440,6 +440,7 @@ namespace omg.org.CosNaming.NamingContext_package {
         
         public override void GetObjectData(System.Runtime.Serialization.SerializationInfo info,
                                            System.Runtime.Serialization.StreamingContext context) {
+            base.GetObjectData(info, context);
             info.AddValue("why", why);
             info.AddValue("rest_of_name", rest_of_name);
         }        
@@ -475,6 +476,7 @@ namespace omg.org.CosNaming.NamingContext_package {
         
         public override void GetObjectData(System.Runtime.Serialization.SerializationInfo info,
                                            System.Runtime.Serialization.StreamingContext context) {
+            base.GetObjectData(info, context);
             info.AddValue("context", cxt);
             info.AddValue("rest_of_name", rest_of_name);
         }        
