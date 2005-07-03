@@ -526,6 +526,27 @@ namespace Ch.Elca.Iiop.IntegrationTests {
                 Assertion.AssertEquals(arg.data[i], result.data[i]);
             }            
         }
+
+        [Test]
+        public void TestInnerStructAsAny() {
+            TestService_package.InnerStruct arg = new TestService_package.InnerStruct(1);
+            TestService_package.InnerStruct result = 
+                (TestService_package.InnerStruct)m_testService.EchoAny(arg);
+            Assertion.AssertEquals("arg.Field1", arg.Field1, result.Field1);
+
+            TestService_package.InnerStruct result2 = 
+                (TestService_package.InnerStruct)m_testService.RetrieveInnerStructAsAny(arg);
+            Assertion.AssertEquals("arg.Field1", arg.Field1, result2.Field1);
+
+            TestService_package._Event argEvent = new TestService_package._Event(1);
+            TestService_package._Event resultEvent = 
+                (TestService_package._Event)m_testService.EchoAny(argEvent);
+            Assertion.AssertEquals("argEvent.EventId", argEvent.EventId, resultEvent.EventId);
+
+            TestService_package._Event resultEvent2 = 
+                (TestService_package._Event)m_testService.RetrieveEventAsAny(argEvent);
+            Assertion.AssertEquals("argEvent.EventId", argEvent.EventId, resultEvent2.EventId);            
+        }
         
         [Test]
         public void TestMBRTypesWithReservedNameCollisions() {

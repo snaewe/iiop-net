@@ -55,6 +55,10 @@ public:
   boundedLongSeq* sequence();
   void sequence(const boundedLongSeq& _v);  
 
+  CORBA::Any* RetrieveInnerStructAsAny(const TestService::InnerStruct& arg);
+  CORBA::Any* RetrieveEventAsAny(const TestService::Event& arg);
+
+
   BlobData EchoBlobData(const BlobData& data);
   intList_slice* EchoIntList5(const intList arg);
   int2Dim_slice* EchoInt2Dim2x2(const int2Dim arg);
@@ -281,6 +285,22 @@ TestService_impl::sequence(const boundedLongSeq& _v) {
     m_intSeq = new ::boundedLongSeq(_v);
 }
 
+
+CORBA::Any* 
+TestService_impl::RetrieveInnerStructAsAny(const TestService::InnerStruct& arg) {
+  TestService::InnerStruct* resultContent = new TestService::InnerStruct(arg);
+  CORBA::Any* result = new CORBA::Any;
+  *result <<= resultContent;
+  return result;
+}
+
+CORBA::Any* 
+TestService_impl::RetrieveEventAsAny(const TestService::Event& arg) {
+  TestService::Event* resultContent = new TestService::Event(arg);
+  CORBA::Any* result = new CORBA::Any;
+  *result <<= resultContent;
+  return result;
+}
 
 BlobData
 TestService_impl::EchoBlobData(const BlobData& data) {

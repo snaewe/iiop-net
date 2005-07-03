@@ -86,6 +86,10 @@ interface TestService {
         long Field1;
     };
 
+    struct Event { 
+        long EventId;
+    }; 
+
     TestUnion EchoTestUnion(in TestUnion arg);
     TestUnionE EchoTestUnionE(in TestUnionE arg);   
     any EchoAny(in any arg);
@@ -126,6 +130,9 @@ interface TestService {
     
     // test escaped-identitfier rule (_ not transmitted)
     attribute boundedLongSeq _sequence;
+
+    any RetrieveInnerStructAsAny(in InnerStruct arg);
+    any RetrieveEventAsAny(in Event arg);
 
     // test for idl arrays
     
