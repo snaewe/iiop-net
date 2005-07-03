@@ -138,7 +138,7 @@ namespace omg.org.IOP {
         /// <summary>
         /// serialise the component data as cdr encapsulation.
         /// </summary>
-        private static byte[] SerialiseComponentData(int tag, object data) {
+        private static byte[] SerialiseComponentData(object data) {
             CdrEncapsulationOutputStream encap = new CdrEncapsulationOutputStream(0);
             Marshaller marshaller = Marshaller.GetSingleton();
             marshaller.Marshal(data.GetType(), AttributeExtCollection.EmptyCollection, 
@@ -147,7 +147,7 @@ namespace omg.org.IOP {
         }                
         
         public static TaggedComponent CreateTaggedComponent(int tag, object componentData) {
-            return new TaggedComponent(tag, SerialiseComponentData(tag, componentData));
+            return new TaggedComponent(tag, SerialiseComponentData(componentData));
         }
         
         /// <summary>deserialise the component data of the given type; encoded as cdr encapsulation.</summary>        
