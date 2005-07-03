@@ -49,6 +49,8 @@ public:
   TestService::InnerStruct EchoInnerStruct(const TestService::InnerStruct& arg);
   ::RecStruct* EchoRecStruct(const RecStruct& arg);
 
+  ::SimpleStruct* EchoSimpleStruct(const SimpleStruct& arg);
+
     CORBA::Octet octet(CORBA::Octet arg);
   boundedLongSeq* sequence();
   void sequence(const boundedLongSeq& _v);  
@@ -258,6 +260,11 @@ TestService_impl::EchoInnerStruct(const TestService::InnerStruct& arg) {
 ::RecStruct *
 TestService_impl::EchoRecStruct(const RecStruct& arg) {
   return new ::RecStruct(arg);
+}
+
+::SimpleStruct* 
+TestService_impl::EchoSimpleStruct(const SimpleStruct& arg) {
+  return new ::SimpleStruct(arg);
 }
 
 CORBA::Octet 

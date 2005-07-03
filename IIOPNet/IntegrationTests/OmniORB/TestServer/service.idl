@@ -42,6 +42,15 @@ struct RecStruct {
     sequence<RecStruct> seq;
 };
 
+enum SimpleEnum {
+    S1, S2, S3
+};
+
+struct SimpleStruct {
+    long code;
+    string msg;
+    SimpleEnum sType;
+};
 
 typedef sequence<wstring> wstringSeq;
 
@@ -109,6 +118,8 @@ interface TestService {
     InnerStruct EchoInnerStruct(in InnerStruct arg);
 
     RecStruct EchoRecStruct(in RecStruct arg);
+
+    SimpleStruct EchoSimpleStruct(in SimpleStruct arg);
     
     // test escaped-identitfier rule (_ not transmitted)
     octet _octet(in octet arg);

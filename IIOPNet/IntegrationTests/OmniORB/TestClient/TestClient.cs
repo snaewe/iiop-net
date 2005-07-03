@@ -362,6 +362,23 @@ namespace Ch.Elca.Iiop.IntegrationTests {
             Assertion.AssertNotNull(result.seq[0]);
         }
 
+        [Test]
+        public void TestStructConstructors() {
+            SimpleStruct st1 = new SimpleStruct();
+            st1.code = 1;
+            st1.msg = "msg";
+            st1.sType = SimpleEnum.S2;
+            SimpleStruct res1 = m_testService.EchoSimpleStruct(st1);
+            Assertion.AssertEquals("st1.code", st1.code, res1.code);
+            Assertion.AssertEquals("st1.msg", st1.msg, res1.msg);
+            Assertion.AssertEquals("st1.sType", st1.sType, res1.sType);
+            SimpleStruct st2 = new SimpleStruct(2, "msg2", SimpleEnum.S3);
+            SimpleStruct res2 = m_testService.EchoSimpleStruct(st2);
+            Assertion.AssertEquals("st2.code", st2.code, res2.code);
+            Assertion.AssertEquals("st2.msg", st2.msg, res2.msg);
+            Assertion.AssertEquals("st2.sType", st2.sType, res2.sType);            
+        }
+
 
         [Test]
         public void TestWChar() {
