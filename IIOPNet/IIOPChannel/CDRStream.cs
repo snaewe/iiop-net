@@ -733,7 +733,7 @@ namespace Ch.Elca.Iiop.Cdr {
         #endregion IFields
         #region IConstructors
         
-        public CdrStreamHelper(Stream stream) {
+        protected CdrStreamHelper(Stream stream) {
             m_stream = stream;
         }
 
