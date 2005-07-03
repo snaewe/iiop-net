@@ -1052,6 +1052,29 @@ namespace Ch.Elca.Iiop.IntegrationTests {
         }
 
         [Test]
+        public void TestExceptionFromIdlNetSerializable() {
+            // check, that the generated exception is serializable also with other formatters, i.e. implements ISerializable correctly
+            TestException ex = new TestException();
+            ex.Code = 2;
+            ex.Msg = "msg";
+            System.Runtime.Serialization.Formatters.Binary.BinaryFormatter formatter =
+                new System.Runtime.Serialization.Formatters.Binary.BinaryFormatter();
+            System.IO.MemoryStream serialised = new System.IO.MemoryStream();
+            try {
+                formatter.Serialize(serialised, ex);
+
+                serialised.Seek(0, System.IO.SeekOrigin.Begin);
+                formatter = new System.Runtime.Serialization.Formatters.Binary.BinaryFormatter();
+                TestException deser = (TestException)formatter.Deserialize(serialised);
+                Assertion.AssertEquals("ex.Code", ex.Code, deser.Code);
+                Assertion.AssertEquals("ex.Msg", ex.Msg, deser.Msg);
+            } finally {
+                serialised.Close();
+            }
+
+        }
+
+        [Test]
         public void TestSystemType() {
             IOrbServices orb = OrbServices.GetSingleton();
 

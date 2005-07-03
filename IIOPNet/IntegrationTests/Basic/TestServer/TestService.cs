@@ -658,6 +658,7 @@ namespace Ch.Elca.Iiop.IntegrationTests {
         public bool ThrowTestException() {
             TestException result = new TestException();
             result.Msg = "test-msg";
+            result.Code = 1;
             throw result;
         }
         

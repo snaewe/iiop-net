@@ -8,6 +8,7 @@ module IntegrationTests {
 exception TestException {
 
     string Msg;
+    long Code;
     
 };
 
