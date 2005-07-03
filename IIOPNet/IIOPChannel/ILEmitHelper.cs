@@ -509,6 +509,17 @@ namespace Ch.Elca.Iiop.Idl {
             typebuild.SetCustomAttribute(serAttr);
         }        
         
+        /// <summary>generates il to cast/unbox a reference to the targetType
+        public void GenerateCastObjectToType(ILGenerator gen, Type targetType) {
+            if (targetType.IsValueType) {
+                gen.Emit(OpCodes.Unbox, targetType); // get addr of value
+                // for ints and floats: ldind may be used too as shortcut for ldobj, but for simplicity don't use it
+                gen.Emit(OpCodes.Ldobj, targetType); // load value onto stack
+            } else {
+                gen.Emit(OpCodes.Castclass, targetType); // cast the reference to the correct return value
+            }
+        }
+        
         #endregion IMethods
     
     }
