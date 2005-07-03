@@ -806,7 +806,7 @@ public class MetaDataGenerator : IDLParserVisitor {
         
         // make sure, every value type has a default constructor
         ConstructorBuilder defConstr = 
-            valueToBuild.DefineDefaultConstructor(MethodAttributes.Public);
+            valueToBuild.DefineDefaultConstructor(MethodAttributes.Family);
 
         // generate elements
         BuildInfo buildInfo = 
@@ -2331,7 +2331,7 @@ public class MetaDataGenerator : IDLParserVisitor {
             new ParameterSpec("context", typeof(System.Runtime.Serialization.StreamingContext)) };
          ConstructorBuilder constrBuilder =
             m_ilEmitHelper.AddConstructor(exceptToCreate, constrParams,
-                                          MethodAttributes.Family);
+                                          MethodAttributes.Family | MethodAttributes.HideBySig);
          ILGenerator body = constrBuilder.GetILGenerator();
          body.Emit(OpCodes.Ldarg_0);
          body.Emit(OpCodes.Ldarg_1);
