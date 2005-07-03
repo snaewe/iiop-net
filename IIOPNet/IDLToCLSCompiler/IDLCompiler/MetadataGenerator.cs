@@ -154,7 +154,7 @@ public class MetaDataGenerator : IDLParserVisitor {
         #endregion IProperties
         
     }
-
+    
     #endregion Types
     #region IFields
 
@@ -1777,6 +1777,26 @@ public class MetaDataGenerator : IDLParserVisitor {
         TypeContainer container = new TypeContainer(typeof(System.MarshalByRefObject));
         return container;
     }
+     
+    private void AddStructConstructor(TypeBuilder structToCreate, IList /* members */ members) {
+        ParameterSpec[] constrParams = new ParameterSpec[members.Count];
+        for (int i = 0; i < members.Count; i++) {
+            FieldBuilder member = (FieldBuilder)members[i];            
+            constrParams[i] = new ParameterSpec(member.Name, member.FieldType);
+        }
+        ConstructorBuilder constrBuilder =
+            m_ilEmitHelper.AddConstructor(structToCreate, constrParams,
+                                          MethodAttributes.Public);
+        ILGenerator body = constrBuilder.GetILGenerator();
+        // don't need to call parent constructor for a struct; only assign the fields
+        for (int i = 0; i < members.Count; i++) {
+            FieldBuilder member = (FieldBuilder)members[i];
+            body.Emit(OpCodes.Ldarg_0); // this
+            body.Emit(OpCodes.Ldarg, i+1); // param value
+            body.Emit(OpCodes.Stfld, member);
+        }
+        body.Emit(OpCodes.Ret);        
+    }
     
     /**
      * @see parser.IDLParserVisitor#visit(ASTstruct_type, Object)
@@ -1807,8 +1827,9 @@ public class MetaDataGenerator : IDLParserVisitor {
                                                structToCreate,
                                                forSymbol);
 
-        // add fileds
-        node.childrenAccept(this, thisTypeInfo); // let the members add themself to the typeBuilder
+        // add fileds and a constructor, which assigns the fields
+        IList members = (IList)node.jjtGetChild(0).jjtAccept(this, thisTypeInfo); // accept the member list
+        AddStructConstructor(structToCreate, members);        
 
         // add type specific attributes
         structToCreate.SetCustomAttribute(new IdlStructAttribute().CreateAttributeBuilder());
@@ -1819,13 +1840,26 @@ public class MetaDataGenerator : IDLParserVisitor {
         return new TypeContainer(resultType);
     }
 
+    
+    /// <summary>
+    /// Adds ASTmember to the type in construction. MemberParent is the node containing ASTmember nodes.
+    /// </summary>
+    private IList /* FieldBuilder */ GenerateMemberList(SimpleNode memberParent, Object data) {
+        ArrayList result = new ArrayList();
+        for (int i = 0; i < memberParent.jjtGetNumChildren(); i++) {
+            IList infos = 
+                (IList)memberParent.jjtGetChild(i).jjtAccept(this, data);
+            result.AddRange(infos);
+        }
+        return result;
+    }
+     
     /**
      * @see parser.IDLParserVisitor#visit(ASTmember_list, Object)
      * @param data an instance of buildinfo for the type, which should contain this members
      */
     public Object visit(ASTmember_list node, Object data) {
-        node.childrenAccept(this, data); // let the member add itself to the typebuilder
-        return null;
+        return GenerateMemberList(node, data);
     }
 
     /**
@@ -1844,15 +1878,18 @@ public class MetaDataGenerator : IDLParserVisitor {
                               node.GetIdentification()));
         }
         fieldType = ReplaceByCustomMappedIfNeeded(fieldType);
-        ASTdeclarators decl = (ASTdeclarators)node.jjtGetChild(1);        
+        ASTdeclarators decl = (ASTdeclarators)node.jjtGetChild(1);
+        ArrayList generatedMembers = new ArrayList();
         for (int i = 0; i < decl.jjtGetNumChildren(); i++) {
             string fieldName = IdlNaming.MapIdlNameToClsName(
                                    DetermineTypeAndNameForDeclarator((ASTdeclarator)decl.jjtGetChild(i), data,
                                                                      ref fieldType));
-            m_ilEmitHelper.AddFieldWithCustomAttrs(builder, fieldName, fieldType, 
-                                                   FieldAttributes.Public);
+            FieldBuilder generatedMember =
+                m_ilEmitHelper.AddFieldWithCustomAttrs(builder, fieldName, fieldType,
+                                                       FieldAttributes.Public);
+            generatedMembers.Add(generatedMember);            
         }
-        return null;
+        return generatedMembers;
     }
 
     private void CheckDiscrValAssignableToDiscrType(Literal discrVal, TypeContainer discrType) {
@@ -2240,9 +2277,8 @@ public class MetaDataGenerator : IDLParserVisitor {
 
     /// <summary>
     /// adds a GetObjectData override to the exception to create.
-    /// </summary>
-    /// <remarks>TODO: add fields to serialise</remarks>
-    private void AddExceptionGetObjectDataOverride(TypeBuilder exceptToCreate) {
+    /// </summary>    
+    private void AddExceptionGetObjectDataOverride(TypeBuilder exceptToCreate, IList members) {
         ParameterSpec[] getObjDataParams = new ParameterSpec[] { 
             new ParameterSpec("info", typeof(System.Runtime.Serialization.SerializationInfo)), 
             new ParameterSpec("context", typeof(System.Runtime.Serialization.StreamingContext)) };
@@ -2258,14 +2294,37 @@ public class MetaDataGenerator : IDLParserVisitor {
         body.Emit(OpCodes.Ldarg_2);
         body.Emit(OpCodes.Call, typeof(Exception).GetMethod("GetObjectData", BindingFlags.Public | 
                                                                              BindingFlags.Instance));        
+        
+        MethodInfo addValueMethod = 
+            typeof(System.Runtime.Serialization.SerializationInfo).GetMethod("AddValue",  BindingFlags.Public | BindingFlags.Instance,
+                                                                             null,
+                                                                             new Type[] { ReflectionHelper.StringType,
+                                                                                          ReflectionHelper.ObjectType,
+                                                                                          ReflectionHelper.TypeType },
+                                                                             new ParameterModifier[0]);
+        MethodInfo getTypeFromH = ReflectionHelper.TypeType.GetMethod("GetTypeFromHandle", BindingFlags.Public | BindingFlags.Static);
+        for (int i = 0; i < members.Count; i++) {
+            FieldInfo member = (FieldInfo)members[i];
+            body.Emit(OpCodes.Ldarg_1); // info
+            body.Emit(OpCodes.Ldstr, member.Name); // memberName
+            body.Emit(OpCodes.Ldarg_0); // this
+            body.Emit(OpCodes.Ldfld, member); // load the member
+            if (member.FieldType.IsValueType) {
+                // need to box a valuetype, because formal parameter is object
+                body.Emit(OpCodes.Box, member.FieldType);
+            }           
+            body.Emit(OpCodes.Ldtoken, member.FieldType);
+            body.Emit(OpCodes.Call, getTypeFromH); // load the type, the third argument of AddValue
+            body.Emit(OpCodes.Callvirt, addValueMethod);
+        }
         body.Emit(OpCodes.Ret);
     }
 
     /// <summary>
     /// adds the constructors for deserialization.
-    /// </summary>    
-    /// <remarks>TODO: add fields to deserialise</remarks>
-    private void AddExceptionDeserializationConstructors(TypeBuilder exceptToCreate) {
+    /// </summary>        
+    private void AddExceptionDeserializationConstructors(TypeBuilder exceptToCreate,
+                                                         IList members) {
         // for ISerializable
         ParameterSpec[] constrParams = new ParameterSpec[] {
             new ParameterSpec("info", typeof(System.Runtime.Serialization.SerializationInfo)), 
@@ -2283,18 +2342,38 @@ public class MetaDataGenerator : IDLParserVisitor {
                                                                   new Type[] { typeof(System.Runtime.Serialization.SerializationInfo),
                                                                                typeof(System.Runtime.Serialization.StreamingContext) },
                                                                   new ParameterModifier[0]));         
+        
+        MethodInfo getValueMethod = 
+            typeof(System.Runtime.Serialization.SerializationInfo).GetMethod("GetValue", BindingFlags.Instance | BindingFlags.Public,
+                                                                             null,
+                                                                             new Type[] { typeof(string), typeof(Type) },
+                                                                             new ParameterModifier[0]);
+        MethodInfo getTypeFromH = ReflectionHelper.TypeType.GetMethod("GetTypeFromHandle", BindingFlags.Public | BindingFlags.Static);
+        for (int i = 0; i < members.Count; i++) {
+            FieldBuilder member = (FieldBuilder)members[i];
+            body.Emit(OpCodes.Ldarg_0); // this for calling store field after GetValue
+            body.Emit(OpCodes.Ldarg_1); // info
+            body.Emit(OpCodes.Ldstr, member.Name); // ld the first arg of GetValue
+            body.Emit(OpCodes.Ldtoken, member.FieldType);
+            body.Emit(OpCodes.Call, getTypeFromH); // ld the 2nd arg of GetValue
+            body.Emit(OpCodes.Callvirt, getValueMethod); // call info.GetValue
+            // now store result in the corresponding field
+            m_ilEmitHelper.GenerateCastObjectToType(body, member.FieldType);
+            body.Emit(OpCodes.Stfld, member);
+        }
+         
         body.Emit(OpCodes.Ret);
         // default constructor
         m_ilEmitHelper.AddDefaultConstructor(exceptToCreate, MethodAttributes.Public);
     }
      
-    private void AddExceptionRequiredSerializationCode(TypeBuilder exceptToCreate) {
+    private void AddExceptionRequiredSerializationCode(TypeBuilder exceptToCreate, IList /* FieldBuilder */ members) {
         // add type specific attributes
         m_ilEmitHelper.AddSerializableAttribute(exceptToCreate);
         // GetObjectDataMethod        
-        AddExceptionGetObjectDataOverride(exceptToCreate);
+        AddExceptionGetObjectDataOverride(exceptToCreate, members);
         // add deserialization constructor
-        AddExceptionDeserializationConstructors(exceptToCreate);
+        AddExceptionDeserializationConstructors(exceptToCreate, members);
     }
      
     /**
@@ -2323,10 +2402,10 @@ public class MetaDataGenerator : IDLParserVisitor {
                                                forSymbol);
 
         // add fileds ...
-        node.childrenAccept(this, thisTypeInfo); // let the members add themself to the typeBuilder
+        IList members = (IList)GenerateMemberList(node, thisTypeInfo);
         // add inheritance from IIdlEntity        
         exceptToCreate.AddInterfaceImplementation(typeof(IIdlEntity));
-        AddExceptionRequiredSerializationCode(exceptToCreate);
+        AddExceptionRequiredSerializationCode(exceptToCreate, members);
         
         // create the type
         m_typeManager.EndTypeDefinition(forSymbol);
