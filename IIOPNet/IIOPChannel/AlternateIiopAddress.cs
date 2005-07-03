@@ -39,7 +39,7 @@ namespace Ch.Elca.Iiop {
         
         #region SFields
         
-        public static Type ClassType = typeof(AlternateIiopAddressComponentData);
+        public readonly static Type ClassType = typeof(AlternateIiopAddressComponentData);
         
         #endregion SFields
         #region IFields

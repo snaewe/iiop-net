@@ -66,7 +66,7 @@ namespace Ch.Elca.Iiop.Security.Ssl {
         
         private static Type s_assocOptionsType = typeof(SecurityAssociationOptions);
                
-        public static Type ClassType = typeof(SSLComponentData);              
+        public readonly static Type ClassType = typeof(SSLComponentData);              
         
         #endregion SFields
         #region IFields

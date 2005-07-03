@@ -46,7 +46,7 @@ namespace Ch.Elca.Iiop.Services {
         
         #region SFields
         
-        public static Type ClassType = typeof(CodeSetComponentData);
+        public readonly static Type ClassType = typeof(CodeSetComponentData);
         
         #endregion SFields        
         #region IFields
