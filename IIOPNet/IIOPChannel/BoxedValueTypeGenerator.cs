@@ -153,7 +153,7 @@ namespace Ch.Elca.Iiop.Idl {
             Type arrayElemType = DetermineInnermostArrayElemType(arrayType);
             // unqualified name of the innermost element type of the array
             string arrayElemTypeName = IdlNaming.MapShortTypeNameToIdl(arrayElemType); // need the mapped name for identifier
-            arrayElemTypeName.Replace(" ", "_");
+            arrayElemTypeName = arrayElemTypeName.Replace(" ", "_");
             string boxUnqual = "seq" + DetermineArrayRank(arrayType) + "_" + arrayElemTypeName;
             
             string namespaceBox = arrayElemType.Namespace;
