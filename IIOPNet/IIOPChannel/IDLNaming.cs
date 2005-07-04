@@ -38,7 +38,7 @@ namespace Ch.Elca.Iiop.Idl {
     /// This class is responsible for realising the identifier (name) mapping
     ///  in the IDL to .NET and .NET to IDL mapping.
     /// </summary>
-    public class IdlNaming {
+    public sealed class IdlNaming {
 
         #region SFields
         
@@ -149,8 +149,8 @@ namespace Ch.Elca.Iiop.Idl {
                     string mappedTypeName = (string)mapper.MapClsType(parameter.ParameterType,
                                                                       ReflectionHelper.CollectParameterAttributes(parameter, method),
                                                                       s_genIdlNameforClsTypeNoAnonSeq);
-                    mappedTypeName.Replace(" ", "_");
-                    mappedTypeName.Replace("::", "__");
+                    mappedTypeName = mappedTypeName.Replace(" ", "_");
+                    mappedTypeName = mappedTypeName.Replace("::", "__");
                     methodName = methodName + "__" + mappedTypeName;
                 }                
             }
