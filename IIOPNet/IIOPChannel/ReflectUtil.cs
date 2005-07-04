@@ -87,6 +87,12 @@ namespace Ch.Elca.Iiop.Util {
 
         
         #endregion SFields
+        #region IConstructors
+
+        private ReflectionHelper() {
+        }
+
+        #endregion IConstructors
         #region SProperties
         
         /// <summary>caches typeof(IIdlEntity)</summary>

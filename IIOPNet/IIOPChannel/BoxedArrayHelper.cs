@@ -42,6 +42,12 @@ namespace Ch.Elca.Iiop.Idl {
         public const string BOX_ONEDIM_ARRAY_METHODNAME = "BoxOneDimArray";
         
         #endregion Constants
+        #region IConstructors
+
+        private BoxedArrayHelper() {
+        }
+
+        #endregion IConstructors
         #region SMethods
 
         /// <summary>

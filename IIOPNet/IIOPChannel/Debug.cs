@@ -33,7 +33,7 @@ using System.Diagnostics;
 
 namespace Ch.Elca.Iiop {
 
-    public class OutputHelper {
+    public sealed class OutputHelper {
         private OutputHelper() {
         }
 
