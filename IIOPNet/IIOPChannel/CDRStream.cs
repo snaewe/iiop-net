@@ -324,6 +324,23 @@ namespace Ch.Elca.Iiop.Cdr {
     [CLSCompliant(false)]
     public interface CdrStreamBase {
         
+        #region IProperties
+
+        /// <summary>the charset to use</summary>
+        int CharSet {
+            get;
+            set;
+        }
+        
+        /// <summary>the wcharset to use</summary>
+        int WCharSet {
+            get; 
+            set;
+        }
+        
+        #endregion IProperties
+        #region IMethods
+        
         /// <summary>
         /// the current position in the stream relative to the beginning of the stream;        
         /// </summary>
@@ -336,6 +353,8 @@ namespace Ch.Elca.Iiop.Cdr {
 
         /// <summary>gets the next aligned position in the stream</summary>
         uint GetNextAlignedPosition(Aligns align);
+        
+        #endregion IMethods
 
     }
     
@@ -385,21 +404,6 @@ namespace Ch.Elca.Iiop.Cdr {
     [CLSCompliant(false)]
     public interface CdrInputStream : CdrEndianDepInputStreamOp, CdrStreamBase {
         
-        #region IProperties
-
-        /// <summary>the charset to use</summary>
-        int CharSet {
-            get;
-            set;
-        }
-        
-        /// <summary>the wcharset to use</summary>
-        int WCharSet {
-            get; 
-            set;
-        }        
-
-        #endregion IProperties
         #region IMethods
         
         /// <summary>reads an octet from the stream</summary>
@@ -531,21 +535,6 @@ namespace Ch.Elca.Iiop.Cdr {
     [CLSCompliant(false)]
     public interface CdrOutputStream : CdrEndianDepOutputStreamOp, CdrStreamBase {
         
-        #region IProperties
-
-        /// <summary>the charset to use</summary>
-        int CharSet {
-            get;
-            set;
-        }
-        
-        /// <summary>the wcharset to use</summary>
-        int WCharSet {
-            get; 
-            set;
-        }
-        
-        #endregion IProperties
         #region IMethods
 
         /// <summary>writes an octet to the stream</summary>
@@ -727,8 +716,8 @@ namespace Ch.Elca.Iiop.Cdr {
 
         private uint m_index = 0;
 
-        protected int m_charSet = CodeSetService.DEFAULT_CHAR_SET;
-        protected int m_wcharSet = CodeSetService.DEFAULT_WCHAR_SET;
+        private int m_charSet = CodeSetService.DEFAULT_CHAR_SET;
+        private int m_wcharSet = CodeSetService.DEFAULT_WCHAR_SET;
         
         #endregion IFields
         #region IConstructors
@@ -747,6 +736,24 @@ namespace Ch.Elca.Iiop.Cdr {
         protected Stream BaseStream {
             get { 
                 return m_stream; 
+            }
+        }
+
+        public int CharSet {
+            get { 
+                return m_charSet;
+            }
+            set { 
+                m_charSet = value;
+            }
+        }
+
+        public int WCharSet {
+            get {
+                return m_wcharSet;
+            }
+            set {
+                m_wcharSet = value;
             }
         }
 
@@ -972,24 +979,6 @@ namespace Ch.Elca.Iiop.Cdr {
 
         #endregion IConstructors
         #region IProperties
-
-        public int CharSet {
-            get { 
-                return m_charSet;
-            }
-            set { 
-                m_charSet = value;
-            }
-        }
-
-        public int WCharSet {
-            get {
-                return m_wcharSet;
-            }
-            set {
-                m_wcharSet = value;
-            }
-        }
         
         /// <summary>gets the stream, which was used to construct the stream</summary>        
         internal Stream BackingStream {
@@ -1508,23 +1497,6 @@ namespace Ch.Elca.Iiop.Cdr {
         #endregion IConstructors
         #region IProperties
 
-        public int CharSet {
-            get { 
-                return m_charSet;
-            }
-            set { 
-                m_charSet = value;
-            }
-        }
-
-        public int WCharSet {
-            get {
-                return m_wcharSet;
-            }
-            set {
-                m_wcharSet = value;
-            }
-        }
         
         internal Stream BackingStream {
             get {
