@@ -52,8 +52,8 @@ namespace Ch.Elca.Iiop.IntegrationTests {
     [TestFixture]
     public class TestClient {
 
-        private const int NR_OF_THREADS = 5;
-        private const int NR_OF_CALLS = 150;        
+        private const int NR_OF_THREADS = 25;
+        private const int NR_OF_CALLS = 75;        
 
         #region IFields
 
@@ -90,7 +90,7 @@ namespace Ch.Elca.Iiop.IntegrationTests {
             ArrayList methodRunners = new ArrayList();
             ArrayList threads = new ArrayList();
             for (int i = 0; i < NR_OF_THREADS; i++) {
-                TimeSpan delay = TimeSpan.FromMilliseconds(m_random.Next(200));
+                TimeSpan delay = TimeSpan.FromMilliseconds(m_random.Next(100));
                 RepeatedMethodCaller rmc1 = new RepeatedMethodCaller(NR_OF_CALLS,
                                                                      delay, remoteMethodCaller,
                                                                      m_testService1);
@@ -99,7 +99,7 @@ namespace Ch.Elca.Iiop.IntegrationTests {
                 threads.Add(sv1);
                 sv1.Start();
                 
-                delay = TimeSpan.FromMilliseconds(m_random.Next(200));
+                delay = TimeSpan.FromMilliseconds(m_random.Next(50));
                 RepeatedMethodCaller rmc2 = new RepeatedMethodCaller(NR_OF_CALLS,
                                                                      delay, remoteMethodCaller,
                                                                      m_testService2);
@@ -224,6 +224,10 @@ namespace Ch.Elca.Iiop.IntegrationTests {
             // wait for response
             System.Int32 result2 = acd.EndInvoke(ar2);                                                         
             Assertion.AssertEquals((System.Int32) arg1 + arg2, result2);
+        }
+
+        private void CallLongBlocking(TestService serviceToUse) {
+            serviceToUse.BlockForTime(4);
         }       
 
         [Test]
@@ -234,6 +238,11 @@ namespace Ch.Elca.Iiop.IntegrationTests {
         [Test]
         public void TestWithStructParamsAsync() {
             RunMultithreaded(new PerformCallDelegate(this.CallStructParamsMethodAsync));            
+        }
+
+        [Test]
+        public void TestLongBlockingCalls() {
+            RunMultithreaded(new PerformCallDelegate(this.CallLongBlocking));
         }
         
         private void CallStructParamsMethod(TestService serviceToUse) {

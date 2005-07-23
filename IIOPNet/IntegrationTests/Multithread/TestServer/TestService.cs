@@ -60,6 +60,11 @@ namespace Ch.Elca.Iiop.IntegrationTests {
         public TestStructA TestEchoStruct(TestStructA arg) {
             return arg;
         }
+
+        public bool BlockForTime(int timeInSec) {
+            System.Threading.Thread.Sleep(timeInSec * 1000);
+            return true;
+        }
         
         public override object InitializeLifetimeService() {
             // live forever
