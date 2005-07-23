@@ -127,7 +127,7 @@ namespace Ch.Elca.Iiop {
             GiopTransportMessageHandler handler = clientCon.TransportHandler;
             // send request and wait for response
             responseHeaders = new TransportHeaders();
-            responseHeaders[GiopConnectionDesc.CLIENT_TR_HEADER_KEY]= clientCon.Desc; // add to response headers            
+            responseHeaders[GiopClientConnectionDesc.CLIENT_TR_HEADER_KEY]= clientCon.Desc; // add to response headers            
             uint reqNr = (uint)msg.Properties[SimpleGiopMsg.REQUEST_ID_KEY];
             responseStream = handler.SendRequestSynchronous(requestStream, reqNr);
             responseStream.Seek(0, SeekOrigin.Begin); // assure stream is read from beginning in formatter
@@ -138,7 +138,7 @@ namespace Ch.Elca.Iiop {
         private void AsyncResponseArrived(IClientChannelSinkStack sinkStack, GiopClientConnection con,
                                           Stream responseStream, Exception resultException) {
             ITransportHeaders responseHeaders = new TransportHeaders();
-            responseHeaders[GiopConnectionDesc.CLIENT_TR_HEADER_KEY]= con.Desc; // add to response headers            
+            responseHeaders[GiopClientConnectionDesc.CLIENT_TR_HEADER_KEY]= con.Desc; // add to response headers            
 
             // forward the response
             if ((resultException == null) && (responseStream != null)) {
@@ -213,8 +213,7 @@ namespace Ch.Elca.Iiop {
         /// </summary>
         /// <param name="requestStream">the request stream</param>
         /// <remarks>is called by GiopTransportMessageHandler</remarks>
-        public void ProcessRequest(Stream requestStream, GiopTransportMessageHandler transportHandler,
-                                   GiopConnectionDesc conDesc) {
+        public void ProcessRequest(Stream requestStream, GiopServerConnection serverCon) {
             Trace.WriteLine("Process request");
 #if DEBUG
             requestStream.Seek(0, SeekOrigin.Begin); // assure stream is read from beginning in formatter
@@ -231,11 +230,11 @@ namespace Ch.Elca.Iiop {
             
             // create the sink stack for async processing of message
             ServerChannelSinkStack sinkStack = new ServerChannelSinkStack();
-            sinkStack.Push(this, transportHandler);
+            sinkStack.Push(this, serverCon);
             // empty transport headers for this protocol
             ITransportHeaders requestHeaders = new TransportHeaders();
-            requestHeaders[GiopConnectionDesc.SERVER_TR_HEADER_KEY] = conDesc;
-            requestHeaders[CommonTransportKeys.IPAddress] = transportHandler.GetPeerAddress();
+            requestHeaders[GiopServerConnection.SERVER_TR_HEADER_KEY] = serverCon;
+            requestHeaders[CommonTransportKeys.IPAddress] = serverCon.TransportHandler.GetPeerAddress();
             
             // next sink will process the request-message
             ServerProcessing result = 
@@ -248,10 +247,10 @@ namespace Ch.Elca.Iiop {
                     try { 
                         sinkStack.Pop(this); 
                     } catch (Exception) { }                    
-                    transportHandler.SendResponse(responseStream);
+                    serverCon.TransportHandler.SendResponse(responseStream);
                     break;                    
                 case ServerProcessing.Async : 
-                    sinkStack.StoreAndDispatch(this, transportHandler); // this sink wants to handle response
+                    sinkStack.StoreAndDispatch(this, serverCon); // this sink wants to handle response
                     // no reply, async
                     break;
                 case ServerProcessing.OneWay :
@@ -262,7 +261,8 @@ namespace Ch.Elca.Iiop {
                     break;
                 default:
                     // should not arrive here
-                    throw new Exception("invalid processing state: " + result);
+                    Trace.WriteLine("internal problem, invalid processing state: " + result);
+                    throw new omg.org.CORBA.INTERNAL(568, omg.org.CORBA.CompletionStatus.Completed_MayBe);
             }                        
         }
         
@@ -271,8 +271,7 @@ namespace Ch.Elca.Iiop {
         /// </summary>
         /// <param name="requestStream">the request stream</param>
         /// <remarks>is called by GiopTransportMessageHandler</remarks>
-        public void ProcessLocateRequest(Stream requestStream, GiopTransportMessageHandler transportHandler,
-                                         GiopConnectionDesc conDesc) {
+        public void ProcessLocateRequest(Stream requestStream, GiopServerConnection serverCon) {
             Trace.WriteLine("Process Locate request");
 #if DEBUG
             requestStream.Seek(0, SeekOrigin.Begin); // assure stream is read from beginning in formatter
@@ -284,7 +283,7 @@ namespace Ch.Elca.Iiop {
 
             GiopMessageHandler handler = GiopMessageHandler.GetSingleton();
             Stream resultMsgStream = handler.HandleIncomingLocateRequestMessage(requestStream);            
-            transportHandler.SendResponse(resultMsgStream);
+            serverCon.TransportHandler.SendResponse(resultMsgStream);
             
             Trace.WriteLine("Locate request processed");            
         }                                        
@@ -305,7 +304,7 @@ namespace Ch.Elca.Iiop {
         public void AsyncProcessResponse(IServerResponseChannelSinkStack sinkStack, object state, 
                                          IMessage msg, ITransportHeaders headers, Stream stream) {
             GiopTransportMessageHandler giopTransportMsgHandler =
-                 (GiopTransportMessageHandler) state;            
+                ((GiopServerConnection) state).TransportHandler;
             giopTransportMsgHandler.SendResponse(stream); // send the response
         }
 

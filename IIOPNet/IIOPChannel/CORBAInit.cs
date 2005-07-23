@@ -34,6 +34,8 @@ using System.Runtime.Remoting;
 using System.Runtime.Remoting.Channels;
 using Ch.Elca.Iiop;
 using Ch.Elca.Iiop.Util;
+using Ch.Elca.Iiop.CorbaObjRef;
+using Ch.Elca.Iiop.Idl;
 using omg.org.CosNaming;
 
 namespace Ch.Elca.Iiop.Services {
@@ -148,14 +150,17 @@ namespace Ch.Elca.Iiop.Services {
                 CORBAInitService initService = null;
                 string key = host + ":" + port;
                 if (!m_initalServices.ContainsKey(key)) {
-                    string corbaLoc = String.Format("corbaloc:iiop:{0}.{1}@{2}:{3}/{4}",
-                                                    1, 0, 
-                                                    host, port, 
-                                                    CORBAInitServiceImpl.INITSERVICE_NAME);
+                    IorProfile initServiceProfile = 
+                        new InternetIiopProfile(new GiopVersion(1, 0),
+                                                                host, (short)port,
+                                                                IiopUrlUtil.GetKeyBytesForId(CORBAInitServiceImpl.INITSERVICE_NAME));
 
+                    Ior initServiceIor = new Ior(Repository.GetRepositoryID(typeof(CORBAInitService)),
+                                                 new IorProfile[] { initServiceProfile });
                     
+                    string iorString = initServiceIor.ToString();                    
                     initService = (CORBAInitService)RemotingServices.Connect(typeof(CORBAInitService), 
-                                                                             corbaLoc);
+                                                                             iorString); // CORBAInitService type not verifiable remote -> make sure that it's possible to verify locally
                     m_initalServices.Add(key, initService);
                 } else {
                     initService = (CORBAInitService) m_initalServices[key];

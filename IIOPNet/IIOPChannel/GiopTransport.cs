@@ -121,11 +121,9 @@ namespace Ch.Elca.Iiop {
     /// <remarks>the methods of this interface are called in a ThreadPool thread</remarks>
     internal interface IGiopRequestMessageReceiver {
                 
-        void ProcessRequest(Stream requestStream, GiopTransportMessageHandler transportHandler,
-                            GiopConnectionDesc conDesc);
+        void ProcessRequest(Stream requestStream, GiopServerConnection serverConnection);
         
-        void ProcessLocateRequest(Stream requestStream, GiopTransportMessageHandler transportHandler,
-                                  GiopConnectionDesc conDesc);
+        void ProcessLocateRequest(Stream requestStream, GiopServerConnection serverConnection);
         
     }        
     
@@ -192,11 +190,13 @@ namespace Ch.Elca.Iiop {
                 bytesAlreadySent += bytesToSendInProgress;
                 IAsyncResult res =
                     m_onTransport.BeginWrite(m_buffer, 0, bytesToSendInProgress, null, null);
-                bool waitOk = m_messageHandler.WaitForEvent(res.AsyncWaitHandle);
-                if (!waitOk) {
-                    throw new omg.org.CORBA.TIMEOUT(37, CompletionStatus.Completed_MayBe);
-                }
-                m_onTransport.EndWrite(res);
+                using (WaitHandle waitForSent = res.AsyncWaitHandle) {
+                    bool waitOk = m_messageHandler.WaitForEvent(waitForSent);
+                    if (!waitOk) {
+                        throw new omg.org.CORBA.TIMEOUT(37, CompletionStatus.Completed_MayBe);
+                    }
+                    m_onTransport.EndWrite(res);
+                } // dispose the handle when no longer needed               
             }
             // write complete
         }                
@@ -843,14 +843,12 @@ namespace Ch.Elca.Iiop {
             // here, the message is no longer fragmented, don't check for fragment here
             switch (header.GiopType) {
                 case GiopMsgTypes.Request:
-                    EnqueueRequestMessage(messageStream); // put message into processing queue
-                    messageReceived.StartReceiveMessage(); // receive next message (non_blocking)
-                    ProcessQueuedRequests(); // make sure that somebody is processing requests; otherwise do it
+                    ProcessRequestMessage(messageStream, messageReceived); // process this message
+                    // don't receive next message here, new message reception is started by dispatcher at appropriate time
                     break;
                 case GiopMsgTypes.LocateRequest:
-                    EnqueueLocateRequestMessage(messageStream); // put message into processing queue
-                    messageReceived.StartReceiveMessage(); // receive next message (non-blocking)
-                    ProcessQueuedRequests(); // make sure that somebody is processing requests; otherwise do it
+                    ProcessLocateRequestMessage(messageStream, messageReceived); // process this message
+                    // don't receive next message here, new message reception is started by dispatcher at appropriate time
                     break;
                 case GiopMsgTypes.Reply:
                     // see, if somebody is interested in the response
@@ -938,45 +936,31 @@ namespace Ch.Elca.Iiop {
 
         
         /// <summary>
-        /// adds this request to the currently pending ones.
+        /// processes this request
         /// </summary>
-        private void EnqueueRequestMessage(Stream requestStream) {
+        private void ProcessRequestMessage(Stream requestStream, MessageReceiveTask receiveTask) {
             lock(this) {
                 if (m_reiceivedRequestDispatcher == null) {
                     SendErrorResponseMessage(); // can't be handled, no dispatcher
                     return;
                 }
             }
-            m_reiceivedRequestDispatcher.EnqueueRequestMessage(requestStream);
+            m_reiceivedRequestDispatcher.ProcessRequestMessage(requestStream, receiveTask);
         }
 
         /// <summary>
-        /// adds this request to the currently pending ones.
+        /// processes this locate reqeuest message
         /// </summary>
-        private void EnqueueLocateRequestMessage(Stream requestStream) {
+        private void ProcessLocateRequestMessage(Stream requestStream, MessageReceiveTask receiveTask) {
             lock(this) {
                 if (m_reiceivedRequestDispatcher == null) {
                     SendErrorResponseMessage(); // can't be handled, no dispatcher
                     return;
                 }
             }
-            m_reiceivedRequestDispatcher.EnqueueLocateRequestMessage(requestStream);
+            m_reiceivedRequestDispatcher.ProcessLocateRequestMessage(requestStream, receiveTask);
         }
-        
-        /// <summary>
-        /// makes sure, that the queued requests get processed. If currently nobody is processing the requests,
-        /// the caller is promoted to the requests processor. When the queue gets emtpy again, the caller is 
-        /// released. When the next requests arrives, a new thread is promoted to request processor.
-        /// </summary>
-        private void ProcessQueuedRequests() {
-            lock(this) {                
-                if (m_reiceivedRequestDispatcher == null) {
-                    return;
-                }
-            }
-            m_reiceivedRequestDispatcher.ProcessQueuedRequests();
-        }
-        
+                
         /// <summary>
         /// extracts the request id from a non-fragmented reply message
         /// </summary>
@@ -1022,85 +1006,34 @@ namespace Ch.Elca.Iiop {
     /// </summary>
     public class GiopReceivedRequestMessageDispatcher {
         
-        #region Types
-               
-        /// <summary>
-        /// encapsulates a request message to process.
-        /// </summary>
-        private abstract class MessageToProcess {
-            
-            private Stream m_messageStream;            
-            
-            protected MessageToProcess(Stream messageStream) {
-                m_messageStream = messageStream;
-            }
-            
-            protected Stream MessageStream {
-                get {
-                    return m_messageStream;
-                }
-            }
-            
-            /// <summary>processes this request</summary>
-            internal abstract void Process(IGiopRequestMessageReceiver receiver, 
-                                           GiopTransportMessageHandler transportHandler,
-                                           GiopConnectionDesc connectionDesc);
-            
-        }
-        
-        private class Request : MessageToProcess {
-
-            internal Request(Stream messageStream) : base(messageStream) {                
-            }
-                        
-            internal override void Process(IGiopRequestMessageReceiver receiver, 
-                                           GiopTransportMessageHandler transportHandler,
-                                           GiopConnectionDesc connectionDesc) {
-                receiver.ProcessRequest(MessageStream, transportHandler, connectionDesc);
-            }
-
-            
-        }
-        
-        private class LocateRequest : MessageToProcess {
-
-            internal LocateRequest(Stream messageStream) : base(messageStream) {                
-            }            
-            
-            internal override void Process(IGiopRequestMessageReceiver receiver,
-                                           GiopTransportMessageHandler transportHandler,
-                                           GiopConnectionDesc connectionDesc) {
-                receiver.ProcessLocateRequest(MessageStream, transportHandler, connectionDesc);
-            }
-            
-        }
-        
-        #endregion Types
         #region IFields
         
         private IGiopRequestMessageReceiver m_receiver;
-        // the connection desc for the handled connection.
-        private GiopConnectionDesc m_conDesc;
+        private GiopServerConnection m_serverCon;
         
         private GiopTransportMessageHandler m_msgHandler;
+        
+        private MessageReceiveTask m_msgReceiveTask;
+        private bool m_receivePending = false;
+        
+        private int m_requestsInProgress;
+        /// <summary>
+        /// how many requests are allowed in parallel.
+        /// </summary>
+        private int m_maxRequestsAllowedInParallel = 25;
         
         /// <summary>
         /// the buffered requests.
         /// </summary>
         private Queue m_requestQueue = new Queue();
-        
-        /// <summary>
-        /// is currently a requestProcessing in progress.
-        /// </summary>
-        private bool m_processing = false;        
-        
+                
         #endregion IFields
         #region IConstructors
         
         /// <summary>creates a giop transport message handler, which accept request messages by delegating to receiver</summary>
         internal GiopReceivedRequestMessageDispatcher(IGiopRequestMessageReceiver receiver, GiopTransportMessageHandler msgHandler,
                                                       GiopConnectionDesc conDesc) {
-            m_conDesc = conDesc;
+            m_serverCon = new GiopServerConnection(conDesc, this);
             if (receiver != null) {
                 m_receiver = receiver;
             } else {
@@ -1111,71 +1044,74 @@ namespace Ch.Elca.Iiop {
                 
         #endregion IConstructors
         #region IMethods
-                               
-        /// <summary>
-        /// enqueues a request message for dispatching.
-        /// </summary>        
-        internal void EnqueueRequestMessage(Stream requestStream) {
-            lock(this) {
-                MessageToProcess req = new Request(requestStream);
-                m_requestQueue.Enqueue(req);
-            }
+        
+        private void StartReadNextMessage() {
+            // read next message
+            m_receivePending = false;
+            m_msgReceiveTask.StartReceiveMessage();
+            m_msgReceiveTask = null;                       
         }
-
-        /// <summary>
-        /// enqueues a locate request message for dispatching.
-        /// </summary>                
-        internal void EnqueueLocateRequestMessage(Stream requestStream) {
-            lock(this) {
-                MessageToProcess req = new LocateRequest(requestStream);
-                m_requestQueue.Enqueue(req);
+        
+        /// <summary>notification from formatter; deserialise request has been completed.</summary>
+        /// <remarks>it's now safe to read next request from transport, 
+        /// because message ordering constraints are fullfilled.
+        /// Because of e.g. codeset negotiation and other session based mechanism, 
+        /// the request deserialisation must be done serialised; 
+        /// the servant dispatch can be done in parallel.</remarks>         
+        internal void NotifyDeserialiseRequestComplete() {
+            try {
+                lock(this) {
+                    if (m_requestsInProgress <= m_maxRequestsAllowedInParallel) {
+                        StartReadNextMessage();
+                    } else {
+                        m_receivePending = true;
+                    }
+                }
+            } catch (Exception ex) {
+                HandleUnexpectedProcessingException();
+                Trace.WriteLine("stopped processing on server connection after unexpected exception: " + ex);
             }
         }
         
-        internal void ProcessQueuedRequests() {
-            lock(this) {
-                if (!m_processing) {
-                    // start processing: promote this thread to request processor.
-                    m_processing = true;
-                } else {
-                    return; // already processing -> return
-                }
-            }
-            Process(); // promote this thread to request processor, because currently nobody processing.
-        }        
-                        
-        /// <summary>
-        /// processes requests incoming from one connection in order (otherwise problems with codeset establishment).
-        /// </summary>        
-        /// <remarks>
-        /// - Reduces the number of thread switches if many requests are concurrently arriving.
-        /// - If no more requests are pending, release thread for other tasks.
-        /// - called by the thread-pool
-        /// </remarks>
-        private void Process() {
+        internal void HandleUnexpectedProcessingException() {
+            // unexpected exception -> processing problem on this connection, close connection...
             try {
-                while (true) {
-                    MessageToProcess req;
-                    lock(this) {
-                        // get next request to process.
-                        if (!(m_requestQueue.Count > 0)) {
-                            m_processing = false; // use a new thread for messages arraving from now on ...
-                            break; // nothing more to process
-                        }
-                        req = (MessageToProcess)m_requestQueue.Dequeue();
+                m_msgHandler.SendConnectionCloseMessage();                
+            } finally {
+                m_msgHandler.ForceCloseConnection();
+            }
+        }
+        
+        internal void ProcessRequestMessage(Stream requestStream, MessageReceiveTask receiveTask) {            
+            try {
+                // call is serialised, no need for a lock; at most one thread is reading messages from transport.
+                m_requestsInProgress++;
+                m_msgReceiveTask = receiveTask;
+                m_receiver.ProcessRequest(requestStream, m_serverCon);
+                lock(this) {
+                    // get lock: in the mean time, deserialise request notification may have been sent.
+                    // -> multiple requests are possible in progress
+                    m_requestsInProgress--;
+                    if (m_receivePending) {
+                        // too many requests in parallel last time when trying to start receive -> do it now                    
+                        StartReadNextMessage();
                     }
-                    // process next request
-                    req.Process(m_receiver, m_msgHandler, m_conDesc );
                 }
-            } catch (Exception) {
-                // unexpected exception -> processing problem on this connection, close connection...
-                try {
-                    m_msgHandler.SendConnectionCloseMessage();
-                } finally {
-                    m_msgHandler.ForceCloseConnection();
-                }
-                // after this, no new thread should be started to process next requests, because
-                // connection closed -> don't set m_processing to false here
+            } catch (Exception ex) {
+                HandleUnexpectedProcessingException();
+                Trace.WriteLine("stopped processing on server connection after unexpected exception: " + ex);
+            }                
+        }
+        
+        internal void ProcessLocateRequestMessage(Stream requestStream, MessageReceiveTask receiveTask) {
+            // this called is completely handled by IIOP.NET 
+            // -> no servant will be called and therefore whole request is processed before reading next message
+            try {
+                m_receiver.ProcessLocateRequest(requestStream, m_serverCon);
+                receiveTask.StartReceiveMessage();
+            } catch (Exception ex) {
+                HandleUnexpectedProcessingException();
+                Trace.WriteLine("stopped processing on server connection after unexpected exception: " + ex);                
             }
         }
                                

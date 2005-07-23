@@ -45,12 +45,6 @@ namespace Ch.Elca.Iiop {
     /// </summary>
     public class GiopConnectionDesc {
 
-        #region Constants
-        
-        internal const string SERVER_TR_HEADER_KEY = "_server_giop_con_desc_";
-        internal const string CLIENT_TR_HEADER_KEY = "_client_giop_con_desc_";
-        
-        #endregion Constants
         #region IFields
 
         private int m_charSetChosen = CodeSetService.DEFAULT_CHAR_SET;
@@ -137,6 +131,11 @@ namespace Ch.Elca.Iiop {
     /// <summary>the connection context for the client side</summary>
     internal class GiopClientConnectionDesc : GiopConnectionDesc {
         
+        #region Constants
+        
+        internal const string CLIENT_TR_HEADER_KEY = "_client_giop_con_desc_";
+        
+        #endregion Constants
         #region IConstructors
         
         internal GiopClientConnectionDesc(GiopClientConnectionManager conManager, GiopClientConnection connection,
@@ -171,6 +170,70 @@ namespace Ch.Elca.Iiop {
         #endregion IProporties
     }
 
+    
+    /// <summary>
+    /// the connection context for the server side
+    /// </summary>
+    public class GiopServerConnection {
+
+        #region Constants
+        
+        internal const string SERVER_TR_HEADER_KEY = "_server_giop_transport_";
+        
+        #endregion Constants        
+        #region IFields
+        
+        private GiopReceivedRequestMessageDispatcher m_msgDispatcher;
+        private GiopConnectionDesc m_conDesc;
+        
+        #endregion IFields
+        #region IConstructors
+        
+        internal GiopServerConnection(GiopConnectionDesc conDesc,
+                                      GiopReceivedRequestMessageDispatcher msgDispatcher) {
+            m_conDesc = conDesc;
+            m_msgDispatcher = msgDispatcher;
+        }
+        
+        #endregion IConstructors
+        #region IProperties
+        
+        /// <summary>
+        /// the connection description.
+        /// </summary>
+        internal GiopConnectionDesc ConDesc {
+            get {
+                return m_conDesc;
+            }
+        }
+        
+        /// <summary>
+        /// the message transport handler
+        /// </summary>
+        internal GiopTransportMessageHandler TransportHandler {
+            get {
+                return m_conDesc.TransportHandler;
+            }
+        }
+        
+        #endregion IProperties
+        #region IMethods
+        
+        /// <summary>notifies the transport about deserialisation complete.
+        /// </summary>
+        /// <remarks>it's now safe to read next request from transport, 
+        /// because message ordering constraints are fullfilled.
+        /// Because of e.g. codeset negotiation and other session based mechanism, 
+        /// the request deserialisation must be done serialised; 
+        /// the servant dispatch can be done in parallel.</remarks> 
+        internal void NotifyDeserialiseRequestComplete() {
+            m_msgDispatcher.NotifyDeserialiseRequestComplete();
+        }
+        
+        #endregion IMethods
+        
+    }
+    
     /// <summary>
     /// stores the relevant information of an IIOP client side
     /// connection
@@ -334,5 +397,5 @@ namespace Ch.Elca.Iiop {
         
     }
 
-
+    
 }

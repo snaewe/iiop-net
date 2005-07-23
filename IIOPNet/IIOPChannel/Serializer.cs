@@ -411,53 +411,19 @@ namespace Ch.Elca.Iiop.Marshalling {
             // create a url from this ior:
             string url = ior.ToString(); // use stringified form of IOR as url --> do not lose information
             Type interfaceType;
-            if (!ior.TypID.Equals("")) { // empty string stands for CORBA::Object
-                interfaceType = Repository.GetTypeForId(ior.TypID);
-            } else {
-                interfaceType = ReflectionHelper.MarshalByRefObjectType;
-            }
-            if (interfaceType == null) { 
-                // check, if formal can be assigned by remote object; for formal MarshalbyRefObject, every remote object is ok
-                if (formal.Equals(ReflectionHelper.MarshalByRefObjectType) || CheckAssignableRemote(formal, url)) {
-                    interfaceType = formal;
-                } else {
-                    Trace.WriteLine("unknown incompatible type-id in IOR: " + ior.TypID);
-                    // unknown repository id encountered:  ior.TypID
-                    // and is_a check failed
-                    throw new INTF_REPOS(1414, CompletionStatus.Completed_MayBe);
-                }
-            }
-
-            if ((!formal.Equals(ReflectionHelper.MarshalByRefObjectType)) && 
-                (!formal.IsAssignableFrom(interfaceType)) &&
-                (!formal.Equals(ReflectionHelper.IObjectType))) {
-                // for formal-parameter MarshalByRefObject and omg.org.CORBA.IObject
-                // everything is possible (i.e. every remote object type can be assigned to it),
-                // the other formal types must be checked
-                if (CheckAssignableRemote(formal, url)) {
-                    interfaceType = formal;
-                } else {
-                    Trace.WriteLine("received obj-reference is not compatible with " + 
-                                    "the required formal parameter, formal: " +
-                                    formal + ", received: " + interfaceType);
-                    throw new BAD_PARAM(20010, CompletionStatus.Completed_MayBe);
-                }
-            }
-            
+            if (!Repository.IsInterfaceCompatible(formal, ior.TypID, out interfaceType)) {
+                // will be checked on first call remotely with is_a; don't do a remote check here, 
+                // because not an appropriate place for a remote call; also safes call if ior not used.
+                Trace.WriteLine(String.Format("ObjRef deser, not locally verifiable, that ior type-id " +
+                                              "{0} is compatible to required formal type {1}. " + 
+                                              "Remote check will be done on first call to this ior.",
+                                              ior.TypID, formal.FullName));                
+            }                        
             // create a proxy
             object proxy = RemotingServices.Connect(interfaceType, url);
             return proxy;
         }
         
-        /// <summary>if compatibility is not checkable with type information included in
-        /// IOR, call _is_a method to check.</summary>
-        private bool CheckAssignableRemote(Type formal, string url) {
-            object proxy = RemotingServices.Connect(s_iObjectType, url);
-            bool isAssignable = (bool)s_isAMethod.Invoke(proxy, 
-                                                         new object[] { Repository.GetRepositoryID(formal)});
-            return isAssignable;
-        }
-
         #endregion IMethods
 
     }

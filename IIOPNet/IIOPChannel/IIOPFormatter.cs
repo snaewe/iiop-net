@@ -39,6 +39,7 @@ using Ch.Elca.Iiop.Services;
 using Ch.Elca.Iiop.CorbaObjRef;
 using Ch.Elca.Iiop.Util;
 using Ch.Elca.Iiop.Interception;
+using Ch.Elca.Iiop.Idl;
 using omg.org.CORBA;
 
 namespace Ch.Elca.Iiop {
@@ -70,6 +71,25 @@ namespace Ch.Elca.Iiop {
                         
     }
     
+    /// <summary>
+    /// async data for the server side.
+    /// </summary>
+    internal class AsyncServerProcessingData : AsyncProcessingData {
+        
+        private GiopServerConnection m_serverCon;
+        
+        internal AsyncServerProcessingData(IMessage reqMsg, GiopServerConnection serverCon) :
+            base(reqMsg, serverCon.ConDesc) {
+            m_serverCon = serverCon;
+        }
+        
+        internal GiopServerConnection ServerCon {
+            get {
+                return m_serverCon;
+            }
+        }            
+        
+    }
         
     /// <summary>
     /// this class is a client side formatter for IIOP-messages in the IIOP-channel
@@ -85,6 +105,10 @@ namespace Ch.Elca.Iiop {
         private GiopClientConnectionManager m_conManager;
         
         private IInterceptionOption[] m_interceptionOptions;
+        
+        private Hashtable m_typesVerified = new Hashtable(); // contains the verified types for this proxy
+        
+        delegate bool Is_a_delegate(string repId);
 
         #endregion IFields
         #region IConstructors
@@ -121,13 +145,13 @@ namespace Ch.Elca.Iiop {
 
         #endregion IProperties
         #region IMethods
-        
+                
         /// <summary>serialises the .NET msg to a GIOP-message</summary>
         private void SerialiseRequest(IMessage msg, IIorProfile target, GiopClientConnectionDesc conDesc,
                                       uint reqId,
                                       out ITransportHeaders headers, out Stream stream) {
             headers = new TransportHeaders();
-            headers[GiopConnectionDesc.CLIENT_TR_HEADER_KEY] = conDesc;
+            headers[GiopClientConnectionDesc.CLIENT_TR_HEADER_KEY] = conDesc;
             // get the stream into which the message should be serialied from the first stream handling
             // sink in the stream handling chain
             stream = m_nextSink.GetRequestStream(msg, headers);
@@ -190,11 +214,52 @@ namespace Ch.Elca.Iiop {
             }
             return target;
         }
+        
+        /// <summary>if compatibility is not checkable with type information included in
+        /// IOR, call _is_a method to check.</summary>
+        private bool CheckAssignableRemote(Type formal, string url) {
+            IObject proxy = (IObject)RemotingServices.Connect(ReflectionHelper.IObjectType, url);
+            Is_a_delegate checkDelegate = new Is_a_delegate(proxy._is_a);                            
+            string requiredTypeId = Repository.GetRepositoryID(formal);
+            return checkDelegate(requiredTypeId);
+        }        
+        
+        private bool IsInterfaceCompatible(Ior target, Type neededTargetType, string targetUrl) {
+            Type interfaceType;
+            if (Repository.IsInterfaceCompatible(neededTargetType, target.TypID, out interfaceType)) {
+                return true; // local check was ok
+            } else {
+                return CheckAssignableRemote(neededTargetType, targetUrl);
+            }                        
+        }
+        
+        private void VerifyInterfaceCompatible(Ior target, IMessage msg) {
+            if (msg is IMethodMessage) {
+                IMethodMessage methodCall = (IMethodMessage)msg;
+                Type targetType = methodCall.MethodBase.DeclaringType;
+                string typeKey = targetType.AssemblyQualifiedName;
+                lock(m_typesVerified.SyncRoot) {
+                    if (m_typesVerified.ContainsKey(typeKey)) {
+                        return;
+                    } else {
+                        if (IsInterfaceCompatible(target, targetType, methodCall.Uri)) {
+                            m_typesVerified[typeKey] = true;
+                        } else {
+                            throw new BAD_PARAM(20010, CompletionStatus.Completed_No);
+                        }
+                    }
+                }
+            } else {
+                // can't verify for this message
+                throw new INTERNAL(319, CompletionStatus.Completed_No);
+            }
+        }
             
         #region Implementation of IMessageSink
         public IMessage SyncProcessMessage(IMessage msg) {
             // allocate (reserve) connection
             Ior target = DetermineTarget(msg);
+            VerifyInterfaceCompatible(target, msg);
             IIorProfile selectedProfile;
             uint reqId;
             GiopClientConnectionDesc conDesc = AllocateConnection(msg, target, out selectedProfile, out reqId);
@@ -226,6 +291,7 @@ namespace Ch.Elca.Iiop {
         public IMessageCtrl AsyncProcessMessage(IMessage msg, IMessageSink replySink) {
             // allocate (reserve) connection
             Ior target = DetermineTarget(msg);
+            VerifyInterfaceCompatible(target, msg);
             IIorProfile selectedProfile;
             uint reqId;
             GiopClientConnectionDesc conDesc = AllocateConnection(msg, target, out selectedProfile, out reqId);
@@ -346,11 +412,11 @@ namespace Ch.Elca.Iiop {
         /// <returns>the .NET message created from the Giop-msg</returns>
         private IMessage DeserialiseRequest(Stream requestStream, 
                                             ITransportHeaders headers,
-                                            GiopConnectionDesc conDesc) {
+                                            GiopServerConnection con) {
             try {
                 GiopMessageHandler handler = GiopMessageHandler.GetSingleton();
                 IMessage result = handler.ParseIncomingRequestMessage(requestStream, 
-                                                                      conDesc, m_interceptionOptions);
+                                                                      con.ConDesc, m_interceptionOptions);
                 return result;
             } finally {
                 requestStream.Close(); // not needed any more
@@ -359,13 +425,13 @@ namespace Ch.Elca.Iiop {
 
         /// <summary>serialises the .NET msg to a GIOP-message</summary>
         private void SerialiseResponse(IServerResponseChannelSinkStack sinkStack, IMessage requestMsg,
-                                       GiopConnectionDesc conDesc, IMessage responseMsg, 
+                                       GiopServerConnection con, IMessage responseMsg, 
                                        ref ITransportHeaders headers, out Stream stream) {            
             GiopVersion version = (GiopVersion)requestMsg.Properties[SimpleGiopMsg.GIOP_VERSION_KEY];
             if (headers == null) {
                 headers = new TransportHeaders();
             }
-            headers[GiopConnectionDesc.SERVER_TR_HEADER_KEY] = conDesc;
+            headers[GiopServerConnection.SERVER_TR_HEADER_KEY] = con;
             // get the stream into which the message should be serialied from a stream handling
             // sink in the stream handling chain
             stream = sinkStack.GetResponseStream(responseMsg, headers);
@@ -374,19 +440,19 @@ namespace Ch.Elca.Iiop {
                 stream = new MemoryStream(); // create a new stream
             }
             GiopMessageHandler handler = GiopMessageHandler.GetSingleton();
-            handler.SerialiseOutgoingReplyMessage(responseMsg, requestMsg, version, stream, conDesc,
+            handler.SerialiseOutgoingReplyMessage(responseMsg, requestMsg, version, stream, con.ConDesc,
                                                   m_interceptionOptions);
         }
 
         /// <summary>serialises an Exception</summary>
         private void SerialiseExceptionResponse(IServerResponseChannelSinkStack sinkStack,
                                                 IMessage requestMsg,
-                                                GiopConnectionDesc conDesc,
+                                                GiopServerConnection con,
                                                 IMessage responseMsg,                                                                                                
                                                 ref ITransportHeaders headers, out Stream stream) {
             // serialise an exception response
             headers = new TransportHeaders();
-            SerialiseResponse(sinkStack, requestMsg, conDesc, responseMsg, ref headers, out stream);
+            SerialiseResponse(sinkStack, requestMsg, con, responseMsg, ref headers, out stream);
         }
     
         #region Implementation of IServerChannelSink
@@ -403,17 +469,24 @@ namespace Ch.Elca.Iiop {
             responseMsg = null;
             responseHeaders = null;
             responseStream = null;
-            GiopConnectionDesc conDesc = (GiopConnectionDesc)
-                requestHeaders[GiopConnectionDesc.SERVER_TR_HEADER_KEY];
+            GiopServerConnection serverCon = (GiopServerConnection)
+                requestHeaders[GiopServerConnection.SERVER_TR_HEADER_KEY];            
                                                    
             try {
-                // deserialise the request
-                deserReqMsg = DeserialiseRequest(requestStream, requestHeaders, conDesc);
-                // processing may be done asynchronous, therefore push this sink on the stack to process a response async
-                AsyncProcessingData asyncData = 
-                    new AsyncProcessingData(deserReqMsg, conDesc);
-                sinkStack.Push(this, asyncData);
                 
+                try {
+                    // deserialise the request
+                    deserReqMsg = DeserialiseRequest(requestStream, requestHeaders, serverCon);
+                } finally {
+                    //request deserialised -> safe to read next request while processing request in servant
+                    // (or sending request deserialisation exception)
+                    serverCon.NotifyDeserialiseRequestComplete();
+                }
+                
+                // processing may be done asynchronous, therefore push this sink on the stack to process a response async
+                AsyncServerProcessingData asyncData = 
+                    new AsyncServerProcessingData(deserReqMsg, serverCon);
+                sinkStack.Push(this, asyncData);                
                 ServerProcessing processingResult;
                 try {
                     // forward the call to the next message handling sink
@@ -428,7 +501,7 @@ namespace Ch.Elca.Iiop {
                     case ServerProcessing.Complete:
                         sinkStack.Pop(this); // not async
                         // send the response
-                        SerialiseResponse(sinkStack, deserReqMsg, conDesc, responseMsg,
+                        SerialiseResponse(sinkStack, deserReqMsg, serverCon, responseMsg,
                                           ref responseHeaders, out responseStream);                        
                         break;
                     case ServerProcessing.Async:
@@ -446,7 +519,7 @@ namespace Ch.Elca.Iiop {
                 responseMsg = deserEx.ResponseMessage;
                 // an exception was thrown during deserialization
                 SerialiseExceptionResponse(sinkStack, 
-                                           deserEx.RequestMessage, conDesc, responseMsg,
+                                           deserEx.RequestMessage, serverCon, responseMsg,
                                            ref responseHeaders, out responseStream);
                 return ServerProcessing.Complete;
             } catch (Exception e) {
@@ -458,7 +531,7 @@ namespace Ch.Elca.Iiop {
                         responseMsg = new ReturnMessage(e, null); // no usable information present
                     }
                     SerialiseExceptionResponse(sinkStack, 
-                                               deserReqMsg, conDesc, responseMsg,
+                                               deserReqMsg, serverCon, responseMsg,
                                                ref responseHeaders, out responseStream);
                 } else {
                     throw e;
@@ -470,10 +543,10 @@ namespace Ch.Elca.Iiop {
         public void AsyncProcessResponse(IServerResponseChannelSinkStack sinkStack, object state,
                                          IMessage msg, ITransportHeaders headers, Stream stream) {
             // headers, stream are null, because formatting is first sink to create these two
-            AsyncProcessingData asyncData = (AsyncProcessingData) state;
+            AsyncServerProcessingData asyncData = (AsyncServerProcessingData) state;
             try {                
                 IMessage requestMsg = asyncData.RequestMsg;
-                SerialiseResponse(sinkStack, requestMsg, asyncData.ConDesc, msg, 
+                SerialiseResponse(sinkStack, requestMsg, asyncData.ServerCon, msg, 
                                   ref headers, out stream);
             } 
             catch (Exception e) {
@@ -483,7 +556,7 @@ namespace Ch.Elca.Iiop {
                     msg = new ReturnMessage(e, null); // no useful information present for requestMsg
                 }
                 // serialise the exception
-                SerialiseExceptionResponse(sinkStack, (IMessage)state, asyncData.ConDesc, msg,
+                SerialiseExceptionResponse(sinkStack, (IMessage)state, asyncData.ServerCon, msg,
                                            ref headers, out stream);
             }
             sinkStack.AsyncProcessResponse(msg, headers, stream); // pass further on to the stream handling sinks

@@ -418,6 +418,36 @@ namespace Ch.Elca.Iiop.Idl {
         }
         
         #endregion loading types 
+        #region verifying types
+        
+        /// <summary>
+        /// returns true, if interface type iorType is assignable to requiredType.
+        /// If not verifable with static inheritance information, returns false.
+        /// </summary>
+        /// <param name="useTypeForId">returns the best local type to use for iorTypeId</param>
+        public static bool IsInterfaceCompatible(Type requiredType, string iorTypeId, out Type useTypeForId) {            
+            Type interfaceType;
+            if (!iorTypeId.Equals(String.Empty)) { // empty string stands for CORBA::Object
+                interfaceType = Repository.GetTypeForId(iorTypeId);
+            } else {
+                interfaceType = ReflectionHelper.MarshalByRefObjectType;
+            }            
+            // for requiredType MarshalByRefObject and omg.org.CORBA.IObject
+            // everything is possible (i.e. every remote object type can be assigned to it),
+            // the other requiredType types must be checked remote if not locally verifable
+            if ((!requiredType.Equals(ReflectionHelper.MarshalByRefObjectType)) &&                
+                (!requiredType.Equals(ReflectionHelper.IObjectType)) && 
+                ((interfaceType == null) || (!requiredType.IsAssignableFrom(interfaceType)))) {
+                // remote type not known or locally assignability not verifable
+                useTypeForId = requiredType;
+                return false;
+            }
+            // interface is assignable (or required type is compatible with all -> do a null check for this case)
+            useTypeForId = (interfaceType != null ? interfaceType : requiredType);
+            return true;            
+        }
+        
+        #endregion verifying types
         #region for typecodes
 
         /// <summary>
