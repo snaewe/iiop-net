@@ -1,3 +1,4 @@
+include ../../MakeVars.mono
 DELAY = ../Utils/delay.exe
 
 build: build-server build-client

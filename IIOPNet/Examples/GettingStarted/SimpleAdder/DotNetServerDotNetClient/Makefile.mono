@@ -1,3 +1,5 @@
+include ../../../../MakeVars.mono
+
 build:
 	$(MAKE) -C server -f Makefile.mono build
 	$(MAKE) -C directClient -f Makefile.mono build

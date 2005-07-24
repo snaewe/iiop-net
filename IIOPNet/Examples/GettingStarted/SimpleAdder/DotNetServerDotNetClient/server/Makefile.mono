@@ -1,4 +1,4 @@
-CSC=gmcs
+include ../../../../../MakeVars.mono
 CLS2IDL     = mono ../../../../../CLSToIDLGenerator/bin/CLSIDLGenerator.exe
 IIOPCHANNEL = ../../../../../IIOPChannel/bin/IIOPChannel.dll
 bin         = bin/

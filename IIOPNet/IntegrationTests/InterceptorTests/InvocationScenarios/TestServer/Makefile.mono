@@ -1,4 +1,4 @@
-CSC=gmcs
+include ../../../../MakeVars.mono
 IIOPCHANNEL = ../../../../IIOPChannel/bin/IIOPChannel.dll
 LAUNCH = ../../../Utils/launch.exe
 KILL = ../../../Utils/kill.exe

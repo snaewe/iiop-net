@@ -1,4 +1,4 @@
-CSC=gmcs
+include ../../../../../MakeVars.mono
 IDLSource=../server/IDL/Ch/Elca/Iiop/Tutorial/GettingStarted/*.idl
 Adder=Ch/Elca/Iiop/Tutorial/GettingStarted/
 IDLToCLS=mono ../../../../../../IDLToCLSCompiler/IDLCompiler/bin/IDLToCLSCompiler.exe

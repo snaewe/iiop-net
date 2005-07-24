@@ -1,4 +1,4 @@
-CSC=gmcs
+include ../../../../../MakeVars.mono
 COMMONASMSOURCE = ../server/bin/Adder.dll
 IIOPCHANNEL = ../../../../../IIOPChannel/bin/IIOPChannel.dll
 BIN=bin/

@@ -1,3 +1,5 @@
+include ../../../MakeVars.mono
+
 build:
 	$(MAKE) -C DotNetServerDotNetClient -f Makefile.mono build
 

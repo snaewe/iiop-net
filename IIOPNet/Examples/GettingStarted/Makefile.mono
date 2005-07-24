@@ -1,3 +1,5 @@
+include ../../MakeVars.mono
+
 build:
 	$(MAKE) -C SimpleAdder -f Makefile.mono build
 

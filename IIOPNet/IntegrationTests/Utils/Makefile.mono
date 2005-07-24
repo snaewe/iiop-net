@@ -1,4 +1,4 @@
-CSC=gmcs
+include ../../MakeVars.mono
 Utils = launch.exe kill.exe delay.exe
 
 .SUFFIXES : .exe .cs

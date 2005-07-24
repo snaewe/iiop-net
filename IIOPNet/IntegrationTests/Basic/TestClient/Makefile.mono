@@ -1,4 +1,4 @@
-CSC=gmcs
+include ../../../MakeVars.mono
 NUNIT=${NUNITV2_HOME}/bin/nunit.framework.dll
 IIOPCHANNEL = ../../../IIOPChannel/bin/IIOPChannel.dll
 bin = bin/

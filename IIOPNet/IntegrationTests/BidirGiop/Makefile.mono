@@ -1,3 +1,5 @@
+include ../../MakeVars.mono
+
 build:
     $(MAKE) -C SingleThreaded build -f Makefile.mono
 

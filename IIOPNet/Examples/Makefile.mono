@@ -1,3 +1,5 @@
+include ../MakeVars.mono
+
 build:
 	$(MAKE) -C GettingStarted -f Makefile.mono build
 

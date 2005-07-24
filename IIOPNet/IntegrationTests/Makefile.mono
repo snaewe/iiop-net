@@ -1,3 +1,5 @@
+include ../MakeVars.mono
+
 build:
 	$(MAKE) -C Utils build -f Makefile.mono
 	$(MAKE) -C Basic build -f Makefile.mono

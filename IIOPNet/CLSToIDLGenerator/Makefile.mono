@@ -1,5 +1,5 @@
+include ../MakeVars.mono
 Key=../Key.snk
-CSC=gmcs
 IIOPChannel=../IIOPChannel/bin/IIOPChannel.dll
 Dest=bin/
 
