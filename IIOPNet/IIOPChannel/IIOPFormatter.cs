@@ -373,7 +373,31 @@ namespace Ch.Elca.Iiop {
     /// this class is a server side formater for IIOP-messages in the IIOP-Channel
     /// </summary>
     public class IiopServerFormatterSink : IServerChannelSink {
-                                  
+        
+        #region Types
+        
+        /// <summary>
+        /// exception thrown by NotifyDeserialiseRequestComplete handler, if a problem occurs and processing
+        /// should be stopped.
+        /// </summary>
+        internal class NotifyReadRequestException : Exception {
+        
+            public NotifyReadRequestException() : base() {            
+            }
+        
+            public NotifyReadRequestException(string msg) : base(msg) {            
+            }
+        
+            public NotifyReadRequestException(string msg, Exception inner) : base(msg, inner) {
+            }        
+        
+            protected NotifyReadRequestException(System.Runtime.Serialization.SerializationInfo info,
+                                                 System.Runtime.Serialization.StreamingContext context) : base(info, context) {        
+            }
+        
+        }        
+        
+        #endregion Types                          
         #region IFields
 
         private IServerChannelSink m_nextSink;
@@ -480,7 +504,13 @@ namespace Ch.Elca.Iiop {
                 } finally {
                     //request deserialised -> safe to read next request while processing request in servant
                     // (or sending request deserialisation exception)
-                    serverCon.NotifyDeserialiseRequestComplete();
+                    try {
+                        serverCon.NotifyDeserialiseRequestComplete();
+                    } catch (Exception ne) {
+                        // unexpected exception. Abort message processing, problem with transport.
+                        throw new NotifyReadRequestException("Problem while trying to inform transport about request deserialistion.", 
+                                                             ne);
+                    }
                 }
                 
                 // processing may be done asynchronous, therefore push this sink on the stack to process a response async
@@ -522,6 +552,9 @@ namespace Ch.Elca.Iiop {
                                            deserEx.RequestMessage, serverCon, responseMsg,
                                            ref responseHeaders, out responseStream);
                 return ServerProcessing.Complete;
+            } catch (NotifyReadRequestException nrre) {
+                Trace.WriteLine("Failed to inform transport about request deserialisation. Processing problem on server connection after unexpected exception: " + nrre.InnerException);
+                throw nrre;
             } catch (Exception e) {
                 // serialise an exception response
                 if (deserReqMsg != null) {

@@ -1059,7 +1059,8 @@ namespace Ch.Elca.Iiop {
             // read next message
             m_receivePending = false;
             m_msgReceiveTask.StartReceiveMessage();
-            m_msgReceiveTask = null;                       
+            // don't perform anything after StartReceiveMessage, because a received message may
+            // already be in ProcessRequestMessage now
         }
         
         /// <summary>notification from formatter; deserialise request has been completed.</summary>
@@ -1069,17 +1070,12 @@ namespace Ch.Elca.Iiop {
         /// the request deserialisation must be done serialised; 
         /// the servant dispatch can be done in parallel.</remarks>         
         internal void NotifyDeserialiseRequestComplete() {
-            try {
-                lock(this) {
-                    if (m_requestsInProgress <= m_maxRequestsAllowedInParallel) {
-                        StartReadNextMessage();
-                    } else {
-                        m_receivePending = true;
-                    }
+            lock(this) {
+                if (m_requestsInProgress <= m_maxRequestsAllowedInParallel) {
+                    StartReadNextMessage();
+                } else {
+                    m_receivePending = true;
                 }
-            } catch (Exception ex) {
-                HandleUnexpectedProcessingException();
-                Trace.WriteLine("stopped processing on server connection after unexpected exception: " + ex);
             }
         }
         
@@ -1129,4 +1125,5 @@ namespace Ch.Elca.Iiop {
         
     }    
     
+        
 }
