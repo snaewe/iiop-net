@@ -1029,12 +1029,7 @@ namespace Ch.Elca.Iiop {
         /// how many requests are allowed in parallel.
         /// </summary>
         private int m_maxRequestsAllowedInParallel = 25;
-        
-        /// <summary>
-        /// the buffered requests.
-        /// </summary>
-        private Queue m_requestQueue = new Queue();
-                
+                       
         #endregion IFields
         #region IConstructors
         

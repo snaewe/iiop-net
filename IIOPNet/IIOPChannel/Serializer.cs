@@ -335,21 +335,6 @@ namespace Ch.Elca.Iiop.Marshalling {
     /// <summary>serializes object references</summary>
     internal class ObjRefSerializer : Serialiser {
 
-        #region SFields
-        
-        private static Type s_iObjectType;
-        private static MethodInfo s_isAMethod;
-        
-        #endregion SFields
-        #region SConstructor
-        
-        static ObjRefSerializer() {
-             s_iObjectType = typeof(omg.org.CORBA.IObject);
-             s_isAMethod = s_iObjectType.GetMethod("_is_a", BindingFlags.Public |
-                                                            BindingFlags.Instance);
-        }
-        
-        #endregion SConstructor        
         #region IMethods
         
         internal override void Serialise(Type formal, object actual, AttributeExtCollection attributes,
