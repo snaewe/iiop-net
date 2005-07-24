@@ -142,6 +142,9 @@ namespace Ch.Elca.Iiop {
                         case IiopServerChannel.MACHINE_NAME_KEY:
                             serverProp[IiopServerChannel.MACHINE_NAME_KEY] = entry.Value;
                             break;
+                        case IiopServerChannel.SERVERTHREADS_MAX_PER_CONNECTION_KEY:
+                            serverProp[IiopServerChannel.SERVERTHREADS_MAX_PER_CONNECTION_KEY] = entry.Value;
+                            break;
                         case IiopClientChannel.CLIENT_RECEIVE_TIMEOUT_KEY:
                             clientProp[IiopClientChannel.CLIENT_RECEIVE_TIMEOUT_KEY] = Convert.ToInt32(entry.Value);
                             break;
@@ -153,7 +156,7 @@ namespace Ch.Elca.Iiop {
                             break;
                         case IiopClientChannel.CLIENT_UNUSED_CONNECTION_KEEPALIVE_KEY:   
                             clientProp[IiopClientChannel.CLIENT_UNUSED_CONNECTION_KEEPALIVE_KEY] = Convert.ToInt32(entry.Value);
-                            break;                             
+                            break;                        
                         case TRANSPORT_FACTORY_KEY:
                             serverProp[TRANSPORT_FACTORY_KEY] =
                                 entry.Value;
@@ -557,9 +560,17 @@ namespace Ch.Elca.Iiop {
         public const string MACHINE_NAME_KEY = "machineName";
         
         /// <summary>
+        /// the maximum number of server threads used for processing requests on a multiplexed client connection.
+        /// If client serialise requests, only one thread is used. If requests arrive, before the server has
+        /// sent the answer, more threads are used to process the requests in parallel up to the given limit.
+        /// </summary>        
+        public const string SERVERTHREADS_MAX_PER_CONNECTION_KEY = "serverThreadsMaxPerConnection";
+        
+        /// <summary>
         /// key used to specify the bidirectional connection manager in the server-props.
         /// </summary>
-        internal const string BIDIR_CONNECTION_MANAGER = "bidirConnectionManager";
+        /// <remarks>for use by IiopChannel only</remarks>
+        internal const string BIDIR_CONNECTION_MANAGER = "bidirConnectionManager";                
         
         #endregion Constants
         #region IFields
@@ -574,6 +585,11 @@ namespace Ch.Elca.Iiop {
         private bool m_useIpAddr = true;
         private IPAddress m_forcedBind;
         private string m_forcedHostNameToUse; // the configured hostname to use by remote connectors, may be null
+        
+        /// <summary>
+        /// the maximum number of server threads used for processing requests on a multiplexed client connection.
+        /// </summary>
+        private int m_serverThreadsMaxPerConnection = 25;
 
         private IServerChannelSinkProvider m_providerChain;
         /// <summary>the standard transport sink for this channel</summary>
@@ -657,6 +673,9 @@ namespace Ch.Elca.Iiop {
                             Type transportFactoryType = Type.GetType((string)entry.Value, true);
                             serverTransportFactory = (IServerTransportFactory)
                                 Activator.CreateInstance(transportFactoryType);
+                            break;
+                        case SERVERTHREADS_MAX_PER_CONNECTION_KEY:
+                            m_serverThreadsMaxPerConnection = Convert.ToInt32(entry.Value);
                             break;
                         case IiopServerChannel.BIDIR_CONNECTION_MANAGER:
                             m_bidirConnectionManager = (GiopBidirectionalConnectionManager)entry.Value;
@@ -752,7 +771,8 @@ namespace Ch.Elca.Iiop {
 
             if (m_bidirConnectionManager != null) {
                 // bidirectional entry point into server channel sink chain.
-                m_bidirConnectionManager.RegisterMessageReceptionHandler(m_transportSink);
+                m_bidirConnectionManager.RegisterMessageReceptionHandler(m_transportSink, 
+                                                                         m_serverThreadsMaxPerConnection);
             }
             
             // ready to wait for messages
@@ -816,7 +836,7 @@ namespace Ch.Elca.Iiop {
         private void ProcessClientMessages(IServerTransport transport) {
             GiopTransportMessageHandler handler = new GiopTransportMessageHandler(transport);
             GiopConnectionDesc conDesc = new GiopConnectionDesc(m_bidirConnectionManager, handler);            
-            handler.InstallReceiver(m_transportSink, conDesc);
+            handler.InstallReceiver(m_transportSink, conDesc, m_serverThreadsMaxPerConnection);
             m_transportHandlers.Add(handler);
             handler.StartMessageReception();            
         }

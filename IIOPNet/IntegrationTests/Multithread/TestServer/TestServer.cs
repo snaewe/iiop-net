@@ -27,6 +27,7 @@
 
 
 using System;
+using System.Collections;
 using System.Runtime.Remoting;
 using System.Runtime.Remoting.Channels;
 
@@ -37,8 +38,10 @@ namespace Ch.Elca.Iiop.IntegrationTests {
 
         public static void Main(String[] args) {
             // register the channel
-            int port = 8087;
-            IiopChannel chan = new IiopChannel(port);
+            IDictionary properties = new Hashtable();
+            properties[IiopServerChannel.PORT_KEY] = 8087;
+            properties[IiopServerChannel.SERVERTHREADS_MAX_PER_CONNECTION_KEY] = 20;            
+            IiopChannel chan = new IiopChannel(properties);
             ChannelServices.RegisterChannel(chan);
 
             TestService test1 = new TestService();

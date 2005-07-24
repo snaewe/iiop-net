@@ -553,8 +553,11 @@ namespace Ch.Elca.Iiop {
         internal GiopTransportMessageHandler(ITransport transport) : this(transport, MessageTimeout.Infinite) {            
         }
         
-        /// <summary>creates a giop transport message handler, which doesn't accept request messages</summary>
-        internal GiopTransportMessageHandler(ITransport transport, MessageTimeout timeout) {            
+        /// <summary>creates a giop transport message handler, which doesn't accept request messages. 
+        /// A receiver must be installed first.</summary>
+        /// <param name="transport">the transport implementation</param>
+        /// <param name="timeout">the client side timeout for a request</param>
+        internal GiopTransportMessageHandler(ITransport transport, MessageTimeout timeout) {
             Initalize(transport, timeout);
         }
         
@@ -924,12 +927,17 @@ namespace Ch.Elca.Iiop {
         /// <summary>
         /// allows to install a receiver when ready to process messages.
         /// </summary>        
-        /// <remarks>used for bidirectional communication.</remarks>
-        internal void InstallReceiver(IGiopRequestMessageReceiver receiver, GiopConnectionDesc receiverConDesc) {
+        /// <param name="serverThreadsMaxPerConnection">
+        /// the maximum number of server threads used for processing requests on a multiplexed client connection.
+        /// </param>
+        /// <remarks>used for standalone server side and used for bidirectional communication.</remarks>
+        internal void InstallReceiver(IGiopRequestMessageReceiver receiver, GiopConnectionDesc receiverConDesc,
+                                      int serverThreadsMaxPerConnection) {
             lock(this) {
                 if (m_reiceivedRequestDispatcher == null) {
                     m_reiceivedRequestDispatcher = 
-                        new GiopReceivedRequestMessageDispatcher(receiver, this, receiverConDesc);
+                        new GiopReceivedRequestMessageDispatcher(receiver, this, receiverConDesc,
+                                                                 serverThreadsMaxPerConnection);
                 }
             }
         }
@@ -1031,8 +1039,11 @@ namespace Ch.Elca.Iiop {
         #region IConstructors
         
         /// <summary>creates a giop transport message handler, which accept request messages by delegating to receiver</summary>
+        /// <param name="serverThreadsMaxPerConnection">
+        /// the maximum number of server threads used for processing requests on a multiplexed client connection.
+        /// </param>        
         internal GiopReceivedRequestMessageDispatcher(IGiopRequestMessageReceiver receiver, GiopTransportMessageHandler msgHandler,
-                                                      GiopConnectionDesc conDesc) {
+                                                      GiopConnectionDesc conDesc, int serverThreadsMaxPerConnection) {
             m_serverCon = new GiopServerConnection(conDesc, this);
             if (receiver != null) {
                 m_receiver = receiver;
@@ -1040,6 +1051,10 @@ namespace Ch.Elca.Iiop {
                 throw new BAD_PARAM(400, CompletionStatus.Completed_MayBe);
             }
             m_msgHandler = msgHandler;
+            if (serverThreadsMaxPerConnection < 1) {
+                throw new BAD_PARAM(401, CompletionStatus.Completed_MayBe);
+            }
+            m_maxRequestsAllowedInParallel = serverThreadsMaxPerConnection;
         }        
                 
         #endregion IConstructors

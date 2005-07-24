@@ -362,6 +362,7 @@ namespace Ch.Elca.Iiop {
         private object[] m_ownListenPoints = new object[0];
         
         private IGiopRequestMessageReceiver m_receptionHandler = null;
+        private int m_serverThreadsMaxPerConnection;
 
         #endregion IFields
         #region IConstructors
@@ -475,8 +476,10 @@ namespace Ch.Elca.Iiop {
         /// <summary>the server channel entry point, which should be invoked, if a request is
         /// received on a bidir connection on the client side.</summary>
         /// <remarks>for use case (2)</remarks>
-        internal void RegisterMessageReceptionHandler(IGiopRequestMessageReceiver receptionHandler) {
+        internal void RegisterMessageReceptionHandler(IGiopRequestMessageReceiver receptionHandler,
+                                                      int serverThreadsMaxPerConnection) {
             m_receptionHandler = receptionHandler;
+            m_serverThreadsMaxPerConnection = serverThreadsMaxPerConnection;
         }
         
         /// <summary>configures a client initiated connection to receive callbacks.</summary>
@@ -486,7 +489,8 @@ namespace Ch.Elca.Iiop {
                 if (conDesc.Connection is GiopClientInitiatedConnection) {
                     GiopTransportMessageHandler handler = 
                         conDesc.Connection.TransportHandler;
-                    handler.InstallReceiver(m_receptionHandler, conDesc); // set, if not yet set.
+                    handler.InstallReceiver(m_receptionHandler, conDesc, 
+                                            m_serverThreadsMaxPerConnection); // set, if not yet set.
                 } else {
                     throw new INTERNAL(545, CompletionStatus.Completed_MayBe);
                 }                

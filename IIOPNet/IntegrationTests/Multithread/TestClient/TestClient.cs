@@ -52,9 +52,6 @@ namespace Ch.Elca.Iiop.IntegrationTests {
     [TestFixture]
     public class TestClient {
 
-        private const int NR_OF_THREADS = 25;
-        private const int NR_OF_CALLS = 75;        
-
         #region IFields
 
         private IiopClientChannel m_channel;
@@ -86,12 +83,12 @@ namespace Ch.Elca.Iiop.IntegrationTests {
             ChannelServices.UnregisterChannel(m_channel);
         }
         
-        private void RunMultithreaded(PerformCallDelegate remoteMethodCaller) {
+        private void RunMultithreaded(PerformCallDelegate remoteMethodCaller, int nrOfCalls, int nrOfThreads) {
             ArrayList methodRunners = new ArrayList();
             ArrayList threads = new ArrayList();
-            for (int i = 0; i < NR_OF_THREADS; i++) {
+            for (int i = 0; i < nrOfThreads; i++) {
                 TimeSpan delay = TimeSpan.FromMilliseconds(m_random.Next(100));
-                RepeatedMethodCaller rmc1 = new RepeatedMethodCaller(NR_OF_CALLS,
+                RepeatedMethodCaller rmc1 = new RepeatedMethodCaller(nrOfCalls,
                                                                      delay, remoteMethodCaller,
                                                                      m_testService1);
                 methodRunners.Add(rmc1);
@@ -100,7 +97,7 @@ namespace Ch.Elca.Iiop.IntegrationTests {
                 sv1.Start();
                 
                 delay = TimeSpan.FromMilliseconds(m_random.Next(50));
-                RepeatedMethodCaller rmc2 = new RepeatedMethodCaller(NR_OF_CALLS,
+                RepeatedMethodCaller rmc2 = new RepeatedMethodCaller(nrOfCalls,
                                                                      delay, remoteMethodCaller,
                                                                      m_testService2);
                 methodRunners.Add(rmc2);
@@ -129,6 +126,11 @@ namespace Ch.Elca.Iiop.IntegrationTests {
                                               exceptionMsg.ToString());
             }
 
+        }
+
+        private void RunMultithreaded(PerformCallDelegate remoteMethodCaller) {
+            RunMultithreaded(remoteMethodCaller, 150, 35); // on the server side max 20 threads for multiplexed con.
+            RunMultithreaded(remoteMethodCaller, 250, 4); // on the server side max 20 threads for multiplexed con.
         }
 
         [Test]
@@ -242,7 +244,8 @@ namespace Ch.Elca.Iiop.IntegrationTests {
 
         [Test]
         public void TestLongBlockingCalls() {
-            RunMultithreaded(new PerformCallDelegate(this.CallLongBlocking));
+            // on the server side max 20 threads for multiplexed con.
+            RunMultithreaded(new PerformCallDelegate(this.CallLongBlocking), 40, 35); 
         }
         
         private void CallStructParamsMethod(TestService serviceToUse) {
