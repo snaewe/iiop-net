@@ -70,8 +70,12 @@ namespace Ch.Elca.Iiop {
         
 		void EndWrite(IAsyncResult asyncResult);
 		
+		int Read(byte[] buffer, int offset, int size);
+		
+		void Write(byte[] buffer, int offset, int size);
+		
 		/// <summary>returns the ip address of the client</summary>
-        IPAddress GetPeerAddress();
+        IPAddress GetPeerAddress();                
         
         #endregion IMethods
         

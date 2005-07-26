@@ -188,15 +188,7 @@ namespace Ch.Elca.Iiop {
                     throw new omg.org.CORBA.INTERNAL(88, CompletionStatus.Completed_MayBe);
                 }
                 bytesAlreadySent += bytesToSendInProgress;
-                IAsyncResult res =
-                    m_onTransport.BeginWrite(m_buffer, 0, bytesToSendInProgress, null, null);
-                using (WaitHandle waitForSent = res.AsyncWaitHandle) {
-                    bool waitOk = m_messageHandler.WaitForEvent(waitForSent);
-                    if (!waitOk) {
-                        throw new omg.org.CORBA.TIMEOUT(37, CompletionStatus.Completed_MayBe);
-                    }
-                    m_onTransport.EndWrite(res);
-                } // dispose the handle when no longer needed               
+                m_onTransport.Write(m_buffer, 0, bytesToSendInProgress);
             }
             // write complete
         }                
@@ -1014,6 +1006,12 @@ namespace Ch.Elca.Iiop {
     /// </summary>
     public class GiopReceivedRequestMessageDispatcher {
         
+        #region Constants
+        
+        private const int NO_RECEIVE_PENDING = 0;
+        private const int RECEIVE_PENDING = 1;
+        
+        #endregion Constants
         #region IFields
         
         private IGiopRequestMessageReceiver m_receiver;
@@ -1022,8 +1020,8 @@ namespace Ch.Elca.Iiop {
         private GiopTransportMessageHandler m_msgHandler;
         
         private MessageReceiveTask m_msgReceiveTask;
-        private bool m_receivePending = false;
         
+        private int m_receivePending = NO_RECEIVE_PENDING; // to be usable with interlocked no bool, but int
         private int m_requestsInProgress;
         /// <summary>
         /// how many requests are allowed in parallel.
@@ -1055,9 +1053,8 @@ namespace Ch.Elca.Iiop {
         #endregion IConstructors
         #region IMethods
         
-        private void StartReadNextMessage() {
+        private void StartReadNextMessage() {            
             // read next message
-            m_receivePending = false;
             m_msgReceiveTask.StartReceiveMessage();
             // don't perform anything after StartReceiveMessage, because a received message may
             // already be in ProcessRequestMessage now
@@ -1070,12 +1067,10 @@ namespace Ch.Elca.Iiop {
         /// the request deserialisation must be done serialised; 
         /// the servant dispatch can be done in parallel.</remarks>         
         internal void NotifyDeserialiseRequestComplete() {
-            lock(this) {
-                if (m_requestsInProgress <= m_maxRequestsAllowedInParallel) {
-                    StartReadNextMessage();
-                } else {
-                    m_receivePending = true;
-                }
+            if (m_requestsInProgress < m_maxRequestsAllowedInParallel) {
+                StartReadNextMessage();
+            } else {
+                Interlocked.Exchange(ref m_receivePending, RECEIVE_PENDING);
             }
         }
         
@@ -1088,20 +1083,25 @@ namespace Ch.Elca.Iiop {
             }
         }
         
-        internal void ProcessRequestMessage(Stream requestStream, MessageReceiveTask receiveTask) {            
+        internal void ProcessRequestMessage(Stream requestStream, MessageReceiveTask receiveTask) {
+            // invariant: only one thread processing the first 3 statments at one instance in time 
+            // (statement nr 3 can lead to a next read allowing another i/o completion thread
+            // to call this method)
             try {
                 // call is serialised, no need for a lock; at most one thread is reading messages from transport.
-                m_requestsInProgress++;
+                Interlocked.Increment(ref m_requestsInProgress);
                 m_msgReceiveTask = receiveTask;
                 m_receiver.ProcessRequest(requestStream, m_serverCon);
-                lock(this) {
-                    // get lock: in the mean time, deserialise request notification may have been sent.
-                    // -> multiple requests are possible in progress
-                    m_requestsInProgress--;
-                    if (m_receivePending) {
-                        // too many requests in parallel last time when trying to start receive -> do it now                    
-                        StartReadNextMessage();
-                    }
+                // in the mean time, deserialise request notification may have been sent.
+                // -> multiple requests are possible in progress and execute the following code
+                int receivePending = Interlocked.Exchange(ref m_receivePending, NO_RECEIVE_PENDING);
+                Interlocked.Decrement(ref m_requestsInProgress);                
+                // ReceivePending will be again set to true, when a request has been deserialised 
+                // and too many requests are processing
+                if (receivePending == RECEIVE_PENDING) {
+                    // too many requests in parallel last time when trying to start receive 
+                    // in NotifyDeserialiseRequestComplete -> do it now
+                    StartReadNextMessage();
                 }
             } catch (Exception ex) {
                 HandleUnexpectedProcessingException();

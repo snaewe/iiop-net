@@ -105,6 +105,14 @@ namespace Ch.Elca.Iiop.Security.Ssl {
             m_stream.EndWrite(asyncResult);
         }
         
+        public int Read(byte[] buffer, int offset, int size) {
+            return m_stream.Read(buffer, offset, size);
+        }        
+        
+        public void Write(byte[] buffer, int offset, int size) {
+            m_stream.Write(buffer, offset, size);
+        }        
+        
         /// <summary><see cref="Ch.Elca.Iiop.ITransport.GetPeerAddress"/></summary>
         public IPAddress GetPeerAddress() {
             SecureSocket secureSocket = (SecureSocket)s_secureTcpClientClientPropertyInfo.GetValue(m_socket, null);
