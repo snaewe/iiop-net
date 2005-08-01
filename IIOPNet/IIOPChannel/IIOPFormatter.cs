@@ -176,8 +176,7 @@ namespace Ch.Elca.Iiop {
                                                            (IMethodCallMessage) requestMsg,
                                                            conDesc, m_interceptionOptions);
             } finally {
-                responseStream.Close(); // stream not needed any more
-                m_conManager.ReleaseConnectionFor(requestMsg); // release the connection, because this interaction is complete            
+                responseStream.Close(); // stream not needed any more                
             }            
             return result;
         }
@@ -267,21 +266,25 @@ namespace Ch.Elca.Iiop {
             // serialise
             IMessage result;
             try {
-                ITransportHeaders requestHeaders;
-                Stream requestStream;
-                SerialiseRequest(msg, selectedProfile, conDesc, reqId,
-                                 out requestHeaders, out requestStream);
+                try {
+                    ITransportHeaders requestHeaders;
+                    Stream requestStream;
+                    SerialiseRequest(msg, selectedProfile, conDesc, reqId,
+                                     out requestHeaders, out requestStream);
 
-                // pass the serialised GIOP-request to the first stream handling sink
-                // when the call returns, the response message has been received
-                ITransportHeaders responseHeaders;                                
-                Stream responseStream;
-                m_nextSink.ProcessMessage(msg, requestHeaders, requestStream, 
-                                          out responseHeaders, out responseStream);
+                    // pass the serialised GIOP-request to the first stream handling sink
+                    // when the call returns, the response message has been received
+                    ITransportHeaders responseHeaders;                                
+                    Stream responseStream;
+                    m_nextSink.ProcessMessage(msg, requestHeaders, requestStream, 
+                                              out responseHeaders, out responseStream);
 
-                // now deserialise the response
-                result = DeserialiseResponse(responseStream, 
-                                             responseHeaders, msg, conDesc);
+                    // now deserialise the response
+                    result = DeserialiseResponse(responseStream, 
+                                                 responseHeaders, msg, conDesc);
+                } finally {
+                    m_conManager.RequestOnConnectionCompleted(msg); // release the connection, because this interaction is complete
+                }
             } catch (Exception e) {
                 result = new ReturnMessage(e, (IMethodCallMessage) msg);
             }
@@ -297,23 +300,25 @@ namespace Ch.Elca.Iiop {
             GiopClientConnectionDesc conDesc = AllocateConnection(msg, target, out selectedProfile, out reqId);
             
             try {
-                SimpleGiopMsg.SetMessageAsyncRequest(msg); // mark message as async, needed for portable interceptors
-                ITransportHeaders requestHeaders;
-                Stream requestStream;
-                SerialiseRequest(msg, selectedProfile, conDesc, reqId,
-                                 out requestHeaders, out requestStream);
-                // pass the serialised GIOP-request to the first stream handling sink
-                // this sink is the last sink in the message handling sink chain, therefore the reply sink chain of all the previous message handling
-                // sink is passed to the ClientChannelSinkStack, which will inform this chain of the received reply
-                ClientChannelSinkStack clientSinkStack = new ClientChannelSinkStack(replySink);
-                AsyncProcessingData asyncData = new AsyncProcessingData(msg, conDesc);
-                clientSinkStack.Push(this, asyncData); // push the formatter onto the sink stack, to get the chance to handle the incoming reply stream
-                // forward the message to the next sink
-                m_nextSink.AsyncProcessRequest(clientSinkStack, msg, requestHeaders, requestStream);
-
-                // for oneway messages, release the connections for future use
-                if ((msg is IMethodCallMessage) && GiopMessageHandler.IsOneWayCall((IMethodCallMessage)msg)) {
-                    m_conManager.ReleaseConnectionFor(msg); // release the connection, because this interaction is complete
+                try {
+                    SimpleGiopMsg.SetMessageAsyncRequest(msg); // mark message as async, needed for portable interceptors
+                    ITransportHeaders requestHeaders;
+                    Stream requestStream;
+                    SerialiseRequest(msg, selectedProfile, conDesc, reqId,
+                                     out requestHeaders, out requestStream);
+                    // pass the serialised GIOP-request to the first stream handling sink
+                    // this sink is the last sink in the message handling sink chain, therefore the reply sink chain of all the previous message handling
+                    // sink is passed to the ClientChannelSinkStack, which will inform this chain of the received reply
+                    ClientChannelSinkStack clientSinkStack = new ClientChannelSinkStack(replySink);
+                    AsyncProcessingData asyncData = new AsyncProcessingData(msg, conDesc);
+                    clientSinkStack.Push(this, asyncData); // push the formatter onto the sink stack, to get the chance to handle the incoming reply stream
+                    // forward the message to the next sink
+                    m_nextSink.AsyncProcessRequest(clientSinkStack, msg, requestHeaders, requestStream);
+                } finally {
+                    // for oneway messages, release the connections for future use
+                    if ((msg is IMethodCallMessage) && GiopMessageHandler.IsOneWayCall((IMethodCallMessage)msg)) {
+                        m_conManager.RequestOnConnectionCompleted(msg); // release the connection, because this interaction is complete
+                    }
                 }
             } catch (Exception e) {
                 // formulate an exception reply for an non-oneway call

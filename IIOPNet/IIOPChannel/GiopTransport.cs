@@ -731,7 +731,8 @@ namespace Ch.Elca.Iiop {
         /// has arravied or a timeout has occured.
         /// </summary>
         /// <returns>the response stream</returns>
-        internal Stream SendRequestSynchronous(Stream requestStream, uint requestId) {            
+        internal Stream SendRequestSynchronous(Stream requestStream, uint requestId,
+                                               GiopClientConnection connection) {
             // interested in a response -> register to receive response.
             // this must be done before sending the message, because otherwise,
             // it would be possible, that a response arrives before being registered
@@ -746,6 +747,7 @@ namespace Ch.Elca.Iiop {
                 }
             }            
             SendMessage(requestStream);
+            connection.NotifyRequestSentCompleted();
             // wait for completion or timeout                
             bool received = waiter.StartWaiting();
             waiter.Completed();
@@ -765,9 +767,11 @@ namespace Ch.Elca.Iiop {
             }            
         }
         
-        internal void SendRequestMessageOneWay(Stream requestStream, uint requestId) {
+        internal void SendRequestMessageOneWay(Stream requestStream, uint requestId,
+                                               GiopClientConnection connection) {
             SendMessage(requestStream);
             // no answer expected.
+            connection.NotifyRequestSentCompleted();
         }
         
         internal void SendRequestMessageAsync(Stream requestStream, uint requestId,
@@ -789,6 +793,7 @@ namespace Ch.Elca.Iiop {
                 }
             }            
             SendMessage(requestStream);
+            connection.NotifyRequestSentCompleted();
             // wait for completion or timeout
             waiter.StartWaiting(); // notify the waiter, that the time for the request starts; is non-blocking
         }

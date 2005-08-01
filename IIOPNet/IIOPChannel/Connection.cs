@@ -308,6 +308,13 @@ namespace Ch.Elca.Iiop {
         /// </summary>
         internal abstract bool IsInitiatedLocal();
         
+        /// <summary>
+        /// Notifies the connection, that a request has been completelty sent on the connection.
+        /// </summary>
+        internal void NotifyRequestSentCompleted() {            
+            m_assocDesc.ConnectionManager.RequestOnConnectionSent(this);
+        }
+        
         #endregion IMethods
 
     

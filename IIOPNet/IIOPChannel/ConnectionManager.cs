@@ -274,20 +274,39 @@ namespace Ch.Elca.Iiop {
             return result.Connection.Desc;
         }
         
-        internal void ReleaseConnectionFor(IMessage msg) {
+        /// <summary>
+        /// Notifies the connection manager, that a request has been completely sent on the connection.
+        /// For non oneway messages, a reply is required before RequestOnConnectionCompleted is called. 
+        /// </summary>        
+        /// <remarks>if multiplexing is allowed, the connection can now be reused for a next request. This
+        /// guarantuees, that the session based services like codeset work correctly.</remarks>
+        internal void RequestOnConnectionSent(GiopClientConnection con) {
+            // TODO
+        }
+        
+        /// <summary>
+        /// Notifies the connection manager, that the connection is no longer needed by the request, because
+        /// the reply has been successfully received.
+        /// </summary>
+        /// <remarks>if multiplexing is not allowed, the connection can now be reused for a next request.</remarks>
+        internal void RequestOnConnectionCompleted(IMessage msg) {
             lock(this) {
-                ConnectionDescription connection = 
-                    (ConnectionDescription)m_allocatedConnections[msg];
-
-                if (connection == null) {
-                    throw new INTERNAL(11111, 
-                                       CompletionStatus.Completed_MayBe);
-                }
-                connection.UpdateLastUsedTime();
-                connection.IsInUse = false;
-                // remove from allocated connections
-                m_allocatedConnections.Remove(msg);
+                ReleaseConnectionFor(msg);
             }
+        }
+        
+        private void ReleaseConnectionFor(IMessage msg) {
+            ConnectionDescription connection = 
+                (ConnectionDescription)m_allocatedConnections[msg];
+
+            if (connection == null) {
+                throw new INTERNAL(11111, 
+                                   CompletionStatus.Completed_MayBe);
+            }
+            connection.UpdateLastUsedTime();
+            connection.IsInUse = false;
+            // remove from allocated connections
+            m_allocatedConnections.Remove(msg);            
         }
         
         /// <summary>get the reserved connection for the message forMessage</summary>

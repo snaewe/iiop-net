@@ -116,7 +116,7 @@ namespace Ch.Elca.Iiop {
                                                 new AsyncResponseAvailableCallBack(this.AsyncResponseArrived),
                                                 sinkStack, clientCon);
             } else {
-                handler.SendRequestMessageOneWay(requestStream, reqNr);
+                handler.SendRequestMessageOneWay(requestStream, reqNr, clientCon);
             }                        
         }
 
@@ -129,7 +129,7 @@ namespace Ch.Elca.Iiop {
             responseHeaders = new TransportHeaders();
             responseHeaders[GiopClientConnectionDesc.CLIENT_TR_HEADER_KEY]= clientCon.Desc; // add to response headers            
             uint reqNr = (uint)msg.Properties[SimpleGiopMsg.REQUEST_ID_KEY];
-            responseStream = handler.SendRequestSynchronous(requestStream, reqNr);
+            responseStream = handler.SendRequestSynchronous(requestStream, reqNr, clientCon);
             responseStream.Seek(0, SeekOrigin.Begin); // assure stream is read from beginning in formatter
             // the previous sink in the chain does further process this response ...
         }
