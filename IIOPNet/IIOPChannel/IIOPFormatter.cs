@@ -354,9 +354,14 @@ namespace Ch.Elca.Iiop {
             AsyncProcessingData asyncData = (AsyncProcessingData) state; // retrieve the request msg stored on the channelSinkStack
             IMessage requestMsg = asyncData.RequestMsg; 
             GiopClientConnectionDesc conDesc = (GiopClientConnectionDesc)asyncData.ConDesc;
-            try {
-                IMessage responseMsg = DeserialiseResponse(stream, headers,
-                                                           requestMsg, conDesc);
+            try {                
+                IMessage responseMsg;
+                try {
+                    responseMsg = DeserialiseResponse(stream, headers,
+                                                      requestMsg, conDesc);
+                } finally {
+                    conDesc.ConnectionManager.RequestOnConnectionCompleted(requestMsg); // release the connection, because this interaction is complete
+                }
                 sinkStack.DispatchReplyMessage(responseMsg); // dispatch the result message to the message handling reply sink chain
             } catch (Exception e) {
                 sinkStack.DispatchException(e); // dispatch the exception to the message handling reply sink chain        
