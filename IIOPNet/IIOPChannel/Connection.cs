@@ -248,6 +248,10 @@ namespace Ch.Elca.Iiop {
                 
         protected GiopTransportMessageHandler m_transportHandler;
         
+        private DateTime m_lastUsed = DateTime.Now;
+        
+        private int m_numberOfRequestsOnCon;
+        
         #endregion IFields
         #region IConstructors
         
@@ -277,7 +281,13 @@ namespace Ch.Elca.Iiop {
                 return m_transportHandler;
             }
         }
-
+        
+        internal int NumberOfRequestsOnConnection {
+            get {
+                return m_numberOfRequestsOnCon;
+            }
+        }
+        
         #endregion IProperties
         #region IMethods
 
@@ -315,6 +325,47 @@ namespace Ch.Elca.Iiop {
             m_assocDesc.ConnectionManager.RequestOnConnectionSent(this);
         }
         
+        /// <summary>
+        /// returns ture, if the connection is not use for at least the specified time; otherwise false.
+        /// </summary>
+        internal bool IsNotUsedForAtLeast(TimeSpan idleTime) {
+            return (m_lastUsed + idleTime < DateTime.Now);
+        }
+            
+        /// <summary>
+        /// if a connection is currently not in use and has not been used for a long time, the
+        /// connection can be closed.
+        /// </summary>
+        internal bool CanBeClosedAsIdle(TimeSpan idleTime) {
+            return (IsNotUsedForAtLeast(idleTime) && (!HasPendingRequests()) && CanCloseConnection());
+        }
+            
+        /// <summary>
+        /// updates the time, this connection has been used last.
+        /// </summary>
+        internal void UpdateLastUsedTime() {
+            m_lastUsed = DateTime.Now;
+        }
+        
+        internal void IncrementNumberOfRequests() {
+            m_numberOfRequestsOnCon++;
+        }
+        
+        internal void DecrementNumberOfRequests() {
+            m_numberOfRequestsOnCon--;
+        }
+        
+        internal bool HasPendingRequests() {
+            return NumberOfRequestsOnConnection > 0;
+        }   
+        
+        /// <summary>
+        /// returns true, if the connection is usable for a next request.
+        /// </summary>
+        internal virtual bool CanBeUsedForNextRequest() {
+            return (CheckConnected() && (Desc.ReqNumberGen.IsAbleToGenerateNext()));
+        }
+                        
         #endregion IMethods
 
     
@@ -326,10 +377,15 @@ namespace Ch.Elca.Iiop {
     /// </summary>
     internal class GiopClientInitiatedConnection : GiopClientConnection {
         
+        #region IFields
+        
+        private IClientTransport m_clientTransport;
+        
+        #endregion IFields
         #region IConstructors
 
         /// <param name="connectionKey">the key describing the connection</param>
-        /// <param name="transport">an already connected client transport</param>
+        /// <param name="transport">a not yet connected client transport</param>
         internal GiopClientInitiatedConnection(string connectionKey, IClientTransport transport,
                                                MessageTimeout requestTimeOut, GiopClientConnectionManager conManager,
                                                bool supportBidir) {            
@@ -338,8 +394,8 @@ namespace Ch.Elca.Iiop {
             GiopTransportMessageHandler handler =
                       new GiopTransportMessageHandler(transport, requestTimeOut);
             GiopClientConnectionDesc conDesc = new GiopClientConnectionDesc(conManager, this, reqNumberGen, handler);
-            Initalize(connectionKey, handler, conDesc);
-            handler.StartMessageReception(); // begin listening for messages
+            m_clientTransport = transport;
+            Initalize(connectionKey, handler, conDesc);            
         }                
         
         #endregion IConstructors
@@ -353,6 +409,14 @@ namespace Ch.Elca.Iiop {
             }            
         }        
         
+        /// <summary>
+        /// opens the connection and begins listening for messages.
+        /// </summary>
+        internal void OpenConnection() {
+            m_clientTransport.OpenConnection();
+            this.TransportHandler.StartMessageReception(); // begin listening for messages
+        }
+        
         internal override bool CanCloseConnection() {
             return true;
         }
@@ -360,8 +424,7 @@ namespace Ch.Elca.Iiop {
         internal override bool IsInitiatedLocal() {
             return true;
         }
-        
-        
+                
         #endregion IMethods
         
     }
@@ -373,6 +436,11 @@ namespace Ch.Elca.Iiop {
     /// </summary>    
     internal class GiopBidirInitiatedConnection : GiopClientConnection {
         
+        #region IFields
+        
+        private bool m_canNoLongerBeUsed;
+        
+        #endregion IFields       
         #region IConstructors
 
         /// <param name="connectionKey">the key describing the connection</param>        
@@ -398,6 +466,14 @@ namespace Ch.Elca.Iiop {
         
         internal override bool IsInitiatedLocal() {
             return false;
+        }        
+        
+        internal override bool CanBeUsedForNextRequest() {
+            return (!m_canNoLongerBeUsed) && base.CanBeUsedForNextRequest();
+        }
+        
+        internal void SetConnectionUnusable() {
+            m_canNoLongerBeUsed = true;
         }        
         
         #endregion IMethods

@@ -156,7 +156,16 @@ namespace Ch.Elca.Iiop {
                             break;
                         case IiopClientChannel.CLIENT_UNUSED_CONNECTION_KEEPALIVE_KEY:   
                             clientProp[IiopClientChannel.CLIENT_UNUSED_CONNECTION_KEEPALIVE_KEY] = Convert.ToInt32(entry.Value);
-                            break;                        
+                            break;           
+                        case IiopClientChannel.CLIENT_CONNECTION_LIMIT_KEY:
+                            clientProp[IiopClientChannel.CLIENT_CONNECTION_LIMIT_KEY] = Convert.ToInt32(entry.Value);
+                            break;
+                        case IiopClientChannel.ALLOW_REQUEST_MULTIPLEX_KEY:
+                            clientProp[IiopClientChannel.ALLOW_REQUEST_MULTIPLEX_KEY] = Convert.ToBoolean(entry.Value);
+                            break;
+                        case IiopClientChannel.MAX_NUMBER_OF_MULTIPLEXED_REQUESTS_KEY:                            
+                            clientProp[IiopClientChannel.MAX_NUMBER_OF_MULTIPLEXED_REQUESTS_KEY] = Convert.ToInt32(entry.Value);
+                            break;
                         case TRANSPORT_FACTORY_KEY:
                             serverProp[TRANSPORT_FACTORY_KEY] =
                                 entry.Value;
@@ -281,6 +290,22 @@ namespace Ch.Elca.Iiop {
         /// the giop request timeout in milliseconds; default is infinite
         /// </summary>
         public const string CLIENT_REQUEST_TIMEOUT_KEY = "clientRequestTimeOut";
+        
+        /// <summary>
+        /// the number of connections concurrently open to the same target.
+        /// </summary>
+        public const string CLIENT_CONNECTION_LIMIT_KEY = "clientConnectionLimit";
+        
+        /// <summary>
+        /// allows to multiplex requests on the same connection, i.e. allows to send a request before
+        /// the response of a previous request has been received.
+        /// </summary>
+        public const string ALLOW_REQUEST_MULTIPLEX_KEY = "allowRequestMultiplex";
+        
+        /// <summary>
+        /// the number of requests maximally active concurrently on a multiplexed connection.
+        /// </summary>
+        public const string MAX_NUMBER_OF_MULTIPLEXED_REQUESTS_KEY = "maxNumberOfMultiplexedRequests";
 
         /// <summary>
         /// the time in milliseconds a unused connection is kept alive on client side; default is 300000ms
@@ -288,6 +313,15 @@ namespace Ch.Elca.Iiop {
         public const string CLIENT_UNUSED_CONNECTION_KEEPALIVE_KEY = "unusedConnectionKeepAlive";   
         
         private const int UNUSED_CLIENT_CONNECTION_TIMEOUT = 300000;
+        
+        /// <summary>allow multiplexing of request, i.e. send a request before the response has been arrived.</summary>
+        private const bool ALLOW_MULTIPLEX_REQUEST = true;
+        
+        /// <summary>the maximum number of multiplexed requests on the same connection</summary>
+        private const int NUMBER_OF_MULTIPLEXED_MAX = 1000;
+        
+        /// <summary>the maximum number of connections open to the same target.</summary>
+        private const int NUMBER_OF_CLIENT_CONNECTION_TO_SAME_TARGET = 5;
                 
         
         #endregion Constants
@@ -321,7 +355,8 @@ namespace Ch.Elca.Iiop {
         
         public IiopClientChannel() {
             InitChannel(new TcpTransportFactory(), MessageTimeout.Infinite, UNUSED_CLIENT_CONNECTION_TIMEOUT, false,
-                        InterceptorManager.EmptyInterceptorOptions);
+                        InterceptorManager.EmptyInterceptorOptions, NUMBER_OF_CLIENT_CONNECTION_TO_SAME_TARGET, 
+                        ALLOW_MULTIPLEX_REQUEST, NUMBER_OF_MULTIPLEXED_MAX);
         }
         
         public IiopClientChannel(IDictionary properties) : 
@@ -343,6 +378,9 @@ namespace Ch.Elca.Iiop {
             int unusedClientConnectionTimeout = UNUSED_CLIENT_CONNECTION_TIMEOUT;
             bool isBidir = false;
             ArrayList interceptionOptions = new ArrayList();
+            int maxNumberOfConnections = NUMBER_OF_CLIENT_CONNECTION_TO_SAME_TARGET;
+            bool allowMultiplex = ALLOW_MULTIPLEX_REQUEST;
+            int maxNumberOfMultplexedRequests = NUMBER_OF_MULTIPLEXED_MAX;
             
             if (properties != null) {
                 foreach (DictionaryEntry entry in properties) {
@@ -371,10 +409,19 @@ namespace Ch.Elca.Iiop {
                         case IiopClientChannel.CLIENT_UNUSED_CONNECTION_KEEPALIVE_KEY:
                             unusedClientConnectionTimeout = Convert.ToInt32(entry.Value);
                             break;
+                        case IiopClientChannel.CLIENT_CONNECTION_LIMIT_KEY:
+                            maxNumberOfConnections = Convert.ToInt32(entry.Value);
+                            break;
+                        case IiopClientChannel.ALLOW_REQUEST_MULTIPLEX_KEY:
+                            allowMultiplex = Convert.ToBoolean(entry.Value);
+                            break;
+                        case IiopClientChannel.MAX_NUMBER_OF_MULTIPLEXED_REQUESTS_KEY:
+                            maxNumberOfMultplexedRequests = Convert.ToInt32(entry.Value);
+                            break;
                         case IiopChannel.BIDIR_KEY:
                             isBidir = Convert.ToBoolean(entry.Value);
                             interceptionOptions.Add(new BiDirIiopInterceptionOption());
-                            break;                            
+                            break;                             
                         default: 
                             Debug.WriteLine("non-default property found for IIOPClient channel: " + entry.Key);
                             nonDefaultOptions[entry.Key] = entry.Value;
@@ -388,7 +435,8 @@ namespace Ch.Elca.Iiop {
             clientTransportFactory.SetupClientOptions(nonDefaultOptions);
             InitChannel(clientTransportFactory, requestTimeOut, 
                         unusedClientConnectionTimeout, isBidir, 
-                        (IInterceptionOption[])interceptionOptions.ToArray(typeof(IInterceptionOption)));
+                        (IInterceptionOption[])interceptionOptions.ToArray(typeof(IInterceptionOption)),
+                        maxNumberOfConnections, allowMultiplex, maxNumberOfMultplexedRequests);
         }
 
         #endregion IConstructors
@@ -453,14 +501,17 @@ namespace Ch.Elca.Iiop {
         
         /// <summary>initalize this channel</summary>
         private void InitChannel(IClientTransportFactory transportFactory, MessageTimeout requestTimeOut,
-                                 int unusedClientConnectionTimeOut, bool isBidir, IInterceptionOption[] interceptionOptions) {
+                                 int unusedClientConnectionTimeOut, bool isBidir, IInterceptionOption[] interceptionOptions,
+                                 int maxNumberOfConnections, bool allowMultiplex, int maxNumberOfMultplexedRequests ) {
             
             if (!isBidir) {
                 m_conManager = new GiopClientConnectionManager(transportFactory, requestTimeOut,
-                                                               unusedClientConnectionTimeOut);
+                                                               unusedClientConnectionTimeOut, maxNumberOfConnections,
+                                                               allowMultiplex, maxNumberOfMultplexedRequests);
             } else {
                 m_conManager = new GiopBidirectionalConnectionManager(transportFactory, requestTimeOut,
-                                                                      unusedClientConnectionTimeOut);
+                                                                      unusedClientConnectionTimeOut, maxNumberOfConnections,
+                                                                      allowMultiplex, maxNumberOfMultplexedRequests);
             }
             IiopClientTransportSinkProvider transportProvider =
                 new IiopClientTransportSinkProvider(m_conManager);
