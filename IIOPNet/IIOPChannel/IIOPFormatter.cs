@@ -352,15 +352,15 @@ namespace Ch.Elca.Iiop {
                                          ITransportHeaders headers, Stream stream) {
             // client side formatter is the last sink in the chain accessing the serialised message, therefore this method is called on the return path
             AsyncProcessingData asyncData = (AsyncProcessingData) state; // retrieve the request msg stored on the channelSinkStack
-            IMessage requestMsg = asyncData.RequestMsg; 
-            GiopClientConnectionDesc conDesc = (GiopClientConnectionDesc)asyncData.ConDesc;
+            IMessage requestMsg = asyncData.RequestMsg;             
             try {                
                 IMessage responseMsg;
                 try {
+                    GiopClientConnectionDesc conDesc = (GiopClientConnectionDesc)asyncData.ConDesc;
                     responseMsg = DeserialiseResponse(stream, headers,
                                                       requestMsg, conDesc);
                 } finally {
-                    conDesc.ConnectionManager.RequestOnConnectionCompleted(requestMsg); // release the connection, because this interaction is complete
+                    m_conManager.RequestOnConnectionCompleted(requestMsg); // release the connection, because this interaction is complete
                 }
                 sinkStack.DispatchReplyMessage(responseMsg); // dispatch the result message to the message handling reply sink chain
             } catch (Exception e) {
