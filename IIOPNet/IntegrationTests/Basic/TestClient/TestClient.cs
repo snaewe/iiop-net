@@ -31,6 +31,7 @@ using System.Reflection;
 using System.Runtime.Remoting;
 using System.Runtime.Remoting.Channels;
 using System.Runtime.Remoting.Messaging;
+using System.Collections;
 using NUnit.Framework;
 using Ch.Elca.Iiop;
 using Ch.Elca.Iiop.Idl;
@@ -68,7 +69,9 @@ namespace Ch.Elca.Iiop.IntegrationTests {
         [SetUp]
         public void SetupEnvironment() {
             // register the channel
-            m_channel = new IiopClientChannel();
+            IDictionary properties = new Hashtable();
+            properties[IiopClientChannel.ALLOW_REQUEST_MULTIPLEX_KEY] = false;
+            m_channel = new IiopClientChannel(properties);
             ChannelServices.RegisterChannel(m_channel);
 
             // get the reference to the test-service
