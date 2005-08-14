@@ -11,6 +11,9 @@ build-client:
 	cd TestClient
 	$(MAKE) build	
 	cd ..
+	@cd TestClientMultiConnection
+	$(MAKE) build	
+	@cd ..
 
 start-server:
 	@cd TestServer
@@ -24,6 +27,9 @@ stop-server:
 
 start-client:
 	@cd TestClient
+	@$(MAKE) /C /I start-client
+	@cd ..
+	@cd TestClientMultiConnection
 	@$(MAKE) /C /I start-client
 	@cd ..
 
@@ -40,3 +46,7 @@ clean:
 	cd TestClient
 	$(MAKE) clean	
 	cd ..
+	cd TestClientMultiConnection
+	$(MAKE) clean	
+	cd ..
+

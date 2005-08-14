@@ -8,6 +8,7 @@ build-server:
 
 build-client:
 	$(MAKE) -C TestClient build -f Makefile.mono
+	$(MAKE) -C TestClientMultiConnection build -f Makefile.mono
 
 start-server:
 	@$(MAKE) -C TestServer start-server -f Makefile.mono
@@ -17,6 +18,7 @@ stop-server:
 
 start-client:
 	@$(MAKE) -C TestClient start-client -f Makefile.mono
+	@$(MAKE) -C TestClientMultiConnection start-client -f Makefile.mono
 
 test:
 	@$(MAKE) start-server -f Makefile.mono
@@ -27,3 +29,4 @@ test:
 clean:
 	$(MAKE) -C TestServer clean -f Makefile.mono
 	$(MAKE) -C TestClient clean -f Makefile.mono
+	$(MAKE) -C TestClientMultiConnection clean -f Makefile.mono
