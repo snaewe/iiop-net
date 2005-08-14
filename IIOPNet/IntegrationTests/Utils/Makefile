@@ -1,5 +1,5 @@
 
-Utils = launch.exe kill.exe delay.exe
+Utils = launch.exe kill.exe delay.exe currenttime.exe
 
 .SUFFIXES : .exe .cs
 
@@ -12,3 +12,4 @@ clean:
 	if exist kill.exe del kill.exe
 	if exist launch.exe del launch.exe
 	if exist delay.exe del delay.exe
+	if exist currenttime.exe del currenttime.exe

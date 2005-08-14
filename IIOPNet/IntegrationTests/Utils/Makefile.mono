@@ -1,5 +1,5 @@
 include ../../MakeVars.mono
-Utils = launch.exe kill.exe delay.exe
+Utils = launch.exe kill.exe delay.exe currenttime.exe
 
 .SUFFIXES : .exe .cs
 
@@ -12,3 +12,4 @@ clean:
 	rm -f kill.exe
 	rm -f launch.exe
 	rm -f delay.exe
+	rm -f currenttime.exe
