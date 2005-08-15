@@ -1,3 +1,5 @@
+PRCURRENTTIME = Utils\currenttime.exe
+
 
 build: nunit-var junit-var
     cd Utils
@@ -82,6 +84,8 @@ junit-var:
 
 
 test: nunit-var junit-var
+    @echo starting integration tests at: 
+    @$(PRCURRENTTIME)
     cd Basic
     $(MAKE) test
     cd ..

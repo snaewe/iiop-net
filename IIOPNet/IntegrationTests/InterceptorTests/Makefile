@@ -1,3 +1,4 @@
+PRCURRENTTIME = ..\Utils\currenttime.exe
 
 build: nunit-var
     cd InvocationScenarios
@@ -16,6 +17,8 @@ nunit-var:
     @if not defined NUNITV2_HOME exit 2
 
 test: nunit-var
+    @echo Interceptor integration tests starting at:
+    @$(PRCURRENTTIME)    
     cd InvocationScenarios
     $(MAKE) test
     cd ..

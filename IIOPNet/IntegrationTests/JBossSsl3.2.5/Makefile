@@ -1,4 +1,5 @@
 DELAY = ..\Utils\delay.exe
+PRCURRENTTIME = ..\Utils\currenttime.exe
 
 build-with-setup:
 	cd TestBeans
@@ -40,6 +41,8 @@ start-client:
         @cd ..
 
 test:
+        @echo Jboss SSL integration test starting at:
+        @$(PRCURRENTTIME)
         @$(MAKE) /C start-server
         @$(DELAY) 150
         @$(MAKE) /C start-client

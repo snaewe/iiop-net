@@ -1,4 +1,5 @@
 DELAY = ..\Utils\delay.exe
+PRCURRENTTIME = ..\Utils\currenttime.exe
 
 build: build-server build-client
 
@@ -28,6 +29,8 @@ start-client:
 	@cd ..
 
 test:
+	@echo Java RMI/IIOP integration test starting at:
+	@$(PRCURRENTTIME)
 	@$(MAKE) /C start-server
 	@$(DELAY) 10
 	@$(MAKE) /C start-client

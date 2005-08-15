@@ -1,3 +1,4 @@
+PRCURRENTTIME = ..\Utils\currenttime.exe
 
 build: nunit-var
     cd SingleThreaded
@@ -21,6 +22,8 @@ nunit-var:
     @if not defined NUNITV2_HOME exit 2
 
 test: nunit-var
+    @echo Bidirectional integration tests starting at:
+    @$(PRCURRENTTIME)
     cd SingleThreaded
     $(MAKE) test
     cd ..

@@ -1,4 +1,5 @@
 DELAY = ..\Utils\delay.exe
+PRCURRENTTIME = ..\Utils\currenttime.exe
 
 build:
 	cd TestBeans
@@ -23,6 +24,8 @@ start-client:
         @cd ..
 
 test:
+        @echo Websphere 5.1 integration test starting at:
+        @$(PRCURRENTTIME)
         @$(MAKE) /C start-server
         @$(DELAY) 5
         @$(MAKE) /C start-client
