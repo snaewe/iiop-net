@@ -1,3 +1,4 @@
+15.08.2005    iiop-net-1-8-0-rc1
 29.05.2005    iiop-net-1-8-0-rc0
 24.04.2005    iiop-net-1-7-1-final
 27.03.2005    iiop-net-1-7-1-rc2
