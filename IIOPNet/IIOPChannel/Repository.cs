@@ -394,29 +394,7 @@ namespace Ch.Elca.Iiop.Idl {
             }
             return foundType;
         }
-        
-        /// <summary>
-        /// loads the boxed value type for the BoxedValueAttribute
-        /// </summary>
-        public static Type GetBoxedValueType(BoxedValueAttribute attr) {
-            string repId = attr.RepositoryId; 
-            Debug.WriteLine("getting boxed value type: " + repId);
-            Type resultType = GetTypeForId(repId);
-            return resultType;
-        }
-
-        /// <summar>load or create a boxed value type for a .NET array, which is mapped to an IDL boxed value type through the CLS to IDL mapping</summary>
-        /// <remarks>this method is not called for IDL Boxed value types, mapped to a CLS array, for those the getBoxedValueType method is responsible</remarks>
-        public static Type GetBoxedArrayType(Type clsArrayType) {
-            BoxedValueRuntimeTypeGenerator gen = BoxedValueRuntimeTypeGenerator.GetSingleton();
-            // convert a .NET true moredim array type to an array of array of ... type
-            if (clsArrayType.GetArrayRank() > 1) {
-                clsArrayType = BoxedArrayHelper.CreateNestedOneDimType(clsArrayType);
-            }
-
-            return gen.GetOrCreateBoxedTypeForArray(clsArrayType);
-        }
-        
+                
         #endregion loading types 
         #region verifying types
         

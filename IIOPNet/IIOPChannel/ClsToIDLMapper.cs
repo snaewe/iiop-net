@@ -393,6 +393,27 @@ namespace Ch.Elca.Iiop.Idl {
             }
             return false;
         }
+        
+        /// <summary>
+        /// loads the boxed value type for the BoxedValueAttribute
+        /// </summary>
+        private static Type GetBoxedValueType(BoxedValueAttribute attr) {
+            string repId = attr.RepositoryId; 
+            Debug.WriteLine("getting boxed value type: " + repId);
+            Type resultType = Repository.GetTypeForId(repId);
+            return resultType;
+        }
+
+        /// <summar>load or create a boxed value type for a .NET array, which is mapped to an IDL boxed value type through the CLS to IDL mapping</summary>
+        /// <remarks>this method is not called for IDL Boxed value types, mapped to a CLS array, for those the getBoxedValueType method is responsible</remarks>
+        private static Type GetBoxedArrayType(Type clsArrayType) {
+            BoxedValueRuntimeTypeGenerator gen = BoxedValueRuntimeTypeGenerator.GetSingleton();
+            // convert a .NET true moredim array type to an array of array of ... type
+            if (clsArrayType.GetArrayRank() > 1) {
+                clsArrayType = BoxedArrayHelper.CreateNestedOneDimType(clsArrayType);
+            }
+            return gen.GetOrCreateBoxedTypeForArray(clsArrayType);
+        }               
 
         #endregion SMethods
         #region IMethods
@@ -427,7 +448,7 @@ namespace Ch.Elca.Iiop.Idl {
             attributes = originalAttributes.RemoveAttributeOfType(s_boxedValAttrType, out boxedValAttr);
             if (boxedValAttr != null) { 
                 // load the boxed value-type for this attribute
-                Type boxed = Repository.GetBoxedValueType((BoxedValueAttribute)boxedValAttr);
+                Type boxed = GetBoxedValueType((BoxedValueAttribute)boxedValAttr);
                 if (boxed == null) { 
                     Trace.WriteLine("boxed type not found for boxed value attribute"); 
                     throw new NO_IMPLEMENT(10001, CompletionStatus.Completed_MayBe);
@@ -624,7 +645,7 @@ namespace Ch.Elca.Iiop.Idl {
                 int[] dimensions = DetermineIdlArrayDimensions(clsType, arrayAttr, ref modifiedAttributes);
                 return action.MapToIdlArray(clsType, dimensions, allAttributes, modifiedAttributes);
             } else {
-                Type boxed = Repository.GetBoxedArrayType(clsType);
+                Type boxed = GetBoxedArrayType(clsType);
                 Type needsBoxingFrom = clsType;
                 clsType = boxed; // transform
                 return action.MapToIdlBoxedValueType(boxed, needsBoxingFrom);
