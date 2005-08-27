@@ -776,7 +776,7 @@ namespace omg.org.PortableInterceptor {
     /// <summary>
     /// Interface usable to register interceptors.
     /// </summary>
-    [RepositoryID("IDL:omg.org/PortableInterceptor/OrbInitalizer:1.0")]
+    [RepositoryID("IDL:omg.org/PortableInterceptor/ORBInitInfo:1.0")]
     [InterfaceType(IdlTypeInterface.LocalInterface)]        
     public interface ORBInitInfo {
         
