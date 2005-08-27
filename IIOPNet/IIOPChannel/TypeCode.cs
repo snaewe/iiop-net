@@ -83,7 +83,7 @@ namespace omg.org.CORBA {
     /// <summary>the typecode interface</summary>
     /// <remarks>mapped by hand from IDL</remarks>
     // Codeing Convention violated (identifiers), because this interface is mapped according the IDL <-> CLS mapping specification
-    [RepositoryIDAttribute("IDL:omg.org/CosNaming/NamingContextExt:1.0")]
+    [RepositoryIDAttribute("IDL:omg.org/CORBA/TypeCode:1.0")]
     [InterfaceTypeAttribute(IdlTypeInterface.ConcreteInterface)]
     public interface TypeCode : IIdlEntity {
         
