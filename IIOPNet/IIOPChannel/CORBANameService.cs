@@ -220,9 +220,10 @@ namespace omg.org.CosNaming {
     /// This is an implementation of the COSNamingContext. 
     /// </summary>
     /// <remarks>
-    /// here, it's required to use the Repository-id: "IDL:omg.org/CosNaming/NamingContext:1.0"
+    /// specify, that the NamingContext interface is implemented ->
+    /// the Repository-id: "IDL:omg.org/CosNaming/NamingContext:1.0" is used.
     /// </remarks>
-    [RepositoryIDAttribute("IDL:omg.org/CosNaming/NamingContext:1.0")]
+    [SupportedInterface(typeof(omg.org.CosNaming.NamingContext))]
     public class COSNamingContextImpl : MarshalByRefObject, NamingContext {
 
         #region IFields
@@ -373,9 +374,10 @@ namespace omg.org.CosNaming {
     /// This is an implementation of the COSNamingContext, living forever
     /// </summary>
     /// <remarks>
-    /// here, it's required to use the Repository-id: "IDL:omg.org/CosNaming/NamingContext:1.0"
+    /// specify, that the NamingContext interface is implemented ->
+    /// the Repository-id: "IDL:omg.org/CosNaming/NamingContext:1.0" is used.
     /// </remarks>
-    [RepositoryIDAttribute("IDL:omg.org/CosNaming/NamingContext:1.0")]
+    [SupportedInterface(typeof(omg.org.CosNaming.NamingContext))]
     public class InitialCOSNamingContextImpl : COSNamingContextImpl {
 
         #region Constants
