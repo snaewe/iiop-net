@@ -169,7 +169,7 @@ namespace Ch.Elca.Iiop.Idl {
             if ((implAttr != null) && (implAttr.Length > 0)) {
                 ImplClassAttribute implCl = (ImplClassAttribute) implAttr[0];
                 // get the type
-                Type implIdlType = Repository.LoadType(implCl.ImplClass);
+                Type implIdlType = Repository.GetValueTypeImplClass(implCl.ImplClass);
                 if (implIdlType != null) { // if impl type not found, (test needed e.g. when called from CLSToIDLGen)
                     CustomMappingDesc descImpl = new CustomMappingDesc(clsType, implIdlType, mapper);
                     m_mappingsIdl[implIdlType] = descImpl;

@@ -441,7 +441,7 @@ namespace Ch.Elca.Iiop.Marshalling {
                 if (attrs.IsInCollection(ReflectionHelper.ImplClassAttributeType)) {
                     ImplClassAttribute implAttr = (ImplClassAttribute)
                                                   attrs.GetAttributeForType(ReflectionHelper.ImplClassAttributeType);
-                    Type implClass = Repository.LoadType(implAttr.ImplClass);
+                    Type implClass = Repository.GetValueTypeImplClass(implAttr.ImplClass);
                     if (implClass == null) {
                         Trace.WriteLine("implementation class : " + implAttr.ImplClass +
                                     " of value-type: " + baseType + " couldn't be found");
@@ -692,7 +692,7 @@ namespace Ch.Elca.Iiop.Marshalling {
                 }
                 ImplClassAttribute implCl = (ImplClassAttribute)implAttr[0];
                 // get the type
-                actualType = Repository.LoadType(implCl.ImplClass);
+                actualType = Repository.GetValueTypeImplClass(implCl.ImplClass);
                 if (actualType == null) {
                     Trace.WriteLine("implementation class : " + implCl.ImplClass +
                                     " of value-type: " + actualType + " couldn't be found");

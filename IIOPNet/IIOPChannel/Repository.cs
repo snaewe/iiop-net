@@ -330,7 +330,12 @@ namespace Ch.Elca.Iiop.Idl {
         #endregion rep-id creation
         #region loading types
 
-
+        /// <summary>
+        /// gets the impl class for a value type specified by the ImplClassAttribute.
+        /// </summary>
+        internal static Type GetValueTypeImplClass(string clsImplClassName) {
+            return LoadType(clsImplClassName);
+        }        
 
         /// <summary>
         /// searches for the CLS type with the specified fully qualified name 
@@ -338,7 +343,7 @@ namespace Ch.Elca.Iiop.Idl {
         /// </summary>
         /// <param name="clsTypeName">the fully qualified CLS type name</param>
         /// <returns></returns>
-        public static Type LoadType(string clsTypeName) {
+        private static Type LoadType(string clsTypeName) {
             Debug.WriteLine("try to load type: " + clsTypeName);
             Type foundType = s_typeCache.GetType(clsTypeName);
             if (foundType != null) { 
