@@ -1,0 +1,27 @@
+Prerequisites
+-------------
+
+For running this integration test, you need NUnit V2.0 or newer and jboss 4.0.
+
+Building the test
+-----------------
+
+- set JBOSS_HOME_4 to your jboss home directory, e.g. C:\Programme\Jboss4.0.2
+- set NUNITV2_HOME to your NUNIT V2.0 home directory, e.g. C:\Programme\NUnitV2
+- use nmake to build the application and the integration test
+
+Deploying the test application containing the test beans
+--------------------------------------------------------
+
+- use deploy.bat or deployConfig TARGET_CONFIG in the directory TestBeans to deploy the application to Jboss 4.0.2.
+
+Running the test
+----------------
+
+- start your jboss 4.0 application server. 
+  Note: It's important to use java 1.4 for running the jboss server, otherwise some tests may not work correct.
+
+- The test can be run using the NUnit GUI or the NUnit Console runner
+  Running the test with console launcher:
+  - change to directory TestClientForJava1.4 (when running JBoss with java1.4)
+  - launch LaunchTest.bat

@@ -1,0 +1,28 @@
+<jboss>
+<enterprise-beans>
+
+<session>
+  <ejb-name>TestBean</ejb-name>
+  <jndi-name>IntegrationTest/test</jndi-name>
+  <configuration-name>Standard Stateless SessionBean</configuration-name>
+  <invoker-bindings>
+  <invoker>
+  <invoker-proxy-binding-name>iiop</invoker-proxy-binding-name>
+  </invoker>
+  </invoker-bindings>
+</session>
+
+<session>
+  <ejb-name>IntAdderBean</ejb-name>
+  <jndi-name>IntegrationTest/intadder</jndi-name>
+  <configuration-name>Standard Stateless SessionBean</configuration-name>
+  <invoker-bindings>
+  <invoker>
+  <invoker-proxy-binding-name>iiop</invoker-proxy-binding-name>
+  </invoker>
+  </invoker-bindings>
+</session>
+
+
+</enterprise-beans>
+</jboss>
