@@ -81,15 +81,15 @@ module IntegrationTests {
 	};
 
 	union TestUnion2 switch(UnionType2) {
-		case TYPE_1:	wstring Field;
-		case TYPE_2:	wstring Field;
-		case TYPE_3:	wstring Field;
-		case TYPE_4:	wstring Field;
-		case TYPE_5:	wstring Field;
-		case TYPE_6:	wstring Field;
-		case TYPE_7:	wstring Field;
-		case TYPE_8:	wstring Field;
-		default: wstring Field;
+		case TYPE_1:	wstring Field1;
+		case TYPE_2:	wstring Field2;
+		case TYPE_3:	wstring Field3;
+		case TYPE_4:	wstring Field4;
+		case TYPE_5:	wstring Field5;
+		case TYPE_6:	wstring Field6;
+		case TYPE_7:	wstring Field7;
+		case TYPE_8:	wstring Field8;
+		default: wstring FieldDefault;
 	};
 	
 	
