@@ -34,6 +34,7 @@ using NUnit.Framework;
 using Ch.Elca.Iiop;
 using Ch.Elca.Iiop.Services;
 using omg.org.CosNaming;
+using omg.org.CORBA;
 
 namespace ch.elca.iiop.integrationTests {
 
@@ -352,6 +353,39 @@ namespace ch.elca.iiop.integrationTests {
             string arg = "TestArg";
             string result = (string) m_test.EchoAnything(arg);
             Assertion.AssertEquals(arg, result);
+        }
+
+        [Test]
+        public void TestStringArrayAsAnyManualTypeCode() {
+            string[] argArray = new string[] { "a", "b", "c" };
+            IOrbServices orb = OrbServices.GetSingleton();
+
+            // variant 1 with manually created type code
+            omg.org.CORBA.TypeCode arrayTypeCode1 = orb.create_value_box_tc("RMI:[Ljava.lang.String;:071DA8BE7F971128:A0F0A4387A3BB342",
+                                                             "seq1_WStringValue",
+                                                             orb.create_tc_for_type(typeof(string)));
+            Any arg1 = new Any(argArray, 
+                              arrayTypeCode1);
+            string[] result1 = (string[]) m_test.EchoAnything(arg1);
+            Assertion.AssertNotNull(result1);
+            Assertion.AssertEquals(argArray.Length, result1.Length);
+            Assertion.AssertEquals(argArray[0], result1[0]);
+            Assertion.AssertEquals(argArray[1], result1[1]);
+            Assertion.AssertEquals(argArray[2], result1[2]);
+        }
+
+        [Test]
+        public void TestStringArrayAsAnyManualBoxing() {
+            string[] argArray = new string[] { "a", "b", "c" };
+
+            org.omg.boxedRMI.CORBA.seq1_WStringValue arg3 =
+                new org.omg.boxedRMI.CORBA.seq1_WStringValue(argArray);                        
+            string[] result3 = (string[]) m_test.EchoAnything(arg3);
+            Assertion.AssertNotNull(result3);
+            Assertion.AssertEquals(argArray.Length, result3.Length);
+            Assertion.AssertEquals(argArray[0], result3[0]);
+            Assertion.AssertEquals(argArray[1], result3[1]);
+            Assertion.AssertEquals(argArray[2], result3[2]);            
         }
 
 
