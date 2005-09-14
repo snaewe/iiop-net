@@ -29,9 +29,9 @@
 
 
 using System;
-using System.Runtime.Remoting;
 using System.Collections;
 using System.Diagnostics;
+using System.Reflection;
 using Ch.Elca.Iiop.Idl;
 using Ch.Elca.Iiop;
 using Ch.Elca.Iiop.CorbaObjRef;
@@ -82,7 +82,12 @@ namespace omg.org.CORBA {
 		        // precodition: type is an instance of TypeCodeImpl
 			    Type requiredObjectType = Repository.GetTypeForTypeCode(type);
 			    if (!requiredObjectType.IsAssignableFrom(obj.GetType())) {
-			        throw new BAD_PARAM(456, CompletionStatus.Completed_MayBe);	
+			        if (IsBoxableTo(obj.GetType(), requiredObjectType)) {
+                        // box value
+			            obj = Activator.CreateInstance(requiredObjectType, new object[] { obj } );
+                    } else {
+                        throw new BAD_PARAM(456, CompletionStatus.Completed_MayBe);	
+                    }			        
 			    }
 			}
 			m_value = obj;
@@ -111,6 +116,28 @@ namespace omg.org.CORBA {
 		}
 		
 		#endregion IProperties
+		#region IMethods
+		
+		private bool IsBoxableTo(Type boxIt, Type boxInto) {
+		    if (!boxInto.IsSubclassOf(ReflectionHelper.BoxedValueBaseType)) {
+		        return false;
+		    }
+		    try {
+                Type boxedType = (Type)boxInto.InvokeMember(BoxedValueBase.GET_FIRST_NONBOXED_TYPE_METHODNAME,
+                                                            BindingFlags.InvokeMethod | BindingFlags.Public |
+                                                            BindingFlags.NonPublic | BindingFlags.Static |
+                                                            BindingFlags.DeclaredOnly,
+                                                            null, null, new object[0]);
+		        if (boxedType.IsAssignableFrom(boxIt)) {
+		            return true;
+		        }
+		    } catch (Exception) {
+		        throw new INTERNAL(10041, CompletionStatus.Completed_MayBe);
+		    }
+		    return false;
+		}
+		
+		#endregion IMethods
 		
 	}
 	
