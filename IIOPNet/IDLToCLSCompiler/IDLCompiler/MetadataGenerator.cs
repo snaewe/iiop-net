@@ -2336,7 +2336,7 @@ public class MetaDataGenerator : IDLParserVisitor {
          body.Emit(OpCodes.Ldarg_0);
          body.Emit(OpCodes.Ldarg_1);
          body.Emit(OpCodes.Ldarg_2);
-         body.Emit(OpCodes.Call, typeof(Exception).GetConstructor(BindingFlags.Public | BindingFlags.NonPublic |
+         body.Emit(OpCodes.Call, typeof(AbstractUserException).GetConstructor(BindingFlags.Public | BindingFlags.NonPublic |
                                                                   BindingFlags.Instance,
                                                                   null,
                                                                   new Type[] { typeof(System.Runtime.Serialization.SerializationInfo),
