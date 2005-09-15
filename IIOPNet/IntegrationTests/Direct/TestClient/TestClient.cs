@@ -1062,7 +1062,30 @@ namespace Ch.Elca.Iiop.IntegrationTests {
             Type result4 = m_testService.EchoType(arg4);
             Assertion.AssertEquals("wrong type for null type echo", arg4, result4);            
         }
-        
+
+        [Test]
+        public void TestUnionNetSerializableOptimized() {
+            // check, that the generated union is serializable also with other formatters optimized (not all fields, but only needed ones)
+            TestUnion arg = new TestUnion();
+            int case1Val = 12;
+            arg.Setval1(case1Val, 2);
+
+            System.Runtime.Serialization.Formatters.Binary.BinaryFormatter formatter =
+                new System.Runtime.Serialization.Formatters.Binary.BinaryFormatter();
+            System.IO.MemoryStream serialised = new System.IO.MemoryStream();
+            try {
+                formatter.Serialize(serialised, arg);
+
+                serialised.Seek(0, System.IO.SeekOrigin.Begin);
+                formatter = new System.Runtime.Serialization.Formatters.Binary.BinaryFormatter();
+                TestUnion deser = (TestUnion)formatter.Deserialize(serialised);
+
+                Assertion.AssertEquals(2, deser.Discriminator);
+                Assertion.AssertEquals(case1Val, deser.Getval1());
+            } finally {
+                serialised.Close();
+            }
+        }        
 
     }
 

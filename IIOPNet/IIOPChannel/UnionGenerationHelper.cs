@@ -140,6 +140,102 @@ namespace Ch.Elca.Iiop.Idl {
             #endregion IMethods
         }
 
+        /// <summary>
+        /// different actions for a switch structure for the discriminator values
+        /// </summary>
+        private interface GenerateUnionCaseAction {           
+            /// <summary>
+            /// generate code to execute for a switch case including default case
+            /// </summary>                        
+            void GenerateCaseAction(ILGenerator gen, SwitchCase forCase, bool isDefaultCase);
+            /// <summary>
+            /// generate code to execute for no default case present (instead of default case code)
+            /// </summary>            
+            void GenerateNoDefaultCasePresent(ILGenerator gen);      
+            /// <summary>
+            /// generate code to load the current discriminator value
+            /// </summary>
+            void GenerateLoadDiscValue(ILGenerator gen);
+        }
+        
+        private class GenerateGetFieldInfoForDiscAction : GenerateUnionCaseAction {
+            
+            private UnionGenerationHelper m_ugh;
+            
+            internal GenerateGetFieldInfoForDiscAction(UnionGenerationHelper ugh) {
+                m_ugh = ugh;
+            }
+            
+            public void GenerateCaseAction(ILGenerator gen, SwitchCase forCase, bool isDefaultCase) {
+                m_ugh.GenerateGetFieldOfUnionType(gen, forCase.ElemField);
+            }
+                
+            public void GenerateNoDefaultCasePresent(ILGenerator gen) {
+                gen.Emit(OpCodes.Ldnull);
+            }
+            
+            public void GenerateLoadDiscValue(ILGenerator gen) {
+                gen.Emit(OpCodes.Ldarg_0);
+            }
+            
+        }
+        
+        private class GenerateAssignFromInfoForDiscAction : GenerateUnionCaseAction {
+            
+            private UnionGenerationHelper m_ugh;
+            private MethodInfo m_getValueMethod;
+            private MethodInfo m_getTypeFromH;            
+            
+            internal GenerateAssignFromInfoForDiscAction(UnionGenerationHelper ugh,
+                                                         MethodInfo getValueMethod,
+                                                         MethodInfo getTypeFromH) {
+                m_ugh = ugh;                
+                m_getValueMethod = getValueMethod;
+                m_getTypeFromH = getTypeFromH;                
+            }
+            
+            public void GenerateCaseAction(ILGenerator gen, SwitchCase forCase, bool isDefaultCase) {
+                m_ugh.GenerateGetFieldFromObjectData(forCase.ElemField, gen, m_getValueMethod, m_getTypeFromH);                
+            }
+            public void GenerateNoDefaultCasePresent(ILGenerator gen) {
+                // nothing to do
+            }
+            
+            public void GenerateLoadDiscValue(ILGenerator gen) {
+                gen.Emit(OpCodes.Ldarg_0);
+                gen.Emit(OpCodes.Ldfld, m_ugh.m_discrField);                
+            }
+            
+        }
+        
+        private class GenerateInsertIntoInfoForDiscAction : GenerateUnionCaseAction {
+            
+            private UnionGenerationHelper m_ugh;
+            private MethodInfo m_addValueMethod;
+            private MethodInfo m_getTypeFromH;
+            
+            internal GenerateInsertIntoInfoForDiscAction(UnionGenerationHelper ugh,
+                                                         MethodInfo addValueMethod,
+                                                         MethodInfo getTypeFromH) {
+                m_ugh = ugh;    
+                m_addValueMethod = addValueMethod;
+                m_getTypeFromH = getTypeFromH;
+            }            
+            
+            public void GenerateCaseAction(ILGenerator gen, SwitchCase forCase, bool isDefaultCase) {
+                m_ugh.GenerateAddFieldToObjectData(forCase.ElemField, gen, m_addValueMethod, m_getTypeFromH);
+            }
+            public void GenerateNoDefaultCasePresent(ILGenerator gen) {
+                // nothing to do
+            }
+            
+            public void GenerateLoadDiscValue(ILGenerator gen) {
+                gen.Emit(OpCodes.Ldarg_0);
+                gen.Emit(OpCodes.Ldfld, m_ugh.m_discrField);
+            }            
+            
+        }            
+        
         #endregion Types        
         #region Constants
 
@@ -147,7 +243,7 @@ namespace Ch.Elca.Iiop.Idl {
         internal const string GET_COVERED_DISCR_VALUES = "GetCoveredDiscrValues";
         internal const string GET_DEFAULT_FIELD = "GetDefaultField";
         internal const string DISCR_FIELD_NAME = "m_discriminator";
-        private const string INIT_FIELD_NAME = "m_initalized";
+        internal const string INIT_FIELD_NAME = "m_initalized";
 
         #endregion Constants
         #region SFields
@@ -167,7 +263,7 @@ namespace Ch.Elca.Iiop.Idl {
 
         private FieldBuilder m_initalizedField;
         private FieldBuilder m_unionTypeCache;
-        
+               
         private ArrayList m_switchCases = new ArrayList();
 
         private ArrayList m_coveredDiscrs = new ArrayList();
@@ -198,7 +294,8 @@ namespace Ch.Elca.Iiop.Idl {
                                        TypeAttributes.Sealed | visibility;
 
             m_builder = modBuilder.DefineType(fullName, typeAttrs, ReflectionHelper.ValueTypeType,
-                                              new System.Type[] { ReflectionHelper.IIdlEntityType });            
+                                              new System.Type[] { ReflectionHelper.IIdlEntityType });
+            m_builder.AddInterfaceImplementation(ReflectionHelper.ISerializableType); // optimization for inter .NET communication
             BeginType();
         }
         
@@ -269,10 +366,9 @@ namespace Ch.Elca.Iiop.Idl {
         }
 
         /// <summary>
-        /// add instance and static constructor
+        /// add static constructor
         /// </summary>
-        private void AddConstructor() {
-            // static constructor
+        private void AddStaticConstructor() {
             ConstructorBuilder staticConstr = m_builder.DefineConstructor(MethodAttributes.Private | MethodAttributes.Static | MethodAttributes.HideBySig,
                                                                           CallingConventions.Standard,
                                                                           Type.EmptyTypes);
@@ -292,7 +388,7 @@ namespace Ch.Elca.Iiop.Idl {
             
             AddTypeField();
             AddInitalizedField();
-            AddConstructor(); // add the static constructor
+            AddStaticConstructor(); // add the static constructor
         }
 
         public Type FinalizeType() {
@@ -301,8 +397,10 @@ namespace Ch.Elca.Iiop.Idl {
             try {
                 Type t = m_builder.CreateType();
                 return t;
-            } catch(Exception e) {
-                throw new NotSupportedException("Error in union " + m_builder.AssemblyQualifiedName, e);
+            } catch(InvalidOperationException ioe) {
+                throw new NotSupportedException("Error in union " + m_builder.AssemblyQualifiedName, ioe);
+            } catch(NotSupportedException nse) {                
+                throw new NotSupportedException("Error in union " + m_builder.AssemblyQualifiedName, nse);
             }
         }
 
@@ -434,18 +532,13 @@ namespace Ch.Elca.Iiop.Idl {
         private void GenerateSerialisationHelpers() {
             GenerateGetFieldInfoForDiscriminator();
             AddGetSpecifiedDefaultCaseFieldGetter();
+            GenerateGetObjectDataMethod();
+            GenerateISerializableDeserializationConstructor();
         }
-
-        private void GenerateGetFieldInfoForDiscriminator() {
-            MethodBuilder getElemMethod = m_ilEmitHelper.AddMethod(m_builder, GET_FIELD_FOR_DISCR_METHOD,
-                                                                   new ParameterSpec[] { 
-                                                                        new ParameterSpec("discrVal", 
-                                                                                          m_discrType, 
-                                                                                          ParameterSpec.ParameterDirection.s_in) 
-                                                                   },
-                                                                   new TypeContainer(typeof(FieldInfo)), 
-                                                                   MethodAttributes.Private | MethodAttributes.HideBySig | MethodAttributes.Static);
-            ILGenerator gen = getElemMethod.GetILGenerator();            
+        
+        private void GenerateSwitchForDiscriminator(ILGenerator gen, GenerateUnionCaseAction action,
+                                                    Label afterSwitchBlock) {
+            
             // process all switch cases stored ...
 
             // generate the following structure:
@@ -469,10 +562,7 @@ namespace Ch.Elca.Iiop.Idl {
             //          br end
             // default:
             //          ...
-            
-            Label endOfMethod = gen.DefineLabel();
             Label defaultCaseLabel = gen.DefineLabel(); // make sure to have default case, even if no default is specified in IDL
-            
             // part1: compare and jump            
             foreach (SwitchCase switchCase in m_switchCases) {
                 if (switchCase.IsDefaultCase()) {
@@ -484,14 +574,14 @@ namespace Ch.Elca.Iiop.Idl {
                 
                 for (int j = 0; j < switchCase.DiscriminatorValues.Length; j++) {
                     // generate tests
-                    gen.Emit(OpCodes.Ldarg_0); // static method -> no this pointer in arg0, instead method argument
+                    action.GenerateLoadDiscValue(gen);
                     PushDiscriminatorValueToStack(gen, switchCase.DiscriminatorValues[j]);
                     gen.Emit(OpCodes.Beq, switchCase.IlLabelAssigned);
                 }
             }
             // if nothing found, jump to default case
             gen.Emit(OpCodes.Br, defaultCaseLabel);
-
+            
             // part2: code for cases (jump-targets)
             SwitchCase defaultCaseFound = null;
             foreach (SwitchCase switchCase in m_switchCases) {
@@ -503,22 +593,35 @@ namespace Ch.Elca.Iiop.Idl {
                 // set position for the case label
                 gen.MarkLabel(switchCase.IlLabelAssigned);
                 // the field to return
-                GenerateGetFieldOfUnionType(gen, switchCase.ElemField);
-                gen.Emit(OpCodes.Br, endOfMethod); // jump to exit point
+                action.GenerateCaseAction(gen, switchCase, false);
+                gen.Emit(OpCodes.Br, afterSwitchBlock); // jump to exit point
             }
 
             // the default case
             gen.MarkLabel(defaultCaseLabel);
             if (defaultCaseFound != null) {
                 // a default case present
-                GenerateGetFieldOfUnionType(gen, defaultCaseFound.ElemField);
+                action.GenerateCaseAction(gen, defaultCaseFound, true);
             } else {
-                gen.Emit(OpCodes.Ldnull);
+                action.GenerateNoDefaultCasePresent(gen);
             }
-            gen.Emit(OpCodes.Br_S, endOfMethod); // jump to exit point            
-            
-            // method end                               
-            gen.MarkLabel(endOfMethod);            
+            gen.Emit(OpCodes.Br_S, afterSwitchBlock); // jump to exit point            
+        }        
+        
+        private void GenerateGetFieldInfoForDiscriminator() {
+            MethodBuilder getFieldForDiscrMethod = m_ilEmitHelper.AddMethod(m_builder, GET_FIELD_FOR_DISCR_METHOD,
+                                                                   new ParameterSpec[] { 
+                                                                        new ParameterSpec("discrVal", 
+                                                                                          m_discrType, 
+                                                                                          ParameterSpec.ParameterDirection.s_in) 
+                                                                   },
+                                                                   new TypeContainer(typeof(FieldInfo)), 
+                                                                   MethodAttributes.Private | MethodAttributes.HideBySig | MethodAttributes.Static);
+            ILGenerator gen = getFieldForDiscrMethod.GetILGenerator();            
+            GenerateGetFieldInfoForDiscAction action = new GenerateGetFieldInfoForDiscAction(this);
+            Label endOfMethod = gen.DefineLabel();            
+            GenerateSwitchForDiscriminator(gen, action, endOfMethod);
+            gen.MarkLabel(endOfMethod);
             gen.Emit(OpCodes.Ret);
         }
 
@@ -534,7 +637,6 @@ namespace Ch.Elca.Iiop.Idl {
                                                          null, new Type[] { ReflectionHelper.StringType, typeof(BindingFlags) }, null);
             gen.Emit(OpCodes.Callvirt, getField); // call getField to retrieve the fieldInfo: pushed result on stack
         }
-
         
         /// <summary>
         /// checks, if a default case is present
@@ -639,6 +741,114 @@ namespace Ch.Elca.Iiop.Idl {
             gen.Emit(OpCodes.Ldloc_0);
             gen.Emit(OpCodes.Ret);
         }
+        
+        /// <summary>
+        /// helper method for implementing ISerializable
+        /// </summary>
+        private void GenerateAddFieldToObjectData(FieldInfo field, ILGenerator body,
+                                                  MethodInfo addValueMethod, MethodInfo getTypeFromH) {
+            body.Emit(OpCodes.Ldarg_1); // info
+            body.Emit(OpCodes.Ldstr, field.Name); // arg1
+            body.Emit(OpCodes.Ldarg_0);
+            body.Emit(OpCodes.Ldfld, field);
+            if (field.FieldType.IsValueType) {
+                body.Emit(OpCodes.Box, field.FieldType); // arg2: field value; need to box because value type
+            }
+            body.Emit(OpCodes.Ldtoken, field.FieldType);
+            body.Emit(OpCodes.Call, getTypeFromH); // load the type, the third argument of AddValue
+            body.Emit(OpCodes.Callvirt, addValueMethod); // finally add the value to the info            
+        }
+        
+        private void GenerateGetObjectDataMethod() {
+            ParameterSpec[] getObjDataParams = new ParameterSpec[] { 
+                new ParameterSpec("info", typeof(System.Runtime.Serialization.SerializationInfo)), 
+                new ParameterSpec("context", typeof(System.Runtime.Serialization.StreamingContext)) };
+            MethodBuilder getObjectDataMethod =
+                m_ilEmitHelper.AddMethod(m_builder, "GetObjectData", getObjDataParams,
+                                         new TypeContainer(typeof(void)),
+                                         MethodAttributes.Virtual | MethodAttributes.Public |
+                                         MethodAttributes.HideBySig);
+            ILGenerator body = 
+                getObjectDataMethod.GetILGenerator();
+
+            MethodInfo addValueMethod =
+                typeof(System.Runtime.Serialization.SerializationInfo).GetMethod("AddValue",  BindingFlags.Public | BindingFlags.Instance,
+                                                                                 null,
+                                                                                 new Type[] { ReflectionHelper.StringType,
+                                                                                              ReflectionHelper.ObjectType,
+                                                                                              ReflectionHelper.TypeType },
+                                                                                 new ParameterModifier[0]);
+            MethodInfo getTypeFromH = 
+                ReflectionHelper.TypeType.GetMethod("GetTypeFromHandle", BindingFlags.Public | BindingFlags.Static);            
+            Label beforeReturn = body.DefineLabel();
+            // serialize initalized field           
+            GenerateAddFieldToObjectData(m_initalizedField, body, addValueMethod, getTypeFromH);
+            // nothing more to do, if not initalized, therefore check here
+            body.Emit(OpCodes.Ldarg_0);
+            body.Emit(OpCodes.Ldfld, m_initalizedField); // fieldvalue
+            body.Emit(OpCodes.Brfalse, beforeReturn);
+            // initalized -> serialise discriminator and corresponding value
+            GenerateAddFieldToObjectData(m_discrField, body, addValueMethod, getTypeFromH);
+                        
+            // now serialize field corresponding to discriminator value
+            // do this by using a switch structure
+            GenerateInsertIntoInfoForDiscAction action = new GenerateInsertIntoInfoForDiscAction(this, addValueMethod, getTypeFromH);
+            GenerateSwitchForDiscriminator(body, action, beforeReturn);
+                                                
+            body.MarkLabel(beforeReturn);
+            body.Emit(OpCodes.Ret);
+        }
+                
+        private void GenerateGetFieldFromObjectData(FieldInfo field, ILGenerator body,
+                                                    MethodInfo getValueMethod, MethodInfo getTypeFromH) {
+            body.Emit(OpCodes.Ldarg_0); // this for calling store field after GetValue
+            body.Emit(OpCodes.Ldarg_1); // info
+            body.Emit(OpCodes.Ldstr, field.Name); // ld the first arg of GetValue
+            body.Emit(OpCodes.Ldtoken, field.FieldType);
+            body.Emit(OpCodes.Call, getTypeFromH); // ld the 2nd arg of GetValue
+            body.Emit(OpCodes.Callvirt, getValueMethod); // call info.GetValue
+            // now store result in the corresponding field
+            m_ilEmitHelper.GenerateCastObjectToType(body, field.FieldType);
+            body.Emit(OpCodes.Stfld, field);
+        }
+        
+        private void GenerateISerializableDeserializationConstructor() {
+            // deserialisation constructor
+            ParameterSpec[] constrParams = new ParameterSpec[] {
+                new ParameterSpec("info", typeof(System.Runtime.Serialization.SerializationInfo)), 
+                new ParameterSpec("context", typeof(System.Runtime.Serialization.StreamingContext)) };
+            ConstructorBuilder constrBuilder =
+                m_ilEmitHelper.AddConstructor(m_builder, constrParams,
+                                              MethodAttributes.Family | MethodAttributes.HideBySig);
+            ILGenerator body = constrBuilder.GetILGenerator();
+            // value type constructors don't call base class constructors                        
+            // directly start with deserialisation                     
+            MethodInfo getValueMethod = 
+                typeof(System.Runtime.Serialization.SerializationInfo).GetMethod("GetValue", BindingFlags.Instance | BindingFlags.Public,
+                                                                                 null,
+                                                                                 new Type[] { typeof(string), typeof(Type) },
+                                                                                 new ParameterModifier[0]);
+            MethodInfo getTypeFromH = 
+                ReflectionHelper.TypeType.GetMethod("GetTypeFromHandle", BindingFlags.Public | BindingFlags.Static);            
+            
+            Label beforeReturn = body.DefineLabel();
+            // get the value of the init field
+            GenerateGetFieldFromObjectData(m_initalizedField, body, getValueMethod, getTypeFromH);
+            // nothing more to do, if not initalized, therefore check here
+            body.Emit(OpCodes.Ldarg_0);
+            body.Emit(OpCodes.Ldfld, m_initalizedField); // fieldvalue
+            body.Emit(OpCodes.Brfalse, beforeReturn);
+            // initalized -> deserialise discriminator and corresponding value
+            GenerateGetFieldFromObjectData(m_discrField, body, getValueMethod, getTypeFromH);
+                        
+            // now deserialize field corresponding to discriminator value
+            GenerateAssignFromInfoForDiscAction action = 
+                new GenerateAssignFromInfoForDiscAction(this, getValueMethod, getTypeFromH);
+            GenerateSwitchForDiscriminator(body, action, beforeReturn);
+            
+            body.MarkLabel(beforeReturn);
+            body.Emit(OpCodes.Ret);
+        }        
 
         private void PushBooleanDiscriminatorValueToStack(ILGenerator gen, object discVal) {
             if (!(discVal is System.Boolean)) {
