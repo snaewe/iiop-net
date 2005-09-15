@@ -1,0 +1,8 @@
+*~
+IDL
+Adder.hh
+AdderSK.cc
+GenericUserException.hh
+GenericUserExceptionSK.cc
+*.exe
+*.obj
