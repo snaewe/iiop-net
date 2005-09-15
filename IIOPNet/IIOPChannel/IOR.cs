@@ -292,12 +292,8 @@ namespace Ch.Elca.Iiop.CorbaObjRef {
         #region SFields
         
         private readonly static object s_defaultCodeSetTaggedComponent = 
-            TaggedComponent.CreateTaggedComponent(TAG_CODE_SETS.ConstVal, 
-                                                  new Services.CodeSetComponentData(Services.CodeSetService.DEFAULT_CHAR_SET,
-                                                                           new int[] { Services.CodeSetService.UTF8_SET, Services.CodeSetService.ISO646IEC_SINGLE },
-                                                                           Services.CodeSetService.DEFAULT_WCHAR_SET,
-                                                                           new int[] { Services.CodeSetService.ISO646IEC_MULTI }));
-        
+            Services.CodeSetService.CreateDefaultCodesetComponent();            
+            
         #endregion SFields
         #region IFields
 

@@ -32,11 +32,13 @@ using System;
 using System.Runtime.Remoting.Messaging;
 using System.Collections;
 using System.IO;
+using System.Text;
 using Ch.Elca.Iiop.Cdr;
 using Ch.Elca.Iiop.CorbaObjRef;
 using Ch.Elca.Iiop.Idl;
 using omg.org.CORBA;
 using omg.org.IOP;
+using Ch.Elca.Iiop.CodeSet;
 
 namespace Ch.Elca.Iiop.Services {
     
@@ -89,18 +91,43 @@ namespace Ch.Elca.Iiop.Services {
 
         public const int SERVICE_ID = 1;
 
-        public const int UTF16_SET = 0x10109;
-        public const int LATIN1_SET = 0x10001;
-        public const int UTF8_SET = 0x5010001;
+        private const int UTF16_SET = 0x10109;
+        private const int LATIN1_SET = 0x10001;
+        private const int UTF8_SET = 0x5010001;
 
-        public const int ISO646IEC_MULTI = 0x10100; // compatible with UTF-16
-        public const int ISO646IEC_SINGLE = 0x10020; // compatible with ASCII
+        private const int ISO646IEC_MULTI = 0x10100; // compatible with UTF-16
+        private const int ISO646IEC_SINGLE = 0x10020; // compatible with ASCII
 
         public const int DEFAULT_CHAR_SET = LATIN1_SET;
         public const int DEFAULT_WCHAR_SET = UTF16_SET;
 
-
         #endregion Constants
+        #region SFields
+        
+        private static CodeSetConversionRegistry s_registry = new CodeSetConversionRegistry();        
+        
+        #endregion SFields
+        #region SConstructor
+        
+        static CodeSetService() {
+            s_registry = new CodeSetConversionRegistry();
+            // add the non-endian dependant encodings here
+            s_registry.AddEncodingAllEndian(CodeSetService.LATIN1_SET, new Latin1Encoding());
+            s_registry.AddEncodingAllEndian(CodeSetService.ISO646IEC_SINGLE, new ASCIIEncoding());
+            s_registry.AddEncodingAllEndian(CodeSetService.UTF8_SET, new UTF8Encoding());
+            // big endian
+            s_registry.AddEncodingBigEndian(CodeSetService.UTF16_SET, 
+                                            new UnicodeEncodingExt(true, false)); // use big endian encoding here, put no unicode byte order mark
+            s_registry.AddEncodingBigEndian(CodeSetService.ISO646IEC_MULTI,
+                                            new UnicodeEncodingExt(true, false));
+            // little endian
+            s_registry.AddEncodingLittleEndian(CodeSetService.UTF16_SET, 
+                                               new UnicodeEncodingExt(false, false)); // use big endian encoding here, put no unicode byte order mark
+            s_registry.AddEncodingLittleEndian(CodeSetService.ISO646IEC_MULTI,
+                                               new UnicodeEncodingExt(false, false));
+        }
+        
+        #endregion SConstructor
         #region IConstructors
         
         private CodeSetService() {
@@ -231,6 +258,39 @@ namespace Ch.Elca.Iiop.Services {
             contexts.AddServiceContext(context);
         }                
         
+        /// <summary>
+        /// creates the tagged codeset component to insert into an IOR
+        /// </summary>
+        /// <returns></returns>
+        internal static TaggedComponent CreateDefaultCodesetComponent() {
+            return TaggedComponent.CreateTaggedComponent(TAG_CODE_SETS.ConstVal, 
+                                                         new Services.CodeSetComponentData(Services.CodeSetService.DEFAULT_CHAR_SET,
+                                                                                new int[] { Services.CodeSetService.UTF8_SET, Services.CodeSetService.ISO646IEC_SINGLE },
+                                                                                            Services.CodeSetService.DEFAULT_WCHAR_SET,
+                                                                                new int[] { Services.CodeSetService.ISO646IEC_MULTI }));
+        }
+        
+        /// <summary>
+        /// get the char encoding to use for a charset id (endian independant)
+        /// </summary>
+        internal static System.Text.Encoding GetCharEncoding(int charSet, bool isWChar) {
+            return s_registry.GetEncodingEndianIndependant(charSet); // get Encoding for charSet
+        }
+               
+        /// <summary>
+        /// get the char encoding to use for a charset id (for big endian)
+        /// </summary>
+        internal static System.Text.Encoding GetCharEncodingBigEndian(int charSet, bool isWChar) {
+            return s_registry.GetEncodingBigEndian(charSet); // get Encoding for charSet
+        }
+        
+        /// <summary>
+        /// get the char encoding to use for a charset id
+        /// </summary>
+        internal static System.Text.Encoding GetCharEncodingLittleEndian(int charSet, bool isWChar) {
+            return s_registry.GetEncodingLittleEndian(charSet); // get Encoding for charSet
+        }
+                
         #endregion SMethods
     
     }

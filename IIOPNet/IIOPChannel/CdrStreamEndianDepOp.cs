@@ -123,8 +123,7 @@ namespace Ch.Elca.Iiop.Cdr {
         }
         
         public char ReadWChar() {
-            Encoding encoding = CdrStreamHelper.GetWCharEncoding(m_stream.WCharSet, 
-                                    CodeSetConversionRegistryBigEndian.GetRegistry());
+            Encoding encoding = CodeSetService.GetCharEncodingBigEndian(m_stream.WCharSet, true);
             if (encoding == null) {
                 throw new INTERNAL(987, CompletionStatus.Completed_MayBe);
             }
@@ -143,8 +142,7 @@ namespace Ch.Elca.Iiop.Cdr {
         }
 
         public string ReadWString()    {
-            Encoding encoding = CdrStreamHelper.GetWCharEncoding(m_stream.WCharSet,
-                                    CodeSetConversionRegistryBigEndian.GetRegistry());
+            Encoding encoding = CodeSetService.GetCharEncodingBigEndian(m_stream.WCharSet, true);
             if (encoding == null) {
                 throw new INTERNAL(987, CompletionStatus.Completed_MayBe);
             }
@@ -237,8 +235,7 @@ namespace Ch.Elca.Iiop.Cdr {
         }
 
         public void WriteWChar(char data) {
-            Encoding encoding = CdrStreamHelper.GetWCharEncoding(m_stream.WCharSet,
-                                                                 CodeSetConversionRegistryBigEndian.GetRegistry());
+            Encoding encoding = CodeSetService.GetCharEncodingBigEndian(m_stream.WCharSet, true);
             if (encoding == null) {
                 throw new INTERNAL(987, CompletionStatus.Completed_MayBe);
             }            
@@ -250,8 +247,7 @@ namespace Ch.Elca.Iiop.Cdr {
         }
 
         public void WriteWString(string data) {
-            Encoding encoding = CdrStreamHelper.GetWCharEncoding(m_stream.WCharSet,
-                                                                 CodeSetConversionRegistryBigEndian.GetRegistry());
+            Encoding encoding = CodeSetService.GetCharEncodingBigEndian(m_stream.WCharSet, true);
             if (encoding == null) {
                 throw new INTERNAL(987, CompletionStatus.Completed_MayBe);
             }
@@ -361,8 +357,7 @@ namespace Ch.Elca.Iiop.Cdr {
         }
         
         public char ReadWChar() {
-            Encoding encoding = CdrStreamHelper.GetWCharEncoding(m_stream.WCharSet, 
-                                    CodeSetConversionRegistryLittleEndian.GetRegistry());
+            Encoding encoding = CodeSetService.GetCharEncodingLittleEndian(m_stream.WCharSet, true);
             if (encoding == null) {
                 throw new INTERNAL(987, CompletionStatus.Completed_MayBe);
             }
@@ -382,8 +377,7 @@ namespace Ch.Elca.Iiop.Cdr {
         }
 
         public string ReadWString()    {
-            Encoding encoding = CdrStreamHelper.GetWCharEncoding(m_stream.WCharSet,
-                                    CodeSetConversionRegistryLittleEndian.GetRegistry());
+            Encoding encoding = CodeSetService.GetCharEncodingLittleEndian(m_stream.WCharSet, true);
             uint length = ReadULong(); 
             byte[] data;
             if ((m_version.Major == 1) && (m_version.Minor <= 1)) { // GIOP 1.1 / 1.0
@@ -473,8 +467,7 @@ namespace Ch.Elca.Iiop.Cdr {
         }
 
         public void WriteWChar(char data) {
-            Encoding encoding = CdrStreamHelper.GetWCharEncoding(m_stream.WCharSet,
-                                                                 CodeSetConversionRegistryLittleEndian.GetRegistry());
+            Encoding encoding = CodeSetService.GetCharEncodingLittleEndian(m_stream.WCharSet, true);
             byte[] toSend = encoding.GetBytes(new char[] { data } );
             if (!((m_version.Major == 1) && (m_version.Minor <= 1))) { // GIOP 1.2
                 m_stream.WriteOctet((byte)toSend.Length);
@@ -483,8 +476,7 @@ namespace Ch.Elca.Iiop.Cdr {
         }
 
         public void WriteWString(string data) {
-            Encoding encoding = CdrStreamHelper.GetWCharEncoding(m_stream.WCharSet,
-                                                                 CodeSetConversionRegistryLittleEndian.GetRegistry());
+            Encoding encoding = CodeSetService.GetCharEncodingLittleEndian(m_stream.WCharSet, true);
             byte[] toSend = encoding.GetBytes(data);
             if ((m_version.Major == 1) && (m_version.Minor <= 1)) { // GIOP 1.0, 1.1
                 byte[] sendNew = new byte[toSend.Length + 2];

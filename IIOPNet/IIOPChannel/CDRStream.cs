@@ -813,20 +813,6 @@ namespace Ch.Elca.Iiop.Cdr {
                 return true;
             }        
         }
-
-        /// <summary>
-        /// get the char encoding to use for this stream
-        /// </summary>
-        internal static Encoding GetCharEncoding(int charSet, CodeSetConversionRegistry regToUse) {
-            return regToUse.GetEncoding(charSet); // get Encoding for charSet
-        }
-        
-        /// <summary>
-        /// get the wchar encoding to use for this stream
-        /// </summary>
-        internal static Encoding GetWCharEncoding(int wcharSet, CodeSetConversionRegistry regToUse) {
-            return regToUse.GetEncoding(wcharSet); // get Encoding for wcharSet
-        }
         
         #endregion IMethods
     }
@@ -1149,7 +1135,7 @@ namespace Ch.Elca.Iiop.Cdr {
         
         public char ReadChar() {
             // char is a multibyte format with not fixed length characters, but in IDL one char is one byte
-            Encoding encoding = CdrStreamHelper.GetCharEncoding(CharSet, CodeSetConversionRegistry.GetRegistry());
+            Encoding encoding = CodeSetService.GetCharEncoding(CharSet, false);
             if (encoding == null) {
                 throw new INTERNAL(987, CompletionStatus.Completed_MayBe);
             } 
@@ -1201,7 +1187,7 @@ namespace Ch.Elca.Iiop.Cdr {
         private string ReadStringData(uint length) {
             byte[] charData = ReadOpaque((int)length - 1); // read string data
             ReadOctet(); // read terminating 0
-            Encoding encoding = CdrStreamHelper.GetCharEncoding(CharSet, CodeSetConversionRegistry.GetRegistry());
+            Encoding encoding = CodeSetService.GetCharEncoding(CharSet, false);
             if (encoding == null) {
                 throw new INTERNAL(987, CompletionStatus.Completed_MayBe);
             }
@@ -1543,7 +1529,7 @@ namespace Ch.Elca.Iiop.Cdr {
         }
 
         public void WriteChar(char data) {
-            Encoding encoding = CdrStreamHelper.GetCharEncoding(CharSet, CodeSetConversionRegistry.GetRegistry());
+            Encoding encoding = CodeSetService.GetCharEncoding(CharSet, false);
             if (encoding == null) {
                 throw new INTERNAL(987, CompletionStatus.Completed_MayBe);
             } 
@@ -1589,7 +1575,7 @@ namespace Ch.Elca.Iiop.Cdr {
         #endregion the following write methods are subject to byte ordering
         
         public void WriteString(string data) {
-            Encoding encoding = CdrStreamHelper.GetCharEncoding(CharSet, CodeSetConversionRegistry.GetRegistry());
+            Encoding encoding = CodeSetService.GetCharEncoding(CharSet, false);
             if (encoding == null) {
                 throw new INTERNAL(987, CompletionStatus.Completed_MayBe);
             }

@@ -34,115 +34,77 @@ using Ch.Elca.Iiop.Services;
 using omg.org.CORBA;
 
 namespace Ch.Elca.Iiop.CodeSet {
+    
+    /// <summary>
+    /// stores the mapping between codesets and encodings for realising the conversion to/from .NET chars
+    /// </summary>
+    internal class CodeSetConversionRegistry {
 
-    public class CodeSetConversionRegistry {
-
-        #region SFields
-
-        private static CodeSetConversionRegistry s_registry = new CodeSetConversionRegistry();
-
-        #endregion SFields
         #region IFields
         
         /// <summary>stores the encodings</summary>
-        private Hashtable m_knownCodeSets = new Hashtable();
+        private Hashtable m_codeSetsEndianIndep = new Hashtable();
+        private Hashtable m_codeSetsBigEndian = new Hashtable();
+        private Hashtable m_codeSetsLittleEndian = new Hashtable();
         
         #endregion IFields
         #region IConstructors
         
-        public CodeSetConversionRegistry() { 
-            // add the non-endian dependant encodings here
-            AddEncoding(CodeSetService.LATIN1_SET, new Latin1Encoding());
-            AddEncoding(CodeSetService.ISO646IEC_SINGLE, new ASCIIEncoding());
-            AddEncoding(CodeSetService.UTF8_SET, new UTF8Encoding());
+        internal CodeSetConversionRegistry() { 
         }
 
         #endregion IConstructors
-        #region SMethods
-
-        /// <summary>get the singleton registry</summary>
-        /// <returns></returns>
-        public static CodeSetConversionRegistry GetRegistry() { 
-            return s_registry; 
-        }
-
-        #endregion SMethods
         #region IMethods
 
 
-        protected void AddEncoding(int id, Encoding encoding) {
-            m_knownCodeSets.Add(id, encoding);    
+        /// <summary>
+        /// adds an encoding for both endians (endian independant)
+        /// </summary>
+        internal void AddEncodingAllEndian(int id, System.Text.Encoding encoding) {
+            m_codeSetsEndianIndep.Add(id,encoding);
+            AddEncodingBigEndian(id, encoding);
+            AddEncodingLittleEndian(id, encoding);
         }
 
-        public Encoding GetEncoding(int id) {
-            return (Encoding)m_knownCodeSets[id];
+        /// <summary>
+        /// adds an encoding for only big endian
+        /// </summary>            
+        internal void AddEncodingBigEndian(int id, System.Text.Encoding encoding) {
+            m_codeSetsBigEndian.Add(id, encoding);
+        }            
+
+        /// <summary>
+        /// adds an encoding for little endian
+        /// </summary>                        
+        internal void AddEncodingLittleEndian(int id, System.Text.Encoding encoding) {
+            m_codeSetsLittleEndian.Add(id, encoding);
+        }            
+
+        /// <summary>
+        /// gets an endian independant encoding
+        /// </summary>                                    
+        internal System.Text.Encoding GetEncodingEndianIndependant(int id) {
+            return (System.Text.Encoding)m_codeSetsEndianIndep[id];
         }
-    
+
+        /// <summary>
+        /// gets an encoding usable with big endian
+        /// </summary>                                    
+        internal System.Text.Encoding GetEncodingBigEndian(int id) {
+            return (System.Text.Encoding)m_codeSetsBigEndian[id];
+        }
+            
+        /// <summary>
+        /// gets an encoding usable with little endian
+        /// </summary>                                    
+        internal System.Text.Encoding GetEncodingLittleEndian(int id) {
+            return (System.Text.Encoding)m_codeSetsLittleEndian[id];
+        }
+
         #endregion IMethods
     }
-    
-    
-    /// <summary>
-    /// This registry contains the known character encodings with big endian characters
-    /// </summary>
-    public class CodeSetConversionRegistryBigEndian : CodeSetConversionRegistry {
-    
-        #region SFields
-        
-        private static CodeSetConversionRegistryBigEndian s_registry = new CodeSetConversionRegistryBigEndian();
+                
 
-        #endregion SFields
-        #region IConstructors
-
-        private CodeSetConversionRegistryBigEndian() {
-            AddEncoding(CodeSetService.UTF16_SET, 
-                        new UnicodeEncodingExt(true, false)); // use big endian encoding here, put no unicode byte order mark
-            AddEncoding(CodeSetService.ISO646IEC_MULTI,
-                        new UnicodeEncodingExt(true, false));
-        }
-
-        #endregion IConsturctors
-        #region SMethods
-
-        /// <summary>get the singleton registry</summary>
-        public static new CodeSetConversionRegistry GetRegistry() {
-            return s_registry;
-        }
-
-        #endregion SMethods
-    
-    }
-
-    /// <summary>
-    /// This registry contains the known character encodings with little endian characters
-    /// </summary>
-    public class CodeSetConversionRegistryLittleEndian : CodeSetConversionRegistry {
-    
-        #region SFields
-        
-        private static CodeSetConversionRegistryLittleEndian s_registry = new CodeSetConversionRegistryLittleEndian();
-
-        #endregion SFields
-        #region IConstructors
-
-        private CodeSetConversionRegistryLittleEndian() {
-            AddEncoding(CodeSetService.UTF16_SET, 
-                        new UnicodeEncodingExt(false, false)); // use big endian encoding here, put no unicode byte order mark
-            AddEncoding(CodeSetService.ISO646IEC_MULTI,
-                        new UnicodeEncodingExt(false, false));
-        }
-
-        #endregion IConsturctors
-        #region SMethods
-
-        /// <summary>get the singleton registry</summary>
-        public static new CodeSetConversionRegistry GetRegistry() {
-            return s_registry;
-        }
-
-        #endregion SMethods
-    
-    }
 
     public class Latin1Encoding : Encoding {
         
