@@ -6,17 +6,26 @@ build:
 	$(MAKE) -C Utils build -f Makefile.mono
 	$(MAKE) -C Basic build -f Makefile.mono
 	$(MAKE) -C Direct build -f Makefile.mono
+	$(MAKE) -C CodeSets build -f Makefile.mono
 	$(MAKE) -C Callback build -f Makefile.mono
+	$(MAKE) -C InterceptorTests build -f Makefile.mono
+	$(MAKE) -C BidirGiop build -f Makefile.mono
 
 test:
 	@echo Starting integration tests at:
 	@mono $(PRCURRENTTIME)
 	$(MAKE) -C Basic test -f Makefile.mono
 	$(MAKE) -C Direct test -f Makefile.mono
+	$(MAKE) -C CodeSets test -f Makefile.mono
 	$(MAKE) -C Callback test -f Makefile.mono
+	$(MAKE) -C InterceptorTests test -f Makefile.mono
+	$(MAKE) -C BidirGiop test -f Makefile.mono
 
 clean:
 	$(MAKE) -C Utils clean -f Makefile.mono
 	$(MAKE) -C Basic clean -f Makefile.mono
 	$(MAKE) -C Direct clean -f Makefile.mono
+	$(MAKE) -C CodeSets clean -f Makefile.mono
 	$(MAKE) -C Callback clean -f Makefile.mono
+	$(MAKE) -C InterceptorTests clean -f Makefile.mono
+	$(MAKE) -C BidirGiop clean -f Makefile.mono

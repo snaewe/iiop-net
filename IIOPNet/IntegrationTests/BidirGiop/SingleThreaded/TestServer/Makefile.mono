@@ -13,22 +13,22 @@ build-server: $(bin)TestServer.exe
 build-idl: IDL/Ch/Elca/Iiop/IntegrationTests/TestService.idl
 
 $(bin)IIOPChannel.dll: $(IIOPCHANNEL)
-    [ -d $(bin) ] || mkdir $(bin)
-    cp $(IIOPCHANNEL) $(bin)
+	[ -d $(bin) ] || mkdir $(bin)
+	cp $(IIOPCHANNEL) $(bin)
 
 $(bin)TestServer.exe: $(bin)IIOPChannel.dll *.cs
-    $(CSC) $(CSFLAGS) /t:exe /r:$(bin)IIOPChannel.dll /out:$(bin)TestServer.exe *.cs
+	$(CSC) $(CSFLAGS) /t:exe /r:$(bin)IIOPChannel.dll /out:$(bin)TestServer.exe *.cs
     
 IDL/Ch/Elca/Iiop/IntegrationTests/TestService.idl: $(bin)TestServer.exe
-    mono ../../../../CLSToIDLGenerator/bin/CLSIDLGenerator.exe -o IDL Ch.Elca.Iiop.IntegrationTests.TestService $(bin)TestServer.exe
+	mono ../../../../CLSToIDLGenerator/bin/CLSIDLGenerator.exe -o IDL Ch.Elca.Iiop.IntegrationTests.TestService $(bin)TestServer.exe
 
 start-server:
-    @mono $(LAUNCH) mono bin/TestServer.exe >> pid
+	@mono $(LAUNCH) mono bin/TestServer.exe >> pid
 
 stop-server:
-    @-for p in `cat pid`; do mono $(KILL) $$p; done
-    @rm -f pid
+	@-for p in `cat pid`; do mono $(KILL) $$p; done
+	@rm -f pid
 
 clean:
-    rm -rf IDL
-    rm -rf bin
+	rm -rf IDL
+	rm -rf bin
