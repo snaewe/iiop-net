@@ -164,6 +164,15 @@ namespace omg.org.CORBA {
         /// Afterwards, the interceptors are enabled and are called during processing.
         /// </summary>
         void CompleteInterceptorRegistration();
+        
+        /// <summary>
+        /// Overrides the IIOP.NET default for charset and wcharset. If this method is
+        /// not invoked specifying a user default, IIOP.NET uses it's default of LATIN1 / UTF16.
+        /// </summary>
+        /// <remarks>This method must be called, before the first call is performed. 
+        /// Otherwise this method throws a BAD_INV_ORDER exception.</remarks>
+        void OverrideDefaultCharSets(Ch.Elca.Iiop.Services.CharSet charSet, 
+                                     Ch.Elca.Iiop.Services.WCharSet wcharSet);
 	    
         #endregion Protable Interceptors
 
@@ -506,6 +515,13 @@ namespace omg.org.CORBA {
 	    
         #endregion Protable Interceptors
         
+        /// <summary>see <see cref="omg.org.CORBA.IOrbServices.OverrideDefaultCharSets"</summary>
+        public void OverrideDefaultCharSets(Ch.Elca.Iiop.Services.CharSet charSet,
+                                            Ch.Elca.Iiop.Services.WCharSet wcharSet) {
+            Ch.Elca.Iiop.Services.CodeSetService.OverrideDefaultCharSets(charSet, wcharSet);
+        }
+        
+        
         #endregion IMethods
     
     }        						
@@ -537,4 +553,41 @@ namespace omg.org.CORBA.ORB_package {
     
 }
 
+
+
+#if UnitTest
+
+namespace Ch.Elca.Iiop.Tests {
+    
+    using System.IO;    
+    using NUnit.Framework;    
+    using omg.org.CORBA;
+    using Ch.Elca.Iiop.Services;
+    
+    /// <summary>
+    /// Unit-tests for orb services
+    /// </summary>
+    public class OrbServicesTest : TestCase {
+        
+        public OrbServicesTest() {
+        }
+                       
+        public void TestOverrideCodeSetsWhenAlreadySet() {
+            Assertion.Assert(Enum.IsDefined(typeof(CharSet), CodeSetService.DefaultCharSet));
+            Assertion.Assert(Enum.IsDefined(typeof(WCharSet), CodeSetService.DefaultWCharSet));
+            
+            IOrbServices orbServices = OrbServices.GetSingleton();
+            try {
+                orbServices.OverrideDefaultCharSets(CharSet.UTF8, WCharSet.UTF16);
+                Assertion.Fail("expected bad_inv_order exception");
+            } catch (BAD_INV_ORDER) {
+                // expected, because already set
+            }
+        }
+        
+    }
+
+}
+
+#endif
 

@@ -47,8 +47,8 @@ namespace Ch.Elca.Iiop {
 
         #region IFields
 
-        private int m_charSetChosen = CodeSetService.DEFAULT_CHAR_SET;
-        private int m_wcharSetChosen = CodeSetService.DEFAULT_WCHAR_SET;
+        private int m_charSetChosen = CodeSetService.DefaultCharSet;
+        private int m_wcharSetChosen = CodeSetService.DefaultWCharSet;
                
         private bool m_codeSetNegotiated = false;
         

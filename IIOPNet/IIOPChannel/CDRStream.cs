@@ -716,8 +716,8 @@ namespace Ch.Elca.Iiop.Cdr {
 
         private uint m_index = 0;
 
-        private int m_charSet = CodeSetService.DEFAULT_CHAR_SET;
-        private int m_wcharSet = CodeSetService.DEFAULT_WCHAR_SET;
+        private int m_charSet = CodeSetService.DefaultCharSet;
+        private int m_wcharSet = CodeSetService.DefaultWCharSet;
         
         #endregion IFields
         #region IConstructors

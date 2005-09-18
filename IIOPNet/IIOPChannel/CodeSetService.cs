@@ -83,6 +83,21 @@ namespace Ch.Elca.Iiop.Services {
     }
     
     /// <summary>
+    /// the supported charsets
+    /// </summary>
+    public enum CharSet {
+        LATIN1 = 0x10001, UTF8 = 0x5010001, 
+        ISO646IEC_SINGLE = 0x10020 /* compatible with ASCII */        
+    }
+    
+    /// <summary>
+    /// the supported wcharsets
+    /// </summary>
+    public enum WCharSet {
+        UTF16 = 0x10109, ISO646IEC_MULTI = 0x10100
+    }
+    
+    /// <summary>
     /// This service handles code-set conversion.
     /// </summary>
     internal sealed class CodeSetService {
@@ -90,21 +105,41 @@ namespace Ch.Elca.Iiop.Services {
         #region Constants
 
         public const int SERVICE_ID = 1;
+        
+        /// <summary>
+        /// default char set used, if not overriden
+        /// </summary>
+        private const int DEFAULT_CHAR_SET_TO_SET = (int)CharSet.LATIN1;
 
-        private const int UTF16_SET = 0x10109;
-        private const int LATIN1_SET = 0x10001;
-        private const int UTF8_SET = 0x5010001;
-
-        private const int ISO646IEC_MULTI = 0x10100; // compatible with UTF-16
-        private const int ISO646IEC_SINGLE = 0x10020; // compatible with ASCII
-
-        public const int DEFAULT_CHAR_SET = LATIN1_SET;
-        public const int DEFAULT_WCHAR_SET = UTF16_SET;
+        /// <summary>
+        /// default wchar set used, if not overriden
+        /// </summary>
+        private const int DEFAULT_WCHAR_SET_TO_SET = (int)WCharSet.UTF16;
+        
+        private const int UNINITALIZED_CHAR_SET = -1;
+        private const int UNINITALIZED_WCHAR_SET = -1;
 
         #endregion Constants
         #region SFields
         
-        private static CodeSetConversionRegistry s_registry = new CodeSetConversionRegistry();        
+        private static CodeSetConversionRegistry s_registry = new CodeSetConversionRegistry();
+        
+        private static readonly Type s_wCharSetType = typeof(WCharSet);
+        private static readonly Type s_charSetType = typeof(CharSet);
+        
+        /// <summary>
+        /// the default char set to use; is initalized either by the user or on first use by IIOP.NET to
+        /// DEFAULT_CHAR_SET.
+        /// </summary>
+        private static volatile int s_defaultCharSet = UNINITALIZED_CHAR_SET;
+
+        /// <summary>
+        /// the default wchar set to use; is initalized either by the user or on first use by IIOP.NET to
+        /// DEFAULT_WCHAR_SET.
+        /// </summary>
+        private static volatile int s_defaultWCharSet = UNINITALIZED_WCHAR_SET;
+        
+        private static object s_initLock = new object();
         
         #endregion SFields
         #region SConstructor
@@ -112,18 +147,18 @@ namespace Ch.Elca.Iiop.Services {
         static CodeSetService() {
             s_registry = new CodeSetConversionRegistry();
             // add the non-endian dependant encodings here
-            s_registry.AddEncodingAllEndian(CodeSetService.LATIN1_SET, new Latin1Encoding());
-            s_registry.AddEncodingAllEndian(CodeSetService.ISO646IEC_SINGLE, new ASCIIEncoding());
-            s_registry.AddEncodingAllEndian(CodeSetService.UTF8_SET, new UTF8Encoding());
+            s_registry.AddEncodingAllEndian((int)CharSet.LATIN1, new Latin1Encoding());
+            s_registry.AddEncodingAllEndian((int)CharSet.ISO646IEC_SINGLE, new ASCIIEncoding());
+            s_registry.AddEncodingAllEndian((int)CharSet.UTF8, new UTF8Encoding());
             // big endian
-            s_registry.AddEncodingBigEndian(CodeSetService.UTF16_SET, 
+            s_registry.AddEncodingBigEndian((int)WCharSet.UTF16,
                                             new UnicodeEncodingExt(true, false)); // use big endian encoding here, put no unicode byte order mark
-            s_registry.AddEncodingBigEndian(CodeSetService.ISO646IEC_MULTI,
+            s_registry.AddEncodingBigEndian((int)WCharSet.ISO646IEC_MULTI,
                                             new UnicodeEncodingExt(true, false));
             // little endian
-            s_registry.AddEncodingLittleEndian(CodeSetService.UTF16_SET, 
+            s_registry.AddEncodingLittleEndian((int)WCharSet.UTF16,
                                                new UnicodeEncodingExt(false, false)); // use big endian encoding here, put no unicode byte order mark
-            s_registry.AddEncodingLittleEndian(CodeSetService.ISO646IEC_MULTI,
+            s_registry.AddEncodingLittleEndian((int)WCharSet.ISO646IEC_MULTI,
                                                new UnicodeEncodingExt(false, false));
         }
         
@@ -134,7 +169,58 @@ namespace Ch.Elca.Iiop.Services {
         }
 
         #endregion IConstructors
+        #region SProperties
+        
+        /// <summary>
+        /// the default char set to use (if nothing different is specified by Code set establishment)
+        /// </summary>
+        internal static int DefaultCharSet {
+            get {
+                if (s_defaultCharSet == UNINITALIZED_CHAR_SET) {
+                    lock(s_initLock) {
+                        if (s_defaultCharSet == UNINITALIZED_CHAR_SET) {
+                            s_defaultCharSet = DEFAULT_CHAR_SET_TO_SET;
+                        }
+                    }
+                }
+                return s_defaultCharSet;
+            }
+        }
+
+        /// <summary>
+        /// the default wchar set to use (if nothing different is specified by Code set establishment)
+        /// </summary>        
+        internal static int DefaultWCharSet {
+            get {
+                if (s_defaultWCharSet == UNINITALIZED_WCHAR_SET) {
+                    lock(s_initLock) {
+                        if (s_defaultWCharSet == UNINITALIZED_WCHAR_SET) {
+                            s_defaultWCharSet = DEFAULT_WCHAR_SET_TO_SET;
+                        }
+                    }
+                }
+                return s_defaultWCharSet;                
+            }
+        }
+        
+        #endregion SProperties
         #region SMethods
+        
+        /// <summary>
+        /// overrides the default char set and the default wcharset to use.
+        /// </summary>
+        internal static void OverrideDefaultCharSets(CharSet defaultCharSet, WCharSet defaultWCharSet) {
+            lock(s_initLock) {
+                if ((s_defaultCharSet != UNINITALIZED_CHAR_SET) || (s_defaultWCharSet != UNINITALIZED_WCHAR_SET)) {
+                    // only settable once, before first used.
+                    throw new BAD_INV_ORDER(690, CompletionStatus.Completed_MayBe);
+                }
+                s_defaultCharSet = (int)defaultCharSet;
+                s_defaultWCharSet = (int)defaultWCharSet;
+            }
+        }
+        
+
                        
         /// <summary>
         /// returns the code set component data or null if not found
@@ -164,25 +250,17 @@ namespace Ch.Elca.Iiop.Services {
         }
         
         private static bool IsWCharSetCompatible(int wcharSet) {
-            if ((wcharSet == UTF16_SET) || (wcharSet == ISO646IEC_MULTI)) { 
-                return true;
-            } else {
-                return false;
-            }
+            return Enum.IsDefined(s_wCharSetType, wcharSet);
         }
         
         private static bool IsCharSetCompatible(int charSet) {
-            if ((charSet == LATIN1_SET) || (charSet == ISO646IEC_SINGLE) || (charSet == UTF8_SET)) {
-                return true;
-            } else {
-                return false;
-            }
+            return Enum.IsDefined(s_charSetType, charSet);
         }
         
         internal static int ChooseCharSet(CodeSetComponentData codeSetComponent) {
-            if (codeSetComponent.NativeCharSet == DEFAULT_CHAR_SET) {
+            if (codeSetComponent.NativeCharSet == DefaultCharSet) {
                 // the same native char sets
-                return DEFAULT_CHAR_SET;
+                return codeSetComponent.NativeCharSet;
             }
             if (IsCharSetCompatible(codeSetComponent.NativeCharSet)) {
                 // client converts to server's native char set
@@ -190,9 +268,9 @@ namespace Ch.Elca.Iiop.Services {
             }
             int[] serverConvSets = codeSetComponent.CharConvSet;
             foreach (int serverConvSet in serverConvSets) {
-                if (serverConvSet == DEFAULT_CHAR_SET) {
+                if (serverConvSet == DefaultCharSet) {
                     // server convert's from client's native char set
-                    return DEFAULT_CHAR_SET;
+                    return serverConvSet;
                 }
             }
             foreach (int serverConvSet in serverConvSets) {
@@ -205,9 +283,9 @@ namespace Ch.Elca.Iiop.Services {
         }
         
         internal static int ChooseWCharSet(CodeSetComponentData codeSetComponent) {
-            if (codeSetComponent.NativeWCharSet == DEFAULT_WCHAR_SET) {
+            if (codeSetComponent.NativeWCharSet == DefaultWCharSet) {
                 // the same native wchar sets
-                return DEFAULT_WCHAR_SET;
+                return codeSetComponent.NativeWCharSet;
             }
             if (IsWCharSetCompatible(codeSetComponent.NativeWCharSet)) {
                 // client converts to server's native wchar set
@@ -215,9 +293,9 @@ namespace Ch.Elca.Iiop.Services {
             }
             int[] serverConvSets = codeSetComponent.WCharConvSet;
             foreach (int serverConvSet in serverConvSets) {
-                if (serverConvSet == DEFAULT_WCHAR_SET) {
+                if (serverConvSet == DefaultWCharSet) {
                     // server convert's from client's native wchar set
-                    return DEFAULT_WCHAR_SET;
+                    return serverConvSet;
                 }
             }
             foreach (int serverConvSet in serverConvSets) {
@@ -263,11 +341,17 @@ namespace Ch.Elca.Iiop.Services {
         /// </summary>
         /// <returns></returns>
         internal static TaggedComponent CreateDefaultCodesetComponent() {
+            Array wCharSets = Enum.GetValues(s_wCharSetType);
+            Array charSets = Enum.GetValues(s_charSetType);
+            int[] wCharSetCodes = new int[wCharSets.Length];
+            int[] charSetCodes = new int[charSets.Length];
+            wCharSets.CopyTo(wCharSetCodes, 0);
+            charSets.CopyTo(charSetCodes, 0);
             return TaggedComponent.CreateTaggedComponent(TAG_CODE_SETS.ConstVal, 
-                                                         new Services.CodeSetComponentData(Services.CodeSetService.DEFAULT_CHAR_SET,
-                                                                                new int[] { Services.CodeSetService.UTF8_SET, Services.CodeSetService.ISO646IEC_SINGLE },
-                                                                                            Services.CodeSetService.DEFAULT_WCHAR_SET,
-                                                                                new int[] { Services.CodeSetService.ISO646IEC_MULTI }));
+                                                         new Services.CodeSetComponentData(Services.CodeSetService.DefaultCharSet,
+                                                                                           charSetCodes,
+                                                                                           Services.CodeSetService.DefaultWCharSet,
+                                                                                           wCharSetCodes));
         }
         
         /// <summary>
