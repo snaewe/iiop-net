@@ -1498,7 +1498,7 @@ char wide_character_literal() #void :
 }
 
 System.Double floating_pt_literal() #void :
-{ Token floatLiteral; string unaryOp = ""; }
+{ Token floatLiteral = null; string unaryOp = ""; }
 {
 [ "+" | "-" { unaryOp = "-"; } ]
 (

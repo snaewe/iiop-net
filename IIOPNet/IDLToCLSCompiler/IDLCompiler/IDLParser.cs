@@ -4266,7 +4266,7 @@ public class IDLParser{/*@bgen(jjtree)*/
   }
 
   public System.Double floating_pt_literal() {
-  Token floatLiteral; string unaryOp = "";
+  Token floatLiteral = null; string unaryOp = "";
     switch ((jj_ntk==-1)?jj_ntk_calc():jj_ntk) {
     case 40:
     case 41:
