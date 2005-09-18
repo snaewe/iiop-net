@@ -345,8 +345,12 @@ namespace Ch.Elca.Iiop.Services {
             Array charSets = Enum.GetValues(s_charSetType);
             int[] wCharSetCodes = new int[wCharSets.Length];
             int[] charSetCodes = new int[charSets.Length];
-            wCharSets.CopyTo(wCharSetCodes, 0);
-            charSets.CopyTo(charSetCodes, 0);
+            for (int i = 0; i < wCharSets.Length; i++) { // Array.CopyTo doesn't work with mono for this case
+                wCharSetCodes[i] = (int)wCharSets.GetValue(i);
+            }
+            for (int i = 0; i < charSets.Length; i++) { // Array.CopyTo doesn't work with mono for this case
+                charSetCodes[i] = (int)charSets.GetValue(i);
+            }
             return TaggedComponent.CreateTaggedComponent(TAG_CODE_SETS.ConstVal, 
                                                          new Services.CodeSetComponentData(Services.CodeSetService.DefaultCharSet,
                                                                                            charSetCodes,
