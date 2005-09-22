@@ -1,0 +1,22 @@
+#ifndef __Ch_Elca_Iiop_Tutorial_GettingStarted_Adder__
+#define __Ch_Elca_Iiop_Tutorial_GettingStarted_Adder__
+
+module Ch {
+module Elca {
+module Iiop {
+module Tutorial {
+module GettingStarted {
+
+interface Adder {
+double add(in double arg1, in double arg2);
+};
+
+#pragma ID Adder "IDL:Ch/Elca/Iiop/Tutorial/GettingStarted/Adder:1.0"
+
+};
+};
+};
+};
+};
+
+#endif
