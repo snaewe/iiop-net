@@ -61,8 +61,8 @@ Interoperation with the following ORBs has been reported:
 </software>
 
 <software name="OmniORB">
-	<report version="4.0.2" color="green">ok</report>
 	<report version="4.0.3" color="green">ok</report>
+	<report version="4.0.2" color="green">ok</report>
 </software>
 <software name="JacORB">
 	<report version="" color="green">JacORB doesn't support Anys with typecode 30 (see <a href="faq.html#faq7_11">FAQ 7.11</a>)</report>
@@ -73,20 +73,21 @@ Interoperation with the following ORBs has been reported:
 Interoperation with J2EE applications is reported for the following application servers:
 <reports>
 <software name="IBM Websphere">
-	<report version="4.0" color="green">ok</report>
-	<report version="5.0" color="green">ok</report>
 	<report version="5.1" color="green">ok</report>
+	<report version="5.0" color="green">ok</report>
+	<report version="4.0" color="green">ok</report>
 </software>
 <software name="JBoss">
-	<report version="3.0.6" color="yellow">in progress</report>
-	<report version="3.2.1" color="green">ok</report>
-	<report version="3.2.2" color="red">no (JBoss bug #<a href="http://sourceforge.net/tracker/index.php?func=detail&aid=829734&group_id=22866&atid=376685">829734</a>)</report>
+	<report version="4.0.2" color="green">ok</report>
 	<report version="3.2.3" color="green">ok</report>
+	<report version="3.2.2" color="red">no (JBoss bug #<a href="http://sourceforge.net/tracker/index.php?func=detail&aid=829734&group_id=22866&atid=376685">829734</a>)</report>
+	<report version="3.2.1" color="green">ok</report>
+	<report version="3.0.6" color="yellow">in progress</report>
 </software>
 <software name="BEA Weblogic">
-	<report version="6.1" color="yellow">array mapping problems</report>
-	<report version="7" color="orange">in progress</report>
 	<report version="8.1" color="green">ok</report>
+	<report version="7" color="orange">in progress</report>
+	<report version="6.1" color="yellow">array mapping problems</report>
 </software>
 
 <software name="Borland Enterprise Server">
@@ -95,12 +96,22 @@ Interoperation with J2EE applications is reported for the following application 
 </reports>
 
 <p/>
+IIOP.NET on Microsoft .NET Framework:
+<reports>
+<software name="MS .NET">
+	<report version="2.0 beta2" color="green"></report>
+	<report version="2.0 beta1" color="red"></report>
+	<report version="1.x" color="green"></report>
+</software>
+</reports>
+<p/>
 IIOP.NET on Mono:
 <reports>
 <software name="Mono">
-	<report version="0.31" color="orange">
-		IntegrationTests/Basic doesn't compile (reason unknown)
-	</report>
-	<report version="1.0" color="yellow">IIOP.NET naming service doesn't work when using .NET as server</report>
+	<report version="1.1.9" color="green">ok with IIOP.NET 1.8.x or newer</report>
+	<report version="1.1.8" color="green">ok with IIOP.NET 1.8.x or newer</report>
+	<report version="1.1.7" color="green">ok with IIOP.NET 1.8.x or newer</report>
+	<report version="1.0.x" color="red"></report>
+	<report version="0.31" color="red"></report>
 </software>
 </reports>

@@ -86,6 +86,8 @@ o"></A></TD></TR>
 IIOP.NET allows a seamless interoperation between .NET, CORBA and J2EE distributed objects. Components on each platform can act
 either in client or server role.
 <p>
+IIOP over SSL is supported from version 1.7.1
+<p>
 <b>CORBA version</b>
 <p>
 IIOP.NET is based on CORBA 2.3.1.<BR>
@@ -95,11 +97,11 @@ Only the parts of the specification related to interoperability are implemented.
 <p>
 IIOP.NET supports the following protocols:<BR>
 IIOP/GIOP 1.0, 1.1, 1.2
+Bidirectional GIOP (1.8 and newer)
 <p>
 The following protocol parts are not supported:
 <UL>
 <LI>Message types other than request, reply, fragment (LocateRequest / LocateReply are partly supported)</LI>
-<LI>Bidirectional GIOP</LI>
 </UL>
 <p>
 <b>Supported types</b>
@@ -137,8 +139,8 @@ Interoperation with the following ORBs has been reported:
 	<tr><td width="10px" bgcolor="#99FF99"></td><td>SUN JDK</td><td align="left">1.4</td><td>OK</td></tr>
 	<tr><td width="10px" bgcolor="#99FF99"></td><td>MICO</td><td align="left">2.3.10</td><td>OK</td></tr>
 	<tr><td width="10px" bgcolor="#99FF99"></td><td>TAO</td><td align="left">1.4</td><td>ok</td></tr>
-	<tr><td width="10px" bgcolor="#99FF99"></td><td>OmniORB</td><td align="left">4.0.2</td><td>ok</td></tr>
 	<tr><td width="10px" bgcolor="#99FF99"></td><td>OmniORB</td><td align="left">4.0.3</td><td>ok</td></tr>
+	<tr><td width="10px" bgcolor="#99FF99"></td><td>OmniORB</td><td align="left">4.0.2</td><td>ok</td></tr>
 	<tr><td width="10px" bgcolor="#99FF99"></td><td>JacORB</td><td align="left"></td><td>JacORB doesn't support Anys with typecode 30 (see <a href="faq.html#faq7_11">FAQ 7.11</a>)</td></tr>
 	</table>
 	</ul>
@@ -147,17 +149,28 @@ Interoperation with J2EE applications is reported for the following application 
 	<ul>
 	<table border="0" cellspacing="6" summary="">
 	<!--tr><th>Software</th><th>Version</th><th>Report</th></tr-->
-	<tr><td width="10px" bgcolor="#99FF99"></td><td>IBM Websphere</td><td align="left">4.0</td><td>ok</td></tr>
-	<tr><td width="10px" bgcolor="#99FF99"></td><td>IBM Websphere</td><td align="left">5.0</td><td>ok</td></tr>
 	<tr><td width="10px" bgcolor="#99FF99"></td><td>IBM Websphere</td><td align="left">5.1</td><td>ok</td></tr>
-	<tr><td width="10px" bgcolor="#FFFF99"></td><td>JBoss</td><td align="left">3.0.6</td><td>in progress</td></tr>
-	<tr><td width="10px" bgcolor="#99FF99"></td><td>JBoss</td><td align="left">3.2.1</td><td>ok</td></tr>
-	<tr><td width="10px" bgcolor="#FF3333"></td><td>JBoss</td><td align="left">3.2.2</td><td>no (JBoss bug #<a href="http://sourceforge.net/tracker/index.php?func=detail&aid=829734&group_id=22866&atid=376685">829734</a>)</td></tr>
+	<tr><td width="10px" bgcolor="#99FF99"></td><td>IBM Websphere</td><td align="left">5.0</td><td>ok</td></tr>
+	<tr><td width="10px" bgcolor="#99FF99"></td><td>IBM Websphere</td><td align="left">4.0</td><td>ok</td></tr>
+	<tr><td width="10px" bgcolor="#99FF99"></td><td>JBoss</td><td align="left">4.0.2</td><td>ok</td></tr>
 	<tr><td width="10px" bgcolor="#99FF99"></td><td>JBoss</td><td align="left">3.2.3</td><td>ok</td></tr>
-	<tr><td width="10px" bgcolor="#FFFF99"></td><td>BEA Weblogic</td><td align="left">6.1</td><td>array mapping problems</td></tr>
-	<tr><td width="10px" bgcolor="#FF9966"></td><td>BEA Weblogic</td><td align="left">7</td><td>in progress</td></tr>
+	<tr><td width="10px" bgcolor="#FF3333"></td><td>JBoss</td><td align="left">3.2.2</td><td>no (JBoss bug #<a href="http://sourceforge.net/tracker/index.php?func=detail&aid=829734&group_id=22866&atid=376685">829734</a>)</td></tr>
+	<tr><td width="10px" bgcolor="#99FF99"></td><td>JBoss</td><td align="left">3.2.1</td><td>ok</td></tr>
+	<tr><td width="10px" bgcolor="#FFFF99"></td><td>JBoss</td><td align="left">3.0.6</td><td>in progress</td></tr>
 	<tr><td width="10px" bgcolor="#99FF99"></td><td>BEA Weblogic</td><td align="left">8.1</td><td>ok</td></tr>
+	<tr><td width="10px" bgcolor="#FF9966"></td><td>BEA Weblogic</td><td align="left">7</td><td>in progress</td></tr>
+	<tr><td width="10px" bgcolor="#FFFF99"></td><td>BEA Weblogic</td><td align="left">6.1</td><td>array mapping problems</td></tr>
 	<tr><td width="10px" bgcolor="#FFFF99"></td><td>Borland Enterprise Server</td><td align="left">5.2.1</td><td>partially tested</td></tr>
+	</table>
+	</ul>
+<p>
+IIOP.NET on Microsoft .NET Framework:
+	<ul>
+	<table border="0" cellspacing="6" summary="">
+	<!--tr><th>Software</th><th>Version</th><th>Report</th></tr-->
+	<tr><td width="10px" bgcolor="#99FF99"></td><td>MS .NET</td><td align="left">2.0 beta2</td><td></td></tr>
+	<tr><td width="10px" bgcolor="#FF3333"></td><td>MS .NET</td><td align="left">2.0 beta1</td><td></td></tr>
+	<tr><td width="10px" bgcolor="#99FF99"></td><td>MS .NET</td><td align="left">1.x</td><td></td></tr>
 	</table>
 	</ul>
 <p>
@@ -165,10 +178,11 @@ IIOP.NET on Mono:
 	<ul>
 	<table border="0" cellspacing="6" summary="">
 	<!--tr><th>Software</th><th>Version</th><th>Report</th></tr-->
-	<tr><td width="10px" bgcolor="#FF9966"></td><td>Mono</td><td align="left">0.31</td><td>
-		IntegrationTests/Basic doesn't compile (reason unknown)
-	</td></tr>
-	<tr><td width="10px" bgcolor="#FFFF99"></td><td>Mono</td><td align="left">1.0</td><td>IIOP.NET naming service doesn't work when using .NET as server</td></tr>
+	<tr><td width="10px" bgcolor="#99FF99"></td><td>Mono</td><td align="left">1.1.9</td><td>ok with IIOP.NET 1.8.x or newer</td></tr>
+	<tr><td width="10px" bgcolor="#99FF99"></td><td>Mono</td><td align="left">1.1.8</td><td>ok with IIOP.NET 1.8.x or newer</td></tr>
+	<tr><td width="10px" bgcolor="#99FF99"></td><td>Mono</td><td align="left">1.1.7</td><td>ok with IIOP.NET 1.8.x or newer</td></tr>
+	<tr><td width="10px" bgcolor="#FF3333"></td><td>Mono</td><td align="left">1.0.x</td><td></td></tr>
+	<tr><td width="10px" bgcolor="#FF3333"></td><td>Mono</td><td align="left">0.31</td><td></td></tr>
 	</table>
 	</ul>
 <p>Please help us keeping this table updated!

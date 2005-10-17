@@ -2,15 +2,13 @@
 
 <SUBJECT>Overview</SUBJECT>
 <p/>
-<img alt="IIOP.NET celebrates it's first anniversary" src="images/birthday_cake.gif" align="right" width="88" height="91">
-
 IIOP.NET allows a seamless interoperation between .NET, CORBA and J2EE distributed objects. This is done by incorporating CORBA/IIOP support into
 .NET, leveraging the remoting framework.<BR>
 <p/>
 IIOP.NET is released under the LGPL license.
 
 <p/>
-The project celebrated its first anniversary on May, 2! During this time, IIOP.NET was downloaded around 2500 times, and grew from a small experimental project to a stable and useful application. Thank you very much to all the IIOP.NET community.
+IIOP.NET was born on May, 2 2003, and grew from a small experimental project to a stable and useful application, mostly thank to the great feedback and dedication of our growing user's community.
 
 <H2 class="contentPart">Features</H2>
 <p/>
@@ -38,8 +36,8 @@ IIOP.NET is directly based on the standard remoting infrastructure.
 
 For using this channel you need the following
 <UL>
-<LI>.NET Framework 1.0 or better</LI>
-<LI>CORBA 2.3 ORB (e.g. included in Sun's JDK 1.4)</LI>
+<LI>either Microsoft .NET Framework 1.x / 2.0 (at least beta2) or Mono 1.1.7 or better</LI>
+<LI>a CORBA 2.3 ORB peer like OmniORB, Sun JDK Orb, JacORB, IBM Websphere, ....</LI>
 </UL>
 
 <H2 class="contentPart">ORB Compatibility</H2>

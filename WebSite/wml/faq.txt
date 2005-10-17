@@ -1,8 +1,7 @@
 <FAQ-SECTION name="Platform Compatibility">
 
-<FAQ question="Does IIOP.NET work with Microsoft's .NET 1.1?">
-
-<p> Yes, it does. This is in fact the platform it was developed on.
+<FAQ question="With which versions of Microsoft's .NET does IIOP.NET work?">
+<p> IIOP.NET works with the .NET Framework 1.0, 1.1 and 2.0 beta2.
 </FAQ>
 
 <FAQ question="Does IIOP.NET work with Microsoft's Windows CE .NET (Compact Framework)?">
@@ -18,7 +17,7 @@
 
 <FAQ question="Does IIOP.NET work with Mono?">
 
-<p>Yes, IIOP.NET does work with Mono 1.0
+<p>From version 1.8.0 IIOP.NET does work with Mono (1.1.7 or newer required)
 
 </FAQ>
 </FAQ-SECTION>
@@ -46,7 +45,7 @@ Yes, it can.
 Some hints are provided in the <a href="websphere4.html">Websphere 4 interoperation howto</a>.
 
 </FAQ>
-<FAQ question="Can IIOP.NET interoperate with IBM Websphere 5?">
+<FAQ question="Can IIOP.NET interoperate with IBM Websphere 5.0 / 5.1?">
 
 <p>
 Yes, it can.
@@ -60,12 +59,29 @@ Yes, it can.
 Some hints are provided in the <a href="jboss3_2.html">JBoss 3.2 interoperation howto</a>.
 
 </FAQ>
+<FAQ question="Can IIOP.NET interoperate with JBoss 4?">
+<p>Yes, it can.
+</FAQ>
+
+<FAQ question="Can IIOP.NET interoperate with OmniORB?">
+<p>Yes, it can.
+</FAQ>
+
+<FAQ question="Can IIOP.NET interoperate with MICO ORB?">
+<p>Yes, it can.
+</FAQ>
+
+<FAQ question="Can IIOP.NET interoperate with TAO ORB?">
+<p>Yes, it can.
+</FAQ>
+
 </FAQ-SECTION>
 <FAQ-SECTION name="Configuration">
 
 <FAQ question="Can the IIOP.NET sources be compiled without any configuration?">
 <p>
-To compile the tutorials, you must copy the files <em>ir.idl</em> and <em>orb.idl</em>
+IIOP.NET itself doesn't need any external file, but to compile the tutorials and 
+some of integration tests, you must copy the files <em>ir.idl</em> and <em>orb.idl</em>
 in the <em>./IDL</em> directory before compiling the tutorials. You will find 
 these two files as part of your Java SDK in the <em>%JAVA_HOME%\lib</em> directory.
 
@@ -143,11 +159,23 @@ The following config file
 <p>
 Add the following configuration lines in the files <code>%NUnit2%\bin\nunit-console.exe.config</code> and <code>%NUnit2%\bin\nunit-gui.exe.config</code>:
 
+<ul>
+<li>for .NET 1.1:
 <pre>
   &lt;startup&gt; 
     &lt;supportedRuntime version="v1.1.4322" /&gt; 
   &lt;/startup&gt; 
 </pre>
+</li>
+<li>for .NET 2.0:
+<pre>
+  &lt;startup&gt; 
+    &lt;supportedRuntime version="v2.0.50215" /&gt; 
+  &lt;/startup&gt; 
+</pre>
+</li>
+</ul>
+
 
 </FAQ>
 </FAQ-SECTION>
@@ -164,18 +192,21 @@ Add the following configuration lines in the files <code>%NUnit2%\bin\nunit-cons
   idl-files         one or more idl files containg OMG IDL definitions
   
   options are
-  -h               help
-  -o directory     output directory (default is `-o .`)
-  -r assembly      assemblies to check for types in, instead of generating them
-  -c xmlfile       specifies custom mappings
-  -d define        defines a preprocessor symbol
-  -idir directory  directory containing idl files (multiple -idir allowed)
-  -vtSkel          enable creation of value type implementation skeletons
-  -vtSkelProv      the fully qualified name of the codedomprovider to use for value type skeleton generation
-  -vtSkelTd        the targetDirectory for generated valuetype impl skeletons
-  -vtSkelO         overwrite already present valuetype skeleton implementations
-  -snk             sign key file (used for generating strong named assemblies)
-  -delaySign       delay signing of assembly (snk file contains only a pk)
+  -h              help
+  -o directory    output directory (default is `-o .`)
+  -r assembly     assemblies to check for types in, instead of generating them
+  -c xmlfile      specifies custom mappings
+  -d define       defines a preprocessor symbol
+  -basedir directory directory to change to before doing any processing.
+  -idir directory directory containing idl files (multiple -idir allowed)
+  -vtSkel         enable creation of value type implementation skeletons
+  -vtSkelProv     The fully qualified name of the codedomprovider to use for value type skeleton generation
+  -vtSkelTd       The targetDirectory for generated valuetype impl skeletons
+  -vtSkelO        Overwrite already present valuetype skeleton implementations
+  -snk            sign key file (used for generating strong named assemblies)
+  -delaySign      delay signing of assembly (snk file contains only a pk)
+  -asmVersion     the version of the generated assembly
+  -mapAnyToCont   maps idl any to the any container omg.org.CORBA.Any; if not specified, any is mapped to object
 </pre>
 
 <p><strong>Examples:</strong>
@@ -212,7 +243,7 @@ generate <code>proxy.dll</code> from <code>def.idl</code> in the current directo
 
 <p><strong>Notes:</strong>
 
-<p>The compiler will warn you that you must provide the implementation for the classes implementing the CORBA valuetypes. The article <a href="http://www.codeproject.com/csharp/iiop_net_and_EJB.asp">Accessing an EJB from .NET Using IIOP.NET: an Example</a> contains a detailed explanation and example (see step 4).
+<p>The compiler will warn you that you must provide the implementation for the classes implementing the CORBA valuetypes. The article <a href="http://www.codeproject.com/csharp/iiop_net_and_EJB.asp">Accessing an EJB from .NET Using IIOP.NET: an Example</a> contains a detailed explanation and example (see step 4). You can generate a skeleton (to be completed) of those classes with the option <code>-vtSkel</code>.
 
 <p>
 
@@ -269,11 +300,20 @@ generate <code>proxy.dll</code> from <code>def.idl</code> in the current directo
 
 <FAQ question="How do I configure the channel timeout?">
 
-<p>This section is valid from release 1.7.0 RC 1 and CVS after 3 October 2004.
+<p><strong>Before version 1.7.0 RC1 timeouts could not be configured.</strong>
 
 <p>The channel timeout is configured during the channel registration. By default, the timeout is set to infinity (no timeout).
 
-<p>The properties <code>IiopClientChannel.CLIENT_RECEIVE_TIMEOUT_KEY</code> and <code>IiopClientChannel.CLIENT_SEND_TIMEOUT_KEY</code> control the reception resp. sending timeouts. The timeouts are in milliseconds.
+<table>
+<tr><td><b>Property</b></td><td><b>Introduced in</b></td><td><b>Type</b></td><td><b>Description</b></td></tr>
+<tr><td><code>IiopClientChannel.CLIENT_RECEIVE_TIMEOUT_KEY</code></td><td>1.7.0 RC1</td><td>int</td><td>reception timeout in milliseconds</td></tr>
+<tr><td><code>IiopClientChannel.CLIENT_SEND_TIMEOUT_KEY</code></td><td>1.7.0 RC1</td><td>int</td><td>sending timeout in milliseconds</td></tr>
+<tr><td><code>IiopClientChannel.CLIENT_REQUEST_TIMEOUT_KEY</code></td><td>1.8</td><td>int</td><td>request timeout in milliseconds: abort request if no answer arrives before the timeout</td></tr>
+<tr><td><code>IiopClientChannel.ALLOW_REQUEST_MULTIPLEX_KEY</code></td><td>1.8</td><td>bool</td><td>allow sending new requests on a connection while previous requests are still pending (default: true)</td></tr>
+<tr><td><code>IiopClientChannel.MAX_NUMBER_OF_MULTIPLEXED_REQUESTS_KEY</code></td><td>1.8</td><td>int</td><td>maximal number of pending requests on a connection; requires ALLOW_REQUEST_MULTIPLE_KEY=true (default: 1000)</td></tr>
+<tr><td><code>IiopClientChannel.CLIENT_CONNECTION_LIMIT_KEY</code></td><td>1.8</td><td>int</td><td>maximal number of open connections to one target (default: 5)</td></tr>
+<tr><td><code>IiopClientChannel.SERVERTHREADS_MAX_PER_CONNECTION_KEY</code></td><td>1.8</td><td>int</td><td>maximal number of incoming pending requests per connection (default: 25)</td></tr>
+</table>
 
 <p>The following code installs an IIOP Channel with receive and send timeouts.
 

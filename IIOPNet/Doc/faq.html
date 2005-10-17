@@ -81,7 +81,7 @@ o"></A></TD></TR>
   <!-- content begin -->
   <H2 class="contentPart">FAQ List</H2>
   <H2 class="contentPart">1. Platform Compatibility</H2>
-  <strong><a href="#faq1_1">1.1 Does IIOP.NET work with Microsoft's .NET 1.1?</a></strong>
+  <strong><a href="#faq1_1">1.1 With which versions of Microsoft's .NET does IIOP.NET work?</a></strong>
 <br>
   <strong><a href="#faq1_2">1.2 Does IIOP.NET work with Microsoft's Windows CE .NET (Compact Framework)?</a></strong>
 <br>
@@ -96,9 +96,17 @@ o"></A></TD></TR>
 <br>
   <strong><a href="#faq2_3">2.3 Can IIOP.NET interoperate with IBM Websphere 4?</a></strong>
 <br>
-  <strong><a href="#faq2_4">2.4 Can IIOP.NET interoperate with IBM Websphere 5?</a></strong>
+  <strong><a href="#faq2_4">2.4 Can IIOP.NET interoperate with IBM Websphere 5.0 / 5.1?</a></strong>
 <br>
   <strong><a href="#faq2_5">2.5 Can IIOP.NET interoperate with JBoss 3.2?</a></strong>
+<br>
+  <strong><a href="#faq2_6">2.6 Can IIOP.NET interoperate with JBoss 4?</a></strong>
+<br>
+  <strong><a href="#faq2_7">2.7 Can IIOP.NET interoperate with OmniORB?</a></strong>
+<br>
+  <strong><a href="#faq2_8">2.8 Can IIOP.NET interoperate with MICO ORB?</a></strong>
+<br>
+  <strong><a href="#faq2_9">2.9 Can IIOP.NET interoperate with TAO ORB?</a></strong>
 <br>
   <H2 class="contentPart">3. Configuration</H2>
   <strong><a href="#faq3_1">3.1 Can the IIOP.NET sources be compiled without any configuration?</a></strong>
@@ -177,8 +185,8 @@ o"></A></TD></TR>
 <br>
   <H2 class="contentPart">1. Platform Compatibility</H2>
 	<table width="100%" style="border: 1px solid #999966;" summary=""><tr><td>
-  <strong><a name="faq1_1">1.1 Does IIOP.NET work with Microsoft's .NET 1.1?</a></strong>
-<p> Yes, it does. This is in fact the platform it was developed on.
+  <strong><a name="faq1_1">1.1 With which versions of Microsoft's .NET does IIOP.NET work?</a></strong>
+<p> IIOP.NET works with the .NET Framework 1.0, 1.1 and 2.0 beta2.
 	</td></tr></table>
 	<br><br>
 	<table width="100%" style="border: 1px solid #999966;" summary=""><tr><td>
@@ -193,7 +201,7 @@ o"></A></TD></TR>
 	<br><br>
 	<table width="100%" style="border: 1px solid #999966;" summary=""><tr><td>
   <strong><a name="faq1_4">1.4 Does IIOP.NET work with Mono?</a></strong>
-<p>Yes, IIOP.NET does work with Mono 1.0
+<p>From version 1.8.0 IIOP.NET does work with Mono (1.1.7 or newer required)
 	</td></tr></table>
 	<br><br>
   <H2 class="contentPart">2. ORB Compatibility</H2>
@@ -220,7 +228,7 @@ Some hints are provided in the <a href="websphere4.html">Websphere 4 interoperat
 	</td></tr></table>
 	<br><br>
 	<table width="100%" style="border: 1px solid #999966;" summary=""><tr><td>
-  <strong><a name="faq2_4">2.4 Can IIOP.NET interoperate with IBM Websphere 5?</a></strong>
+  <strong><a name="faq2_4">2.4 Can IIOP.NET interoperate with IBM Websphere 5.0 / 5.1?</a></strong>
 <p>
 Yes, it can.
 Some hints are provided in the <a href="websphere5.html">Websphere 5 interoperation howto</a>.
@@ -233,11 +241,32 @@ Yes, it can.
 Some hints are provided in the <a href="jboss3_2.html">JBoss 3.2 interoperation howto</a>.
 	</td></tr></table>
 	<br><br>
+	<table width="100%" style="border: 1px solid #999966;" summary=""><tr><td>
+  <strong><a name="faq2_6">2.6 Can IIOP.NET interoperate with JBoss 4?</a></strong>
+<p>Yes, it can.
+	</td></tr></table>
+	<br><br>
+	<table width="100%" style="border: 1px solid #999966;" summary=""><tr><td>
+  <strong><a name="faq2_7">2.7 Can IIOP.NET interoperate with OmniORB?</a></strong>
+<p>Yes, it can.
+	</td></tr></table>
+	<br><br>
+	<table width="100%" style="border: 1px solid #999966;" summary=""><tr><td>
+  <strong><a name="faq2_8">2.8 Can IIOP.NET interoperate with MICO ORB?</a></strong>
+<p>Yes, it can.
+	</td></tr></table>
+	<br><br>
+	<table width="100%" style="border: 1px solid #999966;" summary=""><tr><td>
+  <strong><a name="faq2_9">2.9 Can IIOP.NET interoperate with TAO ORB?</a></strong>
+<p>Yes, it can.
+	</td></tr></table>
+	<br><br>
   <H2 class="contentPart">3. Configuration</H2>
 	<table width="100%" style="border: 1px solid #999966;" summary=""><tr><td>
   <strong><a name="faq3_1">3.1 Can the IIOP.NET sources be compiled without any configuration?</a></strong>
 <p>
-To compile the tutorials, you must copy the files <em>ir.idl</em> and <em>orb.idl</em>
+IIOP.NET itself doesn't need any external file, but to compile the tutorials and
+some of integration tests, you must copy the files <em>ir.idl</em> and <em>orb.idl</em>
 in the <em>./IDL</em> directory before compiling the tutorials. You will find
 these two files as part of your Java SDK in the <em>%JAVA_HOME%\lib</em> directory.
 <p>
@@ -308,11 +337,22 @@ The following config file
   <strong><a name="faq3_3">3.3 How do I configure NUnit V2.0 to use the .NET Framework 1.1?</a></strong>
 <p>
 Add the following configuration lines in the files <code>%NUnit2%\bin\nunit-console.exe.config</code> and <code>%NUnit2%\bin\nunit-gui.exe.config</code>:
+<ul>
+<li>for .NET 1.1:
 <pre>
   &lt;startup&gt;
     &lt;supportedRuntime version="v1.1.4322" /&gt;
   &lt;/startup&gt;
 </pre>
+</li>
+<li>for .NET 2.0:
+<pre>
+  &lt;startup&gt;
+    &lt;supportedRuntime version="v2.0.50215" /&gt;
+  &lt;/startup&gt;
+</pre>
+</li>
+</ul>
 	</td></tr></table>
 	<br><br>
   <H2 class="contentPart">4. Usage</H2>
@@ -326,18 +366,21 @@ Add the following configuration lines in the files <code>%NUnit2%\bin\nunit-cons
   idl-files         one or more idl files containg OMG IDL definitions
   
   options are
-  -h               help
-  -o directory     output directory (default is `-o .`)
-  -r assembly      assemblies to check for types in, instead of generating them
-  -c xmlfile       specifies custom mappings
-  -d define        defines a preprocessor symbol
-  -idir directory  directory containing idl files (multiple -idir allowed)
-  -vtSkel          enable creation of value type implementation skeletons
-  -vtSkelProv      the fully qualified name of the codedomprovider to use for value type skeleton generation
-  -vtSkelTd        the targetDirectory for generated valuetype impl skeletons
-  -vtSkelO         overwrite already present valuetype skeleton implementations
-  -snk             sign key file (used for generating strong named assemblies)
-  -delaySign       delay signing of assembly (snk file contains only a pk)
+  -h              help
+  -o directory    output directory (default is `-o .`)
+  -r assembly     assemblies to check for types in, instead of generating them
+  -c xmlfile      specifies custom mappings
+  -d define       defines a preprocessor symbol
+  -basedir directory directory to change to before doing any processing.
+  -idir directory directory containing idl files (multiple -idir allowed)
+  -vtSkel         enable creation of value type implementation skeletons
+  -vtSkelProv     The fully qualified name of the codedomprovider to use for value type skeleton generation
+  -vtSkelTd       The targetDirectory for generated valuetype impl skeletons
+  -vtSkelO        Overwrite already present valuetype skeleton implementations
+  -snk            sign key file (used for generating strong named assemblies)
+  -delaySign      delay signing of assembly (snk file contains only a pk)
+  -asmVersion     the version of the generated assembly
+  -mapAnyToCont   maps idl any to the any container omg.org.CORBA.Any; if not specified, any is mapped to object
 </pre>
 <p><strong>Examples:</strong>
 <ul>
@@ -366,7 +409,7 @@ generate <code>proxy.dll</code> from <code>def.idl</code> in the current directo
 </dl>
 </ul>
 <p><strong>Notes:</strong>
-<p>The compiler will warn you that you must provide the implementation for the classes implementing the CORBA valuetypes. The article <a href="http://www.codeproject.com/csharp/iiop_net_and_EJB.asp">Accessing an EJB from .NET Using IIOP.NET: an Example</a> contains a detailed explanation and example (see step 4).
+<p>The compiler will warn you that you must provide the implementation for the classes implementing the CORBA valuetypes. The article <a href="http://www.codeproject.com/csharp/iiop_net_and_EJB.asp">Accessing an EJB from .NET Using IIOP.NET: an Example</a> contains a detailed explanation and example (see step 4). You can generate a skeleton (to be completed) of those classes with the option <code>-vtSkel</code>.
 <p>
 	</td></tr></table>
 	<br><br>
@@ -417,9 +460,18 @@ generate <code>proxy.dll</code> from <code>def.idl</code> in the current directo
 	<br><br>
 	<table width="100%" style="border: 1px solid #999966;" summary=""><tr><td>
   <strong><a name="faq4_4">4.4 How do I configure the channel timeout?</a></strong>
-<p>This section is valid from release 1.7.0 RC 1 and CVS after 3 October 2004.
+<p><strong>Before version 1.7.0 RC1 timeouts could not be configured.</strong>
 <p>The channel timeout is configured during the channel registration. By default, the timeout is set to infinity (no timeout).
-<p>The properties <code>IiopClientChannel.CLIENT_RECEIVE_TIMEOUT_KEY</code> and <code>IiopClientChannel.CLIENT_SEND_TIMEOUT_KEY</code> control the reception resp. sending timeouts. The timeouts are in milliseconds.
+<table summary="">
+<tr><td><b>Property</b></td><td><b>Introduced in</b></td><td><b>Type</b></td><td><b>Description</b></td></tr>
+<tr><td><code>IiopClientChannel.CLIENT_RECEIVE_TIMEOUT_KEY</code></td><td>1.7.0 RC1</td><td>int</td><td>reception timeout in milliseconds</td></tr>
+<tr><td><code>IiopClientChannel.CLIENT_SEND_TIMEOUT_KEY</code></td><td>1.7.0 RC1</td><td>int</td><td>sending timeout in milliseconds</td></tr>
+<tr><td><code>IiopClientChannel.CLIENT_REQUEST_TIMEOUT_KEY</code></td><td>1.8</td><td>int</td><td>request timeout in milliseconds: abort request if no answer arrives before the timeout</td></tr>
+<tr><td><code>IiopClientChannel.ALLOW_REQUEST_MULTIPLEX_KEY</code></td><td>1.8</td><td>bool</td><td>allow sending new requests on a connection while previous requests are still pending (default: true)</td></tr>
+<tr><td><code>IiopClientChannel.MAX_NUMBER_OF_MULTIPLEXED_REQUESTS_KEY</code></td><td>1.8</td><td>int</td><td>maximal number of pending requests on a connection; requires ALLOW_REQUEST_MULTIPLE_KEY=true (default: 1000)</td></tr>
+<tr><td><code>IiopClientChannel.CLIENT_CONNECTION_LIMIT_KEY</code></td><td>1.8</td><td>int</td><td>maximal number of open connections to one target (default: 5)</td></tr>
+<tr><td><code>IiopClientChannel.SERVERTHREADS_MAX_PER_CONNECTION_KEY</code></td><td>1.8</td><td>int</td><td>maximal number of incoming pending requests per connection (default: 25)</td></tr>
+</table>
 <p>The following code installs an IIOP Channel with receive and send timeouts.
 <pre>
   IDictionary props = new Hashtable();

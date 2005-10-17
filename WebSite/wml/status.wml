@@ -11,6 +11,9 @@ IIOP.NET allows a seamless interoperation between .NET, CORBA and J2EE distribut
 either in client or server role.
 
 <p/>
+IIOP over SSL is supported from version 1.7.1
+<p/>
+
 <b>CORBA version</b>
 <p/>
 
@@ -22,11 +25,11 @@ Only the parts of the specification related to interoperability are implemented.
 <p/>
 IIOP.NET supports the following protocols:<BR>
 IIOP/GIOP 1.0, 1.1, 1.2
+Bidirectional GIOP (1.8 and newer)
 <p/>
 The following protocol parts are not supported:
 <UL>
 <LI>Message types other than request, reply, fragment (LocateRequest / LocateReply are partly supported)</LI>
-<LI>Bidirectional GIOP</LI>
 </UL>
 <p/>
 <b>Supported types</b>

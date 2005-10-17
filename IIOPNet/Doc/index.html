@@ -81,13 +81,12 @@ o"></A></TD></TR>
   <!-- content begin -->
   <H2 class="contentPart">Overview</H2>
 <p>
-<img alt="IIOP.NET celebrates it's first anniversary" src="images/birthday_cake.gif" align="right" width="88" height="91">
 IIOP.NET allows a seamless interoperation between .NET, CORBA and J2EE distributed objects. This is done by incorporating CORBA/IIOP support into
 .NET, leveraging the remoting framework.<BR>
 <p>
 IIOP.NET is released under the LGPL license.
 <p>
-The project celebrated its first anniversary on May, 2! During this time, IIOP.NET was downloaded around 2500 times, and grew from a small experimental project to a stable and useful application. Thank you very much to all the IIOP.NET community.
+IIOP.NET was born on May, 2 2003, and grew from a small experimental project to a stable and useful application, mostly thank to the great feedback and dedication of our growing user's community.
 <H2 class="contentPart">Features</H2>
 <p>
 <UL>
@@ -111,8 +110,8 @@ IIOP.NET is directly based on the standard remoting infrastructure.
 <p>
 For using this channel you need the following
 <UL>
-<LI>.NET Framework 1.0 or better</LI>
-<LI>CORBA 2.3 ORB (e.g. included in Sun's JDK 1.4)</LI>
+<LI>either Microsoft .NET Framework 1.x / 2.0 (at least beta2) or Mono 1.1.7 or better</LI>
+<LI>a CORBA 2.3 ORB peer like OmniORB, Sun JDK Orb, JacORB, IBM Websphere, ....</LI>
 </UL>
 <H2 class="contentPart">ORB Compatibility</H2>
 <p>
@@ -128,8 +127,8 @@ Interoperation with the following ORBs has been reported:
 	<tr><td width="10px" bgcolor="#99FF99"></td><td>SUN JDK</td><td align="left">1.4</td><td>OK</td></tr>
 	<tr><td width="10px" bgcolor="#99FF99"></td><td>MICO</td><td align="left">2.3.10</td><td>OK</td></tr>
 	<tr><td width="10px" bgcolor="#99FF99"></td><td>TAO</td><td align="left">1.4</td><td>ok</td></tr>
-	<tr><td width="10px" bgcolor="#99FF99"></td><td>OmniORB</td><td align="left">4.0.2</td><td>ok</td></tr>
 	<tr><td width="10px" bgcolor="#99FF99"></td><td>OmniORB</td><td align="left">4.0.3</td><td>ok</td></tr>
+	<tr><td width="10px" bgcolor="#99FF99"></td><td>OmniORB</td><td align="left">4.0.2</td><td>ok</td></tr>
 	<tr><td width="10px" bgcolor="#99FF99"></td><td>JacORB</td><td align="left"></td><td>JacORB doesn't support Anys with typecode 30 (see <a href="faq.html#faq7_11">FAQ 7.11</a>)</td></tr>
 	</table>
 	</ul>
@@ -138,17 +137,28 @@ Interoperation with J2EE applications is reported for the following application 
 	<ul>
 	<table border="0" cellspacing="6" summary="">
 	<!--tr><th>Software</th><th>Version</th><th>Report</th></tr-->
-	<tr><td width="10px" bgcolor="#99FF99"></td><td>IBM Websphere</td><td align="left">4.0</td><td>ok</td></tr>
-	<tr><td width="10px" bgcolor="#99FF99"></td><td>IBM Websphere</td><td align="left">5.0</td><td>ok</td></tr>
 	<tr><td width="10px" bgcolor="#99FF99"></td><td>IBM Websphere</td><td align="left">5.1</td><td>ok</td></tr>
-	<tr><td width="10px" bgcolor="#FFFF99"></td><td>JBoss</td><td align="left">3.0.6</td><td>in progress</td></tr>
-	<tr><td width="10px" bgcolor="#99FF99"></td><td>JBoss</td><td align="left">3.2.1</td><td>ok</td></tr>
-	<tr><td width="10px" bgcolor="#FF3333"></td><td>JBoss</td><td align="left">3.2.2</td><td>no (JBoss bug #<a href="http://sourceforge.net/tracker/index.php?func=detail&aid=829734&group_id=22866&atid=376685">829734</a>)</td></tr>
+	<tr><td width="10px" bgcolor="#99FF99"></td><td>IBM Websphere</td><td align="left">5.0</td><td>ok</td></tr>
+	<tr><td width="10px" bgcolor="#99FF99"></td><td>IBM Websphere</td><td align="left">4.0</td><td>ok</td></tr>
+	<tr><td width="10px" bgcolor="#99FF99"></td><td>JBoss</td><td align="left">4.0.2</td><td>ok</td></tr>
 	<tr><td width="10px" bgcolor="#99FF99"></td><td>JBoss</td><td align="left">3.2.3</td><td>ok</td></tr>
-	<tr><td width="10px" bgcolor="#FFFF99"></td><td>BEA Weblogic</td><td align="left">6.1</td><td>array mapping problems</td></tr>
-	<tr><td width="10px" bgcolor="#FF9966"></td><td>BEA Weblogic</td><td align="left">7</td><td>in progress</td></tr>
+	<tr><td width="10px" bgcolor="#FF3333"></td><td>JBoss</td><td align="left">3.2.2</td><td>no (JBoss bug #<a href="http://sourceforge.net/tracker/index.php?func=detail&aid=829734&group_id=22866&atid=376685">829734</a>)</td></tr>
+	<tr><td width="10px" bgcolor="#99FF99"></td><td>JBoss</td><td align="left">3.2.1</td><td>ok</td></tr>
+	<tr><td width="10px" bgcolor="#FFFF99"></td><td>JBoss</td><td align="left">3.0.6</td><td>in progress</td></tr>
 	<tr><td width="10px" bgcolor="#99FF99"></td><td>BEA Weblogic</td><td align="left">8.1</td><td>ok</td></tr>
+	<tr><td width="10px" bgcolor="#FF9966"></td><td>BEA Weblogic</td><td align="left">7</td><td>in progress</td></tr>
+	<tr><td width="10px" bgcolor="#FFFF99"></td><td>BEA Weblogic</td><td align="left">6.1</td><td>array mapping problems</td></tr>
 	<tr><td width="10px" bgcolor="#FFFF99"></td><td>Borland Enterprise Server</td><td align="left">5.2.1</td><td>partially tested</td></tr>
+	</table>
+	</ul>
+<p>
+IIOP.NET on Microsoft .NET Framework:
+	<ul>
+	<table border="0" cellspacing="6" summary="">
+	<!--tr><th>Software</th><th>Version</th><th>Report</th></tr-->
+	<tr><td width="10px" bgcolor="#99FF99"></td><td>MS .NET</td><td align="left">2.0 beta2</td><td></td></tr>
+	<tr><td width="10px" bgcolor="#FF3333"></td><td>MS .NET</td><td align="left">2.0 beta1</td><td></td></tr>
+	<tr><td width="10px" bgcolor="#99FF99"></td><td>MS .NET</td><td align="left">1.x</td><td></td></tr>
 	</table>
 	</ul>
 <p>
@@ -156,10 +166,11 @@ IIOP.NET on Mono:
 	<ul>
 	<table border="0" cellspacing="6" summary="">
 	<!--tr><th>Software</th><th>Version</th><th>Report</th></tr-->
-	<tr><td width="10px" bgcolor="#FF9966"></td><td>Mono</td><td align="left">0.31</td><td>
-		IntegrationTests/Basic doesn't compile (reason unknown)
-	</td></tr>
-	<tr><td width="10px" bgcolor="#FFFF99"></td><td>Mono</td><td align="left">1.0</td><td>IIOP.NET naming service doesn't work when using .NET as server</td></tr>
+	<tr><td width="10px" bgcolor="#99FF99"></td><td>Mono</td><td align="left">1.1.9</td><td>ok with IIOP.NET 1.8.x or newer</td></tr>
+	<tr><td width="10px" bgcolor="#99FF99"></td><td>Mono</td><td align="left">1.1.8</td><td>ok with IIOP.NET 1.8.x or newer</td></tr>
+	<tr><td width="10px" bgcolor="#99FF99"></td><td>Mono</td><td align="left">1.1.7</td><td>ok with IIOP.NET 1.8.x or newer</td></tr>
+	<tr><td width="10px" bgcolor="#FF3333"></td><td>Mono</td><td align="left">1.0.x</td><td></td></tr>
+	<tr><td width="10px" bgcolor="#FF3333"></td><td>Mono</td><td align="left">0.31</td><td></td></tr>
 	</table>
 	</ul>
 <H2 class="contentPart">Awards</H2>
