@@ -261,12 +261,12 @@ namespace Ch.Elca.Iiop {
             VerifyInterfaceCompatible(target, msg);
             IIorProfile selectedProfile;
             uint reqId;
-            GiopClientConnectionDesc conDesc = AllocateConnection(msg, target, out selectedProfile, out reqId);
-            
             // serialise
             IMessage result;
             try {
                 try {
+                    GiopClientConnectionDesc conDesc = 
+                        AllocateConnection(msg, target, out selectedProfile, out reqId);
                     ITransportHeaders requestHeaders;
                     Stream requestStream;
                     SerialiseRequest(msg, selectedProfile, conDesc, reqId,
@@ -297,10 +297,9 @@ namespace Ch.Elca.Iiop {
             VerifyInterfaceCompatible(target, msg);
             IIorProfile selectedProfile;
             uint reqId;
-            GiopClientConnectionDesc conDesc = AllocateConnection(msg, target, out selectedProfile, out reqId);
-            
             try {
                 try {
+                    GiopClientConnectionDesc conDesc = AllocateConnection(msg, target, out selectedProfile, out reqId);
                     SimpleGiopMsg.SetMessageAsyncRequest(msg); // mark message as async, needed for portable interceptors
                     ITransportHeaders requestHeaders;
                     Stream requestStream;
@@ -314,11 +313,14 @@ namespace Ch.Elca.Iiop {
                     clientSinkStack.Push(this, asyncData); // push the formatter onto the sink stack, to get the chance to handle the incoming reply stream
                     // forward the message to the next sink
                     m_nextSink.AsyncProcessRequest(clientSinkStack, msg, requestHeaders, requestStream);
-                } finally {
                     // for oneway messages, release the connections for future use
                     if ((msg is IMethodCallMessage) && GiopMessageHandler.IsOneWayCall((IMethodCallMessage)msg)) {
                         m_conManager.RequestOnConnectionCompleted(msg); // release the connection, because this interaction is complete
                     }
+                } catch (Exception) {
+                    // release the connection, if something went wrong during connection allocation and send
+                    m_conManager.RequestOnConnectionCompleted(msg); // release the connection, because this interaction is complete
+                    throw;
                 }
             } catch (Exception e) {
                 // formulate an exception reply for an non-oneway call

@@ -259,7 +259,6 @@ namespace Ch.Elca.Iiop {
                                 m_transportFactory.CreateTransport(target);
                             newConnection = CreateClientConnection(targetKey, transport, m_requestTimeOut);
                             result = newConnection;
-                            RegisterConnection(targetKey, result);
                         } else {
                             // wait for connections to become available
                             Monitor.Wait(this); // wait for a new connection to become available.
@@ -267,8 +266,12 @@ namespace Ch.Elca.Iiop {
                     }
                 }
                 result.IncrementNumberOfRequests();
-                m_allocatedConnections[msg] = result;
                 requestNr = result.Desc.ReqNumberGen.GenerateRequestId();
+                m_allocatedConnections[msg] = result;
+                if (newConnection != null) {
+                    // Register the new connection, if everything went ok
+                    RegisterConnection(targetKey, result);                    
+                }
             }
             if (newConnection != null) {
                 // open the connection now outside the locked session, 
@@ -315,25 +318,24 @@ namespace Ch.Elca.Iiop {
         
         /// <summary>
         /// Notifies the connection manager, that the connection is no longer needed by the request, because
-        /// the reply has been successfully received.
+        /// the reply has been successfully received or an exception has occured.
         /// </summary>
         /// <remarks>if multiplexing is not allowed, the connection can now be reused for a next request.</remarks>
         internal void RequestOnConnectionCompleted(IMessage msg) {
             lock(this) {
                 GiopClientConnection connection = 
                     (GiopClientConnection)m_allocatedConnections[msg];
-                if (connection == null) {
-                    throw new INTERNAL(11111, 
-                                       CompletionStatus.Completed_MayBe);
-                }
-                
-                connection.UpdateLastUsedTime();
-                connection.DecrementNumberOfRequests();
-                // remove from allocated connections
-                m_allocatedConnections.Remove(msg);                
-                // make sure, that connection is available again (must be called here in every case, because 
-                // RequestOnConnectionSent has not set it for sure also for mutex allowed).
-                SetConnectionAvailable(connection.ConnectionKey, connection);
+                if (connection != null) {               
+                    connection.UpdateLastUsedTime();
+                    connection.DecrementNumberOfRequests();
+                    // remove from allocated connections
+                    m_allocatedConnections.Remove(msg);                
+                    // make sure, that connection is available again (must be called here in every case, because 
+                    // RequestOnConnectionSent has not set it for sure also for mutex allowed).
+                    SetConnectionAvailable(connection.ConnectionKey, connection);
+                } 
+                // else: nothing to do, because failed to register connection correctly
+                // -> for simpler error handling, call this also, if something during allocation went wrong
             }
         }
                 
