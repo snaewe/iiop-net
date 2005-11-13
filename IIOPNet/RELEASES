@@ -1,4 +1,21 @@
-version 1.8.0 rc0 (15 august 2005)
+version 1.8.0 final (13 november 2005)
+--------------------------------------
+
+new features:
+- CodeSets: now possible to change used default char/wchar via CorbaOrbServices.OverrideDefaultCharSets 
+  (at the moment: only for a channels before first use)
+- Generated unions implement now ISerializable -> more efficient to send them over standard .NET remoting channels (TCP, HTTP).
+
+bugs fixed:
+- Connection not released, if a connection attempt failed (bug #1355805).
+- fixed compile problem with mono 1.1.9
+
+new tests:
+- CodeSets
+- JBoss 4.0
+
+
+version 1.8.0 rc1 (15 august 2005)
 ----------------------------------
 
 new features:
