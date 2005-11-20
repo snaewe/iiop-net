@@ -1813,7 +1813,7 @@ public class MetaDataGenerator : IDLParserVisitor {
         // not needed to check if struct is a nested types, because parent type should already be skipped 
         // --> code generation for all nested types skipped too
         if (m_typeManager.CheckSkip(forSymbol)) { 
-            return null; 
+            return m_typeManager.GetKnownType(forSymbol);
         }
         
         // layout-sequential causes problem, if member of array type is not fully defined (TypeLoadException) -> use autolayout instead
@@ -1968,7 +1968,7 @@ public class MetaDataGenerator : IDLParserVisitor {
         // not needed to check if struct is a nested types, because parent type should already be skipped 
         // --> code generation for all nested types skipped too
         if (m_typeManager.CheckSkip(forSymbol)) { 
-            return null; 
+            return m_typeManager.GetKnownType(forSymbol);
         }
    
         // create Helper for union generation
@@ -2085,7 +2085,7 @@ public class MetaDataGenerator : IDLParserVisitor {
         Symbol forSymbol = buildInfo.GetBuildScope().getSymbol(node.getIdent());
         // check if type is known from a previous run over a parse tree --> if so: skip
         if (m_typeManager.CheckSkip(forSymbol)) { 
-            return null; 
+            return m_typeManager.GetKnownType(forSymbol);
         }
                 
         TypeAttributes typeAttrs = TypeAttributes.Class | TypeAttributes.Public | TypeAttributes.Sealed;        
