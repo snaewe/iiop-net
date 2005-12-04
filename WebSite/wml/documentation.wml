@@ -58,7 +58,13 @@ In English:
 <p/>
 <b>Independent Articles</b>
 <BR><BR>
-In French:
+In English:
+<ul>
+<li>[<A href="http://www.codeproject.com">The CodeProject</A>]
+<A href="http://www.thecodeproject.com/csharp/IIOPNetandTAO.asp">Mixing ACE/TAO and .NET Clients and Servers</A> (Stephen Bogner)
+</ul>
+
+<p/>In French:
 <ul>
 <li>[<A href="http://www.techheadbrothers.com/">Tech Head Brothers</A>] <A href="http://www.techheadbrothers.com/DesktopDefault.aspx?tabindex=1&tabid=7&AId=33">Interopérabilité entre J2EE et .Net</A> (Kader Yildirim)
 <li>[<A href="http://www.techheadbrothers.com/">Tech Head Brothers</A>] <A href="http://www.techheadbrothers.com/DesktopDefault.aspx?tabindex=1&tabid=7&AId=36">Interopérabilité entre .Net Remoting et Java</A> (Kader Yildirim)
