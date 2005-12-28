@@ -61,8 +61,8 @@ namespace Ch.Elca.Iiop.IntegrationTests {
             TestContextBoundService contextBound = new TestContextBoundService();
             RemotingServices.Marshal(contextBound, "testContextBound");            
 
-            TestBoxedValuetypeServiceImpl testBoxedService = new TestBoxedValuetypeServiceImpl();
-            RemotingServices.Marshal(testBoxedService, "testBoxedService");
+            TestIdlTypesServiceImpl testIdlTypesService = new TestIdlTypesServiceImpl();
+            RemotingServices.Marshal(testIdlTypesService, "testIdlTypesService");
 
             Console.WriteLine("server running");
             Thread.Sleep(Timeout.Infinite);

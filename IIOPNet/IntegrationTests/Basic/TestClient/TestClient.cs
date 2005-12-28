@@ -54,7 +54,7 @@ namespace Ch.Elca.Iiop.IntegrationTests {
         private ISimpleTestInterface m_svcSingleCall;
         private ISimpleTestInterface m_svcSingletonCall;
         private ISimpleTestInterface m_contextBound;
-        private TestBoxedValuetypeService m_testBoxedService;
+        private TestIdlTypesService  m_testIdlTypesService;
 
         #endregion IFields
         #region IMethods
@@ -84,7 +84,7 @@ namespace Ch.Elca.Iiop.IntegrationTests {
                 (ISimpleTestInterface)RemotingServices.Connect(typeof(ISimpleTestInterface), "corbaloc:iiop:1.2@localhost:8087/testSingletonCall");
             m_contextBound = 
                 (ISimpleTestInterface)RemotingServices.Connect(typeof(ISimpleTestInterface), "corbaloc:iiop:1.2@localhost:8087/testContextBound");
-            m_testBoxedService = (TestBoxedValuetypeService)RemotingServices.Connect(typeof(TestBoxedValuetypeService), "corbaloc:iiop:1.2@localhost:8087/testBoxedService");
+            m_testIdlTypesService = (TestIdlTypesService)RemotingServices.Connect(typeof(TestIdlTypesService), "corbaloc:iiop:1.2@localhost:8087/testIdlTypesService");
         }
 
         [TearDown]
@@ -582,6 +582,16 @@ namespace Ch.Elca.Iiop.IntegrationTests {
             arg.X = 11;
             arg.Y = -15;
             TestStructA result = m_testService.TestEchoStruct(arg);
+            Assertion.AssertEquals(arg.X, result.X);
+            Assertion.AssertEquals(arg.Y, result.Y);
+        }
+
+        [Test]
+        public void TestStructIdl() {
+            TestStructAIdl arg = new TestStructAIdl();
+            arg.X = 11;
+            arg.Y = -15;
+            TestStructAIdl result = m_testService.TestEchoIdlStruct(arg);
             Assertion.AssertEquals(arg.X, result.X);
             Assertion.AssertEquals(arg.Y, result.Y);
         }
@@ -1197,14 +1207,24 @@ namespace Ch.Elca.Iiop.IntegrationTests {
         [Test]
         public void TestBoxedValuetypes() {
             string arg1 = "test-Arg";
-            string result1 = m_testBoxedService.EchoBoxedString(arg1);
+            string result1 = m_testIdlTypesService.EchoBoxedString(arg1);
             Assertion.AssertEquals("wrong boxed string returned", arg1, result1);
 
-            Test arg2 = new Test(); 
+            TestStructWB arg2 = new TestStructWB(); 
             arg2.a = "a";
             arg2.b = "b";
-            Test result2 = m_testBoxedService.EchoBoxedStruct(arg2);
+            TestStructWB result2 = m_testIdlTypesService.EchoBoxedStruct(arg2);
             Assertion.AssertEquals("wrong boxed struct returned", arg2, result2);
+        }
+
+        [Test]
+        public void TestUnions() {
+            TestUnionLD arg = new TestUnionLD(); 
+            short argVal = 12;
+            arg.Setval0(argVal);
+            TestUnionLD result = m_testIdlTypesService.EchoLDUnion(arg);
+            Assertion.AssertEquals("Wrong disc val returned", arg.Discriminator, result.Discriminator);
+            Assertion.AssertEquals("wrong union val returned", argVal, result.Getval0());
         }
 
         #endregion IMethods

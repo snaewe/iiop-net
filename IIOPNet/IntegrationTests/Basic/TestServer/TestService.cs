@@ -62,6 +62,13 @@ namespace Ch.Elca.Iiop.IntegrationTests {
     }
 
     [Serializable]
+    [IdlStruct]
+    public struct TestStructAIdl {
+        public System.Int32 X;
+        public System.Int32 Y;
+    }
+
+    [Serializable]
     public class TestSerializableClassB1 {
         public System.String Msg;
     }
@@ -405,6 +412,10 @@ namespace Ch.Elca.Iiop.IntegrationTests {
             return arg;
         }
 
+        public TestStructAIdl TestEchoIdlStruct(TestStructAIdl arg) {
+            return arg;
+        }
+
         public TestSerializableClassB2 TestChangeSerializableB2(TestSerializableClassB2 arg, System.String detail) {
             arg.DetailedMsg = detail;
             return arg;
@@ -705,8 +716,8 @@ namespace Ch.Elca.Iiop.IntegrationTests {
     }
 
 
-    [SupportedInterface(typeof(TestBoxedValuetypeService))]
-    public class TestBoxedValuetypeServiceImpl : MarshalByRefObject, TestBoxedValuetypeService {
+    [SupportedInterface(typeof(TestIdlTypesService))]
+    public class TestIdlTypesServiceImpl : MarshalByRefObject, TestIdlTypesService {
 
         
         [return: BoxedValueAttribute("IDL:Ch.Elca.Iiop.IntegrationTests.boxed_string:1.0")]
@@ -715,7 +726,11 @@ namespace Ch.Elca.Iiop.IntegrationTests {
         }
 
         [return: BoxedValueAttribute("IDL:Ch.Elca.Iiop.IntegrationTests.boxed_TestStruct:1.0")]
-        public Test EchoBoxedStruct([BoxedValueAttribute("IDL:Ch.Elca.Iiop.IntegrationTests.boxed_TestStruct:1.0")] Test arg) {
+        public TestStructWB EchoBoxedStruct([BoxedValueAttribute("IDL:Ch.Elca.Iiop.IntegrationTests.boxed_TestStruct:1.0")] TestStructWB arg) {
+            return arg;
+        }
+
+        public TestUnionLD EchoLDUnion(TestUnionLD arg) {
             return arg;
         }
         

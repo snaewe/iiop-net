@@ -22,13 +22,13 @@ $(bin)IIOPChannel.dll: $(IIOPCHANNEL)
 $(bin)TestServer.exe: $(bin)IIOPChannel.dll $(bin)testIdlServices.dll *.cs
     csc $(CSFLAGS) /t:exe /r:$(bin)IIOPChannel.dll /r:$(bin)testIdlServices.dll /out:$(bin)TestServer.exe *.cs
 
-$(bin)testIdlServices.dll: TestExceptionService.idl TestBoxedValueTypeService.idl
-    ..\..\..\IDLToCLSCompiler\IDLCompiler\bin\IDLToCLSCompiler.exe -o $(bin) testIdlServices TestExceptionService.idl TestBoxedValueTypeService.idl
+$(bin)testIdlServices.dll: TestExceptionService.idl TestIdlTypesService.idl
+    ..\..\..\IDLToCLSCompiler\IDLCompiler\bin\IDLToCLSCompiler.exe -o $(bin) testIdlServices TestExceptionService.idl TestIdlTypesService.idl
     
 IDL\Ch\Elca\Iiop\IntegrationTests\TestService.idl: $(bin)TestServer.exe
     ..\..\..\CLSToIDLGenerator\bin\CLSIDLGenerator.exe -o IDL Ch.Elca.Iiop.IntegrationTests.TestService $(bin)TestServer.exe
     copy TestExceptionService.idl IDL\Ch\Elca\Iiop\IntegrationTests\ 
-    copy TestBoxedValueTypeService.idl IDL\Ch\Elca\Iiop\IntegrationTests\ 
+    copy TestIdlTypesService.idl IDL\Ch\Elca\Iiop\IntegrationTests\ 
 
 IDL\Ch\Elca\Iiop\IntegrationTests\ISimpleTestInterface.idl: $(bin)TestServer.exe
     ..\..\..\CLSToIDLGenerator\bin\CLSIDLGenerator.exe -o IDL Ch.Elca.Iiop.IntegrationTests.ISimpleTestInterface $(bin)TestServer.exe
