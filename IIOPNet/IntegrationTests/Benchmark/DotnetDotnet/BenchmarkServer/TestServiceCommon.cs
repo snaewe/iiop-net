@@ -32,14 +32,31 @@ using Ch.Elca.Iiop.Idl;
 
 namespace Ch.Elca.Iiop.Benchmarks {
 
-    public enum TestEnum {
+    [IdlEnum]
+    public enum EnumA {
         A, B, C, D
     }
 
-    [Serializable]
-    public struct TestStructA {
+    [IdlStruct]
+    public struct IdlStructA {
+
+        public IdlStructA(System.Int32 a, System.Int32 b, System.Int32 c,
+                          System.Int32 x, System.Int32 y, System.Int32 z) {
+            A = a;
+            B = b;
+            C = c;
+            X = x;
+            Y = y;
+            Z = z;            
+        }
+
+        public System.Int32 A;
+        public System.Int32 B;
+        public System.Int32 C;
+
         public System.Int32 X;
         public System.Int32 Y;
+        public System.Int32 Z;
     }
 
 
@@ -114,6 +131,11 @@ namespace Ch.Elca.Iiop.Benchmarks {
         double[] DoubleArrEcho(double[] arg);
         int DoubleArrCountElems(double[] arg);
                 
+        [return: IdlSequence(0L)]
+        double[] DoubleIdlSeqEcho([IdlSequence(0L)] double[] arg);
+
+        IdlStructA EchoStruct(IdlStructA arg);
+        EnumA EchoEnum(EnumA arg);
     }
 
 }

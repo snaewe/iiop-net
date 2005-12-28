@@ -183,16 +183,34 @@ namespace Ch.Elca.Iiop.Benchmarks {
             m_testService.DoubleArrEcho(arg);
         }
 
+        void CallDoubleSeqEcho() {
+            double[] arg = new double[5000];
+            m_testService.DoubleIdlSeqEcho(arg);
+        }
+
+
         void CallDoubleArrCountElems() {
             double[] arg = new double[5000];
             m_testService.DoubleArrCountElems(arg);
         }
 
+
+        void CallEnumEcho() {
+            EnumA arg = EnumA.EnumA_C;
+            m_testService.EchoEnum(arg);
+        }
+
+        void CallIdlStructEcho() {
+            IdlStructA arg = new IdlStructA(1,2,3,10,11,12);
+            m_testService.EchoStruct(arg);
+        }
+
+
         delegate void TestProcedure();
 
         private void ExecuteTest(bool addtoref, String msg, TestProcedure t) {
             try {
-                Console.Write("{0,-20}", msg);
+                Console.Write("{0,-25}", msg);
                 PerformanceCounter counter = new PerformanceCounter();
                 for (int i=0; i<m_count; i++) {
                     t();
@@ -247,6 +265,9 @@ namespace Ch.Elca.Iiop.Benchmarks {
             tc.ExecuteTest(false, "()double[]", new TestProcedure(tc.CallDoulbeArrCreate));
             tc.ExecuteTest(false, "(double[])double[]", new TestProcedure(tc.CallDoubleArrEcho));
             tc.ExecuteTest(false, "(double[])V", new TestProcedure(tc.CallDoubleArrCountElems));
+            tc.ExecuteTest(false, "(double_sq)double_sq", new TestProcedure(tc.CallDoubleSeqEcho));
+            tc.ExecuteTest(false, "(EnumA)EnumA", new TestProcedure(tc.CallEnumEcho));
+            tc.ExecuteTest(false, "(IdlStructA)IdlStructA", new TestProcedure(tc.CallIdlStructEcho));
 
             tc.TearDownEnvironment();
 
