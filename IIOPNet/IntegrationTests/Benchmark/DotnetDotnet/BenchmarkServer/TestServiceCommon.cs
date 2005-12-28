@@ -114,6 +114,15 @@ namespace Ch.Elca.Iiop.Benchmarks {
 
         int IIIIII(int i, int j, int k, int l, int m);
 
+        [return: StringValue]
+        string StSt([StringValue] string a);
+        [return: StringValue]
+        string StStStSt([StringValue] string a, [StringValue] string b, 
+                        [StringValue] string c);
+
+        void VD(double i);
+        double DDDDDD(double i, double j, double k, double l, double m);
+
         void VRef(RefType rt);
         RefType RefLocal();
         RefType RefRef(RefType rt); // return remote

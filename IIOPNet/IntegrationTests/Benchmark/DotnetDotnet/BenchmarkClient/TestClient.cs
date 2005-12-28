@@ -116,6 +116,22 @@ namespace Ch.Elca.Iiop.Benchmarks {
             int i = m_testService.IIIIII(9,8,7,6,5);
         }
 
+        void CallStSt() {
+            string r = m_testService.StSt("abcdefg");
+        }
+
+        void CallStStStSt() {
+            string r = m_testService.StStStSt("abcdefg", "hijklmnop", "qrstuvw");
+        }
+
+        void CallVD() {
+            m_testService.VD(1.234567);
+        }
+
+        void callDDDDDD() {
+            double r = m_testService.DDDDDD(1.0, 2.1, 3.2, 4.3, 5.4);
+        }
+
         void CallVLocalRef() {
             m_testService.VRef(m_localRT);
         }
@@ -249,6 +265,10 @@ namespace Ch.Elca.Iiop.Benchmarks {
             tc.ExecuteTest(false, "(IIIII)V", new TestProcedure(tc.CallVIIIII));
             tc.ExecuteTest(false, "(I)I", new TestProcedure(tc.CallII));
             tc.ExecuteTest(false, "(IIIII)I", new TestProcedure(tc.CallIIIIII));
+            tc.ExecuteTest(false, "(St)St", new TestProcedure(tc.CallStSt));
+            tc.ExecuteTest(false, "(St)StStSt", new TestProcedure(tc.CallStStStSt));
+            tc.ExecuteTest(false, "()D", new TestProcedure(tc.CallVD));
+            tc.ExecuteTest(false, "(D)DDD", new TestProcedure(tc.callDDDDDD));
             tc.ExecuteTest(false, "(RT) Local", new TestProcedure(tc.CallVLocalRef));
             tc.ExecuteTest(false, "(RT) Remote", new TestProcedure(tc.CallVRemoteRef));
             tc.ExecuteTest(false, "(RT)RT Remote", new TestProcedure(tc.CallRemoteRefRef));

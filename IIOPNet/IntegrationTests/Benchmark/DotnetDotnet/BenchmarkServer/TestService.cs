@@ -61,6 +61,25 @@ namespace Ch.Elca.Iiop.Benchmarks {
             return i+j+k+l+m;
         }
 
+        [return: StringValue]
+        public string StSt([StringValue] string a) {
+            return a;
+        }
+
+        [return: StringValue]
+        public string StStStSt([StringValue] string a, [StringValue] string b, 
+                               [StringValue] string c) {
+            return a + b + c;
+        }
+
+        public void VD(double i) {
+            // do nothing
+        }
+
+        public double DDDDDD(double i, double j, double k, double l, double m) {
+            return i + j + k + l + m;
+        }        
+
         public void VRef(RefType rt) {
             // do nothing
         }
