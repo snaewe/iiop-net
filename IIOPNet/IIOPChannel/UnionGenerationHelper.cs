@@ -243,6 +243,8 @@ namespace Ch.Elca.Iiop.Idl {
         internal const string GET_COVERED_DISCR_VALUES = "GetCoveredDiscrValues";
         internal const string GET_DEFAULT_FIELD = "GetDefaultField";
         internal const string DISCR_FIELD_NAME = "m_discriminator";
+        internal const string ISINIT_PROPERTY_NAME = "IsInitalized";
+        internal const string DISCR_PROPERTY_NAME = "Discriminator";
         internal const string INIT_FIELD_NAME = "m_initalized";
 
         #endregion Constants
@@ -335,7 +337,7 @@ namespace Ch.Elca.Iiop.Idl {
             m_discrField = m_ilEmitHelper.AddFieldWithCustomAttrs(m_builder, DISCR_FIELD_NAME, m_discrType, 
                                                                   FieldAttributes.Private);
             // Property for discriminiator
-            String propName = "Discriminator";
+            String propName = DISCR_PROPERTY_NAME;
             // set the methods for the property
             MethodBuilder getAccessor = m_ilEmitHelper.AddPropertyGetter(m_builder, propName, m_discrType,
                                                                          MethodAttributes.Public);
@@ -349,11 +351,26 @@ namespace Ch.Elca.Iiop.Idl {
             AddCoveredDiscrsGetter();
         }
 
-        private void AddInitalizedField() {
+        private void AddInitalizedFieldAndProperty() {
             // used to detect uninitalized unions, field is automatically initalized to false
             m_initalizedField = m_ilEmitHelper.AddFieldWithCustomAttrs(m_builder, INIT_FIELD_NAME, 
                                                                        new TypeContainer(ReflectionHelper.BooleanType), 
                                                                        FieldAttributes.Private);
+            // Property for initalized -> allows to check easyily, if union is initalized
+            String propName = ISINIT_PROPERTY_NAME;
+            // set the methods for the property
+            MethodBuilder getAccessor = 
+                m_ilEmitHelper.AddPropertyGetter(m_builder, propName,
+                                                 new TypeContainer(ReflectionHelper.BooleanType),
+                                                 MethodAttributes.Public);
+            ILGenerator gen = getAccessor.GetILGenerator();
+            gen.Emit(OpCodes.Ldarg_0);
+            gen.Emit(OpCodes.Ldfld, m_initalizedField);
+            gen.Emit(OpCodes.Ret);
+            MethodBuilder setAccessor = null;
+            m_ilEmitHelper.AddProperty(m_builder, propName,
+                                       new TypeContainer(ReflectionHelper.BooleanType), 
+                                       getAccessor, setAccessor);
         }
 
         /// <summary>
@@ -387,7 +404,7 @@ namespace Ch.Elca.Iiop.Idl {
             IlEmitHelper.GetSingleton().AddSerializableAttribute(m_builder);
             
             AddTypeField();
-            AddInitalizedField();
+            AddInitalizedFieldAndProperty();
             AddStaticConstructor(); // add the static constructor
         }
 
