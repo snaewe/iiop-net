@@ -174,6 +174,7 @@ namespace Ch.Elca.Iiop.Idl {
                 // native .NET client, which uses not CLS -> IDL -> CLS mapping                
                 methodName = IdlNaming.MapClsMethodNameToIdlName(method, 
                                                                  isOverloaded);
+
             }            
             return methodName;
         }
@@ -200,6 +201,52 @@ namespace Ch.Elca.Iiop.Idl {
             }
             return null;
         }
+        
+        /// <summary>
+        /// Determine the operation name to transmit for an idl operation name
+        /// </summary>        
+        public static string DetermineOperationTransmissionName(string idlName) {
+            return DetermineTransmissionName(idlName);
+        }        
+
+        /// <summary>
+        /// Determine the attribute name to transmit for an idl attribute name
+        /// </summary>
+        public static string DetermineAttributeTransmissionName(string idlName) {
+            return DetermineTransmissionName(idlName);
+        }                
+        
+        /// <summary>
+        /// Determine the getter name to transmit for an idl attribute name
+        /// </summary>
+        public static string DetermineGetterTransmissionName(string idlName) {
+            string attrNameToTransmit =
+                DetermineTransmissionName(idlName);
+            return "_get_" + attrNameToTransmit;
+        }        
+        
+        /// <summary>
+        /// Determine the setter name to transmit for an idl attribute name
+        /// </summary>
+        public static string DetermineSetterTransmissionName(string idlName) {
+            string attrNameToTransmit =
+                DetermineTransmissionName(idlName);
+            return "_set_" + attrNameToTransmit;
+        }                
+        
+        /// <summary>
+        /// Determines the idl name to transmit over the wire according to 
+        /// section 3.2.3.1 Escaped Identifiers, i.e. removes leading underscore.
+        /// The underscore is added, because the identifier would clash with an idl keyword;
+        /// The undersore is not transmitted, therefore remove it from transmissionName.
+        /// </summary>
+        private static string DetermineTransmissionName(string idlName) {
+            string result = idlName;
+            if (idlName.StartsWith("_")) {
+                result = result.Substring(1);
+            }
+            return result;
+        }        
         
         #endregion method name mapping
 

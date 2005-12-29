@@ -2253,22 +2253,28 @@ public class MetaDataGenerator : IDLParserVisitor {
         for (int i = 1; i < node.jjtGetNumChildren(); i++) {
             ASTsimple_declarator simpleDecl = (ASTsimple_declarator) node.jjtGetChild(i);
             String propName = IdlNaming.MapIdlNameToClsName(simpleDecl.getIdent());
-            String transmittedName = DetermineTransmissionName(simpleDecl.getIdent());
+            String transmittedNameGetter = 
+                IdlNaming.DetermineGetterTransmissionName(simpleDecl.getIdent());
             // set the methods for the property
             MethodBuilder getAccessor = m_ilEmitHelper.AddPropertyGetter(builder, 
-                                                                         propName, transmittedName,
+                                                                         propName, transmittedNameGetter,
                                                                          propType,
                                                                          MethodAttributes.Virtual | MethodAttributes.Abstract | MethodAttributes.Public |
                                                                          MethodAttributes.NewSlot);
             MethodBuilder setAccessor = null;
             if (!(node.isReadOnly())) {
+                String transmittedNameSetter = 
+                    IdlNaming.DetermineSetterTransmissionName(simpleDecl.getIdent());
+
                 setAccessor = m_ilEmitHelper.AddPropertySetter(builder, 
-                                                               propName, transmittedName,
+                                                               propName, transmittedNameSetter,
                                                                propType,
                                                                MethodAttributes.Virtual | MethodAttributes.Abstract | MethodAttributes.Public |
                                                                MethodAttributes.NewSlot);
             }            
-            m_ilEmitHelper.AddProperty(builder, propName, transmittedName,
+            string fromIdlPropertyName =
+                IdlNaming.DetermineAttributeTransmissionName(simpleDecl.getIdent());
+            m_ilEmitHelper.AddProperty(builder, propName, fromIdlPropertyName,
                                        propType, getAccessor, setAccessor);
         }
         
@@ -2412,20 +2418,6 @@ public class MetaDataGenerator : IDLParserVisitor {
         return null;
     }
     
-    /// <summary>
-    /// Determines the idl name to transmit according to 
-    /// section 3.2.3.1 Escaped Identifiers, i.e. removes leading underscore.
-    /// The underscore is added, because the identifier would clash with an idl keyword;
-    /// The undersore is not transmitted, therefore remove it in FromIdlName attributes.
-    /// </summary>
-    private String DetermineTransmissionName(String idlName) {
-        String result = idlName;
-        if (idlName.StartsWith("_")) {
-            result = result.Substring(1);
-        }
-        return result;
-    }
-    
     private void AddOneWayAttribute(MethodBuilder builder) {
         ConstructorInfo info = 
             typeof(System.Runtime.Remoting.Messaging.OneWayAttribute).GetConstructor(Type.EmptyTypes);
@@ -2447,7 +2439,8 @@ public class MetaDataGenerator : IDLParserVisitor {
         ParameterSpec[] parameters = (ParameterSpec[])node.jjtGetChild(1).jjtAccept(this, buildInfo);
         // name
         String methodName = IdlNaming.MapIdlNameToClsName(node.getIdent());
-        String transmittedName = DetermineTransmissionName(node.getIdent());
+        String transmittedName = 
+            IdlNaming.DetermineOperationTransmissionName(node.getIdent());
         // ready to create method
         TypeBuilder typeAtBuild = buildInfo.GetContainterType();
         MethodBuilder methodBuilder = 
