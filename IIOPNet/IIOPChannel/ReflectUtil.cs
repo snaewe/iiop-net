@@ -663,6 +663,14 @@ namespace Ch.Elca.Iiop.Util {
             return result;
         }        
         
+        /// <summary>
+        /// gets the by ref Type for a type.
+        /// </summary>
+        public static Type GetByRefTypeFor(Type type) {
+            // use module and not assembly here, because not fully completed types are possible here too
+            return type.Module.GetType(type.FullName + "&"); // not nice, better solution ?
+        }
+        
         #endregion SMethods
 
     }

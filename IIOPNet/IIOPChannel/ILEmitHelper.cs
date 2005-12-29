@@ -154,9 +154,7 @@ namespace Ch.Elca.Iiop.Idl {
                 return m_paramType.GetSeparatedClsType();
             } else { // out or inout parameter
                 // need a type which represents a reference to the parametertype
-                Module declModule = m_paramType.GetSeparatedClsType().Module;
-                // use module and not assembly here, because not fully completed types are possible here too
-                return declModule.GetType(m_paramType.GetSeparatedClsType().FullName + "&"); // not nice, better solution ?
+                return ReflectionHelper.GetByRefTypeFor(m_paramType.GetSeparatedClsType());
             }
         }
 
