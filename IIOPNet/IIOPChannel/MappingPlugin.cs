@@ -34,6 +34,7 @@ using System.Xml;
 using System.Xml.Schema;
 using System.IO;
 using Ch.Elca.Iiop.Util;
+using omg.org.CORBA;
 
 
 namespace Ch.Elca.Iiop.Idl {
@@ -244,6 +245,51 @@ namespace Ch.Elca.Iiop.Idl {
         public CustomMappingDesc GetMappingForIdl(Type idlType) {
             return (CustomMappingDesc)m_mappingsIdl[idlType];
         }
+        
+        /// <summary>
+        /// takes an instance deserialised from a cdr stream and maps it to the instance
+        /// used in .NET. The mapped instance must be assignable to formalSig.
+        /// </summary>
+        /// <remarks>
+        /// Custom mapping must be present; otherwise an exception is thrown.
+        /// </remarks>
+        public object CreateClsForIdlInstance(object idlInstance, Type formalSig) {
+            // for subtype of idl formal support, get acutal mapping
+            CustomMappingDesc actualMapping = GetMappingForIdl(idlInstance.GetType());
+            if (actualMapping == null) {
+                throw new BAD_PARAM(12309, CompletionStatus.Completed_MayBe);
+            }
+            ICustomMapper mapper = actualMapping.Mapper;
+            object result = mapper.CreateClsForIdlInstance(idlInstance);
+            // check, if mapped instance is assignable to formal in CLS signature -> otherwise will not work.
+            if (!formalSig.IsAssignableFrom(result.GetType())) {
+                throw new BAD_PARAM(12311, CompletionStatus.Completed_MayBe);
+            }
+            return result;
+        }
+        
+        /// <summary>
+        /// takes a .NET instance and maps it to the instance, which should be serialised into
+        /// the CDR stream. The mapped instance must be assignable to the formal type specified in idl.
+        /// </summary>
+        /// <remarks>
+        /// Custom mapping must be present; otherwise an exception is thrown.
+        /// </remarks>
+        public object CreateIdlForClsInstance(object clsInstance, Type formal) {
+            // for subtypes support (subtypes of formal before cls to idl mapping; new formal is idl formal)
+            CustomMappingDesc actualMapping =
+                GetMappingForCls(clsInstance.GetType());
+            if (actualMapping == null) {
+                throw new BAD_PARAM(12308, CompletionStatus.Completed_MayBe);
+            }
+            ICustomMapper mapper = actualMapping.Mapper;
+            object actual = mapper.CreateIdlForClsInstance(clsInstance);
+            // check, if mapped is instance is assignable to formal -> otherwise will not work on other side ...
+            if (!formal.IsAssignableFrom(actual.GetType())) {
+                throw new BAD_PARAM(12310, CompletionStatus.Completed_MayBe);
+            }            
+            return actual;
+        }        
 
         #endregion IMethods
 

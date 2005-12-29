@@ -92,26 +92,23 @@ namespace Ch.Elca.Iiop.Marshalling {
                             CdrOutputStream targetStream) {
             Debug.WriteLine("marshal, formal: " + formal);
             // determine the serialiser
-            Serialiser serialiser = DetermineSerialiser(ref formal, ref attributes);
-            Marshal(formal, attributes, serialiser, actual, targetStream);
+            CustomMappingDesc customMappingUsed;
+            Serialiser serialiser = DetermineSerialiser(ref formal, ref attributes, out customMappingUsed);
+            Marshal(formal, attributes, serialiser, actual, customMappingUsed, targetStream);
         }
 
         /// <summary>marshals a paramter/field, using the specified serialiser</summary>
         /// <param name="attributes">the attributes used for further processing; the ones used to determine the serialiser are not part of the collection</param>
+        /// <param name="customMappingUsed">the applied custom mapping, if any; otherwise null</param>
         /// <remarks>this method is available for efficieny reason; normally other overloaded method is used</remarks>
         protected void Marshal(Type formal, AttributeExtCollection attributes, Serialiser serialiser,
-                               object actual, CdrOutputStream targetStream) {
+                               object actual, CustomMappingDesc customMappingUsed, CdrOutputStream targetStream) {
             
             // check for plugged special mappings, e.g. CLS ArrayList -> java.util.ArrayList
             // --> if present, need to convert instance before serialising
-            CustomMapperRegistry cReg = CustomMapperRegistry.GetSingleton();
-            if ((actual != null) && (cReg.IsCustomMappingPresentForCls(actual.GetType()))) {
-                ICustomMapper mapper = cReg.GetMappingForCls(actual.GetType()).Mapper;
-                actual = mapper.CreateIdlForClsInstance(actual);
-                // check, if mapped is instance is assignable to formal -> otherwise will not work on other side ...
-                if (!formal.IsAssignableFrom(actual.GetType())) {
-                    throw new BAD_PARAM(12310, CompletionStatus.Completed_MayBe);
-                }
+            if ((actual != null) && (customMappingUsed != null)) {
+                CustomMapperRegistry cReg = CustomMapperRegistry.GetSingleton();
+                actual = cReg.CreateIdlForClsInstance(actual, formal);
             }            
             serialiser.Serialise(formal, actual, attributes, targetStream);
         }
@@ -120,8 +117,11 @@ namespace Ch.Elca.Iiop.Marshalling {
         /// <param name="formal">The formal type. If formal is modified through mapper, result is returned in this parameter</param>
         /// <param name="attributes">the parameter/field attributes</param>
         /// <returns></returns>
-        protected Serialiser DetermineSerialiser(ref Type formal, ref AttributeExtCollection attributes) {
-            Serialiser serialiser = (Serialiser)s_mapper.MapClsTypeWithTransform(ref formal, ref attributes, s_serDetermination); // formal can be transformed
+        protected Serialiser DetermineSerialiser(ref Type formal, ref AttributeExtCollection attributes,
+                                                 out CustomMappingDesc customMappingUsed) {
+            Serialiser serialiser = 
+                (Serialiser)s_mapper.MapClsTypeWithTransform(ref formal, ref attributes, 
+                                                             s_serDetermination, out customMappingUsed); // formal can be transformed
             if (serialiser == null) {
                 // no serializer present for Type: formal
                 Trace.WriteLine("no serialiser for Type: " + formal);
@@ -148,8 +148,10 @@ namespace Ch.Elca.Iiop.Marshalling {
             Debug.WriteLine("unmarshal, formal: " + formal);
             Type formalNew = formal;
             // determine the serialiser
-            Serialiser serialiser = DetermineSerialiser(ref formalNew, ref attributes);
-            return Unmarshal(formalNew, formal, attributes, serialiser, sourceStream);
+            CustomMappingDesc customMappingUsed;
+            Serialiser serialiser = DetermineSerialiser(ref formalNew, ref attributes, out customMappingUsed);
+            return Unmarshal(formalNew, formal, attributes, serialiser, customMappingUsed,
+                             sourceStream);
         }
 
         /// <summary>unmarshals a parameter/field</summary>
@@ -157,21 +159,18 @@ namespace Ch.Elca.Iiop.Marshalling {
         /// <param name="formalSig">the type in signature/field declaration/...</param>
         /// <param name="serializer">the seriliazer to use</param>
         /// <param name="attributes">the attributes used for further processing; the ones used to determine the serialiser are not part of the collection</param>
+        /// <param name="customMappingUsed">the applied custom mapping, if any; otherwise null</param>
         /// <remarks>this method is available for efficieny reason; normally other overloaded method is used</remarks>
         protected object Unmarshal(Type formalSer, Type formalSig, AttributeExtCollection attributes,
-                                   Serialiser serialiser, CdrInputStream sourceStream) {
+                                   Serialiser serialiser, CustomMappingDesc customMappingUsed,
+                                   CdrInputStream sourceStream) {
             object result = serialiser.Deserialise(formalSer, attributes, sourceStream);
             
             // check for plugged special mappings, e.g. CLS ArrayList -> java.util.ArrayList
             // --> if present, need to convert instance after deserialising
+            if ((result != null) && (customMappingUsed != null)) {
             CustomMapperRegistry cReg = CustomMapperRegistry.GetSingleton();
-            if ((result != null) && (cReg.IsCustomMappingPresentForIdl(result.GetType()))) {
-                ICustomMapper mapper = cReg.GetMappingForIdl(result.GetType()).Mapper;
-                result = mapper.CreateClsForIdlInstance(result);
-                // check, if mapped instance is assignable to formal in CLS signature -> otherwise will not work.
-                if (!formalSig.IsAssignableFrom(result.GetType())) {
-                    throw new BAD_PARAM(12311, CompletionStatus.Completed_MayBe);
-                }
+                result = cReg.CreateClsForIdlInstance(result, formalSig);
             }            
             return result;            
         }
@@ -191,6 +190,7 @@ namespace Ch.Elca.Iiop.Marshalling {
         private Type m_formalToSer;
         private AttributeExtCollection m_attributes;
         private Serialiser m_ser;
+        private CustomMappingDesc m_customMappingDesc;
 
         #endregion IFields
         #region IConstructors
@@ -198,7 +198,7 @@ namespace Ch.Elca.Iiop.Marshalling {
         internal MarshallerForType(Type formal, AttributeExtCollection attributes) {
             m_formal = formal;
             m_formalToSer = formal;            
-            m_ser = DetermineSerialiser(ref m_formalToSer, ref attributes);
+            m_ser = DetermineSerialiser(ref m_formalToSer, ref attributes, out m_customMappingDesc);
             m_attributes = attributes; // the attributes passed, without the ones considered for the serialiser determination
         }
 
@@ -208,13 +208,13 @@ namespace Ch.Elca.Iiop.Marshalling {
         internal void Marshal(object actual, CdrOutputStream targetStream) {
             base.Marshal(m_formalToSer, 
                          m_attributes, // attributecollection can't be modified -> can pass it without copying
-                         m_ser, actual, targetStream);
+                         m_ser, actual, m_customMappingDesc, targetStream);
         }
 
         internal object Unmarshal(CdrInputStream sourceStream) {
             return base.Unmarshal(m_formalToSer, m_formal, 
                                   m_attributes, // attributecollection can't be modified -> can pass it without copying
-                                  m_ser, sourceStream);
+                                  m_ser, m_customMappingDesc, sourceStream);
         }
 
         #endregion IMethods
