@@ -98,6 +98,15 @@ namespace Ch.Elca.Iiop.Marshalling {
             return fieldVal;
         }
 
+        protected void CheckActualNotNull(object actual) {            
+            if (actual == null) {
+                // not allowed
+                throw new BAD_PARAM(3433, CompletionStatus.Completed_MayBe);
+            }
+            // ok
+        }
+
+
         #endregion IMethods
 
     }
@@ -299,10 +308,8 @@ namespace Ch.Elca.Iiop.Marshalling {
 
         internal override void Serialise(Type formal, object actual, AttributeExtCollection attributes,
                                        CdrOutputStream targetStream) {            
-            if (actual == null) { 
                 // string may not be null, if StringValueAttriubte is set"
-                throw new BAD_PARAM(10040, CompletionStatus.Completed_MayBe);
-            }
+            CheckActualNotNull(actual);
             if (m_useWide) {
                 targetStream.WriteWString((string)actual);
             } else {
@@ -756,25 +763,26 @@ namespace Ch.Elca.Iiop.Marshalling {
         #endregion IConstructors
         #region IMethods
         
-        internal override void Serialise(Type formal, object actual, AttributeExtCollection attributes,
-                                         CdrOutputStream targetStream) {
+        private void CheckFormalIsBoxedValueType(Type formal) {
             if (!formal.IsSubclassOf(ReflectionHelper.BoxedValueBaseType)) { 
                 // BoxedValueSerializer can only serialize formal types, 
                 // which are subclasses of BoxedValueBase
                 throw new INTERNAL(10041, CompletionStatus.Completed_MayBe);
             }
-
-            if (m_convertMultiDimArray) {
-                // actual is a multi dimensional array, which must be first converted to a jagged array
-                if ((actual != null) && (!actual.GetType().IsArray) && (!(actual.GetType().GetArrayRank() > 1))) {
-                    throw new BAD_PARAM(9004, CompletionStatus.Completed_MayBe);
-                }
-                actual = BoxedArrayHelper.ConvertMoreDimToNestedOneDim((Array)actual);
-            }
+        }
+        
+        internal override void Serialise(Type formal, object actual, AttributeExtCollection attributes,
+                                         CdrOutputStream targetStream) {
+            CheckFormalIsBoxedValueType(formal);
 
             // perform a boxing
             object boxed = null;
             if (actual != null) {
+                if (m_convertMultiDimArray) {
+                    // actual is a multi dimensional array, which must be first converted to a jagged array
+                    actual = 
+                        BoxedArrayHelper.ConvertMoreDimToNestedOneDimChecked(actual);
+                }
                 boxed = Activator.CreateInstance(formal, new object[] { actual } );
             }
             m_valueSer.Serialise(formal, boxed, attributes, targetStream);
@@ -783,25 +791,17 @@ namespace Ch.Elca.Iiop.Marshalling {
         internal override object Deserialise(Type formal, AttributeExtCollection attributes, 
                                              CdrInputStream sourceStream) {
             Debug.WriteLine("deserialise boxed value, formal: " + formal);
-            if (!formal.IsSubclassOf(ReflectionHelper.BoxedValueBaseType)) { 
-                // BoxedValueSerializer can only serialize formal types,
-                // which are subclasses of BoxedValueBase
-                throw new INTERNAL(10041, CompletionStatus.Completed_MayBe);
-            }
-
+            CheckFormalIsBoxedValueType(formal);
+            
             BoxedValueBase boxedResult = (BoxedValueBase) m_valueSer.Deserialise(formal, attributes, sourceStream);
             object result = null;
             if (boxedResult != null) {
                 // perform an unboxing
                 result = boxedResult.Unbox();
-            }
-
             if (m_convertMultiDimArray) {
                 // result is a jagged arary, which must be converted to a true multidimensional array
-                if ((result != null) && (!result.GetType().IsArray)) {
-                    throw new BAD_PARAM(9004, CompletionStatus.Completed_MayBe);
+                    result = BoxedArrayHelper.ConvertNestedOneDimToMoreDimChecked(result);
                 }
-                result = BoxedArrayHelper.ConvertNestedOneDimToMoreDim((Array)result);
             }
 
             Debug.WriteLine("unboxed result of boxedvalue-ser: " + result);
@@ -914,7 +914,7 @@ namespace Ch.Elca.Iiop.Marshalling {
             FieldInfo initalizedField = GetInitalizedField(formal);
             bool isInit = (bool)initalizedField.GetValue(actual);
             if (isInit == false) {
-                throw new BAD_OPERATION(34, CompletionStatus.Completed_MayBe);
+                throw new BAD_PARAM(34, CompletionStatus.Completed_MayBe);
             }
             // determine value of the discriminator
             FieldInfo discrValField = GetDiscriminatorField(formal);
@@ -1080,10 +1080,8 @@ namespace Ch.Elca.Iiop.Marshalling {
         internal override void Serialise(Type formal, object actual, AttributeExtCollection attributes,
                                        CdrOutputStream targetStream) {
             Array array = (Array) actual;
-            if (array == null) {
-                // not allowed for a sequence:
-                throw new BAD_PARAM(3433, CompletionStatus.Completed_MayBe);
-            }
+            // not allowed for a sequence:
+            CheckActualNotNull(array);
             CheckBound((uint)array.Length);
             targetStream.WriteULong((uint)array.Length);
             // get marshaller for elemtype
@@ -1135,11 +1133,11 @@ namespace Ch.Elca.Iiop.Marshalling {
         #endregion IConstructors
         #region IMethods
 
-        private void CheckInstance(Array array) {
+        private void CheckInstanceDimensions(Array array) {
             if (m_dimensions.Length != array.Rank) {
                 throw new BAD_PARAM(3436, CompletionStatus.Completed_MayBe);
             }
-            for (int i = 0; i < array.Rank; i++) {
+            for (int i = 0; i < m_dimensions.Length; i++) {
                 if (m_dimensions[i] != array.GetLength(i)) {
                     throw new BAD_PARAM(3437, CompletionStatus.Completed_MayBe);
                 }
@@ -1149,12 +1147,12 @@ namespace Ch.Elca.Iiop.Marshalling {
 
         private void SerialiseDimension(Array array, MarshallerForType marshaller, CdrOutputStream targetStream,
                                         int[] indices, int currentDimension) {
-            if (currentDimension == array.Rank) {
+            if (currentDimension == m_dimensions.Length) {
                 object value = array.GetValue(indices);
                 marshaller.Marshal(value, targetStream);
             } else {
                 // the first dimension index in the array is increased slower than the second and so on ...
-                for (int j = 0; j < array.GetLength(currentDimension); j++) {
+                for (int j = 0; j < m_dimensions[currentDimension]; j++) {
                     indices[currentDimension] = j;                    
                     SerialiseDimension(array, marshaller, targetStream, indices, currentDimension + 1);
                 }
@@ -1164,15 +1162,13 @@ namespace Ch.Elca.Iiop.Marshalling {
         internal override void Serialise(Type formal, object actual, AttributeExtCollection attributes,
                                          CdrOutputStream targetStream) {
             Array array = (Array) actual;
-            if (array == null) {
                 // not allowed for an idl array:
-                throw new BAD_PARAM(3433, CompletionStatus.Completed_MayBe);
-            }
-            CheckInstance(array);
+            CheckActualNotNull(array);
+            CheckInstanceDimensions(array);
             // get marshaller for elemtype
             Type elemType = formal.GetElementType();
             MarshallerForType marshaller = new MarshallerForType(elemType, attributes);
-            SerialiseDimension(array, marshaller, targetStream, new int[array.Rank], 0);
+            SerialiseDimension(array, marshaller, targetStream, new int[m_dimensions.Length], 0);
         }
 
         private void DeserialiseDimension(Array array, MarshallerForType marshaller, CdrInputStream sourceStream,
@@ -1182,7 +1178,7 @@ namespace Ch.Elca.Iiop.Marshalling {
                 array.SetValue(entry, indices);
             } else {
                 // the first dimension index in the array is increased slower than the second and so on ...
-                for (int j = 0; j < array.GetLength(currentDimension); j++) {                    
+                for (int j = 0; j < m_dimensions[currentDimension]; j++) {
                     indices[currentDimension] = j;                    
                     DeserialiseDimension(array, marshaller, sourceStream, indices, currentDimension + 1);
                 }
@@ -1196,7 +1192,7 @@ namespace Ch.Elca.Iiop.Marshalling {
             // get marshaller for array element type
             Type elemType = formal.GetElementType();
             MarshallerForType marshaller = new MarshallerForType(elemType, attributes);
-            DeserialiseDimension(result, marshaller, sourceStream, new int[result.Rank], 0);
+            DeserialiseDimension(result, marshaller, sourceStream, new int[m_dimensions.Length], 0);
             return result;
         }
 

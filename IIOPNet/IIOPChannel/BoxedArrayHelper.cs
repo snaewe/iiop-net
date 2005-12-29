@@ -108,7 +108,15 @@ namespace Ch.Elca.Iiop.Idl {
         }
         
         /// <summary>converts a true more dimensional array to an array of array of array of ...</summary>
-        public static Array ConvertMoreDimToNestedOneDim(Array toConv) {
+        public static Array ConvertMoreDimToNestedOneDimChecked(object toConv) {
+            if ((!toConv.GetType().IsArray) && (!(toConv.GetType().GetArrayRank() > 1))) {
+                throw new BAD_PARAM(9004, CompletionStatus.Completed_MayBe);
+            }
+            return ConvertMoreDimToNestedOneDim((Array)toConv);
+        }
+        
+        /// <summary>converts a true more dimensional array to an array of array of array of ...</summary>
+        private static Array ConvertMoreDimToNestedOneDim(Array toConv) {
             if (toConv == null) { 
                 return null; 
             } else if (toConv.Rank <= 1) { 
@@ -134,7 +142,15 @@ namespace Ch.Elca.Iiop.Idl {
         }
         
         /// <summary>converts an array of array of ... to a true more dimensional array</summary>
-        public static Array ConvertNestedOneDimToMoreDim(Array toConv) {
+        public static Array ConvertNestedOneDimToMoreDimChecked(object toConv) {
+            if (!toConv.GetType().IsArray) {
+                throw new BAD_PARAM(9004, CompletionStatus.Completed_MayBe);
+            }
+            return ConvertNestedOneDimToMoreDim((Array)toConv);
+        }
+        
+        /// <summary>converts an array of array of ... to a true more dimensional array</summary>
+        private static Array ConvertNestedOneDimToMoreDim(Array toConv) {
             if (toConv == null) { 
                 return null; 
             } else if (toConv.Rank > 1) {
