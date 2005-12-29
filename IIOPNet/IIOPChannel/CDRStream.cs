@@ -428,6 +428,14 @@ namespace Ch.Elca.Iiop.Cdr {
         /// <param name="align">the requested Alignement</param>
         void ForceReadAlign(Aligns align);
 
+        /// <summary>
+        /// forces the alignement on a boundary. Is for example useful in IIOP 1.2, where a request/response body
+        /// must be 8-aligned. This method doesn't throw an exception in conrast to ForceReadAlign,
+        /// if not enough data in the stream.
+        /// </summary>
+        /// <param name="align">the requested Alignement</param>
+        bool TryForceReadAlign(Aligns align);
+
         /// <summary>reads an encapsulation from this stream</summary>
         CdrEncapsulationInputStream ReadEncapsulation();
 
@@ -1103,6 +1111,31 @@ namespace Ch.Elca.Iiop.Cdr {
             }
         }
 
+        /// <summary>read padding for an aligned read with the requiredAlignement;
+        /// if not enough bytes in the stream read as much as possible and return false</summary>
+        /// <param name="requiredAlignment">align to which size</param>
+        protected bool TryAlignRead(byte requiredAlignment) {
+            bool hadEnoughToRead = false;
+            // do a chunk-start check here, because it's possible, that
+            // the value, for which we align, is in a new chunk 
+            // -> therefore a chunk length tag could be in between ->
+            // the alignement must be check after the chunk-length tag.
+            UpdateAndCheckChunking(0); 
+
+            // nr of bytes the index is after the last aligned index
+            uint align = GetAlignBytes(requiredAlignment);
+            if (align != 0) {
+                if (align <= GetBytesToFollow()) {
+                    // go to the next aligned position
+                    ReadPadding(align);
+                    hadEnoughToRead = true;
+                } else {
+                    SkipRest(); // read the remaining
+                }
+            }       
+            return hadEnoughToRead;
+        }
+
         /// <summary>reads a nr of padding bytes</summary>
         public void ReadPadding(uint nrOfBytes) {
             for (uint i = 0; i < nrOfBytes; i++) { 
@@ -1212,6 +1245,10 @@ namespace Ch.Elca.Iiop.Cdr {
 
         public void ForceReadAlign(Aligns align) {
             AlignRead((byte)align);
+        }
+        
+        public bool TryForceReadAlign(Aligns align) {
+            return TryAlignRead((byte)align);
         }
         
         public CdrEncapsulationInputStream ReadEncapsulation() {

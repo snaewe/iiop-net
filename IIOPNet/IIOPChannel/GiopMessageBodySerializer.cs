@@ -378,6 +378,15 @@ namespace Ch.Elca.Iiop.MessageHandling {
         }
 
         /// <summary>
+        /// the same as AlignBodyIfNeeded, but without throwing exception, when not enough bytes.
+        /// </summary>
+        protected void TryAlignBodyIfNeeded(CdrInputStream cdrStream, GiopVersion version) {
+            if (!version.IsBeforeGiop1_2()) {
+                cdrStream.TryForceReadAlign(Aligns.Align8);
+            } // force an align on 8 for GIOP-version >= 1.2
+        }
+
+        /// <summary>
         /// set the codesets for the stream after codeset service descision
         /// </summary>
         /// <param name="cdrStream"></param>
@@ -654,21 +663,19 @@ namespace Ch.Elca.Iiop.MessageHandling {
         private void DeserialiseRequestBody(CdrInputStream cdrStream, GiopVersion version,
                                             GiopServerRequest request,
                                             out IDictionary contextElements) {
-            // unmarshall parameters
-            ParameterMarshaller paramMarshaller = ParameterMarshaller.GetSingleton();
-            object[] args;
             // clarification from CORBA 2.6, chapter 15.4.1: no padding, when no arguments/no context elements
-            // are serialised, i.e. body empty
+            // are serialised, i.e. body empty            
+            // ignores, if not enough bytes because no args/context; because in this case, no more bytes follow
+            TryAlignBodyIfNeeded(cdrStream, version);
+
+            // unmarshall parameters
+            ParameterMarshaller paramMarshaller = ParameterMarshaller.GetSingleton();            
             bool hasRequestArgs = paramMarshaller.HasRequestArgs(request.CalledMethod);
             AttributeExtCollection methodAttrs =
                 ReflectionHelper.GetCustomAttriutesForMethod(request.CalledMethod, true,
                                                              ReflectionHelper.ContextElementAttributeType);
+            object[] args;
             contextElements = null;
-            if ((hasRequestArgs) || (methodAttrs.Count > 0)) {
-                AlignBodyIfNeeded(cdrStream, version); // aling request body
-            } else {
-                cdrStream.SkipRest(); // ignore paddings, if included    
-            }
             if (hasRequestArgs) {
                 args = paramMarshaller.DeserialiseRequestArgs(request.CalledMethod, cdrStream);
             } else {
@@ -888,18 +895,15 @@ namespace Ch.Elca.Iiop.MessageHandling {
                                                 GiopClientRequest request) {
             MethodInfo targetMethod = request.MethodToCall;
             ParameterMarshaller paramMarshaller = ParameterMarshaller.GetSingleton();
-            object[] outArgs;
-            object retVal = null;
             // body
             // clarification from CORBA 2.6, chapter 15.4.2: no padding, when no arguments are serialised
-            if (paramMarshaller.HasResponseArgs(targetMethod)) {
-                AlignBodyIfNeeded(cdrStream, version);
-                // read the parameters                            
-                retVal = paramMarshaller.DeserialiseResponseArgs(targetMethod, cdrStream, out outArgs);
-            } else {
-                outArgs = new object[0];
-                cdrStream.SkipRest(); // skip padding, if present
-            }
+            TryAlignBodyIfNeeded(cdrStream, version); // read alignement, if present
+            
+            // read the parameters                            
+            object[] outArgs;
+            object retVal = null;
+
+            retVal = paramMarshaller.DeserialiseResponseArgs(targetMethod, cdrStream, out outArgs);
             ReturnMessage response = new ReturnMessage(retVal, outArgs, outArgs.Length, null, request.Request);
             return response;
         }
