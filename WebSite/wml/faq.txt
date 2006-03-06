@@ -702,10 +702,12 @@ jacorb.interop.chunk_custom_rmi_valuetypes=off
 <li>Erik Doernenburg
 <li>Alexej Gapotchenko
 <li>Steven Hartland
+<li>Ramon Guiu i Hernandez
 <li>Tina Hofmann
 <li>Dennis Homann
 <li>Aitor Illarramendi
 <li>Alexander Kornienko 
+<li>Marc R. Lehmann
 <li>Glen Mah
 <li>Eduardo Macarron Miegemolle
 <li>Urs C. Muff
