@@ -13,7 +13,6 @@ All Tutorials assumes that you are familiar with CORBA, .NET Remoting and RMI/II
 To do the tutorials you need
 <UL>
 <LI>.NET Framework</LI>
-<LI>J# Redistributable Package (for the IDL to CLS compiler)</LI>
 <LI>JDK 1.4</LI>
 <LI>IIOP.NET</LI>
 </UL>
