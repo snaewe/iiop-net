@@ -1,0 +1,37 @@
+#include "layout.wml"
+
+<SUBJECT>Contribute</SUBJECT>
+<p/>
+Here are your options to contribute to IIOP.NET:
+<UL>
+<LI>
+Use IIOP.NET and report your experience through the forum. 
+You may report problems through the <A href="http://sourceforge.net/tracker/?group_id=80227&atid=559114">Bug tracker</A> 
+or through the forum. 
+You may also post feature requests in the <A href="http://sourceforge.net/tracker/?group_id=80227&atid=559117">feature request tracker</A> or through the forum. 
+The future development of IIOP.NET is very much influenced by your suggestions.  
+</LI> 
+<LI>implement missing features / improve IIOP.NET 
+Please use the <A HREF="http://sourceforge.net/tracker/?group_id=80227&atid=559116">patch tracker</A> to post your work. We will try to integrate the patch as soon as possible. 
+If you consider the following points, the integration of the patch is much easier: 
+- We normally write tests to make IIOP.NET robust. 
+Therefore, we very much appreciate any tests you provide. <BR/>
+- Your patches should not break any existing tests. If one of the tests is wrong, you may also fix the test. <BR/>
+- Your patches should follow the coding guidelines <BR/>
+</LI> 
+<LI>
+write documentation / tutorials 
+To help others with using IIOP.NET you may write some tutorials / articles on IIOP.NET. You may post them e.g. on sites like <A HREF="http://www.thecodeproject.com/">thecodeproject</A>. If you post the link in this forum, we will also link it from the <A HREF="http://iiop-net.sourceforge.net/documentation.html">documentation page</A>. 
+</LI>
+<LI> 
+Publish success stories 
+Success stories are a motivation factor for all contributors. 
+</LI>
+</UL> 
+
+Contributions to IIOP.NET are very welcome. 
+We maintain a <A HREF="http://iiop-net.sourceforge.net/faq.html#faq8_2">list of IIOP.NET contributors</A>.  
+Thank you for your contributions. 
+
+
+
