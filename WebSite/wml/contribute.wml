@@ -14,10 +14,12 @@ The future development of IIOP.NET is very much influenced by your suggestions.
 <LI>implement missing features / improve IIOP.NET 
 Please use the <A HREF="http://sourceforge.net/tracker/?group_id=80227&atid=559116">patch tracker</A> to post your work. We will try to integrate the patch as soon as possible. 
 If you consider the following points, the integration of the patch is much easier: 
-- We normally write tests to make IIOP.NET robust. 
-Therefore, we very much appreciate any tests you provide. <BR/>
-- Your patches should not break any existing tests. If one of the tests is wrong, you may also fix the test. <BR/>
-- Your patches should follow the coding guidelines <BR/>
+<UL>
+<LI>We normally write tests to make IIOP.NET robust. 
+Therefore, we very much appreciate any tests you provide. </LI>
+<LI>Your patches should not break any existing tests. If one of the tests is wrong, you may also fix the test. </LI>
+<LI>Your patches should follow the coding guidelines </LI>
+</UL>
 </LI> 
 <LI>
 write documentation / tutorials 
