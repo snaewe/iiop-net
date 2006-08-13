@@ -700,6 +700,7 @@ jacorb.interop.chunk_custom_rmi_valuetypes=off
 <li>Blazej Budzynski
 <li>Stefano Delli Ponti
 <li>Erik Doernenburg
+<li>Clemens Fischer
 <li>Alexej Gapotchenko
 <li>Steven Hartland
 <li>Ramon Guiu i Hernandez
@@ -714,6 +715,7 @@ jacorb.interop.chunk_custom_rmi_valuetypes=off
 <li>Andre Natal
 <li>SangHyun Park
 <li>Bill Petheram
+<li>Florian Pflug
 <li>Andreas Rullmann
 <li>Dirk O. Siebnich
 <li>Arne Sostack
