@@ -1,3 +1,4 @@
+23.08.2006    iiop-net-1-9-0-rc0
 20.08.2006    iiop-net-1-9-0-merge
 26.03.2006    iiop-net-1-9-0-beta3
 21.01.2006    iiop-net-1-9-0-beta2
