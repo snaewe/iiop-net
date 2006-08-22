@@ -1,3 +1,4 @@
+include ..\..\..\..\..\MakeVars
 !include .\MakeVars
 IDLSource=..\netServer\IDL 
 IDLTarget=IDL\ 
@@ -5,12 +6,6 @@ IDLTarget=IDL\
 Predef=..\net\IDL\Predef.idl
 
 build: omniorb_home_var client.exe
-
-omniorb_home_var:
-	@IF NOT DEFINED OMNIORB_HOME echo define OMNIORB_HOME first
-	@IF NOT DEFINED OMNIORB_HOME exit 2
-	@IF NOT DEFINED OMNIORB_VERSION echo define OMNIORB_VERSION first
-	@IF NOT DEFINED OMNIORB_VERSION exit 2
 
 client.exe: client.obj AdderSK.obj GenericUserExceptionSK.obj
 	$(LD) $(LDFLAGS) /OUT:$@ client.obj AdderSK.obj GenericUserExceptionSK.obj $(LDLIBS)

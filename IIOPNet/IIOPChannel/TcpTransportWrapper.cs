@@ -75,16 +75,22 @@ namespace Ch.Elca.Iiop {
         public bool IsDataAvailable() {
             return m_stream.DataAvailable;
         }
-        
+                
         /// <summary><see cref="Ch.Elca.Iiop.ITranport.CloseConnection/></summary>
         public void CloseConnection() {
-            try {
-                m_socket.Close();
-            } catch (Exception) {}
-            m_socket = null;
-            try {
-                m_stream.Close(); // close the stream and the socket.
-            } catch (Exception) { }
+            if (m_socket != null) {
+                try {                
+                    m_socket.Close();
+                } catch {
+                    // ignore
+                }
+                m_socket = null;
+                try {
+                    m_stream.Close(); // close the stream and the socket.
+                } catch {
+                    // ignore
+                }
+            }
         }
         
         public IAsyncResult BeginRead(byte[] buffer, int offset, int size, AsyncCallback callback, object state) {
@@ -256,8 +262,19 @@ namespace Ch.Elca.Iiop {
         
         private int m_receiveTimeOut = 0;
         private int m_sendTimeOut = 0;
+        private omg.org.IOP.Codec m_codec;
         
         #endregion IFields
+        #region IProperties
+        
+        /// <summary><see cref="Ch.Elca.Iiop.ITransportFactory.Codec"/></summary>
+        public omg.org.IOP.Codec Codec {
+            set {
+                m_codec = value;
+            }
+        }
+        
+        #endregion IProperties
         #region IMethods
         
         /// <summary><see cref="Ch.Elca.Iiop.IClientTransportFactory.CreateTransport(IIorProfile)"/></summary>
@@ -322,7 +339,8 @@ namespace Ch.Elca.Iiop {
         public string GetEndpointKey(IIorProfile target) {            
             if (target.ProfileId ==  TAG_INTERNET_IOP.ConstVal) {
                 IInternetIiopProfile prof = (IInternetIiopProfile)target;
-                return "iiop://"+prof.HostName+":"+prof.Port;
+                return "iiop" + prof.Version.Major + "." +
+                       prof.Version.Minor + "://"+prof.HostName+":"+prof.Port;
             } else {
                 return String.Empty;
             }

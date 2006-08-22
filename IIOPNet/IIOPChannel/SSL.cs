@@ -68,6 +68,10 @@ namespace Ch.Elca.Iiop.Security.Ssl {
                
         public readonly static Type ClassType = typeof(SSLComponentData);              
         
+        public readonly static omg.org.CORBA.TypeCode TypeCode =
+            Repository.CreateTypeCodeForType(typeof(SSLComponentData),
+                                             AttributeExtCollection.EmptyCollection);
+        
         #endregion SFields
         #region IFields
         

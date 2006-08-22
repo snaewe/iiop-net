@@ -274,7 +274,7 @@ namespace Ch.Elca.Iiop.Idl {
             
             // create the TypeCodes for the members
             FieldInfo[] members = ReflectionHelper.GetAllDeclaredInstanceFields(clsType);
-            ValueTypeMember[] valueMembers = new ValueTypeMember[members.Length];
+            ValueMember[] valueMembers = new ValueMember[members.Length];
             for (int i = 0; i < members.Length; i++) {
                 omg.org.CORBA.TypeCode memberType = CreateOrGetTypeCodeForType(members[i].FieldType, 
                                                         ReflectionHelper.GetCustomAttriutesForField(members[i], 
@@ -285,7 +285,7 @@ namespace Ch.Elca.Iiop.Idl {
                 } else { 
                     visibility = VISIBILITY_PUBLIC; 
                 }
-                valueMembers[i] = new ValueTypeMember(members[i].Name, memberType, visibility);
+                valueMembers[i] = new ValueMember(members[i].Name, memberType, visibility);
             }
             result.Initalize(Repository.GetRepositoryID(clsType),
                              IdlNaming.ReverseIdlToClsNameMapping(clsType.Name),
@@ -306,7 +306,7 @@ namespace Ch.Elca.Iiop.Idl {
                                            result);
             result.Initalize(Repository.GetRepositoryID(clsType),
                              IdlNaming.ReverseIdlToClsNameMapping(clsType.Name), 
-                             new ValueTypeMember[0],
+                             new ValueMember[0],
                              baseTypeCode, ABSTRACT_VALUE_MOD);
             return result;
         }
@@ -436,6 +436,10 @@ namespace Ch.Elca.Iiop.Idl {
             return result;
 
         }
+        public object MapToIdlFlagsEquivalent(Type clsType) {
+            Type underlyingType = Enum.GetUnderlyingType(clsType);
+            return CreateOrGetTypeCodeForType(underlyingType, AttributeExtCollection.EmptyCollection);
+        }
         public object MapToIdlBoolean(Type clsType) {
             return new BooleanTC();
         }
@@ -464,6 +468,9 @@ namespace Ch.Elca.Iiop.Idl {
             return new ULongLongTC();
         }
         public object MapToIdlOctet(Type clsType) {
+            return new OctetTC();
+        }
+        public object MapToIdlSByteEquivalent(Type clsType) {
             return new OctetTC();
         }
         public object MapToIdlVoid(Type clsType) {

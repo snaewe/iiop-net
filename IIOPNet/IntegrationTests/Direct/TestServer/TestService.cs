@@ -86,6 +86,22 @@ namespace Ch.Elca.Iiop.IntegrationTests {
             return arg + 1;
         }
 
+        public System.SByte TestIncSByte(System.SByte arg) {
+            return (System.SByte)(arg + 1);
+        }
+
+        public System.UInt16 TestIncUInt16(System.UInt16 arg) {
+            return (System.UInt16)(arg + 1);
+        }
+
+        public System.UInt32 TestIncUInt32(System.UInt32 arg) {
+            return arg + 1;
+        }
+
+        public System.UInt64 TestIncUInt64(System.UInt64 arg) {
+            return arg + 1;
+        }
+
         public System.Boolean TestNegateBoolean(System.Boolean arg) {
             return ! arg;
         }
@@ -103,6 +119,22 @@ namespace Ch.Elca.Iiop.IntegrationTests {
         }
 
         public TestEnum TestEchoEnumVal(TestEnum arg) {
+            return arg;
+        }
+
+        public TestFlags TestEchoFlagsVal(TestFlags arg) {
+            return arg;
+        }
+
+        public TestEnumBI16 TestEchoEnumI16Val(TestEnumBI16 arg) {
+            return arg;
+        }
+
+        public TestEnumBI64 TestEchoEnumI64Val(TestEnumBI64 arg) {
+            return arg;
+        }
+
+        public TestEnumUI32 TestEchoEnumUI32Val(TestEnumUI32 arg) {
             return arg;
         }
 

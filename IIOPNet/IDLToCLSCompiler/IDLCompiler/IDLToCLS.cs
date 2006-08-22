@@ -110,27 +110,15 @@ public class IDLToCLS {
     #endregion Constants
     #region IFields
     
-    private String[] m_inputFileNames = null;
-    private String m_asmPrefix = null;
-    private String m_destination = ".";
-
-    private ArrayList m_refAssemblies = new ArrayList();
-    
+    private IDLToCLSCommandLine m_commandLine;
+      
     private CodeDomProvider m_vtSkelcodeDomProvider = new CSharpCodeProvider();
-    private DirectoryInfo m_vtSkelTd = new DirectoryInfo(".");
-    private bool m_vtSkelOverwrite = false;
-    private bool m_vtSkelEnable = false;
-    
-    private string m_keyFile;
-    private bool m_delaySign = false;
-    private string m_asmVersion = null;
-    private bool m_mapAnyToAnyCont = false;
-    
+
     #endregion IFields
     #region IConstructors
 
     public IDLToCLS(String[] args) {
-        ParseArgs(args);
+        Setup(args);
     }
 
     #endregion IConstructors
@@ -155,29 +143,7 @@ public class IDLToCLS {
     }
     
     private static void HowTo() {
-        Console.WriteLine("Compiler usage:");
-        Console.WriteLine("  IDLToCLSCompiler [options] target_assembly_name idl-files");
-        Console.WriteLine();
-        Console.WriteLine("creates a CLS assembly for the OMG IDL definition files.");
-        Console.WriteLine("target_assembly_name is the name of the target assembly without .dll");
-        Console.WriteLine("idl-files: one or more idl files containg OMG IDL definitions");
-        Console.WriteLine();
-        Console.WriteLine("options are:");
-        Console.WriteLine("-h              help");
-        Console.WriteLine("-o directory    output directory (default is `-o .`)");
-        Console.WriteLine("-r assembly     assemblies to check for types in, instead of generating them");
-        Console.WriteLine("-c xmlfile      specifies custom mappings");
-        Console.WriteLine("-d define       defines a preprocessor symbol");
-        Console.WriteLine("-basedir directory directory to change to before doing any processing.");
-        Console.WriteLine("-idir directory directory containing idl files (multiple -idir allowed)");
-        Console.WriteLine("-vtSkel         enable creation of value type implementation skeletons");
-        Console.WriteLine("-vtSkelProv     The fully qualified name of the codedomprovider to use for value type skeleton generation");
-        Console.WriteLine("-vtSkelTd       The targetDirectory for generated valuetype impl skeletons");
-        Console.WriteLine("-vtSkelO        Overwrite already present valuetype skeleton implementations");
-        Console.WriteLine("-snk            sign key file (used for generating strong named assemblies)");
-        Console.WriteLine("-delaySign      delay signing of assembly (snk file contains only a pk)");
-        Console.WriteLine("-asmVersion     the version of the generated assembly");
-        Console.WriteLine("-mapAnyToCont   maps idl any to the any container omg.org.CORBA.Any; if not specified, any is mapped to object");
+        IDLToCLSCommandLine.HowTo(Console.Out);
     }
     
     public static void Error(String message) {
@@ -190,105 +156,46 @@ public class IDLToCLS {
     #endregion SMethods
     #region IMethods
     
-    private void ParseArgs(String[] args) {
-        int i = 0;
-        ArrayList customMappingFiles = new ArrayList();
-
-        while ((i < args.Length) && (args[i].StartsWith("-"))) {
-            if (args[i].Equals("-h")) {
-                HowTo();
-                i++;
-                Environment.Exit(0);
-            } else if (args[i].Equals("-o")) {
-                i++;
-                m_destination = args[i++];
-            } else if (args[i].Equals("-r")) {
-                i++;
-                try {                    
-                    Assembly refAsm = Assembly.LoadFrom(args[i++]);
-                    m_refAssemblies.Add(refAsm);
-                } catch (Exception ex) {
-                    Console.WriteLine("can't load assembly: " + args[i] + "\n" + ex);
-                    Environment.Exit(3);
-                }                
-            } else if (args[i].Equals("-c")) {
-                i++;
-                FileInfo customMappingFile = new System.IO.FileInfo(args[i++]);
-                if (!customMappingFiles.Contains(customMappingFile)) {
-                    customMappingFiles.Add(customMappingFile);
-                } else {
-                    Error("tried to add a custom mapping file multiple times: " + customMappingFile.FullName);
-                }
-            } else if (args[i].Equals("-d")) {
-                i++;
-                IDLPreprocessor.AddDefine(args[i++].Trim());
-            } else if (args[i].Equals("-idir")) {
-                i++;
-                DirectoryInfo dir = new DirectoryInfo(args[i++]);
-                IDLPreprocessor.SetIdlDir(dir);
-            } else if (args[i].Equals("-vtSkel")) {
-                i++;
-                m_vtSkelEnable = true;
-            } else if (args[i].Equals("-vtSkelProv")) {
-                i++;
-                string providerTypeName = args[i++].Trim();
-                Type codeDomProvType = Type.GetType(providerTypeName, false);
-                if (codeDomProvType == null) {
-                    Error(String.Format("provider {0} not found!",
-                                        providerTypeName));
-                }
-                m_vtSkelcodeDomProvider = 
-                    (CodeDomProvider) Activator.CreateInstance(codeDomProvType);
-                                           
-                
-            } else if (args[i].Equals("-vtSkelTd")) {
-                i++;
-                m_vtSkelTd = new DirectoryInfo(args[i++]);
-            } else if (args[i].Equals("-vtSkelO")) {
-                i++;
-                m_vtSkelOverwrite = true;
-            } else if (args[i].Equals("-snk")) {
-                i++;
-                m_keyFile = args[i++];
-            } else if (args[i].Equals("-delaySign")) {
-                i++;
-                m_delaySign = true;
-            } else if (args[i].Equals("-asmVersion")) {
-                i++;
-                m_asmVersion = args[i++];
-            } else if (args[i].Equals("-basedir")) {
-                i++;
-                string base_dir = args[i++];
-                if (!Directory.Exists(base_dir))
-                {
-                    Error( String.Format("Error: base directory {0} does not exist!", base_dir ) );
-                    Environment.Exit(3);
-                }
-                Environment.CurrentDirectory = (base_dir);
-            } else if (args[i].Equals("-mapAnyToCont")) {
-                i++;
-                m_mapAnyToAnyCont = true;
-            } else {
-                Error(String.Format("Error: invalid option {0}", args[i]));
-            }
+    private void Setup(String[] args) {
+        m_commandLine = new IDLToCLSCommandLine(args);
+        if (m_commandLine.IsHelpRequested) {
+            HowTo();
+            Environment.Exit(0);
+        }
+        
+        if (m_commandLine.IsInvalid) {
+            Error(m_commandLine.ErrorMessage);
+        }
+        
+        // create output directory
+        if (!Directory.Exists(m_commandLine.OutputDirectory.FullName)) {
+            Directory.CreateDirectory(m_commandLine.OutputDirectory.FullName);
+        }
+        
+        // process include dirs
+        for (int i = 0; i < m_commandLine.IdlSourceDirectories.Count; i++) {
+            IDLPreprocessor.SetIdlDir((DirectoryInfo)m_commandLine.IdlSourceDirectories[i]);
+        }
+        
+        if (m_commandLine.BaseDirectory != null) {
+            Environment.CurrentDirectory = m_commandLine.BaseDirectory.FullName;
         }
 
-        if (!Directory.Exists(m_destination)) {
-            Directory.CreateDirectory(m_destination);
+        // preprocessor defines
+        for (int i = 0; i < m_commandLine.PreprocessorDefines.Count; i++) {
+            IDLPreprocessor.AddDefine((string)m_commandLine.PreprocessorDefines[i]);
         }
         
-        if ((i + 2) > args.Length) {
-            Error("Error: target assembly name or idl-file missing");
+        // vt-skeleton generation setup
+        if (m_commandLine.GenerateValueTypeSkeletons &&
+            m_commandLine.ValueTypeSkeletonCodeDomProviderType != null) {
+            m_vtSkelcodeDomProvider = 
+                    (CodeDomProvider) Activator.CreateInstance(
+                        m_commandLine.ValueTypeSkeletonCodeDomProviderType);
         }
-        
-        m_asmPrefix = args[i];
-        i++;
-        
-        m_inputFileNames = new String[args.Length - i];
-        Array.Copy(args, i, m_inputFileNames, 0, m_inputFileNames.Length);                
         
         SetupAssemblyResolver();
-        AddCustomMappings(customMappingFiles);
+        AddCustomMappings(m_commandLine.CustomMappingFiles);
         
     }
     
@@ -297,7 +204,7 @@ public class IDLToCLS {
     private void SetupAssemblyResolver() {
         ArrayList searchDirectoryList = new ArrayList();
         searchDirectoryList.Add(new DirectoryInfo(".").FullName);
-        foreach (Assembly refAsm in m_refAssemblies) {
+        foreach (Assembly refAsm in m_commandLine.ReferencedAssemblies) {
             string asmDir = new FileInfo(refAsm.Location).Directory.FullName;
             if (!searchDirectoryList.Contains(asmDir)) {
                 searchDirectoryList.Add(asmDir);
@@ -348,17 +255,17 @@ public class IDLToCLS {
     
     private AssemblyName GetAssemblyName() {
         AssemblyName result = new AssemblyName();
-        result.Name = m_asmPrefix;
-        if (m_keyFile != null) {
-            if (!m_delaySign) {
+        result.Name = m_commandLine.TargetAssemblyName;
+        if (m_commandLine.SignKeyFile != null) {
+            if (!m_commandLine.DelaySign) {
                 // load keypair
-                StrongNameKeyPair snP = new StrongNameKeyPair(File.Open(m_keyFile, 
+                StrongNameKeyPair snP = new StrongNameKeyPair(File.Open(m_commandLine.SignKeyFile.FullName, 
                                                                         FileMode.Open, 
                                                                         FileAccess.Read));
                 result.KeyPair = snP;
             } else {
                 // deleay signing, load only pk
-                FileStream publicKeyStream = File.Open(m_keyFile, FileMode.Open);
+                FileStream publicKeyStream = File.Open(m_commandLine.SignKeyFile.FullName, FileMode.Open);
                 byte[] publicKey = new byte[publicKeyStream.Length];
                 publicKeyStream.Read(publicKey, 0, (int)publicKeyStream.Length);
                 // Provide the assembly with a public key.
@@ -366,8 +273,8 @@ public class IDLToCLS {
                 publicKeyStream.Close();
             }
         }
-        if (m_asmVersion != null) {
-            result.Version = new Version(m_asmVersion);
+        if (m_commandLine.AssemblyVersion != null) {
+            result.Version = new Version(m_commandLine.AssemblyVersion);
         }
         return result;
     }
@@ -375,22 +282,25 @@ public class IDLToCLS {
 
     public void MapIdl() {
         MetaDataGenerator generator = new MetaDataGenerator(GetAssemblyName(), 
-                                                            m_destination,
-                                                            m_refAssemblies);
-        if (m_vtSkelEnable) {
+                                                            m_commandLine.OutputDirectory.FullName,
+                                                            m_commandLine.ReferencedAssemblies);
+        if (m_commandLine.GenerateValueTypeSkeletons) {
             generator.EnableValueTypeSkeletonGeneration(m_vtSkelcodeDomProvider,
-                                                        m_vtSkelTd,
-                                                        m_vtSkelOverwrite);
+                                                        m_commandLine.ValueTypeSkeletonsTargetDir,
+                                                        m_commandLine.OverwriteValueTypeSkeletons);
         }       
-        generator.MapAnyToAnyContainer = m_mapAnyToAnyCont;
-        
-        string currentDir = Directory.GetCurrentDirectory();
-        for (int i = 0; i < m_inputFileNames.Length; i++) {
-            Debug.WriteLine("checking file: " + m_inputFileNames[i] );
+        generator.MapAnyToAnyContainer = m_commandLine.MapAnyToAnyContainer;
+        if (m_commandLine.BaseInterface != null) {
+            generator.InheritedInterface = m_commandLine.BaseInterface;
+        }
 
-            string rootedPath = m_inputFileNames[i];
-            if (!Path.IsPathRooted(m_inputFileNames[i])) {
-                rootedPath = Path.Combine(currentDir, m_inputFileNames[i]);
+        string currentDir = Directory.GetCurrentDirectory();
+        for (int i = 0; i < m_commandLine.InputFileNames.Count; i++) {
+            Debug.WriteLine("checking file: " + m_commandLine.InputFileNames[i] );
+
+            string rootedPath = (string)m_commandLine.InputFileNames[i];
+            if (!Path.IsPathRooted((string)m_commandLine.InputFileNames[i])) {
+                rootedPath = Path.Combine(currentDir, (string)m_commandLine.InputFileNames[i]);
             }
             string searchDirectory = Path.GetDirectoryName(rootedPath);
             string fileName = Path.GetFileName(rootedPath);
@@ -401,7 +311,7 @@ public class IDLToCLS {
                     processFile(generator, file);
                 }
             } else {
-                Error("file(s) not found: " + m_inputFileNames[i]);                
+                Error("file(s) not found: " + m_commandLine.InputFileNames[i]);                
             }
         }
         // save the result to disk

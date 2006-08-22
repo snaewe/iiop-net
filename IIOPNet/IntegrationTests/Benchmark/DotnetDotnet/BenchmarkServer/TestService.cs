@@ -137,6 +137,11 @@ namespace Ch.Elca.Iiop.Benchmarks {
             return arg;
         }
 
+        [return: IdlSequence(0L)]
+        public int[] IntIdlSeqEcho([IdlSequence(0L)] int[] arg) {
+            return arg;
+        }
+
         public IdlStructA EchoStruct(IdlStructA arg) {
             return arg;
         }

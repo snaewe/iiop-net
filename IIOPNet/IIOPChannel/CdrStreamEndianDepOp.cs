@@ -37,7 +37,7 @@ using Ch.Elca.Iiop.CodeSet;
 using omg.org.CORBA;
 
 namespace Ch.Elca.Iiop.Cdr {
-
+    
     /// <summary>
     /// this is a big-endian implementation for the endian dependent operation for CDRInput-streams
     /// </summary>
@@ -63,56 +63,62 @@ namespace Ch.Elca.Iiop.Cdr {
         #endregion IConstructors
         #region IMethods
         
+        /// <summary>
+        /// retrieved the wchar encoding to use for wchar/wstring operations.
+        /// </summary>        
+        private Encoding GetWCharEncoding(int wcharSet) {
+            Encoding encoding = CodeSetService.GetCharEncodingBigEndian(wcharSet, true);
+            if (encoding == null) {
+                throw new BAD_PARAM(987, CompletionStatus.Completed_MayBe, "WChar Codeset either not specified or not supported.");
+            }
+            return encoding;
+        }        
+        
         #region read methods depenant on byte ordering
 
         private void Read(int size, Aligns align) {
             m_stream.ForceReadAlign(align);
             m_stream.ReadBytes(m_buf, 0, size);
-            if (BitConverter.IsLittleEndian) { // need to reverse, because BitConverter uses other endian
-                Array.Reverse(m_buf, 0, size);
-            }
         }
 
         public short ReadShort() {
             Read(2, Aligns.Align2);
-            return BitConverter.ToInt16(m_buf, 0);
+            return SystemWireBitConverter.ToInt16(m_buf, false);
         }
 
         public ushort ReadUShort() {
             Read(2, Aligns.Align2);
-            return BitConverter.ToUInt16(m_buf, 0);
+            return SystemWireBitConverter.ToUInt16(m_buf, false);
         }
 
         public int ReadLong() {
             Read(4, Aligns.Align4);
-            return BitConverter.ToInt32(m_buf, 0);
+            return SystemWireBitConverter.ToInt32(m_buf, false);
         }
 
         public uint ReadULong() {
             Read(4, Aligns.Align4);
-            return BitConverter.ToUInt32(m_buf, 0);
+            return SystemWireBitConverter.ToUInt32(m_buf, false);
         }
 
         public long ReadLongLong() {
             Read(8, Aligns.Align8);
-            return BitConverter.ToInt64(m_buf, 0);
+            return SystemWireBitConverter.ToInt64(m_buf, false);
         }
 
         public ulong ReadULongLong() {
             Read(8, Aligns.Align8);
-            return BitConverter.ToUInt64(m_buf, 0);
+            return SystemWireBitConverter.ToUInt64(m_buf, false);
         }
 
         public float ReadFloat() {
             Read(4, Aligns.Align4);
-            float result = BitConverter.ToSingle(m_buf, 0);
-            return result;
+            return SystemWireBitConverter.ToSingle(m_buf, false);
         }
 
         public double ReadDouble() {
             Read(8, Aligns.Align8);
-            double result = BitConverter.ToDouble(m_buf, 0);
-            return result;
+            return SystemWireBitConverter.ToDouble(m_buf, false);
         }
         
         private byte[] AppendChar(byte[] oldData) {
@@ -123,10 +129,7 @@ namespace Ch.Elca.Iiop.Cdr {
         }
         
         public char ReadWChar() {
-            Encoding encoding = CodeSetService.GetCharEncodingBigEndian(m_stream.WCharSet, true);
-            if (encoding == null) {
-                throw new INTERNAL(987, CompletionStatus.Completed_MayBe);
-            }
+            Encoding encoding = GetWCharEncoding(m_stream.WCharSet);
             byte[] data;
             if ((m_version.Major == 1) && (m_version.Minor <= 1)) { // GIOP 1.1 / 1.0
                 data = new byte[] { m_stream.ReadOctet() };
@@ -142,10 +145,7 @@ namespace Ch.Elca.Iiop.Cdr {
         }
 
         public string ReadWString()    {
-            Encoding encoding = CodeSetService.GetCharEncodingBigEndian(m_stream.WCharSet, true);
-            if (encoding == null) {
-                throw new INTERNAL(987, CompletionStatus.Completed_MayBe);
-            }
+            Encoding encoding = GetWCharEncoding(m_stream.WCharSet);
             uint length = ReadULong(); 
             byte[] data;
             if ((m_version.Major == 1) && (m_version.Minor <= 1)) { // GIOP 1.1 / 1.0
@@ -192,53 +192,58 @@ namespace Ch.Elca.Iiop.Cdr {
         #endregion IConstructors
         #region IMethods
         
+        /// <summary>
+        /// retrieved the wchar encoding to use for wchar/wstring operations.
+        /// </summary>        
+        private Encoding GetWCharEncoding(int wcharSet) {
+            Encoding encoding = CodeSetService.GetCharEncodingBigEndian(wcharSet, true);
+            if (encoding == null) {
+                throw new BAD_PARAM(987, CompletionStatus.Completed_MayBe, "WChar Codeset either not specified or not supported.");
+            }
+            return encoding;
+        }        
+        
         #region write methods dependant on byte ordering
 
     	private void Write(byte[] data, int count, Aligns align) {
 	        m_stream.ForceWriteAlign(align);
-            if (BitConverter.IsLittleEndian) { // need to reverse, because BitConverter uses other endian
-    	        Array.Reverse(data, 0, count);
-	        }
 		    m_stream.WriteBytes(data, 0, count);
 	    }
         
         public void WriteShort(short data) {
-		    Write(BitConverter.GetBytes(data), 2, Aligns.Align2);
+		    Write(SystemWireBitConverter.GetBytes(data, false), 2, Aligns.Align2);
         }
 
         public void WriteUShort(ushort data) {
-		    Write(BitConverter.GetBytes(data), 2, Aligns.Align2);
+		    Write(SystemWireBitConverter.GetBytes(data, false), 2, Aligns.Align2);
         }
 
         public void WriteLong(int data) {
-		    Write(BitConverter.GetBytes(data), 4, Aligns.Align4);
+		    Write(SystemWireBitConverter.GetBytes(data, false), 4, Aligns.Align4);
         }
 
         public void WriteULong(uint data) {
-		    Write(BitConverter.GetBytes(data), 4, Aligns.Align4);
+		    Write(SystemWireBitConverter.GetBytes(data, false), 4, Aligns.Align4);
         }
 
         public void WriteLongLong(long data) {
-		    Write(BitConverter.GetBytes(data), 8, Aligns.Align8);
+		    Write(SystemWireBitConverter.GetBytes(data, false), 8, Aligns.Align8);
         }
 
         public void WriteULongLong(ulong data) {
-		    Write(BitConverter.GetBytes(data), 8, Aligns.Align8);
+		    Write(SystemWireBitConverter.GetBytes(data, false), 8, Aligns.Align8);
         }
 
         public void WriteFloat(float data) {
-		    Write(BitConverter.GetBytes(data), 4, Aligns.Align4);
+		    Write(SystemWireBitConverter.GetBytes(data, false), 4, Aligns.Align4);
         }
 
         public void WriteDouble(double data) {
-		    Write(BitConverter.GetBytes(data), 8, Aligns.Align8);
+		    Write(SystemWireBitConverter.GetBytes(data, false), 8, Aligns.Align8);
         }
 
         public void WriteWChar(char data) {
-            Encoding encoding = CodeSetService.GetCharEncodingBigEndian(m_stream.WCharSet, true);
-            if (encoding == null) {
-                throw new INTERNAL(987, CompletionStatus.Completed_MayBe);
-            }            
+            Encoding encoding = GetWCharEncoding(m_stream.WCharSet);
             byte[] toSend = encoding.GetBytes(new char[] { data } );
             if (!((m_version.Major == 1) && (m_version.Minor <= 1))) { // GIOP 1.2
                 m_stream.WriteOctet((byte)toSend.Length);
@@ -247,10 +252,7 @@ namespace Ch.Elca.Iiop.Cdr {
         }
 
         public void WriteWString(string data) {
-            Encoding encoding = CodeSetService.GetCharEncodingBigEndian(m_stream.WCharSet, true);
-            if (encoding == null) {
-                throw new INTERNAL(987, CompletionStatus.Completed_MayBe);
-            }
+            Encoding encoding = GetWCharEncoding(m_stream.WCharSet);
             byte[] toSend = encoding.GetBytes(data);
             if ((m_version.Major == 1) && (m_version.Minor <= 1)) { // GIOP 1.0, 1.1
                 byte[] sendNew = new byte[toSend.Length + 2];
@@ -297,56 +299,62 @@ namespace Ch.Elca.Iiop.Cdr {
         #endregion IConstructors
         #region IMethods
         
+        /// <summary>
+        /// retrieved the wchar encoding to use for wchar/wstring operations.
+        /// </summary>        
+        private Encoding GetWCharEncoding(int wcharSet) {
+            Encoding encoding = CodeSetService.GetCharEncodingLittleEndian(wcharSet, true);
+            if (encoding == null) {
+                throw new BAD_PARAM(987, CompletionStatus.Completed_MayBe, "WChar Codeset either not specified or not supported.");
+            }
+            return encoding;
+        }        
+        
         #region read methods depenant on byte ordering
 
         private void Read(int size, Aligns align) {
             m_stream.ForceReadAlign(align);
             m_stream.ReadBytes(m_buf, 0, size);
-            if (!BitConverter.IsLittleEndian) { // need to reverse, because BitConverter uses other endian
-                Array.Reverse(m_buf, 0, size);
-            }            
         }
 
         public short ReadShort() {
             Read(2, Aligns.Align2);
-            return BitConverter.ToInt16(m_buf, 0);
+            return SystemWireBitConverter.ToInt16(m_buf, true);
         }
 
         public ushort ReadUShort() {
             Read(2, Aligns.Align2);
-            return BitConverter.ToUInt16(m_buf, 0);
+            return SystemWireBitConverter.ToUInt16(m_buf, true);
         }
 
         public int ReadLong() {
             Read(4, Aligns.Align4);
-            return BitConverter.ToInt32(m_buf, 0);
+            return SystemWireBitConverter.ToInt32(m_buf, true);
         }
 
         public uint ReadULong() {
             Read(4, Aligns.Align4);
-            return BitConverter.ToUInt32(m_buf, 0);
+            return SystemWireBitConverter.ToUInt32(m_buf, true);
         }
 
         public long ReadLongLong() {
             Read(8, Aligns.Align8);
-            return BitConverter.ToInt64(m_buf, 0);
+            return SystemWireBitConverter.ToInt64(m_buf, true);
         }
 
         public ulong ReadULongLong() {
             Read(8, Aligns.Align8);
-            return BitConverter.ToUInt64(m_buf, 0);
+            return SystemWireBitConverter.ToUInt64(m_buf, true);
         }
 
         public float ReadFloat() {
             Read(4, Aligns.Align4);
-            float result = BitConverter.ToSingle(m_buf, 0);
-            return result;
+            return SystemWireBitConverter.ToSingle(m_buf, true);
         }
 
         public double ReadDouble() {
             Read(8, Aligns.Align8);
-            double result = BitConverter.ToDouble(m_buf, 0);
-            return result;
+            return SystemWireBitConverter.ToDouble(m_buf, true);
         }
         
         private byte[] AppendChar(byte[] oldData) {
@@ -357,11 +365,7 @@ namespace Ch.Elca.Iiop.Cdr {
         }
         
         public char ReadWChar() {
-            Encoding encoding = CodeSetService.GetCharEncodingLittleEndian(m_stream.WCharSet, true);
-            if (encoding == null) {
-                throw new INTERNAL(987, CompletionStatus.Completed_MayBe);
-            }
-
+            Encoding encoding = GetWCharEncoding(m_stream.WCharSet);
             byte[] data;
             if ((m_version.Major == 1) && (m_version.Minor <= 1)) { // GIOP 1.1 / 1.0
                 data = new byte[] { m_stream.ReadOctet() };
@@ -377,7 +381,7 @@ namespace Ch.Elca.Iiop.Cdr {
         }
 
         public string ReadWString()    {
-            Encoding encoding = CodeSetService.GetCharEncodingLittleEndian(m_stream.WCharSet, true);
+            Encoding encoding = GetWCharEncoding(m_stream.WCharSet);
             uint length = ReadULong(); 
             byte[] data;
             if ((m_version.Major == 1) && (m_version.Minor <= 1)) { // GIOP 1.1 / 1.0
@@ -424,50 +428,58 @@ namespace Ch.Elca.Iiop.Cdr {
         #endregion IConstructors
         #region IMethods
         
+        /// <summary>
+        /// retrieved the wchar encoding to use for wchar/wstring operations.
+        /// </summary>        
+        private Encoding GetWCharEncoding(int wcharSet) {
+            Encoding encoding = CodeSetService.GetCharEncodingLittleEndian(wcharSet, true);
+            if (encoding == null) {
+                throw new BAD_PARAM(987, CompletionStatus.Completed_MayBe, "WChar Codeset either not specified or not supported.");
+            }
+            return encoding;
+        }        
+        
         #region write methods dependant on byte ordering
 
        	private void Write(byte[] data, int count, Aligns align) {
 		    m_stream.ForceWriteAlign(align);
-            if (!BitConverter.IsLittleEndian) { // need to reverse, because BitConverter uses other endian
-    	        Array.Reverse(data, 0, count);
-	        }
 		    m_stream.WriteBytes(data, 0, count);
 	    }
         
         public void WriteShort(short data) {
-		    Write(BitConverter.GetBytes(data), 2, Aligns.Align2);
+		    Write(SystemWireBitConverter.GetBytes(data, true), 2, Aligns.Align2);
         }
 
         public void WriteUShort(ushort data) {
-		    Write(BitConverter.GetBytes(data), 2, Aligns.Align2);
+		    Write(SystemWireBitConverter.GetBytes(data, true), 2, Aligns.Align2);
         }
 
         public void WriteLong(int data) {
-		    Write(BitConverter.GetBytes(data), 4, Aligns.Align4);
+		    Write(SystemWireBitConverter.GetBytes(data, true), 4, Aligns.Align4);
         }
 
         public void WriteULong(uint data) {
-		    Write(BitConverter.GetBytes(data), 4, Aligns.Align4);
+		    Write(SystemWireBitConverter.GetBytes(data, true), 4, Aligns.Align4);
         }
 
         public void WriteLongLong(long data) {
-		    Write(BitConverter.GetBytes(data), 8, Aligns.Align8);
+		    Write(SystemWireBitConverter.GetBytes(data, true), 8, Aligns.Align8);
         }
 
         public void WriteULongLong(ulong data) {
-		    Write(BitConverter.GetBytes(data), 8, Aligns.Align8);
+		    Write(SystemWireBitConverter.GetBytes(data, true), 8, Aligns.Align8);
         }
 
         public void WriteFloat(float data) {
-		    Write(BitConverter.GetBytes(data), 4, Aligns.Align4);
+		    Write(SystemWireBitConverter.GetBytes(data, true), 4, Aligns.Align4);
         }
 
         public void WriteDouble(double data) {
-		    Write(BitConverter.GetBytes(data), 8, Aligns.Align8);
+		    Write(SystemWireBitConverter.GetBytes(data, true), 8, Aligns.Align8);
         }
 
         public void WriteWChar(char data) {
-            Encoding encoding = CodeSetService.GetCharEncodingLittleEndian(m_stream.WCharSet, true);
+            Encoding encoding = GetWCharEncoding(m_stream.WCharSet);
             byte[] toSend = encoding.GetBytes(new char[] { data } );
             if (!((m_version.Major == 1) && (m_version.Minor <= 1))) { // GIOP 1.2
                 m_stream.WriteOctet((byte)toSend.Length);
@@ -476,7 +488,7 @@ namespace Ch.Elca.Iiop.Cdr {
         }
 
         public void WriteWString(string data) {
-            Encoding encoding = CodeSetService.GetCharEncodingLittleEndian(m_stream.WCharSet, true);
+            Encoding encoding = GetWCharEncoding(m_stream.WCharSet);
             byte[] toSend = encoding.GetBytes(data);
             if ((m_version.Major == 1) && (m_version.Minor <= 1)) { // GIOP 1.0, 1.1
                 byte[] sendNew = new byte[toSend.Length + 2];
@@ -612,3 +624,259 @@ namespace Ch.Elca.Iiop.Cdr {
 
 
 }
+
+#if UnitTest
+
+namespace Ch.Elca.Iiop.Tests {
+    
+    using System;
+    using System.Reflection;
+    using Ch.Elca.Iiop.Cdr;
+    using NUnit.Framework;
+    
+    /// <summary>
+    /// Unit-tests for testing CdrEndianDepOp Tests.
+    /// </summary>
+    [TestFixture]
+    public class CdrEndianDepOpTest {
+
+        private const byte STREAM_BIG_ENDIAN_FLAG = 0;
+        private const byte STREAM_LITTLE_ENDIAN_FLAG = 1;
+    	
+    	[Test]
+    	public void TestInt16WBEWToS() {
+    	    MemoryStream stream = new MemoryStream(new byte[] { 0, 1,
+    	                                                        1, 2,
+    	                                                        0x7F, 0xFF,
+    	                                                        0x80, 0x00 });
+    	    CdrInputStreamImpl cdrIn = new CdrInputStreamImpl(stream);
+    	    cdrIn.ConfigStream(STREAM_BIG_ENDIAN_FLAG, new GiopVersion(1, 2));
+    	        	    
+    		System.Int16 result = cdrIn.ReadShort();
+    		Assertion.AssertEquals("read wbe int 16", 1, result);    		
+    		result = cdrIn.ReadShort();
+    		Assertion.AssertEquals("read wbe int 16 (2)", 258, result);
+    		result = cdrIn.ReadShort();
+    		Assertion.AssertEquals("read wbe int 16 (3)", Int16.MaxValue, result);
+    		result = cdrIn.ReadShort();
+    		Assertion.AssertEquals("read wbe int 16 (4)", Int16.MinValue, result);
+    	}
+    	
+    	[Test]
+    	public void TestInt16WLEWToS() {
+    	    MemoryStream stream = new MemoryStream(new byte[] { 1, 0,
+    	                                                        2, 1,
+    	                                                        0xFF, 0x7F,
+    	                                                        0x00, 0x80 });
+    	    CdrInputStreamImpl cdrIn = new CdrInputStreamImpl(stream);
+    	    cdrIn.ConfigStream(STREAM_LITTLE_ENDIAN_FLAG, new GiopVersion(1, 2));
+    	        	    
+    		System.Int16 result = cdrIn.ReadShort();
+    		Assertion.AssertEquals("read wle int 16", 1, result);    		
+    		result = cdrIn.ReadShort();
+    		Assertion.AssertEquals("read wle int 16 (2)", 258, result);
+    		result = cdrIn.ReadShort();
+    		Assertion.AssertEquals("read wle int 16 (3)", Int16.MaxValue, result);
+    		result = cdrIn.ReadShort();
+    		Assertion.AssertEquals("read wle int 16 (4)", Int16.MinValue, result);
+    	}    	    	
+    	
+    	[Test]
+    	public void TestInt16WBESToW() {
+    	    MemoryStream stream = new MemoryStream();
+    	    CdrOutputStreamImpl cdrOut = new CdrOutputStreamImpl(stream, STREAM_BIG_ENDIAN_FLAG);
+    	    cdrOut.WriteShort((short)1);
+    	    cdrOut.WriteShort((short)258);
+    	    cdrOut.WriteShort(Int16.MaxValue);
+    	    cdrOut.WriteShort(Int16.MinValue);
+    	    stream.Seek(0, SeekOrigin.Begin);
+    	    byte[] result = new byte[2];
+    	    stream.Read(result, 0, 2);
+    	    ArrayAssertion.AssertByteArrayEquals("converted wbe int 16", new byte[] { 0, 1 }, result);
+    	    stream.Read(result, 0, 2);    	        	        	        		
+    		ArrayAssertion.AssertByteArrayEquals("converted wbe int 16 (2)", new byte[] { 1, 2 }, result);
+    	    stream.Read(result, 0, 2);    	        	        	        		
+    		ArrayAssertion.AssertByteArrayEquals("converted wbe int 16 (3)", new byte[] { 0x7F, 0xFF }, result);
+    	    stream.Read(result, 0, 2);    	        	        	        		    		
+    		ArrayAssertion.AssertByteArrayEquals("converted wbe int 16 (4)", new byte[] { 0x80, 0x00 }, result);    		
+    	}
+    	
+    	[Test]
+    	public void TestInt16WLESToW() {
+    	    MemoryStream stream = new MemoryStream();
+    	    CdrOutputStreamImpl cdrOut = new CdrOutputStreamImpl(stream, STREAM_LITTLE_ENDIAN_FLAG);
+    	    cdrOut.WriteShort((short)1);
+    	    cdrOut.WriteShort((short)258);
+    	    cdrOut.WriteShort(Int16.MaxValue);
+    	    cdrOut.WriteShort(Int16.MinValue);
+    	    stream.Seek(0, SeekOrigin.Begin);
+    	    byte[] result = new byte[2];
+    	    stream.Read(result, 0, 2);
+    	    ArrayAssertion.AssertByteArrayEquals("converted lbe int 16", new byte[] { 1, 0 }, result);
+    	    stream.Read(result, 0, 2);    	        	        	        		
+    		ArrayAssertion.AssertByteArrayEquals("converted lbe int 16 (2)", new byte[] { 2, 1 }, result);
+    	    stream.Read(result, 0, 2);    	        	        	        		
+    		ArrayAssertion.AssertByteArrayEquals("converted lbe int 16 (3)", new byte[] { 0xFF, 0x7F }, result);
+    	    stream.Read(result, 0, 2);    	        	        	        		    		
+    		ArrayAssertion.AssertByteArrayEquals("converted lbe int 16 (4)", new byte[] { 0x00, 0x80 }, result);    		
+    	}
+    	
+    	
+    	[Test]
+    	public void TestSingleWBEWToS() {
+    	    MemoryStream stream = new MemoryStream(new byte[] { 0x3F, 0x80, 0x00, 0x00,
+    	                                                        0x3C, 0x23, 0xD7, 0x0A,
+    	                                                        0x7F, 0x7F, 0xFF, 0xFF,
+    	                                                        0xFF, 0x7F, 0xFF, 0xFF });
+    	    CdrInputStreamImpl cdrIn = new CdrInputStreamImpl(stream);
+    	    cdrIn.ConfigStream(STREAM_BIG_ENDIAN_FLAG, new GiopVersion(1, 2));
+    	    
+    	    System.Single result = cdrIn.ReadFloat();
+    		Assertion.AssertEquals("converted wbe single", (float)1.0f, result);
+    		result = cdrIn.ReadFloat();
+    		Assertion.AssertEquals("converted wbe single (2)", (float)0.01f, result);
+    		result = cdrIn.ReadFloat();    		
+    		Assertion.AssertEquals("converted wbe single (3)", Single.MaxValue, result);    		
+    		result = cdrIn.ReadFloat();
+    		Assertion.AssertEquals("converted wbe single (4)", Single.MinValue, result);    		
+    	}    	
+    	
+    	[Test]
+    	public void TestSingleWLEWToS() {
+    	    MemoryStream stream = new MemoryStream(new byte[] { 0x00, 0x00, 0x80, 0x3F,
+    	                                                        0x0A, 0xD7, 0x23, 0x3C,
+    	                                                        0xFF, 0xFF, 0x7F, 0x7F,
+    	                                                        0xFF, 0xFF, 0x7F, 0xFF });
+    	    CdrInputStreamImpl cdrIn = new CdrInputStreamImpl(stream);
+    	    cdrIn.ConfigStream(STREAM_LITTLE_ENDIAN_FLAG, new GiopVersion(1, 2));
+    	    
+    	    System.Single result = cdrIn.ReadFloat();
+    		Assertion.AssertEquals("converted wbe single", (float)1.0f, result);
+    		result = cdrIn.ReadFloat();			
+			Assertion.AssertEquals("converted wbe single (2)", (float)0.01f, result);
+            result = cdrIn.ReadFloat();    		
+    		Assertion.AssertEquals("converted wbe single (3)", Single.MaxValue, result);
+            result = cdrIn.ReadFloat();    		
+    		Assertion.AssertEquals("converted wbe single (4)", Single.MinValue, result);
+    	}    	    	    	    	
+    	
+    	[Test]
+    	public void TestSingleWBESToW() {
+    	    MemoryStream stream = new MemoryStream();
+    	    CdrOutputStreamImpl cdrOut = new CdrOutputStreamImpl(stream, STREAM_BIG_ENDIAN_FLAG);
+    	    cdrOut.WriteFloat((float)1);
+    	    cdrOut.WriteFloat((float)0.01);
+    	    cdrOut.WriteFloat(Single.MaxValue);
+    	    cdrOut.WriteFloat(Single.MinValue);
+    	    stream.Seek(0, SeekOrigin.Begin);
+    	    byte[] result = new byte[4];
+    	    stream.Read(result, 0, 4);
+    		ArrayAssertion.AssertByteArrayEquals("converted wbe single", new byte[] { 0x3F, 0x80, 0x00, 0x00 }, result);
+    		stream.Read(result, 0, 4);
+    		ArrayAssertion.AssertByteArrayEquals("converted wbe single (2)", new byte[] { 0x3C, 0x23, 0xD7, 0x0A }, result);
+            stream.Read(result, 0, 4);
+    		ArrayAssertion.AssertByteArrayEquals("converted wbe single (3)", new byte[] { 0x7F, 0x7F, 0xFF, 0xFF }, result);
+            stream.Read(result, 0, 4);
+    		ArrayAssertion.AssertByteArrayEquals("converted wbe single (4)", new byte[] { 0xFF, 0x7F, 0xFF, 0xFF }, result);
+    	}
+    	
+    	[Test]
+    	public void TestSingleWLESToW() {
+    	    MemoryStream stream = new MemoryStream();
+    	    CdrOutputStreamImpl cdrOut = new CdrOutputStreamImpl(stream, STREAM_LITTLE_ENDIAN_FLAG);
+    	    cdrOut.WriteFloat((float)1);
+    	    cdrOut.WriteFloat((float)0.01);
+    	    cdrOut.WriteFloat(Single.MaxValue);
+    	    cdrOut.WriteFloat(Single.MinValue);
+    	    stream.Seek(0, SeekOrigin.Begin);
+    	    byte[] result = new byte[4];
+    	    stream.Read(result, 0, 4);
+    		ArrayAssertion.AssertByteArrayEquals("converted lbe single", new byte[] { 0x00, 0x00, 0x80, 0x3F }, result);
+            stream.Read(result, 0, 4);
+    		ArrayAssertion.AssertByteArrayEquals("converted lbe single (2)", new byte[] { 0x0A, 0xD7, 0x23, 0x3C }, result);
+    	    stream.Read(result, 0, 4);
+    		ArrayAssertion.AssertByteArrayEquals("converted lbe single (3)", new byte[] { 0xFF, 0xFF, 0x7F, 0x7F }, result);
+    	    stream.Read(result, 0, 4);
+    		ArrayAssertion.AssertByteArrayEquals("converted lbe single (4)", new byte[] { 0xFF, 0xFF, 0x7F, 0xFF }, result);
+    	}    	
+    	
+    	[Test]
+    	public void TestDoubleWBEWToS() {
+    	    MemoryStream stream = new MemoryStream(new byte[] { 0x3F, 0xF0, 0, 0, 0, 0, 0, 0,
+    	                                                        0x3F, 0x84, 0x7A, 0xE1, 0x47, 0xAE, 0x14, 0x7B,
+    	                                                        0x7F, 0xEF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
+    	                                                        0xFF, 0xEF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF });
+    	    CdrInputStreamImpl cdrIn = new CdrInputStreamImpl(stream);
+    	    cdrIn.ConfigStream(STREAM_BIG_ENDIAN_FLAG, new GiopVersion(1, 2));
+    	    double result = cdrIn.ReadDouble();
+    	    Assertion.AssertEquals("converted wbe double", 1.0f, result);
+    		result = cdrIn.ReadDouble();
+    		Assertion.AssertEquals("converted wbe double (2)", 0.01f, result);
+            result = cdrIn.ReadDouble();    		
+    		Assertion.AssertEquals("converted wbe double (3)", Double.MaxValue, result);
+    		result = cdrIn.ReadDouble();
+    		Assertion.AssertEquals("converted wbe double (4)", Double.MinValue, result);
+    	}    	
+    	
+    	[Test]
+    	public void TestDoubleWLEWToS() {
+    	    MemoryStream stream = new MemoryStream(new byte[] { 0, 0, 0, 0, 0, 0, 0xF0, 0x3F,
+    	                                                        0x7B, 0x14, 0xAE, 0x47, 0xE1, 0x7A, 0x84, 0x3F,
+    	                                                        0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xEF, 0x7F,
+    	                                                        0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xEF, 0xFF });
+    	    CdrInputStreamImpl cdrIn = new CdrInputStreamImpl(stream);
+    	    cdrIn.ConfigStream(STREAM_LITTLE_ENDIAN_FLAG, new GiopVersion(1, 2));
+    	    double result = cdrIn.ReadDouble();
+    		Assertion.AssertEquals("converted lbe double", 1.0f, result);
+    		result = cdrIn.ReadDouble();
+    		Assertion.AssertEquals("converted lbe double (2)", 0.01f, result);    		
+    	    result = cdrIn.ReadDouble();    		
+    		Assertion.AssertEquals("converted lbe double (3)", Double.MaxValue, result);
+    	    result = cdrIn.ReadDouble();
+    		Assertion.AssertEquals("converted lbe double (4)", Double.MinValue, result);
+    	}    	    	
+    	
+    	[Test]
+    	public void TestDoubleWBESToW() {
+    	    MemoryStream stream = new MemoryStream();
+    	    CdrOutputStreamImpl cdrOut = new CdrOutputStreamImpl(stream, STREAM_BIG_ENDIAN_FLAG);
+    	    cdrOut.WriteDouble((double)1);
+    	    cdrOut.WriteDouble((double)0.01);
+    	    cdrOut.WriteDouble(Double.MaxValue);
+    	    cdrOut.WriteDouble(Double.MinValue);
+    	    stream.Seek(0, SeekOrigin.Begin);
+    	    byte[] result = new byte[8];
+    	    stream.Read(result, 0, 8);
+    		ArrayAssertion.AssertByteArrayEquals("converted wbe double", new byte[] { 0x3F, 0xF0, 0, 0, 0, 0, 0, 0 }, result);
+            stream.Read(result, 0, 8);
+    		ArrayAssertion.AssertByteArrayEquals("converted wbe double (2)", new byte[] { 0x3F, 0x84, 0x7A, 0xE1, 0x47, 0xAE, 0x14, 0x7B }, result);
+            stream.Read(result, 0, 8);
+    		ArrayAssertion.AssertByteArrayEquals("converted wbe double (3)", new byte[] { 0x7F, 0xEF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF }, result);
+            stream.Read(result, 0, 8);
+    		ArrayAssertion.AssertByteArrayEquals("converted wbe double (4)", new byte[] { 0xFF, 0xEF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF }, result);
+    	}
+    	
+    	[Test]
+    	public void TestDoubleWLESToW() {
+    	    MemoryStream stream = new MemoryStream();
+    	    CdrOutputStreamImpl cdrOut = new CdrOutputStreamImpl(stream, STREAM_LITTLE_ENDIAN_FLAG);
+    	    cdrOut.WriteDouble((double)1);
+    	    cdrOut.WriteDouble((double)0.01);
+    	    cdrOut.WriteDouble(Double.MaxValue);
+    	    cdrOut.WriteDouble(Double.MinValue);
+    	    stream.Seek(0, SeekOrigin.Begin);
+    	    byte[] result = new byte[8];
+    	    stream.Read(result, 0, 8);
+    		ArrayAssertion.AssertByteArrayEquals("converted lbe double", new byte[] { 0, 0, 0, 0, 0, 0, 0xF0, 0x3F }, result);
+    		stream.Read(result, 0, 8);
+    		ArrayAssertion.AssertByteArrayEquals("converted lbe double (2)", new byte[] { 0x7B, 0x14, 0xAE, 0x47, 0xE1, 0x7A, 0x84, 0x3F }, result);
+            stream.Read(result, 0, 8);
+    		ArrayAssertion.AssertByteArrayEquals("converted lbe double (3)", new byte[] { 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xEF, 0x7F }, result);
+            stream.Read(result, 0, 8);
+    		ArrayAssertion.AssertByteArrayEquals("converted lbe double (4)", new byte[] { 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xEF, 0xFF }, result);
+    	}    	    	
+    	
+    }
+}
+
+#endif

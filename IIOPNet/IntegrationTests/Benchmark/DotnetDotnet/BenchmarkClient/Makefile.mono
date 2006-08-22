@@ -1,0 +1,39 @@
+include ../../../../MakeVars.mono
+IIOPCHANNEL = ../../../../IIOPChannel/bin/IIOPChannel.dll
+IIOPCHANNELPDB = ../../../../IIOPChannel/bin/IIOPChannel.pdb 
+IDLTOCLSCOMP   = mono ../../../../../IDLToCLSCompiler/IDLCompiler/bin/IDLToCLSCompiler.exe
+CLSFORIDL      = client.dll
+TestServerIDLDir = ../BenchmarkServer/IDL
+TestServerIDLService = $(TestServerIDLDir)/$(ServiceIDLFileName)
+ServiceIDLFileName   = Ch/Elca/Iiop/Benchmarks/TestService.idl 
+bin            = bin/
+IDL            = IDL/
+
+build: compile-idl build-client
+
+compile-idl: $(IDL)$(ServiceIDLFileName) $(bin)$(CLSFORIDL)
+
+$(bin)IIOPChannel.dll: $(IIOPCHANNEL)
+	[ -d $(bin) ] || mkdir $(bin)
+	cp $(IIOPCHANNEL) $(bin)
+
+$(IDL)$(ServiceIDLFileName): $(TestServerIDLService)
+	cp -r $(TestServerIDLDir) .
+    
+$(bin)$(CLSFORIDL): $(IDL)$(ServiceIDLFileName)
+	cd $(IDL); $(IDLTOCLSCOMP) -o ../$(bin) client $(ServiceIDLFileName); cd ..
+
+        
+build-client: $(bin)IIOPChannel.dll $(bin)$(CLSFORIDL) *.cs
+	$(CSC) $(CSFLAGS) /t:exe /r:$(bin)$(CLSFORIDL) /r:$(bin)IIOPChannel.dll /out:bin/ClientTest.exe TestClient.cs PerformanceCounter.cs ValueTypeImpls.cs
+
+start-client:
+	@echo "Benchmark .NET <-> .NET"
+	mono $(bin)ClientTest.exe
+    
+    
+    
+clean:    
+	rm -rf $(IDL)
+	rm -rf $(bin)
+

@@ -2,9 +2,16 @@ include ../../MakeVars.mono
 
 build:
 	$(MAKE) -C InvocationScenarios build -f Makefile.mono
+	$(MAKE) -C PICurrent build -f Makefile.mono
+	$(MAKE) -C ServiceContextsAndTaggedComp build -f Makefile.mono
 
 test:
 	$(MAKE) -C InvocationScenarios test -f Makefile.mono
+	$(MAKE) -C PICurrent test -f Makefile.mono
+	$(MAKE) -C ServiceContextsAndTaggedComp test -f Makefile.mono
 
 clean:
 	$(MAKE) -C InvocationScenarios clean -f Makefile.mono
+	$(MAKE) -C PICurrent clean -f Makefile.mono
+	$(MAKE) -C ServiceContextsAndTaggedComp clean -f Makefile.mono
+

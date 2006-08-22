@@ -1,3 +1,4 @@
+include ..\MakeVars
 Key = ..\Key.snk
 Dest = bin\ 
 UnitTestDest = bin\UnitTest\ 
@@ -8,18 +9,14 @@ build-dll: $(Dest)IIOPChannel.dll
 	
 $(Dest)IIOPChannel.dll: *.cs $(Key)
 	if not exist $(Dest)nul mkdir $(Dest)
-	csc $(CSFLAGS) /res:MappingPluginSchema.xsd /t:library /out:$@ *.cs
+	$(CSC) $(CSFLAGS) /res:MappingPluginSchema.xsd /t:library /out:$@ *.cs
 	
 build-unit-tests: build nunit-var *.cs
 	if not exist $(UnitTestDest)nul mkdir $(UnitTestDest)
-	csc /nowarn:0618 $(CSFLAGS) /d:UnitTest /r:$(NUNITV2_HOME)\bin\nunit.framework.dll /t:library /out:$(UnitTestDest)IIOPChannel.dll *.cs
+	$(CSC) /nowarn:0618 $(CSFLAGS) /d:UnitTest /r:$(NUNIT_FRAMEWORK_DLL) /t:library /out:$(UnitTestDest)IIOPChannel.dll *.cs
 
 test: build-unit-tests
-	%NUNITV2_HOME%\bin\nunit-console.exe /assembly:$(UnitTestDest)IIOPChannel.dll
-
-nunit-var:
-	if not defined NUNITV2_HOME echo Define NUNITV2_HOME as the home directory of your NUNIT installation
-	if not defined NUNITV2_HOME exit 2
+	$(NUNIT_CONSOLE) $(NUNIT_ASSEMBLY_ARG_OPTION)$(UnitTestDest)IIOPChannel.dll
 
 clean:
 	if exist $(Dest)*.dll del /s /q $(Dest)*.dll

@@ -78,6 +78,7 @@ namespace Ch.Elca.Iiop.IntegrationTests {
             Assertion.AssertEquals((System.Byte)(arg + 1), result);
         }
 
+        [Test]
         public void TestWithCallback() {
             CallbackIntIncrementerImpl callback = new CallbackIntIncrementerImpl();
             m_testService.RegisterCallbackIntIncrementer(callback);

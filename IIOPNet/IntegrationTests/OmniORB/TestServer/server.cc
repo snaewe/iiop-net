@@ -4,6 +4,7 @@
 
 #include "service.hh"
 #include "unknownByClient.hh"
+#include "internalif.hh"
 #include <stdio.h>
 
 
@@ -69,6 +70,18 @@ public:
 
 };
 
+
+/*
+ * TestSimpleServiceInternal implementation inherits the POA skeleton class
+ */
+
+class TestSimpleServiceInternal_impl : virtual public POA_Internal::TestSimpleServiceInternal,
+                         public PortableServer::RefCountServantBase
+{
+
+  CORBA::Long EchoLong(CORBA::Long arg);
+
+};
 
 /*
  * Assembly implementation inherits the POA skeleton class
@@ -337,6 +350,12 @@ TestService_impl::CreateAsm() {
 }
 
 
+CORBA::Long 
+TestSimpleServiceInternal_impl::EchoLong(CORBA::Long arg) {
+    return arg;
+}
+
+
 int
 main (int argc, char *argv[])
 {
@@ -356,25 +375,24 @@ main (int argc, char *argv[])
   PortableServer::POA_var poa = PortableServer::POA::_narrow (poaobj);
 
   /*
-   * Create a TestService object
+   * Create service objects
    */
 
   TestService_impl * test = new TestService_impl(poa);
+  TestSimpleServiceInternal_impl * testInternalIf =
+                            new TestSimpleServiceInternal_impl();
 
   /*
-   * Activate the Servant
+   * Activate the Servants
    */
 
-  PortableServer::ObjectId_var oid = poa->activate_object (test);
+  PortableServer::ObjectId_var oidTest = poa->activate_object (test);
+  PortableServer::ObjectId_var oidTestInternal = poa->activate_object (testInternalIf);
   PortableServer::POAManager_var mgr = poa->the_POAManager();
 
 
-  /*
-   * Write reference to file
-   */
-
-  CORBA::Object_var ref = poa->id_to_reference (oid.in());
-
+  CORBA::Object_var refTest = poa->id_to_reference (oidTest.in());
+  CORBA::Object_var refTestInternalIf = poa->id_to_reference (oidTestInternal.in());
 
   /*
    * Acquire a reference to the Naming Service
@@ -394,20 +412,27 @@ main (int argc, char *argv[])
 
 
   /*
-   * Construct Naming Service name for our testservice
+   * Construct Naming Service name for our services
    */
 
-  CosNaming::Name name;
-  name.length (1);
-  name[0].id = CORBA::string_dup ("test");
-  name[0].kind = CORBA::string_dup ("");
+  CosNaming::Name nameTest;
+  nameTest.length (1);
+  nameTest[0].id = CORBA::string_dup ("test");
+  nameTest[0].kind = CORBA::string_dup ("");
+
+  CosNaming::Name nameTestInternalIf;
+  nameTestInternalIf.length (1);
+  nameTestInternalIf[0].id = CORBA::string_dup ("testInternal");
+  nameTestInternalIf[0].kind = CORBA::string_dup ("");
   
   /*
    * Store a reference in the Naming Service. 
    */
 
   printf("Binding TestService in the Naming Service ... \n");
-  nc->rebind (name, ref);
+  nc->rebind (nameTest, refTest);
+  printf("Binding TestServiceInternal in the Naming Service ... \n");
+  nc->rebind (nameTestInternalIf, refTestInternalIf);
   printf("done.\n");
 
   /*

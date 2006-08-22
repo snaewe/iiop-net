@@ -1,5 +1,9 @@
 bin
+binSD
 obj
 *.csproj.user
 .#*
 *.bak
+NCover
+TestResult.xml
+

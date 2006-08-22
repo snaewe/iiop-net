@@ -434,6 +434,7 @@ namespace Ch.Elca.Iiop.IntegrationTests {
             Assertion.AssertEquals(result.GetType().FullName, "java.lang._Double");
         }
         
+        [Test]
         public void TestStringAsAny() {
             string arg = "TestArg";
             string result = (string) m_testService.EchoAnything(arg);

@@ -1,0 +1,29 @@
+
+module Ch {
+module Elca {
+module Iiop { 
+module IntegrationTests {
+
+
+exception TestException {
+
+    string Msg;
+    long Code;
+    
+};
+
+interface TestExceptionService {
+  
+    boolean ThrowTestException() raises (Ch::Elca::Iiop::IntegrationTests::TestException);
+    boolean ThrowDotNetException();
+    boolean ThrowSystemException();
+
+    attribute boolean TestAttrWithException;    
+    
+};
+
+
+};
+};
+};
+};

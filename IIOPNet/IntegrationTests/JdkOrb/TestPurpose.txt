@@ -1,0 +1,8 @@
+This integration test tests the basic interoperability of IIOP.NET 
+with the JDK Orb (direct CORBA, no RMI/IIOP impl).
+
+The remote java test object provides methods to test serialisation and 
+deserialisation of different types.
+
+
+

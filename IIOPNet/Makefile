@@ -1,4 +1,4 @@
-projects = IIOPChannel CLSToIDLGenerator
+include MakeVars
 
 build: build-base build-examples
 
@@ -18,6 +18,9 @@ build-base: key
     $(MAKE) build
     cd ..
     cd IDLToCLSCompiler
+    $(MAKE) build
+    cd ..
+    cd Utils
     $(MAKE) build
     cd ..
 
@@ -74,6 +77,9 @@ clean-base:
     $(MAKE) clean
     cd ..
     cd IDLToCLSCompiler
+    $(MAKE) clean
+    cd ..
+    cd Utils
     $(MAKE) clean
     cd ..
 

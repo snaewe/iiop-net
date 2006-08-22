@@ -229,12 +229,18 @@ namespace Ch.Elca.Iiop.Interception {
     /// <summary>
     /// implementation of <see cref="omg.org.IOP.CodecFactory"></see>
     /// </summary>
-    public class CodecFactoryImpl : CodecFactory {
+    internal class CodecFactoryImpl : CodecFactory {
+        
+        private SerializerFactory m_serFactory;
+        
+        public CodecFactoryImpl(SerializerFactory serFactory) {
+            m_serFactory = serFactory;
+        }
         
         public Codec create_codec (Encoding enc) {
             GiopVersion version = new GiopVersion(enc.major_version, enc.minor_version);
             if (enc.format == omg.org.IOP.ENCODING_CDR_ENCAPS.ConstVal) {
-                Codec impl = new CodecImplEncap(version);
+                Codec impl = new CodecImplEncap(version, m_serFactory);
                 return impl;
             } else {
                 throw new omg.org.IOP.CodecFactory_package.UnknownEncoding();
@@ -244,23 +250,27 @@ namespace Ch.Elca.Iiop.Interception {
     }
     
     
+
     /// <summary>
     /// implementation of <see cref="omg.org.IOP.Codec"> for format ENCODING_CDR_ENCAPS.</see>
     /// </summary>
-    public class CodecImplEncap : Codec {
+    internal class CodecImplEncap : Codec {
         
         #region IFields
         
         private GiopVersion m_version;
-        private MarshallerForType m_marshallerForAnyType;
+        private Serializer m_serializerForAnyType;
+        private SerializerFactory m_serFactory;
         
         #endregion IFields
         #region IConstructors
         
-        public CodecImplEncap(GiopVersion version) {
+        internal CodecImplEncap(GiopVersion version, SerializerFactory serFactory) {
             m_version = version;
-            m_marshallerForAnyType = 
-                new MarshallerForType(ReflectionHelper.ObjectType, AttributeExtCollection.EmptyCollection);
+            m_serFactory = serFactory;
+            m_serializerForAnyType = 
+                m_serFactory.Create(ReflectionHelper.ObjectType,
+                                    AttributeExtCollection.EmptyCollection);
         }
         
         #endregion IConstructors
@@ -273,7 +283,7 @@ namespace Ch.Elca.Iiop.Interception {
         [return: IdlSequence(0L)]
         public byte[] encode (object data) {
             CdrEncapsulationOutputStream outputStream = new CdrEncapsulationOutputStream(0, m_version);
-            m_marshallerForAnyType.Marshal(data, outputStream);
+            m_serializerForAnyType.Serialize(data, outputStream);            
             return outputStream.GetEncapsulationData();
         }
         
@@ -283,7 +293,7 @@ namespace Ch.Elca.Iiop.Interception {
         [ThrowsIdlException(typeof(omg.org.IOP.Codec_package.FormatMismatch))]
         public object decode ([IdlSequence(0L)] byte[] data) {
             CdrEncapsulationInputStream inputStream = new CdrEncapsulationInputStream(data, m_version);            
-            return m_marshallerForAnyType.Unmarshal(inputStream);
+            return m_serializerForAnyType.Deserialize(inputStream);            
         }
 
         /// <summary>
@@ -293,16 +303,19 @@ namespace Ch.Elca.Iiop.Interception {
         [return: IdlSequence(0L)]        
         public byte[] encode_value (object data) {
             CdrEncapsulationOutputStream outputStream = new CdrEncapsulationOutputStream(0, m_version);
-            Marshaller marshaller = Marshaller.GetSingleton();
             if (!(data is Any)) {
-                marshaller.Marshal(data.GetType(), AttributeExtCollection.EmptyCollection,
-                                   data, outputStream);                                   
+                Serializer ser =
+                    m_serFactory.Create(data.GetType(), 
+                                        AttributeExtCollection.EmptyCollection);
+                ser.Serialize(data, outputStream);                                   
             } else {
                 Type marshalAs = ((TypeCodeImpl)((Any)data).Type).GetClsForTypeCode();
                 AttributeExtCollection marshalAsAttrs = 
                     ((TypeCodeImpl)((Any)data).Type).GetClsAttributesForTypeCode();
-                marshaller.Marshal(marshalAs, marshalAsAttrs, 
-                                   data, outputStream);
+                Serializer ser =
+                    m_serFactory.Create(marshalAs, 
+                                        marshalAsAttrs);
+                ser.Serialize(data, outputStream);
             }
             return outputStream.GetEncapsulationData();
         }
@@ -315,11 +328,13 @@ namespace Ch.Elca.Iiop.Interception {
         public object decode_value ([IdlSequence(0L)] byte[] data,
                                     omg.org.CORBA.TypeCode tc) {
             CdrEncapsulationInputStream inputStream = new CdrEncapsulationInputStream(data, m_version);
-            Marshaller marshaller = Marshaller.GetSingleton();
             Type marshalAs = ((TypeCodeImpl)tc).GetClsForTypeCode();
             AttributeExtCollection marshalAsAttrs = 
                     ((TypeCodeImpl)tc).GetClsAttributesForTypeCode();            
-            return marshaller.Unmarshal(marshalAs, marshalAsAttrs, inputStream);
+            Serializer ser =
+                    m_serFactory.Create(marshalAs, 
+                                        marshalAsAttrs);                    
+            return ser.Deserialize(inputStream);
         }
 
         #endregion IMethods

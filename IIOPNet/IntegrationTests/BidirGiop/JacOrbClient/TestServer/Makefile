@@ -1,8 +1,10 @@
+include ..\..\..\..\MakeVars
+
 IIOPCHANNEL = ..\..\..\..\IIOPChannel\bin\IIOPChannel.dll
 IIOPCHANNELPDB = ..\..\..\..\IIOPChannel\bin\IIOPChannel.pdb
-DELAY=..\..\..\utils\delay.exe
-LAUNCH=..\..\..\utils\launch.exe
-KILL=..\..\..\utils\kill.exe
+DELAY=..\..\..\..\Utils\delay.exe
+LAUNCH=..\..\..\..\Utils\launch.exe
+KILL=..\..\..\..\Utils\kill.exe
 bin         = bin\ 
 
 build: $(bin)TestService.dll $(bin)TestServer.exe
@@ -17,7 +19,7 @@ $(bin)TestService.dll: service.idl
     ..\..\..\..\IDLToCLSCompiler\IDLCompiler\bin\IDLToCLSCompiler.exe -o $(bin) TestService service.idl
 
 $(bin)TestServer.exe: $(bin)IIOPChannel.dll $(bin)TestService.dll TestService.cs TestServer.cs
-    csc $(CSFLAGS) /t:exe /r:$(bin)IIOPChannel.dll /r:$(bin)TestService.dll /out:$(bin)TestServer.exe TestServer.cs TestService.cs
+    $(CSC) $(CSFLAGS) /t:exe /r:$(bin)IIOPChannel.dll /r:$(bin)TestService.dll /out:$(bin)TestServer.exe TestServer.cs TestService.cs
 
 start-server:    
     @$(LAUNCH) bin\TestServer.exe >> pid

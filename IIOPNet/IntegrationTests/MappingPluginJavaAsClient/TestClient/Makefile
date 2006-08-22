@@ -1,5 +1,6 @@
+include ..\..\..\MakeVars
+
 TestService=Ch\Elca\Iiop\IntegrationTests\MappingPlugin\ 
-JUNIT_JAR = $(JUNIT_HOME)\junit.jar
 
 build: build-idl build-java build-helperJar
 
@@ -17,14 +18,10 @@ build-idl:
 	idlj -td .. Ch\Elca\Iiop\GenericUserException.idl
 	cd ..
 
-junit-jar:
-	if not defined JUNIT_HOME echo define JUNIT_HOME first (e.g. C:\JUNIT\Junit3.8.1)
-        if not defined JUNIT_HOME exit 2
-
 copy-valuetypeImpls:
         copy valTypeImpls\*.java $(TestService)
 
-build-java: junit-jar copy-valuetypeImpls compile-java
+build-java: junit-var copy-valuetypeImpls compile-java
 
 build-helperJar:
 	jar -c0vf collectionHelpers.jar java\util\*.class
@@ -34,7 +31,7 @@ compile-java: $(TestService)*.java *.java
 
 start-client:
 	@echo "Mapping plugin java client IntegrationTest"
-	java -Xbootclasspath/a:collectionHelpers.jar -Djava.naming.factory.initial=com.sun.jndi.cosnaming.CNCtxFactory -Djava.naming.provider.url=iiop://localhost:8087 -cp .;%JUNIT_HOME%\junit.jar TestClient
+	java -Xbootclasspath/a:collectionHelpers.jar -Djava.naming.factory.initial=com.sun.jndi.cosnaming.CNCtxFactory -Djava.naming.provider.url=iiop://localhost:8087 -cp .;$(JUNIT_JAR) TestClient
 
 clean:
 	if exist IDL\nul rmdir /q /s IDL

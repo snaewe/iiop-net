@@ -79,4 +79,6 @@ public interface Test extends EJBObject {
 
     public boolean TestThrowCustomException(String msg, int number) throws RemoteException, TestCustomException;
 
+    public Object EchoAnything(Object arg) throws RemoteException;    
+
 }

@@ -77,6 +77,33 @@ public class TestClient extends TestCase {
         assertEquals((long)(arg + 1), result);
     }
 
+    public void testUInt16() throws Exception {
+        short arg = 1;
+        short result = m_testService.TestIncUInt16(arg);
+        assertEquals(((short)(arg + 1)), result);
+        arg = -11;
+        result = m_testService.TestIncUInt16(arg);
+        assertEquals(((short)(arg + 1)), result);
+    }
+
+    public void testUInt32() throws Exception {
+        int arg = 1;
+        int result = m_testService.TestIncUInt32(arg);
+        assertEquals(((int)(arg + 1)), result);
+        arg = -11;
+        result = m_testService.TestIncUInt32(arg);
+        assertEquals(((int)(arg + 1)), result);
+    }
+
+    public void testUInt64() throws Exception {
+        long arg = 1;
+        long result = m_testService.TestIncUInt64(arg);
+        assertEquals((long)(arg + 1), result);
+        arg = -11;
+        result = m_testService.TestIncUInt64(arg);
+        assertEquals((long)(arg + 1), result);
+    }
+
     public void testBoolean() throws Exception {
          boolean arg = true;
          boolean result = m_testService.TestNegateBoolean(arg);
@@ -333,6 +360,55 @@ public class TestClient extends TestCase {
         assertEquals(arg, result);
     }
 
+    public void testIntOutArg() throws Exception {
+        int arg = 22;
+        org.omg.CORBA.IntHolder result = new org.omg.CORBA.IntHolder();
+        m_testService.EchoIntByOut(arg, result);
+        assertEquals(arg, result.value);
+    }
 
+    public void testStringOutArg() throws Exception {
+        String arg = "test1";
+        org.omg.CORBA.StringHolder result = new org.omg.CORBA.StringHolder();
+        m_testService.EchoByOut(arg, result);
+        assertEquals(arg, result.value);
+    }
+
+    public void testFlags() throws Exception {
+        int arg = 1;
+        int result = m_testService.TestEchoFlagsVal(arg);
+        assertEquals(arg, result);
+        arg = 3;
+        result = m_testService.TestEchoFlagsVal(arg);
+        assertEquals(arg, result);
+    }
+
+    public void testEnum() throws Exception {
+        TestEnum arg = TestEnum.TestEnum_A;
+        TestEnum result = m_testService.TestEchoEnumVal(arg);
+        assertEquals(arg, result);
+    }
+
+    public void testEnumBI16() throws Exception {
+        TestEnumBI16 arg = TestEnumBI16.TestEnumBI16_B1;
+        TestEnumBI16 result = m_testService.TestEchoEnumI16Val(arg);
+        assertEquals(arg, result);
+    }
+
+    public void testEnumBUI32() throws Exception {
+        TestEnumUI32 arg = TestEnumUI32.TestEnumUI32_C2;
+        TestEnumUI32 result = m_testService.TestEchoEnumUI32Val(arg);
+        assertEquals(arg, result);
+    }
+
+    public void testEnumBI64() throws Exception {
+        TestEnumBI64 arg = TestEnumBI64.TestEnumBI64_AL;
+        TestEnumBI64 result = m_testService.TestEchoEnumI64Val(arg);
+        assertEquals(arg, result);
+
+        arg = TestEnumBI64.TestEnumBI64_BL;
+        result = m_testService.TestEchoEnumI64Val(arg);
+        assertEquals(arg, result);
+    }
 
 }

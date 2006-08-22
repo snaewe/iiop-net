@@ -133,7 +133,8 @@ namespace Ch.Elca.Iiop.Tests {
     /// <summary>
     /// Unit-tests for testing IoUtil class
     /// </summary>
-    public class IoUtilTest : TestCase {
+    [TestFixture]
+    public class IoUtilTest {
         
 
         private void CheckStreamCopy(int nrOfBytes) {

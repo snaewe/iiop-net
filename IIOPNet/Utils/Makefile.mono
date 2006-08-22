@@ -1,0 +1,15 @@
+include ../MakeVars.mono
+Utils = launch.exe kill.exe delay.exe currenttime.exe
+
+.SUFFIXES : .exe .cs
+
+build: $(Utils)
+
+.cs.exe:
+	$(CSC) $(CSFLAGS) $<
+
+clean:
+	rm -f kill.exe
+	rm -f launch.exe
+	rm -f delay.exe
+	rm -f currenttime.exe

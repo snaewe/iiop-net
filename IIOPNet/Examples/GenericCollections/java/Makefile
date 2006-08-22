@@ -1,3 +1,5 @@
+include ..\..\..\MakeVars
+
 IDLSource=..\net\IDL\Ch\Elca\Iiop\Demo\StorageSystem\*.idl
 StorageSystem=Ch\Elca\Iiop\Demo\StorageSystem\ 
 EntryImpl=$(StorageSystem)EntryImpl.java

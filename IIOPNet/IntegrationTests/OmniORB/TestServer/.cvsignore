@@ -10,5 +10,6 @@ service.hh
 unknownByClient.hh
 unknownByClientSK.cc
 unknownByClientDynSK.cc
-
-
+internalif.hh
+internalifSK.cc
+internalifDynSK.cc

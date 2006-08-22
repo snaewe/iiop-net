@@ -327,12 +327,21 @@ namespace Ch.Elca.Iiop.Cdr {
         #region IProperties
 
         /// <summary>the charset to use</summary>
+        /// <remarks>
+        /// The CORBA standards uses LATIN1 charset, if no charset is specified
+        /// in IOR.        
+        /// </remarks>
         int CharSet {
             get;
             set;
         }
         
         /// <summary>the wcharset to use</summary>
+        /// <remarks>
+        /// The CORBA standard defines, that there is no default. 
+        /// If this is not set, serializing/deserializing a wchar/wstring
+        /// is not allowed.
+        /// </remarks>
         int WCharSet {
             get; 
             set;
@@ -635,6 +644,28 @@ namespace Ch.Elca.Iiop.Cdr {
         }
 
         #endregion IConstructors
+        #region IProperties
+        
+        /// <summary>
+        /// the stream, this message output stream writes to, i.e. the stream
+        /// passed in as argument.
+        /// </summary>
+        internal Stream BackingStream {
+            get {
+                return m_stream.BackingStream;
+            }
+        }
+        
+        /// <summary>
+        /// The giop header used for this stream.
+        /// </summary>
+        internal GiopHeader Header {
+            get {
+                return m_header;
+            }
+        }
+        
+        #endregion IProperties
         #region IMethods
 
         /// <summary>get a CDROutputStream for writing the content of the message</summary>
@@ -682,12 +713,22 @@ namespace Ch.Elca.Iiop.Cdr {
 
         #endregion IConstructors
         #region IProperties
+
+        /// <summary>
+        /// the stream, this message output stream writes to, i.e. the stream
+        /// passed in as argument.
+        /// </summary>
+        internal Stream BackingStream {
+            get {
+                return m_inputStream.BackingStream;
+            }
+        }        
         
         internal GiopHeader Header {
             get { 
                 return m_header; 
             }
-        }
+        }               
         
         #endregion IProperties
         #region IMethods
@@ -715,6 +756,8 @@ namespace Ch.Elca.Iiop.Cdr {
         internal const uint INDIRECTION_TAG = 0xffffffff;           
         internal const uint MIN_VALUE_TAG = 0x7fffff00;
         internal const uint MAX_VALUE_TAG = 0x7fffffff;
+        
+        private const int WCHARSET_NOT_SET = -1;
 
         #endregion Constants
         #region IFields
@@ -724,8 +767,10 @@ namespace Ch.Elca.Iiop.Cdr {
 
         private uint m_index = 0;
 
-        private int m_charSet = CodeSetService.DefaultCharSet;
-        private int m_wcharSet = CodeSetService.DefaultWCharSet;
+        // default for this is latin1
+        private int m_charSet = (int)Ch.Elca.Iiop.Services.CharSet.LATIN1;
+        // no default for this available
+        private int m_wcharSet = WCHARSET_NOT_SET;        
         
         #endregion IFields
         #region IConstructors
@@ -1218,6 +1263,11 @@ namespace Ch.Elca.Iiop.Cdr {
         }
 
         private string ReadStringData(uint length) {
+            if (length == 0) {
+                // not valid accoring to CORBA 2.6 standard 15.3.2.7, but used by some orbs.
+                // -> therefore, return the zero length string too, instead of an exception
+                return String.Empty;
+            }
             byte[] charData = ReadOpaque((int)length - 1); // read string data
             ReadOctet(); // read terminating 0
             Encoding encoding = CodeSetService.GetCharEncoding(CharSet, false);
@@ -1323,7 +1373,7 @@ namespace Ch.Elca.Iiop.Cdr {
             }
         }
 
-        private bool isChunked(uint valueTag) {
+        private bool IsChunked(uint valueTag) {
             return ((valueTag & 0x00000008) > 0);
         }
 
@@ -1332,7 +1382,7 @@ namespace Ch.Elca.Iiop.Cdr {
         }
 
         public void BeginReadValueBody(uint valueTag) {
-            if (isChunked(valueTag)) {
+            if (IsChunked(valueTag)) {
                 m_chunkLevel++;
                 // add a chunkinfo for this value type
                 ChunkInfo info = new ChunkInfo(0, this);
@@ -1344,7 +1394,7 @@ namespace Ch.Elca.Iiop.Cdr {
         }
 
         public void EndReadValue(uint valueTag) {
-            if (isChunked(valueTag)) {
+            if (IsChunked(valueTag)) {
                 EndChunk(); 
                 if (m_chunkLevel == 1) {
                     // outermost value: no chunks must be on the stack

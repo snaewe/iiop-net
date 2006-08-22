@@ -35,6 +35,7 @@ using Ch.Elca.Iiop;
 using Ch.Elca.Iiop.Services;
 using Ch.Elca.Iiop.Idl;
 using omg.org.CosNaming;
+using System.Collections;
 
 namespace Ch.Elca.Iiop.Benchmarks {
     
@@ -52,6 +53,8 @@ namespace Ch.Elca.Iiop.Benchmarks {
         private IiopChannel m_channel;
 
         private TestService m_testService;
+        private TestService m_testServiceIorUrl;
+        private TestService m_testServiceFromNs;
 
         private int  m_count;
         private TimeSpan m_totalTime = new TimeSpan(0);      
@@ -68,17 +71,32 @@ namespace Ch.Elca.Iiop.Benchmarks {
             m_count = count;
         }
 
-        public void SetupEnvironment() {
+        public void SetupEnvironment(string serviceUrl, string nsUrl, NameComponent[] name) {
             // register the channel
-            m_channel = new IiopChannel(0);
+            int port = 0;
+            IDictionary dict = new Hashtable();
+            dict["port"] = port;
+            dict["endian"] = "BigEndian";
+            m_channel = new IiopChannel(dict);
             ChannelServices.RegisterChannel(m_channel);
 
-            // access COS nameing service
-            CorbaInit init = CorbaInit.GetInit();
-            NamingContext nameService = init.GetNameService("localhost", 8087);
-            NameComponent[] name = new NameComponent[] { new NameComponent("test", "") };
-            // get the reference to the test-service
-            m_testService = (TestService)nameService.resolve(name);
+            m_testService = (TestService)RemotingServices.Connect(typeof(TestService), serviceUrl);
+            m_testServiceIorUrl = (TestService)
+                omg.org.CORBA.OrbServices.GetSingleton().string_to_object(serviceUrl);
+
+            m_testServiceFromNs = TryGetServiceFromNs(nsUrl, name);
+        }
+
+        private TestService TryGetServiceFromNs(string nsUrl, NameComponent[] name) {
+            try {
+                // access COS nameing service
+                NamingContext nameService = (NamingContext)
+                    RemotingServices.Connect(typeof(NamingContext), nsUrl);
+                // get the reference to the test-service
+                return (TestService)nameService.resolve(name);
+            } catch {
+                return null;
+            }
         }
 
         public void TearDownEnvironment() {
@@ -94,6 +112,16 @@ namespace Ch.Elca.Iiop.Benchmarks {
 
         void CallVoid() {
             m_testService._Void();
+        }
+
+        void CallVoidIorUrl() {
+            m_testServiceIorUrl._Void();
+        }
+
+        void CallVoidIorFromNs() {
+            if (m_testServiceFromNs != null) {
+                m_testServiceFromNs._Void();
+            }
         }
 
         void CallVI() {
@@ -204,6 +232,10 @@ namespace Ch.Elca.Iiop.Benchmarks {
             m_testService.DoubleIdlSeqEcho(arg);
         }
 
+        void CallIntSeqEcho() {
+            int[] arg = new int[5000];
+            m_testService.IntIdlSeqEcho(arg);
+        }
 
         void CallDoubleArrCountElems() {
             double[] arg = new double[5000];
@@ -254,12 +286,17 @@ namespace Ch.Elca.Iiop.Benchmarks {
             }
             TestClient tc = new TestClient(count);
     
-            tc.SetupEnvironment();
+	    string serviceUrl = "corbaloc:iiop:1.2@localhost:8087/test";
+            string nsUrl = "corbaloc:iiop:1.0@localhost:8087/NameService";
+            tc.SetupEnvironment(serviceUrl, nsUrl, 
+                                new NameComponent[] { new NameComponent("test", "") });
             tc.m_localRT = new RefTypeLocalImpl();
             tc.m_remoteRT = tc.m_testService.RefLocal();
     
             tc.ExecuteTest(false, "Reference", new TestProcedure(tc.Dummy));
             tc.ExecuteTest(true, "Void", new TestProcedure(tc.CallVoid));
+            tc.ExecuteTest(false, "VoidUrlIor", new TestProcedure(tc.CallVoidIorUrl));
+            tc.ExecuteTest(false, "VoidUrlFNs", new TestProcedure(tc.CallVoidIorFromNs));
             tc.ExecuteTest(false, "(I)V", new TestProcedure(tc.CallVI));
             tc.ExecuteTest(false, "(II)V", new TestProcedure(tc.CallVII));
             tc.ExecuteTest(false, "(IIIII)V", new TestProcedure(tc.CallVIIIII));
@@ -286,6 +323,7 @@ namespace Ch.Elca.Iiop.Benchmarks {
             tc.ExecuteTest(false, "(double[])double[]", new TestProcedure(tc.CallDoubleArrEcho));
             tc.ExecuteTest(false, "(double[])V", new TestProcedure(tc.CallDoubleArrCountElems));
             tc.ExecuteTest(false, "(double_sq)double_sq", new TestProcedure(tc.CallDoubleSeqEcho));
+            tc.ExecuteTest(false, "(int_sq)int_sq", new TestProcedure(tc.CallIntSeqEcho));
             tc.ExecuteTest(false, "(EnumA)EnumA", new TestProcedure(tc.CallEnumEcho));
             tc.ExecuteTest(false, "(IdlStructA)IdlStructA", new TestProcedure(tc.CallIdlStructEcho));
 

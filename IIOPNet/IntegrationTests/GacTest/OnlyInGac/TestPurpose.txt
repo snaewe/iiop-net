@@ -1,0 +1,7 @@
+This integration test checks the basic functionality of IIOP.NET if assemblies are installed in the GAC.
+
+The remote test object provides methods to test serialisation and 
+deserialisation of different types.
+
+
+

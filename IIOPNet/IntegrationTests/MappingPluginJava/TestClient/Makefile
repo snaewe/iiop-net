@@ -1,4 +1,5 @@
-NUNIT=$(NUNITV2_HOME)\bin\nunit.framework.dll 
+include ..\..\..\MakeVars
+
 IIOPCHANNEL = ..\..\..\IIOPChannel\bin\IIOPChannel.dll 
 IIOPCHANNELPDB = ..\..\..\IIOPChannel\bin\IIOPChannel.pdb 
 MAPPINGPLUGINDIR=..\..\..\MappingPlugin\java\ 
@@ -29,11 +30,11 @@ $(bin)customMappingTest.xml : customMappingTest.xml
 # the assembly containing the cls definition for the custom mapped non-java library test type 
 $(bin)$(CUSTOMMAPPEDTEST) : CustomMapped.cs
 	if not exist $(bin) mkdir $(bin)
-	csc /t:library /out:$(bin)$(CUSTOMMAPPEDTEST) CustomMapped.cs
+	$(CSC) /t:library /out:$(bin)$(CUSTOMMAPPEDTEST) CustomMapped.cs
 	
 
 build-client: $(bin)IIOPChannel.dll $(bin)$(CUSTOMJAVATYPEMAPPING).dll $(bin)customMapping.xml $(bin)customMappingTest.xml $(bin)javaCollections.dll TestClient.cs ValueTypeImpls.cs
-	csc $(CSFLAGS) /t:library /r:$(NUNIT) /r:bin\IIOPChannel.dll /r:$(bin)$(CUSTOMJAVATYPEMAPPING).dll /r:$(bin)javaCollections.dll /r:$(bin)$(CUSTOMMAPPEDTEST) /r:$(bin)\Client.dll /out:$(bin)\ClientTest.dll TestClient.cs ValueTypeImpls.cs
+	$(CSC) $(CSFLAGS) /t:library /r:$(NUNIT_FRAMEWORK_DLL) /r:bin\IIOPChannel.dll /r:$(bin)$(CUSTOMJAVATYPEMAPPING).dll /r:$(bin)javaCollections.dll /r:$(bin)$(CUSTOMMAPPEDTEST) /r:$(bin)\Client.dll /out:$(bin)\ClientTest.dll TestClient.cs ValueTypeImpls.cs
 
 
 copy-idl:
@@ -56,7 +57,7 @@ build-plugin:
 
 start-client:
 	@echo "Mapping plugin java server IntegrationTest"
-	%NUNITV2_HOME%\bin\nunit-console.exe /assembly:bin\ClientTest.dll
+	$(NUNIT_CONSOLE) $(NUNIT_ASSEMBLY_ARG_OPTION)bin\ClientTest.dll
 
 clean-plugin:
 	cd $(MAPPINGPLUGINDIR)

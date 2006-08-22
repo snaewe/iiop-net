@@ -1,3 +1,5 @@
+include ..\..\..\MakeVars
+
 IDLTOCLSCOMPILER=..\..\IDLCompiler\ 
 
 all: build deploy

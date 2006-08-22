@@ -1,0 +1,16 @@
+include ../../MakeVars.mono
+PRCURRENTTIME = ../../Utils/currenttime.exe
+
+build: 
+	$(MAKE) -C OnlyInGac build -f Makefile.mono
+	$(MAKE) -C LocalAndInGac build -f Makefile.mono
+
+test:
+	@echo Gac integration tests starting at:
+	@mono $(PRCURRENTTIME)
+	$(MAKE) -C OnlyInGac test -f Makefile.mono
+	$(MAKE) -C LocalAndInGac test -f Makefile.mono
+
+clean:
+	$(MAKE) -C OnlyInGac clean -f Makefile.mono
+	$(MAKE) -C LocalAndInGac clean -f Makefile.mono

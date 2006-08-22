@@ -134,8 +134,11 @@ namespace Ch.Elca.Iiop.IntegrationTests {
             Ior ior = new Ior(iorString);
             Assertion.Assert("nr of profiles", ior.Profiles.Length > 0);
             IIorProfile profile = ior.Profiles[0];
+            omg.org.IOP.CodecFactory codecFactory = (omg.org.IOP.CodecFactory)
+                orb.resolve_initial_references("CodecFactory");
             object codeset = 
-                profile.TaggedComponents.GetComponentData(1, typeof(CodeSetComponentData));
+                profile.TaggedComponents.GetComponentData(1, codecFactory.create_codec(new omg.org.IOP.Encoding(omg.org.IOP.ENCODING_CDR_ENCAPS.ConstVal, 1, 2)),
+                                                          CodeSetComponentData.TypeCode);
             Assertion.AssertNotNull(codeset);
             Assertion.AssertEquals((int)CharSet.UTF8, ((CodeSetComponentData)codeset).NativeCharSet);
             Assertion.AssertEquals((int)WCharSet.UTF16, ((CodeSetComponentData)codeset).NativeWCharSet);            

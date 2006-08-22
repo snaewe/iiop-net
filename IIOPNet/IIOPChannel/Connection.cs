@@ -35,6 +35,7 @@ using System.Threading;
 using System.Runtime.Remoting.Messaging;
 using System.Diagnostics;
 using Ch.Elca.Iiop.Services;
+using omg.org.CORBA;
 
 namespace Ch.Elca.Iiop {
 
@@ -47,10 +48,11 @@ namespace Ch.Elca.Iiop {
 
         #region IFields
 
-        private int m_charSetChosen = CodeSetService.DefaultCharSet;
-        private int m_wcharSetChosen = CodeSetService.DefaultWCharSet;
+        private int m_charSetChosen;
+        private int m_wcharSetChosen;
                
         private bool m_codeSetNegotiated = false;
+        private bool m_isCodeSetDefined = false;
         
         private GiopClientConnectionManager m_conManager;
         private GiopTransportMessageHandler m_transportHandler;
@@ -67,17 +69,27 @@ namespace Ch.Elca.Iiop {
         #endregion IConstructors
         #region IProperties
 
+        /// <summary>
+        /// the CharSet selected; or throwing an INTERNAL exception, if not
+        /// user specified.
+        /// </summary>
         public int CharSet {
             get {
-                return m_charSetChosen;
+                AssertCodeSetDefined();                
+                return m_charSetChosen;                
             }
         }
 
+        /// <summary>
+        /// the WCharSet selected; or throwing an INTERNAL exception, if not
+        /// user specified.
+        /// </summary>        
         public int WCharSet {
             get {
+                AssertCodeSetDefined();
                 return m_wcharSetChosen;
             }
-        }
+        }                
         
         /// <summary>
         /// a client connection manager responsible for client connections (may be null).
@@ -104,6 +116,12 @@ namespace Ch.Elca.Iiop {
         #endregion IProperties
         #region IMethods
         
+        private void AssertCodeSetDefined() {
+            if (!IsCodeSetDefined()) {
+                throw new INTERNAL(433, CompletionStatus.Completed_MayBe);
+            }
+        }
+        
         /// <summary>
         /// is the codeset already negotiated?
         /// </summary>
@@ -122,6 +140,20 @@ namespace Ch.Elca.Iiop {
             m_charSetChosen = charSet;
             m_wcharSetChosen = wcharSet;
             SetCodeSetNegotiated();
+            SetCodeSetDefined();
+        }
+        
+        /// <summary>
+        /// Returns true, if a specific char and wchar set has been selected.
+        /// Selecting a char/wchar set is done by calling 
+        /// <see cref="GiopConnectionDesc.SetNegotiatedCodeSets"/>.
+        /// </summary>
+        public bool IsCodeSetDefined() {
+            return m_isCodeSetDefined;
+        }
+        
+        private void SetCodeSetDefined() {
+            m_isCodeSetDefined = true;
         }
                 
         #endregion IMethods
@@ -386,13 +418,14 @@ namespace Ch.Elca.Iiop {
 
         /// <param name="connectionKey">the key describing the connection</param>
         /// <param name="transport">a not yet connected client transport</param>
+        /// <param name="headerFlags">the header flags to use for transport related giop messages.</param>
         internal GiopClientInitiatedConnection(string connectionKey, IClientTransport transport,
                                                MessageTimeout requestTimeOut, GiopClientConnectionManager conManager,
-                                               bool supportBidir) {            
+                                               bool supportBidir, byte headerFlags) {            
             GiopRequestNumberGenerator reqNumberGen =
                 (!supportBidir ? new GiopRequestNumberGenerator() : new GiopRequestNumberGenerator(true));
             GiopTransportMessageHandler handler =
-                      new GiopTransportMessageHandler(transport, requestTimeOut);
+                      new GiopTransportMessageHandler(transport, requestTimeOut, headerFlags);
             GiopClientConnectionDesc conDesc = new GiopClientConnectionDesc(conManager, this, reqNumberGen, handler);
             m_clientTransport = transport;
             Initalize(connectionKey, handler, conDesc);            
@@ -482,3 +515,84 @@ namespace Ch.Elca.Iiop {
 
     
 }
+
+
+#if UnitTest
+
+namespace Ch.Elca.Iiop.Tests {
+    
+    using System.IO;
+    using NUnit.Framework;
+    using Ch.Elca.Iiop;
+    using omg.org.CORBA;
+    
+	/// <summary>
+	/// Tests the CdrInputStream
+	/// </summary>
+	[TestFixture]
+	public class ConnectionTests {
+	    
+	    [Test]
+	    public void TestGiopConnectionDescCodeSetNotSet() {
+	        GiopConnectionDesc desc = 
+	            new GiopConnectionDesc(null, null);
+	        Assertion.Assert("Codeset not negotiated at construction time",
+	                         !desc.IsCodeSetNegotiated());
+	        Assertion.Assert("No codeset user defined at construction time",
+	                         !desc.IsCodeSetDefined());	        
+	    }
+	    
+	    [Test]
+	    public void TestGiopConnectionDescCodeSetNotSetAccess() {
+	        GiopConnectionDesc desc = 
+	            new GiopConnectionDesc(null, null);
+	        Assertion.Assert("No codeset user defined at construction time",
+	                         !desc.IsCodeSetDefined());
+	        try {
+    	        int charSet = desc.CharSet;
+    	        Assertion.Fail("Expected expection, when accessing charset, although not set");
+	        } catch (INTERNAL) {
+	            // expected.
+	        }	        
+	        try {
+    	        int wcharSet = desc.WCharSet;
+    	        Assertion.Fail("Expected expection, when accessing charset, although not set");
+	        } catch (INTERNAL) {
+	            // expected.
+	        }	        
+	    }	    
+	    
+	    [Test]
+	    public void TestGiopConnectionDescSetCodeSet() {
+	        int charSet = 0x5010001;
+	        int wcharSet = 0x10100;
+	        GiopConnectionDesc desc =
+	            new GiopConnectionDesc(null, null);
+	        desc.SetNegotiatedCodeSets(charSet, wcharSet);
+	        Assertion.Assert("Codeset negotiated",
+	                         desc.IsCodeSetNegotiated());
+	        Assertion.AssertEquals("char set", charSet, desc.CharSet);
+	        Assertion.AssertEquals("wchar set", wcharSet, desc.WCharSet);
+	        Assertion.Assert("Codeset user defined",
+	                         desc.IsCodeSetDefined());
+
+	    }
+	    
+	    [Test]
+	    public void TestGiopConnectionDescSetCodeSetNegotiated() {
+	        GiopConnectionDesc desc =
+	            new GiopConnectionDesc(null, null);
+	        desc.SetCodeSetNegotiated();
+	        Assertion.Assert("Codeset negotiated",
+	                         desc.IsCodeSetNegotiated());
+	        Assertion.Assert("Codeset not user defined",
+	                         !desc.IsCodeSetDefined());	        
+	    }
+	    
+	    
+	    
+	}
+	
+}
+
+#endif

@@ -1,5 +1,7 @@
-DELAY = ..\Utils\delay.exe
-PRCURRENTTIME = ..\Utils\currenttime.exe
+include ..\..\MakeVars
+
+DELAY = ..\..\Utils\delay.exe
+PRCURRENTTIME = ..\..\Utils\currenttime.exe
 
 build-with-setup:
 	cd TestBeans

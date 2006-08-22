@@ -1,3 +1,5 @@
+include ..\..\..\..\MakeVars
+
 Package     = tutorial.
 PackagePath = tutorial\ 
 IMPLPath    = $(PackagePath)ServiceImpl

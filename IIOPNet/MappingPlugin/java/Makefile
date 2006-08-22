@@ -1,3 +1,4 @@
+include ..\..\MakeVars
 IDLToCLS=..\..\..\IDLToCLSCompiler\IDLCompiler\bin\IDLToCLSCompiler.exe
 TARGETASMCOLL=javaCollections
 TARGETASMMAP=IIOPNetCustomJavaTypeMapping.dll
@@ -32,7 +33,7 @@ build-idl: $(IDL)
     cd ..
 
 build-lib: $(BIN)$(TARGETASMCOLL).dll $(BIN)IIOPChannel.dll CollectionsImpl.cs BaseTypesImpl.cs InstanceMappers.cs
-    csc $(CSFLAGS) /t:library /r:$(BIN)$(TARGETASMCOLL).dll /r:$(BIN)IIOPChannel.dll /out:$(BIN)$(TARGETASMMAP) CollectionsImpl.cs BaseTypesImpl.cs InstanceMappers.cs
+    $(CSC) $(CSFLAGS) /t:library /r:$(BIN)$(TARGETASMCOLL).dll /r:$(BIN)IIOPChannel.dll /out:$(BIN)$(TARGETASMMAP) CollectionsImpl.cs BaseTypesImpl.cs InstanceMappers.cs
 
 clean:
     if exist $(IDL)nul rmdir /q /s $(IDL)

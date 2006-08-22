@@ -1,0 +1,162 @@
+<Project name="IDLTOCLSCompiler" standardNamespace="NewProject" description="" newfilesearch="None" enableviewstate="True" version="1.1" projecttype="C#">
+  <Contents>
+    <File name=".\TypesInAssembliesManager.cs" subtype="Code" buildaction="Compile" dependson="" data="" />
+    <File name=".\ASTadd_expr.cs" subtype="Code" buildaction="Compile" dependson="" data="" />
+    <File name=".\ASTand_expr.cs" subtype="Code" buildaction="Compile" dependson="" data="" />
+    <File name=".\ASTany_type.cs" subtype="Code" buildaction="Compile" dependson="" data="" />
+    <File name=".\ASTarray_declarator.cs" subtype="Code" buildaction="Compile" dependson="" data="" />
+    <File name=".\ASTattr_dcl.cs" subtype="Code" buildaction="Compile" dependson="" data="" />
+    <File name=".\ASTbase_type_spec.cs" subtype="Code" buildaction="Compile" dependson="" data="" />
+    <File name=".\ASTboolean_type.cs" subtype="Code" buildaction="Compile" dependson="" data="" />
+    <File name=".\ASTcase_label.cs" subtype="Code" buildaction="Compile" dependson="" data="" />
+    <File name=".\ASTcasex.cs" subtype="Code" buildaction="Compile" dependson="" data="" />
+    <File name=".\ASTchar_type.cs" subtype="Code" buildaction="Compile" dependson="" data="" />
+    <File name=".\ASTcomplex_declarator.cs" subtype="Code" buildaction="Compile" dependson="" data="" />
+    <File name=".\ASTconst_dcl.cs" subtype="Code" buildaction="Compile" dependson="" data="" />
+    <File name=".\ASTconst_exp.cs" subtype="Code" buildaction="Compile" dependson="" data="" />
+    <File name=".\ASTconst_type.cs" subtype="Code" buildaction="Compile" dependson="" data="" />
+    <File name=".\ASTconstr_type_spec.cs" subtype="Code" buildaction="Compile" dependson="" data="" />
+    <File name=".\ASTcontext_expr.cs" subtype="Code" buildaction="Compile" dependson="" data="" />
+    <File name=".\ASTdeclarator.cs" subtype="Code" buildaction="Compile" dependson="" data="" />
+    <File name=".\ASTdeclarators.cs" subtype="Code" buildaction="Compile" dependson="" data="" />
+    <File name=".\ASTdefinition.cs" subtype="Code" buildaction="Compile" dependson="" data="" />
+    <File name=".\ASTelement_spec.cs" subtype="Code" buildaction="Compile" dependson="" data="" />
+    <File name=".\ASTenum_type.cs" subtype="Code" buildaction="Compile" dependson="" data="" />
+    <File name=".\ASTenumerator.cs" subtype="Code" buildaction="Compile" dependson="" data="" />
+    <File name=".\ASTexcept_dcl.cs" subtype="Code" buildaction="Compile" dependson="" data="" />
+    <File name=".\ASTexport.cs" subtype="Code" buildaction="Compile" dependson="" data="" />
+    <File name=".\ASTfixed_array_size.cs" subtype="Code" buildaction="Compile" dependson="" data="" />
+    <File name=".\ASTfixed_pt_const_type.cs" subtype="Code" buildaction="Compile" dependson="" data="" />
+    <File name=".\ASTfixed_pt_type.cs" subtype="Code" buildaction="Compile" dependson="" data="" />
+    <File name=".\ASTfloating_pt_type.cs" subtype="Code" buildaction="Compile" dependson="" data="" />
+    <File name=".\ASTfloating_pt_type_double.cs" subtype="Code" buildaction="Compile" dependson="" data="" />
+    <File name=".\ASTfloating_pt_type_float.cs" subtype="Code" buildaction="Compile" dependson="" data="" />
+    <File name=".\ASTfloating_pt_type_longdouble.cs" subtype="Code" buildaction="Compile" dependson="" data="" />
+    <File name=".\ASTforward_dcl.cs" subtype="Code" buildaction="Compile" dependson="" data="" />
+    <File name=".\ASTinit_decl.cs" subtype="Code" buildaction="Compile" dependson="" data="" />
+    <File name=".\ASTinit_param_attribute.cs" subtype="Code" buildaction="Compile" dependson="" data="" />
+    <File name=".\ASTinit_param_decl.cs" subtype="Code" buildaction="Compile" dependson="" data="" />
+    <File name=".\ASTinit_param_delcs.cs" subtype="Code" buildaction="Compile" dependson="" data="" />
+    <File name=".\ASTinteger_type.cs" subtype="Code" buildaction="Compile" dependson="" data="" />
+    <File name=".\ASTinterface_body.cs" subtype="Code" buildaction="Compile" dependson="" data="" />
+    <File name=".\ASTinterface_dcl.cs" subtype="Code" buildaction="Compile" dependson="" data="" />
+    <File name=".\ASTinterface_header.cs" subtype="Code" buildaction="Compile" dependson="" data="" />
+    <File name=".\ASTinterface_inheritance_spec.cs" subtype="Code" buildaction="Compile" dependson="" data="" />
+    <File name=".\ASTinterface_name.cs" subtype="Code" buildaction="Compile" dependson="" data="" />
+    <File name=".\ASTinterfacex.cs" subtype="Code" buildaction="Compile" dependson="" data="" />
+    <File name=".\ASTliteral.cs" subtype="Code" buildaction="Compile" dependson="" data="" />
+    <File name=".\ASTmember.cs" subtype="Code" buildaction="Compile" dependson="" data="" />
+    <File name=".\ASTmember_list.cs" subtype="Code" buildaction="Compile" dependson="" data="" />
+    <File name=".\ASTmodule.cs" subtype="Code" buildaction="Compile" dependson="" data="" />
+    <File name=".\ASTmult_expr.cs" subtype="Code" buildaction="Compile" dependson="" data="" />
+    <File name=".\ASTobject_type.cs" subtype="Code" buildaction="Compile" dependson="" data="" />
+    <File name=".\ASToctet_type.cs" subtype="Code" buildaction="Compile" dependson="" data="" />
+    <File name=".\ASTop_dcl.cs" subtype="Code" buildaction="Compile" dependson="" data="" />
+    <File name=".\ASTop_type_spec.cs" subtype="Code" buildaction="Compile" dependson="" data="" />
+    <File name=".\ASTor_expr.cs" subtype="Code" buildaction="Compile" dependson="" data="" />
+    <File name=".\ASTparam_attribute.cs" subtype="Code" buildaction="Compile" dependson="" data="" />
+    <File name=".\ASTparam_dcl.cs" subtype="Code" buildaction="Compile" dependson="" data="" />
+    <File name=".\ASTparam_type_spec.cs" subtype="Code" buildaction="Compile" dependson="" data="" />
+    <File name=".\ASTparameter_dcls.cs" subtype="Code" buildaction="Compile" dependson="" data="" />
+    <File name=".\ASTpositive_int_const.cs" subtype="Code" buildaction="Compile" dependson="" data="" />
+    <File name=".\ASTraises_expr.cs" subtype="Code" buildaction="Compile" dependson="" data="" />
+    <File name=".\ASTscoped_name.cs" subtype="Code" buildaction="Compile" dependson="" data="" />
+    <File name=".\ASTsequence_type.cs" subtype="Code" buildaction="Compile" dependson="" data="" />
+    <File name=".\ASTshift_expr.cs" subtype="Code" buildaction="Compile" dependson="" data="" />
+    <File name=".\ASTsigned_int.cs" subtype="Code" buildaction="Compile" dependson="" data="" />
+    <File name=".\ASTsigned_long_int.cs" subtype="Code" buildaction="Compile" dependson="" data="" />
+    <File name=".\ASTsigned_longlong_int.cs" subtype="Code" buildaction="Compile" dependson="" data="" />
+    <File name=".\ASTsigned_short_int.cs" subtype="Code" buildaction="Compile" dependson="" data="" />
+    <File name=".\ASTsimple_declarator.cs" subtype="Code" buildaction="Compile" dependson="" data="" />
+    <File name=".\ASTsimple_type_spec.cs" subtype="Code" buildaction="Compile" dependson="" data="" />
+    <File name=".\ASTspecification.cs" subtype="Code" buildaction="Compile" dependson="" data="" />
+    <File name=".\ASTstate_member.cs" subtype="Code" buildaction="Compile" dependson="" data="" />
+    <File name=".\ASTstring_type.cs" subtype="Code" buildaction="Compile" dependson="" data="" />
+    <File name=".\ASTstruct_type.cs" subtype="Code" buildaction="Compile" dependson="" data="" />
+    <File name=".\ASTswitch_body.cs" subtype="Code" buildaction="Compile" dependson="" data="" />
+    <File name=".\ASTswitch_type_spec.cs" subtype="Code" buildaction="Compile" dependson="" data="" />
+    <File name=".\ASTtemplate_type_spec.cs" subtype="Code" buildaction="Compile" dependson="" data="" />
+    <File name=".\ASTtype_dcl.cs" subtype="Code" buildaction="Compile" dependson="" data="" />
+    <File name=".\ASTtype_declarator.cs" subtype="Code" buildaction="Compile" dependson="" data="" />
+    <File name=".\ASTtype_spec.cs" subtype="Code" buildaction="Compile" dependson="" data="" />
+    <File name=".\ASTunary_expr.cs" subtype="Code" buildaction="Compile" dependson="" data="" />
+    <File name=".\ASTunion_type.cs" subtype="Code" buildaction="Compile" dependson="" data="" />
+    <File name=".\ASTunsigned_int.cs" subtype="Code" buildaction="Compile" dependson="" data="" />
+    <File name=".\ASTunsigned_long_int.cs" subtype="Code" buildaction="Compile" dependson="" data="" />
+    <File name=".\ASTunsigned_longlong_int.cs" subtype="Code" buildaction="Compile" dependson="" data="" />
+    <File name=".\ASTunsigned_short_int.cs" subtype="Code" buildaction="Compile" dependson="" data="" />
+    <File name=".\ASTvalue.cs" subtype="Code" buildaction="Compile" dependson="" data="" />
+    <File name=".\ASTvalue_abs_decl.cs" subtype="Code" buildaction="Compile" dependson="" data="" />
+    <File name=".\ASTvalue_base_inheritance_spec.cs" subtype="Code" buildaction="Compile" dependson="" data="" />
+    <File name=".\ASTvalue_base_type.cs" subtype="Code" buildaction="Compile" dependson="" data="" />
+    <File name=".\ASTvalue_box_decl.cs" subtype="Code" buildaction="Compile" dependson="" data="" />
+    <File name=".\ASTvalue_decl.cs" subtype="Code" buildaction="Compile" dependson="" data="" />
+    <File name=".\ASTvalue_element.cs" subtype="Code" buildaction="Compile" dependson="" data="" />
+    <File name=".\ASTvalue_forward_decl.cs" subtype="Code" buildaction="Compile" dependson="" data="" />
+    <File name=".\ASTvalue_header.cs" subtype="Code" buildaction="Compile" dependson="" data="" />
+    <File name=".\ASTvalue_name.cs" subtype="Code" buildaction="Compile" dependson="" data="" />
+    <File name=".\ASTvalue_support_inheritance_spec.cs" subtype="Code" buildaction="Compile" dependson="" data="" />
+    <File name=".\ASTwide_char_type.cs" subtype="Code" buildaction="Compile" dependson="" data="" />
+    <File name=".\ASTwide_string_type.cs" subtype="Code" buildaction="Compile" dependson="" data="" />
+    <File name=".\ASTxor_expr.cs" subtype="Code" buildaction="Compile" dependson="" data="" />
+    <File name=".\Error.cs" subtype="Code" buildaction="Compile" dependson="" data="" />
+    <File name=".\IDLParser.cs" subtype="Code" buildaction="Compile" dependson="" data="" />
+    <File name=".\IDLParserConstants.cs" subtype="Code" buildaction="Compile" dependson="" data="" />
+    <File name=".\IDLParserTokenManager.cs" subtype="Code" buildaction="Compile" dependson="" data="" />
+    <File name=".\IDLParserTreeConstants.cs" subtype="Code" buildaction="Compile" dependson="" data="" />
+    <File name=".\IDLParserVisitor.cs" subtype="Code" buildaction="Compile" dependson="" data="" />
+    <File name=".\IDLToCLS.cs" subtype="Code" buildaction="Compile" dependson="" data="" />
+    <File name=".\InternalCompilerException.cs" subtype="Code" buildaction="Compile" dependson="" data="" />
+    <File name=".\InvalidIdlException.cs" subtype="Code" buildaction="Compile" dependson="" data="" />
+    <File name=".\JJTIDLParserState.cs" subtype="Code" buildaction="Compile" dependson="" data="" />
+    <File name=".\MappingPlugin.cs" subtype="Code" buildaction="Compile" dependson="" data="" />
+    <File name=".\MetadataGenerator.cs" subtype="Code" buildaction="Compile" dependson="" data="" />
+    <File name=".\Node.cs" subtype="Code" buildaction="Compile" dependson="" data="" />
+    <File name=".\ParseException.cs" subtype="Code" buildaction="Compile" dependson="" data="" />
+    <File name=".\PragmaScope.cs" subtype="Code" buildaction="Compile" dependson="" data="" />
+    <File name=".\Scope.cs" subtype="Code" buildaction="Compile" dependson="" data="" />
+    <File name=".\ScopeException.cs" subtype="Code" buildaction="Compile" dependson="" data="" />
+    <File name=".\SimpleNode.cs" subtype="Code" buildaction="Compile" dependson="" data="" />
+    <File name=".\SimpleNodeWithIdent.cs" subtype="Code" buildaction="Compile" dependson="" data="" />
+    <File name=".\Symbol.cs" subtype="Code" buildaction="Compile" dependson="" data="" />
+    <File name=".\SymbolDefinition.cs" subtype="Code" buildaction="Compile" dependson="" data="" />
+    <File name=".\SymbolFwdDecl.cs" subtype="Code" buildaction="Compile" dependson="" data="" />
+    <File name=".\SymbolTable.cs" subtype="Code" buildaction="Compile" dependson="" data="" />
+    <File name=".\SymbolTypedef.cs" subtype="Code" buildaction="Compile" dependson="" data="" />
+    <File name=".\SymbolValue.cs" subtype="Code" buildaction="Compile" dependson="" data="" />
+    <File name=".\Tests.cs" subtype="Code" buildaction="Compile" dependson="" data="" />
+    <File name=".\Token.cs" subtype="Code" buildaction="Compile" dependson="" data="" />
+    <File name=".\TokenMgrError.cs" subtype="Code" buildaction="Compile" dependson="" data="" />
+    <File name=".\TypeManager.cs" subtype="Code" buildaction="Compile" dependson="" data="" />
+    <File name=".\AssemblyInfo.cs" subtype="Code" buildaction="Compile" dependson="" data="" />
+    <File name=".\SimpleCharStream.cs" subtype="Code" buildaction="Compile" dependson="" data="" />
+    <File name=".\Literal.cs" subtype="Code" buildaction="Compile" dependson="" data="" />
+    <File name=".\CompileTimeTypeContainer.cs" subtype="Code" buildaction="Compile" dependson="" data="" />
+    <File name=".\ValueTypeImplGenerator.cs" subtype="Code" buildaction="Compile" dependson="" data="" />
+    <File name=".\StringToIntConverter.cs" subtype="Code" buildaction="Compile" dependson="" data="" />
+    <File name=".\ASTprimary_expr_noLit.cs" subtype="Code" buildaction="Compile" dependson="" data="" />
+    <File name=".\IDLToCLSCommandLine.cs" subtype="Code" buildaction="Compile" dependson="" data="" />
+  </Contents>
+  <References>
+    <Reference type="Project" refto="IIOPChannel" localcopy="True" />
+    <Reference type="Project" refto="IDLPreProcCSharp" localcopy="True" />
+  </References>
+  <DeploymentInformation target="" script="" strategy="File" />
+  <Configuration runwithwarnings="False" name="Debug">
+    <CodeGeneration runtime="MsNet" compiler="Csc" compilerversion="" warninglevel="4" nowarn="" includedebuginformation="True" optimize="True" unsafecodeallowed="False" generateoverflowchecks="True" mainclass="" target="Exe" definesymbols="DISABLE_STRONG_NAME" generatexmldocumentation="False" win32Icon="" noconfig="False" nostdlib="False" />
+    <Execution commandlineparameters="" consolepause="True" />
+    <Output directory=".\binSD" assembly="IDL TO CLS Compiler CS" executeScript="" executeBeforeBuild="" executeAfterBuild="" executeBeforeBuildArguments="" executeAfterBuildArguments="" />
+  </Configuration>
+  <Configurations active="Debug">
+    <Configuration runwithwarnings="False" name="Debug">
+      <CodeGeneration runtime="MsNet" compiler="Csc" compilerversion="" warninglevel="4" nowarn="" includedebuginformation="True" optimize="True" unsafecodeallowed="False" generateoverflowchecks="True" mainclass="" target="Exe" definesymbols="DISABLE_STRONG_NAME" generatexmldocumentation="False" win32Icon="" noconfig="False" nostdlib="False" />
+      <Execution commandlineparameters="" consolepause="True" />
+      <Output directory=".\binSD" assembly="IDL TO CLS Compiler CS" executeScript="" executeBeforeBuild="" executeAfterBuild="" executeBeforeBuildArguments="" executeAfterBuildArguments="" />
+    </Configuration>
+    <Configuration runwithwarnings="False" name="Release">
+      <CodeGeneration runtime="MsNet" compiler="Csc" compilerversion="" warninglevel="4" nowarn="" includedebuginformation="True" optimize="True" unsafecodeallowed="False" generateoverflowchecks="True" mainclass="" target="Exe" definesymbols="" generatexmldocumentation="False" win32Icon="" noconfig="False" nostdlib="False" />
+      <Execution commandlineparameters="" consolepause="True" />
+      <Output directory=".\bin\Release" assembly="IDL TO CLS Compiler CS" executeScript="" executeBeforeBuild="" executeAfterBuild="" executeBeforeBuildArguments="" executeAfterBuildArguments="" />
+    </Configuration>
+  </Configurations>
+</Project>

@@ -1,0 +1,1 @@
+This folder contains some utilities, which are used by the makefiles.

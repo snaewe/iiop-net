@@ -1,0 +1,32 @@
+<Combine fileversion="1.0" name="IIOPNet" description="">
+  <StartMode startupentry="" single="True">
+    <Execute entry="IIOPChannel" type="None" />
+    <Execute entry="IDLPreProcCSharp" type="None" />
+    <Execute entry="IDLTOCLSCompiler" type="None" />
+    <Execute entry="SslPlugin" type="None" />
+    <Execute entry="ClsToIdlGenerator" type="None" />
+  </StartMode>
+  <Entries>
+    <Entry filename=".\IIOPChannel\IIOPChannel.prjx" />
+    <Entry filename=".\IDLToCLSCompiler\IDLPreprocessor\IDLPreProcCSharp.prjx" />
+    <Entry filename=".\IDLToCLSCompiler\IDLCompiler\IDL TO CLS Compiler CS.prjx" />
+    <Entry filename=".\SSLPlugin\SslPlugin.prjx" />
+    <Entry filename=".\CLSToIDLGenerator\ClsToIdlGenerator.prjx" />
+  </Entries>
+  <Configurations active="Debug">
+    <Configuration name="Release">
+      <Entry name="IIOPChannel" configurationname="Debug" build="False" />
+      <Entry name="IDLPreProcCSharp" configurationname="Debug" build="False" />
+      <Entry name="IDLTOCLSCompiler" configurationname="Debug" build="False" />
+      <Entry name="SslPlugin" configurationname="Debug" build="False" />
+      <Entry name="ClsToIdlGenerator" configurationname="Debug" build="False" />
+    </Configuration>
+    <Configuration name="Debug">
+      <Entry name="IIOPChannel" configurationname="Debug" build="False" />
+      <Entry name="IDLPreProcCSharp" configurationname="Debug" build="False" />
+      <Entry name="IDLTOCLSCompiler" configurationname="Debug" build="False" />
+      <Entry name="SslPlugin" configurationname="Debug" build="False" />
+      <Entry name="ClsToIdlGenerator" configurationname="Debug" build="False" />
+    </Configuration>
+  </Configurations>
+</Combine>

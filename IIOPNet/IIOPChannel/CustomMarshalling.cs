@@ -212,262 +212,270 @@ namespace Corba {
        
         private static Type s_dummyValType = typeof(DummyValTypeForNull);
 
-        private static Type s_wstringValueType = typeof(WStringValue);
-        private static Type s_stringValueType = typeof(StringValue);
+        private static Type s_wstringValueType = ReflectionHelper.WStringValueType;
+        private static Type s_stringValueType = ReflectionHelper.StringValueType;
 
         #endregion SFields
         #region IFields
 
-        private Marshaller m_marshaller = Marshaller.GetSingleton();
+        private SerializerFactory m_serFactory;
 
         private CdrOutputStream m_cdrOut;
 
         #endregion IFields
         #region IConstructors
 
-        public DataOutputStreamImpl(CdrOutputStream cdrOut) {
+        public DataOutputStreamImpl(CdrOutputStream cdrOut, SerializerFactory serFactory) {
             m_cdrOut = cdrOut;
+            m_serFactory = serFactory;
         }
 
         #endregion IConstructors
         #region IMethods
+        
+        private void Marshal(Type type, AttributeExtCollection attributes,
+                             object val, CdrOutputStream cdrOut) {
+            Serializer ser = m_serFactory.Create(type, attributes);
+            ser.Serialize(val, cdrOut);
+            
+        }
 
         #region Implementation of DataOutputStream
         public void write_any([ObjectIdlType(IdlTypeObject.Any)] object val) {
-            m_marshaller.Marshal(ReflectionHelper.ObjectType, 
-                                 new AttributeExtCollection(new Attribute[] { 
-                                         new ObjectIdlTypeAttribute(IdlTypeObject.Any)}),
-                                 val, m_cdrOut);
+            Marshal(ReflectionHelper.ObjectType, 
+                    new AttributeExtCollection(new Attribute[] { 
+                        new ObjectIdlTypeAttribute(IdlTypeObject.Any)}),
+                    val, m_cdrOut);
         }
 
         public void write_boolean(bool val)    {
-            m_marshaller.Marshal(val.GetType(), AttributeExtCollection.EmptyCollection,
-                                 val, m_cdrOut);
+            Marshal(val.GetType(), AttributeExtCollection.EmptyCollection,
+                    val, m_cdrOut);
         }
 
         public void write_char([WideCharAttribute(false)]char val) {
-            m_marshaller.Marshal(val.GetType(), 
-                                 new AttributeExtCollection(new Attribute[] { 
-                                         new WideCharAttribute(false) }), 
-                                 val, m_cdrOut);
+            Marshal(val.GetType(), 
+                    new AttributeExtCollection(new Attribute[] { 
+                        new WideCharAttribute(false) }), 
+                    val, m_cdrOut);
         }
 
         public void write_wchar([WideCharAttribute(true)]char val) {
-            m_marshaller.Marshal(val.GetType(), 
-                                 new AttributeExtCollection(new Attribute[] { 
-                                         new WideCharAttribute(true) }), 
-                                 val, m_cdrOut);
+            Marshal(val.GetType(), 
+                    new AttributeExtCollection(new Attribute[] { 
+                        new WideCharAttribute(true) }), 
+                    val, m_cdrOut);
         }
 
         public void write_octet(byte val) {
-            m_marshaller.Marshal(val.GetType(), AttributeExtCollection.EmptyCollection,
-                                 val, m_cdrOut);
+            Marshal(val.GetType(), AttributeExtCollection.EmptyCollection,
+                    val, m_cdrOut);
         }
 
         public void write_short(short val) {
-            m_marshaller.Marshal(val.GetType(), AttributeExtCollection.EmptyCollection,
-                                 val, m_cdrOut);
+            Marshal(val.GetType(), AttributeExtCollection.EmptyCollection,
+                    val, m_cdrOut);
         }
 
         public void write_ushort(short val) {
-            m_marshaller.Marshal(val.GetType(), AttributeExtCollection.EmptyCollection,
-                                 val, m_cdrOut);
+            Marshal(val.GetType(), AttributeExtCollection.EmptyCollection,
+                    val, m_cdrOut);
         }
 
         public void write_long(int val) {
-            m_marshaller.Marshal(val.GetType(), AttributeExtCollection.EmptyCollection,
-                                 val, m_cdrOut);
+            Marshal(val.GetType(), AttributeExtCollection.EmptyCollection,
+                    val, m_cdrOut);
         }
 
         public void write_ulong(int val) {
-            m_marshaller.Marshal(val.GetType(), AttributeExtCollection.EmptyCollection,
-                                 val, m_cdrOut);
+            Marshal(val.GetType(), AttributeExtCollection.EmptyCollection,
+                    val, m_cdrOut);
         }
 
         public void write_longlong(long val) {
-            m_marshaller.Marshal(val.GetType(), AttributeExtCollection.EmptyCollection,
-                                 val, m_cdrOut);
+            Marshal(val.GetType(), AttributeExtCollection.EmptyCollection,
+                    val, m_cdrOut);
         }
 
         public void write_ulonglong(long val) {
-            m_marshaller.Marshal(val.GetType(), AttributeExtCollection.EmptyCollection,
-                                 val, m_cdrOut);
+            Marshal(val.GetType(), AttributeExtCollection.EmptyCollection,
+                    val, m_cdrOut);
         }
 
         public void write_float(float val) {
-            m_marshaller.Marshal(val.GetType(), AttributeExtCollection.EmptyCollection,
-                                 val, m_cdrOut);
+            Marshal(val.GetType(), AttributeExtCollection.EmptyCollection,
+                    val, m_cdrOut);
         }
 
         public void write_double(double val) {
-            m_marshaller.Marshal(val.GetType(), AttributeExtCollection.EmptyCollection,
-                                 val, m_cdrOut);
+            Marshal(val.GetType(), AttributeExtCollection.EmptyCollection,
+                    val, m_cdrOut);
         }
 
         public void write_string([WideCharAttribute(false)]string val) {
-            m_marshaller.Marshal(val.GetType(), 
-                                 new AttributeExtCollection(new Attribute[] {
-                                         new WideCharAttribute(false) }),
-                                 val, m_cdrOut);            
+            Marshal(val.GetType(), 
+                    new AttributeExtCollection(new Attribute[] {
+                        new WideCharAttribute(false) }),
+                    val, m_cdrOut);            
         }
         
         public void write_wstring([WideCharAttribute(true)]string val) {
-            m_marshaller.Marshal(val.GetType(), 
-                                 new AttributeExtCollection(new Attribute[] { 
-                                         new WideCharAttribute(true) }), 
-                                 val, m_cdrOut);            
+            Marshal(val.GetType(), 
+                    new AttributeExtCollection(new Attribute[] { 
+                        new WideCharAttribute(true) }), 
+                    val, m_cdrOut);            
         }
 
         public void write_Object(System.MarshalByRefObject val) {
-            m_marshaller.Marshal(ReflectionHelper.MarshalByRefObjectType, 
-                                 AttributeExtCollection.EmptyCollection,
-                                 val, m_cdrOut);
+            Marshal(ReflectionHelper.MarshalByRefObjectType, 
+                    AttributeExtCollection.EmptyCollection,
+                    val, m_cdrOut);
         }
 
         public void write_Abstract([ObjectIdlType(IdlTypeObject.AbstractBase)]object val) {
-            m_marshaller.Marshal(ReflectionHelper.ObjectType, 
-                                 new AttributeExtCollection(new Attribute[] { 
-                                         new ObjectIdlTypeAttribute(IdlTypeObject.AbstractBase) } ),
-                                 val, m_cdrOut);
+            Marshal(ReflectionHelper.ObjectType, 
+                    new AttributeExtCollection(new Attribute[] { 
+                        new ObjectIdlTypeAttribute(IdlTypeObject.AbstractBase) } ),
+                    val, m_cdrOut);
         }
 
         public void write_Value([ObjectIdlType(IdlTypeObject.ValueBase)]object val) {
-            m_marshaller.Marshal(ReflectionHelper.ObjectType, 
-                                 new AttributeExtCollection(new Attribute[] { 
-                                          new ObjectIdlTypeAttribute(IdlTypeObject.ValueBase) } ),
-                                 val, m_cdrOut);
+            Marshal(ReflectionHelper.ObjectType, 
+                    new AttributeExtCollection(new Attribute[] { 
+                        new ObjectIdlTypeAttribute(IdlTypeObject.ValueBase) } ),
+                    val, m_cdrOut);
         }
         
         public void write_ValueOfActualType(object val) {
             if (val != null) {
-                m_marshaller.Marshal(val.GetType(), 
-                                     AttributeExtCollection.EmptyCollection,
-                                     val, m_cdrOut);
+                Marshal(val.GetType(), 
+                        AttributeExtCollection.EmptyCollection,
+                        val, m_cdrOut);
             } else {
-                m_marshaller.Marshal(s_dummyValType, 
-                                     AttributeExtCollection.EmptyCollection,
-                                     val, m_cdrOut);
+                Marshal(s_dummyValType, 
+                        AttributeExtCollection.EmptyCollection,
+                        val, m_cdrOut);
             }
         }
 
         public void write_WStringValue(string val) {
             object boxed = new WStringValue(val);
-            m_marshaller.Marshal(s_wstringValueType, AttributeExtCollection.EmptyCollection,
-                                 boxed, m_cdrOut);
+            Marshal(s_wstringValueType, AttributeExtCollection.EmptyCollection,
+                    boxed, m_cdrOut);
         }
 
         public void write_StringValue(string val) {
             object boxed = new StringValue(val);
-            m_marshaller.Marshal(s_stringValueType, AttributeExtCollection.EmptyCollection,
-                                 boxed, m_cdrOut);
+            Marshal(s_stringValueType, AttributeExtCollection.EmptyCollection,
+                    boxed, m_cdrOut);
         }
 
 
         public void write_boxed(object val, BoxedValueAttribute attr) {
-            m_marshaller.Marshal(val.GetType(), 
-                                 new AttributeExtCollection(new Attribute[] { attr } ),
-                                 val, m_cdrOut);
+            Marshal(val.GetType(), 
+                    new AttributeExtCollection(new Attribute[] { attr } ),
+                    val, m_cdrOut);
         }
 
 
         public void write_TypeCode(omg.org.CORBA.TypeCode val) {
-            m_marshaller.Marshal(ReflectionHelper.CorbaTypeCodeType,
-                                 AttributeExtCollection.EmptyCollection,
-                                 val, m_cdrOut);
+            Marshal(ReflectionHelper.CorbaTypeCodeType,
+                    AttributeExtCollection.EmptyCollection,
+                    val, m_cdrOut);
         }
 
         public void write_any_array([IdlSequenceAttribute(0L)][ObjectIdlType(IdlTypeObject.Any)] object[] seq,
                                     int offset, int length) {
-            m_marshaller.Marshal(ReflectionHelper.ObjectArrayType, 
-                                 new AttributeExtCollection(new Attribute[] { 
-                                         new IdlSequenceAttribute(0L), 
-                                         new ObjectIdlTypeAttribute(IdlTypeObject.Any) } ),
-                                 seq, m_cdrOut);
+            Marshal(ReflectionHelper.ObjectArrayType, 
+                    new AttributeExtCollection(new Attribute[] { 
+                        new IdlSequenceAttribute(0L), 
+                        new ObjectIdlTypeAttribute(IdlTypeObject.Any) } ),
+                    seq, m_cdrOut);
         }
 
         public void write_boolean_array([IdlSequenceAttribute(0L)] bool[] seq, int offset, int length) {
-            m_marshaller.Marshal(seq.GetType(), 
-                                 new AttributeExtCollection(new Attribute[] { 
-                                         new IdlSequenceAttribute(0L) } ),
-                                 seq, m_cdrOut);
+            Marshal(seq.GetType(), 
+                    new AttributeExtCollection(new Attribute[] { 
+                        new IdlSequenceAttribute(0L) } ),
+                    seq, m_cdrOut);
         }
 
         public void write_char_array([IdlSequenceAttribute(0L)] [WideCharAttribute(false)] char[] seq,
                                      int offset, int length)  {
-            m_marshaller.Marshal(seq.GetType(), 
-                                 new AttributeExtCollection(new Attribute[] { 
-                                         new IdlSequenceAttribute(0L), new WideCharAttribute(false) } ),
-                                 seq, m_cdrOut);
+            Marshal(seq.GetType(), 
+                    new AttributeExtCollection(new Attribute[] { 
+                        new IdlSequenceAttribute(0L), new WideCharAttribute(false) } ),
+                    seq, m_cdrOut);
         }
 
         public void write_wchar_array([IdlSequenceAttribute(0L)] [WideCharAttribute(true)] char[]seq,
                                       int offset, int length) {
-            m_marshaller.Marshal(seq.GetType(), 
-                                 new AttributeExtCollection(new Attribute[] { 
-                                         new IdlSequenceAttribute(0L), new WideCharAttribute(true) } ),
-                                 seq, m_cdrOut);
+            Marshal(seq.GetType(), 
+                    new AttributeExtCollection(new Attribute[] { 
+                        new IdlSequenceAttribute(0L), new WideCharAttribute(true) } ),
+                    seq, m_cdrOut);
         }
 
         public void write_octet_array([IdlSequenceAttribute(0L)] byte[] seq, int offset, int length) {
-            m_marshaller.Marshal(seq.GetType(), 
-                                 new AttributeExtCollection(new Attribute[] { 
-                                         new IdlSequenceAttribute(0L) } ),
-                                 seq, m_cdrOut);
+            Marshal(seq.GetType(), 
+                    new AttributeExtCollection(new Attribute[] { 
+                        new IdlSequenceAttribute(0L) } ),
+                    seq, m_cdrOut);
         }
 
         public void write_short_array([IdlSequenceAttribute(0L)] short[] seq, int offset, int length) {
-            m_marshaller.Marshal(seq.GetType(), 
-                                 new AttributeExtCollection(new Attribute[] { 
-                                         new IdlSequenceAttribute(0L) } ),
-                                 seq, m_cdrOut);
+            Marshal(seq.GetType(), 
+                    new AttributeExtCollection(new Attribute[] { 
+                        new IdlSequenceAttribute(0L) } ),
+                    seq, m_cdrOut);
         }
 
         public void write_ushort_array([IdlSequenceAttribute(0L)] short[] seq, int offset, int length) {
-            m_marshaller.Marshal(seq.GetType(), 
-                                 new AttributeExtCollection(new Attribute[] { 
-                                         new IdlSequenceAttribute(0L) } ),
-                                 seq, m_cdrOut);
+            Marshal(seq.GetType(), 
+                    new AttributeExtCollection(new Attribute[] { 
+                        new IdlSequenceAttribute(0L) } ),
+                    seq, m_cdrOut);
         }
 
         public void write_long_array([IdlSequenceAttribute(0L)] int[] seq, int offset, int length) {
-            m_marshaller.Marshal(seq.GetType(),
-                                 new AttributeExtCollection(new Attribute[] { 
-                                         new IdlSequenceAttribute(0L) } ),
-                                 seq, m_cdrOut);
+            Marshal(seq.GetType(),
+                    new AttributeExtCollection(new Attribute[] { 
+                        new IdlSequenceAttribute(0L) } ),
+                    seq, m_cdrOut);
         }
 
         public void write_ulong_array([IdlSequenceAttribute(0L)] int[] seq, int offset, int length) {
-            m_marshaller.Marshal(seq.GetType(), 
-                                 new AttributeExtCollection(new Attribute[] { 
-                                         new IdlSequenceAttribute(0L) } ), 
-                                 seq, m_cdrOut);
+            Marshal(seq.GetType(), 
+                    new AttributeExtCollection(new Attribute[] { 
+                        new IdlSequenceAttribute(0L) } ), 
+                    seq, m_cdrOut);
         }
 
         public void write_ulonglong_array([IdlSequenceAttribute(0L)] long[] seq, int offset, int length) {
-            m_marshaller.Marshal(seq.GetType(), 
-                                 new AttributeExtCollection(new Attribute[] { 
-                                         new IdlSequenceAttribute(0L) } ), 
-                                 seq, m_cdrOut);
+            Marshal(seq.GetType(), 
+                    new AttributeExtCollection(new Attribute[] { 
+                        new IdlSequenceAttribute(0L) } ), 
+                    seq, m_cdrOut);
         }
 
         public void write_longlong_array([IdlSequenceAttribute(0L)] long[] seq, int offset, int length) {
-            m_marshaller.Marshal(seq.GetType(), 
-                                 new AttributeExtCollection(new Attribute[] { 
-                                         new IdlSequenceAttribute(0L) } ),
-                                 seq, m_cdrOut);
+            Marshal(seq.GetType(), 
+                    new AttributeExtCollection(new Attribute[] { 
+                        new IdlSequenceAttribute(0L) } ),
+                    seq, m_cdrOut);
         }
         
         public void write_float_array([IdlSequenceAttribute(0L)] float[] seq, int offset, int length) {
-            m_marshaller.Marshal(seq.GetType(), 
-                                 new AttributeExtCollection(new Attribute[] { 
-                                         new IdlSequenceAttribute(0L) } ), 
-                                 seq, m_cdrOut);
+            Marshal(seq.GetType(), 
+                    new AttributeExtCollection(new Attribute[] { 
+                        new IdlSequenceAttribute(0L) } ), 
+                    seq, m_cdrOut);
         }
         public void write_double_array([IdlSequenceAttribute(0L)] double[] seq, int offset, int length) {
-            m_marshaller.Marshal(seq.GetType(), 
-                                 new AttributeExtCollection(new Attribute[] {
-                                         new IdlSequenceAttribute(0L) } ), 
-                                 seq, m_cdrOut);
+            Marshal(seq.GetType(), 
+                    new AttributeExtCollection(new Attribute[] {
+                        new IdlSequenceAttribute(0L) } ), 
+                    seq, m_cdrOut);
         }
 
         #endregion
@@ -483,21 +491,22 @@ namespace Corba {
         
         #region SFields
 
-        private static Type s_wstringValueType = typeof(WStringValue);
-        private static Type s_stringValueType = typeof(StringValue);
+        private static Type s_wstringValueType = ReflectionHelper.WStringValueType;
+        private static Type s_stringValueType = ReflectionHelper.StringValueType;
 
         #endregion SFields
         #region IFields
 
-        private Marshaller m_marshaller = Marshaller.GetSingleton();
+        private SerializerFactory m_serFactory;
 
         private CdrInputStream m_cdrIn;
 
         #endregion IFields
         #region IConstructors
 
-        public DataInputStreamImpl(CdrInputStream cdrIn) {
+        public DataInputStreamImpl(CdrInputStream cdrIn, SerializerFactory serFactory) {
             m_cdrIn = cdrIn;
+            m_serFactory = serFactory;
         }
 
         #endregion IConstructors
@@ -505,107 +514,113 @@ namespace Corba {
 
         #region Implementation of DataInputStream
         
+        private object Unmarshal(Type type, AttributeExtCollection attributes,
+                                 CdrInputStream cdrIn) {
+            Serializer ser = m_serFactory.Create(type, attributes);
+            return ser.Deserialize(cdrIn);
+        }
+        
         [return:ObjectIdlTypeAttribute(IdlTypeObject.Any)]
         public object read_any() {
-            return m_marshaller.Unmarshal(ReflectionHelper.ObjectType, 
-                                          new AttributeExtCollection(new Attribute[] { 
-                                                  new ObjectIdlTypeAttribute(IdlTypeObject.Any) } ),
-                                          m_cdrIn);
+            return Unmarshal(ReflectionHelper.ObjectType, 
+                             new AttributeExtCollection(new Attribute[] { 
+                                 new ObjectIdlTypeAttribute(IdlTypeObject.Any) } ),
+                             m_cdrIn);
         }
 
         public bool read_boolean() {
-            return (bool)m_marshaller.Unmarshal(ReflectionHelper.BooleanType, 
-                                                AttributeExtCollection.EmptyCollection, m_cdrIn);
+            return (bool)Unmarshal(ReflectionHelper.BooleanType, 
+                                   AttributeExtCollection.EmptyCollection, m_cdrIn);
         }
 
         [return:WideCharAttribute(false)]
         public char read_char() {
-            return (char)m_marshaller.Unmarshal(ReflectionHelper.CharType, 
-                                                new AttributeExtCollection(new Attribute[] { 
-                                                        new WideCharAttribute(false) } ),
-                                                m_cdrIn);            
+            return (char)Unmarshal(ReflectionHelper.CharType, 
+                                   new AttributeExtCollection(new Attribute[] { 
+                                       new WideCharAttribute(false) } ),
+                                   m_cdrIn);            
         }
 
         [return:WideCharAttribute(true)]
         public char read_wchar() {
-            return (char)m_marshaller.Unmarshal(ReflectionHelper.CharType,
-                                                new AttributeExtCollection(new Attribute[] { 
-                                                        new WideCharAttribute(true) } ), 
-                                                m_cdrIn);
+            return (char)Unmarshal(ReflectionHelper.CharType,
+                                   new AttributeExtCollection(new Attribute[] { 
+                                       new WideCharAttribute(true) } ), 
+                                   m_cdrIn);
         }
 
         public byte read_octet() {
-            return (byte)m_marshaller.Unmarshal(ReflectionHelper.ByteType,
-                                                AttributeExtCollection.EmptyCollection, m_cdrIn);
+            return (byte)Unmarshal(ReflectionHelper.ByteType,
+                                   AttributeExtCollection.EmptyCollection, m_cdrIn);
         }
 
         public short read_short() {
-            return (short)m_marshaller.Unmarshal(ReflectionHelper.Int16Type, AttributeExtCollection.EmptyCollection, m_cdrIn);
+            return (short)Unmarshal(ReflectionHelper.Int16Type, AttributeExtCollection.EmptyCollection, m_cdrIn);
         }
 
         public short read_ushort() {
-            return (short)m_marshaller.Unmarshal(ReflectionHelper.Int16Type, AttributeExtCollection.EmptyCollection, m_cdrIn);
+            return (short)Unmarshal(ReflectionHelper.Int16Type, AttributeExtCollection.EmptyCollection, m_cdrIn);
         }
 
         public int read_long() {
-            return (int)m_marshaller.Unmarshal(ReflectionHelper.Int32Type, AttributeExtCollection.EmptyCollection, m_cdrIn);
+            return (int)Unmarshal(ReflectionHelper.Int32Type, AttributeExtCollection.EmptyCollection, m_cdrIn);
         }
 
         public int read_ulong() {
-            return (int)m_marshaller.Unmarshal(ReflectionHelper.Int32Type, AttributeExtCollection.EmptyCollection, m_cdrIn);
+            return (int)Unmarshal(ReflectionHelper.Int32Type, AttributeExtCollection.EmptyCollection, m_cdrIn);
         }
 
         public long read_longlong() {
-            return (long)m_marshaller.Unmarshal(ReflectionHelper.Int64Type, AttributeExtCollection.EmptyCollection, m_cdrIn);
+            return (long)Unmarshal(ReflectionHelper.Int64Type, AttributeExtCollection.EmptyCollection, m_cdrIn);
         }
 
         public long read_ulonglong() {
-            return (long)m_marshaller.Unmarshal(ReflectionHelper.Int64Type, AttributeExtCollection.EmptyCollection, m_cdrIn);
+            return (long)Unmarshal(ReflectionHelper.Int64Type, AttributeExtCollection.EmptyCollection, m_cdrIn);
         }
 
         public float read_float() {
-            return (float)m_marshaller.Unmarshal(ReflectionHelper.SingleType, AttributeExtCollection.EmptyCollection, m_cdrIn);
+            return (float)Unmarshal(ReflectionHelper.SingleType, AttributeExtCollection.EmptyCollection, m_cdrIn);
         }
 
         public double read_double() {
-            return (double)m_marshaller.Unmarshal(ReflectionHelper.DoubleType, AttributeExtCollection.EmptyCollection, m_cdrIn);
+            return (double)Unmarshal(ReflectionHelper.DoubleType, AttributeExtCollection.EmptyCollection, m_cdrIn);
         }
 
         [return:WideCharAttribute(false)]
         public string read_string() {
-            return (string)m_marshaller.Unmarshal(ReflectionHelper.StringType, 
-                                                  new AttributeExtCollection(new Attribute[] { 
-                                                          new WideCharAttribute(false) } ),
-                                                  m_cdrIn);
+            return (string)Unmarshal(ReflectionHelper.StringType, 
+                                     new AttributeExtCollection(new Attribute[] { 
+                                         new WideCharAttribute(false) } ),
+                                     m_cdrIn);
         }
 
         [return:WideCharAttribute(true)]
         public string read_wstring() {
-            return (string)m_marshaller.Unmarshal(ReflectionHelper.StringType, 
-                                                  new AttributeExtCollection(new Attribute[] { 
-                                                          new WideCharAttribute(false) } ),
-                                                  m_cdrIn);
+            return (string)Unmarshal(ReflectionHelper.StringType, 
+                                     new AttributeExtCollection(new Attribute[] { 
+                                         new WideCharAttribute(false) } ),
+                                     m_cdrIn);
         }
 
         public System.MarshalByRefObject read_Object() {
-            return (MarshalByRefObject)m_marshaller.Unmarshal(ReflectionHelper.MarshalByRefObjectType,
-                                                              AttributeExtCollection.EmptyCollection, m_cdrIn);
+            return (MarshalByRefObject)Unmarshal(ReflectionHelper.MarshalByRefObjectType,
+                                                 AttributeExtCollection.EmptyCollection, m_cdrIn);
         }
 
         [return:ObjectIdlType(IdlTypeObject.AbstractBase)]
         public object read_Abstract() {
-            return m_marshaller.Unmarshal(ReflectionHelper.ObjectType, 
-                                          new AttributeExtCollection(new Attribute[] { 
-                                                  new ObjectIdlTypeAttribute(IdlTypeObject.AbstractBase) } ),
-                                          m_cdrIn);
+            return Unmarshal(ReflectionHelper.ObjectType, 
+                             new AttributeExtCollection(new Attribute[] { 
+                                 new ObjectIdlTypeAttribute(IdlTypeObject.AbstractBase) } ),
+                             m_cdrIn);
         }
 
         [return:ObjectIdlType(IdlTypeObject.ValueBase)]
         public object read_Value() {
-            return m_marshaller.Unmarshal(ReflectionHelper.ObjectType, 
-                                          new AttributeExtCollection(new Attribute[] { 
-                                                  new ObjectIdlTypeAttribute(IdlTypeObject.ValueBase) } ),
-                                          m_cdrIn);
+            return Unmarshal(ReflectionHelper.ObjectType, 
+                             new AttributeExtCollection(new Attribute[] { 
+                                 new ObjectIdlTypeAttribute(IdlTypeObject.ValueBase) } ),
+                             m_cdrIn);
         }
 
         /// <summary>
@@ -614,19 +629,19 @@ namespace Corba {
         /// <param name="formal"></param>
         /// <returns></returns>
         public object read_ValueOfType(Type formal) {
-            return m_marshaller.Unmarshal(formal, 
-                                          AttributeExtCollection.EmptyCollection,
-                                          m_cdrIn);
+            return Unmarshal(formal, 
+                             AttributeExtCollection.EmptyCollection,
+                             m_cdrIn);
         }
 
         /// <summary>
         /// reads a corba wstring value
         /// </summary>
         /// <returns>the unboxed string</returns>
-        public string read_WStringValue() {
-            WStringValue result = (WStringValue)m_marshaller.Unmarshal(s_wstringValueType, 
-                                                                       AttributeExtCollection.EmptyCollection,
-                                                                       m_cdrIn);
+        public string read_WStringValue() {            
+            WStringValue result = (WStringValue)Unmarshal(s_wstringValueType, 
+                                                    AttributeExtCollection.EmptyCollection,
+                                                    m_cdrIn);
             return (string)result.Unbox();
         }
 
@@ -635,9 +650,9 @@ namespace Corba {
         /// </summary>
         /// <returns>the unboxed string</returns>
         public string read_StringValue() {
-            StringValue result = (StringValue)m_marshaller.Unmarshal(s_stringValueType, 
-                                                                     AttributeExtCollection.EmptyCollection,
-                                                                     m_cdrIn);
+            StringValue result = (StringValue)Unmarshal(s_stringValueType,
+                                                  AttributeExtCollection.EmptyCollection,
+                                                  m_cdrIn);
             return (string)result.Unbox();
         }
 
@@ -646,7 +661,7 @@ namespace Corba {
                 boxedTypeAttrs = AttributeExtCollection.EmptyCollection; 
             }
             boxedTypeAttrs = boxedTypeAttrs.MergeAttribute(attr);
-            return m_marshaller.Unmarshal(boxedType, boxedTypeAttrs, m_cdrIn);
+            return Unmarshal(boxedType, boxedTypeAttrs, m_cdrIn);
         }
 
         public omg.org.CORBA.TypeCode read_TypeCode() {
@@ -654,37 +669,37 @@ namespace Corba {
         }
 
         public void read_any_array([IdlSequenceAttribute(0L)][ObjectIdlType(IdlTypeObject.Any)] ref object[] seq, int offset, int length) {
-            object[] res = (object[])m_marshaller.Unmarshal(ReflectionHelper.ObjectArrayType, 
-                                                            new AttributeExtCollection(new Attribute[] { 
-                                                                    new IdlSequenceAttribute(0L),
-                                                                    new ObjectIdlTypeAttribute(IdlTypeObject.Any) } ),
-                                                            m_cdrIn);
+            object[] res = (object[])Unmarshal(ReflectionHelper.ObjectArrayType, 
+                                               new AttributeExtCollection(new Attribute[] { 
+                                                   new IdlSequenceAttribute(0L),
+                                                   new ObjectIdlTypeAttribute(IdlTypeObject.Any) } ),
+                                               m_cdrIn);
             Array.Copy((Array)res, 0, (Array)seq, offset, length);
         }
 
         public void read_boolean_array([IdlSequenceAttribute(0L)] ref bool[] seq, int offset, int length) {
-            bool[] res = (bool[])m_marshaller.Unmarshal(seq.GetType(), 
-                                                        new AttributeExtCollection(new Attribute[] { 
-                                                                new IdlSequenceAttribute(0L) } ), 
-                                                        m_cdrIn);
+            bool[] res = (bool[])Unmarshal(seq.GetType(), 
+                                           new AttributeExtCollection(new Attribute[] { 
+                                               new IdlSequenceAttribute(0L) } ), 
+                                           m_cdrIn);
             Array.Copy((Array)res, 0, (Array)seq, offset, length);
         }
 
         public void read_char_array([IdlSequenceAttribute(0L)] [WideCharAttribute(false)] ref char[] seq, int offset, int length) {
-            char[] res = (char[])m_marshaller.Unmarshal(seq.GetType(), 
-                                                        new AttributeExtCollection(new Attribute[] { 
-                                                                new IdlSequenceAttribute(0L), 
-                                                                new WideCharAttribute(false) } ),
-                                                        m_cdrIn);
+            char[] res = (char[])Unmarshal(seq.GetType(), 
+                                           new AttributeExtCollection(new Attribute[] { 
+                                               new IdlSequenceAttribute(0L), 
+                                               new WideCharAttribute(false) } ),
+                                           m_cdrIn);
             Array.Copy((Array)res, 0, (Array)seq, offset, length);
         }
 
         public void read_wchar_array([IdlSequenceAttribute(0L)] [WideCharAttribute(true)] ref char[]seq, int offset, int length) { 
-            char[] res = (char[])m_marshaller.Unmarshal(seq.GetType(),
-                                                        new AttributeExtCollection(new Attribute[] { 
-                                                                new IdlSequenceAttribute(0L), 
-                                                                new WideCharAttribute(true) } ),
-                                                        m_cdrIn);            
+            char[] res = (char[])Unmarshal(seq.GetType(),
+                                           new AttributeExtCollection(new Attribute[] { 
+                                               new IdlSequenceAttribute(0L), 
+                                               new WideCharAttribute(true) } ),
+                                           m_cdrIn);            
             Array.Copy((Array)res, 0, (Array)seq, offset, length);
         }
 
@@ -694,74 +709,74 @@ namespace Corba {
         }
 
         public byte[] read_octet_array() {
-            byte[] res = (byte[])m_marshaller.Unmarshal(typeof(byte[]),
-                                                        new AttributeExtCollection(new Attribute[] { 
-                                                                new IdlSequenceAttribute(0L) } ),
-                                                        m_cdrIn);
+            byte[] res = (byte[])Unmarshal(typeof(byte[]),
+                                           new AttributeExtCollection(new Attribute[] { 
+                                               new IdlSequenceAttribute(0L) } ),
+                                           m_cdrIn);
             return res;
         }
 
 
         public void read_short_array([IdlSequenceAttribute(0L)] ref short[] seq, int offset, int length) {
-            short[] res = (short[])m_marshaller.Unmarshal(seq.GetType(), 
-                                                          new AttributeExtCollection(new Attribute[] { 
-                                                                  new IdlSequenceAttribute(0L) } ),
-                                                          m_cdrIn);
+            short[] res = (short[])Unmarshal(seq.GetType(), 
+                                             new AttributeExtCollection(new Attribute[] { 
+                                                 new IdlSequenceAttribute(0L) } ),
+                                             m_cdrIn);
             Array.Copy((Array)res, 0, (Array)seq, offset, length);
         }
 
         public void read_ushort_array([IdlSequenceAttribute(0L)] ref short[] seq, int offset, int length) {
-            short[] res = (short[])m_marshaller.Unmarshal(seq.GetType(),
-                                                          new AttributeExtCollection(new Attribute[] { 
-                                                                  new IdlSequenceAttribute(0L) } ),
-                                                          m_cdrIn);
+            short[] res = (short[])Unmarshal(seq.GetType(),
+                                             new AttributeExtCollection(new Attribute[] { 
+                                                 new IdlSequenceAttribute(0L) } ),
+                                             m_cdrIn);
             Array.Copy((Array)res, 0, (Array)seq, offset, length);
         }
 
         public void read_long_array([IdlSequenceAttribute(0L)] ref int[] seq, int offset, int length) {
-            int[] res = (int[])m_marshaller.Unmarshal(seq.GetType(), 
-                                                      new AttributeExtCollection(new Attribute[] { 
-                                                              new IdlSequenceAttribute(0L) } ),
-                                                      m_cdrIn);
+            int[] res = (int[])Unmarshal(seq.GetType(), 
+                                         new AttributeExtCollection(new Attribute[] { 
+                                             new IdlSequenceAttribute(0L) } ),
+                                         m_cdrIn);
             Array.Copy((Array)res, 0, (Array)seq, offset, length);
         }
 
         public void read_ulong_array([IdlSequenceAttribute(0L)] ref int[] seq, int offset, int length) {
-            int[] res = (int[])m_marshaller.Unmarshal(seq.GetType(), 
-                                                      new AttributeExtCollection(new Attribute[] { 
-                                                              new IdlSequenceAttribute(0L) } ),
-                                                      m_cdrIn);
+            int[] res = (int[])Unmarshal(seq.GetType(), 
+                                         new AttributeExtCollection(new Attribute[] { 
+                                             new IdlSequenceAttribute(0L) } ),
+                                         m_cdrIn);
             Array.Copy((Array)res, 0, (Array)seq, offset, length);
         }
 
         public void read_ulonglong_array([IdlSequenceAttribute(0L)] ref long[] seq, int offset, int length) {
-            long[] res = (long[])m_marshaller.Unmarshal(seq.GetType(),
-                                                        new AttributeExtCollection(new Attribute[] {
-                                                                new IdlSequenceAttribute(0L) } ),
-                                                        m_cdrIn);
+            long[] res = (long[])Unmarshal(seq.GetType(),
+                                           new AttributeExtCollection(new Attribute[] {
+                                               new IdlSequenceAttribute(0L) } ),
+                                           m_cdrIn);
             Array.Copy((Array)res, 0, (Array)seq, offset, length);
         }
 
         public void read_longlong_array([IdlSequenceAttribute(0L)] ref long[] seq, int offset, int length) {
-            long[] res = (long[])m_marshaller.Unmarshal(seq.GetType(),
-                                                        new AttributeExtCollection(new Attribute[] { 
-                                                                new IdlSequenceAttribute(0L) } ),
-                                                        m_cdrIn);
+            long[] res = (long[])Unmarshal(seq.GetType(),
+                                           new AttributeExtCollection(new Attribute[] { 
+                                               new IdlSequenceAttribute(0L) } ),
+                                           m_cdrIn);
             Array.Copy((Array)res, 0, (Array)seq, offset, length);
         }
 
         public void read_float_array([IdlSequenceAttribute(0L)] ref float[] seq, int offset, int length) {
-            float[] res = (float[])m_marshaller.Unmarshal(seq.GetType(),
-                                                          new AttributeExtCollection(new Attribute[] { 
-                                                                  new IdlSequenceAttribute(0L) } ), m_cdrIn);
+            float[] res = (float[])Unmarshal(seq.GetType(),
+                                             new AttributeExtCollection(new Attribute[] { 
+                                                 new IdlSequenceAttribute(0L) } ), m_cdrIn);
             Array.Copy((Array)res, 0, (Array)seq, offset, length);
         }
 
         public void read_double_array([IdlSequenceAttribute(0L)] ref double[] seq, int offset, int length) {
-            double[] res = (double[])m_marshaller.Unmarshal(seq.GetType(), 
-                                                            new AttributeExtCollection(new Attribute[] { 
-                                                                    new IdlSequenceAttribute(0L) } ),
-                                                            m_cdrIn);
+            double[] res = (double[])Unmarshal(seq.GetType(), 
+                                               new AttributeExtCollection(new Attribute[] { 
+                                                   new IdlSequenceAttribute(0L) } ),
+                                               m_cdrIn);
             Array.Copy((Array)res, 0, (Array)seq, offset, length);
         }
         
@@ -772,3 +787,94 @@ namespace Corba {
     }
 
 }
+
+#if UnitTest
+
+namespace Ch.Elca.Iiop.Tests {
+    
+    using System;
+    using System.Reflection;
+    using System.IO;
+    using NUnit.Framework;
+    using omg.org.CORBA;
+    using omg.org.IOP;
+    using Corba;
+    using Ch.Elca.Iiop.Interception;
+    
+    /// <summary>
+    /// Unit-tests for testing DataInputStream
+    /// </summary>
+    [TestFixture]
+    public class DataInputStreamTest {
+        
+        private SerializerFactory m_serFactory;
+        
+        [SetUp]
+        public void SetUp() {
+            m_serFactory = new SerializerFactory();
+            CodecFactory codecFactory =
+                new CodecFactoryImpl(m_serFactory);
+            Codec codec = 
+                codecFactory.create_codec(
+                    new Encoding(ENCODING_CDR_ENCAPS.ConstVal, 1, 2));
+            m_serFactory.Initalize(new SerializerFactoryConfig(), IiopUrlUtil.Create(codec));
+        }
+    	
+    	private DataInputStream CreateInputStream(byte[] content) {
+    		MemoryStream contentStream = new MemoryStream(content);
+    		CdrInputStreamImpl inputStream = new CdrInputStreamImpl(contentStream);
+    		inputStream.ConfigStream(0, new GiopVersion(1, 2));
+    		inputStream.SetMaxLength((uint)content.Length);
+    		DataInputStreamImpl di = 
+    			new DataInputStreamImpl(inputStream, m_serFactory);
+    		return di;
+    	}
+    	
+    	[Test]
+    	public void TestReadOctet() {
+    		byte val = 1;
+    		DataInputStream inputStream = CreateInputStream(new byte[] { val });
+    		byte read = inputStream.read_octet();
+    		Assertion.AssertEquals("read", val, read);
+    	}
+    	
+    }
+    
+    /// <summary>
+    /// Unit-tests for testing DataOutputStream
+    /// </summary>
+    [TestFixture]
+    public class DataOutputStreamTest {
+
+        private SerializerFactory m_serFactory;
+        
+        [SetUp]
+        public void SetUp() {
+            m_serFactory = new SerializerFactory();
+            CodecFactory codecFactory =
+                new CodecFactoryImpl(m_serFactory);
+            Codec codec = 
+                codecFactory.create_codec(
+                    new Encoding(ENCODING_CDR_ENCAPS.ConstVal, 1, 2));
+            m_serFactory.Initalize(new SerializerFactoryConfig(), IiopUrlUtil.Create(codec));
+        }        
+    	
+    	[Test]
+    	public void TestWriteOctet() {
+    		byte val = 1;
+    		MemoryStream outputStream = new MemoryStream();
+    		CdrOutputStream cdrOut = new CdrOutputStreamImpl(outputStream, 0, new GiopVersion(1,2));
+    		DataOutputStream doStream = new DataOutputStreamImpl(cdrOut,
+    		                                                     m_serFactory);
+    		doStream.write_octet(val);
+    		outputStream.Seek(0, SeekOrigin.Begin);
+    		Assertion.AssertEquals("written", val, outputStream.ReadByte());
+    	}
+    	
+    }
+    
+    
+    
+}
+
+#endif

@@ -1,3 +1,5 @@
+include ..\..\..\MakeVars
+
 build: check build-app
 
 check:

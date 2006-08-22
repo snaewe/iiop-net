@@ -36,6 +36,23 @@ namespace Ch.Elca.Iiop.IntegrationTests {
         A, B, C, D
     }
 
+    [Flags]
+    public enum TestFlags {
+        AF = 0x01, BF = 0x02, CF = 0x04
+    }
+
+    public enum TestEnumBI16 : short {
+        A1, B1, C1
+    }
+
+    public enum TestEnumBI64 : long {
+        AL = Int64.MaxValue, BL = 1000
+    }
+
+    public enum TestEnumUI32 : uint {
+        A2, B2, C2
+    }
+
     [Serializable]
     public struct TestStructA {
         public System.Int32 X;
@@ -164,6 +181,18 @@ namespace Ch.Elca.Iiop.IntegrationTests {
 
         public System.Int64 TestIncInt64(System.Int64 arg) {
             return arg + 1;
+        }
+
+        public System.UInt16 TestIncUInt16(System.UInt16 arg) {
+            return (System.UInt16)(arg + 1);
+        }
+
+        public System.UInt32 TestIncUInt32(System.UInt32 arg) {
+            return arg + (System.UInt32)1;
+        }
+
+        public System.UInt64 TestIncUInt64(System.UInt64 arg) {
+            return arg + (System.UInt64)1;
         }
 
         public System.Boolean TestNegateBoolean(System.Boolean arg) {
@@ -310,6 +339,33 @@ namespace Ch.Elca.Iiop.IntegrationTests {
         public bool CheckEqualityWithServiceV2(TestService toCheck) {
             return toCheck.Equals(this);
         }
+
+        public void EchoByOut(string arg, out string result) {
+            result = arg;
+        }
+
+//        public void EchoByRef(ref string result) {
+//        }
+
+        public void EchoIntByOut(int arg, out int result) {
+            result = arg;
+        }
+
+        public TestFlags TestEchoFlagsVal(TestFlags arg) {
+            return arg;
+        }
+
+        public TestEnumBI16 TestEchoEnumI16Val(TestEnumBI16 arg) {
+            return arg;
+        }
+
+        public TestEnumBI64 TestEchoEnumI64Val(TestEnumBI64 arg) {
+            return arg;
+        }
+
+        public TestEnumUI32 TestEchoEnumUI32Val(TestEnumUI32 arg) {
+            return arg;
+        }
         
         public override object InitializeLifetimeService() {
             // live forever
@@ -340,6 +396,12 @@ namespace Ch.Elca.Iiop.IntegrationTests {
         System.Int32 TestIncInt32(System.Int32 arg);
 
         System.Int64 TestIncInt64(System.Int64 arg);
+
+        System.UInt16 TestIncUInt16(System.UInt16 arg);
+
+        System.UInt32 TestIncUInt32(System.UInt32 arg);
+
+        System.UInt64 TestIncUInt64(System.UInt64 arg);
 
         System.Boolean TestNegateBoolean(System.Boolean arg);
 
@@ -398,9 +460,23 @@ namespace Ch.Elca.Iiop.IntegrationTests {
         [return: StringValue]
         [return: WideChar(false)]
         System.String CheckParamAttrs([StringValue][WideChar(false)]System.String arg);
-
         
-                
+        void EchoByOut([StringValue] string arg, [StringValue] out string result);
+
+        // the following leads to java idlj problem, because of string byref argument
+        // void EchoByRef(ref string result);
+
+        void EchoIntByOut(int arg, out int result);
+
+        TestFlags TestEchoFlagsVal(TestFlags arg);
+
+        TestEnumBI16 TestEchoEnumI16Val(TestEnumBI16 arg);
+
+        TestEnumBI64 TestEchoEnumI64Val(TestEnumBI64 arg);        
+
+        TestEnumUI32 TestEchoEnumUI32Val(TestEnumUI32 arg);
+
+
     }
 
 

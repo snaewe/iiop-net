@@ -153,8 +153,8 @@ namespace Ch.Elca.Iiop.Services {
                     IorProfile initServiceProfile = 
                         new InternetIiopProfile(new GiopVersion(1, 0),
                                                                 host, (short)port,
-                                                                IiopUrlUtil.GetKeyBytesForId(CORBAInitServiceImpl.INITSERVICE_NAME));
-
+                                                                IorUtil.GetKeyBytesForId(CORBAInitServiceImpl.INITSERVICE_NAME));
+                    // don't add a codeset component, because giop 1.0
                     Ior initServiceIor = new Ior(Repository.GetRepositoryID(typeof(CORBAInitService)),
                                                  new IorProfile[] { initServiceProfile });
                     

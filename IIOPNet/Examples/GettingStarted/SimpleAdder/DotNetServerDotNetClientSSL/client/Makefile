@@ -1,3 +1,5 @@
+include ..\..\..\..\..\MakeVars
+
 IDLSource=..\server\IDL\Ch\Elca\Iiop\Tutorial\Gettingstarted\*.idl 
 Adder=Ch\Elca\Iiop\Tutorial\Gettingstarted\ 
 IDLToCLS=..\..\..\..\..\..\IDLToCLSCompiler\IDLCompiler\bin\IDLToCLSCompiler.exe
@@ -31,7 +33,7 @@ build-idl: $(IDL)
 	cd ..
 
 build-client: $(BIN)$(TARGETASM).dll $(BIN)IIOPChannel.dll $(BIN)SSLPlugin.dll $(BIN)org.mentalis.security.dll NClient.cs
-	csc $(CSFLAGS) /r:$(BIN)$(TARGETASM).dll /r:$(BIN)IIOPChannel.dll /r:$(BIN)SSLPlugin.dll /r:$(BIN)org.mentalis.security.dll /out:$(BIN)NClient.exe NClient.cs
+	$(CSC) $(CSFLAGS) /r:$(BIN)$(TARGETASM).dll /r:$(BIN)IIOPChannel.dll /r:$(BIN)SSLPlugin.dll /r:$(BIN)org.mentalis.security.dll /out:$(BIN)NClient.exe NClient.cs
 
 clean:
 	if exist $(IDL)nul rmdir /q /s $(IDL)

@@ -67,14 +67,17 @@ namespace parser {
 
         #region IMethods
         
-        /*    Literal Or(Literal toOrWith);
+        Literal Or(Literal toOrWith);
         Literal Xor(Literal toXorWith);
         Literal And(Literal toAndWith);
-        Literal ShiftBy(Literal shift);
+        Literal ShiftLeftBy(Literal shift);
+        Literal ShiftRightBy(Literal shift);
         Literal MultBy(Literal toMultWith);
+        Literal DivBy(Literal toDivBy);
+        Literal ModBy(Literal toModBy);
         Literal Add(Literal toAddTo);
-        Literal Sub(Literal toSubTo); */
-        // void Negate();
+        Literal Sub(Literal toSubTo);
+        void Negate();
         void InvertSign();
           
         object GetValue();
@@ -128,6 +131,50 @@ namespace parser {
     
         #endregion IConstructors
         #region IMethods
+        
+        public Literal Or(Literal toOrWith) {
+            throw new InvalidOperandInExpressionException("Cannot use bitwise or on float");
+        }
+        
+        public Literal Xor(Literal toXorWith) {
+            throw new InvalidOperandInExpressionException("Cannot use bitwise xor on float");
+        }
+        
+        public Literal And(Literal toAndWith) {
+            throw new InvalidOperandInExpressionException("Cannot use bitwise and on float");
+        }
+        
+        public Literal ShiftRightBy(Literal shift) {
+            throw new InvalidOperandInExpressionException("Cannot use bitwise shift on float");
+        }
+        
+        public Literal ShiftLeftBy(Literal shift) {
+            throw new InvalidOperandInExpressionException("Cannot use bitwise shift on float");
+        }
+        
+        public Literal MultBy(Literal toMultWith) {
+            return new FloatLiteral(m_value * toMultWith.GetFloatValue());
+        }
+        
+        public Literal DivBy(Literal toDivBy) {
+            return new FloatLiteral(m_value / toDivBy.GetFloatValue());
+        }
+        
+        public Literal ModBy(Literal toModBy) {
+            return new FloatLiteral(m_value % toModBy.GetFloatValue());
+        }        
+        
+        public Literal Add(Literal toAddTo) {
+             return new FloatLiteral(m_value + toAddTo.GetFloatValue());
+        }
+        
+        public Literal Sub(Literal toSubTo) {
+             return new FloatLiteral(m_value - toSubTo.GetFloatValue());
+        }
+        
+        public void Negate() {
+            throw new InvalidOperandInExpressionException("Cannot negate a float");
+        }        
         
         public void InvertSign() {
             m_value = m_value * (-1.0);
@@ -207,6 +254,58 @@ namespace parser {
         #endregion IConstructors
         #region IMethods
         
+        public Literal Or(Literal toOrWith) {
+            return new IntegerLiteral(GetIntValue() | toOrWith.GetIntValue());
+        }        
+        
+        public Literal Xor(Literal toXorWith) {
+            return new IntegerLiteral(GetIntValue() ^ toXorWith.GetIntValue());
+        }
+        
+        public Literal And(Literal toAndWith) {            
+            return new IntegerLiteral(GetIntValue() & toAndWith.GetIntValue());
+        }
+        
+        public Literal ShiftRightBy(Literal shift) {
+            if ((shift.GetIntValue() >= 64) || (shift.GetIntValue() < 0)) {
+                throw new InvalidOperandInExpressionException("Invalid shift by argument " + 
+                    shift.GetIntValue() + "; shift is only possible with values in the range 0 <= shift < 63.");
+            }
+            return new IntegerLiteral(GetIntValue() >> (int)shift.GetIntValue());
+        }
+        
+        public Literal ShiftLeftBy(Literal shift) {
+            if ((shift.GetIntValue() >= 64) || (shift.GetIntValue() < 0)) {
+                throw new InvalidOperandInExpressionException("Invalid shift by argument " + 
+                    shift.GetIntValue() + "; shift is only possible with values in the range 0 <= shift < 63.");
+            }
+            return new IntegerLiteral(GetIntValue() << (int)shift.GetIntValue());
+        }
+        
+        public Literal MultBy(Literal toMultWith) {
+            return new IntegerLiteral(m_value * toMultWith.GetIntValue());
+        }
+        
+        public Literal DivBy(Literal toDivBy) {
+            return new IntegerLiteral(m_value / toDivBy.GetIntValue());
+        }
+        
+        public Literal ModBy(Literal toModBy) {
+            return new IntegerLiteral(m_value % toModBy.GetIntValue());
+        }        
+        
+        public Literal Add(Literal toAddTo) {
+            return new IntegerLiteral(m_value + toAddTo.GetIntValue());
+        }
+        
+        public Literal Sub(Literal toSubTo) {
+            return new IntegerLiteral(m_value - toSubTo.GetIntValue());
+        }
+        
+        public void Negate() {
+            m_value = ~ GetIntValue();
+        }        
+        
         public void InvertSign() {
             m_value = m_value * (-1);
         }
@@ -224,7 +323,7 @@ namespace parser {
                 return Convert.ToInt64(m_value);
             } else if (m_value >= UInt64.MinValue && m_value <= UInt64.MaxValue) {
                 UInt64 asUint64 = Convert.ToUInt64(m_value);
-                return (Int64)asUint64;
+                return unchecked((Int64)asUint64); // do an unchecked cast, overflow no issue here
             } else {
                 throw new LiteralTypeMismatchException("integer literal need more than 64bit, not convertible to int64 value");                
             }
@@ -250,7 +349,7 @@ namespace parser {
                     throw new LiteralTypeMismatchException("integer literal need more than 16bit, not assignable to short");
                 }
                 System.UInt16 asUint16 = Convert.ToUInt16(m_value);
-                val = (System.Int16)asUint16; // cast to int16
+                val = unchecked((System.Int16)asUint16); // cast to int16; do an unchecked cast, overflow no issue here
             } else {
                 if ((m_value < Int16.MinValue) || (m_value > Int16.MaxValue)) {
                     throw new LiteralTypeMismatchException("integer literal need more than 16bit, not assignable to short");
@@ -268,7 +367,7 @@ namespace parser {
                     throw new LiteralTypeMismatchException("integer literal need more than 16bit, not assignable to short");
                 }
                 UInt32 asUint32 = Convert.ToUInt32(m_value);
-                val = (System.Int32)asUint32; // cast to int32
+                val = unchecked((System.Int32)asUint32); // cast to int32; do an unchecked cast, overflow no issue here
             } else {
                 if ((m_value < Int32.MinValue) || (m_value > Int32.MaxValue)) {
                     throw new LiteralTypeMismatchException("integer literal need more than 32bit, not assignable to long");
@@ -285,7 +384,7 @@ namespace parser {
                     throw new LiteralTypeMismatchException("integer literal need more than 64bit, not assignable to ulong long");
                 }
                 UInt64 asUint64 = Convert.ToUInt64(m_value);
-                val = (Int64)asUint64;
+                val = unchecked((Int64)asUint64); // cast to int64; do an unchecked cast, overflow no issue here
             } else {
                 if ((m_value < Int64.MinValue) || (m_value > Int64.MaxValue)) {
                     throw new LiteralTypeMismatchException("integer literal need more than 64bit, not assignable to long long");
@@ -301,7 +400,7 @@ namespace parser {
                 Console.WriteLine("illegal const value found for octet " + m_value + "; please change");
                 // compensate illegal java idl generated for some octet vals
                 SByte asSByte = Convert.ToSByte(m_value);
-                val = (Byte)asSByte;
+                val = unchecked((Byte)asSByte); // cast to byte; do an unchecked cast, overflow no issue here
             } else if ((m_value < Byte.MinValue) || (m_value > Byte.MaxValue)) {
                 throw new LiteralTypeMismatchException("integer literal need more than 8bit, not assignable to octet");
             } else {
@@ -407,6 +506,50 @@ namespace parser {
 
         #endregion IConstructors
         #region IMethods
+        
+        public Literal Or(Literal toOrWith) {
+            throw new InvalidOperandInExpressionException("Cannot use bitwise or on char");
+        }
+        
+        public Literal Xor(Literal toXorWith) {
+            throw new InvalidOperandInExpressionException("Cannot use bitwise xor on char");
+        }
+        
+        public Literal And(Literal toAndWith) {
+            throw new InvalidOperandInExpressionException("Cannot use bitwise and on char");
+        }
+        
+        public Literal ShiftRightBy(Literal shift) {
+            throw new InvalidOperandInExpressionException("Cannot use bitwise shift on char");
+        }
+        
+        public Literal ShiftLeftBy(Literal shift) {
+            throw new InvalidOperandInExpressionException("Cannot use bitwise shift on char");
+        }
+        
+        public Literal MultBy(Literal toMultWith) {
+            throw new InvalidOperandInExpressionException("Cannot use mult with char");            
+        }
+        
+        public Literal DivBy(Literal toDivBy) {
+            throw new InvalidOperandInExpressionException("Cannot use div with char");
+        }
+        
+        public Literal ModBy(Literal toModBy) {
+            throw new InvalidOperandInExpressionException("Cannot use mod with char");
+        }        
+        
+        public Literal Add(Literal toAddTo) {
+            throw new InvalidOperandInExpressionException("Cannot use add on char");
+        }        
+        
+        public Literal Sub(Literal toSubTo) {
+            throw new InvalidOperandInExpressionException("Cannot use sub on char");
+        }
+        
+        public void Negate() {
+            throw new InvalidOperandInExpressionException("Cannot negate a char");
+        }        
 
         public void InvertSign() {
             throw new InvalidOperationException("unary operator - not allowed for characters");
@@ -474,6 +617,50 @@ namespace parser {
 
         #endregion IConstructors
         #region IMethods
+        
+        public Literal Or(Literal toOrWith) {
+            throw new InvalidOperandInExpressionException("Cannot use bitwise or on string");
+        }        
+        
+        public Literal Xor(Literal toXorWith) {
+            throw new InvalidOperandInExpressionException("Cannot use bitwise xor on string");
+        }
+        
+        public Literal And(Literal toAndWith) {
+            throw new InvalidOperandInExpressionException("Cannot use bitwise and on string");
+        }
+        
+        public Literal ShiftRightBy(Literal shift) {
+            throw new InvalidOperandInExpressionException("Cannot use bitwise shift on string");
+        }
+        
+        public Literal ShiftLeftBy(Literal shift) {
+            throw new InvalidOperandInExpressionException("Cannot use bitwise shift on string");
+        }
+        
+        public Literal MultBy(Literal toMultWith) {
+            throw new InvalidOperandInExpressionException("Cannot use mult with string");            
+        }
+        
+        public Literal DivBy(Literal toDivBy) {
+            throw new InvalidOperandInExpressionException("Cannot use div with string");
+        }
+        
+        public Literal ModBy(Literal toModBy) {
+            throw new InvalidOperandInExpressionException("Cannot use mod with string");
+        }        
+        
+        public Literal Add(Literal toAddTo) {
+            throw new InvalidOperandInExpressionException("Cannot use add on string");
+        }        
+        
+        public Literal Sub(Literal toSubTo) {
+            throw new InvalidOperandInExpressionException("Cannot use sub on string");
+        }
+        
+        public void Negate() {
+            throw new InvalidOperandInExpressionException("Cannot negate a string");
+        }        
 
         public void InvertSign() {
             throw new InvalidOperationException("unary operator - not allowed for strings");
@@ -536,7 +723,51 @@ namespace parser {
 
         #endregion IConstructors
         #region IMethods
+        
+        public Literal Or(Literal toOrWith) {
+            throw new InvalidOperandInExpressionException("Cannot use bitwise or on bool");
+        }        
+        
+        public Literal Xor(Literal toXorWith) {
+            throw new InvalidOperandInExpressionException("Cannot use bitwise xor on bool");
+        }
+        
+        public Literal And(Literal toAndWith) {
+            throw new InvalidOperandInExpressionException("Cannot use bitwise and on bool");
+        }
+        
+        public Literal ShiftRightBy(Literal shift) {
+            throw new InvalidOperandInExpressionException("Cannot use bitwise shift on bool");
+        }
+        
+        public Literal ShiftLeftBy(Literal shift) {
+            throw new InvalidOperandInExpressionException("Cannot use bitwise shift on bool");
+        }
+        
+        public Literal MultBy(Literal toMultWith) {
+            throw new InvalidOperandInExpressionException("Cannot use mult with bool");            
+        }
+        
+        public Literal DivBy(Literal toDivBy) {
+            throw new InvalidOperandInExpressionException("Cannot use div with bool");
+        }
+        
+        public Literal ModBy(Literal toModBy) {
+            throw new InvalidOperandInExpressionException("Cannot use mod with bool");
+        }        
+        
+        public Literal Add(Literal toAddTo) {
+            throw new InvalidOperandInExpressionException("Cannot use add on bool");
+        }
 
+        public Literal Sub(Literal toSubTo) {
+            throw new InvalidOperandInExpressionException("Cannot use sub on bool");
+        }        
+
+        public void Negate() {
+            m_value = !m_value;
+        }        
+        
         public void InvertSign() {
             throw new InvalidOperationException("unary operator - not allowed for boolean");
         }
@@ -608,6 +839,50 @@ namespace parser {
     
         #endregion IConstructors
         #region IMethods
+        
+        public Literal Or(Literal toOrWith) {
+            throw new InvalidOperandInExpressionException("Cannot use bitwise or on enum");
+        }
+        
+        public Literal Xor(Literal toXorWith) {
+            throw new InvalidOperandInExpressionException("Cannot use bitwise xor on enum");
+        }
+        
+        public Literal And(Literal toAndWith) {
+            throw new InvalidOperandInExpressionException("Cannot use bitwise and on enum");
+        }
+        
+        public Literal ShiftRightBy(Literal shift) {
+            throw new InvalidOperandInExpressionException("Cannot use bitwise shift on enum");
+        }        
+        
+        public Literal ShiftLeftBy(Literal shift) {
+            throw new InvalidOperandInExpressionException("Cannot use bitwise shift on enum");
+        }
+        
+        public Literal MultBy(Literal toMultWith) {
+            throw new InvalidOperandInExpressionException("Cannot use mult with enum");            
+        }
+        
+        public Literal DivBy(Literal toDivBy) {
+            throw new InvalidOperandInExpressionException("Cannot use div with enum");
+        }
+        
+        public Literal ModBy(Literal toModBy) {
+            throw new InvalidOperandInExpressionException("Cannot use mod with enum");
+        }
+        
+        public Literal Add(Literal toAddTo) {
+            throw new InvalidOperandInExpressionException("Cannot use add on enum");
+        }        
+        
+        public Literal Sub(Literal toSubTo) {
+            throw new InvalidOperandInExpressionException("Cannot use sub on enum");
+        }
+        
+        public void Negate() {
+            throw new InvalidOperandInExpressionException("Cannot negate an enum");
+        }        
         
         public void InvertSign() {
             throw new InvalidOperationException("unary operator - not allowed for enum value");

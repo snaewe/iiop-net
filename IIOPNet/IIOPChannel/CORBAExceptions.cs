@@ -205,6 +205,42 @@ namespace Ch.Elca.Iiop {
         #endregion IMethods
 
     }
+    
+    /// <summary>
+    /// Contains constant values related to corba system exceptions.
+    /// </summary>
+    internal sealed class CorbaSystemExceptionCodes {
+        
+        #region Constants
+        
+        /// <summary>
+        /// IIOP.NET is not able to connect to the target.
+        /// </summary>
+        internal const int TRANSIENT_CANTCONNECT = 4000;       
+        
+        /// <summary>
+        /// IIOP.NET detected, that an allocated connection has been dropped,
+        /// before the request was sent.
+        /// </summary>
+        internal const int TRANSIENT_CONNECTION_DROPPED = 4001;
+        
+        /// <summary>
+        /// IIOP.NET detected, that reading/writing to a connection is
+        /// no longer possible for a request in progress.
+        /// </summary>
+        internal const int COMM_FAILURE_CONNECTION_DROPPED = 209;
+        
+        #endregion Constants
+        #region IConstructors
+        
+        private CorbaSystemExceptionCodes() {
+            
+        }
+        
+        #endregion IConstructors
+        
+        
+    }
 
 }
 
@@ -304,6 +340,10 @@ namespace omg.org.CORBA {
         
         public BAD_PARAM(int minor, CompletionStatus status) : 
             base(System.Reflection.MethodInfo.GetCurrentMethod().DeclaringType.FullName, minor, status) { }
+        
+        public BAD_PARAM(int minor, CompletionStatus status, string additionalDetail) : 
+            base(System.Reflection.MethodInfo.GetCurrentMethod().DeclaringType.FullName +
+			    " ["+additionalDetail+"] ", minor, status) { }
         
         protected BAD_PARAM(System.Runtime.Serialization.SerializationInfo info,
                             System.Runtime.Serialization.StreamingContext context) : base(info, context) {            
@@ -627,6 +667,11 @@ namespace omg.org.CORBA {
 
         public TRANSIENT(int minor, CompletionStatus status) : 
             base(System.Reflection.MethodInfo.GetCurrentMethod().DeclaringType.FullName, minor, status) { }
+        
+        public TRANSIENT(int minor, CompletionStatus status, string additionalDetail) : 
+            base(System.Reflection.MethodInfo.GetCurrentMethod().DeclaringType.FullName +
+			    " ["+additionalDetail+"] ", minor, status) { }
+        
         
         protected TRANSIENT(System.Runtime.Serialization.SerializationInfo info,
                             System.Runtime.Serialization.StreamingContext context) : base(info, context) {

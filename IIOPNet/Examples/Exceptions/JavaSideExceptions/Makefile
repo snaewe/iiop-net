@@ -1,3 +1,5 @@
+include ..\..\..\MakeVars
+
 build: idl-files
 	cd JavaServer
 	$(MAKE) build

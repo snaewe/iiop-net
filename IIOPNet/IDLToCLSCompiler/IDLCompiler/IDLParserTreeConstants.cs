@@ -44,7 +44,7 @@ public class IDLParserTreeConstants
   public const int JJTADD_EXPR = 35;
   public const int JJTMULT_EXPR = 36;
   public const int JJTUNARY_EXPR = 37;
-  public const int JJTPRIMARY_EXPR_NOLIT = 38;
+  public const int JJTPRIMARY_EXPR = 38;
   public const int JJTLITERAL = 39;
   public const int JJTPOSITIVE_INT_CONST = 40;
   public const int JJTTYPE_DCL = 41;
@@ -147,7 +147,7 @@ public class IDLParserTreeConstants
     "add_expr",
     "mult_expr",
     "unary_expr",
-    "primary_expr_noLit",
+    "primary_expr",
     "literal",
     "positive_int_const",
     "type_dcl",

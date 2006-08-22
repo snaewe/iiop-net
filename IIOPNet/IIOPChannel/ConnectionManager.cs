@@ -81,16 +81,22 @@ namespace Ch.Elca.Iiop {
         /// the number of requests, which should be at most multiplexed on one connection. If too many
         /// requests are multiplexed, try to wait for some to complete.
         /// </summary>
-        private int m_maxNumberOfMultiplexedRequests;                
+        private int m_maxNumberOfMultiplexedRequests;    
+        
+        /// <summary>
+        /// The default header flags used when creating transport related messages.
+        /// </summary>
+        protected byte m_headerFlags;
         
         #endregion IFields
         #region IConstructors                        
         
         internal GiopClientConnectionManager(IClientTransportFactory transportFactory, MessageTimeout requestTimeOut,
                                              int unusedKeepAliveTime, int maxNumberOfConnections, bool allowMultiplex,
-                                             int maxNumberOfMultplexedRequests) {
+                                             int maxNumberOfMultplexedRequests, byte headerFlags) {
             Initalize(transportFactory, requestTimeOut, unusedKeepAliveTime, 
-                      maxNumberOfConnections, allowMultiplex, maxNumberOfMultplexedRequests);
+                      maxNumberOfConnections, allowMultiplex, maxNumberOfMultplexedRequests,
+                      headerFlags);
         }
                 
         #endregion IConstructors
@@ -103,7 +109,7 @@ namespace Ch.Elca.Iiop {
         
         private void Initalize(IClientTransportFactory transportFactory, MessageTimeout requestTimeOut,
                                int unusedKeepAliveTime, int maxNumberOfConnections, bool allowMultiplex,
-                               int maxNumberOfMultplexedRequests) {
+                               int maxNumberOfMultplexedRequests, byte headerFlags) {
             m_transportFactory = transportFactory;
             m_requestTimeOut = requestTimeOut;
             if (unusedKeepAliveTime != Timeout.Infinite) {
@@ -118,6 +124,7 @@ namespace Ch.Elca.Iiop {
             }
             m_allowMultiplex = allowMultiplex;
             m_maxNumberOfMultiplexedRequests = maxNumberOfMultplexedRequests;
+            m_headerFlags = headerFlags;
         }
         
         
@@ -177,7 +184,8 @@ namespace Ch.Elca.Iiop {
                 
         protected virtual GiopClientInitiatedConnection CreateClientConnection(string targetKey, IClientTransport transport,
                                                               MessageTimeout requestTimeOut) {
-            return new GiopClientInitiatedConnection(targetKey, transport, requestTimeOut, this, false);
+            return new GiopClientInitiatedConnection(targetKey, transport, requestTimeOut, this, false,
+                                                     m_headerFlags);
         }
         
         /// <summary>
@@ -442,9 +450,9 @@ namespace Ch.Elca.Iiop {
         internal GiopBidirectionalConnectionManager(IClientTransportFactory transportFactory, MessageTimeout requestTimeOut,
                                                     int unusedKeepAliveTime,
                                                     int maxNumberOfConnections, bool allowMultiplex,
-                                                    int maxNumberOfMultplexedRequests) : 
+                                                    int maxNumberOfMultplexedRequests, byte headerFlags) : 
             base(transportFactory, requestTimeOut, unusedKeepAliveTime, maxNumberOfConnections, 
-                 allowMultiplex, maxNumberOfMultplexedRequests) {
+                 allowMultiplex, maxNumberOfMultplexedRequests, headerFlags) {
         }
                 
         #endregion IConstructors
@@ -545,7 +553,8 @@ namespace Ch.Elca.Iiop {
         /// <remarks>for use case (2)</remarks>
         protected override GiopClientInitiatedConnection CreateClientConnection(string targetKey, IClientTransport transport,
                                                                                 MessageTimeout requestTimeOut) {
-            return new GiopClientInitiatedConnection(targetKey, transport, requestTimeOut, this, true);
+            return new GiopClientInitiatedConnection(targetKey, transport, requestTimeOut, this, true,
+                                                     m_headerFlags);
         }        
         
         /// <summary>sets the listen points, which can be sent to the other side for connecting back to

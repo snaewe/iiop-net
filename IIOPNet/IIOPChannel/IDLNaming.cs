@@ -34,6 +34,7 @@ using Ch.Elca.Iiop.Util;
 
 namespace Ch.Elca.Iiop.Idl {
 
+    
     /// <summary>
     /// This class is responsible for realising the identifier (name) mapping
     ///  in the IDL to .NET and .NET to IDL mapping.
@@ -157,51 +158,57 @@ namespace Ch.Elca.Iiop.Idl {
             return methodName;
         }
         
-        /// <summary>
-        /// determines the method name to use in a corba request.
-        /// </summary>
-        public static string GetRequestMethodName(MethodInfo method, bool isOverloaded) {
-            string methodName = method.Name;
-            
-            AttributeExtCollection methodAttributes = 
-                ReflectionHelper.GetCustomAttriutesForMethod(method, true);
+        /// <summary>gets the request method name for attribute, if possible.</summary>
+        private static string GetRequestMethodNameFromAttr(MethodInfo info) {
+            AttributeExtCollection methodAttributes =
+                ReflectionHelper.GetCustomAttriutesForMethod(info, true);
             if (methodAttributes.IsInCollection(ReflectionHelper.FromIdlNameAttributeType)) {
-                FromIdlNameAttribute idlNameAttr = 
+                FromIdlNameAttribute idlNameAttr =
                     (FromIdlNameAttribute)methodAttributes.GetAttributeForType(ReflectionHelper.FromIdlNameAttributeType);
-                methodName = idlNameAttr.IdlName;
+                return idlNameAttr.IdlName;
             } else {
-                // do a CLS to IDL mapping, because .NET server expect this for every client, also for a
-                // native .NET client, which uses not CLS -> IDL -> CLS mapping                
-                methodName = IdlNaming.MapClsMethodNameToIdlName(method, 
-                                                                 isOverloaded);
-
-            }            
-            return methodName;
-        }
-        
-        /// <summary>
-        /// find the CLS method for the idl name of an overloaded CLS method, defined in type serverType
-        /// </summary>
-        internal static MethodInfo FindClsMethodForOverloadedMethodIdlName(string idlName,
-                                                                           Type serverType) {            
-            if (idlName.IndexOf("__") < 0) {
                 return null;
             }
-            string methodName = idlName.Substring(0, idlName.IndexOf("__"));
-            methodName = ReverseClsToIdlNameMapping(methodName);
-            MethodInfo[] methods = serverType.GetMethods(BindingFlags.Public | BindingFlags.Instance);
-            foreach (MethodInfo method in methods) {
-                if (method.Name.Equals(methodName)) {
-                    // method name is equal -> check if mangled method Name is the same
-                    string mappedName = MapClsMethodNameToIdlName(method, true);
-                    if (mappedName.Equals(idlName)) {
-                        return method;
-                    }
+        }
+
+        /// <summary>
+        /// determines the operation name to use in a corba request for a method.
+        /// </summary>
+        internal static string GetPropertyRequestOperationName(PropertyInfo forProperty, bool forSetter) {
+            string methodName;
+            if (!forSetter) {
+                methodName = GetRequestMethodNameFromAttr(forProperty.GetGetMethod());
+            } else {
+                methodName = GetRequestMethodNameFromAttr(forProperty.GetSetMethod());
+            }
+            if (methodName == null) {
+                string mappedPropertyName =
+                    IdlNaming.MapClsNameToIdlName(forProperty.Name);
+                if (!forSetter) {
+                    methodName = DetermineGetterTransmissionName(mappedPropertyName);
+                } else {
+                    methodName = DetermineSetterTransmissionName(mappedPropertyName);
                 }
             }
-            return null;
+            return methodName;
         }
-        
+
+        /// <summary>
+        /// determines the operation name to use in a corba request for a method.
+        /// </summary>
+        internal static string GetMethodRequestOperationName(MethodInfo method, bool isOverloaded) {
+            string methodName = GetRequestMethodNameFromAttr(method);
+            if (methodName == null) {
+                // determine name for a native .NET method (not mapped from idl)
+                // do a CLS to IDL mapping, because .NET server expect this for every client, also for a
+                // native .NET client, which uses not CLS -> IDL -> CLS mapping
+                methodName = IdlNaming.MapClsMethodNameToIdlName(method,
+                                                                 isOverloaded);
+                methodName = DetermineOperationTransmissionName(methodName);
+            }
+            return methodName;
+        }
+                
         /// <summary>
         /// Determine the operation name to transmit for an idl operation name
         /// </summary>        
@@ -306,16 +313,35 @@ namespace Ch.Elca.Iiop.Idl {
         }
 
         /// <summary>
-        /// map a fully qualified name for a CLS type to an IDL-name
+        /// creates a repository id for a CLS type
         /// </summary>
-        /// <param name="forType"></param>
-        /// <returns></returns>
-        public static string MapFullTypeNameToIdlRepIdTypePart(Type forType) {
-            string nameSpaceInIdl = MapNamespaceToIdl(forType, "/", false);
+        public static string MapFullTypeNameToIdlRepId(Type forType) {
+            return MapTypeNameToIdlRepId(forType.Name, forType.Namespace);
+        }
+        
+        /// <summary>
+        /// creates a repository id from a fully qualified name for a CLS type
+        /// </summary>
+        internal static string MapFullTypeNameToIdlRepId(string fullTypeName) {
+            string namespaceName = String.Empty;
+            string shortName = fullTypeName;
+            int lastSeparatorIndex = fullTypeName.LastIndexOf(".");
+            if (lastSeparatorIndex >= 0) {
+                namespaceName = fullTypeName.Substring(0, lastSeparatorIndex);
+                shortName = fullTypeName.Substring(lastSeparatorIndex + 1);
+            }
+            return MapTypeNameToIdlRepId(shortName, namespaceName);
+        }
+        
+        /// <summary>
+        /// creates a repository id from a simple type name and the namespace name for a CLS type
+        /// </summary>
+        private static string MapTypeNameToIdlRepId(string shortTypeName, string namepsaceName) {
+            string nameSpaceInIdl = MapNamespaceNameToIdl(namepsaceName, "/", false);
             if (!nameSpaceInIdl.Equals("")) {
                 nameSpaceInIdl += "/";
             }
-            return nameSpaceInIdl + MapShortTypeNameToIdl(forType);
+            return "IDL:" + nameSpaceInIdl + MapClsNameToIdlName(shortTypeName) + ":1.0";            
         }
 
         /// <summary>
@@ -326,7 +352,7 @@ namespace Ch.Elca.Iiop.Idl {
         // generator needs scoped form
         public static string MapFullTypeNameToIdlScoped(Type forType) {
             bool isTypeMappedFromIdl = ReflectionHelper.IIdlEntityType.IsAssignableFrom(forType);
-            string result = MapNamespaceToIdl(forType, "::", isTypeMappedFromIdl);
+            string result = MapNamespaceNameToIdl(forType.Namespace, "::", isTypeMappedFromIdl);
             if (result.Length > 0) { 
                 result += "::"; 
             }
@@ -348,15 +374,6 @@ namespace Ch.Elca.Iiop.Idl {
             } else {
                 return MapClsNameToIdlName(forType.Name);
             }
-        }
-
-        /// <summary>
-        /// maps a namespace name to an IDL name
-        /// </summary>
-        /// <param name="separator">separator between module parts, e.g. / or ::</param>        
-        private static string MapNamespaceToIdl(Type forType, string separator, 
-                                                bool isMappedFromIdlToCls) {
-            return MapNamespaceNameToIdl(forType.Namespace, separator, isMappedFromIdlToCls);
         }
         
         /// <summary>
@@ -478,7 +495,11 @@ namespace Ch.Elca.Iiop.Idl {
             s_clsMapSpecial.Add(ReflectionHelper.Int16Type, "short");
             s_clsMapSpecial.Add(ReflectionHelper.Int32Type, "long");
             s_clsMapSpecial.Add(ReflectionHelper.Int64Type, "long long");
+            s_clsMapSpecial.Add(ReflectionHelper.UInt16Type, "unsigned short");
+            s_clsMapSpecial.Add(ReflectionHelper.UInt32Type, "unsigned long");
+            s_clsMapSpecial.Add(ReflectionHelper.UInt64Type, "unsigned long long");            
             s_clsMapSpecial.Add(ReflectionHelper.ByteType, "octet");
+            s_clsMapSpecial.Add(ReflectionHelper.SByteType, "octet");
             s_clsMapSpecial.Add(ReflectionHelper.BooleanType, "boolean");
             s_clsMapSpecial.Add(ReflectionHelper.VoidType, "void");
 
@@ -754,22 +775,25 @@ namespace Ch.Elca.Iiop.Idl {
             return "long";
         }
         public object MapToIdlULong(System.Type dotNetType) {
-            return "ulong";
+            return "unsigned long";
         }
         public object MapToIdlLongLong(System.Type dotNetType) {
             return "long long";
         }
         public object MapToIdlULongLong(System.Type dotNetType) {
-            return "ulong ulong";
+            return "unsigned long long";
         }
         public object MapToIdlUShort(System.Type dotNetType) {
-            return "ushort";
+            return "unsigned short";
         }
         public object MapToIdlShort(System.Type dotNetType) {
             return "short";
         }
         public object MapToIdlOctet(System.Type dotNetType) {
             return "octet";
+        }
+        public object MapToIdlSByteEquivalent(Type clsType) {
+            return MapToIdlOctet(clsType);
         }
         public object MapToIdlVoid(System.Type dotNetType) {
             return "void";
@@ -806,6 +830,13 @@ namespace Ch.Elca.Iiop.Idl {
         }
         public object MapToIdlEnum(System.Type dotNetType) {
             return IdlNaming.MapFullTypeNameToIdlScoped(dotNetType);
+        }
+        public object MapToIdlFlagsEquivalent(Type clsType) {            
+            Type underlyingType = Enum.GetUnderlyingType(clsType);
+            // map to the base type of the flags (i.e. underlyingType).
+            string refUnderlyingType = (string)m_mapper.MapClsType(underlyingType, AttributeExtCollection.EmptyCollection,
+                                                                   this);            
+            return refUnderlyingType;
         }
         public object MapToIdlConcreteInterface(System.Type dotNetType) {
             if (!dotNetType.Equals(ReflectionHelper.MarshalByRefObjectType)) {

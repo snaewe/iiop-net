@@ -1,3 +1,131 @@
+version 1.9.0 final (20 august 2006)
+------------------------------------
+
+bug fixed:
+- fixed memory leak on the server side: some resource allocated for clients were not freed until application end
+- improved object_to_string, string_to_object implementation to support more
+  cases (interface type unknown, ...), see also bug #1470735
+- corrected misspelling of ORBInitializer (bug #1471200)
+- Too optimistic connection reusing (bug #1496479)
+- IDL to CLS compiler: removed idl grammer issue; negate without () around expression to negate is now possible,
+  e.g. ~5 (not only ~(5))
+- IDL to CLS compiler: fixed overflow problem in parser token manager (was a parser generator issue)
+  -> code works now also with overflow checks enabled
+
+new features:
+- IDL to CLS compiler supports now complex constant expressions, i.e. it's possible to let the compiler
+  calculate the value of a constant.
+- improved IDL to CLS compiler command line: added support for -lib: option.
+- retry on transient exceptions, completed_no
+- used endian for giop messages is now configurable on the channel level, by using the endian config key
+- now possible to configure string, idlseq and array serializer to serialize null as empty value
+
+other improvements:
+- additional performance improvements (to profit most: enable compiler optimizations when building IIOP.NET with set CSFLAGS=/o)
+- changed custom mapping for java.util.DateTime to work also with java 1.5
+- improved tracing in debug mode
+
+standard compliance:
+- improved usage of TRANSIENT/COMM_FAILURE:
+  replaced COMM_FAILURE by TRANSIENT exception, if the target is
+  unreachable or connection has been dropped, before the sending has started
+
+Tests:
+- support for multiple versions of the .NET Framework
+- Updated to new NUnit Version 2.2.x
+- added new test for ssl between .NET client and .NET server
+
+IDE support:
+- Added project files for #Develop 2.0
+
+
+version 1.9.0 beta3 (26 march 2006)
+-----------------------------------
+
+bugs fixed:
+- memory leak in fragmented message handling code (bug #1438229)
+- incorrect decoding of UTF-16 wstrings (bug #1408883)
+
+compatibility:
+- Deserialising a wrongly encoded null string (done by some orbs)
+  produces a run-time error (bug #1365811 / patch #1432276)
+- IDL to CLS compiler supports that all generated (concrete/abstract)
+  interfaces inherit from an additional user specified base interface
+  -> needed for integration into EL4Net (el4net.sourceforge.net)
+  (patch #1444178)
+
+changes:
+*) Mapping:
+- Mapping for ulong, uint, ushort, sbyte from cls to idl now defined
+  -> CLS to IDL generator can generate idl for this; can send/receive these types now
+- Mapping for .NET enum (not for enums mapped from idl to CLS): 
+  Don't use the enum value assigned to elements any more,
+  but the position of the element in the value array of the enum -> a mapping
+  to idl is almost ever possible (impossible is only enum with more than Int32.MaxValue entries)
+  -> all possible enum base types are now allowed (not only Int32)
+- Mapping for .NET flag enums defined: they are mapped to their corresponding base type
+
+*) Any/TypeCode
+- Any works better for uint, ushort and some other types.
+- implemented more type-code releated operations of orb interface; but not yet complete
+- fixed issue with type for typecode creation, which lead to some types not found in repository
+  (exception: NO_IMPLEMENT, minor 941)
+
+*) Tests
+- Integration tests / unit tests cleaned up: 
+  now all tests should pass.
+
+improvements:
+- added project files for sharp develop 1.x / sharp develop 2
+
+new tests:
+- Integration tests with JDK ORB directly (not RMI/IIOP simplification)
+
+version 1.9.0 beta2 (21 january 2006)
+-------------------------------------
+
+Improvements:
+- BAD_PARAM exception with minor code 20010 has now a better error
+  message to simplify development with IIOP.NET.
+  This exception is thrown, if an attempt is made to 
+  use a remote interface, which a certain target object doesn't support.
+
+Changes:
+- LocateRequest message is now handled also by the formatter sink and no
+  longer in the transport sink. 
+  (This change will allow some formatter level serialization configuration
+  options later)
+
+version 1.9.0 beta1 (02 january 2006)
+-------------------------------------
+new features:
+- IIOP.NET will no longer retrieve root assemblies on it's own, but instead 
+  investigates the assemblies loaded by the application. It also tries to load
+  referenced assemblies from those assemblies.
+  IIOP.NET investigates the types in the loaded assemblies and builds a mapping
+  of CORBA type identifiers (repository id's) and types when the assembly is
+  loaded. 
+  To reduce the amount of types considered, only public types are 
+  handled by IIOP.NET. Assembly private types are ignored. 
+  Due to these changes: 
+  - IIOP.NET can handle assemblies installed in the GAC 
+  - the mapping between repository id's and types is less restrictive
+
+- Performance improvements:
+  The IIOP.NET performance benchmark now runs more than 2 times faster
+  on the test machine.
+  Mainly, the performance for serializing/deserializing 
+  complex corba value types and structs has been massively improved.
+  For those types, the benchmark now runs up to around 6 times faster.
+  For simple calls, the benchmark now runs around 20% faster.
+ 
+  To achieve this performance improvement, information needed to
+  serialize/deserialize are cached.
+
+new tests:
+- tests for assemblies in gac added
+  
+
 version 1.8.0 final (13 november 2005)
 --------------------------------------
 

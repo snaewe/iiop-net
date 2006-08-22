@@ -1,4 +1,5 @@
-NUNIT=$(NUNITV2_HOME)\bin\nunit.framework.dll 
+include ..\..\..\MakeVars
+
 IIOPCHANNEL = ..\..\..\IIOPChannel\bin\IIOPChannel.dll 
 IIOPCHANNELPDB = ..\..\..\IIOPChannel\bin\IIOPChannel.pdb 
 bin         = bin\ 
@@ -29,12 +30,12 @@ $(bin)IIOPChannel.dll: $(IIOPCHANNEL)
         if exist $(IIOPCHANNELPDB) copy /y $(IIOPCHANNELPDB) $(bin)IIOPChannel.pdb
 
 $(bin)ClientTest.dll: $(bin)IIOPChannel.dll $(bin)Client.dll *.cs
-    csc $(CSFLAGS) /t:library /r:$(NUNIT) /r:$(bin)IIOPChannel.dll /r:$(bin)Client.dll /out:$(bin)ClientTest.dll TestClient.cs
+    $(CSC) $(CSFLAGS) /t:library /r:$(NUNIT_FRAMEWORK_DLL) /r:$(bin)IIOPChannel.dll /r:$(bin)Client.dll /out:$(bin)ClientTest.dll TestClient.cs
 
 
 start-client:
     @echo "Callback IntegrationTest"
-    %NUNITV2_HOME%\bin\nunit-console.exe /assembly:bin\ClientTest.dll
+    $(NUNIT_CONSOLE) $(NUNIT_ASSEMBLY_ARG_OPTION)bin\ClientTest.dll
 
 clean:
     if exist IDL del /s /q IDL

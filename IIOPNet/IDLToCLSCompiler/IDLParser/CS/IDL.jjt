@@ -678,7 +678,9 @@ void and_expr() :
 void shift_expr() :
 {}
 {
-  add_expr() ( ( ">>" | "<<" ) add_expr() )*
+  add_expr() ( ( ">>" { jjtThis.AppendShiftOperation(ShiftOps.Right); }
+               | "<<" { jjtThis.AppendShiftOperation(ShiftOps.Left); }
+             ) add_expr() )*
 }
 
 /* Production 34 */
@@ -686,7 +688,9 @@ void shift_expr() :
 void add_expr() :
 {}
 {
-  mult_expr() ( ( "+" | "-" ) mult_expr() )*
+  mult_expr() ( ( "+" { jjtThis.AppendAddOperation(AddOps.Plus); }
+                | "-" { jjtThis.AppendAddOperation(AddOps.Minus); }
+              ) mult_expr() )*
 }
 
 /* Production 35 */
@@ -694,7 +698,10 @@ void add_expr() :
 void mult_expr() :
 {}
 {
-  unary_expr() ( ( "*" | "/" | "%" ) unary_expr() )*
+  unary_expr() ( ( "*" { jjtThis.AppendMultOperation(MultOps.Mult); }
+                 | "/" { jjtThis.AppendMultOperation(MultOps.Div); }
+                 | "%" { jjtThis.AppendMultOperation(MultOps.Mod); }
+               ) unary_expr() )*
 }
 
 /* Production 36 */
@@ -702,10 +709,7 @@ void mult_expr() :
 void unary_expr() :
 { UnaryOps unary_op = UnaryOps.UnaryNone; }
 {
-  LOOKAHEAD(2)
-  [ unary_op = unary_operator() ] primary_expr_noLit() { jjtThis.SetUnaryOperation(unary_op); }
-| 
-  literal() { jjtThis.SetUnaryOperation(UnaryOps.UnaryNone); }
+  [ unary_op = unary_operator() ] primary_expr() { jjtThis.SetUnaryOperation(unary_op); }
 }
 
 /* Production 37 chapter 3.4 corba 2.3.1 */
@@ -719,12 +723,14 @@ UnaryOps unary_operator() #void :
   "~" { return UnaryOps.UnaryNegate; }
 }
 
-/* Production 38 chapter 3.4 corba 2.3.1; moved literal directly to unery_expr, because otherwise Int64.MinValue leads to ParseException */
+/* Production 38 chapter 3.4 corba 2.3.1 */
 
-void primary_expr_noLit() :
+void primary_expr() :
 {}
 {
   scoped_name()
+|
+  literal()
 |
   "(" const_exp() ")"
 }
@@ -765,13 +771,7 @@ System.Boolean boolean_literal() #void :
 {
   "TRUE" { return true; }
 |
-  LOOKAHEAD(2)  
-  "~" "TRUE" { return false; }
-|
   "FALSE" { return false; }
-|
-  LOOKAHEAD(2)  
-  "~" "FALSE" { return true; }
 }
 
 /* Production 41, chapter 3.4, corba 2.3.1 */
@@ -1420,9 +1420,8 @@ String identifier() #void :
 }
 
 System.Decimal integer_literal() #void :
-{ Token intToken; string unaryOp = ""; }
+{ Token intToken; }
 {
-[ "+" | "-" { unaryOp = "-"; } ]
 (     intToken = <OCTALINT> { 
                                 String octVal = intToken.image;
                                 // remove leading 0
@@ -1431,12 +1430,11 @@ System.Decimal integer_literal() #void :
                                 if (octVal.EndsWith("l") || octVal.EndsWith("L") || octVal.EndsWith("u") || octVal.EndsWith("U")) {
                                     octVal = octVal.Substring(0, octVal.Length-1); // remove u, U, L, l
                                 }
-                                octVal = unaryOp + octVal;
                                 return StringToIntConverter.Parse(octVal, 8);
                             }
 |
       intToken = <DECIMALINT> { 
-                                String val = unaryOp + intToken.image;
+                                String val = intToken.image;
                                 // check for l, L, u, U at the end
                                 if (val.EndsWith("l") || val.EndsWith("L") || val.EndsWith("u") || val.EndsWith("U")) {
                                     val = val.Substring(0, val.Length-1); // remove u, U, L, l
@@ -1452,7 +1450,6 @@ System.Decimal integer_literal() #void :
                                 if (hexVal.EndsWith("l") || hexVal.EndsWith("L") || hexVal.EndsWith("u") || hexVal.EndsWith("U")) {
                                     hexVal = hexVal.Substring(0, hexVal.Length-1); // remove u, U, L, l
                                 }
-                                hexVal = unaryOp + hexVal;
                                 return StringToIntConverter.Parse(hexVal, 16);
                               }  
 )  
@@ -1498,9 +1495,8 @@ char wide_character_literal() #void :
 }
 
 System.Double floating_pt_literal() #void :
-{ Token floatLiteral = null; string unaryOp = ""; }
+{ Token floatLiteral = null; }
 {
-[ "+" | "-" { unaryOp = "-"; } ]
 (
  ( 
   (
@@ -1508,7 +1504,7 @@ System.Double floating_pt_literal() #void :
      |
          floatLiteral = <FLOATTWO>
   ) { 
-      String floatVal = unaryOp + floatLiteral.image;
+      String floatVal = floatLiteral.image;
       if (floatVal.EndsWith("f") || floatVal.EndsWith("F") || floatVal.EndsWith("l") || floatVal.EndsWith("L")) {
         floatVal = floatVal.Substring(0, floatVal.Length - 1);
       }
@@ -1523,22 +1519,18 @@ System.Double floating_pt_literal() #void :
 |
          "Infinity"
 {
-    if (unaryOp != "-") {  
-        return Double.PositiveInfinity;
-    } else {
-        return Double.NegativeInfinity;
-    }
+    return Double.PositiveInfinity;
 }
 )
 
 }
 
 System.Decimal fixed_pt_literal() #void :
-{ Token fixedLiteral; string unaryOp = ""; }
+{ Token fixedLiteral; }
 {
-    [ "+" | "-" { unaryOp = "-"; } ] fixedLiteral = <FIXED>
+    fixedLiteral = <FIXED>
 {
-    String fixedVal = unaryOp + fixedLiteral.image;
+    String fixedVal = fixedLiteral.image;
     if (fixedVal.EndsWith("d") || fixedVal.EndsWith("D")) {
         fixedVal = fixedVal.Substring(0, fixedVal.Length - 1);
     }

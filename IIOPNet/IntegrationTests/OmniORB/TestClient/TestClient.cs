@@ -48,7 +48,9 @@ namespace Ch.Elca.Iiop.IntegrationTests {
         private IiopClientChannel m_channel;
 
         private TestService m_testService;
+        private TestSimpleServicePublic m_testServiceInternalIf;
 
+        private IOrbServices m_orb;
 
         #endregion IFields
 
@@ -69,11 +71,20 @@ namespace Ch.Elca.Iiop.IntegrationTests {
             NameComponent[] name = new NameComponent[] { new NameComponent("test", "") };
             // get the reference to the test-service
             m_testService = (TestService)nameService.resolve(name);
+
+            NameComponent[] nameInternal = 
+                new NameComponent[] { new NameComponent("testInternal", "") };
+            // get the reference to a service with a server-side only interface inherited from a public one
+            m_testServiceInternalIf = 
+               (TestSimpleServicePublic)nameService.resolve(nameInternal);
+
+            m_orb = OrbServices.GetSingleton();
         }
 
         [TearDown]
         public void TearDownEnvironment() {
             m_testService = null;
+            m_testServiceInternalIf = null;
             // unregister the channel            
             ChannelServices.UnregisterChannel(m_channel);
         }
@@ -555,6 +566,40 @@ namespace Ch.Elca.Iiop.IntegrationTests {
 
 /*            CCE.N_Assembly _asm = m_testService.Create_Asm();
             Assertion.AssertNotNull("_asm not created", _asm); */
+        }
+
+        [Test]
+        public void TestIsAServiceWithServerSideIf() {
+            // most specific interface of the remote object is known on 
+            // the server side only
+            Assertion.Assert("wrong public type info",
+                      m_orb.is_a(m_testServiceInternalIf,
+                                 "IDL:TestSimpleServicePublic:1.0"));
+
+            Assertion.Assert("wrong server only type info",
+                      m_orb.is_a(m_testServiceInternalIf,
+                                 "IDL:TestSimpleServicePublic:1.0"));
+
+        }
+
+        [Test]
+        public void TestCallServiceWithServerSideIf() {
+            // most specific interface of the remote object is known on 
+            // the server side only
+            int arg = 1;
+            int result = 
+                m_testServiceInternalIf.EchoLong(arg);
+            Assertion.AssertEquals(arg, result);
+        }
+
+        [Test]
+        public void TestMostSpecTypeSrvWithServerSideIf() {
+            string objToString = 
+                m_orb.object_to_string(m_testServiceInternalIf);
+            Ch.Elca.Iiop.CorbaObjRef.Ior forObj = new 
+                Ch.Elca.Iiop.CorbaObjRef.Ior(objToString);
+            Assertion.AssertEquals("IDL:Internal/TestSimpleServiceInternal:1.0",
+                                   forObj.TypID);
         }
 
     }

@@ -51,8 +51,26 @@ namespace CCE {
 
 namespace Ch.Elca.Iiop.IntegrationTests {
 
+    [IdlEnum]
     public enum TestEnum {
         A, B, C, D
+    }
+
+    [Flags]
+    public enum TestFlags {
+        AF = 0x01, BF = 0x02, CF = 0x04
+    }
+
+    public enum TestEnumBI16 : short {
+        A1, B1, C1
+    }
+
+    public enum TestEnumBI64 : long {
+        AL = Int64.MaxValue, BL = 1000
+    }
+
+    public enum TestEnumUI32 : uint {
+        A2, B2, C2
     }
 
     [Serializable]
@@ -218,6 +236,22 @@ namespace Ch.Elca.Iiop.IntegrationTests {
             return arg + 1;
         }
 
+        public System.UInt16 TestIncUInt16(System.UInt16 arg) {
+            return (System.UInt16)(arg + 1);
+        }
+
+        public System.UInt32 TestIncUInt32(System.UInt32 arg) {
+            return arg + (System.UInt32)1;
+        }
+
+        public System.UInt64 TestIncUInt64(System.UInt64 arg) {
+            return arg + (System.UInt64)1;
+        }
+
+        public System.SByte TestIncSByte(System.SByte arg) {
+            return (System.SByte)(arg + 1);
+        }
+
         public System.Boolean TestNegateBoolean(System.Boolean arg) {
             return ! arg;
         }
@@ -237,6 +271,22 @@ namespace Ch.Elca.Iiop.IntegrationTests {
         public TestEnum TestEchoEnumVal(TestEnum arg) {
             return arg;
         }
+
+        public TestFlags TestEchoFlagsVal(TestFlags arg) {
+            return arg;
+        }
+
+        public TestEnumBI16 TestEchoEnumI16Val(TestEnumBI16 arg) {
+            return arg;
+        }
+
+        public TestEnumBI64 TestEchoEnumI64Val(TestEnumBI64 arg) {
+            return arg;
+        }
+
+        public TestEnumUI32 TestEchoEnumUI32Val(TestEnumUI32 arg) {
+            return arg;
+        }        
 
         public System.Byte[] TestAppendElementToByteArray(System.Byte[] arg, System.Byte toAppend) {
             System.Byte[] result;
@@ -389,6 +439,10 @@ namespace Ch.Elca.Iiop.IntegrationTests {
             arrayTC = orbServices.create_array_tc(2, arrayTC);
             Any arrayAsAny = new Any(arg, arrayTC);
             return arrayAsAny;
+        }
+
+        public object[] EchoObjectArray(object[] arg) {
+            return arg;
         }
 
         public Adder RetrieveAdder() {
@@ -727,6 +781,13 @@ namespace Ch.Elca.Iiop.IntegrationTests {
 
         [return: BoxedValueAttribute("IDL:Ch.Elca.Iiop.IntegrationTests.boxed_TestStruct:1.0")]
         public TestStructWB EchoBoxedStruct([BoxedValueAttribute("IDL:Ch.Elca.Iiop.IntegrationTests.boxed_TestStruct:1.0")] TestStructWB arg) {
+            return arg;
+        }
+
+        
+
+        [return: BoxedValueAttribute("IDL:Ch/Elca/Iiop/IntegrationTests/ValidListSeq:1.0")]
+        public Int32[]  EchoBoxedSeq([BoxedValueAttribute("IDL:Ch/Elca/Iiop/IntegrationTests/ValidListSeq:1.0")] Int32[] arg) {
             return arg;
         }
 

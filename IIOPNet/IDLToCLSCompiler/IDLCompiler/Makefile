@@ -1,3 +1,5 @@
+include ..\..\MakeVars
+
 Key = ..\..\Key.snk
 IIOPChannel = ..\..\IIOPChannel\bin\IIOPChannel.dll
 IDLPreprocessor = ..\IDLPreprocessor\bin\IDLPreprocessor.dll
@@ -17,12 +19,8 @@ $(Dest)IDLPreprocessor.dll: $(IDLPreprocessor)
 	copy $(IDLPreprocessor) $@
 
 $(Dest)IDLToCLSCompiler.exe: $(Dest)IIOPChannel.dll $(Dest)IDLPreprocessor.dll *.cs $(Key)
-	csc /nowarn:0162,0164,0168,0169,0219 $(CSFLAGS) /res:MappingPluginSchema.xsd /r:$(Dest)IIOPChannel.dll /r:$(Dest)IDLPreprocessor.dll /t:exe /out:$@ *.cs
+	$(CSC) /nowarn:0162,0164,0168,0169,0219 $(CSFLAGS) /res:MappingPluginSchema.xsd /r:$(Dest)IIOPChannel.dll /r:$(Dest)IDLPreprocessor.dll /t:exe /out:$@ *.cs
 
-
-nunit-var:
-        if not defined NUNITV2_HOME echo Define NUNITV2_HOME as the home directory of your NUNIT installation
-        if not defined NUNITV2_HOME exit 2
 
 build-tests: nunit-var $(DestUt)IDLToCLSCompiler.exe
 
@@ -36,14 +34,13 @@ $(DestUt)IDLPreprocessor.dll: $(IDLPreprocessor)
 
 
 $(DestUt)IDLToCLSCompiler.exe: $(DestUt)IIOPChannel.dll $(DestUt)IDLPreprocessor.dll *.cs $(Key)
-	csc $(CSFLAGS) /d:UnitTest /res:MappingPluginSchema.xsd /r:$(NUNITV2_HOME)\bin\nunit.framework.dll /r:$(DestUt)IIOPChannel.dll /r:$(DestUt)IDLPreprocessor.dll /t:exe /out:$@ *.cs
+	$(CSC) $(CSFLAGS) /d:UnitTest /res:MappingPluginSchema.xsd /r:$(NUNIT_FRAMEWORK_DLL) /r:$(DestUt)IIOPChannel.dll /r:$(DestUt)IDLPreprocessor.dll /t:exe /out:$@ *.cs
 
 
 test: build-tests
-	%NUNITV2_HOME%\bin\nunit-console.exe /assembly:$(DestUt)IDLToCLSCompiler.exe
+	$(NUNIT_CONSOLE) $(NUNIT_ASSEMBLY_ARG_OPTION)$(DestUt)IDLToCLSCompiler.exe
+
 	
-
-
 clean:
 	if exist $(Dest)* del /s /q $(Dest)*
 	if exist $(Dest) rmdir /s /q $(Dest)

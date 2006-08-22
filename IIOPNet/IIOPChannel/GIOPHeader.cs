@@ -34,6 +34,13 @@ using Ch.Elca.Iiop.Cdr;
 
 namespace Ch.Elca.Iiop {
     
+    /// <summary>
+    /// specifies the endian.
+    /// </summary>
+    public enum Endian {
+        LittleEndian, BigEndian
+    }
+    
     public struct GiopVersion {
         
         #region IFields
@@ -164,6 +171,8 @@ namespace Ch.Elca.Iiop {
         }
 
         #endregion IConstructors
+        #region SProperties                
+        #endregion SProperties
         #region IProperties
 
         internal GiopVersion Version {
@@ -254,6 +263,73 @@ namespace Ch.Elca.Iiop {
 
         
         #endregion IMethods
+        #region SMethods
         
+        /// <summary>
+        /// Gets the default header flags for the given endian.
+        /// </summary>
+        internal static byte GetDefaultHeaderFlagsForEndian(Endian endian) {
+            if (endian == Endian.BigEndian) {
+                return 0;
+            } else {
+                return 1;
+            }
+        }
+        
+        /// <summary>
+        /// Gets the default header flags for the platform endian.
+        /// </summary>        
+        internal static byte GetDefaultHeaderFlagsForPlatform() {
+            Endian endian;
+            if (BitConverter.IsLittleEndian) {
+                endian = Endian.LittleEndian;
+            } else {
+                endian = Endian.BigEndian;
+            }
+            return GetDefaultHeaderFlagsForEndian(endian);
+        }
+        
+        #endregion SMethods
     }
 }
+#if UnitTest
+
+namespace Ch.Elca.Iiop.Tests {
+    
+    using System.Reflection;
+    using NUnit.Framework;
+    using Ch.Elca.Iiop;
+
+    /// <summary>
+    /// Unit-tests for testing request/reply serialisation/deserialisation
+    /// </summary>
+    [TestFixture]
+    public class GiopHeaderTest {
+        
+        [Test]
+        public void TestGetHeaderFlagsForBigEndian() {
+            Assertion.AssertEquals(0, GiopHeader.GetDefaultHeaderFlagsForEndian(Endian.BigEndian));
+        }
+        
+        [Test]
+        public void TestGetHeaderFlagsForLittleEndian() {
+            Assertion.AssertEquals(1, GiopHeader.GetDefaultHeaderFlagsForEndian(Endian.LittleEndian));
+        }        
+        
+        [Test]
+        public void TestGetHeaderFlagsForPlatform() {
+            byte expected;
+            if (BitConverter.IsLittleEndian) {
+                expected = 1;
+            } else {
+                expected = 0;
+            }
+            Assertion.AssertEquals(expected,
+                                   GiopHeader.GetDefaultHeaderFlagsForPlatform());
+        }
+        
+    }
+    
+}
+
+#endif

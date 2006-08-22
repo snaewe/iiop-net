@@ -1,4 +1,5 @@
-NUNIT=$(NUNITV2_HOME)\bin\nunit.framework.dll 
+include ..\..\..\MakeVars
+
 IIOPCHANNEL = ..\..\..\IIOPChannel\bin\IIOPChannel.dll 
 IIOPCHANNELPDB = ..\..\..\IIOPChannel\bin\IIOPChannel.pdb 
 bin         = bin\ 
@@ -14,7 +15,7 @@ $(bin)IIOPChannel.dll: $(bin) $(IIOPCHANNEL)
 
 build-client: $(bin)IIOPChannel.dll *.cs
 	if not exist bin\nul mkdir bin
-	csc $(CSFLAGS) /t:library /r:$(NUNIT) /r:bin\IIOPChannel.dll /r:bin\Client.dll /out:bin\ClientTest.dll TestClient.cs
+	$(CSC) $(CSFLAGS) /t:library /r:$(NUNIT_FRAMEWORK_DLL) /r:bin\IIOPChannel.dll /r:bin\Client.dll /out:bin\ClientTest.dll TestClient.cs
 
 
 compile-idl:
@@ -25,7 +26,7 @@ compile-idl:
 
 start-client:
 	@echo "MICO Extension IntegrationTest"
-	%NUNITV2_HOME%\bin\nunit-console.exe /assembly:bin\ClientTest.dll
+	$(NUNIT_CONSOLE) $(NUNIT_ASSEMBLY_ARG_OPTION)bin\ClientTest.dll
 
 clean:
 	if exist bin del /s /q bin

@@ -1,19 +1,13 @@
+include ..\..\..\..\MakeVars
 !include .\MakeVars
 RELATIVE=$(OMNIORB_HOME)
-DELAY=..\..\..\utils\delay.exe
-LAUNCH=..\..\..\utils\launch.exe
-KILL=..\..\..\utils\kill.exe
+DELAY=..\..\..\..\Utils\delay.exe
+LAUNCH=..\..\..\..\Utils\launch.exe
+KILL=..\..\..\..\Utils\kill.exe
 
 
 build: omniorb_home_var server.exe
 
-omniorb_home_var:
-    @IF NOT DEFINED OMNIORB_HOME echo define OMNIORB_HOME first
-    @IF NOT DEFINED OMNIORB_HOME exit 2
-    @IF NOT DEFINED OMNIORB_VERSION echo define OMNIORB_VERSION first
-    @IF NOT DEFINED OMNIORB_VERSION exit 2
-
-    
 server.exe: service.hh serviceSK.obj server.obj serviceDynSK.obj 
     $(LD) $(LDFLAGS) /OUT:$@ serviceSK.obj serviceDynSK.obj server.obj $(LDLIBS)
 

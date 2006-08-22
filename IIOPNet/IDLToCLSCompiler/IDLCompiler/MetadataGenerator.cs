@@ -170,6 +170,8 @@ public class MetaDataGenerator : IDLParserVisitor {
 
     private TypesInAssemblyManager m_typesInRefAsms;
 
+    private Type m_interfaceToInheritFrom = null;
+
     /** is the generator initalized for parsing a file */
     private bool m_initalized = false;
 
@@ -194,7 +196,7 @@ public class MetaDataGenerator : IDLParserVisitor {
     /// </param>
     /// <param name="signKey">the key to use to sign the generated assembly; pass null to not sign the assembly</param>
     public MetaDataGenerator(AssemblyName targetAssemblyName, String targetDir,
-                             ArrayList refAssemblies) {
+                             IList refAssemblies) {
         m_targetAsmName = targetAssemblyName;        
         // define a persistent assembly
         CreateResultAssembly(targetDir);
@@ -216,7 +218,19 @@ public class MetaDataGenerator : IDLParserVisitor {
             m_mapAnyToAnyContainer = value;
         }
     }
-    
+
+    /// <summary>
+    /// optionally defines an base interface for the generated interface.
+    /// </summary>
+    public Type InheritedInterface {
+        get {
+            return m_interfaceToInheritFrom;
+        }
+        set {
+            m_interfaceToInheritFrom = value;
+        }
+    }
+
     #if UnitTest
     
     public Assembly ResultAssembly {
@@ -250,11 +264,12 @@ public class MetaDataGenerator : IDLParserVisitor {
     
     /// <summary>initalizes the assemblies, which contains type to use
     /// instead of generating them</summary>
-    private void InitalizeRefAssemblies(ArrayList refAssemblies) {
+    private void InitalizeRefAssemblies(IList refAssemblies) {
         // add the IIOPChannel dll; IIdlAttribute is in channel assembly
         Type typeInChannel = typeof(IIdlAttribute);
-        refAssemblies.Add(typeInChannel.Assembly);
-        m_typesInRefAsms = new TypesInAssemblyManager(refAssemblies);
+        ArrayList refAssembliesWithChannelAsm = new ArrayList(refAssemblies);
+        refAssembliesWithChannelAsm.Add(typeInChannel.Assembly);
+        m_typesInRefAsms = new TypesInAssemblyManager(refAssembliesWithChannelAsm);
     }    
 
     ///<summary>
@@ -366,7 +381,6 @@ public class MetaDataGenerator : IDLParserVisitor {
             }
             result.Add(resultType.GetCompactClsType());
         }
-        
         return (System.Type[])result.ToArray(typeof(Type));
     }
 
@@ -541,11 +555,16 @@ public class MetaDataGenerator : IDLParserVisitor {
      */
     public Object visit(ASTinterface_header node, Object data) {
         Type[] result = new Type[0];
+        ArrayList resList = new ArrayList();
         if (node.jjtGetNumChildren() > 0) {
             ASTinterface_inheritance_spec inheritSpec = (ASTinterface_inheritance_spec) node.jjtGetChild(0);
             result = (Type[])inheritSpec.jjtAccept(this, data);
+            resList.AddRange(result);
         }
-        return result;
+        if (m_interfaceToInheritFrom != null && !node.isLocal()) {
+            resList.Add(m_interfaceToInheritFrom);
+        }
+        return resList.ToArray(typeof(Type));
     }
 
     /**
@@ -1260,59 +1279,78 @@ public class MetaDataGenerator : IDLParserVisitor {
      * @see parser.IDLParserVisitor#visit(ASTor_expr, Object)
      */
     public Object visit(ASTor_expr node, Object data) {
-        if (node.jjtGetNumChildren() > 1) {
-            throw new NotImplementedException("only simple expressions are supported yet");
+        Literal result = 
+            (Literal)node.jjtGetChild(0).jjtAccept(this, data);
+        for(int i=1; i < node.jjtGetNumChildren(); i++) {
+            // evaluate the xor-expr and or it to the current result
+            result = result.Or((Literal)node.jjtGetChild(i).jjtAccept(this, data));
         }
-        // evaluate the xor-expr
-        Object result = node.jjtGetChild(0).jjtAccept(this, data);
-        return result;
+        return result;                
     }
 
     /**
      * @see parser.IDLParserVisitor#visit(ASTxor_expr, Object)
      */
     public Object visit(ASTxor_expr node, Object data) {
-        if (node.jjtGetNumChildren() > 1) {
-            throw new NotImplementedException("only simple expressions are supported yet");
+        Literal result = 
+            (Literal)node.jjtGetChild(0).jjtAccept(this, data);
+        for(int i=1; i < node.jjtGetNumChildren(); i++) {
+            // evaluate the and-expr and xor it to the current result
+            result = result.Xor((Literal)node.jjtGetChild(i).jjtAccept(this, data));
         }
-        // evaluate the and-expr
-        Object result = node.jjtGetChild(0).jjtAccept(this, data);
-        return result;
+        return result;        
     }
 
     /**
      * @see parser.IDLParserVisitor#visit(ASTand_expr, Object)
      */
     public Object visit(ASTand_expr node, Object data) {
-        if (node.jjtGetNumChildren() > 1) {
-            throw new NotImplementedException("only simple expressions are supported yet");
+        Literal result = 
+            (Literal)node.jjtGetChild(0).jjtAccept(this, data);
+        for(int i=1; i < node.jjtGetNumChildren(); i++) {
+            // evaluate the shift-expr and and it to the current result
+            result = result.And((Literal)node.jjtGetChild(i).jjtAccept(this, data));
         }
-        // evaluate the shift-expr
-        Object result = node.jjtGetChild(0).jjtAccept(this, data);
         return result;
     }
 
     /**
      * @see parser.IDLParserVisitor#visit(ASTshift_expr, Object)
      */
-    public Object visit(ASTshift_expr node, Object data) {
-        if (node.jjtGetNumChildren() > 1) {
-            throw new NotImplementedException("only simple expressions are supported yet");
+    public Object visit(ASTshift_expr node, Object data) {        
+        Literal result = 
+            (Literal)node.jjtGetChild(0).jjtAccept(this, data);
+        for(int i=1; i < node.jjtGetNumChildren(); i++) {
+            // evaluate the add-expr and lshift/rshift the current result with it
+            switch (node.GetShiftOperation(i-1)) {
+                case ShiftOps.Right:
+                    result = result.ShiftRightBy((Literal)node.jjtGetChild(i).jjtAccept(this, data));
+                    break;
+                case ShiftOps.Left:
+                    result = result.ShiftLeftBy((Literal)node.jjtGetChild(i).jjtAccept(this, data));
+                    break;
+            }
         }
-        // evaluate the add-expr
-        Object result = node.jjtGetChild(0).jjtAccept(this, data);
         return result;
     }
 
     /**
      * @see parser.IDLParserVisitor#visit(ASTadd_expr, Object)
      */
-    public Object visit(ASTadd_expr node, Object data) {
-        if (node.jjtGetNumChildren() > 1) {
-            throw new NotImplementedException("only simple expressions are supported yet");
+    public Object visit(ASTadd_expr node, Object data) {                
+        Literal result = 
+            (Literal)node.jjtGetChild(0).jjtAccept(this, data);
+        for(int i=1; i < node.jjtGetNumChildren(); i++) {
+            // evaluate the mult-expr and add/sub it to the current result
+            switch (node.GetAddOperation(i-1)) {
+                case AddOps.Plus:
+                    result = result.Add((Literal)node.jjtGetChild(i).jjtAccept(this, data));
+                    break;
+                case AddOps.Minus:
+                    result = result.Sub((Literal)node.jjtGetChild(i).jjtAccept(this, data));
+                    break;
+            }
         }
-        // evaluate the mult-expr
-        Object result = node.jjtGetChild(0).jjtAccept(this, data);
         return result;
     }
 
@@ -1320,11 +1358,22 @@ public class MetaDataGenerator : IDLParserVisitor {
      * @see parser.IDLParserVisitor#visit(ASTmult_expr, Object)
      */
     public Object visit(ASTmult_expr node, Object data) {
-        if (node.jjtGetNumChildren() > 1) {
-            throw new NotImplementedException("only simple expressions are supported yet");
+        Literal result = 
+            (Literal)node.jjtGetChild(0).jjtAccept(this, data);
+        for(int i=1; i < node.jjtGetNumChildren(); i++) {
+            // evaluate the unary-expr and mult/div/mod it to the current result
+            switch (node.GetMultOperation(i-1)) {
+                case MultOps.Mult:
+                    result = result.MultBy((Literal)node.jjtGetChild(i).jjtAccept(this, data));
+                    break;
+                case MultOps.Div:
+                    result = result.DivBy((Literal)node.jjtGetChild(i).jjtAccept(this, data));
+                    break;
+                case MultOps.Mod:
+                    result = result.ModBy((Literal)node.jjtGetChild(i).jjtAccept(this, data));
+                    break;                    
+            }
         }
-        // evaluate the unary-expr
-        Object result = node.jjtGetChild(0).jjtAccept(this, data);
         return result;
     }
 
@@ -1336,7 +1385,8 @@ public class MetaDataGenerator : IDLParserVisitor {
         Literal result = (Literal)node.jjtGetChild(0).jjtAccept(this, data);
         switch (node.GetUnaryOperation()) {
             case UnaryOps.UnaryNegate:
-                throw new NotImplementedException("unary operator negation not implemented");
+                result.Negate();
+                break;
             case UnaryOps.UnaryMinus:
                 result.InvertSign();
                 break;
@@ -1348,9 +1398,9 @@ public class MetaDataGenerator : IDLParserVisitor {
     }
 
     /**
-     * @see parser.IDLParserVisitor#visit(ASTprimary_expr_noLit, Object)
+     * @see parser.IDLParserVisitor#visit(ASTprimary_expr, Object)
      */
-    public Object visit(ASTprimary_expr_noLit node, Object data) {
+    public Object visit(ASTprimary_expr node, Object data) {
         // possible cases (one child):
         // scoped_name
         // literal

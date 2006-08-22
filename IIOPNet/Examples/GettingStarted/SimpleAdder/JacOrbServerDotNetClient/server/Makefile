@@ -1,3 +1,5 @@
+include ..\..\..\..\..\MakeVars
+
 IDL         = IDL\ 
 IDLType     = Ch.Elca.Iiop.Tutorial.GettingStarted.Adder
 IDLPath     = Ch\Elca\Iiop\Tutorial\GettingStarted\Adder

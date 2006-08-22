@@ -1,3 +1,5 @@
+include ..\..\..\..\MakeVars
+
 build:
 	cd java
 	$(MAKE) build

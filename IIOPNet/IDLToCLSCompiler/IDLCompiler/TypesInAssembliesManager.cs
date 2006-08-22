@@ -44,12 +44,12 @@ namespace Ch.Elca.Iiop.IdlCompiler.Action {
 
         #region IFiels
 
-        private ArrayList m_refAssemblies;
+        private IList m_refAssemblies;
 
         #endregion IFields
         #region IConstructors
 
-        public TypesInAssemblyManager(ArrayList refAssemblies) {
+        public TypesInAssemblyManager(IList refAssemblies) {
             m_refAssemblies = refAssemblies;
         }
 

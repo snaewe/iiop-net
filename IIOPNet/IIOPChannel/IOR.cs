@@ -111,7 +111,8 @@ namespace Ch.Elca.Iiop.CorbaObjRef {
             }
         }
         
-        /// <summary>the type represented by typeid</summary>
+        /// <summary>the type represented by typeid, or null, if no type is known for
+        /// the type id.</summary>
         public Type Type {
             get {
                 return Repository.GetTypeForId(m_typId);
@@ -239,13 +240,7 @@ namespace Ch.Elca.Iiop.CorbaObjRef {
         /// creates a tagged profile from this profile.
         /// </summary>
         TaggedProfile CreateTaggedProfile();
-        
-        /// <summary>
-        /// deserialise the component data for the contained component with the specified id; if component
-        /// is not present, returns null.
-        /// </summary>
-        object GetTaggedComponentData(int tag, Type componentType);
-                
+                       
         /// <summary>
         /// returns true, if at least one tagged component with the given tag is present.
         /// </summary>
@@ -290,10 +285,6 @@ namespace Ch.Elca.Iiop.CorbaObjRef {
     internal abstract class IorProfile : IIorProfile {
         
         #region SFields
-        
-        private readonly static object s_defaultCodeSetTaggedComponent = 
-            Services.CodeSetService.CreateDefaultCodesetComponent();            
-            
         #endregion SFields
         #region IFields
 
@@ -362,15 +353,7 @@ namespace Ch.Elca.Iiop.CorbaObjRef {
         public void AddTaggedComponents(TaggedComponent[] components) {
             m_taggedComponents.AddComponents(components);
         }        
-        
-        public void AddTaggedComponentWithData(int tag, object componentData) {
-            m_taggedComponents.AddComponentWithData(tag, componentData);
-        }
-        
-        public object GetTaggedComponentData(int tag, Type componentType) {
-            return m_taggedComponents.GetComponentData(tag, componentType);
-        }
-                
+
         public bool ContainsTaggedComponent(int tag) {
             return m_taggedComponents.ContainsTaggedComponent(tag);
         }
@@ -393,15 +376,7 @@ namespace Ch.Elca.Iiop.CorbaObjRef {
         public abstract TaggedProfile CreateTaggedProfile();
         
         #endregion IMethods
-        #region SMethods
-        
-        /// <summary>
-        /// returns the codeset tagged component, which should be added to the profiles by default.
-        /// </summary>        
-        protected static TaggedComponent GetDefaultCodeSetTaggedComponent() {
-            return (TaggedComponent)s_defaultCodeSetTaggedComponent;
-        }
-        
+        #region SMethods                
         #endregion SMethods
     
     }
@@ -423,8 +398,6 @@ namespace Ch.Elca.Iiop.CorbaObjRef {
         public InternetIiopProfile(GiopVersion version, string hostName, short port, byte[] objectKey) : base(version, objectKey) {
             m_hostName = hostName;
             m_port = port;
-            // default codesetComponent
-            TaggedComponents.AddComponent(IorProfile.GetDefaultCodeSetTaggedComponent());
         }
 
         /// <summary>
@@ -453,7 +426,8 @@ namespace Ch.Elca.Iiop.CorbaObjRef {
 
         public int Port {
             get { 
-                return (ushort)m_port; // m_port is mapped from an unsigned short -> cast back to ushort, before return
+        		// do an unchecked cast, overflow no issue here
+        		return unchecked((ushort)m_port); // m_port is mapped from an unsigned short -> cast back to ushort, before return
             }
         }        
 
@@ -471,7 +445,8 @@ namespace Ch.Elca.Iiop.CorbaObjRef {
             Debug.WriteLine("giop-verion: " + m_giopVersion);
             m_hostName = encapsulation.ReadString();
             Debug.WriteLine("hostname: " + m_hostName);
-            m_port = (short)encapsulation.ReadUShort();
+            m_port = unchecked(
+				(short)encapsulation.ReadUShort()); // do an unchecked cast, overflow no issue here
             Debug.WriteLine("port: " + m_port);
             uint objectKeyLength = encapsulation.ReadULong();
             m_objectKey = new byte[objectKeyLength];
@@ -538,10 +513,8 @@ namespace Ch.Elca.Iiop.CorbaObjRef {
     internal sealed class MultipleComponentsProfile : IorProfile {
     
         #region IConstructors
-
+        
         public MultipleComponentsProfile() : base(new GiopVersion(1,2), null) {
-            // default codesetComponent
-            TaggedComponents.AddComponent(IorProfile.GetDefaultCodeSetTaggedComponent());        
         }
 
         /// <summary>
@@ -683,15 +656,36 @@ namespace Ch.Elca.Iiop.Tests {
     
     using NUnit.Framework;
     using Ch.Elca.Iiop.CorbaObjRef;
+    using Ch.Elca.Iiop.Services;
     
     /// <summary>
     /// Unit-test for class Ior
     /// </summary>
-    public class IorTest : TestCase {
+    [TestFixture]    
+    public class IorTest {
+
+        private Codec m_codec;
+        private SerializerFactory m_serFactory;
         
         public IorTest() {
+        }                
+        
+        [SetUp]
+        public void SetUp() {
+    	    m_serFactory =
+    	        new SerializerFactory();
+            CodecFactory codecFactory =
+                new Ch.Elca.Iiop.Interception.CodecFactoryImpl(m_serFactory);
+            m_codec = 
+                codecFactory.create_codec(
+                    new omg.org.IOP.Encoding(ENCODING_CDR_ENCAPS.ConstVal, 1, 2));            
+            IiopUrlUtil iiopUrlUtil = 
+                IiopUrlUtil.Create(m_codec, new object[] { 
+                    Services.CodeSetService.CreateDefaultCodesetComponent(m_codec)});
+            m_serFactory.Initalize(new SerializerFactoryConfig(), iiopUrlUtil);
         }
 
+        [Test]
         public void TestIorCreation() {
             string iorString = "IOR:0000000000000024524d493a48656c6c6f496e746572666163653a3030303030303030303030303030303000000000010000000000000050000102000000000c31302e34302e32302e3531001f9500000000000853617948656C6C6F0000000100000001000000200000000000010001000000020501000100010020000101090000000100010100";
             Ior ior = new Ior(iorString);
@@ -750,6 +744,7 @@ namespace Ch.Elca.Iiop.Tests {
             }
         }
         
+        [Test]
         public void TestNonUsableProfileIncluded() {
             string iorString = "IOR:000000000000001b49444c3a636d6956322f5573657241636365737356323a312e3000020000000210ca1000000000650000000800000008646576312d73660033de6f8e0000004d000000020000000855736572504f41000000001043415355736572416363657373563200c3fbedfb0000000e007c4c51000000fd57aacdaf801a0000000e007c4c51000000fd57aacdaf80120000009400000000000000980001023100000008646576312d736600200b00020000004d000000020000000855736572504f41000000001043415355736572416363657373563200c3fbedfb0000000e007c4c51000000fd57aacdaf801a0000000e007c4c51000000fd57aacdaf8012000000140000000200000002000000140000000400000001000000230000000400000001000000000000000800000000cb0e0001";            
             Ior ior = new Ior(iorString);
@@ -763,6 +758,7 @@ namespace Ch.Elca.Iiop.Tests {
             Assertion.AssertEquals("wrong number of profiles", 2, ior.Profiles.Length);
         }
         
+        [Test]
         public void TestParseAndRecreate() {
             string iorString = "IOR:0000000000000024524d493a48656c6c6f496e746572666163653a3030303030303030303030303030303000000000010000000000000050000102000000000c31302e34302e32302e3531001f9500000000000853617948656C6C6F0000000100000001000000200000000000010001000000020501000100010020000101090000000100010100";
             Ior ior = new Ior(iorString);
@@ -777,6 +773,7 @@ namespace Ch.Elca.Iiop.Tests {
                                    recreated2.ToLower());                        
         }
         
+        [Test]        
         public void TestWithSslComponent() {
             string iorString = "IOR:000000000000003749444C3A43682F456C63612F49696F702F5475746F7269616C2F47657474696E67537461727465642F4164646572496D706C3A312E30000000000001000000000000005C000102000000000D3139322E3136382E312E33370000000000000005616464657200000000000002000000010000001C0000000000010001000000010001002000010109000000010001010000000014000000080000006000601F97";
             Ior ior = new Ior(iorString);
@@ -788,11 +785,84 @@ namespace Ch.Elca.Iiop.Tests {
             Assertion.AssertEquals("wrong minor", 2, iiopProf.Version.Minor);            
             Assertion.AssertEquals("wrong number of components in profile", 2, iiopProf.TaggedComponents.Count);
             Assertion.AssertNotNull("no ssl tagged component found",
-                                    iiopProf.GetTaggedComponentData(TAG_SSL_SEC_TRANS.ConstVal,
-                                                                           Ch.Elca.Iiop.Security.Ssl.SSLComponentData.ClassType));
+                                    iiopProf.TaggedComponents.GetComponentData(TAG_SSL_SEC_TRANS.ConstVal, m_codec,
+                                                                               Ch.Elca.Iiop.Security.Ssl.SSLComponentData.TypeCode));
         }
         
     }
+
+
+    /// <summary>
+    /// Unit-test for class InternetIiopProfile
+    /// </summary>
+    [TestFixture]
+    public class InternetIiopProfileTest {
+
+        private InternetIiopProfile m_profile;
+        private string m_hostName;
+        private short m_port;
+        private byte[] m_objectKey;
+        private GiopVersion m_version;
+        private Codec m_codec;
+        private SerializerFactory m_serFactory;
+
+        [SetUp]
+        public void Setup() {
+            m_version = new GiopVersion(1, 2);
+            m_hostName = "localhost";
+            m_port = 8089;
+            m_objectKey = new byte[] { 65 };
+            m_profile = new InternetIiopProfile(m_version, m_hostName, m_port, m_objectKey);
+            
+    	    m_serFactory =
+    	        new SerializerFactory();
+            CodecFactory codecFactory =
+                new Ch.Elca.Iiop.Interception.CodecFactoryImpl(m_serFactory);
+            m_codec = 
+                codecFactory.create_codec(
+                    new omg.org.IOP.Encoding(ENCODING_CDR_ENCAPS.ConstVal, 1, 2));
+            IiopUrlUtil iiopUrlUtil = 
+                IiopUrlUtil.Create(m_codec, new object[] { 
+                    Services.CodeSetService.CreateDefaultCodesetComponent(m_codec)});            
+            m_serFactory.Initalize(new SerializerFactoryConfig(), iiopUrlUtil);
+        }
+
+        [Test]
+        public void TestDefaultProfileCreateion() {
+            Assertion.AssertEquals("profile version wrong", m_version, m_profile.Version); 
+            Assertion.AssertEquals("profile Hostname wrong", m_hostName, m_profile.HostName);
+            Assertion.AssertEquals("profile port wrong", m_port, m_profile.Port);
+            Assertion.AssertNotNull("profile key null", m_profile.ObjectKey);
+            Assertion.AssertEquals("profile key wrong", m_objectKey.Length, m_profile.ObjectKey.Length);
+            Assertion.AssertEquals("tagged components empty", 0, m_profile.TaggedComponents.Count);
+        }
+        
+        [Test]
+        public void TestAddTaggedComponent() {
+            CodeSetComponentData codeSetCompVal = 
+                new CodeSetComponentData((int)CharSet.LATIN1,
+                                         new int[] { (int)CharSet.LATIN1 },
+                                         (int)WCharSet.UTF16,
+                                         new int[] { (int)WCharSet.UTF16 });
+            TaggedComponent codeSetComponent =
+                new TaggedComponent(TAG_CODE_SETS.ConstVal,
+                                    m_codec.encode_value(codeSetCompVal));
+            m_profile.AddTaggedComponent(codeSetComponent);
+            Assertion.AssertEquals("tagged components one entry", 1, m_profile.TaggedComponents.Count);
+            Assertion.Assert("not found code set component", 
+                             m_profile.ContainsTaggedComponent(TAG_CODE_SETS.ConstVal));
+            CodeSetComponentData retrieved = 
+                (CodeSetComponentData)m_profile.TaggedComponents.GetComponentData(TAG_CODE_SETS.ConstVal,
+                                                                       m_codec,
+                                                                       CodeSetComponentData.TypeCode);
+            Assertion.AssertNotNull("not found code set component",
+                                    retrieved);
+            Assertion.AssertEquals("char set", codeSetCompVal.NativeCharSet, retrieved.NativeCharSet);
+            Assertion.AssertEquals("wchar set", codeSetCompVal.NativeWCharSet, retrieved.NativeWCharSet);                                                  
+        }
+
+    }
+
 
 }
 

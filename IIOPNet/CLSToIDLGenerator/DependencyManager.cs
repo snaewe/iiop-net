@@ -67,9 +67,13 @@ namespace Ch.Elca.Iiop.Idl {
             m_defaultMappedTypes.Add(typeof(System.Int16));
             m_defaultMappedTypes.Add(typeof(System.Int32));
             m_defaultMappedTypes.Add(typeof(System.Int64));
+            m_defaultMappedTypes.Add(typeof(System.UInt16));
+            m_defaultMappedTypes.Add(typeof(System.UInt32));
+            m_defaultMappedTypes.Add(typeof(System.UInt64));            
             m_defaultMappedTypes.Add(typeof(void));
             m_defaultMappedTypes.Add(typeof(System.Boolean));
             m_defaultMappedTypes.Add(typeof(System.Byte));
+            m_defaultMappedTypes.Add(typeof(System.SByte));
             m_defaultMappedTypes.Add(typeof(System.Single));
             m_defaultMappedTypes.Add(typeof(System.Double));
             m_defaultMappedTypes.Add(typeof(System.String));

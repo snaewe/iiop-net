@@ -435,7 +435,8 @@ namespace Ch.Elca.Iiop.Tests {
     /// <summary>
     /// Unit-tests for testing AttributeExtCollection
     /// </summary>
-    public class AttributeExtCollectionTest : TestCase {
+    [TestFixture]
+    public class AttributeExtCollectionTest {
         
         [Test]
         public void TestRemoveElement() {
@@ -533,7 +534,7 @@ namespace Ch.Elca.Iiop.Tests {
             
         }
         
-        
+        [Test]
         public void TestMergeCollections() {
             
             TestAttributeForCollT1 a1 = new TestAttributeForCollT1(1);
@@ -566,6 +567,7 @@ namespace Ch.Elca.Iiop.Tests {
             
         }
         
+        [Test]
         public void TestMergeAttribute() {
             
             TestAttributeForCollT1 a1 = new TestAttributeForCollT1(1);

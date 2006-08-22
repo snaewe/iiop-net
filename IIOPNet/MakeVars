@@ -1,0 +1,36 @@
+.DEFAULT_GOAL : build
+
+CSC=$(NET_FRAMEWORK_DIR)csc
+GACUTIL=$(NET_FRAMEWORK_SDK_DIR)gacutil
+NUNIT_FRAMEWORK_DLL=$(NUNITV2_HOME)\bin\nunit.framework.dll 
+NUNIT_CONSOLE=%NUNITV2_HOME%\bin\nunit-console.exe
+# the following option can be set to /assembly: to support older versions of nunit
+# NUNIT_ASSEMBLY_ARG_OPTION=/assembly:
+
+NUNITFORMS=$(NUNITFORMS_HOME)\NUnitForms.dll
+
+JUNIT_JAR = $(JUNIT_HOME)\junit.jar
+
+
+nunit-var:
+	@if not defined NUNITV2_HOME echo Define NUNITV2_HOME as the home directory of your NUNIT installation
+	@if not defined NUNITV2_HOME exit 2
+
+junit-var:
+	@if not defined JUNIT_HOME echo set the JUNIT_HOME variable to the JUNIT home directory. Please check TestInstructions.txt.
+	@if not defined JUNIT_HOME exit 2
+
+JacORBHome:
+    if not defined JACORB_HOME echo define JACORB_HOME first (e.g. C:\JACORB)
+    if not defined JACORB_HOME exit 2
+
+omniorb_home_var:
+    @IF NOT DEFINED OMNIORB_HOME echo define OMNIORB_HOME first
+    @IF NOT DEFINED OMNIORB_HOME exit 2
+    @IF NOT DEFINED OMNIORB_VERSION echo define OMNIORB_VERSION first
+    @IF NOT DEFINED OMNIORB_VERSION exit 2
+
+mico_home_var:
+    @IF NOT DEFINED MICO_HOME echo define MICO_HOME first
+    @IF NOT DEFINED MICO_HOME exit 2
+

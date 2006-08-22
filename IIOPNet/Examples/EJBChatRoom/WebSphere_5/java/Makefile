@@ -1,3 +1,5 @@
+include ..\..\..\..\MakeVars
+
 ANT_ARGS=-Dbasedir="." -Dwas_home="$(WAS_HOME)" 
 JAVA_HOME=$(WAS_HOME)\java 
 ANTCLASSPATH="$(JAVA_HOME)\lib\tools.jar";"$(WAS_HOME)\lib\xerces.jar";"$(WAS_HOME)\lib\j2ee.jar";"$(WAS_HOME)\lib\ant.jar"

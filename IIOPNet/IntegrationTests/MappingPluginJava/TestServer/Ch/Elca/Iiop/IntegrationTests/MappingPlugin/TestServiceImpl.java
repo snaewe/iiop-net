@@ -217,6 +217,10 @@ public class TestServiceImpl extends PortableRemoteObject implements TestService
         return arg;
     }
 
+    public Date receiveCurrentDate() throws RemoteException {
+        return new Date();
+    }
+
     public CustomMappedSerializable echoCustomMappedSer(CustomMappedSerializable arg) throws RemoteException {
         return arg;
     }

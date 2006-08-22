@@ -1,10 +1,12 @@
+include ..\..\..\MakeVars
+
 Test=ch\elca\iiop\integrationTests\ 
 BIN=bin\ 
 IDL=IDL\ 
 TestPackage=ch.elca.iiop.integrationTests.
-LAUNCH = ..\..\Utils\launch.exe
-DELAY = ..\..\Utils\delay.exe
-KILL = ..\..\Utils\kill.exe
+LAUNCH = ..\..\..\Utils\launch.exe
+DELAY = ..\..\..\Utils\delay.exe
+KILL = ..\..\..\Utils\kill.exe
 
 JBOSS_SSL_CONF = allSsl
 JBOSS_SSL_CONF_DIR = $(JBOSS_HOME_3_2_5)\server\$(JBOSS_SSL_CONF)\ 

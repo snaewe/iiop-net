@@ -1,0 +1,55 @@
+include ../../../../MakeVars.mono
+IIOPCHANNEL = ../../../../IIOPChannel/bin/IIOPChannel.dll
+IIOPCHANNELPDB = ../../../../IIOPChannel/bin/IIOPChannel.pdb
+LAUNCH = ../../../../Utils/launch.exe
+KILL = ../../../../Utils/kill.exe
+DELAY = ../../../../Utils/delay.exe
+
+bin         = bin/
+
+build: build-idl
+
+build-server: $(bin)TestServer.exe
+
+build-idl: IDL/Ch/Elca/Iiop/IntegrationTests/TestService.idl IDL/Ch/Elca/Iiop/IntegrationTests/ISimpleTestInterface.idl
+
+$(bin)IIOPChannel.dll: $(IIOPCHANNEL)
+	[ -d $(bin) ] || mkdir $(bin)
+	cp $(IIOPCHANNEL) $(bin)
+
+$(bin)TestServer.exe:  $(bin)IIOPChannel.dll $(bin)testIdlServices.dll *.cs
+	$(CSC) $(CSFLAGS) /t:exe /r:$(IIOPCHANNEL) /r:$(bin)testIdlServices.dll /out:$(bin)TestServer.exe *.cs
+
+$(bin)testIdlServices.dll: TestExceptionService.idl TestBoxedValueTypeService.idl
+	mono ../../../../IDLToCLSCompiler/IDLCompiler/bin/IDLToCLSCompiler.exe -o $(bin) -snk ../../../../Key.snk testIdlServices TestExceptionService.idl TestBoxedValueTypeService.idl
+
+    
+IDL/Ch/Elca/Iiop/IntegrationTests/TestService.idl: $(bin)TestServer.exe
+	mono ../../../../CLSToIDLGenerator/bin/CLSIDLGenerator.exe -o IDL Ch.Elca.Iiop.IntegrationTests.TestService $(bin)TestServer.exe
+	cp TestExceptionService.idl IDL/Ch/Elca/Iiop/IntegrationTests/ 
+	cp TestBoxedValueTypeService.idl IDL/Ch/Elca/Iiop/IntegrationTests/ 
+
+IDL/Ch/Elca/Iiop/IntegrationTests/ISimpleTestInterface.idl: $(bin)TestServer.exe
+	mono ../../../../CLSToIDLGenerator/bin/CLSIDLGenerator.exe -o IDL Ch.Elca.Iiop.IntegrationTests.ISimpleTestInterface $(bin)TestServer.exe
+
+start-server: install-gac
+	@mono $(LAUNCH) mono bin/TestServer.exe >> pid
+
+install-gac: $(IIOPCHANNEL)
+	gacutil /i $(IIOPCHANNEL)
+	gacutil /i $(bin)testIdlServices.dll
+
+stop-server: uninstall-gac
+	@-for p in `cat pid`; do mono $(KILL) $$p; done
+	@rm -f pid
+
+uninstall-gac:
+	gacutil /u testIdlServices
+	gacutil /u IIOPChannel
+
+
+clean: 
+	rm -rf IDL
+	rm -rf bin
+
+

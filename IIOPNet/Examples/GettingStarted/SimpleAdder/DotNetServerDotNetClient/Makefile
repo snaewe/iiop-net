@@ -1,3 +1,5 @@
+include ..\..\..\..\MakeVars
+
 build:
 	cd server
 	$(MAKE) build
@@ -20,3 +22,13 @@ clean:
         cd idlClient
         $(MAKE) clean
         cd ..
+
+start-server:
+	cd server
+	$(MAKE) start-server
+	cd ..
+
+stop-server:
+	cd server
+	$(MAKE) stop-server
+	cd ..

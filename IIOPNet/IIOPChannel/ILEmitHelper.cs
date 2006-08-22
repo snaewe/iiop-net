@@ -507,6 +507,14 @@ namespace Ch.Elca.Iiop.Idl {
             typebuild.SetCustomAttribute(serAttr);
         }        
         
+        /// <summary>
+        /// adds a repository id attribute to the type in construction.
+        /// </summary>
+        public void AddRepositoryIDAttribute(TypeBuilder typebuild, string id) {
+            RepositoryIDAttribute repIdAttr = new RepositoryIDAttribute(id);
+            typebuild.SetCustomAttribute(repIdAttr.CreateAttributeBuilder());            
+        }
+        
         /// <summary>generates il to cast/unbox a reference to the targetType
         public void GenerateCastObjectToType(ILGenerator gen, Type targetType) {
             if (targetType.IsValueType) {

@@ -350,6 +350,13 @@ namespace ch.elca.iiop.integrationTests {
             }
         }
 
+        [Test]
+        public void TestStringAsAny() {
+            string arg = "TestArg";
+            string result = (string) m_test.EchoAnything(arg);
+            Assertion.AssertEquals(arg, result);
+        }
+
 
     }
 

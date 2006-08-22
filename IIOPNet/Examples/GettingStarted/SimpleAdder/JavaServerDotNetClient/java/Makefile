@@ -1,3 +1,5 @@
+include ..\..\..\..\..\MakeVars
+
 IDLType	    = ch.elca.iiop.tutorial.gettingstarted.AdderImpl
 IDLPath     = ch\elca\iiop\tutorial\gettingstarted\ 
 IMPLPath    = $(IDLPath)AdderImpl

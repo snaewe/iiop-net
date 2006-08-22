@@ -1,0 +1,33 @@
+include ../../../MakeVars.mono
+NUNIT=${NUNITV2_HOME}/bin/nunit.framework.dll
+IIOPCHANNEL = ../../../IIOPChannel/bin/IIOPChannel.dll
+bin = bin/
+
+build: build-client
+
+build-client: $(bin)ClientTest.dll
+
+compile-idl: IDL/Ch/Elca/Iiop/IntegrationTests/TestService.idl
+
+IDL/Ch/Elca/Iiop/IntegrationTests/TestService.idl: ../TestServer/IDL/Ch/Elca/Iiop/IntegrationTests/TestService.idl
+	[ -d IDL ] || mkdir IDL
+	cp -f ../../../IDLToCLSCompiler/IDL/*.idl IDL
+	cp -r ../TestServer/IDL/* IDL
+
+$(bin)Client.dll: IDL/Ch/Elca/Iiop/IntegrationTests/TestService.idl
+	cd IDL; mono ../../../../IDLToCLSCompiler/IDLCompiler/bin/IDLToCLSCompiler.exe -o ../bin Client Ch/Elca/Iiop/IntegrationTests/TestService.idl
+
+$(bin)IIOPChannel.dll: $(IIOPCHANNEL)
+	[ -d $(bin) ] || mkdir $(bin)
+	cp $(IIOPCHANNEL) $(bin)
+
+$(bin)ClientTest.dll: $(bin)IIOPChannel.dll $(bin)Client.dll *.cs
+	$(CSC) $(CSFLAGS) /t:library /r:$(NUNIT) /r:$(bin)IIOPChannel.dll /r:$(bin)Client.dll /out:$(bin)ClientTest.dll TestClient.cs ValueTypeImpls.cs
+
+start-client:
+	@echo "Serialization Options IntegrationTest"
+	mono ${NUNITV2_HOME}/bin/nunit-console.exe bin/ClientTest.dll
+
+clean:
+	rm -rf IDL
+	rm -rf bin

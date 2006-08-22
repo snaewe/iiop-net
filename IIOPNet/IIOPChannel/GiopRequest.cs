@@ -167,18 +167,20 @@ namespace Ch.Elca.Iiop.MessageHandling {
             get {
                 string result = (string)
                     m_requestMessage.Properties[SimpleGiopMsg.IDL_METHOD_NAME_KEY];
-                if (result == null) {
-                    result = IdlNaming.GetRequestMethodName((MethodInfo)m_requestMessage.MethodBase,
-                                                            RemotingServices.IsMethodOverloaded(m_requestMessage));
-                    m_requestMessage.Properties[SimpleGiopMsg.IDL_METHOD_NAME_KEY] = result;
-                }
+                if (result != null) {
                 return result;
+                } else {
+                    throw new BAD_INV_ORDER(200, CompletionStatus.Completed_MayBe);
+                }
             }
             set {
-                // not changable (?), but needed to implement interface
-                throw new BAD_OPERATION(200, CompletionStatus.Completed_MayBe);
-            }            
-        }        
+                if (value == null) {
+                    throw new INTERNAL(200, CompletionStatus.Completed_MayBe);
+                }
+                m_requestMessage.Properties[SimpleGiopMsg.IDL_METHOD_NAME_KEY] =
+                        value;
+            }        
+        }
         
         /// <summary>
         /// the request arguments
@@ -716,7 +718,7 @@ namespace Ch.Elca.Iiop.MessageHandling {
         /// <summary>
         /// the full name of the type of .NET object, servicing this request.
         /// </summary>
-        internal string ServerType {
+        internal string ServerTypeName {
             get {
                 if (m_requestCallMessage == null) {
                     if (m_requestMessage.Properties[SimpleGiopMsg.TYPENAME_KEY] != null) {
@@ -736,6 +738,26 @@ namespace Ch.Elca.Iiop.MessageHandling {
                 }
             }
         }
+        
+        /// <summary>
+        /// the type of .NET object, servicing this request.
+        /// </summary>
+        internal Type ServerTypeType {
+            get {
+                if (m_requestMessage.Properties[SimpleGiopMsg.TARGET_TYPE_KEY] != null) {
+                    return (Type)m_requestMessage.Properties[SimpleGiopMsg.TARGET_TYPE_KEY];
+                } else {
+                    throw new BAD_INV_ORDER(210, CompletionStatus.Completed_MayBe);
+                }
+            }
+            set {
+                if (m_requestCallMessage == null) {
+                    m_requestMessage.Properties[SimpleGiopMsg.TARGET_TYPE_KEY] = value;
+                } else {
+                    throw new BAD_OPERATION(210, CompletionStatus.Completed_MayBe);
+                }
+            }
+        }        
         
         /// <summary>
         /// the request arguments
@@ -1000,89 +1022,53 @@ namespace Ch.Elca.Iiop.MessageHandling {
             return calledMethodInfo;
         }
 
-        /// <summary>aquire the information for a specific object method call</summary>
-        /// <param name="serverType">the type of the object called</param>
-        /// <param name="calledMethodInfo">the MethodInfo of the method, which is called</param>
-        /// <returns>returns the mapped methodName of the operation to call of this object specific method</returns>
-        private MethodInfo DecodeObjectOperation(string methodName, Type serverType) {
-            // method name mapping
-            string resultMethodName;
-            if (ReflectionHelper.IIdlEntityType.IsAssignableFrom(serverType)) {
-                resultMethodName = methodName;
-                // an interface mapped to from Idl is implemented by server ->
-                // compensate 3.2.3.1: removal of _ for names, which clashes with CLS id's
-                if (IdlNaming.NameClashesWithClsKeyWord(methodName)) {
-                    resultMethodName = "_" + methodName;
-                } else if (methodName.StartsWith("_get_")) {
-                    // handle properties correctly
-                    PropertyInfo prop = serverType.GetProperty(methodName.Substring(5), BindingFlags.Instance | BindingFlags.Public);
-                    if (prop != null) {
-                        resultMethodName = prop.GetGetMethod().Name;
-                    }
-                } else if (methodName.StartsWith("_set_")) {
-                    // handle properties correctly
-                    PropertyInfo prop = serverType.GetProperty(methodName.Substring(5), BindingFlags.Instance | BindingFlags.Public);
-                    if (prop != null) {
-                        resultMethodName = prop.GetSetMethod().Name;
-                    }
-                }
-            } else {                
-                resultMethodName = IdlNaming.ReverseClsToIdlNameMapping(methodName);
-                if (resultMethodName.StartsWith("get_") || resultMethodName.StartsWith("set_")) {
-                    // special handling for properties, because properties with a name, which is transformed on mapping,
-                    // need to be specially identified, because porperty name is included in method name.
-                    string propName = IdlNaming.ReverseClsToIdlNameMapping(resultMethodName.Substring(4));
-                    PropertyInfo prop = serverType.GetProperty(propName, BindingFlags.Public | BindingFlags.Instance);
-                    if (prop != null) {
-                        if (resultMethodName.StartsWith("get_")) {
-                            resultMethodName = prop.GetGetMethod().Name;
-                        } else {
-                            resultMethodName = prop.GetSetMethod().Name;
-                        }
-                    }
-                }
-
-            }
-            
-            MethodInfo calledMethodInfo = serverType.GetMethod(resultMethodName);
-            if (calledMethodInfo == null) { 
-                // possibly an overloaded method!
-                calledMethodInfo = IdlNaming.FindClsMethodForOverloadedMethodIdlName(methodName, serverType);
-                if (calledMethodInfo == null) { // not found -> BAD_OPERATION
-                    throw new BAD_OPERATION(0, CompletionStatus.Completed_No); 
-                }
-            }
-            return calledMethodInfo;
-        }                
-                        
         /// <summary>
-        /// resolve the call to a .net method according to the properties already set.
-        /// As a result, update the request message.
+        /// Resolve the target type for this request.
         /// </summary>
-        internal void ResolveCall() {
+        internal void ResolveTargetType() {
             if (m_requestCallMessage != null) { // is fixed
                 throw new BAD_OPERATION(300, CompletionStatus.Completed_MayBe);
             }
             
-            MethodInfo callForMethod;
             Type serverType;
             bool regularOp;            
             string calledUri = RequestUri;
                                                 
-            string internalMethodName; // the implementation method name
             if (!StandardCorbaOps.CheckIfStandardOp(RequestMethodName)) {
                 regularOp = true; // non-pseude op
                 serverType = RemotingServices.GetServerTypeForUri(calledUri);
                 if (serverType == null) {
                     throw new OBJECT_NOT_EXIST(0, CompletionStatus.Completed_No); 
                 }
+            } else {
+                regularOp = false; // pseude-object op
+                calledUri = StandardCorbaOps.WELLKNOWN_URI; // change object-uri
+                serverType = StandardCorbaOps.s_type;
+            }
+            IsStandardCorbaOperation = !regularOp;
+            ServerTypeName = serverType.FullName;
+            ServerTypeType = serverType;
+            CalledUri = calledUri;
+        }
+        
+        /// <summary>
+        /// resolve the call to a .net method according to the properties already set.
+        /// As a result, update the request message.
+        /// </summary>
+        /// <remarks>ResolveTargetType must have been called before</remarks>
+        internal void ResolveCalledMethod(MethodInfo forRequestMethodName) {
+            if (ServerTypeType == null) {
+                // ResolveTargetType not called before
+                throw new BAD_OPERATION(305, CompletionStatus.Completed_MayBe);
+            }
+            MethodInfo callForMethod = forRequestMethodName;
+            string internalMethodName; // the implementation method name
+            if (!IsStandardCorbaOperation) {
                 // handle object specific-ops
-                callForMethod = DecodeObjectOperation(RequestMethodName, serverType);
                 internalMethodName = callForMethod.Name;
                 // to handle overloads correctly, add signature info:
                 CalledMethodSignature = ReflectionHelper.GenerateSigForMethod(callForMethod);                
             } else {
-                regularOp = false; // pseude-object op
                 // handle standard corba-ops like _is_a
                 callForMethod = DecodeStandardOperation(RequestMethodName);
                 MethodInfo internalCall = 
@@ -1091,13 +1077,8 @@ namespace Ch.Elca.Iiop.MessageHandling {
                     throw new INTERNAL(2802, CompletionStatus.Completed_MayBe);    
                 }
                 internalMethodName = internalCall.Name;
-                calledUri = StandardCorbaOps.WELLKNOWN_URI; // change object-uri
-                serverType = StandardCorbaOps.s_type;
             }            
-            ServerType = serverType.FullName;
-            CalledUri = calledUri;
             CalledMethodName = internalMethodName;            
-            IsStandardCorbaOperation = !regularOp;
             CalledMethod = callForMethod;
         }                
                 

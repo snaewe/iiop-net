@@ -87,6 +87,7 @@ namespace omg.org.IOP {
     
     [RepositoryID("IDL:omg.org/IOP/TaggedProfile:1.0")]
     [IdlStruct()]
+    [Serializable]
     public struct TaggedProfile {
         public int tag;
         [IdlSequence(0L)]

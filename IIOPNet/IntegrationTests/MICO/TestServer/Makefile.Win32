@@ -1,16 +1,13 @@
+include ..\..\..\MakeVars
 !include .\MakeVars.Win32
 RELATIVE=$(MICO_HOME)
-DELAY=..\..\utils\delay.exe
-LAUNCH=..\..\utils\launch.exe
-KILL=..\..\utils\kill.exe
+DELAY=..\..\..\utils\delay.exe
+LAUNCH=..\..\..\utils\launch.exe
+KILL=..\..\..\utils\kill.exe
 
 
 build: mico_home_var server
-
-mico_home_var:
-    @IF NOT DEFINED MICO_HOME echo define MICO_HOME first
-    @IF NOT DEFINED MICO_HOME exit 2
-    
+  
 server: service.h service.obj server.obj service.cc
 	$(LD) $(LDFLAGS) service.obj server.obj $(LDLIBS) $(COS_LDLIBS) /OUT:server.exe
 

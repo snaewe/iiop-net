@@ -169,10 +169,10 @@ namespace Ch.Elca.Iiop.Interception {
 	                }
 	                // call all registered orb initalizers.
 	                ORBInitInfoImpl info = new ORBInitInfoImpl(m_orb);
-	                foreach (ORBInitalizer init in orbInitalizers) {
+	                foreach (ORBInitializer init in orbInitalizers) {
 	                    init.pre_init(info);	                    
 	                }
-	                foreach (ORBInitalizer init in orbInitalizers) {
+	                foreach (ORBInitializer init in orbInitalizers) {
 	                    init.post_init(info);
 	                }
 	                InstallInterceptors();

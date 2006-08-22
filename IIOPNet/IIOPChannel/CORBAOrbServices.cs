@@ -90,6 +90,41 @@ namespace omg.org.CORBA {
                                  [StringValue] [WideChar(false)] string name,
                                  [IdlSequence(0L)][StringValue] [WideChar(false)] string[] members);
                 
+        TypeCode create_struct_tc ([StringValue] [WideChar(false)] string id, 
+                                   [StringValue] [WideChar(false)] string name,
+                                   [IdlSequence(0L)] StructMember[] members);
+        
+        TypeCode create_value_tc ([StringValue] [WideChar(false)] string id, 
+                                  [StringValue] [WideChar(false)] string name,
+                                  short type_modifier,
+                                  omg.org.CORBA.TypeCode concrete_base,
+                                  [IdlSequence(0L)] ValueMember[] members);
+        
+        // TypeCode create_native_tc (
+        //    [StringValue] [WideChar(false)] string id, 
+        //    [StringValue] [WideChar(false)] string name);
+
+        // TypeCode create_recursive_tc(
+        //    [StringValue] [WideChar(false)] string id);
+        
+        // TypeCode create_recursive_sequence_tc (// deprecated
+        // long bound, long offset
+        // );
+        
+        // TypeCode create_fixed_tc (
+        // short digits,
+        // short scale);
+        
+        TypeCode create_exception_tc([StringValue] [WideChar(false)] string id, 
+                                     [StringValue] [WideChar(false)] string name,
+                                     [IdlSequence(0L)] StructMember[] members);
+        
+        // TypeCode create_union_tc (
+        //    [StringValue] [WideChar(false)] string id, 
+        //    [StringValue] [WideChar(false)] string name,        
+        //    omg.org.CORBA.TypeCode discriminator_type,
+        //    [IdlSequence(0L)] UnionMember[] members);
+                
         #endregion TypeCode creation operations
         
     }
@@ -144,10 +179,10 @@ namespace omg.org.CORBA {
         #region Pseudo object operation helpers
                 
         /// <summary>checks, if object supports the specified interface</summary>
-        bool is_a(object proxy, Type type);
+        bool is_a(object obj, Type type);
       
         /// <summary>checks, if object supports the specified interface</summary>
-        bool is_a(object proxy, string repId);
+        bool is_a(object obj, string repId);
         
         /// <summary>checks, if the object is existing</summary>
         bool non_existent(object proxy);
@@ -157,13 +192,16 @@ namespace omg.org.CORBA {
 	    
         /// <summary>registers an initalizer for portable interceptors. The interceptors are
         /// enabled by calling CompleteInterceptorRegistration.</summary>
-        void RegisterPortableInterceptorInitalizer(ORBInitalizer initalizer);
+        void RegisterPortableInterceptorInitalizer(ORBInitializer initalizer);
 	    
         /// <summary>
         /// completes registration of interceptors. 
         /// Afterwards, the interceptors are enabled and are called during processing.
         /// </summary>
         void CompleteInterceptorRegistration();
+
+        #endregion Protable Interceptors
+        #region Config
         
         /// <summary>
         /// Overrides the IIOP.NET default for charset and wcharset. If this method is
@@ -174,7 +212,17 @@ namespace omg.org.CORBA {
         void OverrideDefaultCharSets(Ch.Elca.Iiop.Services.CharSet charSet, 
                                      Ch.Elca.Iiop.Services.WCharSet wcharSet);
 	    
-        #endregion Protable Interceptors
+
+        /// <summary>
+        /// The configuration for the serializer factory.
+        /// With this config, it's possible to configure some serializer
+        /// parameters.
+        /// </summary>
+        Ch.Elca.Iiop.Marshalling.SerializerFactoryConfig SerializerFactoryConfig {
+            get;
+        }
+
+        #endregion Config
 
     }
     
@@ -193,15 +241,21 @@ namespace omg.org.CORBA {
         private InterceptorManager m_interceptorManager;
         private CodecFactory m_codecFactory;
         private Ch.Elca.Iiop.Interception.PICurrentManager m_piCurrentManager;
+        private Ch.Elca.Iiop.Marshalling.ArgumentsSerializerFactory m_argSerializerFactory;
+        private Ch.Elca.Iiop.Marshalling.SerializerFactory m_serializerFactory;
+        private IiopUrlUtil m_iiopUrlUtil;
+        private Ch.Elca.Iiop.Marshalling.SerializerFactoryConfig m_serializerFactoryConfig;
+        private bool m_isInitialized = false;
 		
         #endregion IFields
         #region IConstructors
         
         private OrbServices() {         
             m_orbInitalizers = new ArrayList();
-            m_codecFactory = new CodecFactoryImpl();
             m_piCurrentManager = new PICurrentManager();
-            m_interceptorManager = new InterceptorManager(this);
+            m_interceptorManager = new InterceptorManager(this);  
+            m_serializerFactoryConfig = 
+                new Ch.Elca.Iiop.Marshalling.SerializerFactoryConfig();
         }
         
         #endregion IConstructors
@@ -228,6 +282,7 @@ namespace omg.org.CORBA {
         /// </summary>
         internal CodecFactory CodecFactory {
             get {
+                EnsureInitialized();
                 return m_codecFactory;
             }
         }
@@ -249,10 +304,74 @@ namespace omg.org.CORBA {
                 return m_piCurrentManager;
             }
         }
+        
+        /// <summary>
+        /// The configuration for the serializer factory.
+        /// With this config, it's possible to configure some serializer
+        /// parameters.
+        /// </summary>
+        public Ch.Elca.Iiop.Marshalling.SerializerFactoryConfig SerializerFactoryConfig {
+            get {
+                EnsureNotInitalized();
+                return m_serializerFactoryConfig;
+            }
+        }
+		
+        /// <summary>
+        /// returns the factory responsible for creating ArgumentsSerializer
+        /// </summary>
+        internal Ch.Elca.Iiop.Marshalling.ArgumentsSerializerFactory ArgumentsSerializerFactory {
+            get {
+                EnsureInitialized();
+                return m_argSerializerFactory;
+            }        
+        }
+        
+        /// <summary>
+        /// returns the IiopUrlUtil responsible for parsing urls.
+        /// </summary>
+        internal IiopUrlUtil IiopUrlUtil {
+            get {
+                EnsureInitialized();
+                return m_iiopUrlUtil;
+            }
+        }
 		
         #endregion IProperties
         #region IMethods
         
+        private void Initalize() {            
+            m_serializerFactory = new Ch.Elca.Iiop.Marshalling.SerializerFactory();
+            m_codecFactory = new CodecFactoryImpl(m_serializerFactory);                        
+            m_argSerializerFactory = 
+                new Ch.Elca.Iiop.Marshalling.ArgumentsSerializerFactory(m_serializerFactory);
+            Codec iiopUrlUtilCodec =                 
+                    m_codecFactory.create_codec(
+                                       new Encoding(ENCODING_CDR_ENCAPS.ConstVal, 
+                                                    1, 2));
+            m_iiopUrlUtil = 
+                IiopUrlUtil.Create(iiopUrlUtilCodec, new object[] { 
+                    Ch.Elca.Iiop.Services.CodeSetService.CreateDefaultCodesetComponent(iiopUrlUtilCodec)});
+            m_serializerFactory.Initalize(m_serializerFactoryConfig, 
+                                          m_iiopUrlUtil);
+        }
+        
+        private void EnsureInitialized() {
+            lock(this) {
+                if (!m_isInitialized) {
+                    Initalize();
+                    m_isInitialized = true;
+                }
+            }
+        }
+        
+        private void EnsureNotInitalized() {
+            lock(this) {
+                if (m_isInitialized) {
+                    throw new BAD_INV_ORDER(691, CompletionStatus.Completed_MayBe);
+                }
+            }
+        }
         
         private void CheckIsValidUri(string uri) {
             if (!IiopUrlUtil.IsUrl(uri)) {
@@ -260,8 +379,13 @@ namespace omg.org.CORBA {
             }
         }
         
-        private void CheckIsProxy(MarshalByRefObject mbrProxy) {
-            if ((mbrProxy == null) || (!RemotingServices.IsTransparentProxy(mbrProxy))) {
+        private bool IsProxy(object obj) {
+            MarshalByRefObject mbrProxy = obj as MarshalByRefObject;
+            return ((mbrProxy != null) && (RemotingServices.IsTransparentProxy(mbrProxy)));
+        }
+        
+        private void CheckIsProxy(object obj) {
+            if (!IsProxy(obj)) {
                 // argument is not a proxy
                 throw new BAD_PARAM(265, CompletionStatus.Completed_Yes);
             }
@@ -270,16 +394,18 @@ namespace omg.org.CORBA {
         
         /// <summary>takes an IOR or a corbaloc and returns a proxy</summary>
         public object string_to_object([StringValue] string uri) {
-            CheckIsValidUri(uri);
-            
+            CheckIsValidUri(uri);            
             Ior ior = IiopUrlUtil.CreateIorForUrl(uri, String.Empty);
             // performance opt: if an ior passed in, use it
             string iorString = uri;         
             if (!IiopUrlUtil.IsIorString(uri)) {
                 iorString = ior.ToString();
             }
-                
-            return RemotingServices.Connect(ior.Type, iorString);
+            Type type = ReflectionHelper.MarshalByRefObjectType;
+            if (ior.Type != null) { // type is known
+                type = ior.Type;
+            } // if not known, use MarshalByRefObject
+            return RemotingServices.Connect(type, iorString);
         }
         
         /// <summary>takes a proxy and returns the IOR / corbaloc / ...</summary>
@@ -296,11 +422,11 @@ namespace omg.org.CORBA {
                     return uri;
                 } else {
                     // create an IOR assuming type is CORBA::Object
-                    return IiopUrlUtil.CreateIorForUrl(uri, "").ToString();
+                    return IiopUrlUtil.CreateIorForUrl(uri, String.Empty).ToString();
                 }
             } else {
                 // local object
-                return IiopUrlUtil.CreateIorForObjectFromThisDomain(mbr).ToString();
+                return IorUtil.CreateIorForObjectFromThisDomain(mbr).ToString();
             }
         }
 
@@ -452,41 +578,80 @@ namespace omg.org.CORBA {
                 return null;
             }
         }
+        
+        public TypeCode create_struct_tc ([StringValue] [WideChar(false)] string id, 
+                                          [StringValue] [WideChar(false)] string name,
+                                          [IdlSequence(0L)] StructMember[] members) {
+            return new StructTC(id, name, members);
+        }
+        
+        public TypeCode create_value_tc ([StringValue] [WideChar(false)] string id, 
+                                         [StringValue] [WideChar(false)] string name,
+                                         short type_modifier,
+                                         omg.org.CORBA.TypeCode concrete_base,
+                                         [IdlSequence(0L)] ValueMember[] members) {
+            return new ValueTypeTC(id, name,
+                                   members, concrete_base, type_modifier);
+        }
+        
+        public TypeCode create_exception_tc([StringValue] [WideChar(false)] string id, 
+                                            [StringValue] [WideChar(false)] string name,
+                                            [IdlSequence(0L)] StructMember[] members) {
+            return new ExceptTC(id, name, members);
+        }                
                 
         #endregion TypeCode creation operations     
         
         #region Pseudo object operation helpers
                 
-        public bool is_a(object proxy, Type type) {
+        /// <summary>see <see cref="omg.org.CORBA.IOrbServices.is_a(object, type)"</summary>
+        public bool is_a(object obj, Type type) {
             if (type == null) {
                 throw new ArgumentException("type must be != null");
             }
             string repId = Repository.GetRepositoryID(type);
-            return is_a(proxy, repId);
+            return is_a(obj, repId);
             
         }
         
-        public bool is_a(object proxy, string repId) {
-            if (proxy == null) {
-                throw new ArgumentException("proxy must be != null");
+        /// <summary>
+        /// checks by calling is_a on the remote object, if the
+        /// proxy supports an interface with type repId.
+        /// </summary>
+        private bool IsAssignableRemote(object proxy, string repId) {
+            // create a new proxy to the same url to prevent issues with type compatibility to IObject.
+            string proxyUrl = RemotingServices.GetObjectUri((MarshalByRefObject)proxy);
+            IObject objProxy =
+                (IObject)RemotingServices.Connect(ReflectionHelper.IObjectType, proxyUrl);
+            return objProxy._is_a(repId);
+        }                        
+        
+        /// <summary>see <see cref="omg.org.CORBA.IOrbServices.is_a(object, string)"</summary>
+        public bool is_a(object obj, string repId) {
+            if (obj == null) {
+                throw new ArgumentException("obj must be != null");
             } 
-            CheckIsProxy(proxy as MarshalByRefObject);
             if (repId == null) {
                 throw new ArgumentException("repId must be != null");
-            }           
-            
+            }                                
             if (repId.Equals("IDL:omg.org/CORBA/Object:1.0") ||
                 repId.Equals(String.Empty)) {
                 // always true
                 return true;
             }
-            
-            // perform remote call to check for is_a
-            return ((IObject)proxy)._is_a(repId);           
+            if (IsProxy(obj)) {      
+                // perform remote call to check for is_a
+                return IsAssignableRemote(obj, repId);
+            } else {
+                Type assignableTo = Repository.GetTypeForId(repId); 
+                // do a local check
+                return Repository.IsCompatible(assignableTo,
+                                               obj.GetType());
+            }
         }
         
         public bool non_existent(object proxy) {
-            CheckIsProxy(proxy as MarshalByRefObject);
+            CheckIsProxy(proxy);
             
             return ((IObject)proxy)._non_existent();
         }
@@ -495,7 +660,7 @@ namespace omg.org.CORBA {
         #region Portable Interceptors
 	    
         /// <summary>see <see cref="omg.org.CORBA.IOrbServices.RegisterPortableInterceptorInitalizer"</summary>
-        public void RegisterPortableInterceptorInitalizer(ORBInitalizer initalizer) {
+        public void RegisterPortableInterceptorInitalizer(ORBInitializer initalizer) {
             lock(m_orbInitalizers.SyncRoot) {
                 m_orbInitalizers.Add(initalizer);
             }
@@ -560,21 +725,50 @@ namespace omg.org.CORBA.ORB_package {
 namespace Ch.Elca.Iiop.Tests {
     
     using System.IO;    
+    using System.Runtime.Remoting.Channels;
     using NUnit.Framework;    
     using omg.org.CORBA;
     using Ch.Elca.Iiop.Services;
+    using Ch.Elca.Iiop;    
+    using Ch.Elca.Iiop.Idl;
+    using Ch.Elca.Iiop.Marshalling;
     
     /// <summary>
-    /// Unit-tests for orb services
+    /// Unit-tests for orb services code set
     /// </summary>
-    public class OrbServicesTest : TestCase {
+    [TestFixture]
+    public class OrbServicesCodeSetTest {
         
-        public OrbServicesTest() {
+        private Codec m_codec;
+        private SerializerFactory m_serFactory;
+        
+        public OrbServicesCodeSetTest() {
         }
+        
+    	[SetUp]
+    	public void SetUp() {
+    	    m_serFactory =
+    	        new SerializerFactory();
+            CodecFactory codecFactory =
+                new CodecFactoryImpl(m_serFactory);
+            m_codec = 
+                codecFactory.create_codec(
+                    new omg.org.IOP.Encoding(ENCODING_CDR_ENCAPS.ConstVal, 1, 2));            
+            IiopUrlUtil iiopUrlUtil = 
+                IiopUrlUtil.Create(m_codec, new object[] { 
+                    Services.CodeSetService.CreateDefaultCodesetComponent(m_codec)});            
+            m_serFactory.Initalize(new SerializerFactoryConfig(), iiopUrlUtil);
+    	}
                        
-        public void TestOverrideCodeSetsWhenAlreadySet() {
-            Assertion.Assert(Enum.IsDefined(typeof(CharSet), CodeSetService.DefaultCharSet));
-            Assertion.Assert(Enum.IsDefined(typeof(WCharSet), CodeSetService.DefaultWCharSet));
+        [Test]
+        public void TestOverrideCodeSetsWhenAlreadySet() {    	                            
+            TaggedComponent defaultComponent = 
+                CodeSetService.CreateDefaultCodesetComponent(m_codec);
+            CodeSetComponentData codeSetData = (CodeSetComponentData)
+                m_codec.decode_value(defaultComponent.component_data,
+                                     CodeSetComponentData.TypeCode);                
+            Assertion.Assert(Enum.IsDefined(typeof(CharSet), codeSetData.NativeCharSet));
+            Assertion.Assert(Enum.IsDefined(typeof(WCharSet), codeSetData.NativeWCharSet));
             
             IOrbServices orbServices = OrbServices.GetSingleton();
             try {
@@ -586,6 +780,310 @@ namespace Ch.Elca.Iiop.Tests {
         }
         
     }
+    
+    
+    /// <summary>
+    /// Unit-tests for type code creation using orb services
+    /// </summary>
+    [TestFixture]
+    public class OrbServicesTCTest {
+
+        private IOrbServices m_orb;
+        
+        [SetUp]
+        public void SetUp() {
+            m_orb = OrbServices.GetSingleton();            
+        }
+        
+        [Test]
+        public void TestCreateTCForLongType() {                   
+            int longArg = 1;            
+            omg.org.CORBA.TypeCode long_TC = m_orb.create_tc_for(longArg);
+            Assertion.AssertEquals("created tc kind", TCKind.tk_long,
+                                   long_TC.kind());
+        }
+        
+        [Test]
+        public void TestAliasTC() {
+            string name = "OrbServices_TestAlias";
+            string aliasRepId = "IDL:Ch/Elca/Iiop/Tests/" + name + ":1.0";
+            TypeCodeImpl aliasedTC = (TypeCodeImpl)m_orb.create_long_tc();
+            omg.org.CORBA.TypeCode alias_TC =
+                m_orb.create_alias_tc(aliasRepId, name, aliasedTC);
+            Assertion.AssertEquals("alias id", aliasRepId, alias_TC.id());
+            Assertion.AssertEquals("alias kind", TCKind.tk_alias, alias_TC.kind());
+            Assertion.AssertEquals("alias cls type", aliasedTC.GetClsForTypeCode(),
+                                   ((TypeCodeImpl)alias_TC).GetClsForTypeCode());            
+        }
+        
+        [Test]
+        public void TestSequenceTC() {
+            TypeCodeImpl seqMemberType = (TypeCodeImpl)m_orb.create_octet_tc();            
+            omg.org.CORBA.TypeCode seqOfOctet_TC = 
+                m_orb.create_sequence_tc(0, seqMemberType);
+            Assertion.AssertEquals("sequence kind", TCKind.tk_sequence, seqOfOctet_TC.kind());
+            Assertion.AssertEquals("sequence member type", seqMemberType.GetClsForTypeCode(),
+                                   ((TypeCodeImpl)seqOfOctet_TC.content_type()).GetClsForTypeCode());
+        }
+        
+        [Test]
+        public void TestStructTC() {
+            string name = "OrbServices_TestStruct";
+            string repId = "IDL:Ch/Elca/Iiop/Tests/" + name + ":1.0";
+            
+            StructMember m1 = new StructMember("M1", m_orb.create_long_tc());            
+            omg.org.CORBA.TypeCode tc = 
+                m_orb.create_struct_tc(repId, name,
+                                       new StructMember[] { m1 });
+            Assertion.AssertEquals("id", repId, tc.id());
+            Assertion.AssertEquals("king", TCKind.tk_struct, tc.kind());
+            Assertion.AssertEquals("nr of members", 1, tc.member_count());
+            Assertion.AssertEquals("member m1 name", m1.name, tc.member_name(0));
+            Assertion.AssertEquals("member m1 type", m1.type.kind(), tc.member_type(0).kind());
+        }
+        
+        [Test]
+        public void TestValueTypeTC() {
+            string name = "OrbServices_TestValueType";
+            string repId = "IDL:Ch/Elca/Iiop/Tests/" + name + ":1.0";
+            
+            ValueMember m1 = new ValueMember("M1", m_orb.create_long_tc(), 0);
+            omg.org.CORBA.TypeCode tc = 
+                m_orb.create_value_tc(repId, name, 0, m_orb.create_null_tc(),
+                                      new ValueMember[] { m1 });
+            Assertion.AssertEquals("id", repId, tc.id());
+            Assertion.AssertEquals("king", TCKind.tk_value, tc.kind());
+            Assertion.AssertEquals("nr of members", 1, tc.member_count());
+            Assertion.AssertEquals("member m1 name", m1.name, tc.member_name(0));
+            Assertion.AssertEquals("member m1 type", m1.type.kind(), tc.member_type(0).kind());
+        }
+        
+        [Test]
+        public void TestExceptTC() {
+            string name = "OrbServices_TestException";
+            string repId = "IDL:Ch/Elca/Iiop/Tests/" + name + ":1.0";
+            
+            StructMember m1 = new StructMember("M1", m_orb.create_long_tc());            
+            omg.org.CORBA.TypeCode tc = 
+                m_orb.create_exception_tc(repId, name,
+                                       new StructMember[] { m1 });
+            Assertion.AssertEquals("id", repId, tc.id());
+            Assertion.AssertEquals("king", TCKind.tk_except, tc.kind());
+            Assertion.AssertEquals("nr of members", 1, tc.member_count());
+            Assertion.AssertEquals("member m1 name", m1.name, tc.member_name(0));
+            Assertion.AssertEquals("member m1 type", m1.type.kind(), tc.member_type(0).kind());
+        }
+        
+    }
+
+    [RepositoryID("IDL:Ch/Elca/Iiop/Tests/IsALocalIfTestInterface:1.0")]
+    [InterfaceTypeAttribute(IdlTypeInterface.LocalInterface)]
+    public interface IsALocalIfTestInterface {
+    }
+    
+    public class IsALocalIfTestImpl : IsALocalIfTestInterface {        
+    }
+    
+    
+    [RepositoryID("IDL:Ch/Elca/Iiop/Tests/IsARemoteIfTestInterface:1.0")]
+    [InterfaceTypeAttribute(IdlTypeInterface.ConcreteInterface)]    
+    public interface IsARemoteIfTestInterface {
+        
+    }
+    
+    [RepositoryID("IDL:Ch/Elca/Iiop/Tests/IsARemoteIfTestInterfaceNotImpl:1.0")]
+    [InterfaceTypeAttribute(IdlTypeInterface.ConcreteInterface)]    
+    public interface IsARemoteIfTestInterfaceNotImpl {
+        
+    }    
+    
+    [SupportedInterface(typeof(IsARemoteIfTestInterface))]
+    public class IsARemoteIfTestImpl1 : MarshalByRefObject, IsARemoteIfTestInterface {
+    }
+    
+    public class IsARemoteIfTestImpl2 : MarshalByRefObject, IsARemoteIfTestInterface {
+    }
+    
+    /// <summary>
+    /// Unit-tests for methods related to object / string coneversions.
+    /// </summary>
+    [TestFixture]
+    public class OrbServicesStringObjectConversionTest {
+
+        private IorProfile m_profile;
+        private IOrbServices m_orb;              
+        private IiopClientChannel m_clientChannel;
+        
+        [SetUp]
+        public void SetUp() {
+            m_orb = OrbServices.GetSingleton();
+            
+            m_profile =
+                new InternetIiopProfile(new GiopVersion(1,2),
+                                        "localhost",
+                                        1001,
+                                        new byte[] { 1, 0, 0, 0 });
+                        
+            m_clientChannel = new IiopClientChannel();
+            ChannelServices.RegisterChannel(m_clientChannel);
+        }
+        
+        [TearDown]
+        public void TearDown() {            
+            if (m_clientChannel != null) {
+                ChannelServices.UnregisterChannel(m_clientChannel);
+            }
+            m_clientChannel = null;
+        }
+        
+        [Test]
+        public void TestStringToObjectIORNormal() {
+            Ior ior = new Ior("IDL:omg.org/CORBA/Object:1.0",
+                              new IorProfile[] { m_profile });
+            string iorString = ior.ToString();
+            object objToString = m_orb.string_to_object(iorString);
+            Assertion.AssertNotNull("obj to string not created", objToString);
+            Assertion.Assert("obj not a proxy", 
+                             RemotingServices.IsTransparentProxy(objToString));                              
+        }
+        
+        [Test]
+        public void TestStringToObjectIORUnknownType() {                                                              
+            Ior ior = new Ior("IDL:Ch/Elca/Iiop/Tests/TestClientUnknownIf1:1.0",
+                              new IorProfile[] { m_profile });
+            string iorString = ior.ToString();
+            object objToString = m_orb.string_to_object(iorString);
+            Assertion.AssertNotNull("obj to string not created", objToString);
+            Assertion.Assert("obj not a proxy", 
+                             RemotingServices.IsTransparentProxy(objToString));
+        }                        
+        
+    }
+    
+    
+    /// <summary>
+    /// Unit-tests for methods related to pseudo object operations (is_a, ...).
+    /// </summary>
+    [TestFixture]
+    public class OrbServicesPseudoObjectOperationTests {
+
+        private const int TEST_PORT = 8090;
+        
+        private IOrbServices m_orb;              
+        private IiopChannel m_channel;
+        
+        [SetUp]
+        public void SetUp() {
+            m_orb = OrbServices.GetSingleton();                        
+                        
+            m_channel = new IiopChannel(TEST_PORT);
+            ChannelServices.RegisterChannel(m_channel);
+        }
+        
+        [TearDown]
+        public void TearDown() {            
+            if (m_channel != null) {
+                ChannelServices.UnregisterChannel(m_channel);
+            }
+            m_channel = null;
+        }
+    
+        [Test]
+        public void TestIsAForNonProxy() {
+            IsALocalIfTestImpl impl = new IsALocalIfTestImpl();
+            Assertion.Assert("is_a result for interface IsALocalIfTestInterface wrong", 
+                             m_orb.is_a(impl, "IDL:Ch/Elca/Iiop/Tests/IsALocalIfTestInterface:1.0"));
+            
+            Assertion.Assert("is_a check for incompatible type",
+                             !m_orb.is_a(impl,
+                                         "IDL:Ch/Elca/Iiop/Tests/IsARemoteIfTestInterfaceNotImpl:1.0"));            
+        }
+        
+        [Test]
+        public void TestIsAForProxySupIf() {
+            MarshalByRefObject mbr = new IsARemoteIfTestImpl1();
+            string uri = "TestIsAForProxySupIf";
+            Type type = typeof(IsARemoteIfTestInterface);
+            string repId = "IDL:Ch/Elca/Iiop/Tests/IsARemoteIfTestInterface:1.0";            
+            try {
+                RemotingServices.Marshal(mbr, uri);
+                IsARemoteIfTestInterface proxy = (IsARemoteIfTestInterface)
+                    RemotingServices.Connect(type, "iiop://localhost:" + TEST_PORT + "/" + uri);
+                Assertion.Assert("is_a check for proxy rep-id",
+                                 m_orb.is_a(proxy, 
+                                            repId));
+                Assertion.Assert("is_a check for proxy type based",
+                                 m_orb.is_a(proxy, 
+                                            type));
+                Assertion.Assert("is_a check for incompatible type",
+                                 !m_orb.is_a(proxy,
+                                             typeof(IsARemoteIfTestInterfaceNotImpl)));
+            } finally {
+                RemotingServices.Disconnect(mbr);
+            }
+        }
+        
+        [Test]
+        public void TestIsAForProxyNonSupIf() {
+            MarshalByRefObject mbr = new IsARemoteIfTestImpl2();
+            string uri = "TestIsAForProxyNonSupIf";
+            Type type = typeof(IsARemoteIfTestInterface);
+            string repId = "IDL:Ch/Elca/Iiop/Tests/IsARemoteIfTestInterface:1.0";            
+            try {
+                RemotingServices.Marshal(mbr, uri);
+                IsARemoteIfTestInterface proxy = (IsARemoteIfTestInterface)
+                    RemotingServices.Connect(type, "iiop://localhost:" + TEST_PORT + "/" + uri);
+                Assertion.Assert("is_a check for proxy rep-id",
+                                 m_orb.is_a(proxy, 
+                                            repId));
+                Assertion.Assert("is_a check for proxy type based",
+                                 m_orb.is_a(proxy, 
+                                            type));
+                Assertion.Assert("is_a check for incompatible type",
+                                 !m_orb.is_a(proxy,
+                                             typeof(IsARemoteIfTestInterfaceNotImpl)));
+            } finally {
+                RemotingServices.Disconnect(mbr);
+            }            
+        }
+        
+        [Test]
+        public void TestIsAForImplSupIf() {
+            MarshalByRefObject mbr = new IsARemoteIfTestImpl1();
+            Type type = typeof(IsARemoteIfTestInterface);
+            string repId = "IDL:Ch/Elca/Iiop/Tests/IsARemoteIfTestInterface:1.0";            
+            
+            Assertion.Assert("is_a check for proxy rep-id",
+                             m_orb.is_a(mbr, 
+                                        repId));
+            Assertion.Assert("is_a check for proxy type based",
+                             m_orb.is_a(mbr, 
+                                        type));      
+            Assertion.Assert("is_a check for incompatible type",
+                             !m_orb.is_a(mbr,
+                                         typeof(IsARemoteIfTestInterfaceNotImpl)));
+        }
+        
+        [Test]
+        public void TestIsAForImplNonSupIf() {
+            MarshalByRefObject mbr = new IsARemoteIfTestImpl2();
+            Type type = typeof(IsARemoteIfTestInterface);
+            string repId = "IDL:Ch/Elca/Iiop/Tests/IsARemoteIfTestInterface:1.0";            
+            
+            Assertion.Assert("is_a check for proxy rep-id",
+                             m_orb.is_a(mbr, 
+                                        repId));
+            Assertion.Assert("is_a check for proxy type based",
+                             m_orb.is_a(mbr, 
+                                        type));                        
+            Assertion.Assert("is_a check for incompatible type",
+                             !m_orb.is_a(mbr,
+                                         typeof(IsARemoteIfTestInterfaceNotImpl)));            
+        }
+        
+        
+    }
+    
 
 }
 

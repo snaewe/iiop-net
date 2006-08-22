@@ -1,3 +1,5 @@
+include ..\..\..\..\MakeVars
+
 build:
 	cd net
 	$(MAKE) build
@@ -13,3 +15,13 @@ clean:
         cd java
         $(MAKE) clean
         cd ..
+
+start-server:
+	cd net
+	$(MAKE) start-server
+	cd ..
+
+stop-server:
+	cd net
+	$(MAKE) stop-server
+	cd ..

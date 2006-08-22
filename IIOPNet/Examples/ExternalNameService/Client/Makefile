@@ -1,3 +1,5 @@
+include ..\..\..\MakeVars
+
 IDL         = IDL\ 
 
 build: build-idl build-java

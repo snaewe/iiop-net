@@ -1,3 +1,4 @@
+include ..\..\MakeVars
 
 build:
 	cd net
@@ -14,3 +15,12 @@ clean:
 	cd ..
 
 
+start-server:
+	cd net
+	$(MAKE) start-server
+ 	cd ..
+ 
+stop-server:
+ 	cd net
+ 	$(MAKE) stop-server
+ 	cd ..

@@ -1,0 +1,40 @@
+include ../../../../MakeVars.mono
+IIOPCHANNEL = ../../../../IIOPChannel/bin/IIOPChannel.dll
+LAUNCH = ../../../../Utils/launch.exe
+KILL = ../../../../Utils/kill.exe
+DELAY = ../../../../Utils/delay.exe
+CLSTOIDLGEN = mono ../../../../CLSToIDLGenerator/bin/CLSIDLGenerator.exe
+
+bin = bin/
+IDL = idl/
+
+build: build-server build-idl
+
+build-server: $(bin)TestServiceCommon.dll $(bin)TestServer.exe
+
+build-idl: IDL\Ch\Elca\Iiop\Benchmarks\TestService.idl 
+
+$(bin)IIOPChannel.dll: $(IIOPCHANNEL)
+	[ -d $(bin) ] || mkdir $(bin)
+	cp $(IIOPCHANNEL) $(bin)
+
+$(bin)TestServiceCommon.dll: $(bin)IIOPChannel.dll TestServiceCommon.cs
+	$(CSC) $(CSFLAGS) /t:library /r:$(bin)IIOPChannel.dll /out:$(bin)TestServiceCommon.dll TestServiceCommon.cs
+
+
+$(bin)TestServer.exe: $(bin)IIOPChannel.dll $(bin)TestServiceCommon.dll TestServer.cs TestService.cs
+	$(CSC) $(CSFLAGS) /t:exe /r:$(bin)IIOPChannel.dll /r:$(bin)TestServiceCommon.dll /out:$(bin)TestServer.exe TestServer.cs TestService.cs
+    
+IDL\Ch\Elca\Iiop\Benchmarks\TestService.idl: $(bin)TestServer.exe
+	$(CLSTOIDLGEN) -o IDL Ch.Elca.Iiop.Benchmarks.TestService $(bin)TestServiceCommon.dll
+
+start-server:
+	@mono $(LAUNCH) mono bin/TestServer.exe >> pid
+
+stop-server:
+	@-for p in `cat pid`; do mono $(KILL) $$p; done
+	@rm -f pid
+
+clean:
+	rm -rf IDL
+	rm -rf bin

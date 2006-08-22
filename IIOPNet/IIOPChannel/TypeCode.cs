@@ -42,6 +42,8 @@ namespace omg.org.CORBA {
     /// <summary>the type code enumeration</summary>
     /// <remarks>IDL enums are mapped to CLS with an int32 base type</remarks>
     [IdlEnumAttribute]
+    [Serializable]
+    [RepositoryID("IDL:omg.org/CORBA/TCKind:1.0")]    
     public enum TCKind : int {
         tk_null = 0, 
         tk_void = 1,
@@ -109,6 +111,8 @@ namespace omg.org.CORBA {
         [return:StringValueAttribute()]
         string member_name(int index);
 
+        TypeCode member_type (int index);
+        
         // for union:        
         object member_label (int index);        
         TypeCode discriminator_type();
@@ -126,48 +130,6 @@ namespace omg.org.CORBA {
         TypeCode concrete_base_type();
 
         #endregion IMethods
-
-    }
-
-
-    internal struct StructMember {
-        
-        #region IFields
-
-        internal string m_name;
-        internal TypeCode m_type;
-
-        #endregion IFileds
-        #region IConstructors
-        
-        public StructMember(string name, TypeCode type) {
-            m_name = name;
-            m_type = type;
-        }
-
-        #endregion IConstructors
-
-    }
-
-
-    internal struct ValueTypeMember {
-
-        #region IFields
-
-        internal string m_name;
-        internal TypeCode m_type;
-        internal short m_visibility;
-
-        #endregion IFields
-        #region IConstructors
-
-        public ValueTypeMember(string name, TypeCode type, short visibility) {
-            m_name = name;
-            m_type = type;
-            m_visibility = visibility;
-        }
-
-        #endregion IConstructors
 
     }
 
@@ -207,7 +169,8 @@ namespace omg.org.CORBA {
 
         /// <summary>serialize the whole type-code to the stream</summary>
         /// <param name="cdrStream"></param>
-        internal virtual void WriteToStream(CdrOutputStream cdrStream) {            
+        internal virtual void WriteToStream(CdrOutputStream cdrStream,
+                                            SerializerFactory serFactory) {
             uint val = Convert.ToUInt32(kind());
             StreamPosition indirPos = cdrStream.WriteIndirectableInstanceTag(val);
             cdrStream.StoreIndirection(this, 
@@ -218,13 +181,65 @@ namespace omg.org.CORBA {
 
         /// <summary>reads the type-code content from the stream, without the TCKind at the beginning</summary>
         /// <remarks>helper which is used by the constructor with arg CdrInputStream</remarks>
-        internal virtual void ReadFromStream(CdrInputStream cdrStream) { }
+        internal virtual void ReadFromStream(CdrInputStream cdrStream,
+                                             SerializerFactory serFactory) { }
         
         protected string ReadRepositoryId(CdrInputStream cdrStream) {
             return cdrStream.ReadString();
         }
 
+        /// <summary>
+        /// get the corresponding .NET type for this typecode.
+        /// </summary>        
         internal abstract Type GetClsForTypeCode();
+        
+        /// <summary>checks, if the value is of this typecode.</summary>
+        internal virtual bool IsInstanceOfTypeCode(object val) {
+            if (val == null) {
+                return !GetClsForTypeCode().IsValueType;
+            }
+            return GetClsForTypeCode() == val.GetType();
+        }
+        
+        protected Exception CreateCantConvertToAssignableException(object val) {
+        	string typeName = (val != null ? val.GetType().AssemblyQualifiedName : "[null]");
+        	Type clsForTypeCode = GetClsForTypeCode();
+        	string tcTypeName = (clsForTypeCode != null ? clsForTypeCode.AssemblyQualifiedName : "[null]");
+            return new BAD_PARAM(456, CompletionStatus.Completed_MayBe,
+        	                     "The given instance " + val + " of type " + typeName +
+        	                     " is not compatible with the type code of kind " + m_kind +
+        	                     " mapped to type " + tcTypeName);
+        }
+        
+        protected Exception CreateCantConvertToExternalRepresentationException(object val) {
+            return new BAD_PARAM(456, CompletionStatus.Completed_MayBe);
+        }        
+        
+        /// <summary>
+        /// If the type of the value is equal to the expected one, this
+        /// method can assign the value without conversion.
+        /// For non CLS compliant types and other not directly assignable values,
+        /// this method can be used to check, if convert from
+        /// a tc equivalent representation to the type compatible with the typecode
+        /// is possible.
+        /// </summary>
+        internal virtual object ConvertToAssignable(object val) {
+            if (IsInstanceOfTypeCode(val)) {
+                return val;
+            } else {
+                throw CreateCantConvertToAssignableException(val);
+            }
+        }
+
+        /// <summary>
+        /// If result of a Deserialization is an internal helper type, this
+        /// method can be used to convert to the external representation.
+        /// For non CLS compliant types, this method can be used to convert from
+        /// the type compatible with the typecode to a cls compliant equivalent.
+        /// </summary>
+        internal virtual object ConvertToExternalRepresentation(object val, bool useClsOnly) {
+            return val;
+        }
         
 
         /// <summary>
@@ -250,16 +265,19 @@ namespace omg.org.CORBA {
         /// <returns>If overriden, the type created. Default is: Exception</returns>
         internal virtual Type CreateType(ModuleBuilder modBuilder, string fullTypeName) {
             throw new INTERNAL(129, CompletionStatus.Completed_MayBe);
-        }
+        }        
 
         #region Implementation of TypeCode
-        public bool equal(omg.org.CORBA.TypeCode tc) {
+        public virtual bool equal(omg.org.CORBA.TypeCode tc) {
             if (tc.kind() != kind()) {
                 return false;
             }
             return true;
         }
-        public bool equivalent(omg.org.CORBA.TypeCode tc) {
+        public virtual bool equivalent(omg.org.CORBA.TypeCode tc) {
+            if (tc.kind() != kind()) {
+                return false;
+            }            
             return true;
         }
 
@@ -293,7 +311,7 @@ namespace omg.org.CORBA {
         public virtual int default_index() {
             throw new BAD_OPERATION(0, CompletionStatus.Completed_No);
         }
-        public virtual omg.org.CORBA.TypeCode member_type(int index)     {
+        public virtual omg.org.CORBA.TypeCode member_type(int index) {
             throw new BAD_OPERATION(0, CompletionStatus.Completed_No);
         }
         public virtual int length() {
@@ -351,14 +369,16 @@ namespace omg.org.CORBA {
             return m_name;
         }
 
-        internal override void ReadFromStream(CdrInputStream cdrStream) {
+        internal override void ReadFromStream(CdrInputStream cdrStream, 
+                                              SerializerFactory serFactory) {
             CdrEncapsulationInputStream encap = cdrStream.ReadEncapsulation();    
             m_id = ReadRepositoryId(encap);
             m_name = encap.ReadString();
         }
 
-        internal override void WriteToStream(CdrOutputStream cdrStream) {
-            base.WriteToStream(cdrStream);
+        internal override void WriteToStream(CdrOutputStream cdrStream,
+                                             SerializerFactory serFactory) {
+            base.WriteToStream(cdrStream, serFactory);
             CdrEncapsulationOutputStream encap = new CdrEncapsulationOutputStream(0, cdrStream);
             encap.WriteString(m_id);
             encap.WriteString(m_name);
@@ -461,7 +481,11 @@ namespace omg.org.CORBA {
         public NullTC() : base(TCKind.tk_null) { }
 
         #endregion IConstructors
-        #region IMethods
+        #region IMethods        
+        
+        internal override bool IsInstanceOfTypeCode(object val) {
+            return val == null;
+        }
         
         internal override Type GetClsForTypeCode() {
             // this operation is not supported for a NullTC
@@ -479,6 +503,11 @@ namespace omg.org.CORBA {
 
         #endregion IConstructors
         #region IMethods
+
+        internal override bool IsInstanceOfTypeCode(object val) {
+            return (val == null) ||
+                (val.GetType() == GetClsForTypeCode());
+        }
         
         internal override Type GetClsForTypeCode() {
             return ReflectionHelper.VoidType;
@@ -530,9 +559,32 @@ namespace omg.org.CORBA {
         #region IMethods
         
         internal override Type GetClsForTypeCode() {
-            return ReflectionHelper.Int16Type;
+            return ReflectionHelper.UInt16Type;
         }
 
+        internal override object ConvertToAssignable(object val) {
+            if (IsInstanceOfTypeCode(val)) {
+                return val;
+            } else if (val != null && val.GetType().Equals(ReflectionHelper.Int16Type)) {
+                short valCls = (short)val;
+                return unchecked((ushort)valCls); // do an unchecked cast, overflow no issue here
+            } else {
+                throw CreateCantConvertToAssignableException(val);
+            }
+        }
+
+        internal override object ConvertToExternalRepresentation(object val, bool useClsOnly) {
+            if (!useClsOnly) {
+                return val;
+            }
+            if (val.GetType().Equals(GetClsForTypeCode())) {
+                ushort valToConv = (ushort)val;
+                return unchecked((short)valToConv); // do an unchecked cast, overflow no issue here
+            } else {
+                throw CreateCantConvertToExternalRepresentationException(val);
+            }
+        }                
+        
         #endregion IMethods
 
     }
@@ -547,8 +599,31 @@ namespace omg.org.CORBA {
         #region IMethods
 
         internal override Type GetClsForTypeCode() {
-            return ReflectionHelper.Int32Type;
+            return ReflectionHelper.UInt32Type;
         }
+                        
+        internal override object ConvertToAssignable(object val) {
+            if (IsInstanceOfTypeCode(val)) {
+                return val;
+            } else if (val != null && val.GetType().Equals(ReflectionHelper.Int32Type)) {
+                int valCls = (int)val;
+                return unchecked((uint)valCls); // do an unchecked cast, overflow no issue here
+            } else {
+                throw CreateCantConvertToAssignableException(val);
+            }
+        }
+
+        internal override object ConvertToExternalRepresentation(object val, bool useClsOnly) {
+            if (!useClsOnly) {
+                return val;
+            }
+            if (val.GetType().Equals(GetClsForTypeCode())) {
+                uint valToConv = (uint)val;
+                return unchecked((int)valToConv); // do an unchecked cast, overflow no issue here
+            } else {
+                throw CreateCantConvertToExternalRepresentationException(val);
+            }
+        }        
 
         #endregion IMethods
 
@@ -638,6 +713,17 @@ namespace omg.org.CORBA {
 
         #endregion IConstructors
         #region IMethods
+        
+        internal override object ConvertToAssignable(object val) {
+            if (IsInstanceOfTypeCode(val)) {
+                return val;
+            } else if (val != null && val.GetType().Equals(ReflectionHelper.SByteType)) {
+                sbyte valNonCls = (sbyte)val;
+                return unchecked((byte)valNonCls); // do an unchecked cast, overflow no issue here
+            } else {
+                throw CreateCantConvertToAssignableException(val);
+            }
+        }
 
         internal override Type GetClsForTypeCode() {
             return ReflectionHelper.ByteType;
@@ -684,22 +770,23 @@ namespace omg.org.CORBA {
             return m_aliased;
         }
 
-        internal override void ReadFromStream(CdrInputStream cdrStream) {
+        internal override void ReadFromStream(CdrInputStream cdrStream,
+                                              SerializerFactory serFactory) {
             CdrEncapsulationInputStream encap = cdrStream.ReadEncapsulation();    
             m_id = ReadRepositoryId(encap);
             m_name = encap.ReadString();
-            TypeCodeSerializer ser = new TypeCodeSerializer();
-            m_aliased = (TypeCode) ser.Deserialise(ReflectionHelper.CorbaTypeCodeType, 
-                                                   AttributeExtCollection.EmptyCollection, encap);
+            TypeCodeSerializer ser = new TypeCodeSerializer(serFactory);
+            m_aliased = (TypeCode) ser.Deserialize(encap);
         }
 
-        internal override void WriteToStream(CdrOutputStream cdrStream) {
-            base.WriteToStream(cdrStream);
+        internal override void WriteToStream(CdrOutputStream cdrStream,
+                                             SerializerFactory serFactory) {
+            base.WriteToStream(cdrStream, serFactory);
             CdrEncapsulationOutputStream encap = new CdrEncapsulationOutputStream(0, cdrStream);
             encap.WriteString(m_id);
             encap.WriteString(m_name);
-            TypeCodeSerializer ser = new TypeCodeSerializer();
-            ser.Serialise(ReflectionHelper.CorbaTypeCodeType, m_aliased, AttributeExtCollection.EmptyCollection, encap);
+            TypeCodeSerializer ser = new TypeCodeSerializer(serFactory);
+            ser.Serialize(m_aliased, encap);
             encap.WriteToTargetStream();
         }
 
@@ -799,12 +886,14 @@ namespace omg.org.CORBA {
             return m_length;
         }
         
-        internal override void ReadFromStream(CdrInputStream cdrStream) {
+        internal override void ReadFromStream(CdrInputStream cdrStream,
+                                              SerializerFactory serFactory) {
             m_length = (int)cdrStream.ReadULong();
         }
 
-        internal override void WriteToStream(CdrOutputStream cdrStream) {
-            base.WriteToStream(cdrStream);
+        internal override void WriteToStream(CdrOutputStream cdrStream,
+                                             SerializerFactory serFactory) {
+            base.WriteToStream(cdrStream, serFactory);
             cdrStream.WriteULong((uint)m_length);
         }
     
@@ -851,12 +940,14 @@ namespace omg.org.CORBA {
             return m_length;
         }
         
-        internal override void ReadFromStream(CdrInputStream cdrStream) {
+        internal override void ReadFromStream(CdrInputStream cdrStream,
+                                              SerializerFactory serFactory) {
             m_length = (int)cdrStream.ReadULong();
         }
 
-        internal override void WriteToStream(CdrOutputStream cdrStream) {
-            base.WriteToStream(cdrStream);
+        internal override void WriteToStream(CdrOutputStream cdrStream,
+                                             SerializerFactory serFactory) {
+            base.WriteToStream(cdrStream, serFactory);
             cdrStream.WriteULong((uint)m_length);
         }
     
@@ -904,9 +995,32 @@ namespace omg.org.CORBA {
 
         #endregion IConstructors
         #region IMethods
+        
+        internal override object ConvertToAssignable(object val) {
+            if (IsInstanceOfTypeCode(val)) {
+                return val;
+            } else if (val != null && val.GetType().Equals(ReflectionHelper.Int64Type)) {
+                long valCls = (long)val;
+                return unchecked((ulong)valCls); // do an unchecked cast, overflow no issue here
+            } else {
+                throw CreateCantConvertToAssignableException(val);
+            }
+        }
+
+        internal override object ConvertToExternalRepresentation(object val, bool useClsOnly) {
+            if (!useClsOnly) {
+                return val;
+            }
+            if (val.GetType().Equals(GetClsForTypeCode())) {
+                ulong valToConv = (ulong)val;
+                return unchecked((long)valToConv); // do an unchecked cast, overflow no issue here
+            } else {
+                throw CreateCantConvertToExternalRepresentationException(val);
+            }
+        }
 
         internal override Type GetClsForTypeCode() {
-            return ReflectionHelper.Int64Type;
+            return ReflectionHelper.UInt64Type;
         }
 
         #endregion IMethods
@@ -957,7 +1071,8 @@ namespace omg.org.CORBA {
             return m_members[index];
         }
 
-        internal override void ReadFromStream(CdrInputStream cdrStream) {
+        internal override void ReadFromStream(CdrInputStream cdrStream,
+                                              SerializerFactory serFactory) {
             CdrEncapsulationInputStream encap = cdrStream.ReadEncapsulation();    
             m_id = ReadRepositoryId(encap);
             m_name = encap.ReadString();
@@ -968,8 +1083,9 @@ namespace omg.org.CORBA {
             }
         }
 
-        internal override void WriteToStream(CdrOutputStream cdrStream) {
-            base.WriteToStream(cdrStream);
+        internal override void WriteToStream(CdrOutputStream cdrStream,
+                                             SerializerFactory serFactory) {
+            base.WriteToStream(cdrStream, serFactory);
             CdrEncapsulationOutputStream encap = new CdrEncapsulationOutputStream(0, cdrStream);
             encap.WriteString(m_id);
             encap.WriteString(m_name);
@@ -984,7 +1100,7 @@ namespace omg.org.CORBA {
             Type result = Repository.GetTypeForId(m_id);
             if (result == null) {
                 // create the type represented by this typeCode
-                string typeName = Repository.GetTypeNameForId(m_id);
+                string typeName = Repository.CreateTypeNameForId(m_id);
                 result = TypeFromTypeCodeRuntimeGenerator.GetSingleton().CreateOrGetType(typeName, this);
             }
             return result;
@@ -1007,6 +1123,11 @@ namespace omg.org.CORBA {
 
             // add IDLEnum attribute
             result.SetCustomAttribute(new IdlEnumAttribute().CreateAttributeBuilder());
+            // add rep-id Attr
+            IlEmitHelper.GetSingleton().AddRepositoryIDAttribute(result, m_id);
+            // serializable attribute
+            IlEmitHelper.GetSingleton().AddSerializableAttribute(result);
+
         
             // create the type
             return result.CreateType();            
@@ -1022,7 +1143,7 @@ namespace omg.org.CORBA {
 
         private string m_id;
         private string m_name;
-        private TypeCode m_boxed;
+        private TypeCodeImpl m_boxed;
 
         #endregion IFields
         #region IConstructors
@@ -1034,7 +1155,7 @@ namespace omg.org.CORBA {
         public ValueBoxTC(string repositoryID, string name, TypeCode boxed) : base(TCKind.tk_value_box) {
             m_id = repositoryID;
             m_name = name;
-            m_boxed = boxed;    
+            m_boxed = (TypeCodeImpl)boxed;
         }
 
         #endregion IConstructors
@@ -1054,23 +1175,23 @@ namespace omg.org.CORBA {
             return m_boxed;
         }
 
-        internal override void ReadFromStream(CdrInputStream cdrStream) {
+        internal override void ReadFromStream(CdrInputStream cdrStream,
+                                              SerializerFactory serFactory) {
             CdrEncapsulationInputStream encap = cdrStream.ReadEncapsulation();    
             m_id = ReadRepositoryId(encap);
             m_name = encap.ReadString();
-            TypeCodeSerializer ser = new TypeCodeSerializer();
-            m_boxed = (TypeCode) ser.Deserialise(ReflectionHelper.CorbaTypeCodeType, 
-                                                 new AttributeExtCollection(new Attribute[0]), encap);
+            TypeCodeSerializer ser = new TypeCodeSerializer(serFactory);
+            m_boxed = (TypeCodeImpl) ser.Deserialize(encap);
         }
 
-        internal override void WriteToStream(CdrOutputStream cdrStream) {
-            base.WriteToStream(cdrStream);
+        internal override void WriteToStream(CdrOutputStream cdrStream,
+                                             SerializerFactory serFactory) {
+            base.WriteToStream(cdrStream, serFactory);
             CdrEncapsulationOutputStream encap = new CdrEncapsulationOutputStream(0, cdrStream);
             encap.WriteString(m_id);
             encap.WriteString(m_name);
-            TypeCodeSerializer ser = new TypeCodeSerializer();
-            ser.Serialise(ReflectionHelper.CorbaTypeCodeType, m_boxed, 
-                          new AttributeExtCollection(new Attribute[0]), encap);
+            TypeCodeSerializer ser = new TypeCodeSerializer(serFactory);
+            ser.Serialize(m_boxed, encap);
             encap.WriteToTargetStream();
         }
 
@@ -1078,7 +1199,7 @@ namespace omg.org.CORBA {
             Type result = Repository.GetTypeForId(m_id);
             if (result == null) {
                 // create the type represented by this typeCode
-                string typeName = Repository.GetTypeNameForId(m_id);
+                string typeName = Repository.CreateTypeNameForId(m_id);
                 result = TypeFromTypeCodeRuntimeGenerator.GetSingleton().CreateOrGetType(typeName, this);
             }
             return result;
@@ -1090,9 +1211,50 @@ namespace omg.org.CORBA {
             // create the type
             BoxedValueTypeGenerator generator = new BoxedValueTypeGenerator();
             TypeBuilder result = generator.CreateBoxedType(boxedType, modBuilder, fullTypeName, attrs);
+            // add rep-id Attr
+            IlEmitHelper.GetSingleton().AddRepositoryIDAttribute(result, m_id);
             return result.CreateType();
         }
+        
+        internal override object ConvertToAssignable(object val) {
+            Type requiredObjectType = GetClsForTypeCode();
+            if (IsInstanceOfTypeCode(val)) {
+                return val;            
+            } else if (IsBoxableTo(val.GetType(),requiredObjectType)) {
+                // box value
+                return Activator.CreateInstance(requiredObjectType, new object[] { val } );
+            } else {
+                throw CreateCantConvertToAssignableException(val);
+            }
+        }        
 
+		private bool IsBoxableTo(Type boxIt, Type boxInto) {
+		    if (!boxInto.IsSubclassOf(ReflectionHelper.BoxedValueBaseType)) {
+		        return false;
+		    }
+		    try {
+                Type boxedType = (Type)boxInto.InvokeMember(BoxedValueBase.GET_FIRST_NONBOXED_TYPE_METHODNAME,
+                                                            BindingFlags.InvokeMethod | BindingFlags.Public |
+                                                            BindingFlags.NonPublic | BindingFlags.Static |
+                                                            BindingFlags.DeclaredOnly,
+                                                            null, null, new object[0]);
+		        if (boxedType.IsAssignableFrom(boxIt)) {
+		            return true;
+		        }
+		    } catch {
+		        throw new INTERNAL(10041, CompletionStatus.Completed_MayBe);
+		    }
+		    return false;
+		}        
+        
+        internal override object ConvertToExternalRepresentation(object val, bool useClsOnly) {
+            if (val is BoxedValueBase) {
+                val = ((BoxedValueBase)val).Unbox(); // unboxing the boxed-value, because BoxedValueTypes are internal types, which should not be used by users
+            }   
+            // because the container instance is replaced by this instance,
+            // convert to external representation.
+            return m_boxed.ConvertToExternalRepresentation(val, useClsOnly);
+        }
 
         #endregion IMethods
 
@@ -1133,20 +1295,20 @@ namespace omg.org.CORBA {
             return m_seqType;
         }
 
-        internal override void ReadFromStream(CdrInputStream cdrStream) {
+        internal override void ReadFromStream(CdrInputStream cdrStream,
+                                              SerializerFactory serFactory) {
             CdrEncapsulationInputStream encap = cdrStream.ReadEncapsulation();    
-            TypeCodeSerializer ser = new TypeCodeSerializer();
-            m_seqType = (TypeCode) ser.Deserialise(ReflectionHelper.CorbaTypeCodeType, 
-                                                   new AttributeExtCollection(new Attribute[0]), encap);
+            TypeCodeSerializer ser = new TypeCodeSerializer(serFactory);
+            m_seqType = (TypeCode) ser.Deserialize(encap);
             m_length = (int)encap.ReadULong();
         }
 
-        internal override void WriteToStream(CdrOutputStream cdrStream) {
-            base.WriteToStream(cdrStream);
+        internal override void WriteToStream(CdrOutputStream cdrStream,
+                                             SerializerFactory serFactory) {
+            base.WriteToStream(cdrStream, serFactory);
             CdrEncapsulationOutputStream encap = new CdrEncapsulationOutputStream(0, cdrStream);
-            TypeCodeSerializer ser = new TypeCodeSerializer();
-            ser.Serialise(ReflectionHelper.CorbaTypeCodeType, m_seqType, 
-                          new AttributeExtCollection(new Attribute[0]), encap);
+            TypeCodeSerializer ser = new TypeCodeSerializer(serFactory);
+            ser.Serialize(m_seqType, encap);
             encap.WriteULong((uint)m_length);
             encap.WriteToTargetStream();
         }
@@ -1226,20 +1388,20 @@ namespace omg.org.CORBA {
             return m_innerDimension;
         }
 
-        internal override void ReadFromStream(CdrInputStream cdrStream) {
+        internal override void ReadFromStream(CdrInputStream cdrStream,
+                                              SerializerFactory serFactory) {
             CdrEncapsulationInputStream encap = cdrStream.ReadEncapsulation();    
-            TypeCodeSerializer ser = new TypeCodeSerializer();
-            m_innerDimension = (TypeCode) ser.Deserialise(ReflectionHelper.CorbaTypeCodeType, 
-                                                          new AttributeExtCollection(new Attribute[0]), encap);
+            TypeCodeSerializer ser = new TypeCodeSerializer(serFactory);
+            m_innerDimension = (TypeCode) ser.Deserialize(encap);
             m_length = (int)encap.ReadULong();
         }
 
-        internal override void WriteToStream(CdrOutputStream cdrStream) {
-            base.WriteToStream(cdrStream);
+        internal override void WriteToStream(CdrOutputStream cdrStream,
+                                             SerializerFactory serFactory) {
+            base.WriteToStream(cdrStream, serFactory);
             CdrEncapsulationOutputStream encap = new CdrEncapsulationOutputStream(0, cdrStream);
-            TypeCodeSerializer ser = new TypeCodeSerializer();
-            ser.Serialise(ReflectionHelper.CorbaTypeCodeType, m_innerDimension, 
-                          new AttributeExtCollection(new Attribute[0]), encap);
+            TypeCodeSerializer ser = new TypeCodeSerializer(serFactory);
+            ser.Serialize(m_innerDimension, encap);
             encap.WriteULong((uint)m_length);
             encap.WriteToTargetStream();
         }
@@ -1365,39 +1527,39 @@ namespace omg.org.CORBA {
         }
         [return:StringValueAttribute()]
         public override string member_name(int index) {
-            return m_members[index].m_name;
+            return m_members[index].name;
         }
         public override TypeCode member_type(int index)     {
-            return m_members[index].m_type;            
+            return m_members[index].type;            
         }
 
-        internal override void ReadFromStream(CdrInputStream cdrStream) {
+        internal override void ReadFromStream(CdrInputStream cdrStream,
+                                              SerializerFactory serFactory) {
             CdrEncapsulationInputStream encap = cdrStream.ReadEncapsulation();    
             m_id = ReadRepositoryId(encap);
             m_name = encap.ReadString();
             uint length = encap.ReadULong();
             m_members = new StructMember[length];
-            TypeCodeSerializer ser = new TypeCodeSerializer();
+            TypeCodeSerializer ser = new TypeCodeSerializer(serFactory);
             for (int i = 0; i < length; i++) {
                 string memberName = encap.ReadString();
-                TypeCode memberType = (TypeCode)ser.Deserialise(ReflectionHelper.CorbaTypeCodeType, 
-                                                                new AttributeExtCollection(new Attribute[0]), encap);
+                TypeCode memberType = (TypeCode)ser.Deserialize(encap);
                 StructMember member = new StructMember(memberName, memberType);
                 m_members[i] = member;
             }
         }
 
-        internal override void WriteToStream(CdrOutputStream cdrStream) {
-            base.WriteToStream(cdrStream);
+        internal override void WriteToStream(CdrOutputStream cdrStream,
+                                             SerializerFactory serFactory) {
+            base.WriteToStream(cdrStream, serFactory);
             CdrEncapsulationOutputStream encap = new CdrEncapsulationOutputStream(0, cdrStream);
             encap.WriteString(m_id);
             encap.WriteString(m_name);
             encap.WriteULong((uint)m_members.Length);
-            TypeCodeSerializer ser = new TypeCodeSerializer();            
+            TypeCodeSerializer ser = new TypeCodeSerializer(serFactory);            
             foreach(StructMember member in m_members) {
-                encap.WriteString(member.m_name);
-                ser.Serialise(ReflectionHelper.CorbaTypeCodeType, member.m_type, 
-                              new AttributeExtCollection(new Attribute[0]), encap);
+                encap.WriteString(member.name);
+                ser.Serialize(member.type, encap);
             }
             encap.WriteToTargetStream();
         }
@@ -1406,7 +1568,7 @@ namespace omg.org.CORBA {
             Type result = Repository.GetTypeForId(m_id);
             if (result == null) {
                 // create the type represented by this typeCode
-                string typeName = Repository.GetTypeNameForId(m_id);
+                string typeName = Repository.CreateTypeNameForId(m_id);
                 result = TypeFromTypeCodeRuntimeGenerator.GetSingleton().CreateOrGetType(typeName, this);
             }
             return result;
@@ -1428,6 +1590,33 @@ namespace omg.org.CORBA {
         public StructTC(string repositoryID, string name, StructMember[] members) : base(repositoryID, name, members, TCKind.tk_struct) { }        
         
         #endregion IConstructors
+        #region IMethods
+        
+        internal override Type CreateType(ModuleBuilder modBuilder, string fullTypeName) {
+            // layout-sequential causes problem, if member of array type is not fully defined (TypeLoadException) -> use autolayout instead
+            TypeAttributes typeAttrs = TypeAttributes.Class | TypeAttributes.Public | TypeAttributes.Serializable | TypeAttributes.BeforeFieldInit | 
+                                   /* TypeAttributes.SequentialLayout | */ TypeAttributes.Sealed;
+        
+            TypeBuilder result = modBuilder.DefineType(fullTypeName, typeAttrs, typeof(System.ValueType));
+            // add rep-id Attr
+            IlEmitHelper.GetSingleton().AddRepositoryIDAttribute(result, id());
+            // define members
+            for (int i = 0; i < member_count(); i++) {
+                Type memberType = ((TypeCodeImpl) (member_type(i))).GetClsForTypeCode();
+                FieldAttributes fieldAttrs = FieldAttributes.Public;
+                FieldBuilder field = result.DefineField(member_name(i), memberType, fieldAttrs);
+                CustomAttributeBuilder[] cAttrs = ((TypeCodeImpl) (member_type(i))).GetAttributes();
+                foreach (CustomAttributeBuilder cAttr in cAttrs) {
+                    field.SetCustomAttribute(cAttr);
+                }            
+            }
+            // add type specific attributes
+            result.SetCustomAttribute(new IdlStructAttribute().CreateAttributeBuilder());
+            IlEmitHelper.GetSingleton().AddSerializableAttribute(result);
+            return result.CreateType();
+        }
+        
+        #endregion IMethods
 
     }
 
@@ -1540,53 +1729,52 @@ namespace omg.org.CORBA {
             return m_members[index].ElementType;
         }
 
-        internal override void ReadFromStream(CdrInputStream cdrStream) {
+        internal override void ReadFromStream(CdrInputStream cdrStream,
+                                              SerializerFactory serFactory) {
             CdrEncapsulationInputStream encap = cdrStream.ReadEncapsulation();
             m_id = ReadRepositoryId(encap);
             m_name = encap.ReadString();
-            Marshaller marshaller = Marshaller.GetSingleton();
-            TypeCodeSerializer ser = new TypeCodeSerializer();
-            m_discriminatorType = (omg.org.CORBA.TypeCode)ser.Deserialise(ReflectionHelper.CorbaTypeCodeType, 
-                                                                          new AttributeExtCollection(new Attribute[0]), 
-                                                                          encap);
+            TypeCodeSerializer ser = new TypeCodeSerializer(serFactory);
+            m_discriminatorType = (omg.org.CORBA.TypeCode)ser.Deserialize(encap);
             Type discrTypeCls = ((TypeCodeImpl)m_discriminatorType).GetClsForTypeCode();
             m_defaultCase = encap.ReadLong();
             
             uint length = encap.ReadULong();
             m_members = new UnionSwitchCase[length];            
+            Serializer serDisc =
+                serFactory.Create(discrTypeCls, 
+                                  AttributeExtCollection.EmptyCollection);
             for (int i = 0; i < length; i++) {
-                object discrLabel = marshaller.Unmarshal(discrTypeCls, new AttributeExtCollection(new Attribute[0]), 
-                                                         encap);
+                object discrLabel = serDisc.Deserialize(encap);
                 string memberName = encap.ReadString();                
-                omg.org.CORBA.TypeCode memberType = (omg.org.CORBA.TypeCode)ser.Deserialise(ReflectionHelper.CorbaTypeCodeType, 
-                                                                                            new AttributeExtCollection(new Attribute[0]), 
-                                                                                            encap);    
+                omg.org.CORBA.TypeCode memberType = 
+                    (omg.org.CORBA.TypeCode)ser.Deserialize(encap);    
                 UnionSwitchCase member = new UnionSwitchCase(discrLabel, memberName, memberType);
                 m_members[i] = member;
             }
         }
 
-        internal override void WriteToStream(CdrOutputStream cdrStream) {
+        internal override void WriteToStream(CdrOutputStream cdrStream,
+                                             SerializerFactory serFactory) {
             // write common part: typecode nr
-            base.WriteToStream(cdrStream);
+            base.WriteToStream(cdrStream, serFactory);
             // complex type-code: in encapsulation
             CdrEncapsulationOutputStream encap = new CdrEncapsulationOutputStream(0, cdrStream);
             encap.WriteString(m_id);
             encap.WriteString(m_name);
-            Marshaller marshaller = Marshaller.GetSingleton();
-            TypeCodeSerializer ser = new TypeCodeSerializer();
+            TypeCodeSerializer ser = new TypeCodeSerializer(serFactory);
             Type discrTypeCls = ((TypeCodeImpl)m_discriminatorType).GetClsForTypeCode();
-            ser.Serialise(ReflectionHelper.CorbaTypeCodeType, m_discriminatorType, 
-                          new AttributeExtCollection(new Attribute[0]), encap);
+            ser.Serialize(m_discriminatorType, encap);
             encap.WriteLong(m_defaultCase);
             
             encap.WriteULong((uint)m_members.Length);
+            Serializer serDisc =
+                serFactory.Create(discrTypeCls, 
+                                  AttributeExtCollection.EmptyCollection);            
             for (int i = 0; i < m_members.Length; i++) {
-                marshaller.Marshal(discrTypeCls, new AttributeExtCollection(new Attribute[0]), 
-                                   m_members[i].DiscriminatorValue, encap);
+                serDisc.Serialize(m_members[i].DiscriminatorValue, encap);
                 encap.WriteString(m_members[i].ElementName);
-                ser.Serialise(ReflectionHelper.CorbaTypeCodeType, m_members[i].ElementType,
-                             new AttributeExtCollection(new Attribute[0]), encap);
+                ser.Serialize(m_members[i].ElementType, encap);
             }            
 
             encap.WriteToTargetStream();
@@ -1596,7 +1784,7 @@ namespace omg.org.CORBA {
             Type result = Repository.GetTypeForId(m_id);
             if (result == null) {
                 // create the type represented by this typeCode
-                string typeName = Repository.GetTypeNameForId(m_id);
+                string typeName = Repository.CreateTypeNameForId(m_id);
                 result = TypeFromTypeCodeRuntimeGenerator.GetSingleton().CreateOrGetType(typeName, this);
             }
             return result;
@@ -1665,6 +1853,9 @@ namespace omg.org.CORBA {
                                              elemCase.GetDiscriminatorValues());                
             }                       
             
+            // add rep-id Attr
+            IlEmitHelper.GetSingleton().AddRepositoryIDAttribute(genHelper.Builder, m_id);
+            
             // create the resulting type
             return genHelper.FinalizeType();
         }
@@ -1694,7 +1885,7 @@ namespace omg.org.CORBA {
 
         private string m_id;
         private string m_name;
-        private ValueTypeMember[] m_members;
+        private ValueMember[] m_members;
         private short m_typeMod;
         private TypeCode m_baseClass;
 
@@ -1705,18 +1896,18 @@ namespace omg.org.CORBA {
         internal ValueTypeTC() : base(TCKind.tk_value) {
         }     
 
-        public ValueTypeTC(string repositoryID, string name, ValueTypeMember[] members, TypeCode baseClass, short typeMod) : base(TCKind.tk_value) {
+        public ValueTypeTC(string repositoryID, string name, ValueMember[] members, TypeCode baseClass, short typeMod) : base(TCKind.tk_value) {
             Initalize(repositoryID, name, members, baseClass, typeMod);
         }
 
         #endregion IConstructors
         #region IMethods
         
-        public void Initalize(string repositoryID, string name, ValueTypeMember[] members, TypeCode baseClass, short typeMod) {
+        public void Initalize(string repositoryID, string name, ValueMember[] members, TypeCode baseClass, short typeMod) {
             m_id = repositoryID;
             m_name = name;
             m_members = members;
-            if (m_members == null) { m_members = new ValueTypeMember[0]; }
+            if (m_members == null) { m_members = new ValueMember[0]; }
             m_baseClass = baseClass;
             m_typeMod = typeMod;            
         }
@@ -1737,14 +1928,14 @@ namespace omg.org.CORBA {
         }
         [return:StringValueAttribute()]
         public override string member_name(int index) {
-            return m_members[index].m_name;
+            return m_members[index].name;
         }
         public override TypeCode member_type(int index)     {
-            return m_members[index].m_type;            
+            return m_members[index].type;            
         }
 
         public override short member_visibility(int index) {
-            return m_members[index].m_visibility;
+            return m_members[index].access;
         }
         public override short type_modifier() {
             return m_typeMod;
@@ -1754,44 +1945,42 @@ namespace omg.org.CORBA {
         }
 
 
-        internal override void ReadFromStream(CdrInputStream cdrStream) {
+        internal override void ReadFromStream(CdrInputStream cdrStream,
+                                              SerializerFactory serFactory) {
             CdrEncapsulationInputStream encap = cdrStream.ReadEncapsulation();    
             m_id = ReadRepositoryId(encap);
             m_name = encap.ReadString();
             m_typeMod = encap.ReadShort();
-            TypeCodeSerializer ser = new TypeCodeSerializer();
-            m_baseClass = (TypeCode)ser.Deserialise(ReflectionHelper.CorbaTypeCodeType, 
-                                                    new AttributeExtCollection(new Attribute[0]), encap);
+            TypeCodeSerializer ser = new TypeCodeSerializer(serFactory);
+            m_baseClass = (TypeCode)ser.Deserialize(encap);
             // deser members
             uint length = encap.ReadULong();
-            m_members = new ValueTypeMember[length];
+            m_members = new ValueMember[length];
             for (int i = 0; i < length; i++) {
                 string memberName = encap.ReadString();
-                TypeCode memberType = (TypeCode)ser.Deserialise(ReflectionHelper.CorbaTypeCodeType, 
-                                                                new AttributeExtCollection(new Attribute[0]), encap);
+                TypeCode memberType = (TypeCode)ser.Deserialize(encap);
                 short visibility = encap.ReadShort();
-                ValueTypeMember member = new ValueTypeMember(memberName, memberType, visibility);
+                ValueMember member = new ValueMember(memberName, memberType, visibility);
                 m_members[i] = member;
             }
         }
 
-        internal override void WriteToStream(CdrOutputStream cdrStream) {
-            base.WriteToStream(cdrStream);
+        internal override void WriteToStream(CdrOutputStream cdrStream,
+                                             SerializerFactory serFactory) {
+            base.WriteToStream(cdrStream, serFactory);
             CdrEncapsulationOutputStream encap = new CdrEncapsulationOutputStream(0, cdrStream);
             encap.WriteString(m_id);
             encap.WriteString(m_name);
             encap.WriteShort(m_typeMod);
-            TypeCodeSerializer ser = new TypeCodeSerializer();
+            TypeCodeSerializer ser = new TypeCodeSerializer(serFactory);
             // ser baseclass type
-            ser.Serialise(ReflectionHelper.CorbaTypeCodeType, m_baseClass, 
-                          new AttributeExtCollection(new Attribute[0]), encap);
+            ser.Serialize(m_baseClass, encap);
             // ser members
             encap.WriteULong((uint)m_members.Length);
-            foreach(ValueTypeMember member in m_members) {
-                encap.WriteString(member.m_name);
-                ser.Serialise(ReflectionHelper.CorbaTypeCodeType, member.m_type, 
-                              new AttributeExtCollection(new Attribute[0]), encap);
-                encap.WriteShort(member.m_visibility);
+            foreach(ValueMember member in m_members) {
+                encap.WriteString(member.name);
+                ser.Serialize(member.type, encap);
+                encap.WriteShort(member.access);
             }
             encap.WriteToTargetStream();
         }
@@ -1800,7 +1989,7 @@ namespace omg.org.CORBA {
             Type result = Repository.GetTypeForId(m_id);
             if (result == null) {
                 // create the type represented by this typeCode
-                string typeName = Repository.GetTypeNameForId(m_id);
+                string typeName = Repository.CreateTypeNameForId(m_id);
                 result = TypeFromTypeCodeRuntimeGenerator.GetSingleton().CreateOrGetType(typeName, this);
             }
             return result;
@@ -1810,20 +1999,20 @@ namespace omg.org.CORBA {
             Type baseType = ReflectionHelper.ObjectType;
             if (!(m_baseClass is NullTC)) {
                 baseType = ((TypeCodeImpl)m_baseClass).GetClsForTypeCode();
-            }
-            string typeName = Repository.GetTypeNameForId(m_id);
+            }            
             TypeAttributes attrs = TypeAttributes.Class | TypeAttributes.Serializable;
             attrs = attrs | TypeAttributes.Public;
-            TypeBuilder result = modBuilder.DefineType(typeName, attrs ,baseType);
+            TypeBuilder result = modBuilder.DefineType(fullTypeName, attrs ,baseType);
             // add rep-id Attr
-            RepositoryIDAttribute repIdAttr = new RepositoryIDAttribute(m_id);
-            result.SetCustomAttribute(repIdAttr.CreateAttributeBuilder());
+            IlEmitHelper.GetSingleton().AddRepositoryIDAttribute(result, m_id);
+            // serializable attribute
+            IlEmitHelper.GetSingleton().AddSerializableAttribute(result);
             // define members
-            foreach (ValueTypeMember member in m_members) {
-                Type memberType = ((TypeCodeImpl) (member.m_type)).GetClsForTypeCode();                
+            foreach (ValueMember member in m_members) {
+                Type memberType = ((TypeCodeImpl) (member.type)).GetClsForTypeCode();                
                 FieldAttributes fieldAttrs = FieldAttributes.Public;
-                FieldBuilder field = result.DefineField(member.m_name, memberType, fieldAttrs);
-                CustomAttributeBuilder[] cAttrs = ((TypeCodeImpl) (member.m_type)).GetAttributes();
+                FieldBuilder field = result.DefineField(member.name, memberType, fieldAttrs);
+                CustomAttributeBuilder[] cAttrs = ((TypeCodeImpl) (member.type)).GetAttributes();
                 foreach (CustomAttributeBuilder cAttr in cAttrs) {
                     field.SetCustomAttribute(cAttr);
                 }
@@ -1832,8 +2021,286 @@ namespace omg.org.CORBA {
             return result.CreateType();
         }
 
+        // fix for Orbs (e.g. JBoss), 
+        // which send boxed value types as normal value types and non-boxed types.
+        internal override object ConvertToExternalRepresentation(object val, bool useClsOnly) {
+            if (val is BoxedValueBase) {
+                val = ((BoxedValueBase)val).Unbox(); // unboxing the boxed-value, because BoxedValueTypes are internal types, which should not be used by users
+                val = ((TypeCodeImpl)m_members[0].type).
+                    ConvertToExternalRepresentation(val, useClsOnly);
+            }   
+            return val;
+        }        
+        
         #endregion IMethods
 
     }
     
 }  
+
+
+#if UnitTest
+
+namespace Ch.Elca.Iiop.Tests {
+    
+    using System;
+    using System.Reflection;
+    using NUnit.Framework;
+    using omg.org.CORBA;
+    
+    /// <summary>
+    /// Unit-tests for testing long type code
+    /// </summary>
+    [TestFixture]
+    public class LongTypeCodeTest {
+    
+        
+        private LongTC m_tc;
+        
+        [SetUp]
+        public void Setup() {
+            m_tc = new LongTC();
+        }
+        
+        [Test]
+        public void TestTypeForTypeCode() {            
+            Assertion.AssertEquals("wrong type for typecode",
+                                   ReflectionHelper.Int32Type, m_tc.GetClsForTypeCode());
+        }
+        
+        [Test]
+        public void TestEqual() {
+            LongTC other = new LongTC();
+            Assertion.Assert("not equal", m_tc.equal(other));
+            ULongTC other2 = new ULongTC();
+            Assertion.Assert("equal but shoudln't", !m_tc.equal(other2));            
+        }
+        
+        [Test]
+        public void TestEquivalent() {
+            LongTC other = new LongTC();
+            Assertion.Assert("not equal", m_tc.equivalent(other));
+            ULongTC other2 = new ULongTC();
+            Assertion.Assert("equal but shoudln't", !m_tc.equivalent(other2));
+        }        
+        
+        [Test]
+        public void TestKind() {
+            Assertion.AssertEquals("wrong kind", TCKind.tk_long, m_tc.kind());
+        }
+        
+        [Test]
+        public void CanAssignValue() {
+            int val = 11;
+            Assertion.Assert("value assignement not possible", m_tc.IsInstanceOfTypeCode(val));
+            uint val2 = 22;
+            Assertion.Assert("value assignement possible, but shouldn't", 
+                             !m_tc.IsInstanceOfTypeCode(val2));
+            Assertion.Assert("value assignement possible, but shouldn't", 
+                             !m_tc.IsInstanceOfTypeCode(null));
+        }
+        
+        [Test]
+        public void ConvertFromClsCompliant() {
+            int val = 11;
+            Assertion.AssertEquals("convert was not correct", val, m_tc.ConvertToAssignable(val));
+            Assertion.AssertEquals("convert was not correct", val.GetType(), 
+                                   m_tc.ConvertToAssignable(val).GetType());
+        }
+        
+        [Test]
+        public void ConvertToClsCompliant() {
+            int val = 11;
+            Assertion.AssertEquals("convert was not correct", val, 
+                                   m_tc.ConvertToExternalRepresentation(val, true));
+            Assertion.AssertEquals("convert was not correct", val.GetType(),
+                                   m_tc.ConvertToExternalRepresentation(val, true).GetType());
+        }        
+    }
+    
+    /// <summary>
+    /// Unit-tests for testing ulong type code
+    /// </summary>
+    [TestFixture]
+    public class ULongTypeCodeTest {
+    
+        
+        private ULongTC m_tc;
+        
+        [SetUp]
+        public void Setup() {
+            m_tc = new ULongTC();
+        }
+        
+        [Test]
+        public void TestTypeForTypeCode() {            
+            Assertion.AssertEquals("wrong type for typecode",
+                                   ReflectionHelper.UInt32Type, m_tc.GetClsForTypeCode());
+        }
+        
+        [Test]
+        public void TestEqual() {
+            ULongTC other = new ULongTC();
+            Assertion.Assert("not equal", m_tc.equal(other));
+            LongTC other2 = new LongTC();
+            Assertion.Assert("equal but shoudln't", !m_tc.equal(other2));            
+        }
+        
+        [Test]
+        public void TestEquivalent() {
+            ULongTC other = new ULongTC();
+            Assertion.Assert("not equal", m_tc.equivalent(other));
+            LongTC other2 = new LongTC();
+            Assertion.Assert("equal but shoudln't", !m_tc.equivalent(other2));
+        }        
+        
+        [Test]
+        public void TestKind() {
+            Assertion.AssertEquals("wrong kind", TCKind.tk_ulong, m_tc.kind());
+        }
+        
+        [Test]
+        public void CanAssignValue() {
+            uint val = 11;
+            Assertion.Assert("value assignement not possible", m_tc.IsInstanceOfTypeCode(val));
+            int val2 = 22;
+            Assertion.Assert("value assignement possible, but shouldn't", 
+                             !m_tc.IsInstanceOfTypeCode(val2));
+            Assertion.Assert("value assignement possible, but shouldn't", 
+                             !m_tc.IsInstanceOfTypeCode(null));
+        }
+                
+        [Test]
+        public void ConvertFromClsCompliant() {
+            uint val = 11;
+            int valCls = (int)val;
+            Assertion.AssertEquals("convert was not correct", val, m_tc.ConvertToAssignable(valCls));
+            Assertion.AssertEquals("convert was not correct", val.GetType(),
+                                   m_tc.ConvertToAssignable(valCls).GetType());
+        }
+        
+        [Test]
+        public void ConvertToClsCompliant() {
+            uint val = 11;
+            int valCls = (int)val;
+            Assertion.AssertEquals("convert was not correct", 
+                                   valCls, m_tc.ConvertToExternalRepresentation(val, true));            
+            Assertion.AssertEquals("convert was not correct", 
+                                   valCls.GetType(), 
+                                   m_tc.ConvertToExternalRepresentation(val, true).GetType());
+        }        
+        
+    }    
+    
+    /// <summary>
+    /// Unit-tests for testing ulong type code
+    /// </summary>
+    [TestFixture]
+    public class ULongLongTypeCodeTest {
+    
+        
+        private ULongLongTC m_tc;
+        
+        [SetUp]
+        public void Setup() {
+            m_tc = new ULongLongTC();
+        }
+        
+        [Test]
+        public void TestTypeForTypeCode() {            
+            Assertion.AssertEquals("wrong type for typecode",
+                                   ReflectionHelper.UInt64Type, m_tc.GetClsForTypeCode());
+        }
+        
+        [Test]
+        public void TestEqual() {
+            ULongLongTC other = new ULongLongTC();
+            Assertion.Assert("not equal", m_tc.equal(other));
+            LongLongTC other2 = new LongLongTC();
+            Assertion.Assert("equal but shoudln't", !m_tc.equal(other2));            
+        }
+        
+        [Test]
+        public void TestEquivalent() {
+            ULongLongTC other = new ULongLongTC();
+            Assertion.Assert("not equal", m_tc.equivalent(other));
+            LongLongTC other2 = new LongLongTC();
+            Assertion.Assert("equal but shoudln't", !m_tc.equivalent(other2));
+        }        
+        
+        [Test]
+        public void TestKind() {
+            Assertion.AssertEquals("wrong kind", TCKind.tk_ulonglong, m_tc.kind());
+        }
+        
+        [Test]
+        public void CanAssignValue() {
+            ulong val = 11;
+            Assertion.Assert("value assignement not possible", m_tc.IsInstanceOfTypeCode(val));
+            long val2 = 22;
+            Assertion.Assert("value assignement possible, but shouldn't", 
+                             !m_tc.IsInstanceOfTypeCode(val2));
+            Assertion.Assert("value assignement possible, but shouldn't", 
+                             !m_tc.IsInstanceOfTypeCode(null));
+        }
+    }    
+    
+    
+    /// <summary>
+    /// Unit-tests for testing ulong type code
+    /// </summary>
+    [TestFixture]
+    public class UShortTypeCodeTest {
+    
+        
+        private UShortTC m_tc;
+        
+        [SetUp]
+        public void Setup() {
+            m_tc = new UShortTC();
+        }
+        
+        [Test]
+        public void TestTypeForTypeCode() {            
+            Assertion.AssertEquals("wrong type for typecode",
+                                   ReflectionHelper.UInt16Type, m_tc.GetClsForTypeCode());
+        }
+        
+        [Test]
+        public void TestEqual() {
+            UShortTC other = new UShortTC();
+            Assertion.Assert("not equal", m_tc.equal(other));
+            ShortTC other2 = new ShortTC();
+            Assertion.Assert("equal but shoudln't", !m_tc.equal(other2));            
+        }
+        
+        [Test]
+        public void TestEquivalent() {
+            UShortTC other = new UShortTC();
+            Assertion.Assert("not equal", m_tc.equivalent(other));
+            ShortTC other2 = new ShortTC();
+            Assertion.Assert("equal but shoudln't", !m_tc.equivalent(other2));
+        }        
+        
+        [Test]
+        public void TestKind() {
+            Assertion.AssertEquals("wrong kind", TCKind.tk_ushort, m_tc.kind());
+        }
+        
+        [Test]
+        public void CanAssignValue() {
+            ushort val = 11;
+            Assertion.Assert("value assignement not possible", m_tc.IsInstanceOfTypeCode(val));
+            short val2 = 22;
+            Assertion.Assert("value assignement possible, but shouldn't", 
+                             !m_tc.IsInstanceOfTypeCode(val2));
+            Assertion.Assert("value assignement possible, but shouldn't", 
+                             !m_tc.IsInstanceOfTypeCode(null));
+        }
+    }    
+    
+    
+}
+    
+#endif
+

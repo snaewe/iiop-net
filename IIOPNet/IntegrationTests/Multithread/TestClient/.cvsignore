@@ -1,3 +1,4 @@
 bin
 IDL
 *.bak
+TestResult.xml

@@ -84,6 +84,8 @@ public interface TestService extends java.rmi.Remote {
     
     public Date echoDate(Date arg) throws RemoteException;
 
+    public Date receiveCurrentDate() throws RemoteException;
+
     public CustomMappedSerializable echoCustomMappedSer(CustomMappedSerializable arg) throws RemoteException;
 
 

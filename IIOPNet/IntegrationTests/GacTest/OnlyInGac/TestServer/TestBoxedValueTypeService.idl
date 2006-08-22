@@ -1,0 +1,34 @@
+
+module Ch {
+module Elca {
+module Iiop { 
+module IntegrationTests {    
+
+    valuetype boxed_string string; 
+    #pragma ID boxed_string "IDL:Ch.Elca.Iiop.IntegrationTests.boxed_string:1.0"
+ 
+    struct Test 
+    { 
+        boxed_string a; 
+        boxed_string b; 
+    }; 
+
+    #pragma ID Test "IDL:Ch/Elca/Iiop/IntegrationTests/Test:1.0"
+ 
+    valuetype boxed_TestStruct Test; 
+
+    #pragma ID boxed_TestStruct "IDL:Ch.Elca.Iiop.IntegrationTests.boxed_TestStruct:1.0"
+    
+
+    interface TestBoxedValuetypeService {
+
+        boxed_string EchoBoxedString(in boxed_string arg);
+        boxed_TestStruct EchoBoxedStruct(in boxed_TestStruct arg);
+
+    };
+
+
+};
+};
+};
+};

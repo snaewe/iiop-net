@@ -118,12 +118,27 @@ namespace Ch.Elca.Iiop {
         bool IsConnectionCloseException(Exception e);
                 
     }
+
+    /// <summary>
+    /// Base interface for client and server transport factories.
+    /// </summary>
+    public interface ICommonTransportFactory {
+
+        /// <summary>
+        /// The codec to use for creating tagged components.
+        /// This property is injected by the IIOPChannel.
+        /// </summary>
+        omg.org.IOP.Codec Codec {
+            set;
+        }        
+        
+    }
             
     
     /// <summary>
     /// creates client transports
     /// </summary>
-    public interface IClientTransportFactory {
+    public interface IClientTransportFactory : ICommonTransportFactory {
         
         /// <summary>creates a client transport to the target</summary>
         IClientTransport CreateTransport(IIorProfile target);
@@ -159,7 +174,7 @@ namespace Ch.Elca.Iiop {
     }
     
     /// <summary>creates server transports</summary>
-    public interface IServerTransportFactory {
+    public interface IServerTransportFactory : ICommonTransportFactory {
         
         /// <summary>creates a connecton listener, which notifies about new clients 
         /// using clientAcceptCallback</summary>
@@ -178,7 +193,8 @@ namespace Ch.Elca.Iiop {
     }
     
     /// <summary>creates client and server transports</summary>
-    public interface ITransportFactory : IClientTransportFactory, IServerTransportFactory {        
+    public interface ITransportFactory : IClientTransportFactory, IServerTransportFactory {
+                
     }        
     
     /// <summary>delegate to a method, which should be called, when a client connection is accepted</summary>

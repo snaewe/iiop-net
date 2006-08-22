@@ -47,6 +47,9 @@ namespace Ch.Elca.Iiop.Util {
         private static Type s_iobjectType = typeof(omg.org.CORBA.IObject);
         private static Type s_IorProfileType = typeof(Ch.Elca.Iiop.CorbaObjRef.IorProfile);
         private static Type s_iSerializableType = typeof(System.Runtime.Serialization.ISerializable);
+        private static Type s_anyType = typeof(omg.org.CORBA.Any);
+        private static Type s_stringValueType = typeof(omg.org.CORBA.StringValue);
+        private static Type s_wstringValueType = typeof(omg.org.CORBA.WStringValue);
         
         private static Type s_idlEnumAttributeType = typeof(IdlEnumAttribute);
         private static Type s_implClassAttributeType = typeof(ImplClassAttribute);
@@ -63,6 +66,7 @@ namespace Ch.Elca.Iiop.Util {
         private static Type s_contextElementAttributeType = typeof(ContextElementAttribute);
         private static Type s_supportedInterfaceAttributeType = typeof(SupportedInterfaceAttribute);
         private static Type s_repositoryIdAttributeType = typeof(RepositoryIDAttribute);
+        private static Type s_flagsAttributeType = typeof(FlagsAttribute);
 
         private static Type s_voidType = typeof(void);
         private static Type s_stringType = typeof(System.String);
@@ -145,6 +149,27 @@ namespace Ch.Elca.Iiop.Util {
             }
         }
 
+        /// <summary>caches typeof(omg.org.CORBA.Any)</summary>
+        public static Type AnyType {
+            get {
+                return s_anyType;
+            }
+        }                
+
+        /// <summary>caches typeof(omg.org.CORBA.StringValue)</summary>
+        public static Type StringValueType {
+            get {
+                return s_stringValueType;
+            }
+        }
+        
+        /// <summary>caches typeof(omg.org.CORBA.WStringValue)</summary>
+        public static Type WStringValueType {
+            get {
+                return s_wstringValueType;
+            }
+        }
+        
         /// <summary>caches typeof(IdlEnumAttribute)</summary>        
         public static Type IdlEnumAttributeType {
             get {
@@ -253,6 +278,15 @@ namespace Ch.Elca.Iiop.Util {
                 return s_repositoryIdAttributeType;
             }
         }        
+
+        /// <summary>
+        /// caches typeof(FlagsAttribute)
+        /// </summary>        
+        public static Type FlagsAttributeType {
+            get {
+                return s_flagsAttributeType;
+            }
+        }
 
         /// <summary>caches typeof(void)</summary>
         public static Type VoidType {
@@ -548,6 +582,30 @@ namespace Ch.Elca.Iiop.Util {
             return result;
                                
         }
+        
+        /// <summary>
+        /// returns true, if a parameter is an out parameter
+        /// </summary>
+        public static bool IsOutParam(ParameterInfo paramInfo) {
+            return paramInfo.IsOut;
+        }
+
+        /// <summary>
+        /// returns true, if a parameter is a ref parameter
+        /// </summary>
+        public static bool IsRefParam(ParameterInfo paramInfo) {
+            if (!paramInfo.ParameterType.IsByRef) { return false; }
+            return (!paramInfo.IsOut) || (paramInfo.IsOut && paramInfo.IsIn);
+        }
+
+        /// <summary>
+        /// returns true, if a parameter is an in parameter
+        /// </summary>
+        public static bool IsInParam(ParameterInfo paramInfo) {
+            if (paramInfo.ParameterType.IsByRef) { return false; } // only out/ref params have a byRef type
+            return ((paramInfo.IsIn) || 
+                    ((!(paramInfo.IsOut)) && (!(paramInfo.IsRetval))));
+        }        
 
         /// <summary>
         /// checks, if a similar method is defined in the interface specified;

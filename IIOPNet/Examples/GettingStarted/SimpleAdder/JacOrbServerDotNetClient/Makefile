@@ -1,3 +1,5 @@
+include ..\..\..\..\MakeVars
+
 build:
 	cd server
 	$(MAKE) build

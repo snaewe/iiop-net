@@ -1,3 +1,5 @@
+include ..\MakeVars
+
 Key = ..\Key.snk
 IIOPChannel = ..\IIOPChannel\bin\IIOPChannel.dll
 Dest = bin\ 
@@ -11,7 +13,7 @@ $(Dest)IIOPChannel.dll: $(IIOPChannel)
 	copy $(IIOPChannel) $@
 
 $(Dest)CLSIDLGenerator.exe: $(Dest)IIOPChannel.dll *.cs $(Key)
-	csc $(CSFLAGS) /res:GeneratorMappingPluginSchema.xsd /r:$(Dest)IIOPChannel.dll /t:exe /out:$@ *.cs 
+	$(CSC) $(CSFLAGS) /res:GeneratorMappingPluginSchema.xsd /r:$(Dest)IIOPChannel.dll /t:exe /out:$@ *.cs 
 
 
 clean:

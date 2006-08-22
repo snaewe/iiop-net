@@ -94,9 +94,10 @@ namespace Ch.Elca.Iiop.IntegrationTests {
             }
         }        
 
-        public void send_request(ClientRequestInfo ri) {            
-            if (ri.operation != "NoValueInScope") {
-                int testEntryBegin = (int)ri.get_slot(m_slotId);
+        public void send_request(ClientRequestInfo ri) {
+            object testEntryBeginAsObject = ri.get_slot(m_slotId);
+            if (testEntryBeginAsObject != null) {
+                int testEntryBegin = (int)testEntryBeginAsObject;
                 TestServiceContext contextEntry = new TestServiceContext();
                 contextEntry.TestEntry = testEntryBegin;
                 ServiceContext context = new ServiceContext(1000,

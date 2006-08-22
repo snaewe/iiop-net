@@ -146,5 +146,10 @@ interface TestService {
 
 }; 
 
+// the following is used e.g. for is_a tests
+interface TestSimpleServicePublic {
 
+    long EchoLong(in long arg);
+
+};
 

@@ -1,3 +1,5 @@
+include ..\..\..\..\MakeVars
+
 build:
 	cd netServer
 	$(MAKE) build
@@ -13,3 +15,13 @@ clean:
         cd omniOrbClient
         $(MAKE) clean
         cd ..
+
+start-server:
+	cd netServer
+	$(MAKE) start-server
+ 	cd ..
+ 
+stop-server:
+ 	cd netServer
+ 	$(MAKE) stop-server
+ 	cd ..

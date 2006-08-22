@@ -372,6 +372,14 @@ namespace Ch.Elca.Iiop.IntegrationTests.MappingPlugin {
             Assertion.AssertEquals("current date (seconds) not echoed correctly", arg.Second, result.Second);
             Assertion.AssertEquals("current date (milliseconds) not echoed correctly", arg.Millisecond, result.Millisecond);            
         }
+
+        [Test]
+        public void TestGetDateTime() {
+            DateTime now = DateTime.Now;
+            DateTime result = m_testService.receiveCurrentDate();
+            // check date difference is less than two minutes
+            Assertion.Assert("date difference too big", (result - now).TotalSeconds < 120);
+        }
         
         [Test]
         public void TestCustomMappedSerializable() {

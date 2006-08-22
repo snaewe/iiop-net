@@ -1,3 +1,5 @@
+include ..\..\..\MakeVars
+
 ValObjectDemo=ch\elca\iiop\demo\valueObjectDemo\  
 
 

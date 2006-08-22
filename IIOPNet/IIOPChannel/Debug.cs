@@ -30,6 +30,7 @@
 using System;
 using System.Text;
 using System.Diagnostics;
+using System.IO;
 
 namespace Ch.Elca.Iiop {
 
@@ -58,6 +59,16 @@ namespace Ch.Elca.Iiop {
                 Debug.WriteLine("  |   " +sb.ToString());
             }
         }
+
+        [Conditional("TRACE")]
+        [Conditional("DEBUG")]        
+        public static void LogStream(Stream stream) {
+            stream.Seek(0, SeekOrigin.Begin); // assure stream is read from beginning
+            byte[] data = new byte[stream.Length];
+            stream.Read(data, 0, (int)stream.Length);
+            OutputHelper.DebugBuffer(data);
+        }
+        
     }
 
 }

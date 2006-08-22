@@ -1,11 +1,13 @@
+include ..\..\..\MakeVars
+
 IIOPCHANNEL = ..\..\..\IIOPChannel\bin\IIOPChannel.dll
 IIOPCHANNELPDB = ..\..\..\IIOPChannel\bin\IIOPChannel.pdb
 MAPPINGPLUGINDIR = ..\..\..\MappingPlugin\java\ 
 CUSTOMJAVATYPEMAPPING=IIOPNetCustomJavaTypeMapping
 
-LAUNCH=..\..\Utils\launch.exe
-KILL = ..\..\Utils\kill.exe
-DELAY = ..\..\Utils\delay.exe
+LAUNCH=..\..\..\Utils\launch.exe
+KILL = ..\..\..\Utils\kill.exe
+DELAY = ..\..\..\Utils\delay.exe
 
 bin         = bin\ 
 
@@ -31,7 +33,7 @@ $(bin)customGeneratorMapping.xml: $(bin) $(MAPPINGPLUGINDIR)customGeneratorMappi
         copy /y $(MAPPINGPLUGINDIR)customGeneratorMapping.xml $(bin)
 
 build-server: $(bin)IIOPChannel.dll $(bin)$(CUSTOMJAVATYPEMAPPING).dll $(bin)customMapping.xml $(bin)javaCollections.dll *.cs
-    csc $(CSFLAGS) /res:customMapping.xml /t:exe /r:$(bin)IIOPChannel.dll /out:$(bin)TestServer.exe TestService.cs TestServer.cs
+    $(CSC) $(CSFLAGS) /res:customMapping.xml /t:exe /r:$(bin)IIOPChannel.dll /out:$(bin)TestServer.exe TestService.cs TestServer.cs
     
 
 build-idl: $(bin)customGeneratorMapping.xml
@@ -50,7 +52,7 @@ clean-plugin:
 
 start-server:
 	@$(LAUNCH) bin\TestServer.exe >> pid
-#	for /F "usebackq" %%r in (`..\..\Utils\launch.exe bin\TestServer.exe`) do set pid=%%r
+#	for /F "usebackq" %%r in (`..\..\..\Utils\launch.exe bin\TestServer.exe`) do set pid=%%r
 
 stop-server:
 	@for /F %%p in (pid) do @$(KILL) %%p

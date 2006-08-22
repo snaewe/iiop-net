@@ -1,3 +1,5 @@
+include ..\..\..\..\MakeVars
+
 CommandProc=ch\elca\iiop\demo\ejbCommand\ 
 JBOSS_CLP=%JBOSS_HOME%\server\all\lib\jboss-j2ee.jar;.
 IDL=IDL\ 

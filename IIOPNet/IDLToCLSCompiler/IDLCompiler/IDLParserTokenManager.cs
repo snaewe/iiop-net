@@ -1937,7 +1937,7 @@ public Token getNextToken()
      {
         if (jjmatchedPos + 1 < curPos)
            input_stream.backup(curPos - jjmatchedPos - 1);
-        if ((jjtoToken[jjmatchedKind >> 6] & ((ulong)(1L << (jjmatchedKind & 0x3F)))) != (ulong)0L)
+        if ((jjtoToken[jjmatchedKind >> 6] & ((ulong)((ulong)1L << (jjmatchedKind & 0x3F)))) != (ulong)0L)
         {
            matchedToken = jjFillToken();
        if (jjnewLexState[jjmatchedKind] != -1)

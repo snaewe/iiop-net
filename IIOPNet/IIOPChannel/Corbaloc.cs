@@ -37,34 +37,41 @@ using Ch.Elca.Iiop.Security.Ssl;
 
 namespace Ch.Elca.Iiop.CorbaObjRef {
 
+	/// <summary>
+	/// This class parses a corbaloc url.
+	/// </summary>
 	internal class Corbaloc {
     	    	
-    	#region IFields
+        #region SFields
+        
+        private readonly static object[] s_defaultComponents =
+            new object[0];
+        
+        #endregion SFields    	
+        #region IFields
     		
 		/// <summary>the key string as string</summary>
 		private string m_keyString;
 	    private byte[] m_keyBytes;
 		
 		private CorbaLocObjAddr[] m_objAddrs;
+		private IorProfile[] m_profiles;
     	
     	#endregion IFields
     	#region IConstructors
+
+    	/// <summary>creates the corbaloc from a corbaloc url string</summary>
+    	internal Corbaloc(string corbalocUrl, Codec codec) : this(corbalocUrl, codec, s_defaultComponents) {
+    	}
     	
     	/// <summary>creates the corbaloc from a corbaloc url string</summary>
-    	public Corbaloc(string corbalocUrl) {
-            Parse(corbalocUrl);
+    	internal Corbaloc(string corbalocUrl, Codec codec, IList /* TaggedComponent */ additionalComponents) {
+            Parse(corbalocUrl, codec, additionalComponents);
     	}
     
     	#endregion IConstructors
     	#region IProperties
-    	
-    	/// <summary>the obj_addr_list</summary>
-    	public CorbaLocObjAddr[] ObjAddrs {
-    		get {
-    			return m_objAddrs;
-    		}
-    	}
-    	
+    	    	
     	/// <summary>
     	/// contains an ASCII representation of the object key; valid characters in
     	/// this string are member of the ASCII charset ->
@@ -87,7 +94,8 @@ namespace Ch.Elca.Iiop.CorbaObjRef {
     	#region IMethods
     
     	/// <summary>parses a corbaloc url according to section 13.6.10 in Corba standard</summary>
-    	private void Parse(string corbalocUrl) {
+    	private void Parse(string corbalocUrl, Codec codec,
+    	                   IList /* TaggedComponent */ additionalComponents) {
     		if (!corbalocUrl.StartsWith("corbaloc:")) {
     			throw new BAD_PARAM(7, CompletionStatus.Completed_No);
     		}
@@ -101,19 +109,22 @@ namespace Ch.Elca.Iiop.CorbaObjRef {
     		    (m_keyString == null)) {
     		    throw new BAD_PARAM(10, CompletionStatus.Completed_No);
     		}
-    		ParseAddrList(addrPart);    		
     	    // create key bytes from keystring
     	    CalculateKeyBytesFromKeyString();
+    		ParseAddrList(addrPart, codec, additionalComponents);
 	    }
 	    
 	    /// <summary>parses the addr list</summary>
-	    private void ParseAddrList(string addrList) {
+	    private void ParseAddrList(string addrList, Codec codec,
+	                               IList /* TaggedComponent */ additionalComponents) {
 	    	if (addrList == null) {
 	    		throw new BAD_PARAM(8, CompletionStatus.Completed_No);
 	    	}
 	    	string[] parts = addrList.Split(',');
             // at least one!
             m_objAddrs = new CorbaLocObjAddr[parts.Length];
+            m_profiles = new IorProfile[parts.Length];                        
+
 	    	for (int i = 0; i < parts.Length; i++) {
 	    	    if (CorbaLocIiopAddr.IsResponsibleForProtocol(parts[i])) {
 	    			m_objAddrs[i] = new CorbaLocIiopAddr(parts[i]);
@@ -122,19 +133,23 @@ namespace Ch.Elca.Iiop.CorbaObjRef {
 	    		} else {
 	    			throw new BAD_PARAM(8, CompletionStatus.Completed_No);
 	    		}
+            	m_profiles[i] = GetProfileFor(m_objAddrs[i], GetKeyAsByteArray(), codec,
+            	                              additionalComponents);
 	    	}	    	
+	    }
+	    
+	    private IorProfile GetProfileFor(CorbaLocObjAddr objAddr, byte[] objKey, Codec codec,
+	                                     IList /* TaggedComponent */ additionalComponents) {
+			IorProfile addrProfile = 
+	            objAddr.GetProfileForAddr(objKey, codec);
+			for (int i = 0; i < additionalComponents.Count; i++) {
+		        addrProfile.AddTaggedComponent((TaggedComponent)additionalComponents[i]);
+		    }
+            return addrProfile;
 	    }
 
 	    public IorProfile[] GetProfiles() {
-	        ArrayList resultList = new ArrayList();
-	        foreach (CorbaLocObjAddr addr in m_objAddrs) {
-	            resultList.AddRange(addr.GetProfilesForAddr(GetKeyAsByteArray()));        
-	        }
-	        IorProfile[] result = (IorProfile[])resultList.ToArray(ReflectionHelper.IorProfileType);
-            if (result.Length == 0) {
-                throw new INV_OBJREF(8421, CompletionStatus.Completed_MayBe);
-            }
-            return result;
+            return m_profiles;
 	    }
 	    
 	    public Uri ParseUrl(out string objectUri, out GiopVersion version) {
@@ -148,7 +163,7 @@ namespace Ch.Elca.Iiop.CorbaObjRef {
 	    private void CalculateKeyBytesFromKeyString() {
 	        string id = KeyString;	        
             // TODO: not really correct: need to resolve %HexHex escape sequences
-            m_keyBytes = IiopUrlUtil.GetKeyBytesForId(id);
+            m_keyBytes = IorUtil.GetKeyBytesForId(id);
 	    }
 	    
 	    /// <summary>converts the key string to a byte array, resolving escape sequences</summary>
@@ -163,9 +178,9 @@ namespace Ch.Elca.Iiop.CorbaObjRef {
 	/// <summary>marker interface to mark a corbaloc obj addr</summary>
 	internal interface CorbaLocObjAddr {
         /// <summary>
-        /// converts the address to IorProfiles
+        /// converts this address to an IorProfile
         /// </summary>
-        IorProfile[] GetProfilesForAddr(byte[] objectKey);
+        IorProfile GetProfileForAddr(byte[] objectKey, Codec codec);
         
         /// <summary>
         /// parses the address into a .NET usable form
@@ -262,7 +277,7 @@ namespace Ch.Elca.Iiop.CorbaObjRef {
 	    	
 	    }
 	    
-	    public abstract IorProfile[] GetProfilesForAddr(byte[] objectKey);
+	    public abstract IorProfile GetProfileForAddr(byte[] objectKey, Codec codec);
 	    
 	    public abstract Uri ParseUrl(string objectUri, out GiopVersion version);
 
@@ -291,9 +306,9 @@ namespace Ch.Elca.Iiop.CorbaObjRef {
             }
         }
 
-        public override IorProfile[] GetProfilesForAddr(byte[] objectKey) {	        
+        public override IorProfile GetProfileForAddr(byte[] objectKey, Codec codec) {	        
             InternetIiopProfile result = new InternetIiopProfile(Version, Host, (short)Port, objectKey);
-            return new IorProfile[] { result };
+            return result;
         }
 
         public override Uri ParseUrl(string objectUri, out GiopVersion version) {
@@ -322,6 +337,8 @@ namespace Ch.Elca.Iiop.CorbaObjRef {
     /// <summary>represents an iiop ssl obj_addr in a corbaloc</summary>
     internal class CorbaLocIiopSslAddr : CorbaLocIiopAddrBase {
 
+        #region IFields
+        #endregion IFields
         #region IConstructors
 
         public CorbaLocIiopSslAddr(string addr) : base(addr) {
@@ -335,13 +352,17 @@ namespace Ch.Elca.Iiop.CorbaObjRef {
             return 9;
         }
         
-        public override IorProfile[] GetProfilesForAddr(byte[] objectKey) {
+        public override IorProfile GetProfileForAddr(byte[] objectKey, Codec codec) {
             InternetIiopProfile result = new InternetIiopProfile(Version, Host, 0, objectKey);
-            result.AddTaggedComponentWithData(TAG_SSL_SEC_TRANS.ConstVal, 
-                                              new SSLComponentData(SecurityAssociationOptions.EstablishTrustInClient,
-                                                                   SecurityAssociationOptions.EstablishTrustInTarget,
-                                                                   (short)Port));
-            return new IorProfile[] { result };
+            SSLComponentData sslComp = 
+                new SSLComponentData(SecurityAssociationOptions.EstablishTrustInClient,
+                                     SecurityAssociationOptions.EstablishTrustInTarget,
+                                     (short)Port);
+            TaggedComponent sslTaggedComp = 
+                new TaggedComponent(TAG_SSL_SEC_TRANS.ConstVal,
+                                    codec.encode_value(sslComp));
+            result.AddTaggedComponent(sslTaggedComp);
+            return result;
         }        
     
         public override Uri ParseUrl(string objectUri, out GiopVersion version) {
@@ -378,115 +399,206 @@ namespace Ch.Elca.Iiop.Tests {
 	
     using NUnit.Framework;
     using Ch.Elca.Iiop.CorbaObjRef;
+    using Ch.Elca.Iiop.Services;
+    using Ch.Elca.Iiop.Security.Ssl;
+    using Ch.Elca.Iiop.Marshalling;
+    using Ch.Elca.Iiop.Interception;
     
     /// <summary>
     /// Unit-test for class Corbaloc
     /// </summary>
-    public class CorbalocTest : TestCase {
+    [TestFixture]
+    public class CorbalocTest {
+    	
+    	private object m_defaultCodeSetTaggedComponent;
+    	private Codec m_codec;
         
         public CorbalocTest() {
         }
+    	
+    	[SetUp]
+    	public void SetUp() {
+    	    SerializerFactory serFactory =
+    	        new SerializerFactory();
+            CodecFactory codecFactory =
+                new CodecFactoryImpl(serFactory);
+            m_codec = 
+                codecFactory.create_codec(
+                    new Encoding(ENCODING_CDR_ENCAPS.ConstVal, 1, 2));
+            serFactory.Initalize(new SerializerFactoryConfig(), 
+                IiopUrlUtil.Create(m_codec,
+                                   new object[] { 
+                                        Services.CodeSetService.CreateDefaultCodesetComponent(m_codec) }));
+            m_defaultCodeSetTaggedComponent = 
+                Services.CodeSetService.CreateDefaultCodesetComponent(m_codec);                		            
+    	}
 
-        
+        [Test]
         public void TestSingleCompleteCorbaLocIiop() {
 			string testCorbaLoc = "corbaloc:iiop:1.2@elca.ch:1234/test";
-        	Corbaloc parsed = new Corbaloc(testCorbaLoc);
+			Corbaloc parsed = new Corbaloc(testCorbaLoc, m_codec, 
+			                               new object[] { m_defaultCodeSetTaggedComponent });
         	Assertion.AssertEquals("test", parsed.KeyString);
-        	Assertion.AssertEquals(1, parsed.ObjAddrs.Length);
-        	Assertion.AssertEquals(typeof(CorbaLocIiopAddr), parsed.ObjAddrs[0].GetType());
-        	CorbaLocIiopAddr addr = (CorbaLocIiopAddr)(parsed.ObjAddrs[0]);
-        	Assertion.AssertEquals(1, addr.Version.Major);
-        	Assertion.AssertEquals(2, addr.Version.Minor);
-        	Assertion.AssertEquals("elca.ch", addr.Host);
-        	Assertion.AssertEquals(1234, addr.Port);
+        	        	        	        	
+        	Assertion.AssertEquals(1, parsed.GetProfiles().Length);
+        	Assertion.AssertEquals(typeof(InternetIiopProfile), parsed.GetProfiles()[0].GetType());
+        	InternetIiopProfile profile = (InternetIiopProfile)parsed.GetProfiles()[0];
+        	Assertion.Assert(profile.TaggedComponents.ContainsTaggedComponent(
+                                CodeSetService.SERVICE_ID));
+
+        	Assertion.AssertEquals(1, profile.Version.Major);
+        	Assertion.AssertEquals(2, profile.Version.Minor);
+        	Assertion.AssertEquals("elca.ch", profile.HostName);
+        	Assertion.AssertEquals(1234, profile.Port);        	        	        	        	
         }
         
+        [Test]
         public void TestMultipleCompleteCorbaLocIiop() {
         	string testCorbaLoc = "corbaloc:iiop:1.2@elca.ch:1234,:1.2@elca.ch:1235,:1.2@elca.ch:1236/test";
-        	Corbaloc parsed = new Corbaloc(testCorbaLoc);
+        	Corbaloc parsed = new Corbaloc(testCorbaLoc, m_codec,
+        	                               new object[] { m_defaultCodeSetTaggedComponent });
         	Assertion.AssertEquals("test", parsed.KeyString);
-        	Assertion.AssertEquals(3, parsed.ObjAddrs.Length);
-        	Assertion.AssertEquals(typeof(CorbaLocIiopAddr), parsed.ObjAddrs[0].GetType());
-        	Assertion.AssertEquals(typeof(CorbaLocIiopAddr), parsed.ObjAddrs[1].GetType());
-        	Assertion.AssertEquals(typeof(CorbaLocIiopAddr), parsed.ObjAddrs[2].GetType());
         	
-        	CorbaLocIiopAddr addr = (CorbaLocIiopAddr)(parsed.ObjAddrs[0]);
-        	Assertion.AssertEquals(1, addr.Version.Major);
-        	Assertion.AssertEquals(2, addr.Version.Minor);
-        	Assertion.AssertEquals("elca.ch", addr.Host);
-        	Assertion.AssertEquals(1234, addr.Port);
+        	IorProfile[] profiles = parsed.GetProfiles();        	
+        	Assertion.AssertEquals(3, profiles.Length);
+        	Assertion.AssertEquals(typeof(InternetIiopProfile), profiles[0].GetType());
+        	Assertion.AssertEquals(typeof(InternetIiopProfile), profiles[1].GetType());
+        	Assertion.AssertEquals(typeof(InternetIiopProfile), profiles[2].GetType());
         	
-        	addr = (CorbaLocIiopAddr)(parsed.ObjAddrs[1]);
-        	Assertion.AssertEquals(1, addr.Version.Major);
-        	Assertion.AssertEquals(2, addr.Version.Minor);
-        	Assertion.AssertEquals("elca.ch", addr.Host);
-        	Assertion.AssertEquals(1235, addr.Port);
+        	InternetIiopProfile prof = (InternetIiopProfile)(profiles[0]);
+        	Assertion.AssertEquals(1, prof.Version.Major);
+        	Assertion.AssertEquals(2, prof.Version.Minor);
+        	Assertion.AssertEquals("elca.ch", prof.HostName);
+        	Assertion.AssertEquals(1234, prof.Port);
         	
-        	addr = (CorbaLocIiopAddr)(parsed.ObjAddrs[2]);
-        	Assertion.AssertEquals(1, addr.Version.Major);
-        	Assertion.AssertEquals(2, addr.Version.Minor);
-        	Assertion.AssertEquals("elca.ch", addr.Host);
-        	Assertion.AssertEquals(1236, addr.Port);        	
+        	prof = (InternetIiopProfile)(profiles[1]);
+        	Assertion.AssertEquals(1, prof.Version.Major);
+        	Assertion.AssertEquals(2, prof.Version.Minor);
+        	Assertion.AssertEquals("elca.ch", prof.HostName);
+        	Assertion.AssertEquals(1235, prof.Port);
+        	
+        	prof = (InternetIiopProfile)(profiles[2]);
+        	Assertion.AssertEquals(1, prof.Version.Major);
+        	Assertion.AssertEquals(2, prof.Version.Minor);
+        	Assertion.AssertEquals("elca.ch", prof.HostName);
+        	Assertion.AssertEquals(1236, prof.Port);        	
         }
         
         /// <summary>test corba loc with iiop addrs, check the defaults</summary>
+        [Test]
         public void TestIncompleteCorbaLocIiop() {
         	string testCorbaLoc = "corbaloc::/test";
-        	Corbaloc parsed = new Corbaloc(testCorbaLoc);
-        	Assertion.AssertEquals("test", parsed.KeyString);
-        	Assertion.AssertEquals(1, parsed.ObjAddrs.Length);
-        	Assertion.AssertEquals(typeof(CorbaLocIiopAddr), parsed.ObjAddrs[0].GetType());
-        	CorbaLocIiopAddrBase addr = (CorbaLocIiopAddr)(parsed.ObjAddrs[0]);
-        	Assertion.AssertEquals(1, addr.Version.Major);
-        	Assertion.AssertEquals(0, addr.Version.Minor);
-        	Assertion.AssertEquals("localhost", addr.Host);
-        	Assertion.AssertEquals(2809, addr.Port);
+        	Corbaloc parsed = new Corbaloc(testCorbaLoc, m_codec,
+        	                               new object[] { m_defaultCodeSetTaggedComponent });
+        	Assertion.AssertEquals("test", parsed.KeyString);        	
+        	IorProfile[] profiles = parsed.GetProfiles();
+        	Assertion.AssertEquals(1, profiles.Length);
+        	Assertion.AssertEquals(typeof(InternetIiopProfile), profiles[0].GetType());
+        	InternetIiopProfile prof = (InternetIiopProfile)(profiles[0]);
+        	Assertion.AssertEquals(1, prof.Version.Major);
+        	Assertion.AssertEquals(0, prof.Version.Minor);
+        	Assertion.AssertEquals("localhost", prof.HostName);
+        	Assertion.AssertEquals(2809, prof.Port);
         	
         	testCorbaLoc = "corbaloc::elca.ch/test";
-        	parsed = new Corbaloc(testCorbaLoc);
+        	parsed = new Corbaloc(testCorbaLoc, m_codec,
+        	                      new object[] { m_defaultCodeSetTaggedComponent });
         	Assertion.AssertEquals("test", parsed.KeyString);
-        	Assertion.AssertEquals(1, parsed.ObjAddrs.Length);
-        	Assertion.AssertEquals(typeof(CorbaLocIiopAddr), parsed.ObjAddrs[0].GetType());
-        	addr = (CorbaLocIiopAddr)(parsed.ObjAddrs[0]);
-        	Assertion.AssertEquals(1, addr.Version.Major);
-        	Assertion.AssertEquals(0, addr.Version.Minor);
-        	Assertion.AssertEquals("elca.ch", addr.Host);
-        	Assertion.AssertEquals(2809, addr.Port);
+        	profiles = parsed.GetProfiles();
+        	Assertion.AssertEquals(1, profiles.Length);
+        	Assertion.AssertEquals(typeof(InternetIiopProfile), profiles[0].GetType());
+        	prof = (InternetIiopProfile)(profiles[0]);
+        	Assertion.AssertEquals(1, prof.Version.Major);
+        	Assertion.AssertEquals(0, prof.Version.Minor);
+        	Assertion.AssertEquals("elca.ch", prof.HostName);
+        	Assertion.AssertEquals(2809, prof.Port);
         	
         	testCorbaLoc = "corbaloc:iiop:1.2@elca.ch/test";
-        	 parsed = new Corbaloc(testCorbaLoc);
+        	parsed = new Corbaloc(testCorbaLoc, m_codec,
+        	                      new object[] { m_defaultCodeSetTaggedComponent });
         	Assertion.AssertEquals("test", parsed.KeyString);
-        	Assertion.AssertEquals(1, parsed.ObjAddrs.Length);
-        	Assertion.AssertEquals(typeof(CorbaLocIiopAddr), parsed.ObjAddrs[0].GetType());
-        	addr = (CorbaLocIiopAddr)(parsed.ObjAddrs[0]);
-        	Assertion.AssertEquals(1, addr.Version.Major);
-        	Assertion.AssertEquals(2, addr.Version.Minor);
-        	Assertion.AssertEquals("elca.ch", addr.Host);
-        	Assertion.AssertEquals(2809, addr.Port);
+        	profiles = parsed.GetProfiles();
+        	Assertion.AssertEquals(1, profiles.Length);
+        	Assertion.AssertEquals(typeof(InternetIiopProfile), profiles[0].GetType());
+        	prof = (InternetIiopProfile)(profiles[0]);
+        	Assertion.AssertEquals(1, prof.Version.Major);
+        	Assertion.AssertEquals(2, prof.Version.Minor);
+        	Assertion.AssertEquals("elca.ch", prof.HostName);
+        	Assertion.AssertEquals(2809, prof.Port);
         	
         	testCorbaLoc = "corbaloc::elca.ch:1234/test";
-        	parsed = new Corbaloc(testCorbaLoc);
+        	parsed = new Corbaloc(testCorbaLoc, m_codec,
+        	                      new object[] { m_defaultCodeSetTaggedComponent });
         	Assertion.AssertEquals("test", parsed.KeyString);
-        	Assertion.AssertEquals(1, parsed.ObjAddrs.Length);
-        	Assertion.AssertEquals(typeof(CorbaLocIiopAddr), parsed.ObjAddrs[0].GetType());
-        	addr = (CorbaLocIiopAddr)(parsed.ObjAddrs[0]);
-        	Assertion.AssertEquals(1, addr.Version.Major);
-        	Assertion.AssertEquals(0, addr.Version.Minor);
-        	Assertion.AssertEquals("elca.ch", addr.Host);
-        	Assertion.AssertEquals(1234, addr.Port);
-            
-        	testCorbaLoc = "corbaloc:iiop-ssl:elca.ch:1234/test";
-        	parsed = new Corbaloc(testCorbaLoc);
-        	Assertion.AssertEquals("test", parsed.KeyString);
-        	Assertion.AssertEquals(1, parsed.ObjAddrs.Length);
-        	Assertion.AssertEquals(typeof(CorbaLocIiopSslAddr), parsed.ObjAddrs[0].GetType());
-        	addr = (CorbaLocIiopSslAddr)(parsed.ObjAddrs[0]);
-        	Assertion.AssertEquals(1, addr.Version.Major);
-        	Assertion.AssertEquals(0, addr.Version.Minor);
-        	Assertion.AssertEquals("elca.ch", addr.Host);
-        	Assertion.AssertEquals(1234, addr.Port);
-            
+        	profiles = parsed.GetProfiles();
+        	Assertion.AssertEquals(1, profiles.Length);
+        	Assertion.AssertEquals(typeof(InternetIiopProfile), profiles[0].GetType());
+        	prof = (InternetIiopProfile)(profiles[0]);
+        	Assertion.AssertEquals(1, prof.Version.Major);
+        	Assertion.AssertEquals(0, prof.Version.Minor);
+        	Assertion.AssertEquals("elca.ch", prof.HostName);
+        	Assertion.AssertEquals(1234, prof.Port);                        
         }
+        
+        [Test]
+        public void TestCorbaLocIiopSsl() {
+        	string testCorbaLoc = "corbaloc:iiop-ssl:elca.ch:1234/test";
+        	Corbaloc parsed = new Corbaloc(testCorbaLoc, m_codec,
+        	                               new object[] { m_defaultCodeSetTaggedComponent });
+        	Assertion.AssertEquals("test", parsed.KeyString);
+        	IorProfile[] profiles = parsed.GetProfiles();
+        	Assertion.AssertEquals(1, profiles.Length);
+        	Assertion.AssertEquals(typeof(InternetIiopProfile), profiles[0].GetType());
+        	InternetIiopProfile prof = (InternetIiopProfile)(profiles[0]);
+        	Assertion.AssertEquals(1, prof.Version.Major);
+        	Assertion.AssertEquals(0, prof.Version.Minor);
+        	Assertion.AssertEquals("elca.ch", prof.HostName);
+        	Assertion.AssertEquals(0, prof.Port);     
+        	        	
+        	
+        	Assertion.Assert(profiles[0].TaggedComponents.ContainsTaggedComponent(
+                                 CodeSetService.SERVICE_ID));
+        	Assertion.Assert(profiles[0].TaggedComponents.ContainsTaggedComponent(
+                                 TAG_SSL_SEC_TRANS.ConstVal));
+        }
+        
+        [ExpectedException(typeof(BAD_PARAM))]
+        [Test]
+        public void TestNoCorbaLoc() {
+        	string otherUrl = "iiop://localhost:8087/test";
+        	Corbaloc parsed = new Corbaloc(otherUrl, m_codec,
+        	                               new object[] { m_defaultCodeSetTaggedComponent });
+        }
+        
+        [Test]
+        public void TestParseUrl() {
+            string testCorbaLoc = "corbaloc:iiop:1.2@elca.ch:1234/test";
+            Corbaloc parsed = new Corbaloc(testCorbaLoc, m_codec,
+                                           new object[] { m_defaultCodeSetTaggedComponent });
+            string objectUri;
+            GiopVersion version;
+            Uri channelUri = parsed.ParseUrl(out objectUri, out version);
+            Assertion.AssertEquals("object uri", "test", objectUri);
+            Assertion.AssertEquals("version major", 1, version.Major);
+            Assertion.AssertEquals("version minor", 2, version.Minor);
+            Assertion.AssertEquals("channel uri", "iiop1.2://elca.ch:1234/",
+                                   channelUri.AbsoluteUri);
+        }
+        
+        [Test]
+        public void TestParseUrlSsl() {
+            string testCorbaLoc = "corbaloc:iiop-ssl:1.2@elca.ch:1234/test";
+            Corbaloc parsed = new Corbaloc(testCorbaLoc, m_codec,
+                                           new object[] { m_defaultCodeSetTaggedComponent });
+            string objectUri;
+            GiopVersion version;
+            Uri channelUri = parsed.ParseUrl(out objectUri, out version);
+            Assertion.AssertEquals("object uri", "test", objectUri);
+            Assertion.AssertEquals("version major", 1, version.Major);
+            Assertion.AssertEquals("version minor", 2, version.Minor);
+            Assertion.AssertEquals("channel uri", "iiop-ssl1.2://elca.ch:1234/",
+                                   channelUri.AbsoluteUri);
+        }        
         
     }
 

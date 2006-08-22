@@ -1,0 +1,17 @@
+module Ch {
+module Elca {
+module Iiop {
+module IntegrationTests {
+
+interface TestService {
+
+    long EchoLong(in long arg);
+
+    any StringArrayAsAny(in string arg1, in string arg2);
+
+};
+
+};
+};
+};
+};

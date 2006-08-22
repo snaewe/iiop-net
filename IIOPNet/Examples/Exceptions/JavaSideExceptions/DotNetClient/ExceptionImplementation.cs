@@ -116,7 +116,13 @@ public class ExceptionCommon {
     }
 
     public void Serialise(Corba.DataOutputStream stream) {
-        throw new omg.org.CORBA.NO_IMPLEMENT(2876, omg.org.CORBA.CompletionStatus.Completed_MayBe);
+        stream.write_octet(1);
+        stream.write_boolean(true);
+
+        stream.write_ValueOfActualType(m_cause);
+        stream.write_WStringValue(m_msg);
+
+        stream.write_boxed(m_trace, new BoxedValueAttribute("RMI:[Ljava.lang.StackTraceElement;:CD38F9930EA8AAEC:6109C59A2636DD85"));
     }
 
 }

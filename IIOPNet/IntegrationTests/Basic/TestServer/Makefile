@@ -1,8 +1,10 @@
+include ..\..\..\MakeVars
+
 IIOPCHANNEL = ..\..\..\IIOPChannel\bin\IIOPChannel.dll
 IIOPCHANNELPDB = ..\..\..\IIOPChannel\bin\IIOPChannel.pdb
-LAUNCH = ..\..\Utils\launch.exe
-KILL = ..\..\Utils\kill.exe
-DELAY = ..\..\Utils\delay.exe
+LAUNCH = ..\..\..\Utils\launch.exe
+KILL = ..\..\..\Utils\kill.exe
+DELAY = ..\..\..\Utils\delay.exe
 
 bin         = bin\ 
 
@@ -20,7 +22,7 @@ $(bin)IIOPChannel.dll: $(IIOPCHANNEL)
 
 
 $(bin)TestServer.exe: $(bin)IIOPChannel.dll $(bin)testIdlServices.dll *.cs
-    csc $(CSFLAGS) /t:exe /r:$(bin)IIOPChannel.dll /r:$(bin)testIdlServices.dll /out:$(bin)TestServer.exe *.cs
+    $(CSC) $(CSFLAGS) /t:exe /r:$(bin)IIOPChannel.dll /r:$(bin)testIdlServices.dll /out:$(bin)TestServer.exe *.cs
 
 $(bin)testIdlServices.dll: TestExceptionService.idl TestIdlTypesService.idl
     ..\..\..\IDLToCLSCompiler\IDLCompiler\bin\IDLToCLSCompiler.exe -o $(bin) testIdlServices TestExceptionService.idl TestIdlTypesService.idl

@@ -1,4 +1,4 @@
-/* IIOPMessageBodySerializer.cs
+/* GiopMessageBodySerializer.cs
  * 
  * Project: IIOP.NET
  * IIOPChannel
@@ -49,184 +49,6 @@ using omg.org.IOP;
 namespace Ch.Elca.Iiop.MessageHandling {
 
     
-    /// <summary>
-    /// used to specify the LocateStatus for a locate reply
-    /// </summary>
-    public enum LocateStatus {
-        UNKNOWN_OBJECT,
-        OBJECT_HERE,
-        OBJECT_FORWARD
-    }
-    
-    
-    /// <summary>
-    /// simple implementation of the IMessage interface
-    /// </summary>
-    public class SimpleGiopMsg : IMessage {
-        
-        #region Constants
-
-        /// <summary>the key to access the requestId in the message properties</summary>
-        public const string REQUEST_ID_KEY = "_request_ID";
-        /// <summary>the key to access the giop-version in the message properties</summary>
-        public const string GIOP_VERSION_KEY = "_giop_version";
-        /// <summary>the key to access the response-flags in the message properties</summary>
-        public const string RESPONSE_FLAGS_KEY = "_response_flags";
-        /// <summary>the key to access the idl method name in the message properties</summary>
-        public const string IDL_METHOD_NAME_KEY = "_idl_method_name";        
-        /// <summary>the key to access the flag, specifying if one of the corba standard ops, like is_a is called or a regular object operation, in the message properties</summary>
-        public const string IS_STANDARD_CORBA_OP_KEY = "_is_standard_corba_op";           
-        /// <summary>the key to access the client side requested uri in the message properties</summary>
-        public const string REQUESTED_URI_KEY = "_requested_uri_op";                   
-        /// <summary>the key to access the called method info</summary>
-        public const string CALLED_METHOD_KEY = "_called_method";
-        /// <summary>the key to access the service context for this message (either request or reply context, depending on the message</summary>
-        public const string SERVICE_CONTEXT = "_service_context";
-        /// <summary>the key to access the piCurrent request scoped slots for this message</summary>
-        public const string PI_CURRENT_SLOTS = "_piCurrent_slots_";
-        /// <summary>the key to access the interception flow instance in this message</summary>
-        public const string INTERCEPTION_FLOW = "_interception_flow";
-        /// <summary>the key to access the isAsyncMessage property in the message properties.</summary>
-        public const string IS_ASYNC_REQUEST = "_is_async_request";
-        /// <summary>the key to access the selected profile for connection on client side.</summary>
-        public const string TARGET_PROFILE_KEY = "_target_profile_key";
-        /// <summary>the key used to access the object key in the message properties (only server side)</summary>
-        public const string REQUESTED_OBJECT_KEY = "__ObjectKey";        
-        /// <summary>the key used to access the uri-property in messages</summary>         
-        public const string URI_KEY = "__Uri";
-        /// <summary>the key used to access the typename-property in messages</summary>
-        public const string TYPENAME_KEY = "__TypeName";
-        /// <summary>the key used to access the methodname-property in messages</summary>
-        public const string METHODNAME_KEY = "__MethodName";
-        /// <summary>the key used to access the argument-property in messages</summary>
-        public const string ARGS_KEY = "__Args";
-        /// <summary>the key used to access the method-signature property in messages</summary>
-        public const string METHOD_SIG_KEY = "__MethodSignature";
-
-        #endregion Constants
-        #region IFields
-        
-        private Hashtable m_properties = new Hashtable();
-
-        #endregion IFields
-        #region IProperties
-    
-        #region Implementation of IMessage
-        
-        public IDictionary Properties {
-            get {
-                return m_properties;
-            }
-        }
-        
-        #endregion
-
-        #endregion IProperties
-        #region SMethods
-        
-        /// <summary>
-        /// helper method, which sets the service context inside the message
-        /// </summary>
-        internal static void SetServiceContextInMessage(IMessage msg, ServiceContextList svcContext) {
-            msg.Properties[SimpleGiopMsg.SERVICE_CONTEXT] = svcContext;                        
-        }
-
-        /// <summary>
-        /// helper method, which gets the service context from the message
-        /// </summary>        
-        internal static ServiceContextList GetServiceContextFromMessage(IMessage msg) {
-            return (ServiceContextList)msg.Properties[SimpleGiopMsg.SERVICE_CONTEXT];
-        }
-        
-        /// <summary>
-        /// helper method to the the interception flow  inside a message
-        /// </summary>
-        internal static void SetInterceptionFlow(IMessage msg, RequestInterceptionFlow flow) {
-            msg.Properties[SimpleGiopMsg.INTERCEPTION_FLOW] = flow;
-        }
-        
-        /// <summary>
-        /// helper method to extract the interception flow from inside a message
-        /// </summary>
-        internal static RequestInterceptionFlow GetInterceptionFlow(IMessage msg) {
-            return (RequestInterceptionFlow)msg.Properties[SimpleGiopMsg.INTERCEPTION_FLOW];
-        }
-        
-        /// <summary>
-        /// helper method to extract the pi current from inside a message
-        /// </summary>
-        internal static PICurrentImpl GetPICurrent(IMessage msg) {
-            return (PICurrentImpl)msg.Properties[SimpleGiopMsg.PI_CURRENT_SLOTS];
-        }
-        
-        /// <summary>
-        /// helper method to set the picurrent inside a message.
-        /// </summary>
-        internal static void SetPICurrent(IMessage msg, PICurrentImpl current) {
-            msg.Properties[SimpleGiopMsg.PI_CURRENT_SLOTS] = current;
-        }                
-
-        /// <summary>
-        /// helper method, which sets the is_async to true for message
-        /// </summary>
-        internal static void SetMessageAsyncRequest(IMessage msg) {
-            msg.Properties[SimpleGiopMsg.IS_ASYNC_REQUEST] = true;
-        }                        
-        
-        /// <summary>
-        /// helper method, which gets the is_async for the message
-        /// </summary>
-        internal static bool IsMessageAsyncRequest(IMessage msg) {
-            if (msg.Properties.Contains(SimpleGiopMsg.IS_ASYNC_REQUEST)) {
-                return (bool)msg.Properties[SimpleGiopMsg.IS_ASYNC_REQUEST];
-            } else {
-                return false;
-            }
-        }
-        
-        #endregion SMethods        
-
-    }
-    
-    /// <summary>contains the information for a location forward reply</summary>
-    internal class LocationForwardMessage : IMessage {
-        
-        #region Constants
-        
-        internal const string FWD_PROXY_KEY = "__FwdToProxy";
-        
-        #endregion Constants
-        #region IFields        
-        
-        private IDictionary m_properties = new Hashtable();
-        
-        #endregion IFields
-        #region IConstructors
-        
-        internal LocationForwardMessage(MarshalByRefObject toProxy) {
-            m_properties[FWD_PROXY_KEY] = toProxy;            
-        }
-        
-        #endregion IConstructors
-        #region IProperties
-        
-        public IDictionary Properties {
-            get {
-                return m_properties;
-            }
-        }
-        
-        internal MarshalByRefObject FwdToProxy {
-            get {
-                return (MarshalByRefObject)m_properties[FWD_PROXY_KEY];
-            }
-        }
-        
-        #endregion IProperties
-        
-    }
-
-
     /// <summary>
     /// this exception is thrown, when something does not work during request deserialization.
     /// This exception stores
@@ -288,16 +110,17 @@ namespace Ch.Elca.Iiop.MessageHandling {
 
         #region IFields
 
-        private MarshallerForType m_contextSeqMarshaller;
+        private ArgumentsSerializerFactory m_argSerFactory; 
+        private SerializerFactory m_serFactory;
+        private CodecFactory m_codecFactory;
 
         #endregion IFields
         #region IConstructors
 
-        internal GiopMessageBodySerialiser() {            
-            m_contextSeqMarshaller = new MarshallerForType(typeof(string[]), 
-                                        new AttributeExtCollection(new Attribute[] { new IdlSequenceAttribute(0L),
-                                                                                     new StringValueAttribute(),
-                                                                                     new WideCharAttribute(false) }));
+        internal GiopMessageBodySerialiser(ArgumentsSerializerFactory argSerFactory) {      
+            m_serFactory = argSerFactory.SerializerFactory;
+            m_argSerFactory = argSerFactory;   
+            m_codecFactory = new CodecFactoryImpl(m_serFactory);
         }
 
         #endregion IConstructors
@@ -314,18 +137,24 @@ namespace Ch.Elca.Iiop.MessageHandling {
             
             if (targetProfile.Version.IsAfterGiop1_0()) {
 
-                if (!conDesc.IsCodeSetNegotiated()) {                               
-                    object codeSetComponent = CodeSetService.FindCodeSetComponent(targetProfile);
+                if (!conDesc.IsCodeSetNegotiated()) {
+                    Codec codec =
+                        m_codecFactory.create_codec(new Encoding(ENCODING_CDR_ENCAPS.ConstVal,
+                                                                 targetProfile.Version.Major,
+                                                                 targetProfile.Version.Minor));
+                    object codeSetComponent = CodeSetService.FindCodeSetComponent(targetProfile, codec);
                     if (codeSetComponent != null) {
                         int charSet = CodeSetService.ChooseCharSet((CodeSetComponentData)codeSetComponent);
                         int wcharSet = CodeSetService.ChooseWCharSet((CodeSetComponentData)codeSetComponent);
                         conDesc.SetNegotiatedCodeSets(charSet, wcharSet);
                     } else {
                         conDesc.SetCodeSetNegotiated();
-                    }                    
-                    Ch.Elca.Iiop.Services.CodeSetService.InsertCodeSetServiceContext(cntxColl,
-                                                                                     conDesc.CharSet, 
-                                                                                     conDesc.WCharSet);
+                    }
+                    if (conDesc.IsCodeSetDefined()) {
+                        // only insert a codeset service context, if a codeset is selected
+                        CodeSetService.InsertCodeSetServiceContext(cntxColl,
+                            conDesc.CharSet, conDesc.WCharSet);
+                    }
                 }
             } else {
                 // giop 1.0; don't send code set service context; don't check again
@@ -391,8 +220,11 @@ namespace Ch.Elca.Iiop.MessageHandling {
         /// </summary>
         /// <param name="cdrStream"></param>
         private void SetCodeSet(CdrInputStream cdrStream, GiopConnectionDesc conDesc) {
-            cdrStream.CharSet = conDesc.CharSet;
-            cdrStream.WCharSet = conDesc.WCharSet;
+            if (conDesc.IsCodeSetDefined()) {
+                // set the codeset, if one is chosen
+                cdrStream.CharSet = conDesc.CharSet;
+                cdrStream.WCharSet = conDesc.WCharSet;
+            } // otherwise: use cdrStream default.
         }
 
         /// <summary>
@@ -400,8 +232,11 @@ namespace Ch.Elca.Iiop.MessageHandling {
         /// </summary>
         /// <param name="cdrStream"></param>
         private void SetCodeSet(CdrOutputStream cdrStream, GiopConnectionDesc conDesc) {            
-            cdrStream.CharSet = conDesc.CharSet;
-            cdrStream.WCharSet = conDesc.WCharSet;
+            if (conDesc.IsCodeSetDefined()) {
+                // set the codeset, if one is chosen
+                cdrStream.CharSet = conDesc.CharSet;
+                cdrStream.WCharSet = conDesc.WCharSet;
+            } // otherwise: use cdrStream default.
         }
 
         /// <summary>read the target for the request</summary>
@@ -424,7 +259,7 @@ namespace Ch.Elca.Iiop.MessageHandling {
                 }
             }
             // get the object-URI of the responsible object
-            return IiopUrlUtil.GetObjectUriForObjectKey(objectKey);
+            return IorUtil.GetObjectUriForObjectKey(objectKey);
         }
 
         private byte[] ReadTargetKey(CdrInputStream cdrStream) {
@@ -468,6 +303,13 @@ namespace Ch.Elca.Iiop.MessageHandling {
                                           clientRequest.RequestId));
             try {
                 clientRequest.SetRequestPICurrentFromThreadScopeCurrent(); // copy from thread scope picurrent before processing request
+                
+                ArgumentsSerializer ser =
+                    m_argSerFactory.Create(clientRequest.MethodToCall.DeclaringType);
+                // determine the request method to send
+                string idlRequestName = ser.GetRequestNameFor(clientRequest.MethodToCall);
+                clientRequest.RequestMethodName = idlRequestName;
+                
                 clientRequest.InterceptSendRequest();
                 GiopVersion version = targetProfile.Version;
                 ServiceContextList cntxColl = clientRequest.RequestServiceContext;
@@ -502,7 +344,7 @@ namespace Ch.Elca.Iiop.MessageHandling {
                 } else { // GIOP 1.2
                     SerialiseContext(targetStream, cntxColl); // service context
                 }
-                SerialiseRequestBody(targetStream, clientRequest, version);                
+                SerialiseRequestBody(targetStream, clientRequest, version, ser);                
             } catch (Exception ex) {
                 Debug.WriteLine("exception while serialising request: " + ex);
                 Exception newException = clientRequest.InterceptReceiveException(ex); // interception point may change exception
@@ -514,43 +356,19 @@ namespace Ch.Elca.Iiop.MessageHandling {
             }
         }
 
-        private void SerialiseContextElements(CdrOutputStream targetStream, MethodInfo methodToCall,
-                                              LogicalCallContext callContext) {
-            AttributeExtCollection methodAttrs =
-                ReflectionHelper.GetCustomAttriutesForMethod(methodToCall, true,
-                                                             ReflectionHelper.ContextElementAttributeType);
-            if (methodAttrs.Count > 0) {
-                string[] contextSeq = new string[methodAttrs.Count * 2];
-                for (int i = 0; i < methodAttrs.Count; i++) {
-                    string contextKey =
-                        ((ContextElementAttribute)methodAttrs.GetAttributeAt(i)).ContextElementKey;
-                    contextSeq[i * 2] = contextKey;
-                    if (callContext.GetData(contextKey) != null) {
-                        contextSeq[i * 2 + 1] = callContext.GetData(contextKey).ToString();
-                    } else {
-                        contextSeq[i * 2 + 1] = "";
-                    }
-                }
-                m_contextSeqMarshaller.Marshal(contextSeq, targetStream);
-            }
-        }
-
         /// <summary>serializes the request body</summary>
         /// <param name="targetStream"></param>
         /// <param name="clientRequest">the request to serialise</param>
         /// <param name="version">the GIOP-version</param>
         private void SerialiseRequestBody(CdrOutputStream targetStream, GiopClientRequest clientRequest,
-                                          GiopVersion version) {
+                                          GiopVersion version, ArgumentsSerializer ser) {
             // body of request msg: serialize arguments
             // clarification from CORBA 2.6, chapter 15.4.1: no padding, when no arguments are serialised  -->
             // for backward compatibility, do it nevertheless
             AlignBodyIfNeeded(targetStream, version);
-            ParameterMarshaller marshaller = ParameterMarshaller.GetSingleton();
-            marshaller.SerialiseRequestArgs(clientRequest.MethodToCall, clientRequest.RequestArguments, 
-                                            targetStream);
-            // check for context elements
-            SerialiseContextElements(targetStream, clientRequest.MethodToCall,
-                                     clientRequest.RequestCallContext);
+            ser.SerializeRequestArgs(clientRequest.RequestMethodName, 
+                                     clientRequest.RequestArguments,
+                                     targetStream, clientRequest.RequestCallContext);
         }
 
         /// <summary>
@@ -602,9 +420,14 @@ namespace Ch.Elca.Iiop.MessageHandling {
                 serverRequest.InterceptReceiveRequestServiceContexts();
                 serverRequest.SetThreadScopeCurrentFromPICurrent(); // copy request scope picurrent to thread scope pi-current
                 
+                serverRequest.ResolveTargetType(); // determine the .net target object type and check if target object is available
+                ArgumentsSerializer argSer =
+                    m_argSerFactory.Create(serverRequest.ServerTypeType);
+                MethodInfo called =
+                    argSer.GetMethodInfoFor(serverRequest.RequestMethodName);
+                serverRequest.ResolveCalledMethod(called); // set target method and handle special cases                                                
                 IDictionary contextElements;
-                serverRequest.ResolveCall(); // determine the .net target method
-                DeserialiseRequestBody(cdrStream, version, serverRequest, out contextElements);                
+                DeserialiseRequestBody(cdrStream, version, serverRequest, argSer, out contextElements);                
                 methodCallInfo = new MethodCall(serverRequest.Request);
                 if (contextElements != null) {
                     AddContextElementsToCallContext(methodCallInfo.LogicalCallContext, contextElements);
@@ -632,25 +455,6 @@ namespace Ch.Elca.Iiop.MessageHandling {
             }
         }
 
-        private IDictionary DeserialseContextElements(CdrInputStream cdrStream, AttributeExtCollection contextElemAttrs) {
-            IDictionary result = new HybridDictionary();
-            string[] contextElems = (string[])m_contextSeqMarshaller.Unmarshal(cdrStream);
-            if (contextElems.Length % 2 != 0) {
-                throw new MARSHAL(67, CompletionStatus.Completed_No);
-            }
-            for (int i = 0; i < contextElems.Length; i += 2) {
-                string contextElemKey = contextElems[i];
-                // insert into call context, if part of signature
-                foreach (ContextElementAttribute attr in contextElemAttrs) {
-                    if (attr.ContextElementKey == contextElemKey) {
-                        result[contextElemKey] = contextElems[i + 1];
-                        break;
-                    }
-                }
-            }
-            return result;
-        }
-        
         private object[] AdaptArgsForStandardOp(object[] args, string objectUri) {
             object[] result = new object[args.Length+1];
             result[0] = objectUri; // this argument is passed to all standard operations
@@ -662,6 +466,7 @@ namespace Ch.Elca.Iiop.MessageHandling {
         /// <param name="contextElements">the deserialised context elements, if any or null</param>        
         private void DeserialiseRequestBody(CdrInputStream cdrStream, GiopVersion version,
                                             GiopServerRequest request,
+                                            ArgumentsSerializer ser,
                                             out IDictionary contextElements) {
             // clarification from CORBA 2.6, chapter 15.4.1: no padding, when no arguments/no context elements
             // are serialised, i.e. body empty            
@@ -669,21 +474,9 @@ namespace Ch.Elca.Iiop.MessageHandling {
             TryAlignBodyIfNeeded(cdrStream, version);
 
             // unmarshall parameters
-            ParameterMarshaller paramMarshaller = ParameterMarshaller.GetSingleton();            
-            bool hasRequestArgs = paramMarshaller.HasRequestArgs(request.CalledMethod);
-            AttributeExtCollection methodAttrs =
-                ReflectionHelper.GetCustomAttriutesForMethod(request.CalledMethod, true,
-                                                             ReflectionHelper.ContextElementAttributeType);
-            object[] args;
-            contextElements = null;
-            if (hasRequestArgs) {
-                args = paramMarshaller.DeserialiseRequestArgs(request.CalledMethod, cdrStream);
-            } else {
-                args = new object[request.CalledMethod.GetParameters().Length];
-            }
-            if (methodAttrs.Count > 0) {
-                contextElements = DeserialseContextElements(cdrStream, methodAttrs);
-            }            
+            object[] args = ser.DeserializeRequestArgs(request.RequestMethodName, cdrStream,
+                                                       out contextElements);
+
             // for standard corba ops, adapt args:
             if (request.IsStandardCorbaOperation) {
                 args = AdaptArgsForStandardOp(args, request.RequestUri);
@@ -774,10 +567,12 @@ namespace Ch.Elca.Iiop.MessageHandling {
             // clarification form CORBA 2.6, chapter 15.4.2: no padding, when no arguments are serialised  -->
             // for backward compatibility, do it nevertheless
             AlignBodyIfNeeded(targetStream, version);
-            // marshal the parameters
-            ParameterMarshaller marshaller = ParameterMarshaller.GetSingleton();
-            marshaller.SerialiseResponseArgs(request.CalledMethod, 
-                                             request.ReturnValue, request.OutArgs, targetStream);            
+            // marshal the parameters            
+            
+            ArgumentsSerializer ser =
+                m_argSerFactory.Create(request.CalledMethod.DeclaringType);
+            ser.SerializeResponseArgs(request.RequestMethodName, request.ReturnValue, request.OutArgs,
+                                      targetStream);            
         }                
 
         /// <summary>serialize the exception as a CORBA System exception</summary>
@@ -795,18 +590,17 @@ namespace Ch.Elca.Iiop.MessageHandling {
             if (!(corbaEx is AbstractCORBASystemException)) {
                 corbaEx = new UNKNOWN(202, omg.org.CORBA.CompletionStatus.Completed_MayBe);
             }
-            
-            Marshaller marshaller = Marshaller.GetSingleton();
-            marshaller.Marshal(corbaEx.GetType(), Util.AttributeExtCollection.EmptyCollection,
-                               corbaEx, targetStream);
+            Serializer ser =
+                m_serFactory.Create(corbaEx.GetType(), Util.AttributeExtCollection.EmptyCollection);
+            ser.Serialize(corbaEx, targetStream);
         }
 
         private void SerialiseUserException(CdrOutputStream targetStream, AbstractUserException userEx) {            
             Type exceptionType = userEx.GetType();            
-            // marshal the exception
-            Marshaller marshaller = Marshaller.GetSingleton();
-            marshaller.Marshal(exceptionType, Util.AttributeExtCollection.EmptyCollection,
-                               userEx, targetStream);
+            // serialize a user exception
+            Serializer ser =
+                m_serFactory.Create(exceptionType, Util.AttributeExtCollection.EmptyCollection);
+            ser.Serialize(userEx, targetStream);
         }
 
 
@@ -858,7 +652,8 @@ namespace Ch.Elca.Iiop.MessageHandling {
                         response = new ReturnMessage(systemEx, request.Request); // definitive exception only available here, because interception chain may change exception
                         break;
                     case 3 :
-                        // LOCATION_FORWARD:
+                    case 4 :
+                        // LOCATION_FORWARD / LOCATION_FORWARD_PERM:
                         // --> deserialise it and return location fwd message
                         response = DeserialiseLocationFwdReply(cdrStream, version, request);
                         UpdateClientRequestWithReplyData(request, response, cntxColl);
@@ -893,8 +688,6 @@ namespace Ch.Elca.Iiop.MessageHandling {
         /// <summary>deserialize response with ok-status.</summary>
         private IMessage DeserialiseNormalReply(CdrInputStream cdrStream, GiopVersion version, 
                                                 GiopClientRequest request) {
-            MethodInfo targetMethod = request.MethodToCall;
-            ParameterMarshaller paramMarshaller = ParameterMarshaller.GetSingleton();
             // body
             // clarification from CORBA 2.6, chapter 15.4.2: no padding, when no arguments are serialised
             TryAlignBodyIfNeeded(cdrStream, version); // read alignement, if present
@@ -903,8 +696,12 @@ namespace Ch.Elca.Iiop.MessageHandling {
             object[] outArgs;
             object retVal = null;
 
-            retVal = paramMarshaller.DeserialiseResponseArgs(targetMethod, cdrStream, out outArgs);
-            ReturnMessage response = new ReturnMessage(retVal, outArgs, outArgs.Length, null, request.Request);
+            ArgumentsSerializer ser =
+                m_argSerFactory.Create(request.MethodToCall.DeclaringType);
+            retVal = ser.DeserializeResponseArgs(request.RequestMethodName, out outArgs,
+                                                 cdrStream);            
+            ReturnMessage response = new ReturnMessage(retVal, outArgs, outArgs.Length, null, 
+                                                       request.Request);
             return response;
         }
 
@@ -913,11 +710,10 @@ namespace Ch.Elca.Iiop.MessageHandling {
             // exception body
             AlignBodyIfNeeded(cdrStream, version);
 
-            Marshaller marshaller = Marshaller.GetSingleton();
-            Exception result = (Exception) marshaller.Unmarshal(typeof(omg.org.CORBA.AbstractCORBASystemException),
-                                                                Util.AttributeExtCollection.EmptyCollection,
-                                                                cdrStream);
-            
+            Serializer ser =
+                m_serFactory.Create(typeof(omg.org.CORBA.AbstractCORBASystemException), 
+                                    Util.AttributeExtCollection.EmptyCollection);            
+            Exception result = (Exception) ser.Deserialize(cdrStream);            
             if (result == null) { 
                 return new Exception("received system error from peer orb, but error was not deserializable");
             } else {
@@ -929,10 +725,10 @@ namespace Ch.Elca.Iiop.MessageHandling {
             // exception body
             AlignBodyIfNeeded(cdrStream, version);
 
-            Marshaller marshaller = Marshaller.GetSingleton();
-            Exception result = (Exception) marshaller.Unmarshal(typeof(AbstractUserException),
-                                                                Util.AttributeExtCollection.EmptyCollection,
-                                                                cdrStream);
+            Serializer ser =
+                m_serFactory.Create(typeof(AbstractUserException), 
+                                    Util.AttributeExtCollection.EmptyCollection);            
+            Exception result = (Exception) ser.Deserialize(cdrStream);
             if (result == null) {
                 return new Exception("user exception received from peer orb, but was not deserializable");
             } else {
@@ -948,9 +744,10 @@ namespace Ch.Elca.Iiop.MessageHandling {
                                                                    GiopClientRequest request) {
             AlignBodyIfNeeded(cdrStream, version);
             // read the Location fwd IOR
-            Marshaller marshaller = Marshaller.GetSingleton();
-            MarshalByRefObject newProxy = marshaller.Unmarshal(request.MethodToCall.DeclaringType, 
-                                                               AttributeExtCollection.EmptyCollection, cdrStream)
+            Serializer ser =
+                m_serFactory.Create(request.MethodToCall.DeclaringType, 
+                                    Util.AttributeExtCollection.EmptyCollection);
+            MarshalByRefObject newProxy = ser.Deserialize(cdrStream)
                                               as MarshalByRefObject;
             if (newProxy == null) {
                 throw new OBJECT_NOT_EXIST(2402, CompletionStatus.Completed_No);
@@ -968,10 +765,11 @@ namespace Ch.Elca.Iiop.MessageHandling {
         /// <param name="version"></param>
         /// <param name="forRequestId">returns the request id as out param</param>
         /// <returns>the uri of the object requested to find</returns>
-        public string DeserialiseLocateRequest(CdrInputStream cdrStream, GiopVersion version, out uint forRequestId) {
-            forRequestId = cdrStream.ReadULong();
+        public LocateRequestMessage DeserialiseLocateRequest(CdrInputStream cdrStream, GiopVersion version) {
+            uint forRequestId = cdrStream.ReadULong();
             byte[] objectKey;
-            return ReadTarget(cdrStream, version, out objectKey);
+            string uri = ReadTarget(cdrStream, version, out objectKey);
+            return new LocateRequestMessage(forRequestId, objectKey, uri);
         }
 
         /// <summary>
@@ -982,11 +780,11 @@ namespace Ch.Elca.Iiop.MessageHandling {
         /// if LocateStatus is OBJECT_FORWARD.
         ///  </param>
         public void SerialiseLocateReply(CdrOutputStream targetStream, GiopVersion version, uint forRequestId, 
-                                         LocateStatus status, Ior forward) {
+                                         LocateReplyMessage msg) {
             targetStream.WriteULong(forRequestId);
-            switch (status) {
+            switch (msg.Status) {
                 case LocateStatus.OBJECT_HERE:
-                    targetStream.WriteULong(1);
+                    targetStream.WriteULong((uint)msg.Status);
                     break;
                 default:
                     Debug.WriteLine("Locate reply status not supported");
@@ -1015,17 +813,65 @@ namespace Ch.Elca.Iiop.Tests {
     using Ch.Elca.Iiop.MessageHandling;
     using Ch.Elca.Iiop.Cdr;
     using omg.org.CORBA;
+
     
+    interface TestStringInterface {
+        
+        [return: StringValue()]
+        [return: WideChar(false)]
+        string EchoString([StringValue] [WideChar(false)] string arg);
+        
+        [return: StringValue()]
+        [return: WideChar(true)]
+        string EchoWString([StringValue] [WideChar(true)] string arg);
+        
+    }
+    
+    public class TestStringInterfaceImpl : MarshalByRefObject, TestStringInterface {
+                    	
+        [return: StringValue()]
+        [return: WideChar(false)]        		
+		public string EchoString([StringValue] [WideChar(true)] string arg) {
+			return arg;
+		}
+    	
+        [return: StringValue()]
+        [return: WideChar(false)]        		
+		public string EchoWString([StringValue] [WideChar(true)] string arg) {
+		    return arg;
+		}
+    }
 
     /// <summary>
     /// Unit-tests for testing request/reply serialisation/deserialisation
     /// </summary>
-    public class MessageBodySerialiserTest : TestCase {
+    [TestFixture]    
+    public class MessageBodySerialiserTest {
         
+        private IiopUrlUtil m_iiopUrlUtil;
+        private SerializerFactory m_serFactory;
+        
+        [SetUp]
+        public void SetUp() {
+            m_serFactory =
+    	        new SerializerFactory();
+            CodecFactory codecFactory =
+                new CodecFactoryImpl(m_serFactory);
+            Codec codec = 
+                codecFactory.create_codec(
+                    new Encoding(ENCODING_CDR_ENCAPS.ConstVal, 1, 2));            
+            m_iiopUrlUtil = 
+                IiopUrlUtil.Create(codec, new object[] { 
+                    Services.CodeSetService.CreateDefaultCodesetComponent(codec)});
+            m_serFactory.Initalize(new SerializerFactoryConfig(), m_iiopUrlUtil);
+        }
+        
+        [Test]
         public void TestSameServiceIdMultiple() {
             // checks if service contexts with the same id, doesn't throw an exception
             // checks, that the first service context is considered, others are thrown away
-            GiopMessageBodySerialiser ser = new GiopMessageBodySerialiser();
+            GiopMessageBodySerialiser ser = new GiopMessageBodySerialiser(
+                                                new ArgumentsSerializerFactory(m_serFactory));
             MemoryStream stream = new MemoryStream();
             CdrOutputStreamImpl cdrOut = new CdrOutputStreamImpl(stream, 0, new GiopVersion(1,2));
             cdrOut.WriteULong(2); // nr of contexts
@@ -1042,7 +888,184 @@ namespace Ch.Elca.Iiop.Tests {
             omg.org.IOP.ServiceContextList result = new ServiceContextList(cdrIn);
             // check if context is present
             Assertion.Assert("expected context not in collection", result.ContainsServiceContext(1234567) == true);
+        }
+        
+        [Test]
+        [ExpectedException(typeof(BAD_PARAM))]        
+        public void TestWCharSetNotDefinedClient() {
+            MethodInfo methodToCall =
+                typeof(TestStringInterface).GetMethod("EchoWString");
+            object[] args = new object[] { "test" };            
+            string uri = 
+                "IOR:000000000000000100000000000000010000000000000020000102000000000A6C6F63616C686F73740004D2000000047465737400000000";
+            Ior target = m_iiopUrlUtil.CreateIorForUrl(uri, "");
+            IIorProfile targetProfile = target.Profiles[0];
+            TestMessage msg = new TestMessage(methodToCall, args, uri);
+            msg.Properties[SimpleGiopMsg.REQUEST_ID_KEY] = (uint)5; // set request-id
+            msg.Properties[SimpleGiopMsg.TARGET_PROFILE_KEY] = targetProfile;
+            
+            // prepare connection context
+            GiopClientConnectionDesc conDesc = new GiopClientConnectionDesc(null, null, 
+                                                                            new GiopRequestNumberGenerator(), null);            
+            
+            GiopMessageBodySerialiser ser = new GiopMessageBodySerialiser(
+                                                new ArgumentsSerializerFactory(m_serFactory));
+            GiopClientRequest request = 
+                new GiopClientRequest(msg, conDesc,
+                                      new IInterceptionOption[0]);
+            CdrOutputStreamImpl targetStream = 
+                new CdrOutputStreamImpl(new MemoryStream(), 0, new GiopVersion(1,2));
+            ser.SerialiseRequest(request, targetStream, targetProfile,
+                                 conDesc);
+        }
+        
+        [Test]
+        public void TestWCharSetDefinedClient() {
+            MethodInfo methodToCall =
+                typeof(TestStringInterface).GetMethod("EchoWString");
+            object[] args = new object[] { "test" };
+            string uri = "iiop://localhost:8087/testuri"; // Giop 1.2 will be used because no version spec in uri
+            Ior target = m_iiopUrlUtil.CreateIorForUrl(uri, "");
+            IIorProfile targetProfile = target.Profiles[0];
+            TestMessage msg = new TestMessage(methodToCall, args, uri);
+            msg.Properties[SimpleGiopMsg.REQUEST_ID_KEY] = (uint)5; // set request-id
+            msg.Properties[SimpleGiopMsg.TARGET_PROFILE_KEY] = targetProfile;
+            
+            // prepare connection context
+            GiopClientConnectionDesc conDesc = new GiopClientConnectionDesc(null, null, 
+                                                                            new GiopRequestNumberGenerator(), null);            
+                        
+            GiopMessageBodySerialiser ser = new GiopMessageBodySerialiser(
+                                                new ArgumentsSerializerFactory(m_serFactory));
+            GiopClientRequest request = 
+                new GiopClientRequest(msg, conDesc,
+                                      new IInterceptionOption[0]);
+            MemoryStream baseStream = new MemoryStream();
+            CdrOutputStreamImpl targetStream =
+                new CdrOutputStreamImpl(baseStream, 0, new GiopVersion(1,2));
+            ser.SerialiseRequest(request, targetStream, targetProfile,
+                                 conDesc);
+            
+            ArrayAssertion.AssertByteArrayEquals("serialised message",
+                new byte[] { 0, 0, 0, 5, 3, 0, 0, 0,
+                             0, 0, 0, 0, 
+                             0, 0, 0, 7, 116, 101, 115, 116,
+                             117, 114, 105, 0,
+                             0, 0, 0, 12, 69, 99, 104, 111, 
+                             87, 83, 116, 114, 105, 110, 103, 0,
+                             0, 0, 0, 1, 0, 0, 0, 1,
+                             0, 0, 0, 12, 0, 0, 0, 0,
+                             0, 1, 0, 1, 0, 1, 1, 9,                              
+                             0, 0, 0, 8, 0, 116, 0, 101,
+                             0, 115, 0, 116},
+                baseStream.ToArray());
         }        
+        
+        
+        [Test]
+        public void TestWCharSetDefinedServer() {
+            byte[] sourceContent = 
+                new byte[] {
+                             0, 0, 0, 5, 3, 0, 0, 0,
+                             0, 0, 0, 0, 
+                             0, 0, 0, 7, 116, 101, 115, 116,
+                             117, 114, 105, 0,
+                             0, 0, 0, 12, 69, 99, 104, 111, 
+                             87, 83, 116, 114, 105, 110, 103, 0,
+                             0, 0, 0, 1, 0, 0, 0, 1,
+                             0, 0, 0, 12, 0, 0, 0, 0,
+                             0, 1, 0, 1, 0, 1, 1, 9,                              
+                             0, 0, 0, 8, 0, 116, 0, 101,
+                             0, 115, 0, 116};            
+            MemoryStream sourceStream =
+                new MemoryStream(sourceContent);
+            
+            // create a connection context: this is needed for request deserialisation
+            GiopConnectionDesc conDesc = new GiopConnectionDesc(null, null);
+
+            // go to stream begin
+            sourceStream.Seek(0, SeekOrigin.Begin);
+            
+            GiopMessageBodySerialiser ser = new GiopMessageBodySerialiser(
+                                                new ArgumentsSerializerFactory(m_serFactory));
+            
+            CdrInputStreamImpl cdrSourceStream = 
+                new CdrInputStreamImpl(sourceStream);
+            cdrSourceStream.ConfigStream(0, new GiopVersion(1, 2));
+            cdrSourceStream.SetMaxLength((uint)sourceContent.Length);
+ 
+            IMessage result = null;
+            TestStringInterfaceImpl service = new TestStringInterfaceImpl();
+            try {
+                // object which should be called
+                string uri = "testuri";
+                RemotingServices.Marshal(service, uri);
+
+                // deserialise request message
+                result = ser.DeserialiseRequest(cdrSourceStream, new GiopVersion(1,2),
+                                                conDesc, InterceptorManager.EmptyInterceptorOptions);
+            } finally {
+                RemotingServices.Disconnect(service);
+            }
+
+            // now check if values are correct
+            Assertion.Assert("deserialised message is null", result != null);
+            object[] args = (object[])result.Properties[SimpleGiopMsg.ARGS_KEY];
+            Assertion.Assert("args is null", args != null);
+            Assertion.AssertEquals(1, args.Length);
+            Assertion.AssertEquals("test", args[0]);
+        }  
+        
+        [Test]
+        public void TestWCharSetNotDefinedServer() {
+            byte[] sourceContent = 
+                new byte[] {
+                             0, 0, 0, 5, 3, 0, 0, 0,
+                             0, 0, 0, 0, 
+                             0, 0, 0, 7, 116, 101, 115, 116,
+                             117, 114, 105, 0,
+                             0, 0, 0, 12, 69, 99, 104, 111, 
+                             87, 83, 116, 114, 105, 110, 103, 0,
+                             0, 0, 0, 0, 0, 0, 0, 0, 
+                             0, 0, 0, 8, 0, 116, 0, 101,
+                             0, 115, 0, 116};
+            MemoryStream sourceStream =
+                new MemoryStream(sourceContent);
+            
+            // create a connection context: this is needed for request deserialisation
+            GiopConnectionDesc conDesc = new GiopConnectionDesc(null, null);
+
+            // go to stream begin
+            sourceStream.Seek(0, SeekOrigin.Begin);
+            
+            GiopMessageBodySerialiser ser = new GiopMessageBodySerialiser(
+                                                new ArgumentsSerializerFactory(m_serFactory));
+            
+            CdrInputStreamImpl cdrSourceStream = 
+                new CdrInputStreamImpl(sourceStream);
+            cdrSourceStream.ConfigStream(0, new GiopVersion(1, 2));
+            cdrSourceStream.SetMaxLength((uint)sourceContent.Length);
+ 
+            IMessage result = null;
+            TestStringInterfaceImpl service = new TestStringInterfaceImpl();
+            try {
+                // object which should be called
+                string uri = "testuri";
+                RemotingServices.Marshal(service, uri);
+
+                // deserialise request message
+                result = ser.DeserialiseRequest(cdrSourceStream, new GiopVersion(1,2),
+                                                conDesc, InterceptorManager.EmptyInterceptorOptions);
+                Assertion.Fail("no exception, although code set not set");
+            } catch (RequestDeserializationException rde) {
+                Assertion.AssertNotNull("rde inner exception",
+                                        rde.Reason);
+                Assertion.AssertEquals("rde type",
+                                       typeof(BAD_PARAM), rde.Reason.GetType());
+            } finally {
+                RemotingServices.Disconnect(service);
+            }
+        }                
                 
     }
     

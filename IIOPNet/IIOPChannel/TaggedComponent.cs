@@ -90,6 +90,7 @@ namespace omg.org.IOP {
             
     [RepositoryID("IDL:omg.org/IOP/TaggedComponent:1.0")]
     [IdlStruct]
+    [Serializable]
     public struct TaggedComponent {
     
         #region SFields
@@ -133,32 +134,6 @@ namespace omg.org.IOP {
         }
         
         #endregion IMethods
-        #region SMethods
-        
-        /// <summary>
-        /// serialise the component data as cdr encapsulation.
-        /// </summary>
-        private static byte[] SerialiseComponentData(object data) {
-            CdrEncapsulationOutputStream encap = new CdrEncapsulationOutputStream(0);
-            Marshaller marshaller = Marshaller.GetSingleton();
-            marshaller.Marshal(data.GetType(), AttributeExtCollection.EmptyCollection, 
-                               data, encap);
-            return encap.GetEncapsulationData();
-        }                
-        
-        public static TaggedComponent CreateTaggedComponent(int tag, object componentData) {
-            return new TaggedComponent(tag, SerialiseComponentData(componentData));
-        }
-        
-        /// <summary>deserialise the component data of the given type; encoded as cdr encapsulation.</summary>        
-        public static object DeserialiseComponentData(TaggedComponent component, Type componentDataType) {
-            CdrEncapsulationInputStream encap = new CdrEncapsulationInputStream(component.component_data);
-            Marshaller marshaller = Marshaller.GetSingleton();
-            return marshaller.Unmarshal(componentDataType, AttributeExtCollection.EmptyCollection, 
-                                        encap);
-        }        
-        
-        #endregion SMethods        
         
     }
     
@@ -248,11 +223,11 @@ namespace omg.org.IOP {
         /// serialise the given component data and adds it to the list of components.
         /// The data is encoded in a cdr encapsulation.
         /// </summary>
-        public TaggedComponent AddComponentWithData(int tag, object data) {
-            if (data == null) {
+        public TaggedComponent AddComponentWithData(int tag, object data, Codec codec) {
+            if ((data == null) || (codec == null)) {
                 throw new BAD_PARAM(80, CompletionStatus.Completed_MayBe);
             }                        
-            TaggedComponent result = TaggedComponent.CreateTaggedComponent(tag, data);
+            TaggedComponent result = new TaggedComponent(tag, codec.encode_value(data));
             AddComponent(result);
             return result;
         }
@@ -282,11 +257,13 @@ namespace omg.org.IOP {
         /// Assumes, that the componentData is encapsulated in a cdr encapsulation. The secound argument
         /// specifies, how the data inside the encapsulation looks like.
         /// </summary>
-        public object GetComponentData(int tag, Type componentDataType) {
+        public object GetComponentData(int tag, Codec codec, 
+                                       omg.org.CORBA.TypeCode componentDataType) {
             object result = null;
             object resultComp = GetComponentInternal(tag);
             if (resultComp != null) {
-                return TaggedComponent.DeserialiseComponentData((TaggedComponent)resultComp, componentDataType);
+                return codec.decode_value(((TaggedComponent)resultComp).component_data,
+                                          componentDataType);
             }
             return result;
         }        

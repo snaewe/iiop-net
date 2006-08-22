@@ -334,9 +334,7 @@ namespace Ch.Elca.Iiop.IdlCompiler.Action {
                 
         private void AddRepositoryIdAttribute(TypeBuilder typebuild, string repId) {
             if (repId != null) {
-                CustomAttributeBuilder repIdAttrBuilder = 
-                    new RepositoryIDAttribute(repId).CreateAttributeBuilder();
-                typebuild.SetCustomAttribute(repIdAttrBuilder);
+                IlEmitHelper.GetSingleton().AddRepositoryIDAttribute(typebuild, repId);
             }
         }                
         

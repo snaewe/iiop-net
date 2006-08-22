@@ -1,3 +1,5 @@
+include ..\..\..\..\MakeVars
+
 Chatroom=ch\elca\iiop\demo\ejbChatroom\ 
 
 

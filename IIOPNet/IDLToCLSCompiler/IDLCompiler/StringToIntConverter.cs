@@ -80,7 +80,7 @@ namespace parser {
                     throw CreateOutOfRangeException(val, negative);
                 }
                 
-                Int64 currentDigit = ParseChar(valueToParse[i], basis);
+                Decimal currentDigit = ParseChar(valueToParse[i], basis);
                 if (!negative) {
                     result += currentDigit * currentDigitBaseVal;
                     if (result < 0) {
@@ -167,11 +167,13 @@ namespace Ch.Elca.Iiop.IdlCompiler.Tests {
         	Assertion.AssertEquals("parse error", 11, StringToIntConverter.Parse("11", 10));
         	Assertion.AssertEquals("parse error", 10001, StringToIntConverter.Parse("10001", 10));        	
         	Assertion.AssertEquals("parse error", Int64.MaxValue, StringToIntConverter.Parse(Int64.MaxValue.ToString(), 10));        	
+        	Assertion.AssertEquals("parse error", UInt64.MaxValue, StringToIntConverter.Parse(UInt64.MaxValue.ToString(), 10));        	
         	
         	Assertion.AssertEquals("parse error", -1, StringToIntConverter.Parse("-1", 10));
         	Assertion.AssertEquals("parse error", -11, StringToIntConverter.Parse("-11", 10));
         	Assertion.AssertEquals("parse error", -10001, StringToIntConverter.Parse("-10001", 10));
         	Assertion.AssertEquals("parse error", Int64.MinValue, StringToIntConverter.Parse(Int64.MinValue.ToString(), 10));        	
+        	Assertion.AssertEquals("parse error", UInt64.MinValue, StringToIntConverter.Parse(UInt64.MinValue.ToString(), 10));        	
         }
         
         [Test]

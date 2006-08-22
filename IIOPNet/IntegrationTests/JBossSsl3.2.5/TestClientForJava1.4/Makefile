@@ -1,4 +1,5 @@
-NUNIT=$(NUNITV2_HOME)\bin\nunit.framework.dll 
+include ..\..\..\MakeVars
+
 IIOPCHANNEL = ..\..\..\IIOPChannel\bin\IIOPChannel.dll 
 IIOPCHANNELPDB = ..\..\..\IIOPChannel\bin\IIOPChannel.pdb 
 SSLPLUGIN = ..\..\..\SSLPlugin\bin\SslPlugin.dll 
@@ -28,7 +29,7 @@ $(bin)Org.Mentalis.Security.dll: $(bin) $(MENTALIS)
 
 
 build-client: $(bin) $(bin)IIOPChannel.dll $(bin)SslPlugin.dll $(bin)Org.Mentalis.Security.dll *.cs
-	csc $(CSFLAGS) /t:library /r:$(NUNIT) /r:$(bin)SSLPlugin.dll /r:$(bin)IIOPChannel.dll /r:$(bin)Client.dll /out:$(bin)ClientTest.dll TestClient.cs ValueTypeImpls.cs ExceptionImpl.cs
+	$(CSC) $(CSFLAGS) /t:library /r:$(NUNIT_FRAMEWORK_DLL) /r:$(bin)SSLPlugin.dll /r:$(bin)IIOPChannel.dll /r:$(bin)Client.dll /out:$(bin)ClientTest.dll TestClient.cs ValueTypeImpls.cs ExceptionImpl.cs
 
 copy-idl:
     if not exist IDL\nul mkdir IDL
@@ -44,7 +45,7 @@ compile-idl:
 
 start-client:
         @echo "JBoss IntegrationTest"
-        %NUNITV2_HOME%\bin\nunit-console.exe /assembly:bin\ClientTest.dll
+        $(NUNIT_CONSOLE) $(NUNIT_ASSEMBLY_ARG_OPTION)bin\ClientTest.dll
 
 clean:
 	if exist IDL del /s /q IDL

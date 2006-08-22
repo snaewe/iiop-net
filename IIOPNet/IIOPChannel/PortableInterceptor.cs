@@ -38,6 +38,7 @@ namespace omg.org.Dynamic {
             
     [IdlStruct]
     [RepositoryID("IDL:omg.org/Dynamic/Parameter:1.0")]
+    [Serializable]
     public struct Parameter {
                         
         [ObjectIdlTypeAttribute(IdlTypeObject.Any)]
@@ -727,7 +728,7 @@ namespace omg.org.PortableInterceptor {
     /// </summary>
     [RepositoryID("IDL:omg.org/PortableInterceptor/OrbInitalizer:1.0")]
     [InterfaceType(IdlTypeInterface.LocalInterface)]    
-    public interface ORBInitalizer {
+    public interface ORBInitializer {
         
         void pre_init(ORBInitInfo info);
         

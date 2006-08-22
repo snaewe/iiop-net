@@ -1,3 +1,5 @@
+include ..\..\..\..\..\MakeVars
+
 bin=bin\ 
 idl=idl\ 
 IDLToCLSCompiler=..\..\..\..\..\..\IDLToCLSCompiler\IDLCompiler\bin\IDLToCLSCompiler.exe
@@ -26,7 +28,7 @@ build-consumer: $(bin)IIOPChannel.dll $(bin)$(CLSForIDL).dll $(bin)$(Consumer)
 
 
 $(bin)$(Consumer): *.cs
-    csc /out:$(bin)$(Consumer) /r:$(bin)$(CLSForIDL).dll /r:$(bin)IIOPChannel.dll *.cs
+    $(CSC) /out:$(bin)$(Consumer) /r:$(bin)$(CLSForIDL).dll /r:$(bin)IIOPChannel.dll *.cs
     
 clean:
     if exist $(bin) rmdir /s /q $(bin)

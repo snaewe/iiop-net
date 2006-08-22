@@ -1,3 +1,5 @@
+include ..\..\..\..\..\MakeVars
+
 IDLSource=..\server\IDL\*.idl 
 IDLToCLS=..\..\..\..\..\..\IDLToCLSCompiler\IDLCompiler\bin\IDLToCLSCompiler.exe
 TARGETASM=adder
@@ -21,7 +23,7 @@ build-idl: $(IDL)
 	cd ..
 
 build-client: $(BIN)$(TARGETASM).dll $(BIN)IIOPChannel.dll NClient.cs
-	csc /r:$(BIN)$(TARGETASM).dll /r:$(BIN)IIOPChannel.dll /out:$(BIN)NClient.exe NClient.cs
+	$(CSC) /r:$(BIN)$(TARGETASM).dll /r:$(BIN)IIOPChannel.dll /out:$(BIN)NClient.exe NClient.cs
 
 clean:
 	if exist $(IDL)nul rmdir /q /s $(IDL)

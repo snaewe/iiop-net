@@ -1,10 +1,9 @@
-PRCURRENTTIME = Utils\currenttime.exe
+include ..\MakeVars
+
+PRCURRENTTIME = ..\Utils\currenttime.exe
 
 
 build: nunit-var junit-var
-    cd Utils
-    $(MAKE) build
-    cd ..
     cd Basic
     $(MAKE) build
     cd ..
@@ -41,20 +40,22 @@ build: nunit-var junit-var
     cd MappingPluginJavaAsClient
     $(MAKE) build
     cd ..
+    cd JdkOrb
+    $(MAKE) build
+    cd ..
     cd MappingOptions
+    $(MAKE) build
+    cd ..
+    cd SerializationOptions
     $(MAKE) build
     cd ..
     cd Jboss3.2.1
     @if not defined JBOSS_HOME echo JBOSS_HOME not set, skipping JBOSS integration test
     @if defined JBOSS_HOME $(MAKE) build
     cd ..
-    cd WAS5
-    @if not defined WAS_HOME echo WAS_HOME not set, skipping WAS5 integration test
-    @if defined WAS_HOME $(MAKE) build
-    cd ..
-    cd WAS5_1
-    @if not defined WAS5_1_HOME echo WAS5_1_HOME not set, skipping WAS5_1 integration test
-    @if defined WAS5_1_HOME $(MAKE) build
+    cd Jboss4.0
+    @if not defined JBOSS_HOME_4 echo JBOSS_HOME_4 not set, skipping JBOSS 4 integration test
+    @if defined JBOSS_HOME_4 $(MAKE) build
     cd ..
     cd MICO
     @if not defined MICO_HOME echo MICO_HOME not set, skipping MICO integration test
@@ -68,6 +69,17 @@ build: nunit-var junit-var
 #   @if not defined JACORB_HOME echo JACORB_HOME not set, skipping JACORB integration test
 #   @if defined JACORB_HOME $(MAKE) /C build
 #   cd ..
+    cd GacTest
+    $(MAKE) build
+    cd ..
+    cd WAS5
+    @if not defined WAS_HOME echo WAS_HOME not set, skipping WAS5 integration test
+    @if defined WAS_HOME $(MAKE) build
+    cd ..
+    cd WAS5_1
+    @if not defined WAS5_1_HOME echo WAS5_1_HOME not set, skipping WAS5_1 integration test
+    @if defined WAS5_1_HOME $(MAKE) build
+    cd ..
 
 build-ssl:
     cd JBossSsl3.2.5
@@ -75,15 +87,9 @@ build-ssl:
     @if not defined JAVA_HOME echo JAVA_HOME not set, skipping JBOSS SSL integration test
     @if defined JBOSS_HOME_3_2_5 @if defined JAVA_HOME $(MAKE) /C build-with-setup 
     cd ..
-
-
-nunit-var:        
-    @if not defined NUNITV2_HOME echo Set the NUNITV2_HOME variable to the NUnit V2 home directory. Please check TestInstructions.txt.
-    @if not defined NUNITV2_HOME exit 2
-
-junit-var:
-    @if not defined JUNIT_HOME echo set the JUNIT_HOME variable to the JUNIT home directory. Please check TestInstructions.txt.
-    @if not defined JUNIT_HOME exit 2
+    cd DotnetDotNetSsl
+    $(MAKE) build
+    cd ..
 
 
 test: nunit-var junit-var
@@ -125,20 +131,22 @@ test: nunit-var junit-var
     cd MappingPluginJavaAsClient
     $(MAKE) test
     cd ..
+    cd JdkOrb
+    $(MAKE) test
+    cd ..
     cd MappingOptions
+    $(MAKE) test
+    cd ..
+    cd SerializationOptions
     $(MAKE) test
     cd ..
     cd Jboss3.2.1
     @if not defined JBOSS_HOME echo JBOSS_HOME not set, skipping JBOSS integration test
     @if defined JBOSS_HOME $(MAKE) test
     cd ..
-    cd WAS5
-    @if not defined WAS_HOME echo WAS_HOME not set, skipping WAS5 integration test
-    @if defined WAS_HOME $(MAKE) test
-    cd ..
-    cd WAS5_1
-    @if not defined WAS5_1_HOME echo WAS5_1_HOME not set, skipping WAS5_1 integration test
-    @if defined WAS5_1_HOME $(MAKE) test
+    cd Jboss4.0
+    @if not defined JBOSS_HOME_4 echo JBOSS_HOME_4 not set, skipping JBOSS 4 integration test
+    @if defined JBOSS_HOME_4 $(MAKE) test
     cd ..
     cd MICO
     @if not defined MICO_HOME echo MICO_HOME not set, skipping MICO integration test
@@ -148,6 +156,17 @@ test: nunit-var junit-var
     @if not defined OMNIORB_HOME echo OMNIORB_HOME not set, skipping OmniORB integration test
     @if defined OMNIORB_HOME $(MAKE) /C test
     cd ..
+    cd GacTest
+    $(MAKE) test
+    cd ..
+    cd WAS5
+    @if not defined WAS_HOME echo WAS_HOME not set, skipping WAS5 integration test
+    @if defined WAS_HOME $(MAKE) test
+    cd ..
+    cd WAS5_1
+    @if not defined WAS5_1_HOME echo WAS5_1_HOME not set, skipping WAS5_1 integration test
+    @if defined WAS5_1_HOME $(MAKE) test
+    cd ..
 
 test-ssl:
     cd JBossSsl3.2.5
@@ -155,12 +174,11 @@ test-ssl:
     @if not defined JAVA_HOME echo JAVA_HOME not set, skipping JBOSS SSL integration test
     @if defined JBOSS_HOME_3_2_5 @if defined JAVA_HOME $(MAKE) test
     cd ..
-    
+    cd DotnetDotNetSsl
+    $(MAKE) test
+    cd ..    
 
 clean:
-    cd Utils
-    $(MAKE) clean
-    cd ..
     cd Basic
     $(MAKE) clean
     cd ..
@@ -194,10 +212,19 @@ clean:
     cd MappingPluginJavaAsClient
     $(MAKE) clean
     cd ..
+    cd JdkOrb
+    $(MAKE) clean
+    cd ..
     cd MappingOptions
     $(MAKE) clean
     cd ..
+    cd SerializationOptions
+    $(MAKE) clean
+    cd ..
     cd Jboss3.2.1
+    $(MAKE) clean
+    cd ..
+    cd Jboss4.0
     $(MAKE) clean
     cd ..
     cd WAS5
@@ -218,3 +245,10 @@ clean:
     cd JBossSsl3.2.5
     $(MAKE) /C clean
     cd ..
+    cd GacTest
+    $(MAKE) clean
+    cd ..
+    cd DotnetDotNetSsl
+    $(MAKE) clean
+    cd ..    
+

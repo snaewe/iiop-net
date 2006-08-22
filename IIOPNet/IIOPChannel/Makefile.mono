@@ -9,11 +9,11 @@ build-dll: $(Dest)IIOPChannel.dll
 
 $(Dest)IIOPChannel.dll: *.cs $(Key)
 	[ -d $(Dest) ] || mkdir $(Dest)
-	$(CSC) $(CSFLAGS) /t:library /out:$@ *.cs Mono/*.cs
+	$(CSC) $(CSFLAGS) /r:System.Runtime.Remoting.dll /t:library /out:$@ *.cs Mono/*.cs
 
 build-unit-tests: build nunit-var
 	[ -d $(UnitTestDest) ] || mkdir $(UnitTestDest)
-	$(CSC) /nowarn:0618 $(CSFLAGS) /d:UnitTest /r:${NUNITV2_HOME}/bin/nunit.framework.dll /t:library /out:$(UnitTestDest)IIOPChannel.dll *.cs Mono/*.cs
+	$(CSC) /nowarn:0618 $(CSFLAGS) /d:UnitTest /r:System.Runtime.Remoting.dll /r:${NUNITV2_HOME}/bin/nunit.framework.dll /t:library /out:$(UnitTestDest)IIOPChannel.dll *.cs Mono/*.cs
 
 test: build-unit-tests
 	mono ${NUNITV2_HOME}/bin/nunit-console.exe $(UnitTestDest)IIOPChannel.dll

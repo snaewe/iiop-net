@@ -129,7 +129,7 @@ namespace Ch.Elca.Iiop {
         #endregion Types
         #region IFields
     
-        private Hashtable m_fragmentedMsgs = new Hashtable();
+        private Hashtable /* requestid, fragmentedMsgDesc */ m_fragmentedMsgs = new Hashtable();
     
         #endregion IFields
         #region IMethods
@@ -193,7 +193,7 @@ namespace Ch.Elca.Iiop {
                 } else {
                     fragmentDesc.AddLastFragment(cdrInput, payLoadLength);
                     // remove the desc for unfinished msg from table
-                    m_fragmentedMsgs.Remove(fragmentDesc);
+                    m_fragmentedMsgs.Remove(reqId);
                 }
                 return fragmentDesc;
             }            
@@ -250,7 +250,8 @@ namespace Ch.Elca.Iiop.Tests {
     /// <summary>
     /// Unit-tests for testing fragment assembling
     /// </summary>
-    public class FragmentedMsgAsmTest : TestCase {
+    [TestFixture]    
+    public class FragmentedMsgAsmTest {
         
         
         /// <param name="fragmentContentBlocks">the nr of 4 byte blocks in the content; 
@@ -482,7 +483,71 @@ namespace Ch.Elca.Iiop.Tests {
             }
         }
         
-        
+        [Test]
+        public void TestCantAddFragmentIfNotStarted() {
+            Stream msgStream = new MemoryStream();
+            byte endianFlags = 0;
+            uint reqId = 15;            
+            uint lastFragmentContentLength = 13;
+            uint currentOffsetInMsg = 0; // the content offset for the next message
+            GiopVersion version = new GiopVersion(1,2);
+            CdrOutputStreamImpl cdrOut = new CdrOutputStreamImpl(msgStream, endianFlags, version);
+            AddFinishFragment(cdrOut, version, endianFlags, reqId,
+                              lastFragmentContentLength,
+                              currentOffsetInMsg);
+            msgStream.Seek(0, SeekOrigin.Begin);
+            try {
+                FragmentedMessageAssembler assembler = new FragmentedMessageAssembler();
+                // finish fragment
+                GiopHeader combinedHeader;
+                assembler.FinishFragmentedMsg(msgStream, out combinedHeader);                
+                Assertion.Fail("accepted finish fragment, although no start fragment seen");
+            } catch (IOException) {
+                // ok, no start fragment found
+            }
+        }        
+
+        [Test]
+        public void TestCantAddFragmentAfterMessageFinished() {
+            Stream msgStream = new MemoryStream();
+            byte endianFlags = 0;
+            uint reqId = 16;
+            
+            uint startMsgContentBlocks = 2; // make sure, that start fragment length is a multiple of 8; giop 1.2
+            uint lastFragmentContentLength = 13;
+            uint currentOffsetInMsg = 0; // the content offset for the next message
+            GiopVersion version = new GiopVersion(1,2);
+            CdrOutputStreamImpl cdrOut = AddStartMsg(msgStream, version, endianFlags,
+                                                     reqId, startMsgContentBlocks,
+                                                     out currentOffsetInMsg);
+            uint endOffset = AddFinishFragment(cdrOut, version, endianFlags, reqId, 
+                                               lastFragmentContentLength,
+                                               currentOffsetInMsg);
+                              
+            msgStream.Seek(0, SeekOrigin.Begin);
+            // start fragment
+            FragmentedMessageAssembler assembler = new FragmentedMessageAssembler();
+            assembler.StartFragment(msgStream);
+            // finish fragment
+            GiopHeader combinedHeader;
+            assembler.FinishFragmentedMsg(msgStream, out combinedHeader);
+
+            // now check, that no additional finish fragment is supported        
+            msgStream = new MemoryStream();
+            currentOffsetInMsg = 0; // the content offset for the next message
+            cdrOut = new CdrOutputStreamImpl(msgStream, endianFlags, version);
+            AddFinishFragment(cdrOut, version, endianFlags, reqId,
+                              lastFragmentContentLength,
+                              currentOffsetInMsg);
+            msgStream.Seek(0, SeekOrigin.Begin);
+            try {
+                // finish fragment
+                assembler.FinishFragmentedMsg(msgStream, out combinedHeader);
+                Assertion.Fail("accepted finish fragment, although no start fragment seen");
+            } catch (IOException) {
+                // ok, no start fragment found
+            }                     
+        }
         
     }
 

@@ -1,0 +1,2 @@
+NOTE:
+This example works with Websphere 5.1

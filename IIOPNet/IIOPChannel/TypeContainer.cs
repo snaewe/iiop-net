@@ -31,6 +31,7 @@ using System;
 using System.Reflection;
 using System.Reflection.Emit;
 using System.Collections;
+using System.Diagnostics;
 using Ch.Elca.Iiop.Util;
 using omg.org.CORBA;
 
@@ -143,7 +144,7 @@ namespace Ch.Elca.Iiop.Idl {
                     SplitBoxedForm(boxedValueRepId);
                 } catch (Exception e) {
                     // invalid boxedValueType found: static method missing or not callable: BoxedValueBase.GET_FIRST_NONBOXED_TYPE_METHODNAME
-                    Console.WriteLine("problematic boxed val found: " + m_clsType.FullName + "; ex: " + e);
+                    Trace.WriteLine("problematic boxed val found: " + m_clsType.FullName + "; ex: " + e);
                     throw new INTERNAL(890, CompletionStatus.Completed_MayBe);
                 }
             }

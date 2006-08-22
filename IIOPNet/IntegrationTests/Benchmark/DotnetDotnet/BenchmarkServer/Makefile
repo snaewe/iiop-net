@@ -1,11 +1,13 @@
+include ..\..\..\..\MakeVars
+
 IIOPCHANNEL    = ..\..\..\..\IIOPChannel\bin\IIOPChannel.dll
 IIOPCHANNELPDB = ..\..\..\..\IIOPChannel\bin\IIOPChannel.pdb
 CLSTOIDLGEN    = ..\..\..\..\CLSToIDLGenerator\bin\CLSIDLGenerator.exe
 bin         = bin\ 
 IDL         = IDL\ 
-LAUNCH      = ..\..\..\Utils\launch.exe
-KILL        = ..\..\..\Utils\kill.exe
-DELAY       = ..\..\..\Utils\delay.exe
+LAUNCH      = ..\..\..\..\Utils\launch.exe
+KILL        = ..\..\..\..\Utils\kill.exe
+DELAY       = ..\..\..\..\Utils\delay.exe
 
 
 build:  build-server build-idl
@@ -19,11 +21,11 @@ $(bin)IIOPChannel.dll: $(IIOPCHANNEL)
 
 
 $(bin)TestServiceCommon.dll: $(bin)IIOPChannel.dll TestServiceCommon.cs
-    csc $(CSFLAGS) /t:library /r:$(bin)IIOPChannel.dll /out:$(bin)TestServiceCommon.dll TestServiceCommon.cs
+    $(CSC) $(CSFLAGS) /t:library /r:$(bin)IIOPChannel.dll /out:$(bin)TestServiceCommon.dll TestServiceCommon.cs
 
 
 $(bin)TestServer.exe: $(bin)IIOPChannel.dll $(bin)TestServiceCommon.dll TestServer.cs TestService.cs
-    csc $(CSFLAGS) /t:exe /r:$(bin)IIOPChannel.dll /r:$(bin)TestServiceCommon.dll /out:$(bin)TestServer.exe TestServer.cs TestService.cs
+    $(CSC) $(CSFLAGS) /t:exe /r:$(bin)IIOPChannel.dll /r:$(bin)TestServiceCommon.dll /out:$(bin)TestServer.exe TestServer.cs TestService.cs
     
 
 build-idl: IDL\Ch\Elca\Iiop\Benchmarks\TestService.idl

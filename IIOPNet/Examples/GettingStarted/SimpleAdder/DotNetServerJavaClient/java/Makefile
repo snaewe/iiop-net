@@ -1,3 +1,5 @@
+include ..\..\..\..\..\MakeVars
+
 IDLSource=..\net\IDL\Ch\Elca\Iiop\Tutorial\GettingStarted\*.idl
 Adder=Ch\Elca\Iiop\Tutorial\GettingStarted\ 
 

@@ -1,4 +1,4 @@
-
+include ..\MakeVars
 
 build: idl-files
 	cd GenericCollections
@@ -42,6 +42,19 @@ idl-files:
 	if not exist ..\IDL\orb.idl echo You did not install IDL\orb.idl. Please check Readme.txt, Installation
 	if not exist ..\IDL\orb.idl exit 2
 
+nunit2_2-var:        
+	@if not defined NUNITV2_2_HOME echo Set the NUNITV2_2_HOME variable to the NUnit V2_2 home directory. Please check TestInstructions.txt.
+	@if not defined NUNITV2_2_HOME exit 2
+nunitforms-var:
+	@if not defined NUNITFORMS_HOME echo Set the NUNITFORMS_HOME variable to the NUnit Forms V1_3 home directory. Please check TestInstructions.txt.
+	@if not defined NUNITFORMS_HOME exit 2
+
+test: nunit2_2-var nunitforms-var
+	cd Callback
+	cd ChatroomInterDN
+	$(MAKE) test
+	cd ..
+	cd ..
 
 clean:
 	cd GenericCollections

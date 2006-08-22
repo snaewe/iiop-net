@@ -1,0 +1,103 @@
+<Project name="IIOPChannel" standardNamespace="NewProject" description="" newfilesearch="None" enableviewstate="True" version="1.1" projecttype="C#">
+  <Contents>
+    <File name=".\AssemblyCache.cs" subtype="Code" buildaction="Compile" dependson="" data="" />
+    <File name=".\AssemblyInfo.cs" subtype="Code" buildaction="Compile" dependson="" data="" />
+    <File name=".\AttributeExtCollection.cs" subtype="Code" buildaction="Compile" dependson="" data="" />
+    <File name=".\BoxedArrayHelper.cs" subtype="Code" buildaction="Compile" dependson="" data="" />
+    <File name=".\BoxedValue.cs" subtype="Code" buildaction="Compile" dependson="" data="" />
+    <File name=".\BoxedValueTypeGenerator.cs" subtype="Code" buildaction="Compile" dependson="" data="" />
+    <File name=".\CDRStream.cs" subtype="Code" buildaction="Compile" dependson="" data="" />
+    <File name=".\CdrStreamEndianDepOp.cs" subtype="Code" buildaction="Compile" dependson="" data="" />
+    <File name=".\ClsToIDLMapper.cs" subtype="Code" buildaction="Compile" dependson="" data="" />
+    <File name=".\CodeSetConversion.cs" subtype="Code" buildaction="Compile" dependson="" data="" />
+    <File name=".\CodeSetService.cs" subtype="Code" buildaction="Compile" dependson="" data="" />
+    <File name=".\Connection.cs" subtype="Code" buildaction="Compile" dependson="" data="" />
+    <File name=".\ConnectionManager.cs" subtype="Code" buildaction="Compile" dependson="" data="" />
+    <File name=".\CORBAExceptions.cs" subtype="Code" buildaction="Compile" dependson="" data="" />
+    <File name=".\CORBAInit.cs" subtype="Code" buildaction="Compile" dependson="" data="" />
+    <File name=".\CORBAInitService.cs" subtype="Code" buildaction="Compile" dependson="" data="" />
+    <File name=".\Corbaloc.cs" subtype="Code" buildaction="Compile" dependson="" data="" />
+    <File name=".\CORBANameService.cs" subtype="Code" buildaction="Compile" dependson="" data="" />
+    <File name=".\CustomMarshalling.cs" subtype="Code" buildaction="Compile" dependson="" data="" />
+    <File name=".\FragmentedMsgAssembler.cs" subtype="Code" buildaction="Compile" dependson="" data="" />
+    <File name=".\GIOPHeader.cs" subtype="Code" buildaction="Compile" dependson="" data="" />
+    <File name=".\GiopMessageBodySerializer.cs" subtype="Code" buildaction="Compile" dependson="" data="" />
+    <File name=".\GiopMessageHandler.cs" subtype="Code" buildaction="Compile" dependson="" data="" />
+    <File name=".\GiopMsgTypes.cs" subtype="Code" buildaction="Compile" dependson="" data="" />
+    <File name=".\GiopRequestNumberHelper.cs" subtype="Code" buildaction="Compile" dependson="" data="" />
+    <File name=".\IDLAttributes.cs" subtype="Code" buildaction="Compile" dependson="" data="" />
+    <File name=".\IDLNaming.cs" subtype="Code" buildaction="Compile" dependson="" data="" />
+    <File name=".\IIOPChannel.cs" subtype="Code" buildaction="Compile" dependson="" data="" />
+    <File name=".\IIOPFormatter.cs" subtype="Code" buildaction="Compile" dependson="" data="" />
+    <File name=".\IIOPTransport.cs" subtype="Code" buildaction="Compile" dependson="" data="" />
+    <File name=".\IIOPURLUtil.cs" subtype="Code" buildaction="Compile" dependson="" data="" />
+    <File name=".\IOR.cs" subtype="Code" buildaction="Compile" dependson="" data="" />
+    <File name=".\IORUtil.cs" subtype="Code" buildaction="Compile" dependson="" data="" />
+    <File name=".\MappingPlugin.cs" subtype="Code" buildaction="Compile" dependson="" data="" />
+    <File name=".\PeekSupportingStream.cs" subtype="Code" buildaction="Compile" dependson="" data="" />
+    <File name=".\ReflectUtil.cs" subtype="Code" buildaction="Compile" dependson="" data="" />
+    <File name=".\Repository.cs" subtype="Code" buildaction="Compile" dependson="" data="" />
+    <File name=".\Serializer.cs" subtype="Code" buildaction="Compile" dependson="" data="" />
+    <File name=".\Services.cs" subtype="Code" buildaction="Compile" dependson="" data="" />
+    <File name=".\StandardCorbaOps.cs" subtype="Code" buildaction="Compile" dependson="" data="" />
+    <File name=".\StringUtil.cs" subtype="Code" buildaction="Compile" dependson="" data="" />
+    <File name=".\TypeCode.cs" subtype="Code" buildaction="Compile" dependson="" data="" />
+    <File name=".\TypeFromTypeCodeGenerator.cs" subtype="Code" buildaction="Compile" dependson="" data="" />
+    <File name=".\AppServerCompatibility.cs" subtype="Code" buildaction="Compile" dependson="" data="" />
+    <File name=".\UnionGenerationHelper.cs" subtype="Code" buildaction="Compile" dependson="" data="" />
+    <File name=".\TypeContainer.cs" subtype="Code" buildaction="Compile" dependson="" data="" />
+    <File name=".\ILEmitHelper.cs" subtype="Code" buildaction="Compile" dependson="" data="" />
+    <File name=".\Debug.cs" subtype="Code" buildaction="Compile" dependson="" data="" />
+    <File name=".\GiopTransport.cs" subtype="Code" buildaction="Compile" dependson="" data="" />
+    <File name=".\IOUtil.cs" subtype="Code" buildaction="Compile" dependson="" data="" />
+    <File name=".\TransportWrapper.cs" subtype="Code" buildaction="Compile" dependson="" data="" />
+    <File name=".\TcpTransportWrapper.cs" subtype="Code" buildaction="Compile" dependson="" data="" />
+    <File name=".\SSL.cs" subtype="Code" buildaction="Compile" dependson="" data="" />
+    <File name=".\Any.cs" subtype="Code" buildaction="Compile" dependson="" data="" />
+    <File name=".\CORBAOrbServices.cs" subtype="Code" buildaction="Compile" dependson="" data="" />
+    <File name=".\IiopLoc.cs" subtype="Code" buildaction="Compile" dependson="" data="" />
+    <File name=".\CorbaContextElement.cs" subtype="Code" buildaction="Compile" dependson="" data="" />
+    <File name=".\PortableInterceptor.cs" subtype="Code" buildaction="Compile" dependson="" data="" />
+    <File name=".\InterceptorManager.cs" subtype="Code" buildaction="Compile" dependson="" data="" />
+    <File name=".\InterceptionFlow.cs" subtype="Code" buildaction="Compile" dependson="" data="" />
+    <File name=".\AlternateIiopAddress.cs" subtype="Code" buildaction="Compile" dependson="" data="" />
+    <File name=".\GiopRequest.cs" subtype="Code" buildaction="Compile" dependson="" data="" />
+    <File name=".\InterceptionInfo.cs" subtype="Code" buildaction="Compile" dependson="" data="" />
+    <File name=".\TaggedComponent.cs" subtype="Code" buildaction="Compile" dependson="" data="" />
+    <File name=".\Policy.cs" subtype="Code" buildaction="Compile" dependson="" data="" />
+    <File name=".\Codec.cs" subtype="Code" buildaction="Compile" dependson="" data="" />
+    <File name=".\Current.cs" subtype="Code" buildaction="Compile" dependson="" data="" />
+    <File name=".\PICurrentImpl.cs" subtype="Code" buildaction="Compile" dependson="" data="" />
+    <File name=".\TaggedProfile.cs" subtype="Code" buildaction="Compile" dependson="" data="" />
+    <File name=".\BidirIiop.cs" subtype="Code" buildaction="Compile" dependson="" data="" />
+    <File name=".\TypeCodeCreator.cs" subtype="Code" buildaction="Compile" dependson="" data="" />
+    <File name=".\SerializerFactory.cs" subtype="Code" buildaction="Compile" dependson="" data="" />
+    <File name=".\ArgumentsSerializerFactory.cs" subtype="Code" buildaction="Compile" dependson="" data="" />
+    <File name=".\ArgumentsSerializer.cs" subtype="Code" buildaction="Compile" dependson="" data="" />
+    <File name=".\Messages.cs" subtype="Code" buildaction="Compile" dependson="" data="" />
+    <File name=".\TestUtil.cs" subtype="Code" buildaction="Compile" dependson="" data="" />
+    <File name=".\RepositoryTypes.cs" subtype="Code" buildaction="Compile" dependson="" data="" />
+    <File name=".\SystemWireBitConverter.cs" subtype="Code" buildaction="Compile" dependson="" data="" />
+  </Contents>
+  <References>
+    <Reference type="Gac" refto="nunit.framework, Version=2.0.6.0, Culture=neutral, PublicKeyToken=96d09a1eb7f44a77" localcopy="True" />
+  </References>
+  <DeploymentInformation target="" script="" strategy="File" />
+  <Configuration runwithwarnings="False" name="Debug">
+    <CodeGeneration runtime="MsNet" compiler="Csc" compilerversion="Standard" warninglevel="4" nowarn="" includedebuginformation="True" optimize="True" unsafecodeallowed="False" generateoverflowchecks="True" mainclass="" target="Library" definesymbols="DISABLE_STRONG_NAME UnitTest" generatexmldocumentation="False" win32Icon="" noconfig="False" nostdlib="False" />
+    <Execution commandlineparameters="" consolepause="True" />
+    <Output directory=".\binSD" assembly="IIOPChannel" executeScript="" executeBeforeBuild="" executeAfterBuild="" executeBeforeBuildArguments="" executeAfterBuildArguments="" />
+  </Configuration>
+  <Configurations active="Debug">
+    <Configuration runwithwarnings="False" name="Debug">
+      <CodeGeneration runtime="MsNet" compiler="Csc" compilerversion="Standard" warninglevel="4" nowarn="" includedebuginformation="True" optimize="True" unsafecodeallowed="False" generateoverflowchecks="True" mainclass="" target="Library" definesymbols="DISABLE_STRONG_NAME UnitTest" generatexmldocumentation="False" win32Icon="" noconfig="False" nostdlib="False" />
+      <Execution commandlineparameters="" consolepause="True" />
+      <Output directory=".\binSD" assembly="IIOPChannel" executeScript="" executeBeforeBuild="" executeAfterBuild="" executeBeforeBuildArguments="" executeAfterBuildArguments="" />
+    </Configuration>
+    <Configuration runwithwarnings="False" name="Release">
+      <CodeGeneration runtime="MsNet" compiler="Csc" compilerversion="" warninglevel="4" nowarn="" includedebuginformation="True" optimize="True" unsafecodeallowed="False" generateoverflowchecks="True" mainclass="" target="Exe" definesymbols="" generatexmldocumentation="False" win32Icon="" noconfig="False" nostdlib="False" />
+      <Execution commandlineparameters="" consolepause="True" />
+      <Output directory=".\bin\Release" assembly="IIOPChannel" executeScript="" executeBeforeBuild="" executeAfterBuild="" executeBeforeBuildArguments="" executeAfterBuildArguments="" />
+    </Configuration>
+  </Configurations>
+</Project>

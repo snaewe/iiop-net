@@ -1,4 +1,5 @@
-NUNIT=$(NUNITV2_HOME)\bin\nunit.framework.dll 
+include ..\..\..\MakeVars
+
 IIOPCHANNEL = ..\..\..\IIOPChannel\bin\IIOPChannel.dll 
 IIOPCHANNELPDB = ..\..\..\IIOPChannel\bin\IIOPChannel.pdb 
 TestService = ..\TestServer\bin\TestServiceCommon.dll 
@@ -24,11 +25,11 @@ $(bin)TestServiceCommon.dll: $(TestService)
         if exist $(TestServicePDB) copy /y $(TestServicePDB) $(bin)TestServiceCommon.pdb
 
 $(bin)ClientTest.dll: $(bin)IIOPChannel.dll $(bin)TestUnion.dll $(bin)TestServiceCommon.dll *.cs
-	csc $(CSFLAGS) /t:library /r:$(NUNIT) /r:$(bin)TestUnion.dll /r:$(bin)TestServiceCommon.dll /r:$(bin)IIOPChannel.dll /out:bin\ClientTest.dll TestClient.cs
+	$(CSC) $(CSFLAGS) /t:library /r:$(NUNIT_FRAMEWORK_DLL) /r:$(bin)TestUnion.dll /r:$(bin)TestServiceCommon.dll /r:$(bin)IIOPChannel.dll /out:bin\ClientTest.dll TestClient.cs
 
 start-client:
 	@echo "Direct IntegrationTest"
-	%NUNITV2_HOME%\bin\nunit-console.exe /assembly:bin\ClientTest.dll
+	$(NUNIT_CONSOLE) $(NUNIT_ASSEMBLY_ARG_OPTION)bin\ClientTest.dll
 
 clean:
 	if exist bin del /s /q bin

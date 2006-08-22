@@ -44,7 +44,7 @@ namespace Ch.Elca.Iiop.IntegrationTests {
     /// <summary>
     /// adds the test interceptors.
     /// </summary>
-    public class TestInterceptorInit : ORBInitalizer {
+    public class TestInterceptorInit : ORBInitializer {
 
         private TestRequestInterceptor m_requestIntercept;
 

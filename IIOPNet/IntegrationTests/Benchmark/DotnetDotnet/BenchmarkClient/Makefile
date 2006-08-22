@@ -1,3 +1,5 @@
+include ..\..\..\..\MakeVars
+
 IIOPCHANNEL = ..\..\..\..\IIOPChannel\bin\IIOPChannel.dll 
 IIOPCHANNELPDB = ..\..\..\..\IIOPChannel\bin\IIOPChannel.pdb 
 IDLTOCLSCOMP   = ..\..\..\..\..\IDLToCLSCompiler\IDLCompiler\bin\IDLToCLSCompiler.exe
@@ -30,7 +32,7 @@ $(bin)$(CLSFORIDL): $(IDL)$(ServiceIDLFileName)
 
         
 build-client: $(bin)IIOPChannel.dll $(bin)$(CLSFORIDL) *.cs
-    csc $(CSFLAGS) /t:exe /r:$(bin)$(CLSFORIDL) /r:$(bin)IIOPChannel.dll /out:bin\ClientTest.exe TestClient.cs PerformanceCounter.cs ValueTypeImpls.cs
+    $(CSC) $(CSFLAGS) /t:exe /r:$(bin)$(CLSFORIDL) /r:$(bin)IIOPChannel.dll /out:bin\ClientTest.exe TestClient.cs PerformanceCounter.cs ValueTypeImpls.cs
 
 start-client:
     @echo "Benchmark .NET <-> .NET"

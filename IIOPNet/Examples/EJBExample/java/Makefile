@@ -1,3 +1,5 @@
+include ..\..\..\MakeVars
+
 Adder=ch\elca\iiop\demo\ejbAdder\ 
 
 

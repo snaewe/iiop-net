@@ -91,6 +91,7 @@ namespace Ch.Elca.Iiop.IntegrationTests {
             Assertion.AssertEquals((System.Byte)(arg2 + 1), result2);
         }
 
+        [Test]
         public void TestWithTimeout() {
             System.Byte arg = 1;
             try {

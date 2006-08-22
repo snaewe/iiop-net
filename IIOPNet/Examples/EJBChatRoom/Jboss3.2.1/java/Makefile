@@ -1,3 +1,5 @@
+include ..\..\..\..\MakeVars
+
 Chatroom=ch\elca\iiop\demo\ejbChatroom\ 
 JBOSS_CLP=%JBOSS_HOME%\server\all\lib\jboss-j2ee.jar;.
 IDL=IDL\ 
@@ -35,6 +37,13 @@ build-idl: $(IDL)
 	rmic -idl -classpath %JBOSS_HOME%\server\all\lib\jboss-j2ee.jar;. -d ..\IDL ch.elca.iiop.demo.ejbChatroom.Chatroom
 	rmic -idl -classpath %JBOSS_HOME%\server\all\lib\jboss-j2ee.jar;. -d ..\IDL ch.elca.iiop.demo.ejbChatroom.ChatroomHome
 	cd ..
+
+start-server: deploy-bean
+        @echo Starting JBoss in configuration all
+        @start $(JBOSS_HOME)\bin\run.bat -c All
+
+deploy-bean:
+	copy bin\chatroom_ejb.jar %JBOSS_HOME%\server\all\deploy
 
 
 clean:

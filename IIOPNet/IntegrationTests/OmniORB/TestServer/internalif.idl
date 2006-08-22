@@ -1,0 +1,8 @@
+#include "service.idl"
+
+module Internal {
+
+    interface TestSimpleServiceInternal : TestSimpleServicePublic {
+    };
+
+};

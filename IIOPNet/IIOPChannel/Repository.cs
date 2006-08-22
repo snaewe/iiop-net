@@ -41,63 +41,174 @@ using omg.org.CORBA;
 namespace Ch.Elca.Iiop.Idl {
 
     /// <summary>
-    /// Summary description for Repository.
+    /// The repository contains all types known to IIOP.NET. It handles the repository-id resolution / retrieval as
+    /// well as typecode creation / resolution.
     /// </summary>
     public class Repository {
 
-        /// <summary>cache last loaded types</summary>
-        private class TypeCache {
-            
-            #region IFields
+        /// <summary>
+        /// Keeps track of loaded assemblies. It handles the load of new assemblies by registering types
+        /// in repository.
+        /// </summary>
+        private class AssemblyLoader {
 
-            private Type m_place1 = null;
-            private Type m_place2 = null;
+            private Repository m_forRepository;
+            private Hashtable m_loadedAssemblies = new Hashtable();
 
-            #endregion IFields
-            #region IConstructors
-                        
-            public TypeCache() {
+			#region IConstructors
+
+            internal AssemblyLoader(Repository forRepository) {
+                m_forRepository = forRepository;
+                AppDomain.CurrentDomain.AssemblyResolve += new ResolveEventHandler(this.AssemblyNotResolvable);
+                AppDomain.CurrentDomain.AssemblyLoad += new AssemblyLoadEventHandler(this.AssemblyLoaded);                
+                Assembly[] alreadyLoaded = AppDomain.CurrentDomain.GetAssemblies();
+                for (int i = 0; i < alreadyLoaded.Length; i++) {                    
+                    RegisterTypes(alreadyLoaded[i]);
+                }                
             }
-
+            
             #endregion IConstructors
             #region IMethods
+                        
+            private void AssemblyLoaded(object sender, AssemblyLoadEventArgs args) {
+                RegisterTypes(args.LoadedAssembly);                
+                AssemblyName[] refAssemblies =
+                    args.LoadedAssembly.GetReferencedAssemblies();
+                if (refAssemblies != null) {
+                    for (int i = 0; i <refAssemblies.Length; i++) {                        
+                        try {
+                            if (refAssemblies[i] != null) {
+                                Assembly.Load(refAssemblies[i]); // this will call AssemblyLoaded for this assembly
+                            }
+                        } catch (BadImageFormatException) {
+                            Trace.WriteLine("bad format -> ignoring assembly " + refAssemblies[i].FullName);
+                            // ignore assembly
+                        } catch (FileNotFoundException) {
+                            Trace.WriteLine("missing -> ignoring assembly " + refAssemblies[i].FullName);
+                            // ignore assembly
+                        } catch (System.Security.SecurityException) {
+                            Trace.WriteLine("security problem -> ignoring assembly " + refAssemblies[i].FullName);
+                            // ignore assembly
+                        }
+                    }
+                }
+            }
+                        
 
-            public void Cache(Type type) {
-                lock(this) {
-                    m_place2 = m_place1;
-                    m_place1 = type;
+            private string ParseAssemblyNamePart(string part) {
+                int valueIndex = part.IndexOf("=");
+                if (valueIndex > 0) {
+                    return part.Substring(valueIndex + 1).Trim();
+                } else {
+                    return null;
+                }
+            }
+            private void ParseAssemblyName(string asmName, out string simpleName, out string version, 
+                                           out string publicKeyToken, out string culture) {
+                version = null;
+                publicKeyToken = null;
+                culture = null;
+                string[] nameParts = asmName.Split(',');                
+                simpleName = nameParts[0].Trim();
+                for (int i = 1; i < nameParts.Length; i++) {
+                    string trimmedPart = nameParts[i].Trim();
+                    if (trimmedPart.StartsWith("Version")) {
+                        version = ParseAssemblyNamePart(nameParts[i]);
+                    } else if (trimmedPart.StartsWith("PublicKeyToken")) {
+                        publicKeyToken = ParseAssemblyNamePart(nameParts[i]);
+                    } else if (trimmedPart.StartsWith("Culture")) {
+                        culture = ParseAssemblyNamePart(nameParts[i]);
+                    }
                 }
             }
 
-            public Type GetType(string clsName) {
-                lock(this) {
-                    if ((m_place1 != null) && (m_place1.FullName.Equals(clsName))) { 
-                        return m_place1; 
+            private Assembly AssemblyNotResolvable(object sender, ResolveEventArgs args) {
+                Debug.WriteLine("assembly was not resolvable: " + args.Name);
+                string toResolveName;
+                string toResolveVersion;
+                string toResolvePkToken;
+                string toResolveCulture;
+                ParseAssemblyName(args.Name, out toResolveName, out toResolveVersion,
+                                  out toResolvePkToken, out toResolveCulture);
+                if ((toResolvePkToken != null) && (toResolveVersion != null) && (toResolveCulture == null)) {
+                    // il emit doesn't generate full assembly names for referenced types if Culture is Invariant.
+                    // Therefore, a type can't be resolved, if the assembly is only installed in the gac ->
+                    // fix this by adding invariant culture here
+                    Assembly[] assemblies;
+                    lock(m_loadedAssemblies.SyncRoot) {
+                        assemblies = new Assembly[m_loadedAssemblies.Count];
+                        m_loadedAssemblies.Values.CopyTo(assemblies, 0);
                     }
-                    if ((m_place2 != null) && (m_place2.FullName.Equals(clsName))) { 
-                        Type result = m_place2;
-                        m_place2 = m_place1;
-                        m_place1 = result;
-                        return result; 
+                    for (int i = 0; i < assemblies.Length; i++) {
+                        if (((Assembly)assemblies[i]).GetName().Name == toResolveName) {
+                            // candidate
+                            string candidateName;
+                            string candidateVersion;
+                            string candidatePkToken;
+                            string candidateCulture;
+                            ParseAssemblyName(((Assembly)assemblies[i]).FullName, 
+                                              out candidateName, out candidateVersion,
+                                              out candidatePkToken, out candidateCulture);
+                            if ((candidateVersion == toResolveVersion) && 
+                                (candidatePkToken == toResolvePkToken)) {
+                                return assemblies[i];
+                            }                                
+                    }
                     }
                 }
                 return null;
             }
 
+            private void RegisterTypes(Assembly forAssembly) {
+                lock(m_loadedAssemblies.SyncRoot) {
+                    if (!m_loadedAssemblies.ContainsKey(forAssembly.FullName)) {
+                        m_loadedAssemblies[forAssembly.FullName] = forAssembly;                        
+                    } else {
+                        return; // already loaded
+                    }
+                }
+                // locking is done by register type
+                Type[] types;
+                try {
+                    types = forAssembly.GetTypes();                    
+                } catch (ReflectionTypeLoadException rtle) { // can happen for dynamic assemblies
+                    Debug.WriteLine(String.Format("Couldn't load all types from assembly {0}; exception: {1}",
+                                                  forAssembly.FullName, rtle));
+                    types = rtle.Types; // the types loaded without exception
+                }
+                if (types != null) { // check needed for mono, because mono returns null for GetTypes in case of dynamically created assemblies
+                    for (int i = 0; i < types.Length; i++) {
+                        if (types[i] != null) { // null, if type coudln't be loaded
+                            m_forRepository.RegisterType(types[i]);
+                        }
+                    }                
+                }
+            }
+            
             #endregion IMethods
 
         }
 
+        #region IFields
+        
+        private Repository.AssemblyLoader m_assemblyLoader;
+        private Hashtable m_loadedTypesByRepId = new Hashtable();
+        private Hashtable m_repIdsByLoadedTypes = new Hashtable(); // for types not dynamically generated by IIOP.NET
+        private Hashtable m_valueTypeImpls = new Hashtable();
+        
+        #endregion IFields
+
         #region IConstructors
 
         private Repository() {
+            m_assemblyLoader = new Repository.AssemblyLoader(this);            
         }
 
         #endregion IConstructors
         #region SFields
+        
 
-        private static AssemblyCache s_asmCache = AssemblyCache.GetSingleton();
-        private static TypeCache s_typeCache = new TypeCache();
+        private static Repository s_instance = new Repository();
 
         #endregion SFields
         #region SMethods
@@ -112,62 +223,41 @@ namespace Ch.Elca.Iiop.Idl {
                 (repId == "IDL:omg.org/CORBA/Object:1.0")) {
                 return ReflectionHelper.MarshalByRefObjectType;
             }           
-            Type result = null;
-            string typeNameAssumeIdlMapped = GetTypeNameForId(repId, true);
-            if (typeNameAssumeIdlMapped != null) {
-                // now try to load the type:
-                // check, if type with correct repository id can be found, 
-                // if it's assumed, that repId represents a type, which was
-                // mapped from IDL to CLS
-                result = LoadType(typeNameAssumeIdlMapped);
-                bool isRepIdCorrect = false;
-                if (result != null) {
-                    try {
-                        isRepIdCorrect = GetRepositoryID(result) == repId;
-                    } catch (Exception) {
-                        // for types in construction, not supported -> ignore
-                    }
-                }
-                if (result == null || !isRepIdCorrect) {
-                    // check, if type can be found, if a native CLS type mapped to idl is assumed.
-                    string typeNameAssumeCls = GetTypeNameForId(repId, false);
-                    if (typeNameAssumeCls != null) {
-                        result = LoadType(typeNameAssumeCls);
-                    }
+            Type result = (Type)s_instance.m_loadedTypesByRepId[repId];
+            if (result == null) {
+                // check for java bug in idl to java mapping;
+                // the idlj compiler changes the repository id while mapping from idl to java
+                if (repId.StartsWith("IDL:org/omg/BoxedArray/System")) {
+                    result = GetTypeForId("IDL:org/omg/BoxedArray/_System" + repId.Substring(29));
                 }
             }
+            Debug.WriteLineIf(result == null, "type not found for id: " + repId);
             return result;
         }
 
         /// <summary>
-        /// gets the fully qualified type name for the repository-id
+        /// create a fully qualified type name for the repository-id; if no type is registered for
+        /// a repostiroy id, this name can be used to create a type for the repository id.
         /// </summary>
-        internal static string GetTypeNameForId(string repId) {
-            return GetTypeNameForId(repId, false);
-        }
-
-        /// <summary>
-        /// gets the fully qualified type name for the repository-id
-        /// </summary>
-        private static string GetTypeNameForId(string repId, bool assumeMappedFromIdl) {
+        internal static string CreateTypeNameForId(string repId) {
             if (repId.StartsWith("RMI")) {
-                return GetTypeNameForRMIId(repId);
+                return CreateTypeNameForRMIId(repId);
             } else if (repId.StartsWith("IDL")) {
-                return GetTypeNameForIDLId(repId, assumeMappedFromIdl);
+                return CreateTypeNameForIDLId(repId, false);
             } else {
                 return null; // unknown
             }
         }
 
         /// <summary>
-        /// gets the CLS type name represented by the IDL-id
+        /// creates a CLS type name for a type represented by the IDL-id
         /// </summary>
         /// <param name="idlID"></param>
         /// <param name="assumeMappedFromIdl">should assume, that type represented by idlid is mapped from IDL to CLS</param>
         /// <returns>
         /// The typename for the idlID
         /// </returns>
-        private static string GetTypeNameForIDLId(string idlID, bool assumeMappedFromIdl) {
+        private static string CreateTypeNameForIDLId(string idlID, bool assumeMappedFromIdl) {
             idlID = idlID.Substring(4);
             if (idlID.IndexOf(":") < 0) { 
                 // invalid repository id: idlID
@@ -178,11 +268,11 @@ namespace Ch.Elca.Iiop.Idl {
             return typeName;
         }
         /// <summary>
-        /// gets the CLS type name represented by the RMI-id
+        /// create a CLS type name for a type represented by the RMI-id
         /// </summary>
         /// <param name="rmiID"></param>
         /// <returns></returns>
-        private static string GetTypeNameForRMIId(string rmiID) {
+        private static string CreateTypeNameForRMIId(string rmiID) {
             rmiID = rmiID.Substring(4);
             string typeName = "";
             if (rmiID.IndexOf(":") >= 0) {
@@ -307,24 +397,21 @@ namespace Ch.Elca.Iiop.Idl {
         /// <param name="type"></param>
         /// <returns></returns>
         public static string GetRepositoryID(Type type) {
-            object[] attr = type.GetCustomAttributes(ReflectionHelper.RepositoryIDAttributeType, true);    
-            if (attr != null && attr.Length > 0) {
-                RepositoryIDAttribute repIDAttr = (RepositoryIDAttribute) attr[0];
-                return repIDAttr.Id;
-            }
-            attr = type.GetCustomAttributes(ReflectionHelper.SupportedInterfaceAttributeType, true);
-            if (attr != null && attr.Length > 0) {
-                SupportedInterfaceAttribute repIDFrom = (SupportedInterfaceAttribute) attr[0];
-                Type fromType = repIDFrom.FromType;
-                if (fromType.Equals(type)) { 
-                    throw new INTERNAL(1701, CompletionStatus.Completed_MayBe); 
+            string result;
+            lock(s_instance) {
+                result = (string)s_instance.m_repIdsByLoadedTypes[type];
+                if (result == null) {
+                    // internal types are not supported, because there are a lot of 
+                    // internal types with the same name in ms.net assemblies.
+                    if (!type.IsPublic) {
+                        throw new BAD_PARAM(568, CompletionStatus.Completed_MayBe);
+                    }
+                    // can happed for dynamically created types
+                    s_instance.RegisterType(type);
+                    result = (string)s_instance.m_repIdsByLoadedTypes[type];
                 }
-                return GetRepositoryID(fromType);
+                return result;
             }
-            
-            // no Repository ID attribute on type, have to create an ID:
-            string idlName = IdlNaming.MapFullTypeNameToIdlRepIdTypePart(type);
-            return "IDL:" + idlName + ":1.0"; // TODO: versioning?
         }
 
         #endregion rep-id creation
@@ -333,75 +420,37 @@ namespace Ch.Elca.Iiop.Idl {
         /// <summary>
         /// gets the impl class for a value type specified by the ImplClassAttribute.
         /// </summary>
+        /// <remarks>returns null, if impl class not found.</remarks>
         internal static Type GetValueTypeImplClass(string clsImplClassName) {
-            return LoadType(clsImplClassName);
-        }        
-
-        /// <summary>
-        /// searches for the CLS type with the specified fully qualified name 
-        /// in all accessible assemblies
-        /// </summary>
-        /// <param name="clsTypeName">the fully qualified CLS type name</param>
-        /// <returns></returns>
-        private static Type LoadType(string clsTypeName) {
-            Debug.WriteLine("try to load type: " + clsTypeName);
-            Type foundType = s_typeCache.GetType(clsTypeName);
-            if (foundType != null) { 
-                return foundType; 
+            lock(s_instance) {
+                Type result= (Type)(s_instance.m_valueTypeImpls[clsImplClassName]);
+                Debug.WriteLineIf(result == null, "value type impl not found in repository: " + clsImplClassName);
+                return result;
             }
-            // not in cache, load from asm
-            foundType = LoadTypeFromAssemblies(clsTypeName);
-            if (foundType == null) { // check for nested type
-                foundType = LoadNested(clsTypeName);
-            }
-            if (foundType == null) { // check if accessible with Type.GetType
-                foundType = Type.GetType(clsTypeName, false);
-            }
-
-            if (foundType != null) {
-                s_typeCache.Cache(foundType);
-            }
-            return foundType;
-        }
-
-        private static Type LoadTypeFromAssemblies(string clsTypeName) {
-            Type foundType = null;
-            Assembly[] cachedAsms = s_asmCache.CachedAssemblies;
-            for (int i = 0; i < cachedAsms.Length; i++) {
-                foundType = cachedAsms[i].GetType(clsTypeName);
-                if (foundType != null) { 
-                    break; 
-                }
-            }
-            if (foundType == null) {
-                // check if it's a dynamically created type for a CLS type which is mapped to a boxed value type
-                BoxedValueRuntimeTypeGenerator singleton = BoxedValueRuntimeTypeGenerator.GetSingleton();
-                foundType = singleton.RetrieveType(clsTypeName);
-                if (foundType == null) {
-                    // check in Types created dynamically for type-codes:
-                    TypeFromTypeCodeRuntimeGenerator typeCodeGen = TypeFromTypeCodeRuntimeGenerator.GetSingleton();
-                    foundType = typeCodeGen.RetrieveType(clsTypeName);
-                }
-            }
-            
-            return foundType;
         }    
 
+        #endregion loading types 
+        #region dynamically created types
 
-        private static Type LoadNested(string clsTypeName) {
-            if (clsTypeName.IndexOf(".") < 0) { return null; }
-            string nesterTypeName = clsTypeName.Substring(0, clsTypeName.LastIndexOf("."));
-            string nestedType = clsTypeName.Substring(clsTypeName.LastIndexOf(".")+1);
-            string name = nesterTypeName + "_package." + nestedType;
-            Type foundType = LoadTypeFromAssemblies(name);
-            if (foundType == null) { // check access via Type.GetType
-                Type.GetType(name, false);
-            }
-            return foundType;
+        /// <summary>
+        /// informs the repository about a dynamically created type
+        /// </summary>
+        internal static void RegisterDynamicallyCreatedType(Type type) {
+            s_instance.RegisterType(type);
         }
                 
-        #endregion loading types 
+        #endregion dynamically created types
         #region verifying types
+        
+        /// <summary>
+        /// returns true, if the Type objectType is compatible with requiredType,
+        /// i.e. objectType is_a requiredType.
+        /// </summary>
+        /// <remarks>objectType could be e.g. the interface type implemented by a remote object,
+        /// or the type of a local object implementation class, ...</remarks>
+        public static bool IsCompatible(Type requiredType, Type objectType) {
+            return requiredType.IsAssignableFrom(objectType);
+        }
         
         /// <summary>
         /// returns true, if interface type iorType is assignable to requiredType.
@@ -420,7 +469,7 @@ namespace Ch.Elca.Iiop.Idl {
             // the other requiredType types must be checked remote if not locally verifable
             if ((!requiredType.Equals(ReflectionHelper.MarshalByRefObjectType)) &&                
                 (!requiredType.Equals(ReflectionHelper.IObjectType)) && 
-                ((interfaceType == null) || (!requiredType.IsAssignableFrom(interfaceType)))) {
+                ((interfaceType == null) || (!IsCompatible(requiredType, interfaceType)))) {
                 // remote type not known or locally assignability not verifable
                 useTypeForId = requiredType;
                 return false;
@@ -472,7 +521,168 @@ namespace Ch.Elca.Iiop.Idl {
         }
         #endregion for typecodes
         #endregion SMethods
+        #region IMethods
+               
+        /// <summary>
+        /// returns the repository id to use for type. In the repIdForType the string identifing the
+        /// type is returned. The result and the repIdForType can be different (e.g. SuppertedInterface)
+        /// </summary>
+        private string GetRepositoryIDFromType(Type type, out string repIdForType) {
+            string result;
+            object[] attr = type.GetCustomAttributes(ReflectionHelper.RepositoryIDAttributeType, false);
+            if (attr != null && attr.Length > 0) {
+                RepositoryIDAttribute repIDAttr = (RepositoryIDAttribute) attr[0];
+                result = repIDAttr.Id;                
+            } else {
+                result = IdlNaming.MapFullTypeNameToIdlRepId(type);                
+            }
+            repIdForType = result;
+            if (type.IsMarshalByRef) {
+                attr = type.GetCustomAttributes(ReflectionHelper.SupportedInterfaceAttributeType, true);
+                if (attr != null && attr.Length > 0) {
+                    SupportedInterfaceAttribute repIDFrom = (SupportedInterfaceAttribute) attr[0];
+                    Type fromType = repIDFrom.FromType;
+                    if (fromType.Equals(type)) { 
+                        throw new INTERNAL(1701, CompletionStatus.Completed_MayBe); 
+                    }
+                    string repIdForInterface;
+                    result = GetRepositoryIDFromType(fromType, out repIdForInterface); // repository ID to use when serialising such a type
+                }
+            }
+            if (IsValueTypeImplClass(type)) {
+                string repIdForValType;
+                result = GetRepositoryIDFromType(type.BaseType, out repIdForValType); // repository ID to use when serialising such a type
+            }
+            return result;
+        }
+        
+        private bool IsValueTypeImplClass(Type type) {
+            Type baseType = type.BaseType;
+            if (baseType != null) {
+                object[] attr = baseType.GetCustomAttributes(ReflectionHelper.ImplClassAttributeType, false);               
+                if (attr != null && attr.Length > 0) {
+                    string implClassName = ((ImplClassAttribute)attr[0]).ImplClass;
+                    return (implClassName == type.FullName); // implClassName must be the name of type
+                }
+            }
+            return false;
+        }
+        
+        
+        private void RegisterType(Type type) {
+            lock(this) {                
+                if ((type.IsPublic) &&
+                    (!m_repIdsByLoadedTypes.ContainsKey(type))) {
+                    string repIdForType; // the rep-id, which should be resolved to the Type type
+                    // repIdToUse is the rep-id, which should be told everyone, which wants to refernce Type type.
+                    // This needs not to be the same as repIdForType (e.g. for SupportedInterface attribute)
+                    string repIdToUse = GetRepositoryIDFromType(type, out repIdForType);
+                    m_repIdsByLoadedTypes[type] = repIdToUse;
+                    if (!m_loadedTypesByRepId.ContainsKey(repIdForType)) {
+                        m_loadedTypesByRepId[repIdForType] = type;
+                    } else {
+                        // rep-id should by unique
+                        Trace.WriteLine(String.Format("For the repId {0} type {1} is already present, tried to " +
+                                                      "assign another type {2} to same id!", repIdForType, ((Type)m_loadedTypesByRepId[repIdForType]).AssemblyQualifiedName,
+                                                      type.AssemblyQualifiedName));
+                        // throw new INTERNAL(905, CompletionStatus.Completed_MayBe);
+                    }
+                    // check if it's a value type impl class                    
+                    if (IsValueTypeImplClass(type)) {
+                        m_valueTypeImpls[type.FullName] = type;
+                    }
+                    
+                }
+            }
+        }
+        
+        #endregion IMethods
 
     }
 
 }
+
+
+#if UnitTest
+
+namespace Ch.Elca.Iiop.Tests {   
+    
+    using System.IO;        
+    using NUnit.Framework;    
+    using omg.org.CORBA;
+    using Ch.Elca.Iiop.Services;
+    using Ch.Elca.Iiop;    
+    using Ch.Elca.Iiop.Idl;
+    
+    [RepositoryID("IDL:Ch/Elca/Iiop/Tests/IRepositoryTestIf1:1.0")]
+    public interface IRepositoryTestIf1 {
+        
+    }
+    
+    [RepositoryID("IDL:Ch/Elca/Iiop/Tests/IRepositoryTestIf2:1.0")]
+    public interface IRepositoryTestIf2 : IRepositoryTestIf1 {
+        
+    }
+    
+    [RepositoryID("IDL:Ch/Elca/Iiop/Tests/IRepositoryTestIf3:1.0")]
+    public interface IRepositoryTestIf3 {
+        
+    }    
+    
+    [RepositoryID("IDL:Ch/Elca/Iiop/Tests/RepositoryTestClassImpl:1.0")]
+    public class RepositoryTestClassImpl : IRepositoryTestIf2 {
+        
+    }
+    
+    /// <summary>
+    /// Unit tests for repository type check operations.
+    /// </summary>
+    [TestFixture]
+    public class RepositoryTypeChecksTest {
+     
+        
+        [Test]
+        public void TestInterfaceCompatible() {
+            string repIdIf = "IDL:Ch/Elca/Iiop/Tests/IRepositoryTestIf2:1.0";
+            string repIdCl = "IDL:Ch/Elca/Iiop/Tests/RepositoryTestClassImpl:1.0";
+            
+            Type required = typeof(IRepositoryTestIf1);
+            
+            Type typeForId;
+            Assertion.Assert("type compatibility for TestIf2", 
+                             Repository.IsInterfaceCompatible(required,
+                                                              repIdIf,
+                                                              out typeForId));
+            Assertion.AssertEquals("type for if id", typeof(IRepositoryTestIf2),
+                                   typeForId);
+            
+            Assertion.Assert("type compatibility for TestClassImpl", 
+                             Repository.IsInterfaceCompatible(required,
+                                                              repIdCl,
+                                                              out typeForId));
+            Assertion.AssertEquals("type for cl id", typeof(RepositoryTestClassImpl),
+                                   typeForId);            
+        }
+        
+        [Test]
+        public void TestInterfaceNotCompatible() {            
+            string repIdCl = "IDL:Ch/Elca/Iiop/Tests/RepositoryTestClassImpl:1.0";
+            
+            Type required = typeof(IRepositoryTestIf3);
+            
+            Type typeForId;
+            bool isCompatible =
+                Repository.IsInterfaceCompatible(required, repIdCl, 
+                                                 out typeForId);
+            // for non-verifiable type compatibility, return required Type for the id
+            Assertion.AssertEquals("type for incompatible id", required,
+                                   typeForId);
+            Assertion.Assert("type compatibility for TestIf2", !isCompatible);
+        }                
+        
+        
+    }
+    
+}
+
+#endif

@@ -82,8 +82,14 @@ namespace Ch.Elca.Iiop.IntegrationTests {
         }
 
         public void receive_request_service_contexts(ServerRequestInfo ri) {
-            if (ri.operation != "NoValueInScope") {
-                ServiceContext context = ri.get_request_service_context(1000);
+            object contextAsObject;
+            try {
+                contextAsObject = ri.get_request_service_context(1000);
+            } catch (BAD_PARAM) {
+                contextAsObject = null;
+            }
+            if (contextAsObject != null) {
+                ServiceContext context = (ServiceContext)contextAsObject;
                 TestServiceContext contextReceived = (TestServiceContext)m_codec.decode(context.context_data);
                 ri.set_slot(m_slotId, contextReceived.TestEntry);
             }
@@ -102,8 +108,9 @@ namespace Ch.Elca.Iiop.IntegrationTests {
         }
         
         public void send_reply(ServerRequestInfo ri) {
-            if (ri.operation != "NoValueInScope") {
-                int entryResult = (int)ri.get_slot(m_slotId);
+            object testEntryAsObject = ri.get_slot(m_slotId);
+            if (testEntryAsObject != null) {
+                int entryResult = (int)testEntryAsObject;
                 TestServiceContext resultContextEntry = 
                     new TestServiceContext(entryResult);
                 ServiceContext context = new ServiceContext(1000, m_codec.encode(resultContextEntry));

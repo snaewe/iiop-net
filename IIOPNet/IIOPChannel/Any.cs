@@ -67,7 +67,7 @@ namespace omg.org.CORBA {
 		
 		#region IFields
 		
-		private TypeCode m_typeCode;
+		private TypeCodeImpl m_typeCode;
 		private object m_value;
 		
 		
@@ -77,38 +77,55 @@ namespace omg.org.CORBA {
 		public Any(object obj, TypeCode type) {
 			if (type == null) {
 				throw new BAD_PARAM(456, CompletionStatus.Completed_MayBe);
-			}			
-			if (obj != null) {
-		        // precodition: type is an instance of TypeCodeImpl
-			    Type requiredObjectType = Repository.GetTypeForTypeCode(type);
-			    if (!requiredObjectType.IsAssignableFrom(obj.GetType())) {
-			        if (IsBoxableTo(obj.GetType(), requiredObjectType)) {
-                        // box value
-			            obj = Activator.CreateInstance(requiredObjectType, new object[] { obj } );
-                    } else {
-                        throw new BAD_PARAM(456, CompletionStatus.Completed_MayBe);	
-                    }			        
-			    }
 			}
-			m_value = obj;
-			m_typeCode = type;
+		    SetTypeCode(type);
+		    m_value = m_typeCode.ConvertToAssignable(obj);
 		}
 		
 		public Any(object obj) {
-			m_value = obj;
-			m_typeCode = OrbServices.GetSingleton().create_tc_for(obj);
-			
+		    SetTypeCode(		        
+                OrbServices.GetSingleton().create_tc_for(obj));
+		    // because serialization is done based on the typecode type, make sure
+		    // that the value is assignable to the typecode.
+		    // For cases, where the .NET type can't be mapped directly to idl (like SByte),
+		    // this would otherwise lead to problems in Serializer.
+		    m_value = m_typeCode.ConvertToAssignable(obj);
 		}
-		
+				
 		#endregion IConstructors
 		#region IProperties
 		
+		/// <summary>
+		/// The value assignable to the typecode -> i.e. the internal representation.
+		/// </summary>		
+		internal object ValueInternalRepresenation {
+		    get {
+		        return m_value;
+		    }
+		}
+		
+		/// <summary>
+		/// the value best corresponding to the typecode specified.
+		/// </summary>
 		public object Value {
 			get {
-				return m_value;
+				return m_typeCode.ConvertToExternalRepresentation(m_value, false);
 			}
 		}
 		
+		/// <summary>
+		/// the cls compliant value corresponding to the typecode specified.
+		/// </summary>
+		public object ClsValue {
+		    get {
+		        // return m_typeCode.ConvertToClsValue();
+		        return m_typeCode.ConvertToExternalRepresentation(m_value, true);
+		    }
+		}
+		
+		/// <summary>
+		/// the typecode of this any container
+		/// </summary>
 		public TypeCode Type {
 			get {
 				return m_typeCode;
@@ -117,24 +134,27 @@ namespace omg.org.CORBA {
 		
 		#endregion IProperties
 		#region IMethods
+
+		private void SetTypeCode(TypeCode typeCode) {
+            if (!(typeCode is omg.org.CORBA.TypeCodeImpl)) { 
+                throw new INTERNAL(567, CompletionStatus.Completed_MayBe); 
+		    }
+		    m_typeCode = (TypeCodeImpl)typeCode;
+		}		
 		
-		private bool IsBoxableTo(Type boxIt, Type boxInto) {
-		    if (!boxInto.IsSubclassOf(ReflectionHelper.BoxedValueBaseType)) {
+		public override bool Equals(object obj) {
+		    Any other = obj as Any;
+		    if (other == null) {
 		        return false;
 		    }
-		    try {
-                Type boxedType = (Type)boxInto.InvokeMember(BoxedValueBase.GET_FIRST_NONBOXED_TYPE_METHODNAME,
-                                                            BindingFlags.InvokeMethod | BindingFlags.Public |
-                                                            BindingFlags.NonPublic | BindingFlags.Static |
-                                                            BindingFlags.DeclaredOnly,
-                                                            null, null, new object[0]);
-		        if (boxedType.IsAssignableFrom(boxIt)) {
-		            return true;
-		        }
-		    } catch (Exception) {
-		        throw new INTERNAL(10041, CompletionStatus.Completed_MayBe);
-		    }
-		    return false;
+		    return (other.Type.equal(Type) && 
+		            (other.m_value != null ? other.m_value.Equals(m_value) :
+		                                   m_value == null));
+		}
+		
+		public override int GetHashCode() {
+		    return m_typeCode.GetHashCode() ^
+		        (m_value != null ? m_value.GetHashCode() : 0);
 		}
 		
 		#endregion IMethods
@@ -142,3 +162,237 @@ namespace omg.org.CORBA {
 	}
 	
 }
+
+
+#if UnitTest
+
+namespace Ch.Elca.Iiop.Tests {
+    
+    using System;
+    using System.Reflection;
+    using NUnit.Framework;
+    using omg.org.CORBA;
+    
+    /// <summary>
+    /// Unit-tests for testing Any container
+    /// </summary>
+    [TestFixture]
+    public class AnyContainerTest {
+    
+        
+        [Test]
+        public void BoxOctet() {
+            byte val = 11;
+            omg.org.CORBA.TypeCode tc = new OctetTC();
+            Any anyContainer = new Any(val, tc);
+            Assertion.AssertEquals("wrong tc", tc, anyContainer.Type);
+            Assertion.AssertEquals("wrong val", val, anyContainer.Value);
+            Assertion.AssertEquals("wrong val", val, anyContainer.ClsValue);
+        }
+        
+        [Test]
+        public void BoxIncompatibleType() {
+            try {
+                byte val = 11;
+                omg.org.CORBA.TypeCode tc = new LongTC();
+                Any anyContainer = new Any(val, tc);
+                Assertion.Fail("expected exception");
+            } catch (BAD_PARAM bp) {
+                Assertion.AssertEquals(456, bp.Minor);
+            }
+        }
+        
+        [Test]
+        public void BoxULong() {
+            uint val = 11;
+            omg.org.CORBA.TypeCode tc = new ULongTC();
+            Any anyContainer = new Any(val, tc);
+            Assertion.AssertEquals("wrong tc", tc, anyContainer.Type);
+            Assertion.AssertEquals("wrong val", val, anyContainer.Value);
+            Assertion.AssertEquals("wrong val", (int)val, anyContainer.ClsValue);
+            Assertion.AssertEquals("wrong val type", ReflectionHelper.Int32Type, 
+                                   anyContainer.ClsValue.GetType());            
+        }
+        
+        [Test]
+        public void BoxULongFromCls() {
+            int val = 11;
+            omg.org.CORBA.TypeCode tc = new ULongTC();
+            Any anyContainer = new Any(val, tc);
+            Assertion.AssertEquals("wrong tc", tc, anyContainer.Type);
+            Assertion.AssertEquals("wrong val", (uint)val, anyContainer.Value);
+            Assertion.AssertEquals("wrong val", ((uint)val).GetType(), anyContainer.Value.GetType());
+            Assertion.AssertEquals("wrong val", val, anyContainer.ClsValue);
+        }           
+
+        [Test]
+        public void BoxULongFromClsOutsideRange() {
+            int val = -11;
+            omg.org.CORBA.TypeCode tc = new ULongTC();
+            Any anyContainer = new Any(val, tc);
+            Assertion.AssertEquals("wrong tc", tc, anyContainer.Type);
+            // do an unchecked cast, overflow no issue here
+            Assertion.AssertEquals("wrong val", unchecked((uint)val), anyContainer.Value);
+            Assertion.AssertEquals("wrong val", unchecked((uint)val).GetType(), anyContainer.Value.GetType());
+            Assertion.AssertEquals("wrong val", val, anyContainer.ClsValue);
+        }       
+        
+        [Test]
+        public void BoxLong() {
+            int val = 11;
+            omg.org.CORBA.TypeCode tc = new LongTC();
+            Any anyContainer = new Any(val, tc);
+            Assertion.AssertEquals("wrong tc", tc, anyContainer.Type);
+            Assertion.AssertEquals("wrong val", val, anyContainer.Value);
+            Assertion.AssertEquals("wrong val", val, anyContainer.ClsValue);
+        }
+        
+        [Test]
+        public void BoxULongLong() {
+            ulong val = 11;
+            omg.org.CORBA.TypeCode tc = new ULongLongTC();
+            Any anyContainer = new Any(val, tc);
+            Assertion.AssertEquals("wrong tc", tc, anyContainer.Type);
+            Assertion.AssertEquals("wrong val", val, anyContainer.Value);
+            Assertion.AssertEquals("wrong val", (long)val, anyContainer.ClsValue);
+            Assertion.AssertEquals("wrong val type", ReflectionHelper.Int64Type, 
+                                   anyContainer.ClsValue.GetType());
+        }
+        
+        [Test]
+        public void BoxULongLongFromCls() {
+            long val = 11;
+            omg.org.CORBA.TypeCode tc = new ULongLongTC();
+            Any anyContainer = new Any(val, tc);
+            Assertion.AssertEquals("wrong tc", tc, anyContainer.Type);
+            Assertion.AssertEquals("wrong val", (ulong)val, anyContainer.Value);
+            Assertion.AssertEquals("wrong val", ((ulong)val).GetType(), anyContainer.Value.GetType());
+            Assertion.AssertEquals("wrong val", val, anyContainer.ClsValue);
+        }        
+        
+        [Test]
+        public void BoxULongLongFromClsOutsideRange() {
+            long val = -11;
+            omg.org.CORBA.TypeCode tc = new ULongLongTC();
+            Any anyContainer = new Any(val, tc);
+            Assertion.AssertEquals("wrong tc", tc, anyContainer.Type);
+            // do an unchecked cast, overflow no issue here
+            Assertion.AssertEquals("wrong val", unchecked((ulong)val), anyContainer.Value);
+            Assertion.AssertEquals("wrong val", unchecked((ulong)val).GetType(), anyContainer.Value.GetType());
+            Assertion.AssertEquals("wrong val", val, anyContainer.ClsValue);
+        }        
+        
+        [Test]
+        public void BoxUShort() {
+            ushort val = 11;
+            omg.org.CORBA.TypeCode tc = new UShortTC();
+            Any anyContainer = new Any(val, tc);
+            Assertion.AssertEquals("wrong tc", tc, anyContainer.Type);
+            Assertion.AssertEquals("wrong val", val, anyContainer.Value);
+            Assertion.AssertEquals("wrong val", (short)val, anyContainer.ClsValue);
+            Assertion.AssertEquals("wrong val type", ReflectionHelper.Int16Type, 
+                                   anyContainer.ClsValue.GetType());
+        }
+        
+        [Test]
+        public void BoxUShortFromCls() {
+            short val = 11;
+            omg.org.CORBA.TypeCode tc = new UShortTC();
+            Any anyContainer = new Any(val, tc);
+            Assertion.AssertEquals("wrong tc", tc, anyContainer.Type);
+            Assertion.AssertEquals("wrong val", (ushort)val, anyContainer.Value);
+            Assertion.AssertEquals("wrong val", ((ushort)val).GetType(), anyContainer.Value.GetType());
+            Assertion.AssertEquals("wrong val", val, anyContainer.ClsValue);
+        }        
+        
+        [Test]
+        public void BoxUShortFromClsOutsideRange() {
+            short val = -11;
+            omg.org.CORBA.TypeCode tc = new UShortTC();
+            Any anyContainer = new Any(val, tc);
+            Assertion.AssertEquals("wrong tc", tc, anyContainer.Type);
+            // do an unchecked cast, overflow no issue here
+            Assertion.AssertEquals("wrong val", unchecked((ushort)val), anyContainer.Value);
+            Assertion.AssertEquals("wrong val", unchecked((ushort)val).GetType(), anyContainer.Value.GetType());
+            Assertion.AssertEquals("wrong val", val, anyContainer.ClsValue);
+        }                
+        
+        [Test]
+        public void BoxSByteToOctet() {
+            sbyte val = 11;
+            omg.org.CORBA.TypeCode tc = new OctetTC();
+            Any anyContainer = new Any(val, tc);
+            Assertion.AssertEquals("wrong tc", tc, anyContainer.Type);
+            Assertion.AssertEquals("wrong val", (byte)val, anyContainer.Value);
+            Assertion.AssertEquals("wrong val", (byte)val, anyContainer.ClsValue);
+            Assertion.AssertEquals("wrong val type", ReflectionHelper.ByteType, 
+                                   anyContainer.ClsValue.GetType());
+        }        
+        
+        [Test]
+        public void BoxSByteToOctetOutsideRange() {
+            sbyte val = -11;
+            omg.org.CORBA.TypeCode tc = new OctetTC();
+            Any anyContainer = new Any(val, tc);
+            Assertion.AssertEquals("wrong tc", tc, anyContainer.Type);
+            // do an unchecked cast, overflow no issue here
+            Assertion.AssertEquals("wrong val", unchecked((byte)val), anyContainer.Value);
+            Assertion.AssertEquals("wrong val", unchecked((byte)val), anyContainer.ClsValue);
+            Assertion.AssertEquals("wrong val type", ReflectionHelper.ByteType, 
+                                   anyContainer.ClsValue.GetType());
+        }        
+        
+        [Test]
+        public void BoxBoxedValueTypeFromUnboxed() {
+            omg.org.CORBA.TypeCode tc = 
+                new ValueBoxTC("IDL:omg.org/CORBA/StringValue:1.0", "StringValue",
+                               new StringTC());
+            string toBoxInto = "test";
+            Any anyContainer = new Any(toBoxInto, tc);
+            Assertion.AssertEquals("wrong tc", tc, anyContainer.Type);
+            Assertion.AssertEquals("wrong val type", ReflectionHelper.StringValueType,
+                                   anyContainer.ValueInternalRepresenation.GetType());
+            
+            Assertion.AssertEquals("wrong val", toBoxInto,
+                                   anyContainer.Value);
+            Assertion.AssertEquals("wrong val type", ReflectionHelper.StringType,
+                                   anyContainer.Value.GetType());            
+            
+        }
+        
+        [Test]
+        public void BoxBoxedValueTypeFromBoxed() {
+            omg.org.CORBA.TypeCode tc = 
+                new ValueBoxTC("IDL:omg.org/CORBA/StringValue:1.0", "StringValue",
+                               new StringTC());
+            StringValue toBoxInto = new StringValue("test");
+            Any anyContainer = new Any(toBoxInto, tc);
+            Assertion.AssertEquals("wrong tc", tc, anyContainer.Type);
+            Assertion.AssertEquals("wrong val", toBoxInto,
+                                   anyContainer.ValueInternalRepresenation);
+            Assertion.AssertEquals("wrong val type", ReflectionHelper.StringValueType,
+                                   anyContainer.ValueInternalRepresenation.GetType());
+            
+            Assertion.AssertEquals("wrong val", toBoxInto.Unbox(),
+                                   anyContainer.Value);
+            Assertion.AssertEquals("wrong val type", ReflectionHelper.StringType,
+                                   anyContainer.Value.GetType());            
+        }        
+        
+        [Test]
+        public void TestNonAssignableException() {
+        	try {
+        		Any any = new Any("1.0", new OctetTC());
+        		Assertion.Fail("assignement possible, but shouldn't");
+        	} catch (BAD_PARAM bpEx) {
+        		Assertion.Assert("exception message", 
+        		                 bpEx.Message.StartsWith("CORBA system exception : omg.org.CORBA.BAD_PARAM [The given instance 1.0 of type"));
+        	}
+        }
+        
+    }
+    
+}
+    
+#endif
+

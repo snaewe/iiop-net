@@ -288,11 +288,13 @@ namespace Ch.Elca.Iiop.Tests {
     /// <summary>
     /// Unit test for PeekSupportingStrem
     /// </summary>
-    public class TestPeekSupport : TestCase {
+    [TestFixture]    
+    public class TestPeekSupport {
 
         public TestPeekSupport() {
         }
 
+        [Test]
         public void TestPeekSupportReadByteNoPeek() {
             MemoryStream stream = new MemoryStream();
             for (int i = 0; i < 10; i++) { 
@@ -306,6 +308,7 @@ namespace Ch.Elca.Iiop.Tests {
             }
         }
 
+        [Test]
         public void TestPeekSupportReadBytePeek() {
             MemoryStream stream = new MemoryStream();
             for (int i = 0; i < 10; i++) { 
@@ -326,6 +329,7 @@ namespace Ch.Elca.Iiop.Tests {
             }
         }
 
+        [Test]
         public void TestPeekSupportMulitplePeek() {
             MemoryStream stream = new MemoryStream();
             for (int i = 0; i < 10; i++) { 
@@ -358,6 +362,7 @@ namespace Ch.Elca.Iiop.Tests {
             }
         }
 
+        [Test]
         public void TestPeekSupportReadArrayNoPeek() {
             MemoryStream stream = new MemoryStream();
             for (int i = 0; i < 10; i++) { 
@@ -373,7 +378,8 @@ namespace Ch.Elca.Iiop.Tests {
                 Assertion.AssertEquals(i, result[i]); 
             }
         }
-
+        
+        [Test]
         public void TestEmptyPeek() {
             MemoryStream stream = new MemoryStream();
             for (int i = 0; i < 10; i++) { 

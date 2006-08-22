@@ -1,3 +1,5 @@
+include ..\..\..\..\MakeVars
+
 build: build-cls build-client
 
 
@@ -14,7 +16,7 @@ build-cls:
 
 build-client:
 	copy ..\..\..\..\IIOPChannel\bin\IIOPChannel.dll bin\ 
-	csc $(CSFLAGS) /r:bin\IIOPChannel.dll /r:bin\chatroom.dll /t:exe /out:bin\Client.exe *.cs	
+	$(CSC) $(CSFLAGS) /r:bin\IIOPChannel.dll /r:bin\chatroom.dll /t:exe /out:bin\Client.exe *.cs	
 
 
 clean:

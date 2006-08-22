@@ -122,6 +122,81 @@ namespace Ch.Elca.Iiop.IntegrationTests {
         }
 
         [Test]
+        public void TestSByte() {
+            System.SByte arg = 1;
+            System.SByte result = m_testService.TestIncSByte(arg);
+            Assertion.AssertEquals((System.SByte)(arg + 1), result);
+            arg = -2;
+            result = m_testService.TestIncSByte(arg);
+            Assertion.AssertEquals((System.SByte)(arg + 1), result);
+        }
+
+        [Test]
+        public void TestSByteAsAny() {
+            System.SByte arg = 1;
+            System.SByte result = (System.SByte)
+                ((System.Byte)m_testService.EchoAnything(arg));
+            Assertion.AssertEquals((System.SByte)arg, result);
+            arg = -2;
+            result = (System.SByte)
+                ((System.Byte)m_testService.EchoAnything(arg));
+            Assertion.AssertEquals((System.SByte)arg, result);
+
+            Any argAny = new Any(arg);
+            Any resultAny = m_testService.EchoAnythingContainer(argAny);
+            result = (System.SByte)
+                ((System.Byte)resultAny.Value);
+            Assertion.AssertEquals((System.SByte)arg, result);
+        }
+
+        [Test]
+        public void TestUInt16() {
+            System.UInt16 arg = 1;
+            System.UInt16 result = m_testService.TestIncUInt16(arg);
+            Assertion.AssertEquals((System.Int16)(arg + 1), result);
+            arg = System.UInt16.MaxValue - (System.UInt16)1;
+            result = m_testService.TestIncUInt16(arg);
+            Assertion.AssertEquals((System.UInt16)(arg + 1), result);
+        }
+
+        [Test]
+        public void TestUInt32() {
+            System.UInt32 arg = 1;
+            System.UInt32 result = m_testService.TestIncUInt32(arg);
+            Assertion.AssertEquals((System.UInt32)(arg + 1), result);
+            arg = System.UInt32.MaxValue - (System.UInt32)1;
+            result = m_testService.TestIncUInt32(arg);
+            Assertion.AssertEquals((System.UInt32)(arg + 1), result);
+        }
+
+        [Test]
+        public void TestUInt64() {
+            System.UInt64 arg = 1;
+            System.UInt64 result = m_testService.TestIncUInt64(arg);
+            Assertion.AssertEquals((System.UInt64)(arg + 1), result);
+            arg = System.UInt64.MaxValue - 1;
+            result = m_testService.TestIncUInt64(arg);
+            Assertion.AssertEquals((System.UInt64)(arg + 1), result);
+        }
+
+        [Test]
+        public void TestUInt64AsAny() {
+            System.UInt64 arg = 1;
+            System.UInt64 result = (System.UInt64)
+                ((System.Int64)m_testService.EchoAnything(arg));
+            Assertion.AssertEquals(arg, result);
+            arg = System.UInt64.MaxValue - 1;
+            result = (System.UInt64)
+                ((System.Int64)m_testService.EchoAnything(arg));
+            Assertion.AssertEquals(arg, result);
+            
+            Any argAny = new Any(arg);
+            Any resultAny = m_testService.EchoAnythingContainer(argAny);
+            result = (System.UInt64)resultAny.Value;
+            Assertion.AssertEquals(arg, result);
+        }
+
+        [Test]
         public void TestBoolean() {
             System.Boolean arg = true;
             System.Boolean result = m_testService.TestNegateBoolean(arg);
@@ -162,6 +237,67 @@ namespace Ch.Elca.Iiop.IntegrationTests {
             Assertion.AssertEquals(arg, result);
             arg = TestEnum.D;
             result = m_testService.TestEchoEnumVal(arg);
+            Assertion.AssertEquals(arg, result);
+        }
+
+        [Test]
+        public void TestFlagsArguments() {
+            TestFlags arg = TestFlags.A1;
+            TestFlags result = m_testService.TestEchoFlagsVal(arg);
+            Assertion.AssertEquals(arg, result);
+            arg = TestFlags.All;
+            result = m_testService.TestEchoFlagsVal(arg);
+            Assertion.AssertEquals(arg, result);
+        }
+
+        [Test]
+        public void TestEnumBI16Val() {
+            TestEnumBI16 arg = TestEnumBI16.B1;
+            TestEnumBI16 result = m_testService.TestEchoEnumI16Val(arg);
+            Assertion.AssertEquals(arg, result);
+        }
+
+        [Test]
+        public void TestEnumBUI32Val() {
+            TestEnumUI32 arg = TestEnumUI32.C2;
+            TestEnumUI32 result = m_testService.TestEchoEnumUI32Val(arg);
+            Assertion.AssertEquals(arg, result);
+            arg = TestEnumUI32.A2;
+            result = m_testService.TestEchoEnumUI32Val(arg);
+            Assertion.AssertEquals(arg, result);
+            arg = TestEnumUI32.B2;
+            result = m_testService.TestEchoEnumUI32Val(arg);
+            Assertion.AssertEquals(arg, result);
+        }
+
+        [Test]
+        public void TestEnumBI64Val() {
+            TestEnumBI64 arg = TestEnumBI64.AL;
+            TestEnumBI64 result = m_testService.TestEchoEnumI64Val(arg);
+            Assertion.AssertEquals(arg, result);
+
+            arg = TestEnumBI64.BL;
+            result = m_testService.TestEchoEnumI64Val(arg);
+            Assertion.AssertEquals(arg, result);
+        }
+
+        [Test]
+        public void TestEnumAsAny() {
+            TestEnum arg = TestEnum.A;
+            TestEnum result = (TestEnum)m_testService.EchoAnything(arg);
+            Assertion.AssertEquals(arg, result);
+            arg = TestEnum.D;
+            result = (TestEnum)m_testService.EchoAnything(arg);
+            Assertion.AssertEquals(arg, result);
+        }
+
+        [Test]
+        public void TestFlagsAsAny() {
+            TestFlags arg = TestFlags.A1;
+            TestFlags result = (TestFlags)m_testService.EchoAnything(arg);
+            Assertion.AssertEquals(arg, result);
+            arg = TestFlags.All;
+            result = (TestFlags)m_testService.EchoAnything(arg);
             Assertion.AssertEquals(arg, result);
         }
 
@@ -535,7 +671,15 @@ namespace Ch.Elca.Iiop.IntegrationTests {
             Any result = m_testService.EchoAnythingContainer(any);
             Assertion.AssertEquals(any.Value, result.Value);
         }
-                
+
+        // this test is a replacement for the next one, until behaviour is decided
+        [Test]
+        public void TestCallEqualityServerAndProxy() {
+            m_testService.CheckEqualityWithServiceV2((TestService)m_testService);
+            m_testService.CheckEqualityWithService((MarshalByRefObject)m_testService);
+        }
+                        
+        [Ignore("Not yet decided, what behaviour should be supported by IIOP.NET")]
         [Test]
         public void TestEqualityServerAndProxy() {
             bool result = m_testService.CheckEqualityWithServiceV2((TestService)m_testService);
@@ -1040,6 +1184,7 @@ namespace Ch.Elca.Iiop.IntegrationTests {
             Assertion.AssertEquals("wrong adder result", arg1 + arg2, adder.Add(arg1, arg2));
         }
 
+        [Test]
         public void TestErrorReportBadOperation() {
             m_testService.GetAllUsagerType();
         }

@@ -1,3 +1,4 @@
+include ..\MakeVars
 Key = ..\Key.snk
 IIOPCHANNEL = ..\IIOPChannel\bin\IIOPChannel.dll
 SSLLibrary = ..\thirdparty\SSL\bin\Org.Mentalis.Security
@@ -19,7 +20,7 @@ $(BIN)Org.Mentalis.Security.dll:
     
 
 build-lib: $(BIN)IIOPChannel.dll $(BIN)Org.Mentalis.Security.dll *.cs $(Key)
-    csc $(CSFLAGS) /t:library /r:$(BIN)Org.Mentalis.Security.dll /r:$(BIN)IIOPChannel.dll /out:$(BIN)SSLPlugin.dll *.cs
+    $(CSC) $(CSFLAGS) /t:library /r:$(BIN)Org.Mentalis.Security.dll /r:$(BIN)IIOPChannel.dll /out:$(BIN)SSLPlugin.dll *.cs
 
 clean:
     if exist $(BIN)nul rmdir /q /s $(BIN)

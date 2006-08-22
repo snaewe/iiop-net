@@ -393,11 +393,11 @@ namespace Ch.Elca.Iiop.Idl {
         }
 
         private void WriteParamDirection(ParameterInfo info) {
-            if (Marshalling.ParameterMarshaller.IsInParam(info)) {
+            if (ReflectionHelper.IsInParam(info)) {
                 m_currentOutputStream.Write("in");
-            } else if (Marshalling.ParameterMarshaller.IsOutParam(info)) {
+            } else if (ReflectionHelper.IsOutParam(info)) {
                 m_currentOutputStream.Write("out");
-            } else if (Marshalling.ParameterMarshaller.IsRefParam(info)) {
+            } else if (ReflectionHelper.IsRefParam(info)) {
                 m_currentOutputStream.Write("inout");
             }
             m_currentOutputStream.Write(" ");
@@ -533,6 +533,10 @@ namespace Ch.Elca.Iiop.Idl {
             return null;
         }
 
+        public object MapToIdlFlagsEquivalent(Type clsType) {
+            // nothing to do, because mapped to a base type
+            return null;
+        }
         
         public object MapToIdlAbstractInterface(Type clsType) {
             if (m_depManager.CheckMappedType(clsType)) { 
@@ -851,6 +855,9 @@ namespace Ch.Elca.Iiop.Idl {
         public object MapToIdlOctet(Type clsType) {
             throw new NotSupportedException("is a standard type, not redifinable");
         }
+        public object MapToIdlSByteEquivalent(Type clsType) {
+            throw new NotSupportedException("is a standard type, not redifinable");
+        }        
         public object MapToIdlUShort(Type clsType) {
             throw new NotSupportedException("is a standard type, not redifinable");
         }
@@ -908,7 +915,7 @@ namespace Ch.Elca.Iiop.Idl {
 
         public object MapToIdlLocalInterface(Type clsType) {
             throw new NotSupportedException("no type declaration possible for local interfaces");
-        }
+        }        
 
         #endregion unsupported operations for this mapping action
 
@@ -1007,11 +1014,11 @@ namespace Ch.Elca.Iiop.Idl {
             return null;
         }
 
+        #region unsupported mappings for fwd decls
+        
         public object MapToIdlBoxedValueType(System.Type dotNetType, Type needsBoxingFrom) {
             throw new NotSupportedException("a value-box can't have a forward declaration");
-        }
-        
-        #region unsupported mappings for fwd decls
+        }                
 
         public object MapToIdlVoid(System.Type dotNetType) {
             throw new NotSupportedException("no fwd declaration possible for this IDL-type");
@@ -1022,6 +1029,10 @@ namespace Ch.Elca.Iiop.Idl {
         }
 
         public object MapToIdlOctet(System.Type dotNetType) {
+            throw new NotSupportedException("no fwd declaration possible for this IDL-type");
+        }
+
+        public object MapToIdlSByteEquivalent(Type clsType) {
             throw new NotSupportedException("no fwd declaration possible for this IDL-type");
         }
         
@@ -1127,6 +1138,10 @@ namespace Ch.Elca.Iiop.Idl {
 
         public object MapToIdlLocalInterface(System.Type dotNetType) {
             throw new NotSupportedException("nothing maps to local interface, no fwd decl possible.");
+        }
+        
+        public object MapToIdlFlagsEquivalent(System.Type dotNetType) {
+            throw new NotSupportedException("no fwd declaration possible for this IDL-type");
         }
 
         #endregion
@@ -1249,6 +1264,11 @@ namespace Ch.Elca.Iiop.Idl {
             return null;            
         }
         
+        public object MapToIdlFlagsEquivalent(Type clsType) {
+            // nothing to do, because mapped to a base type
+            return null;
+        }
+        
         #region unsupported mappings for fwd decls
 
         public object MapToIdlVoid(System.Type dotNetType) {
@@ -1262,6 +1282,10 @@ namespace Ch.Elca.Iiop.Idl {
         public object MapToIdlOctet(System.Type dotNetType) {
             throw new NotSupportedException("no include possible for this IDL-type");
         }
+        
+        public object MapToIdlSByteEquivalent(Type clsType) {
+            throw new NotSupportedException("no include possible for this IDL-type");
+        }        
         
         public object MapToIdlShort(System.Type dotNetType) {
             throw new NotSupportedException("no include possible for this IDL-type");
@@ -1325,7 +1349,7 @@ namespace Ch.Elca.Iiop.Idl {
 
         public object MapToTypeCode(System.Type dotNetType) {
             throw new NotSupportedException("no include possible for this IDL-type");
-        }
+        }                
 
         #endregion
                 

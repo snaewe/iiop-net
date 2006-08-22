@@ -21,8 +21,8 @@ namespace Ch.Elca.Iiop.Demo.Chatroom {
 
         #region Constants
 
-        private const string CONNECTED_INFO = "connected";
-        private const string NOT_CONNECTED_INFO = "not connected";
+        public const string CONNECTED_INFO = "connected";
+        public const string NOT_CONNECTED_INFO = "not connected";
 
 
         #endregion Constants
@@ -51,12 +51,13 @@ namespace Ch.Elca.Iiop.Demo.Chatroom {
 
         #endregion IFields
 
-        public Chatform(IChatroom chatroom) {
+        /// <summary>default constructor for designer support</summary>
+        /// <remarks>set Chatroom by Chatroom property</remarks>
+        public Chatform() {
 	    //
             // Required for Windows Form Designer support
             //
             InitializeComponent();
-            m_chatroom = chatroom;
         }
 
         /// <summary>
@@ -224,6 +225,12 @@ namespace Ch.Elca.Iiop.Demo.Chatroom {
 
         }
 		#endregion
+
+        public IChatroom Chatroom {
+            set {
+                m_chatroom = value;
+            }
+        }
 
         private void m_connectButton_Click(object sender, System.EventArgs e) {
             if (m_listener == null) {

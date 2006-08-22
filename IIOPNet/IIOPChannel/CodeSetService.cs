@@ -39,6 +39,7 @@ using Ch.Elca.Iiop.Idl;
 using omg.org.CORBA;
 using omg.org.IOP;
 using Ch.Elca.Iiop.CodeSet;
+using Ch.Elca.Iiop.Util;
 
 namespace Ch.Elca.Iiop.Services {
     
@@ -49,6 +50,11 @@ namespace Ch.Elca.Iiop.Services {
         #region SFields
         
         public readonly static Type ClassType = typeof(CodeSetComponentData);
+        
+        public readonly static omg.org.CORBA.TypeCode TypeCode =
+            Repository.CreateTypeCodeForType(typeof(CodeSetComponentData),
+                                             AttributeExtCollection.EmptyCollection);
+        
         
         #endregion SFields        
         #region IFields
@@ -152,14 +158,14 @@ namespace Ch.Elca.Iiop.Services {
             s_registry.AddEncodingAllEndian((int)CharSet.UTF8, new UTF8Encoding());
             // big endian
             s_registry.AddEncodingBigEndian((int)WCharSet.UTF16,
-                                            new UnicodeEncodingExt(true, false)); // use big endian encoding here, put no unicode byte order mark
+                                            new UnicodeEncodingExt(true)); // use big endian encoding here
             s_registry.AddEncodingBigEndian((int)WCharSet.ISO646IEC_MULTI,
-                                            new UnicodeEncodingExt(true, false));
+                                            new UnicodeEncodingExt(true));
             // little endian
             s_registry.AddEncodingLittleEndian((int)WCharSet.UTF16,
-                                               new UnicodeEncodingExt(false, false)); // use big endian encoding here, put no unicode byte order mark
+                                               new UnicodeEncodingExt(false)); // use little endian encoding here
             s_registry.AddEncodingLittleEndian((int)WCharSet.ISO646IEC_MULTI,
-                                               new UnicodeEncodingExt(false, false));
+                                               new UnicodeEncodingExt(false));
         }
         
         #endregion SConstructor
@@ -174,7 +180,7 @@ namespace Ch.Elca.Iiop.Services {
         /// <summary>
         /// the default char set to use (if nothing different is specified by Code set establishment)
         /// </summary>
-        internal static int DefaultCharSet {
+        private static int DefaultCharSet {
             get {
                 if (s_defaultCharSet == UNINITALIZED_CHAR_SET) {
                     lock(s_initLock) {
@@ -190,7 +196,7 @@ namespace Ch.Elca.Iiop.Services {
         /// <summary>
         /// the default wchar set to use (if nothing different is specified by Code set establishment)
         /// </summary>        
-        internal static int DefaultWCharSet {
+        private static int DefaultWCharSet {
             get {
                 if (s_defaultWCharSet == UNINITALIZED_WCHAR_SET) {
                     lock(s_initLock) {
@@ -225,10 +231,11 @@ namespace Ch.Elca.Iiop.Services {
         /// <summary>
         /// returns the code set component data or null if not found
         /// </summary>
-        internal static object /* CodeSetComponentData */ FindCodeSetComponent(IIorProfile profile) {
+        internal static object /* CodeSetComponentData */ FindCodeSetComponent(IIorProfile profile, Codec codec) {
             TaggedComponentList list = profile.TaggedComponents;
             object result = 
-                list.GetComponentData(TAG_CODE_SETS.ConstVal, CodeSetComponentData.ClassType);
+                list.GetComponentData(TAG_CODE_SETS.ConstVal, codec,
+                                      CodeSetComponentData.TypeCode);
             if (result != null) {
                 return (CodeSetComponentData)result;
             }            
@@ -340,7 +347,30 @@ namespace Ch.Elca.Iiop.Services {
         /// creates the tagged codeset component to insert into an IOR
         /// </summary>
         /// <returns></returns>
-        internal static TaggedComponent CreateDefaultCodesetComponent() {
+        internal static TaggedComponent CreateDefaultCodesetComponent(Codec codec) {
+            return CreateCodesetComponent(codec, 
+                                          Services.CodeSetService.DefaultCharSet,
+                                          Services.CodeSetService.DefaultWCharSet);
+        }
+        
+        /// <summary>
+        /// creates the tagged codeset component to insert into an IOR
+        /// </summary>
+        /// <returns></returns>
+        internal static TaggedComponent CreateCodesetComponent(Codec codec, 
+                                                               CharSet nativeCharSet,
+                                                               WCharSet nativeWCharSet) {
+            return CreateCodesetComponent(codec, (int)nativeCharSet,
+                                          (int)nativeWCharSet);
+        }
+        
+        /// <summary>
+        /// creates the tagged codeset component to insert into an IOR
+        /// </summary>
+        /// <returns></returns>
+        private static TaggedComponent CreateCodesetComponent(Codec codec, 
+                                                              int nativeCharSet,
+                                                              int nativeWCharSet) {
             Array wCharSets = Enum.GetValues(s_wCharSetType);
             Array charSets = Enum.GetValues(s_charSetType);
             int[] wCharSetCodes = new int[wCharSets.Length];
@@ -351,12 +381,14 @@ namespace Ch.Elca.Iiop.Services {
             for (int i = 0; i < charSets.Length; i++) { // Array.CopyTo doesn't work with mono for this case
                 charSetCodes[i] = (int)charSets.GetValue(i);
             }
-            return TaggedComponent.CreateTaggedComponent(TAG_CODE_SETS.ConstVal, 
-                                                         new Services.CodeSetComponentData(Services.CodeSetService.DefaultCharSet,
-                                                                                           charSetCodes,
-                                                                                           Services.CodeSetService.DefaultWCharSet,
-                                                                                           wCharSetCodes));
-        }
+            Services.CodeSetComponentData codeSetCompData =
+                new Services.CodeSetComponentData(nativeCharSet,
+                                                  charSetCodes,
+                                                  nativeWCharSet,
+                                                  wCharSetCodes);            
+            return new TaggedComponent(TAG_CODE_SETS.ConstVal,
+                                       codec.encode_value(codeSetCompData));
+        }        
         
         /// <summary>
         /// get the char encoding to use for a charset id (endian independant)

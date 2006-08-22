@@ -1,8 +1,10 @@
+include ..\..\..\MakeVars
+
 IIOPCHANNEL = ..\..\..\IIOPChannel\bin\IIOPChannel.dll
 IIOPCHANNELPDB = ..\..\..\IIOPChannel\bin\IIOPChannel.pdb
-LAUNCH = ..\..\Utils\launch.exe
-KILL = ..\..\Utils\kill.exe
-DELAY = ..\..\Utils\delay.exe
+LAUNCH = ..\..\..\Utils\launch.exe
+KILL = ..\..\..\Utils\kill.exe
+DELAY = ..\..\..\Utils\delay.exe
 
 bin         = bin\ 
 
@@ -19,7 +21,7 @@ $(bin)IIOPChannel.dll: $(IIOPCHANNEL)
 	if exist $(IIOPCHANNELPDB) copy /y $(IIOPCHANNELPDB) $(bin)IIOPChannel.pdb
 
 $(bin)TestServer.exe: $(bin)IIOPChannel.dll *.cs
-    csc $(CSFLAGS) /t:exe /r:$(bin)IIOPChannel.dll /out:$(bin)TestServer.exe *.cs
+    $(CSC) $(CSFLAGS) /t:exe /r:$(bin)IIOPChannel.dll /out:$(bin)TestServer.exe *.cs
 
 IDL\Ch\Elca\Iiop\IntegrationTests\TestService.idl: $(bin)TestServer.exe
     ..\..\..\CLSToIDLGenerator\bin\CLSIDLGenerator.exe -o IDL Ch.Elca.Iiop.IntegrationTests.TestService $(bin)TestServer.exe
@@ -27,7 +29,7 @@ IDL\Ch\Elca\Iiop\IntegrationTests\TestService.idl: $(bin)TestServer.exe
 
 start-server:
 	@$(LAUNCH) bin\TestServer.exe >> pid
-#	for /F "usebackq" %%r in (`..\..\Utils\launch.exe bin\TestServer.exe`) do set pid=%%r
+#	for /F "usebackq" %%r in (`..\..\..\Utils\launch.exe bin\TestServer.exe`) do set pid=%%r
 
 stop-server:
 	@for /F %%p in (pid) do @$(KILL) %%p

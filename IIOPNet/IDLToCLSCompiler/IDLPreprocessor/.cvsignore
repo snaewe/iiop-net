@@ -1,7 +1,6 @@
 bin
 obj
-IDLPreprocessor.vjsproj.user
+binSD
+*.csproj.user
 .#*
-*.cmbx
-*.prjx
 

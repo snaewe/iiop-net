@@ -1,3 +1,5 @@
+include ..\..\MakeVars
+
 build:
 	cd SimpleAdder
 	$(MAKE) build

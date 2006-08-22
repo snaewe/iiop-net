@@ -444,7 +444,7 @@ namespace java.util {
         public override void Serialize(Corba.DataOutputStream arg) {
             // rmi data
             arg.write_octet(1);
-            arg.write_octet(1);
+            arg.write_octet(0);
             // offset in milliseconds
             arg.write_longlong(m_offsetInMillis);            
         }

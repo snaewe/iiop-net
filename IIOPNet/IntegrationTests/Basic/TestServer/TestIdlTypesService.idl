@@ -28,13 +28,18 @@ module IntegrationTests {
 
     #pragma ID TestUnionLD "IDL:Ch/Elca/Iiop/IntegrationTests/TestUnionLD:1.0"
 
+
+    typedef unsigned long ValidList;  
+    valuetype ValidListSeq sequence<ValidList> ; 
+
     interface TestIdlTypesService {
 
         boxed_string EchoBoxedString(in boxed_string arg);
         boxed_TestStruct EchoBoxedStruct(in boxed_TestStruct arg);
 
         TestUnionLD EchoLDUnion(in TestUnionLD arg);
-        
+
+        ValidListSeq EchoBoxedSeq(in ValidListSeq arg);        
 
     };
 

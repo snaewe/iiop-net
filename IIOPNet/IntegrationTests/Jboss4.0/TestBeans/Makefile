@@ -1,11 +1,13 @@
+include ..\..\..\MakeVars
+
 Test=ch\elca\iiop\integrationTests\ 
 BIN=bin\ 
 IDL=IDL\ 
 TestPackage=ch.elca.iiop.integrationTests.
 JBOSS_CLP=%JBOSS_HOME_4%\server\all\lib\jboss-j2ee.jar;.
-LAUNCH = ..\..\Utils\launch.exe
-DELAY = ..\..\Utils\delay.exe
-KILL = ..\..\Utils\kill.exe
+LAUNCH = ..\..\..\Utils\launch.exe
+DELAY = ..\..\..\Utils\delay.exe
+KILL = ..\..\..\Utils\kill.exe
 
 
 build: copy-meta-data build-classes build-jar build-idl
