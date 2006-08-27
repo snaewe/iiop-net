@@ -176,6 +176,15 @@ namespace Ch.Elca.Iiop.IdlCompiler.Tests {
             Assertion.AssertEquals("not serializable", true, toCheck.IsSerializable);
         }
         
+        /// <summary>
+        /// Check, that the ExplicitSerializationOrdered attribute has been placed.
+        /// </summary>
+        protected void CheckExplicitSerializationOrderedAttributePresent(Type type) {
+            object[] attrs = type.GetCustomAttributes(ReflectionHelper.ExplicitSerializationOrderedType, 
+                                                      false);
+            Assertion.AssertNotNull("attrs null?", attrs);
+            Assertion.AssertEquals("wrong number of ExplicitSerializationOrderedAttribute", 1, attrs.Length);
+        }
         
         /// <summary>
         /// Check, that a given public method is present.

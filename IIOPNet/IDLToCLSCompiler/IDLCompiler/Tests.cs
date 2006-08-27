@@ -214,6 +214,7 @@ namespace Ch.Elca.Iiop.IdlCompiler.Tests {
                        
             CheckImplClassAttr(valType, "testmod.TestImpl");
             CheckSerializableAttributePresent(valType);
+            CheckExplicitSerializationOrderedAttributePresent(valType);
             CheckRepId(valType, "IDL:testmod/Test:1.0");
             
             CheckIIdlEntityInheritance(valType);
@@ -264,6 +265,7 @@ namespace Ch.Elca.Iiop.IdlCompiler.Tests {
                        
             CheckImplClassAttr(valType, "testmod.TestImpl");
             CheckSerializableAttributePresent(valType);
+            CheckExplicitSerializationOrderedAttributePresent(valType);
             CheckRepId(valType, "IDL:testmod/Test:1.0");
             
             CheckIIdlEntityInheritance(valType);
@@ -310,6 +312,7 @@ namespace Ch.Elca.Iiop.IdlCompiler.Tests {
             Assertion.Assert("is a struct", structType.IsValueType);
             CheckIdlStructAttributePresent(structType);
             CheckSerializableAttributePresent(structType);
+            CheckExplicitSerializationOrderedAttributePresent(structType);
             
             CheckFieldPresent(structType, "a", typeof(System.Int32), 
                               BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly);            
@@ -354,6 +357,7 @@ namespace Ch.Elca.Iiop.IdlCompiler.Tests {
             Assertion.Assert("is a struct", structType1.IsValueType);
             CheckIdlStructAttributePresent(structType1);
             CheckSerializableAttributePresent(structType1);
+            CheckExplicitSerializationOrderedAttributePresent(structType1);
             
             CheckFieldPresent(structType1, "a", typeof(System.Int32), 
                               BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly);            
@@ -373,6 +377,7 @@ namespace Ch.Elca.Iiop.IdlCompiler.Tests {
             Assertion.Assert("is a struct", structType2.IsValueType);
             CheckIdlStructAttributePresent(structType2);
             CheckSerializableAttributePresent(structType2);
+            CheckExplicitSerializationOrderedAttributePresent(structType2);
             
             CheckFieldPresent(structType2, "a", typeof(System.Int32), 
                               BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly);            
