@@ -450,10 +450,8 @@ namespace Ch.Elca.Iiop.Idl {
             }
         }
 
-        private void DetermineContentDependenciesFromFields() {
-            BindingFlags flags = BindingFlags.Instance | BindingFlags.DeclaredOnly | BindingFlags.Public | BindingFlags.NonPublic;
-            
-            FieldInfo[] fields = m_forType.GetFields(flags);
+        private void DetermineContentDependenciesFromFields() {            
+            FieldInfo[] fields = ReflectionHelper.GetAllDeclaredInstanceFieldsOrdered(m_forType);
             foreach (FieldInfo info in fields) {
                 if (!m_manager.IsDefaultMapped(info.FieldType) && !info.FieldType.Equals(m_forType)) {
                     // only add to dependencies, if not default mapped

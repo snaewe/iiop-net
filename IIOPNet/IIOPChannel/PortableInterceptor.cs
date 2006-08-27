@@ -39,8 +39,10 @@ namespace omg.org.Dynamic {
     [IdlStruct]
     [RepositoryID("IDL:omg.org/Dynamic/Parameter:1.0")]
     [Serializable]
+    [ExplicitSerializationOrdered()]
     public struct Parameter {
                         
+        [ExplicitSerializationOrderNr(0)]
         [ObjectIdlTypeAttribute(IdlTypeObject.Any)]
         public object argument;
         // TODO:
@@ -214,6 +216,7 @@ namespace omg.org.PortableInterceptor {
     
     [RepositoryID("IDL:omg.org/PortableInterceptor/InvalidSlot:1.0")]
     [Serializable]
+    [ExplicitSerializationOrdered()]
     public class InvalidSlot : AbstractUserException {
 
         #region IConstructors
@@ -234,10 +237,12 @@ namespace omg.org.PortableInterceptor {
     
     [RepositoryID("IDL:omg.org/PortableInterceptor/ForwardRequest:1.0")]
     [Serializable]
+    [ExplicitSerializationOrdered()]
     public class ForwardRequest : AbstractUserException {
 
         #region IFields
         
+        [ExplicitSerializationOrderNr(0)]
         private MarshalByRefObject m_forward;
         
         #endregion IFields
@@ -739,10 +744,12 @@ namespace omg.org.PortableInterceptor {
     
     [RepositoryIDAttribute("IDL:omg.org/PortableInterceptor/DuplicateName:1.0")]
     [Serializable]
+    [ExplicitSerializationOrdered()]
     public class DuplicateName : AbstractUserException {
         
         #region IFields
         
+        [ExplicitSerializationOrderNr(0)]
         public string name;
         
         #endregion IFields

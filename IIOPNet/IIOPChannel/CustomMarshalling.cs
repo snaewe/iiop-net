@@ -204,6 +204,7 @@ namespace Corba {
         /// see write_ValueOfActualType
         /// </summary>
         [Serializable]
+        [ExplicitSerializationOrdered()]
         internal class DummyValTypeForNull {
         }
         

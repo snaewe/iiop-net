@@ -34,6 +34,8 @@ using Ch.Elca.Iiop.CorbaObjRef;
 namespace Ch.Elca.Iiop {
 
     /// <summary>the data encoded for the tagged component ALTERNATE_IIOP_ADDRESS.</summary>
+    [ExplicitSerializationOrdered()]
+    [Serializable]
     [IdlStruct]
     public struct AlternateIiopAddressComponentData {
         
@@ -44,10 +46,12 @@ namespace Ch.Elca.Iiop {
         #endregion SFields
         #region IFields
         
+        [ExplicitSerializationOrderNr(0)]
         [StringValue()]
         [WideChar(false)]
         public string HostID;
         
+        [ExplicitSerializationOrderNr(1)]
         public short Port;            
         
         #endregion IFields

@@ -79,6 +79,7 @@ namespace omg.org.CORBA {
         }
     }
     
+    [ExplicitSerializationOrdered()]
     [RepositoryID("IDL:omg.org/CORBA/StructMember:1.0")]
     [Serializable]
     [IdlStruct]
@@ -95,17 +96,21 @@ namespace omg.org.CORBA {
             this.type_def = null;
         }
         
+        [ExplicitSerializationOrderNr(0)]
         [StringValue()]
         [WideCharAttribute(false)]
         public string name;
         
+        [ExplicitSerializationOrderNr(1)]
         public omg.org.CORBA.TypeCode type;
         
+        [ExplicitSerializationOrderNr(2)]
         /// <remarks>not used for typecode opertions</remarks>
         public IDLType type_def;
 
     }
     
+    [ExplicitSerializationOrdered()]
     [RepositoryID("IDL:omg.org/CORBA/ValueMember:1.0")]
     [Serializable]
     [IdlStruct]
@@ -127,6 +132,7 @@ namespace omg.org.CORBA {
         /// <summary>
         /// the name of this member
         /// </summary>
+        [ExplicitSerializationOrderNr(0)]
         [StringValue()]
         [WideCharAttribute(false)]
         public string name;
@@ -134,27 +140,32 @@ namespace omg.org.CORBA {
         /// <summary>
         /// the type of this member
         /// </summary>
+        [ExplicitSerializationOrderNr(1)]
         public omg.org.CORBA.TypeCode type;
         
         /// <summary>
         /// the visibility of this value member
         /// </summary>
+        [ExplicitSerializationOrderNr(2)]
         public short access;
         
         /// <remarks>not used for typecode opertions</remarks>
+        [ExplicitSerializationOrderNr(3)]
         public IDLType type_def;
         
         /// <remarks>not used for typecode opertions</remarks>
+        [ExplicitSerializationOrderNr(4)]
         public string version;
         
         /// <remarks>not used for typecode opertions</remarks>
+        [ExplicitSerializationOrderNr(5)]
         public string defined_in;
         
         /// <remarks>not used for typecode opertions</remarks>
-        public string id;                        
+        [ExplicitSerializationOrderNr(6)]
+        public string id;
         
     }        
-
 
     
 }

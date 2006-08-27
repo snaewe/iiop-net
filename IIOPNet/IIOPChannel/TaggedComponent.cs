@@ -91,6 +91,7 @@ namespace omg.org.IOP {
     [RepositoryID("IDL:omg.org/IOP/TaggedComponent:1.0")]
     [IdlStruct]
     [Serializable]
+    [ExplicitSerializationOrdered()]
     public struct TaggedComponent {
     
         #region SFields
@@ -100,7 +101,9 @@ namespace omg.org.IOP {
         #endregion SFields
         #region IFields
         
+        [ExplicitSerializationOrderNr(0)]
         public int tag;
+        [ExplicitSerializationOrderNr(1)]
         [IdlSequence(0L)]
         public byte[] component_data;
         

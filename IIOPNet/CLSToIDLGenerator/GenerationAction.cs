@@ -405,7 +405,7 @@ namespace Ch.Elca.Iiop.Idl {
 
         /// <summary>map the fields of a concrete value type</summary>
         private void MapValueTypeFields(Type typeToMap, BindingFlags flags) {
-            FieldInfo[] fields = typeToMap.GetFields(flags);
+            FieldInfo[] fields = ReflectionHelper.GetAllDeclaredInstanceFieldsOrdered(typeToMap);
             foreach (FieldInfo field in fields) {
                 if (!field.IsNotSerialized) { // do not serialize transient fields
                     MapValueTypeField(field, typeToMap);
@@ -415,7 +415,7 @@ namespace Ch.Elca.Iiop.Idl {
 
         /// <summary>map the fields of a concrete value type</summary>
         private void MapStructFields(Type typeToMap) {
-            FieldInfo[] fields = ReflectionHelper.GetAllDeclaredInstanceFields(typeToMap);
+            FieldInfo[] fields = ReflectionHelper.GetAllDeclaredInstanceFieldsOrdered(typeToMap);
             foreach (FieldInfo field in fields) {
                 Type fieldType = field.FieldType;
                 string fieldTypeMapped = (string)m_mapper.MapClsType(fieldType, 
@@ -780,8 +780,7 @@ namespace Ch.Elca.Iiop.Idl {
             WriteModuleOpenings(modules);
             m_currentOutputStream.Write("valuetype " + unqualName);
             // write the only field:
-            FieldInfo[] fields = clsType.GetFields(BindingFlags.Public | BindingFlags.NonPublic | 
-                                                   BindingFlags.Instance | BindingFlags.DeclaredOnly);
+            FieldInfo[] fields = ReflectionHelper.GetAllDeclaredInstanceFieldsOrdered(clsType);
             if ((fields == null) || (fields.Length != 1)) { 
                 throw new ArgumentException("invalid boxed value type: " + clsType + ", only one field is allowed"); 
             }
@@ -814,8 +813,7 @@ namespace Ch.Elca.Iiop.Idl {
             m_currentOutputStream.WriteLine("exception " + unqualName + "{");
             
             // map the state members
-            FieldInfo[] fields = clsType.GetFields(BindingFlags.Public | BindingFlags.NonPublic |
-                                                   BindingFlags.Instance | BindingFlags.DeclaredOnly);
+            FieldInfo[] fields = ReflectionHelper.GetAllDeclaredInstanceFieldsOrdered(clsType);
             foreach (FieldInfo fieldToMap in fields) {
                 Type fieldType = fieldToMap.FieldType;
                 string fieldTypeMapped = (string)m_mapper.MapClsType(fieldType, Util.AttributeExtCollection.ConvertToAttributeCollection(fieldToMap.GetCustomAttributes(true)),

@@ -698,6 +698,7 @@ namespace omg.org.CORBA.ORB_package {
     
     [RepositoryIDAttribute("IDL:omg.org/CORBA/ORB/InvalidName:1.0")]
     [Serializable]
+    [ExplicitSerializationOrdered()]
     public class InvalidName : AbstractUserException {
         
         #region IConstructors

@@ -102,6 +102,7 @@ namespace Ch.Elca.Iiop {
     /// </summary>
     [RepositoryIDAttribute("IDL:Ch/Elca/Iiop/GenericUserException:1.0")]
     [Serializable]
+    [ExplicitSerializationOrdered()]
     public class GenericUserException : AbstractUserException {
         
         #region IFields
@@ -112,6 +113,7 @@ namespace Ch.Elca.Iiop {
         /// <remarks>mapped to the name field in the CORBA exception for this class; 
         /// is mapped as normal string and not as WStringValue to support Orbs, which don't implement value types</remarks>
         [StringValue()]
+        [ExplicitSerializationOrderNr(0)]
         private string name = "";
         /// <summary>
         /// recursively lists the exception messages (i.e. includes inner exception messages)
@@ -119,12 +121,14 @@ namespace Ch.Elca.Iiop {
         /// <remarks>mapped to the message field in the CORBA exception for this class;
         /// is mapped as normal string and not as WStringValue to support Orbs, which don't implement value types</remarks>
         [StringValue()]
+        [ExplicitSerializationOrderNr(1)]
         private string message = "";
         /// <summary>
         /// recursively lists the methods throwed the exceptions
         /// <remarks>mapped to the throwingMethod field in the CORBA exception for this class;
 		/// is mapped as normal string and not as WStringValue to support Orbs, which don't implement value types</remarks>
         [StringValue()]
+        [ExplicitSerializationOrderNr(2)]
         private string throwingMethod = "";
 
         #endregion IFields

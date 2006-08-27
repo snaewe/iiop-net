@@ -126,6 +126,7 @@
     <Compile Include="CdrStreamTests.cs" />
     <Compile Include="IORUtil.cs" />
     <Compile Include="SystemWireBitConverter.cs" />
+    <Compile Include="SerializationOrderFieldinfoComparer.cs" />
   </ItemGroup>
   <Import Project="$(SharpDevelopBinPath)\SharpDevelop.Build.CSharp.targets" />
 </Project>

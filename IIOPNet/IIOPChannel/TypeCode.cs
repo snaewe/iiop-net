@@ -1609,8 +1609,11 @@ namespace omg.org.CORBA {
                 foreach (CustomAttributeBuilder cAttr in cAttrs) {
                     field.SetCustomAttribute(cAttr);
                 }            
+                field.SetCustomAttribute(
+                    new ExplicitSerializationOrderNr(i).CreateAttributeBuilder());
             }
             // add type specific attributes
+            result.SetCustomAttribute(new ExplicitSerializationOrdered().CreateAttributeBuilder());
             result.SetCustomAttribute(new IdlStructAttribute().CreateAttributeBuilder());
             IlEmitHelper.GetSingleton().AddSerializableAttribute(result);
             return result.CreateType();
@@ -2008,7 +2011,8 @@ namespace omg.org.CORBA {
             // serializable attribute
             IlEmitHelper.GetSingleton().AddSerializableAttribute(result);
             // define members
-            foreach (ValueMember member in m_members) {
+            for (int i = 0; i < m_members.Length; i++) {
+                ValueMember member = m_members[i];
                 Type memberType = ((TypeCodeImpl) (member.type)).GetClsForTypeCode();                
                 FieldAttributes fieldAttrs = FieldAttributes.Public;
                 FieldBuilder field = result.DefineField(member.name, memberType, fieldAttrs);
@@ -2016,7 +2020,11 @@ namespace omg.org.CORBA {
                 foreach (CustomAttributeBuilder cAttr in cAttrs) {
                     field.SetCustomAttribute(cAttr);
                 }
+                // explicit serialization order
+                field.SetCustomAttribute(
+                    new ExplicitSerializationOrderNr(i).CreateAttributeBuilder());
             }
+            result.SetCustomAttribute(new ExplicitSerializationOrdered().CreateAttributeBuilder());
             // create the type
             return result.CreateType();
         }

@@ -831,10 +831,17 @@ public class MetaDataGenerator : IDLParserVisitor {
         BuildInfo buildInfo = 
             new ConcreteValTypeBuildInfo(enclosingScope.getChildScope(forSymbol.getSymbolName()),
                                          valueToBuild, forSymbol, defConstr);
+        ArrayList /* FieldBuilder */ fields = new ArrayList();
         for (int i = 1; i < node.jjtGetNumChildren(); i++) { // for all value_element children
             ASTvalue_element elem = (ASTvalue_element)node.jjtGetChild(i);
-            elem.jjtAccept(this, buildInfo);    
+            IList stateFields = (IList)
+                elem.jjtAccept(this, buildInfo);
+            if (stateFields != null) {
+                // only state value elements return field builders
+                fields.AddRange(stateFields);
+            }
         }
+        AddExplicitSerializationOrder(valueToBuild, fields);        
 
         // finally create the type
         Type resultType = m_typeManager.EndTypeDefinition(forSymbol);        
@@ -987,8 +994,7 @@ public class MetaDataGenerator : IDLParserVisitor {
      * @param data a Buildinfo instance for the value-type containing this content
      */
     public Object visit(ASTvalue_element node, Object data) {
-        node.jjtGetChild(0).jjtAccept(this, data); // generate for an export, state or init_dcl member
-        return null;
+        return node.jjtGetChild(0).jjtAccept(this, data); // generate for an export, state or init_dcl member
     }
 
     #region constructor definition, at the moment not supported
@@ -1067,7 +1073,7 @@ public class MetaDataGenerator : IDLParserVisitor {
      * @see parser.IDLParserVisitor#visit(ASTstate_member, Object)
      * @param data the buildInfo for this value-type
      */
-    public Object visit(ASTstate_member node, Object data) {
+    public Object visit(ASTstate_member node, Object data) {        
         CheckParameterForBuildInfo(data, node);
         BuildInfo info = (BuildInfo) data;
         TypeBuilder builder = info.GetContainterType();
@@ -1080,11 +1086,14 @@ public class MetaDataGenerator : IDLParserVisitor {
                               typeSpecNode.GetIdentification(), 
                               node.GetIdentification()));
         }
+        IList /* FieldBuilder */ fields = new ArrayList();
         ASTdeclarators decl = (ASTdeclarators)node.jjtGetChild(1);
         for (int i = 0; i < decl.jjtGetNumChildren(); i++) {
             string declFieldName = 
                 DetermineTypeAndNameForDeclarator((ASTdeclarator)decl.jjtGetChild(i), data,
                                                   ref fieldType);
+            string idlFieldName;
+            FieldAttributes fieldAttributes;
             if (node.isPrivate()) { // map to protected field
                 String privateName = declFieldName;
                 // compensate a problem in the java rmi compiler, which can produce illegal idl:
@@ -1092,16 +1101,19 @@ public class MetaDataGenerator : IDLParserVisitor {
                 if (!privateName.StartsWith("m_")) { 
                     privateName = "m_" + privateName; 
                 }
-                privateName = IdlNaming.MapIdlNameToClsName(privateName);
-                m_ilEmitHelper.AddFieldWithCustomAttrs(builder, privateName, 
-                                                       fieldType, FieldAttributes.Family);
+                idlFieldName = privateName;     
+                fieldAttributes = FieldAttributes.Family;
             } else { // map to public field
-                String fieldName = IdlNaming.MapIdlNameToClsName(declFieldName);
-                m_ilEmitHelper.AddFieldWithCustomAttrs(builder, fieldName, 
-                                                       fieldType, FieldAttributes.Public);
+                idlFieldName = declFieldName;                
+                fieldAttributes = FieldAttributes.Public;
             }
+            idlFieldName = IdlNaming.MapIdlNameToClsName(idlFieldName);
+            FieldBuilder field = 
+                m_ilEmitHelper.AddFieldWithCustomAttrs(builder, idlFieldName,
+                                                       fieldType, fieldAttributes);
+            fields.Add(field);
         }
-        return null;
+        return fields;
     }
 
     /**
@@ -1827,6 +1839,16 @@ public class MetaDataGenerator : IDLParserVisitor {
         TypeContainer container = new TypeContainer(typeof(System.MarshalByRefObject));
         return container;
     }
+    
+    private void AddExplicitSerializationOrder(TypeBuilder forType,
+                                               IList /* FieldBuilder */ members) {
+        forType.SetCustomAttribute(
+            new ExplicitSerializationOrdered().CreateAttributeBuilder());
+        for (int i = 0; i < members.Count; i++) {
+            ((FieldBuilder)members[i]).SetCustomAttribute(
+                new ExplicitSerializationOrderNr(i).CreateAttributeBuilder());
+        }
+    }
      
     private void AddStructConstructor(TypeBuilder structToCreate, IList /* members */ members) {
         ParameterSpec[] constrParams = new ParameterSpec[members.Count];
@@ -1880,6 +1902,7 @@ public class MetaDataGenerator : IDLParserVisitor {
         // add fileds and a constructor, which assigns the fields
         IList members = (IList)node.jjtGetChild(0).jjtAccept(this, thisTypeInfo); // accept the member list
         AddStructConstructor(structToCreate, members);        
+        AddExplicitSerializationOrder(structToCreate, members);
 
         // add type specific attributes
         structToCreate.SetCustomAttribute(new IdlStructAttribute().CreateAttributeBuilder());
@@ -1900,7 +1923,7 @@ public class MetaDataGenerator : IDLParserVisitor {
             IList infos = 
                 (IList)memberParent.jjtGetChild(i).jjtAccept(this, data);
             result.AddRange(infos);
-        }
+        }        
         return result;
     }
      
@@ -1909,7 +1932,8 @@ public class MetaDataGenerator : IDLParserVisitor {
      * @param data an instance of buildinfo for the type, which should contain this members
      */
     public Object visit(ASTmember_list node, Object data) {
-        return GenerateMemberList(node, data);
+        IList /* FieldBuilder */ members = GenerateMemberList(node, data);
+        return members;
     }
 
     /**
@@ -2462,6 +2486,7 @@ public class MetaDataGenerator : IDLParserVisitor {
         // add inheritance from IIdlEntity        
         exceptToCreate.AddInterfaceImplementation(typeof(IIdlEntity));
         AddExceptionRequiredSerializationCode(exceptToCreate, members);
+        AddExplicitSerializationOrder(exceptToCreate, members);
         
         // create the type
         m_typeManager.EndTypeDefinition(forSymbol);

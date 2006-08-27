@@ -45,13 +45,16 @@ namespace omg.org.CosNaming {
     [Serializable]
     [IdlStructAttribute]
     [RepositoryIDAttribute("IDL:omg.org/CosNaming/NameComponent:1.0")]
+    [ExplicitSerializationOrdered()]
     public struct NameComponent : IIdlEntity {
              
         #region IFields
 
+        [ExplicitSerializationOrderNr(0)]
         [WideChar(false)]
         [StringValueAttribute]
         private string m_id;
+        [ExplicitSerializationOrderNr(1)]
         [WideChar(false)]
         [StringValueAttribute]
         private string m_kind;
@@ -94,13 +97,16 @@ namespace omg.org.CosNaming {
     [Serializable]
     [IdlStructAttribute]
     [RepositoryIDAttribute("IDL:omg.org/CosNaming/Binding:1.0")]
+    [ExplicitSerializationOrdered()]
     public struct Binding : IIdlEntity {
 
         #region IFields
         
-        [IdlSequenceAttribute(0L)] 
+        [ExplicitSerializationOrderNr(0)]
+        [IdlSequenceAttribute(0L)]
         public NameComponent[] binding_name;
-        public BindingType binding_type;                                  
+        [ExplicitSerializationOrderNr(1)]
+        public BindingType binding_type;
         
         #endregion IFields
         
@@ -411,11 +417,14 @@ namespace omg.org.CosNaming.NamingContext_package {
 
     [RepositoryIDAttribute("IDL:omg.org/CosNaming/NamingContext/NotFound:1.0")]
     [Serializable]
+    [ExplicitSerializationOrdered()]
     public class NotFound : AbstractUserException {
         
         #region IFields
         
+        [ExplicitSerializationOrderNr(0)]
         public NotFoundReason why;
+        [ExplicitSerializationOrderNr(1)]
         [IdlSequenceAttribute(0L)]
         public NameComponent[] rest_of_name;
 
@@ -453,11 +462,14 @@ namespace omg.org.CosNaming.NamingContext_package {
 
     [RepositoryIDAttribute("IDL:omg.org/CosNaming/NamingContext/CannotProceed:1.0")]
     [Serializable]
+    [ExplicitSerializationOrdered()]
     public class CannotProceed : AbstractUserException {
         
         #region IFields
         
+        [ExplicitSerializationOrderNr(0)]
         public NamingContext cxt;
+        [ExplicitSerializationOrderNr(1)]
         [IdlSequenceAttribute(0L)]
         public NameComponent[] rest_of_name;
 
@@ -489,6 +501,7 @@ namespace omg.org.CosNaming.NamingContext_package {
 
     [RepositoryIDAttribute("IDL:omg.org/CosNaming/NamingContext/InvalidName:1.0")]
     [Serializable]
+    [ExplicitSerializationOrdered()]
     public class InvalidName : AbstractUserException {
         
         #region IConstructors
@@ -509,6 +522,7 @@ namespace omg.org.CosNaming.NamingContext_package {
 
     [RepositoryIDAttribute("IDL:omg.org/CosNaming/NamingContext/AlreadyBound:1.0")]
     [Serializable]
+    [ExplicitSerializationOrdered()]
     public class AlreadyBound : AbstractUserException {
         
         #region IConstructors
@@ -529,6 +543,7 @@ namespace omg.org.CosNaming.NamingContext_package {
 
     [RepositoryIDAttribute("IDL:omg.org/CosNaming/NamingContext/NotEmpty:1.0")]
     [Serializable]
+    [ExplicitSerializationOrdered()]
     public class NotEmpty : AbstractUserException {
         
         #region IConstructors

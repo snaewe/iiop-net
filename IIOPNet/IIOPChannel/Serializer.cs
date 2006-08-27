@@ -636,7 +636,7 @@ namespace Ch.Elca.Iiop.Marshalling {
                 while (typeHierarchy.Count > 0) {
                     Type demarshalType = (Type)typeHierarchy.Pop();
                     // reads all fields declared in the Type: no inherited fields
-                    FieldInfo[] fields = ReflectionHelper.GetAllDeclaredInstanceFields(demarshalType);
+                    FieldInfo[] fields = ReflectionHelper.GetAllDeclaredInstanceFieldsOrdered(demarshalType);
                     allFields.AddRange(fields);
                     for (int i = 0; i < fields.Length; i++) {
                         allSerializers.Add(CreateSerializerForField(fields[i], serFactory));
@@ -1019,7 +1019,7 @@ namespace Ch.Elca.Iiop.Marshalling {
         }
 
         private void DetermineFieldMapping() {
-            m_fields = ReflectionHelper.GetAllDeclaredInstanceFields(m_forType);
+            m_fields = ReflectionHelper.GetAllDeclaredInstanceFieldsOrdered(m_forType);
             m_fieldSerializers = new Serializer[m_fields.Length];
             for (int i = 0; i < m_fields.Length; i++) {
                 m_fieldSerializers[i] = CreateSerializerForField(m_fields[i], m_serFactory);           
@@ -1933,7 +1933,7 @@ namespace Ch.Elca.Iiop.Marshalling {
             } else {
                 Exception exception = (Exception)Activator.CreateInstance(exceptionType);
                 // deserialise fields
-                FieldInfo[] fields = ReflectionHelper.GetAllDeclaredInstanceFields(exceptionType);                
+                FieldInfo[] fields = ReflectionHelper.GetAllDeclaredInstanceFieldsOrdered(exceptionType);                
                 foreach (FieldInfo field in fields) {
                     Serializer ser = m_serFactory.Create(field.FieldType, 
                                                          ReflectionHelper.GetCustomAttriutesForField(field, true));
@@ -1954,7 +1954,7 @@ namespace Ch.Elca.Iiop.Marshalling {
                 targetStream.WriteULong((uint)sysEx.Minor);
                 targetStream.WriteULong((uint)sysEx.Status);
             } else {
-                FieldInfo[] fields = ReflectionHelper.GetAllDeclaredInstanceFields(actual.GetType());                
+                FieldInfo[] fields = ReflectionHelper.GetAllDeclaredInstanceFieldsOrdered(actual.GetType());                
                 foreach (FieldInfo field in fields) {
                     object fieldVal = field.GetValue(actual);
                     Serializer ser = m_serFactory.Create(field.FieldType,                     
@@ -2973,11 +2973,14 @@ namespace Ch.Elca.Iiop.Tests {
     }
     
 	[Serializable]
+	[ExplicitSerializationOrdered()]
 	[RepositoryID("IDL:Ch/Elca/Iiop/Tests/SimpleValueTypeWith2Ints")]
 	public class SimpleValueTypeWith2Ints {
 		
-		private int m_val1;
-		private int m_val2;
+		[ExplicitSerializationOrderNr(0)]
+	    private int m_val1;
+		[ExplicitSerializationOrderNr(1)]
+	    private int m_val2;
 		
 		public SimpleValueTypeWith2Ints() {			
 		}
@@ -3302,6 +3305,133 @@ namespace Ch.Elca.Iiop.Tests {
 	    
 	}	
 	
+	
+	[ExplicitSerializationOrdered()]
+	[IdlStruct]
+	public struct TestExplicitelyOrderedStruct {
+	    	    	            
+	    [ExplicitSerializationOrderNr(1)]
+	    public int FieldB;
+	    
+	    [ExplicitSerializationOrderNr(2)]
+	    public int FieldC;
+	    
+	    [ExplicitSerializationOrderNr(0)]
+	    public int FieldA;
+	    
+	    [ExplicitSerializationOrderNr(3)]
+	    public int FieldD;
+	    
+	    public TestExplicitelyOrderedStruct(int a, int b, int c, int d) {
+	        FieldA = a;
+	        FieldB = b;
+	        FieldC = c;
+	        FieldD = d;
+	    }	    		
+	    
+	    public override string ToString() {
+			return "a: " + FieldA + "; b: " + FieldB + "; c: " + FieldC +
+			    ";d: " + FieldD;
+		}
+	    
+	}
+	
+	[IdlStruct]
+	public struct TestImplicitelyOrderedStruct {
+	    	    	            	    
+	    public int FieldB;
+	    
+	    public int FieldC;
+	    
+	    public int FieldA;
+	    
+	    public int FieldD;
+	    
+	    public TestImplicitelyOrderedStruct(int a, int b, int c, int d) {
+	        FieldA = a;
+	        FieldB = b;
+	        FieldC = c;
+	        FieldD = d;
+	    }	    		
+	    
+	    public override string ToString() {
+			return "a: " + FieldA + "; b: " + FieldB + "; c: " + FieldC +
+			    ";d: " + FieldD;
+		}
+	    
+	}
+
+	
+	/// <summary>
+	/// Serializer tests for idl structs.
+	/// </summary>
+	[TestFixture]
+    public class SerializerTestIdlStruct : AbstractSerializerTest {
+	    
+	    private SerializerFactory m_serFactory;
+	    private IdlStructSerializer m_explicitelyOrderedStructSer;
+	    private IdlStructSerializer m_implicitelyOrderedStructSer;
+	    
+	    [SetUp]
+	    public void SetUp() {
+	        m_serFactory = new SerializerFactory();
+            omg.org.IOP.CodecFactory codecFactory =
+                new Ch.Elca.Iiop.Interception.CodecFactoryImpl(m_serFactory);
+            omg.org.IOP.Codec codec = 
+                codecFactory.create_codec(
+                    new omg.org.IOP.Encoding(omg.org.IOP.ENCODING_CDR_ENCAPS.ConstVal, 1, 2));
+            m_serFactory.Initalize(new SerializerFactoryConfig(), IiopUrlUtil.Create(codec));
+            
+            m_explicitelyOrderedStructSer = 
+                new IdlStructSerializer(typeof(TestExplicitelyOrderedStruct), 
+                                        m_serFactory);
+            m_explicitelyOrderedStructSer.Initalize();
+            m_implicitelyOrderedStructSer =
+                new IdlStructSerializer(typeof(TestImplicitelyOrderedStruct), 
+                                        m_serFactory);
+            m_implicitelyOrderedStructSer.Initalize();
+	    }
+	    
+	    [Test]
+	    public void TestExplicitelyOrderedStrutSer() {	   
+	        
+	        TestExplicitelyOrderedStruct toSer = new TestExplicitelyOrderedStruct(1, 2, 3, 4);
+	        GenericSerTest(m_explicitelyOrderedStructSer,
+	                       toSer, new byte[] { 0, 0, 0, 1, 0, 0, 0, 2, 0, 0, 0, 3,
+	                           0, 0, 0, 4 });
+	    }
+	    
+	    [Test]
+	    public void TestExplicitelyOrderedStructDeser() {
+	        TestExplicitelyOrderedStruct toDeser = new TestExplicitelyOrderedStruct(1, 2, 3, 4);
+	        GenericDeserTest(m_explicitelyOrderedStructSer,
+	                         new byte[] { 0, 0, 0, 1, 0, 0, 0, 2, 0, 0, 0, 3,
+	                                      0, 0, 0, 4 },
+	                         toDeser);
+	    }
+	    
+	    [Test]
+	    public void TestImplicitelyOrderedStrutSer() {	   
+	        
+	        TestImplicitelyOrderedStruct toSer = new TestImplicitelyOrderedStruct(1, 2, 3, 4);
+	        GenericSerTest(m_implicitelyOrderedStructSer,
+	                       toSer, new byte[] { 0, 0, 0, 1, 0, 0, 0, 2, 0, 0, 0, 3,
+	                           0, 0, 0, 4 });
+	    }
+	    
+	    [Test]
+	    public void TestImplicitelyOrderedStructDeser() {
+	        TestImplicitelyOrderedStruct toDeser = new TestImplicitelyOrderedStruct(1, 2, 3, 4);
+	        GenericDeserTest(m_implicitelyOrderedStructSer,
+	                         new byte[] { 0, 0, 0, 1, 0, 0, 0, 2, 0, 0, 0, 3,
+	                                      0, 0, 0, 4 },
+	                         toDeser);
+	    }
+	    
+	    
+	}
+	
 }
+
     
 #endif

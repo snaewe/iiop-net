@@ -30,6 +30,7 @@
 using System;
 using System.Reflection;
 using Ch.Elca.Iiop.Idl;
+using System.Collections;
 
 namespace Ch.Elca.Iiop.Util {
     
@@ -67,6 +68,8 @@ namespace Ch.Elca.Iiop.Util {
         private static Type s_supportedInterfaceAttributeType = typeof(SupportedInterfaceAttribute);
         private static Type s_repositoryIdAttributeType = typeof(RepositoryIDAttribute);
         private static Type s_flagsAttributeType = typeof(FlagsAttribute);
+        private static Type s_explicitSerializationOrderNrType = typeof(ExplicitSerializationOrderNr);
+        private static Type s_explicitSerializationOrderedType = typeof(ExplicitSerializationOrdered);
 
         private static Type s_voidType = typeof(void);
         private static Type s_stringType = typeof(System.String);
@@ -287,6 +290,24 @@ namespace Ch.Elca.Iiop.Util {
                 return s_flagsAttributeType;
             }
         }
+        
+        /// <summary>
+        /// caches typeof(ExplicitSerializationOrderNr)
+        /// </summary>
+        public static Type ExplicitSerializationOrderNrType {
+            get {        
+                return s_explicitSerializationOrderNrType;
+            }
+        }
+        
+        /// <summary>
+        /// caches typeof(ExplicitSerializationOrdered)
+        /// </summary>
+        public static Type ExplicitSerializationOrderedType {
+            get {        
+                return s_explicitSerializationOrderedType;
+            }
+        }
 
         /// <summary>caches typeof(void)</summary>
         public static Type VoidType {
@@ -450,11 +471,29 @@ namespace Ch.Elca.Iiop.Util {
         /// </summary>
         /// <param name="type">The type to get the fields for</param>
         /// <returns></returns>
-        public static FieldInfo[] GetAllDeclaredInstanceFields(Type type) {
+        private static FieldInfo[] GetAllDeclaredInstanceFields(Type type) {
             BindingFlags flags = BindingFlags.Instance | BindingFlags.Public |
                                  BindingFlags.NonPublic | BindingFlags.DeclaredOnly;
             return type.GetFields(flags);
-        }        
+        }  
+        
+        /// <summary>
+        /// Get all the instance fields directly declared in Type type in the serialization order.
+        /// </summary>
+        /// <param name="type">The type to get the fields for</param>
+        /// <remarks>the order is either defined by the ExplicitSerializationOrderNr attributes or
+        /// by the field name, if implicitely ordered.</remarks>
+        public static FieldInfo[] GetAllDeclaredInstanceFieldsOrdered(Type type) {
+            FieldInfo[] fields = GetAllDeclaredInstanceFields(type);
+            IComparer comparer;
+            if (type.IsDefined(ReflectionHelper.ExplicitSerializationOrderedType, false)) {
+                comparer = ExplicitOrderFieldInfoComparer.Instance;    
+            } else {
+                comparer = ImplicitOrderFieldInfoComparer.Instance;
+            }
+            Array.Sort(fields, comparer);            
+            return fields;
+        }
         
         /// <summary>
         /// get the custom attributes for the Type type.

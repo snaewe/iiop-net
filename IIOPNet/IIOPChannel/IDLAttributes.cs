@@ -889,5 +889,77 @@ namespace Ch.Elca.Iiop.Idl {
         #endregion IMethods
 
     }
+    
+    
+    /// <summary>
+    /// Specifies, that a type defines explict serialization order for its fields.
+    /// </summary>
+    [AttributeUsage(AttributeTargets.Class | AttributeTargets.Struct, AllowMultiple = false)]
+    public sealed class ExplicitSerializationOrdered : Attribute, IIdlAttribute {
+
+        #region IMethods
+
+        /// <summary>creates an attribute builder for this custom attribute</summary>
+        public CustomAttributeBuilder CreateAttributeBuilder() {
+            Type attrType = this.GetType();
+            ConstructorInfo attrConstr = attrType.GetConstructor(Type.EmptyTypes);
+            CustomAttributeBuilder result = new CustomAttributeBuilder(attrConstr, new Object[0]);
+            return result;
+        }
+
+        #endregion IMethods
+
+        
+    }
+    
+    
+        /// <summary>
+    /// Specifies, that a type defines explict serialization order for its fields.
+    /// </summary>
+    [AttributeUsage(AttributeTargets.Field, AllowMultiple = false)]
+    public sealed class ExplicitSerializationOrderNr : Attribute, IIdlAttribute {
+
+        #region IFields
+        
+        private int m_orderNr;        
+        
+        #endregion IFields
+        #region IConstructors
+        
+        /// <summary>
+        /// constructor taking the order nr of the tagged field.
+        /// </summary>        
+        public ExplicitSerializationOrderNr(int orderNr) {               
+            m_orderNr = orderNr;
+        }        
+        
+        #endregion IConstructors
+        #region IProperties
+
+        /// <summary>
+        /// The order number.
+        /// </summary>
+        public int OrderNr {
+            get {
+                return m_orderNr;
+            }
+        }
+
+        #endregion IProperties        
+        #region IMethods
+
+        /// <summary>creates an attribute builder for this custom attribute</summary>
+        public CustomAttributeBuilder CreateAttributeBuilder() {
+            Type attrType = this.GetType();
+            ConstructorInfo attrConstr = attrType.GetConstructor(new Type[] { ReflectionHelper.Int32Type } );
+            CustomAttributeBuilder result = new CustomAttributeBuilder(attrConstr, new Object[] { m_orderNr });
+            return result;            
+        }
+
+        #endregion IMethods
+
+        
+    }
+
 
 }

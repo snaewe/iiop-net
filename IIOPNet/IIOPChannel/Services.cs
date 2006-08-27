@@ -39,12 +39,15 @@ using Ch.Elca.Iiop.CorbaObjRef;
 
 namespace omg.org.IOP {
     
+    [ExplicitSerializationOrdered()]
     [IdlStruct]
     public struct ServiceContext {
     
         #region IFields
         
+        [ExplicitSerializationOrderNr(0)]
         public int context_id;
+        [ExplicitSerializationOrderNr(1)]
         [IdlSequence(0L)]
         public byte[] context_data;
         

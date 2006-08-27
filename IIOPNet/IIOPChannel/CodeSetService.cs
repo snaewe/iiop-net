@@ -45,6 +45,7 @@ namespace Ch.Elca.Iiop.Services {
     
     
     [IdlStruct]
+    [ExplicitSerializationOrdered]
     public struct CodeSetComponentData {
         
         #region SFields
@@ -59,11 +60,15 @@ namespace Ch.Elca.Iiop.Services {
         #endregion SFields        
         #region IFields
         
+        [ExplicitSerializationOrderNr(0)]
         public int NativeCharSet;
+        [ExplicitSerializationOrderNr(1)]
         [IdlSequence(0L)]
         public int[] CharConvSet;
         
+        [ExplicitSerializationOrderNr(2)]
         public int NativeWCharSet;
+        [ExplicitSerializationOrderNr(3)]
         [IdlSequence(0L)]
         public int[] WCharConvSet;
         

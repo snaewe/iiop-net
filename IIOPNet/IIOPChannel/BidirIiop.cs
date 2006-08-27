@@ -37,14 +37,17 @@ namespace omg.org.IIOP {
     [RepositoryID("IDL:omg.org/IIOP/ListenPoint:1.0")]
     [IdlStruct]
     [Serializable]
+    [ExplicitSerializationOrdered()]
     public struct ListenPoint {
     
         #region IFields
         
+        [ExplicitSerializationOrderNr(0)]
         [StringValue()]
         [WideChar(false)]
         public string host;
         
+        [ExplicitSerializationOrderNr(1)]
         public short port;
         
         #endregion IFields
@@ -78,12 +81,14 @@ namespace omg.org.IIOP {
     [RepositoryID("IDL:omg.org/IIOP/BiDirIIOPServiceContext:1.0")]
     [IdlStruct]
     [Serializable]
+    [ExplicitSerializationOrdered()]
     public struct BiDirIIOPServiceContext {
     
         public BiDirIIOPServiceContext(ListenPoint[] listenPoints) {
             listen_points = listenPoints;
         }
         
+        [ExplicitSerializationOrderNr(0)]
         [IdlSequence(0L)]
         public ListenPoint[] listen_points;
     

@@ -104,10 +104,14 @@ namespace omg.org.IOP {
     [Serializable()]
     [RepositoryID("IDL:omg.org/IOP/Encoding:1.0")]
     [IdlStruct()]
+    [ExplicitSerializationOrdered()]
     public struct Encoding : IIdlEntity {
                
+        [ExplicitSerializationOrderNr(0)]
         public short format;
+        [ExplicitSerializationOrderNr(1)]
         public byte major_version;
+        [ExplicitSerializationOrderNr(2)]
         public byte minor_version;
         
         public Encoding(short format, byte major_version, byte minor_version) {
@@ -139,6 +143,7 @@ namespace omg.org.IOP.Codec_package {
     /// encoding.
     /// </summary>
     [Serializable]
+    [ExplicitSerializationOrdered()]
     public class InvalidTypeForEncoding : AbstractUserException {
      
         public InvalidTypeForEncoding() {
@@ -159,6 +164,7 @@ namespace omg.org.IOP.Codec_package {
     /// sequence cannot be decoded into an any.
     /// </summary>
     [Serializable]
+    [ExplicitSerializationOrdered()]
     public class FormatMismatch : AbstractUserException {
      
         public FormatMismatch() {
@@ -179,6 +185,7 @@ namespace omg.org.IOP.Codec_package {
     /// the given octet sequence.
     /// </summary>
     [Serializable]
+    [ExplicitSerializationOrdered()]
     public class TypeMismatch : AbstractUserException {
      
         public TypeMismatch() {
@@ -202,6 +209,7 @@ namespace omg.org.IOP.CodecFactory_package {
     /// raised, if the codec factory, cannot create a Codec of the given encoding.
     /// </summary>
     [Serializable]
+    [ExplicitSerializationOrdered()]
     public class UnknownEncoding : AbstractUserException {
      
         public UnknownEncoding() {

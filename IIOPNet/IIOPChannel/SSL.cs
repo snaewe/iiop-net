@@ -59,6 +59,7 @@ namespace Ch.Elca.Iiop.Security.Ssl {
     }    
         
     /// <summary>the tagged component data of the TAG_SSL_SEC_TRANS component</summary>
+    [ExplicitSerializationOrdered()]
     [IdlStruct]
     public struct SSLComponentData {
 
@@ -76,12 +77,15 @@ namespace Ch.Elca.Iiop.Security.Ssl {
         #region IFields
         
         /// <summary>the association options for the target</summary>
+        [ExplicitSerializationOrderNr(0)]
         private short    m_target_supports;
         /// <summary>the accociation options required for the target</summary>
+        [ExplicitSerializationOrderNr(1)]
         private short    m_target_requires;
         
         /// <summary>the listening port</summary>
         /// <remarks>was mapped form an UShort, is negative for high ports
+        [ExplicitSerializationOrderNr(2)]
         public short Port; // Port is mapped from an unsigned short -> cast back to ushort, before return
         
         #endregion IFields        

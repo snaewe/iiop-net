@@ -140,7 +140,7 @@ namespace Ch.Elca.Iiop.Idl {
             RegisterCreatedTypeCodeForType(clsType, AttributeExtCollection.EmptyCollection,
                                            result);
             
-            FieldInfo[] members = ReflectionHelper.GetAllDeclaredInstanceFields(clsType);
+            FieldInfo[] members = ReflectionHelper.GetAllDeclaredInstanceFieldsOrdered(clsType);
             StructMember[] structMembers = new StructMember[members.Length];
             for (int i = 0; i < members.Length; i++) {                
                 omg.org.CORBA.TypeCode memberType = 
@@ -273,7 +273,7 @@ namespace Ch.Elca.Iiop.Idl {
                                            result);                        
             
             // create the TypeCodes for the members
-            FieldInfo[] members = ReflectionHelper.GetAllDeclaredInstanceFields(clsType);
+            FieldInfo[] members = ReflectionHelper.GetAllDeclaredInstanceFieldsOrdered(clsType);
             ValueMember[] valueMembers = new ValueMember[members.Length];
             for (int i = 0; i < members.Length; i++) {
                 omg.org.CORBA.TypeCode memberType = CreateOrGetTypeCodeForType(members[i].FieldType, 
@@ -413,7 +413,7 @@ namespace Ch.Elca.Iiop.Idl {
             RegisterCreatedTypeCodeForType(clsType, AttributeExtCollection.EmptyCollection,
                                            result);
             
-            FieldInfo[] members = ReflectionHelper.GetAllDeclaredInstanceFields(clsType);
+            FieldInfo[] members = ReflectionHelper.GetAllDeclaredInstanceFieldsOrdered(clsType);
             StructMember[] exMembers = new StructMember[members.Length];
             for (int i = 0; i < members.Length; i++) {                
                 omg.org.CORBA.TypeCode memberType = CreateOrGetTypeCodeForType(members[i].FieldType,
