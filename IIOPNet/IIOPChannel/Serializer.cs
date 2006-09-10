@@ -539,10 +539,13 @@ namespace Ch.Elca.Iiop.Marshalling {
             private Serializer[] m_fieldSerializers;
             private SerializerFactory m_serFactory;
             private bool m_initalized;
+            private string m_repositoryIDOfType;
             
             internal ValueConcreteInstanceSerializer(Type concreteType, SerializerFactory serFactory) {
                 m_forConcreteType = concreteType;
                 m_serFactory = serFactory;
+                // determine the repository ID of this type
+                m_repositoryIDOfType = DetermineRepositoryID(concreteType);
                 // determine instance to instantiate for concreteType: 
                 // check for a value type implementation class
                 m_forConcreteInstanceType = DetermineInstanceToCreateType(m_forConcreteType);
@@ -667,6 +670,16 @@ namespace Ch.Elca.Iiop.Marshalling {
                 return typeHierarchy;
             }
             
+            private string DetermineRepositoryID(Type forType) {
+                string repId;
+                if (!IsImplClass(forType)) {
+                    repId = Repository.GetRepositoryID(forType);
+                } else { // an impl-class is not serialized, because it's not known at the receiving ORB
+                    repId = Repository.GetRepositoryID(forType.BaseType);
+                }
+                return repId;
+            }
+            
             /// <summary>writes all the fields of the instance</summary>
             private void WriteFields(object instance, 
                                      CdrOutputStream targetStream) {
@@ -689,20 +702,19 @@ namespace Ch.Elca.Iiop.Marshalling {
                 }                                
             }                                    
             
+            /// <summary>
+            /// Serialize an instance of the type, this concrete serializer is for,
+            /// i.e. actual.GetType() is the same type as the one passed to the constructor
+            /// of this serializer.
+            /// </summary>
             internal void Serialize(object actual, CdrOutputStream targetStream) {
                 CheckInitalized();
                 uint valueTag = CdrStreamHelper.MIN_VALUE_TAG; // value-tag with no option set
                 // attentition here: if formal type represents an IDL abstract interface, writing no type information is not ok.
                 // do not use no typing information option, because java orb can't handle it
                 valueTag = valueTag | 0x00000002;
-                StreamPosition indirPos = targetStream.WriteIndirectableInstanceTag(valueTag);
-                string repId = "";
-                if (!IsImplClass(actual.GetType())) {
-                    repId = Repository.GetRepositoryID(actual.GetType());
-                } else { // an impl-class is not serialized, because it's not known at the receiving ORB
-                    repId = Repository.GetRepositoryID(actual.GetType().BaseType);
-                }
-                targetStream.WriteIndirectableString(repId, IndirectionType.IndirRepId,
+                StreamPosition indirPos = targetStream.WriteIndirectableInstanceTag(valueTag);                                
+                targetStream.WriteIndirectableString(m_repositoryIDOfType, IndirectionType.IndirRepId,
                                                      IndirectionUsage.ValueType);
 
                 // add instance to indirection table
