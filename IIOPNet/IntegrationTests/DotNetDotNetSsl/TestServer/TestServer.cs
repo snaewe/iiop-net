@@ -54,7 +54,8 @@ namespace Ch.Elca.Iiop.IntegrationTests {
                 "Ch.Elca.Iiop.Security.Ssl.DefaultServerAuthenticationImpl,SSLPlugin";
 
             props[DefaultServerAuthenticationImpl.SERVER_CERTIFICATE] = 
-                "B0C3F311242883777B050F49F8597745B25A1896";
+                "BCDCAD33286EC145056C7ED780BAE31BFB5B988D";                 
+
             props[DefaultServerAuthenticationImpl.STORE_LOCATION] = "CurrentUser";
 
             IiopChannel chan = new IiopChannel(props);
