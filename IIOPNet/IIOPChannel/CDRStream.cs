@@ -43,7 +43,7 @@ namespace Ch.Elca.Iiop.Cdr {
     /// <summary>
     /// alignements possible in CDRStreams
     /// </summary>
-    public enum Aligns {
+    public enum Aligns : byte {
         Align2 = 2,
         Align4 = 4,
         Align8 = 8
