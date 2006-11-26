@@ -150,6 +150,16 @@ namespace Ch.Elca.Iiop.Benchmarks {
             return arg;
         }
 
+        [return: IdlSequence(0L)]
+        public EnumA[] EnumIdlSeqEcho([IdlSequence(0L)] EnumA[] arg) {
+            return arg;
+        }
+        
+        [return: IdlArray(0L, 500)]
+        [return: IdlArrayDimension(0L, 1, 3)]
+        public System.Int32[,] IdlLongArray5times3Echo([IdlArray(0L, 500)][IdlArrayDimension(0L, 1, 3)] System.Int32[,] arg) {
+            return arg;
+        }
         
         public override object InitializeLifetimeService() {
             // live forever

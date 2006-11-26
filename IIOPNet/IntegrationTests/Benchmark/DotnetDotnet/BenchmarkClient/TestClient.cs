@@ -253,6 +253,15 @@ namespace Ch.Elca.Iiop.Benchmarks {
             m_testService.EchoStruct(arg);
         }
 
+        void CallEnumSeqEcho() {
+            EnumA[] arg = new EnumA[1000];
+            m_testService.EnumIdlSeqEcho(arg);
+        }
+
+        void CallIdlArrayEcho() {
+            int[,] arg = new int[500,3];
+            m_testService.IdlLongArray5times3Echo(arg);
+        }
 
         delegate void TestProcedure();
 
@@ -326,6 +335,8 @@ namespace Ch.Elca.Iiop.Benchmarks {
             tc.ExecuteTest(false, "(int_sq)int_sq", new TestProcedure(tc.CallIntSeqEcho));
             tc.ExecuteTest(false, "(EnumA)EnumA", new TestProcedure(tc.CallEnumEcho));
             tc.ExecuteTest(false, "(IdlStructA)IdlStructA", new TestProcedure(tc.CallIdlStructEcho));
+            tc.ExecuteTest(false, "(enum_sq)enum_sq", new TestProcedure(tc.CallEnumSeqEcho));
+            tc.ExecuteTest(false, "(int_ar2d)int_ar2d", new TestProcedure(tc.CallIdlArrayEcho));
 
             tc.TearDownEnvironment();
 

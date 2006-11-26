@@ -148,6 +148,15 @@ namespace Ch.Elca.Iiop.Benchmarks {
 
         IdlStructA EchoStruct(IdlStructA arg);
         EnumA EchoEnum(EnumA arg);
+
+        [return: IdlSequence(0L)]
+        EnumA[] EnumIdlSeqEcho([IdlSequence(0L)] EnumA[] arg);
+        
+        [return: IdlArray(0L, 500)]
+        [return: IdlArrayDimension(0L, 1, 3)]
+        System.Int32[,] IdlLongArray5times3Echo([IdlArray(0L, 500)][IdlArrayDimension(0L, 1, 3)] System.Int32[,] arg);
+
+
     }
 
 }
