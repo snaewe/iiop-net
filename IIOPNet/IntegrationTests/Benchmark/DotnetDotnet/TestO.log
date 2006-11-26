@@ -145,3 +145,160 @@ VoidUrlFNs               534.7933   ms for 1000 calls, per call : 0.5347933  ms
 (EnumA)EnumA             402.8031   ms for 1000 calls, per call : 0.4028031  ms
 (IdlStructA)IdlStructA   438.6764   ms for 1000 calls, per call : 0.4386764  ms
 Total time = 70.2628153 s
+
+// version from 10.09.2006; .NET 1.1
+
+Count overridden, set to 1000
+Reference                0.1069     ms for 1000 calls, per call : 0.0001069  ms
+Void                     409.9909   ms for 1000 calls, per call : 0.4099909  ms
+VoidUrlIor               449.8015   ms for 1000 calls, per call : 0.4498015  ms
+VoidUrlFNs               516.0921   ms for 1000 calls, per call : 0.5160921  ms
+(I)V                     456.756    ms for 1000 calls, per call : 0.456756   ms
+(II)V                    534.8464   ms for 1000 calls, per call : 0.5348464  ms
+(IIIII)V                 421.4795   ms for 1000 calls, per call : 0.4214795  ms
+(I)I                     415.0077   ms for 1000 calls, per call : 0.4150077  ms
+(IIIII)I                 430.8525   ms for 1000 calls, per call : 0.4308525  ms
+(St)St                   520.2647   ms for 1000 calls, per call : 0.5202647  ms
+(St)StStSt               514.6651   ms for 1000 calls, per call : 0.5146651  ms
+()D                      417.4499   ms for 1000 calls, per call : 0.4174499  ms
+(D)DDD                   424.1935   ms for 1000 calls, per call : 0.4241935  ms
+(RT) Local               542.3032   ms for 1000 calls, per call : 0.5423032  ms
+(RT) Remote              695.9121   ms for 1000 calls, per call : 0.6959121  ms
+(RT)RT Remote            742.7293   ms for 1000 calls, per call : 0.7427293  ms
+(RT)RT(loc) Remote       681.369    ms for 1000 calls, per call : 0.681369   ms
+(Val1)V                  437.7796   ms for 1000 calls, per call : 0.4377796  ms
+(Val1)Val1               465.981    ms for 1000 calls, per call : 0.465981   ms
+()Val1                   434.9192   ms for 1000 calls, per call : 0.4349192  ms
+(Val2)V                  1853.3883  ms for 1000 calls, per call : 1.8533883  ms
+(Val2Rep)V               971.377    ms for 1000 calls, per call : 0.971377   ms
+(Val2)Val2               3611.6207  ms for 1000 calls, per call : 3.6116207  ms
+(Val2Rep)Val2            1244.5604  ms for 1000 calls, per call : 1.2445604  ms
+()Val2                   1948.7334  ms for 1000 calls, per call : 1.9487334  ms
+()Val2Rep                838.5733   ms for 1000 calls, per call : 0.8385733  ms
+()double[]               6691.499   ms for 1000 calls, per call : 6.691499   ms
+(double[])double[]       12813.2695 ms for 1000 calls, per call : 12.8132695 ms
+(double[])V              7443.865   ms for 1000 calls, per call : 7.443865   ms
+(double_sq)double_sq     12884.3674 ms for 1000 calls, per call : 12.8843674 ms
+(int_sq)int_sq           9531.0607  ms for 1000 calls, per call : 9.5310607  ms
+(EnumA)EnumA             560.7908   ms for 1000 calls, per call : 0.5607908  ms
+(IdlStructA)IdlStructA   572.176    ms for 1000 calls, per call : 0.572176   ms
+Total time = 70.4777816 s
+
+Count overridden, set to 1000
+Reference                0.1075     ms for 1000 calls, per call : 0.0001075  ms
+Void                     473.8375   ms for 1000 calls, per call : 0.4738375  ms
+VoidUrlIor               552.2263   ms for 1000 calls, per call : 0.5522263  ms
+VoidUrlFNs               481.2156   ms for 1000 calls, per call : 0.4812156  ms
+(I)V                     406.9983   ms for 1000 calls, per call : 0.4069983  ms
+(II)V                    425.8284   ms for 1000 calls, per call : 0.4258284  ms
+(IIIII)V                 574.0433   ms for 1000 calls, per call : 0.5740433  ms
+(I)I                     441.6611   ms for 1000 calls, per call : 0.4416611  ms
+(IIIII)I                 414.6418   ms for 1000 calls, per call : 0.4146418  ms
+(St)St                   416.6479   ms for 1000 calls, per call : 0.4166479  ms
+(St)StStSt               485.1954   ms for 1000 calls, per call : 0.4851954  ms
+()D                      536.3812   ms for 1000 calls, per call : 0.5363812  ms
+(D)DDD                   416.5926   ms for 1000 calls, per call : 0.4165926  ms
+(RT) Local               498.1951   ms for 1000 calls, per call : 0.4981951  ms
+(RT) Remote              603.8214   ms for 1000 calls, per call : 0.6038214  ms
+(RT)RT Remote            902.2548   ms for 1000 calls, per call : 0.9022548  ms
+(RT)RT(loc) Remote       682.9437   ms for 1000 calls, per call : 0.6829437  ms
+(Val1)V                  494.334    ms for 1000 calls, per call : 0.494334   ms
+(Val1)Val1               588.0448   ms for 1000 calls, per call : 0.5880448  ms
+()Val1                   431.8613   ms for 1000 calls, per call : 0.4318613  ms
+(Val2)V                  1800.0075  ms for 1000 calls, per call : 1.8000075  ms
+(Val2Rep)V               788.3323   ms for 1000 calls, per call : 0.7883323  ms
+(Val2)Val2               3375.6374  ms for 1000 calls, per call : 3.3756374  ms
+(Val2Rep)Val2            1426.3318  ms for 1000 calls, per call : 1.4263318  ms
+()Val2                   2046.8282  ms for 1000 calls, per call : 2.0468282  ms
+()Val2Rep                815.2625   ms for 1000 calls, per call : 0.8152625  ms
+()double[]               6440.4515  ms for 1000 calls, per call : 6.4404515  ms
+(double[])double[]       12829.3417 ms for 1000 calls, per call : 12.8293417 ms
+(double[])V              7464.4799  ms for 1000 calls, per call : 7.4644799  ms
+(double_sq)double_sq     12877.2131 ms for 1000 calls, per call : 12.8772131 ms
+(int_sq)int_sq           9729.6698  ms for 1000 calls, per call : 9.7296698  ms
+(EnumA)EnumA             507.4656   ms for 1000 calls, per call : 0.5074656  ms
+(IdlStructA)IdlStructA   453.6205   ms for 1000 calls, per call : 0.4536205  ms
+Total time = 70.3814738 s
+
+
+
+// .NET 2.0, 26.11.2006, before adding 2 new tests
+
+Count overridden, set to 1000
+Reference                0.1709     ms for 1000 calls, per call : 0.0001709  ms
+Void                     310.0444   ms for 1000 calls, per call : 0.3100444  ms
+VoidUrlIor               345.9911   ms for 1000 calls, per call : 0.3459911  ms
+VoidUrlFNs               387.4749   ms for 1000 calls, per call : 0.3874749  ms
+(I)V                     315.019    ms for 1000 calls, per call : 0.315019   ms
+(II)V                    319.0405   ms for 1000 calls, per call : 0.3190405  ms
+(IIIII)V                 407.2766   ms for 1000 calls, per call : 0.4072766  ms
+(I)I                     410.786    ms for 1000 calls, per call : 0.410786   ms
+(IIIII)I                 324.2995   ms for 1000 calls, per call : 0.3242995  ms
+(St)St                   330.9747   ms for 1000 calls, per call : 0.3309747  ms
+(St)StStSt               351.241    ms for 1000 calls, per call : 0.351241   ms
+()D                      341.1034   ms for 1000 calls, per call : 0.3411034  ms
+(D)DDD                   452.4044   ms for 1000 calls, per call : 0.4524044  ms
+(RT) Local               450.3139   ms for 1000 calls, per call : 0.4503139  ms
+(RT) Remote              456.8756   ms for 1000 calls, per call : 0.4568756  ms
+(RT)RT Remote            606.2105   ms for 1000 calls, per call : 0.6062105  ms
+(RT)RT(loc) Remote       633.4679   ms for 1000 calls, per call : 0.6334679  ms
+(Val1)V                  433.7023   ms for 1000 calls, per call : 0.4337023  ms
+(Val1)Val1               364.3633   ms for 1000 calls, per call : 0.3643633  ms
+()Val1                   334.253    ms for 1000 calls, per call : 0.334253   ms
+(Val2)V                  1855.5972  ms for 1000 calls, per call : 1.8555972  ms
+(Val2Rep)V               914.0586   ms for 1000 calls, per call : 0.9140586  ms
+(Val2)Val2               3362.1647  ms for 1000 calls, per call : 3.3621647  ms
+(Val2Rep)Val2            1303.3824  ms for 1000 calls, per call : 1.3033824  ms
+()Val2                   1763.6596  ms for 1000 calls, per call : 1.7636596  ms
+()Val2Rep                785.2324   ms for 1000 calls, per call : 0.7852324  ms
+()double[]               6453.4302  ms for 1000 calls, per call : 6.4534302  ms
+(double[])double[]       12080.2115 ms for 1000 calls, per call : 12.0802115 ms
+(double[])V              6388.1272  ms for 1000 calls, per call : 6.3881272  ms
+(double_sq)double_sq     12086.4584 ms for 1000 calls, per call : 12.0864584 ms
+(int_sq)int_sq           10205.2819 ms for 1000 calls, per call : 10.2052819 ms
+(EnumA)EnumA             458.2652   ms for 1000 calls, per call : 0.4582652  ms
+(IdlStructA)IdlStructA   473.3629   ms for 1000 calls, per call : 0.4733629  ms
+Total time = 65.7042451 s
+
+--------------------------------------------------------------------------------------
+
+// .NET 2.0, 26.11.2006, adding 2 new tests for 2-dim idl array and for idl enum seq
+
+Count overridden, set to 1000
+Reference                0.1704     ms for 1000 calls, per call : 0.0001704  ms
+Void                     314.167    ms for 1000 calls, per call : 0.314167   ms
+VoidUrlIor               456.7379   ms for 1000 calls, per call : 0.4567379  ms
+VoidUrlFNs               451.2743   ms for 1000 calls, per call : 0.4512743  ms
+(I)V                     312.543    ms for 1000 calls, per call : 0.312543   ms
+(II)V                    314.864    ms for 1000 calls, per call : 0.314864   ms
+(IIIII)V                 318.2256   ms for 1000 calls, per call : 0.3182256  ms
+(I)I                     320.5418   ms for 1000 calls, per call : 0.3205418  ms
+(IIIII)I                 442.8638   ms for 1000 calls, per call : 0.4428638  ms
+(St)St                   408.8234   ms for 1000 calls, per call : 0.4088234  ms
+(St)StStSt               340.7614   ms for 1000 calls, per call : 0.3407614  ms
+()D                      315.7624   ms for 1000 calls, per call : 0.3157624  ms
+(D)DDD                   330.3422   ms for 1000 calls, per call : 0.3303422  ms
+(RT) Local               449.0305   ms for 1000 calls, per call : 0.4490305  ms
+(RT) Remote              601.6298   ms for 1000 calls, per call : 0.6016298  ms
+(RT)RT Remote            642.2813   ms for 1000 calls, per call : 0.6422813  ms
+(RT)RT(loc) Remote       552.6051   ms for 1000 calls, per call : 0.5526051  ms
+(Val1)V                  452.3183   ms for 1000 calls, per call : 0.4523183  ms
+(Val1)Val1               458.3761   ms for 1000 calls, per call : 0.4583761  ms
+()Val1                   341.6182   ms for 1000 calls, per call : 0.3416182  ms
+(Val2)V                  1911.8019  ms for 1000 calls, per call : 1.9118019  ms
+(Val2Rep)V               965.2629   ms for 1000 calls, per call : 0.9652629  ms
+(Val2)Val2               3130.8216  ms for 1000 calls, per call : 3.1308216  ms
+(Val2Rep)Val2            1272.4888  ms for 1000 calls, per call : 1.2724888  ms
+()Val2                   1910.4009  ms for 1000 calls, per call : 1.9104009  ms
+()Val2Rep                931.4932   ms for 1000 calls, per call : 0.9314932  ms
+()double[]               6370.9865  ms for 1000 calls, per call : 6.3709865  ms
+(double[])double[]       11863.8994 ms for 1000 calls, per call : 11.8638994 ms
+(double[])V              6311.4546  ms for 1000 calls, per call : 6.3114546  ms
+(double_sq)double_sq     11885.9829 ms for 1000 calls, per call : 11.8859829 ms
+(int_sq)int_sq           9994.0601  ms for 1000 calls, per call : 9.9940601  ms
+(EnumA)EnumA             448.8176   ms for 1000 calls, per call : 0.4488176  ms
+(IdlStructA)IdlStructA   481.9615   ms for 1000 calls, per call : 0.4819615  ms
+(enum_sq)enum_sq         6052.8826  ms for 1000 calls, per call : 6.0528826  ms
+(int_ar2d)int_ar2d       3645.4663  ms for 1000 calls, per call : 3.6454663  ms
+Total time = 75.0027173 s
+
