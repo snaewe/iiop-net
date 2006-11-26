@@ -43,7 +43,9 @@ namespace Ch.Elca.Iiop.Util {
         
         #region SFields
         
-        private static AttributeExtCollection s_emptyCollection = new AttributeExtCollection();
+        private static AttributeExtCollection s_emptyCollection = new AttributeExtCollection();        
+        
+        public static readonly Type ClassType = typeof(AttributeExtCollection);
         
         #endregion
         #region IFields

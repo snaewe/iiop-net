@@ -1390,7 +1390,11 @@ namespace Ch.Elca.Iiop.Marshalling {
     }
 
     /// <summary>serializes idl sequences</summary>
+#if NET_2
+    internal class IdlSequenceSerializer<T> : Serializer {
+#else
     internal class IdlSequenceSerializer : Serializer {
+#endif
         
         #region IFields
         
@@ -1405,16 +1409,26 @@ namespace Ch.Elca.Iiop.Marshalling {
         /// <summary>
         /// default constructor.
         /// </summary>
+#if !NET_2
         /// <param name="forType">The sequence type</param>
+#endif
         /// <param name="elemAttrs">The sequence element type attributes</param>
         /// <param name="bound">the number of elements allowed maximally</param>
         /// <param name="allowNull">Allow to serialize null or not. If allowed, serialize it
         /// as empty sequence.</param>
         /// <param name="serFactory">The serializer factory created this serializer</param>
-        public IdlSequenceSerializer(Type forType, AttributeExtCollection elemAttrs,
+        public IdlSequenceSerializer(
+#if !NET_2                                     
+                                     Type forType,
+#endif                                     
+                                     AttributeExtCollection elemAttrs,
                                      int bound, bool allowNull, SerializerFactory serFactory) {
             m_allowNull = allowNull;
+#if NET_2
+            m_forTypeElemType = typeof(T);
+#else
             m_forTypeElemType = forType.GetElementType();
+#endif
             m_bound = bound;    
             // element is not the same than the sequence -> therefore problems with recursion
             DetermineElementSerializer(m_forTypeElemType, elemAttrs, serFactory);
@@ -1445,7 +1459,11 @@ namespace Ch.Elca.Iiop.Marshalling {
                 targetStream.WriteULong(0);
                 return;
             }
+#if NET_2
+            T[] array = (T[]) actual;
+#else
             Array array = (Array) actual;
+#endif            
             // not allowed for a sequence:
             CheckActualNotNull(array);
             CheckBound((uint)array.Length);
@@ -1453,7 +1471,13 @@ namespace Ch.Elca.Iiop.Marshalling {
             // serialize sequence elements            
             for (int i = 0; i < array.Length; i++) {
                 // it's more efficient to not determine serialise for each element; instead use cached ser
-                m_elementSerializer.Serialize(array.GetValue(i), targetStream);
+                m_elementSerializer.Serialize(
+#if NET_2
+                                              array[i],
+#else                                              
+                                              array.GetValue(i),
+#endif
+                                              targetStream);
             }
         }
 
@@ -1461,13 +1485,21 @@ namespace Ch.Elca.Iiop.Marshalling {
             // mapped from an IDL-sequence
             uint nrOfElements = sourceStream.ReadULong();
             CheckBound(nrOfElements);
-            
+
+#if NET_2
+            T[] result = new T[nrOfElements];
+#else
             Array result = Array.CreateInstance(m_forTypeElemType, (int)nrOfElements);
+#endif
             // serialize sequence elements                        
             for (int i = 0; i < nrOfElements; i++) {
                 // it's more efficient to not determine serialise for each element; instead use cached ser
                 object entry = m_elementSerializer.Deserialize(sourceStream);
+#if NET_2
+                result[i] = (T) entry;
+#else
                 result.SetValue(entry, i);
+#endif                
             }
             return result;
         }
@@ -3174,8 +3206,13 @@ namespace Ch.Elca.Iiop.Tests {
                 m_serFactory.Create(m_seqType, m_seqAttributes);
             
             Assertion.AssertNotNull("ser", ser);
+#if NET_2
+            Assertion.AssertEquals("ser type", typeof(IdlSequenceSerializer<>).MakeGenericType(m_seqType.GetElementType()),
+                                   ser.GetType());
+#else
             Assertion.AssertEquals("ser type", typeof(IdlSequenceSerializer),
                                    ser.GetType());
+#endif
             
             GenericSerTest(ser, actual, expected);            
 	    }

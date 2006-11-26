@@ -29,6 +29,7 @@
 
 using System;
 using System.Collections;
+using System.Reflection;
 using System.Diagnostics;
 using Ch.Elca.Iiop.Util;
 using Ch.Elca.Iiop.Idl;
@@ -47,6 +48,8 @@ namespace Ch.Elca.Iiop.Marshalling {
         
         /// <summary>is responsible for the mapping CLS to IDL</summary>
         private static ClsToIdlMapper s_mapper = ClsToIdlMapper.GetSingleton();        
+        
+        private static readonly Type ClassType = typeof(SerializerFactory);
         
         #endregion SFields
         #region IFields
@@ -264,9 +267,17 @@ namespace Ch.Elca.Iiop.Marshalling {
         }
         
         public object MapToIdlSequence(System.Type clsType, int bound, AttributeExtCollection allAttributes, AttributeExtCollection elemTypeAttributes) {
-            return new IdlSequenceSerializer(clsType, elemTypeAttributes, bound, 
+#if NET_2
+			Type serializerType = typeof(IdlSequenceSerializer<>).MakeGenericType(clsType.GetElementType());
+			ConstructorInfo ci = serializerType.GetConstructor(new Type[] { 
+														AttributeExtCollection.ClassType, ReflectionHelper.Int32Type, ReflectionHelper.BooleanType, 
+														SerializerFactory.ClassType });
+            return ci.Invoke(new object[] { elemTypeAttributes, bound, m_config.SequenceSerializationAllowNull, this });
+#else
+            return new IdlSequenceSerializer(clsType, elemTypeAttributes, bound,
                                              m_config.SequenceSerializationAllowNull,
                                              this);
+#endif
         }
         public object MapToIdlArray(System.Type clsType, int[] dimensions, AttributeExtCollection allAttributes, AttributeExtCollection elemTypeAttributes) {            
             return new IdlArraySerializer(clsType, elemTypeAttributes, dimensions,
