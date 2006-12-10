@@ -125,7 +125,7 @@ namespace Ch.Elca.Iiop.Util {
         #endregion
         #region IMethods
     
-        public bool Contains(Attribute attr) {
+        private bool Contains(object attr) {
             for (int i = 0; i < m_attributes.Length; i++) {
                 if (m_attributes[i].Equals(attr)) {
                     return true;
@@ -317,20 +317,22 @@ namespace Ch.Elca.Iiop.Util {
         }
 
         public override bool Equals(object obj) {
-            if (obj == null) { return false; }
-            if (!(obj.GetType().Equals(typeof(AttributeExtCollection)))) { return false; }
-
-            IEnumerator enumerator = GetEnumerator();
-            while (enumerator.MoveNext()) {
-                Attribute attr = (Attribute) enumerator.Current;
-                if (!((AttributeExtCollection)obj).Contains(attr)) { return false; }
+            AttributeExtCollection other = obj as AttributeExtCollection;
+            if (other == null) {
+                return false;
             }
-
-            enumerator = ((AttributeExtCollection)obj).GetEnumerator();
-            while (enumerator.MoveNext()) {
-                Attribute attr = (Attribute) enumerator.Current;
-                if (!(Contains(attr))) { return false; }
+            
+            for (int i = 0; i < this.m_attributes.Length; i++) {
+                if (!other.Contains(this.m_attributes[i])) {
+                    return false; 
+                }
+            }            
+            for (int i = 0; i < other.m_attributes.Length; i++) {
+                if (!this.Contains(other.m_attributes[i])) {
+                    return false;
+                }
             }
+            
             return true;
         }
 
@@ -589,6 +591,31 @@ namespace Ch.Elca.Iiop.Tests {
             Assertion.AssertEquals("wrong merged", a4, merged1.GetAttributeAt(4));
             Assertion.AssertEquals("result length", 5, merged1.Count);
         }
+        
+        [Test]
+        public void TestCollectionEqualsIsEqual() {
+            TestAttributeForCollT1 a1 = new TestAttributeForCollT1(1);
+            TestAttributeForCollT2 a2 = new TestAttributeForCollT2(2);
+            TestAttributeForCollT3 a3 = new TestAttributeForCollT3(3);
+            
+            AttributeExtCollection c1 = new AttributeExtCollection(new Attribute[] { a1, a2, a3 });
+            AttributeExtCollection c2 = new AttributeExtCollection(new Attribute[] { a3, a2, a1 });
+            
+            Assertion.Assert("collection equality", c1.Equals(c2));
+        }
+        
+        [Test]
+        public void TestCollectionEqualsNotEqual() {
+            TestAttributeForCollT1 a1 = new TestAttributeForCollT1(1);
+            TestAttributeForCollT2 a2 = new TestAttributeForCollT2(2);
+            TestAttributeForCollT3 a3 = new TestAttributeForCollT3(3);
+            
+            AttributeExtCollection c1 = new AttributeExtCollection(new Attribute[] { a1, a2, a3 });
+            AttributeExtCollection c2 = new AttributeExtCollection(new Attribute[] { a3, a2 });
+            
+            Assertion.Assert("collection equality", !c1.Equals(c2));
+        }
+
         
     }
 
