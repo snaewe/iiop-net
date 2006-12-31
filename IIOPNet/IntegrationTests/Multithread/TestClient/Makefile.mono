@@ -1,5 +1,5 @@
 include ../../../MakeVars.mono
-NUNIT=${NUNITV2_HOME}/bin/nunit.framework.dll
+NUNIT=${NUNITV2_HOME}/$(NUNIT_BIN_SUBDIR)nunit.framework.dll
 IIOPCHANNEL = ../../../IIOPChannel/bin/IIOPChannel.dll
 bin = bin/
 
@@ -26,7 +26,7 @@ $(bin)ClientTest.dll: $(bin)IIOPChannel.dll $(bin)Client.dll *.cs
 
 start-client:
 	@echo "Multi-Threaded IntegrationTest"
-	mono ${NUNITV2_HOME}/bin/nunit-console.exe bin/ClientTest.dll
+	mono ${NUNITV2_HOME}/$(NUNIT_BIN_SUBDIR)nunit-console.exe bin/ClientTest.dll
 
 clean:
 	rm -rf IDL

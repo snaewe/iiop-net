@@ -1,5 +1,5 @@
 include ../../../MakeVars.mono
-NUNIT=${NUNITV2_HOME}/bin/nunit.framework.dll
+NUNIT=${NUNITV2_HOME}/$(NUNIT_BIN_SUBDIR)nunit.framework.dll
 IIOPCHANNEL = ../../../IIOPChannel/bin/IIOPChannel.dll
 TestService = ../TestServer/bin/TestServiceCommon.dll
 TestUnion = ../TestServer/bin/TestUnion.dll
@@ -24,7 +24,7 @@ $(bin)ClientTest.dll: $(bin)IIOPChannel.dll $(bin)TestUnion.dll $(bin)TestServic
 
 start-client:
 	@echo "Direct IntegrationTest"
-	mono ${NUNITV2_HOME}/bin/nunit-console.exe bin/ClientTest.dll
+	mono ${NUNITV2_HOME}/$(NUNIT_BIN_SUBDIR)nunit-console.exe bin/ClientTest.dll
 
 clean:
 	rm -rf bin

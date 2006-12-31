@@ -13,10 +13,10 @@ $(Dest)IIOPChannel.dll: *.cs $(Key)
 
 build-unit-tests: build nunit-var
 	[ -d $(UnitTestDest) ] || mkdir $(UnitTestDest)
-	$(CSC) /nowarn:0618 $(CSFLAGS) /d:UnitTest /r:System.Runtime.Remoting.dll /r:${NUNITV2_HOME}/bin/nunit.framework.dll /t:library /out:$(UnitTestDest)IIOPChannel.dll *.cs Mono/*.cs
+	$(CSC) /nowarn:0618 $(CSFLAGS) /d:UnitTest /r:System.Runtime.Remoting.dll /r:${NUNITV2_HOME}/$(NUNIT_BIN_SUBDIR)nunit.framework.dll /t:library /out:$(UnitTestDest)IIOPChannel.dll *.cs Mono/*.cs
 
 test: build-unit-tests
-	mono ${NUNITV2_HOME}/bin/nunit-console.exe $(UnitTestDest)IIOPChannel.dll
+	mono ${NUNITV2_HOME}/$(NUNIT_BIN_SUBDIR)nunit-console.exe $(UnitTestDest)IIOPChannel.dll
 
 nunit-var:
 	@[ ! -z ${NUNITV2_HOME} ] || echo "Define NUNITV2_HOME as the root directory of your Nunit installation"
