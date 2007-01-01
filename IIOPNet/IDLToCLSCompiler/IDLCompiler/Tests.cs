@@ -638,26 +638,28 @@ namespace Ch.Elca.Iiop.IdlCompiler.Tests {
             }            
         }
 
-
-        [Ignore("mono issue")]
+        /// <summary>
+        /// Test idenifier names with special characters inside (e.g. \u00DF : sharp s).
+        /// </summary>
         [Test]
         public void TestIdentifiers() {
             MemoryStream testSource = new MemoryStream();
             StreamWriter writer = CreateSourceWriter(testSource);
             
             // idl:
-            writer.WriteLine("module WithSpecialß {");
-            writer.WriteLine("    enum Testß {");
-            writer.WriteLine("        ß, B, ÿ");
+            writer.WriteLine("module WithSpecial\u00DF {");
+            writer.WriteLine("    enum Test\u00DF {");
+            writer.WriteLine("        \u00DF, B, \u00FF");
             writer.WriteLine("    };");
             writer.WriteLine("};");
             
             writer.Flush();
+
             testSource.Seek(0, SeekOrigin.Begin);
             Assembly result = CreateIdl(testSource, GetAssemblyName());
                        
             // check if enum is correctly created
-            Type enumType = result.GetType("WithSpecialß.Testß", true);
+            Type enumType = result.GetType("WithSpecial\u00DF.Test\u00DF", true);
             CheckIdlEnumAttributePresent(enumType);
             
             // check enum val
@@ -667,9 +669,9 @@ namespace Ch.Elca.Iiop.IdlCompiler.Tests {
             Assertion.AssertEquals("wrong number of fields in enum", 
                                    3, fields.Length);
             
-            CheckEnumField(fields[0], "ß");
+            CheckEnumField(fields[0], "\u00DF");
             CheckEnumField(fields[1], "B");
-            CheckEnumField(fields[2], "ÿ");
+            CheckEnumField(fields[2], "\u00FF");
             
             writer.Close();            
         }
