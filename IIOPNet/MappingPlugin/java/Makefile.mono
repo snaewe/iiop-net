@@ -9,7 +9,7 @@ IDL=IDL/
 build: build-idl build-lib
 
 $(BIN)IIOPChannel.dll: $(IIOPCHANNEL)
-	[ -d $(bin) ] || mkdir $(bin)
+	[ -d $(BIN) ] || mkdir $(BIN)
 	cp $(IIOPCHANNEL) $(BIN)IIOPChannel.dll
 
 build-idl: 
@@ -35,4 +35,4 @@ build-lib: $(BIN)$(TARGETASMCOLL).dll $(BIN)IIOPChannel.dll CollectionsImpl.cs B
 
 clean:
 	rm -rf $(IDL)
-	rm -rf $(bin)	
+	rm -rf $(BIN)	
