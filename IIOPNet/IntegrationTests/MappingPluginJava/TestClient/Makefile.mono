@@ -57,7 +57,7 @@ start-client:
 	mono ${NUNITV2_HOME}/$(NUNIT_BIN_SUBDIR)nunit-console.exe bin/ClientTest.dll
 
 clean-plugin:
-	$(MAKE) -C $(MAPPINGPLUGINDIR) clean
+	$(MAKE) -C $(MAPPINGPLUGINDIR) -f Makefile.mono clean
 
 clean: clean-plugin
 	rm -rf $(IDL)
