@@ -1,17 +1,18 @@
 include ../../../MakeVars.mono
 
-IIOPCHANNEL = ../../../IIOPChannel/bin/IIOPChannel.dll 
-MAPPINGPLUGINDIR=../../../MappingPlugin/java/ 
+IIOPCHANNEL = ../../../IIOPChannel/bin/IIOPChannel.dll
+NUNIT_FRAMEWORK_DLL = ${NUNITV2_HOME}/$(NUNIT_BIN_SUBDIR)nunit.framework.dll
+MAPPINGPLUGINDIR=../../../MappingPlugin/java/
 CUSTOMJAVATYPEMAPPING=IIOPNetCustomJavaTypeMapping
 CUSTOMMAPPEDTEST=CustomMapped.dll
-bin         = bin/ 
-IDL         = IDL/ 
+bin         = bin/
+IDL         = IDL/
 
 build: build-plugin $(bin)CustomMapped.dll copy-idl compile-idl build-client
 
 $(bin)IIOPChannel.dll: $(IIOPCHANNEL)
 	[ -d $(bin) ] || mkdir $(bin)
-        cp $(IIOPCHANNEL) $(bin)IIOPChannel.dll
+	cp $(IIOPCHANNEL) $(bin)IIOPChannel.dll
 
 $(bin)javaCollections.dll: $(MAPPINGPLUGINDIR)/bin/javaCollections.dll
 	[ -d $(bin) ] || mkdir $(bin)
@@ -19,7 +20,7 @@ $(bin)javaCollections.dll: $(MAPPINGPLUGINDIR)/bin/javaCollections.dll
 
 $(bin)$(CUSTOMJAVATYPEMAPPING).dll: $(MAPPINGPLUGINDIR)/bin/$(CUSTOMJAVATYPEMAPPING).dll
 	[ -d $(bin) ] || mkdir $(bin)
-	cp $(MAPPINGPLUGINDIR)bin\$(CUSTOMJAVATYPEMAPPING).* $(bin)
+	cp $(MAPPINGPLUGINDIR)bin/$(CUSTOMJAVATYPEMAPPING).* $(bin)
 
 $(bin)customMapping.xml: $(MAPPINGPLUGINDIR)customMapping.xml
 	[ -d $(bin) ] || mkdir $(bin)
@@ -28,7 +29,7 @@ $(bin)customMapping.xml: $(MAPPINGPLUGINDIR)customMapping.xml
 # mapping file for mapping CustomMappedSerilizable (java) <-> CustomMappedSerializableCls (CLS)
 $(bin)customMappingTest.xml : customMappingTest.xml
 	[ -d $(bin) ] || mkdir $(bin)
-        cp customMappingTest.xml $(bin)
+	cp customMappingTest.xml $(bin)
 
 # the assembly containing the cls definition for the custom mapped non-java library test type 
 $(bin)$(CUSTOMMAPPEDTEST) : CustomMapped.cs
@@ -37,12 +38,12 @@ $(bin)$(CUSTOMMAPPEDTEST) : CustomMapped.cs
 	
 
 build-client: $(bin)IIOPChannel.dll $(bin)$(CUSTOMJAVATYPEMAPPING).dll $(bin)customMapping.xml $(bin)customMappingTest.xml $(bin)javaCollections.dll TestClient.cs ValueTypeImpls.cs
-	$(CSC) $(CSFLAGS) /t:library /r:$(NUNIT_FRAMEWORK_DLL) /r:bin\IIOPChannel.dll /r:$(bin)$(CUSTOMJAVATYPEMAPPING).dll /r:$(bin)javaCollections.dll /r:$(bin)$(CUSTOMMAPPEDTEST) /r:$(bin)\Client.dll /out:$(bin)\ClientTest.dll TestClient.cs ValueTypeImpls.cs
+	$(CSC) $(CSFLAGS) /t:library /r:$(NUNIT_FRAMEWORK_DLL) /r:bin/IIOPChannel.dll /r:$(bin)$(CUSTOMJAVATYPEMAPPING).dll /r:$(bin)javaCollections.dll /r:$(bin)$(CUSTOMMAPPEDTEST) /r:$(bin)client.dll /out:$(bin)ClientTest.dll TestClient.cs ValueTypeImpls.cs
 
 
 copy-idl:
 	[ -d $(IDL) ] || mkdir $(IDL)
-	cd $(IDL); cp ../../../../IDLToCLSCompiler/IDL/*.idl .; cp -r ../../TestServer/IDL/ .; cd ..
+	cp ../../../IDLToCLSCompiler/IDL/*.idl $(IDL); cp -r ../TestServer/IDL/ .
 
 compile-idl: $(bin)javaCollections.dll $(bin)customMapping.xml $(bin)customMappingTest.xml $(bin)CustomMapped.dll
 	cd $(IDL); mono ../../../../IDLToCLSCompiler/IDLCompiler/bin/IDLToCLSCompiler.exe -c ../$(bin)customMapping.xml -c ../$(bin)customMappingTest.xml -o ../$(bin) -r ../$(bin)javaCollections.dll client Ch/Elca/Iiop/IntegrationTests/MappingPlugin/TestService.idl Ch/Elca/Iiop/IntegrationTests/MappingPlugin/TestSerializableClassB1.idl; cd ..
