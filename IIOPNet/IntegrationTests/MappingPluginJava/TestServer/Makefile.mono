@@ -31,7 +31,7 @@ start-server:
 	@cd $(bin); mono ../$(LAUNCH) java -Djava.naming.factory.initial=com.sun.jndi.cosnaming.CNCtxFactory -Djava.naming.provider.url=iiop://localhost:1050 -cp . TestServer >> ../pid; cd ..
 
 stop-server:
-	@-for p in `cat pid`; do mono $(KILL) $$p; done
+	@-for p in `cat pid`; do kill $$p; done
 	@rm -f pid
 
 clean:
