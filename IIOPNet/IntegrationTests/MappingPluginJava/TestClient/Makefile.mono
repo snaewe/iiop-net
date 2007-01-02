@@ -54,7 +54,7 @@ build-plugin:
 
 start-client:
 	@echo "Mapping plugin java server IntegrationTest"
-	${NUNITV2_HOME}/$(NUNIT_BIN_SUBDIR)nunit-console.exe bin\ClientTest.dll
+	mono ${NUNITV2_HOME}/$(NUNIT_BIN_SUBDIR)nunit-console.exe bin/ClientTest.dll
 
 clean-plugin:
 	$(MAKE) -C $(MAPPINGPLUGINDIR) clean
