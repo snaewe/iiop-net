@@ -1,0 +1,29 @@
+include ../../MakeVars.mono
+DELAY = ../../Utils/delay.exe
+
+build: build-server build-client
+
+build-server:
+	$(MAKE) -C TestServer build -f Makefile.mono
+
+build-client:
+	$(MAKE) -C TestClient build -f Makefile.mono
+
+start-server:
+	@$(MAKE) -C TestServer start-server -f Makefile.mono
+
+stop-server:
+	@$(MAKE) -C TestServer stop-server -f Makefile.mono
+
+start-client:
+	@$(MAKE) -C TestClient start-client -f Makefile.mono
+
+test:
+	@$(MAKE) start-server -f Makefile.mono
+	@mono $(DELAY) 10
+	@-$(MAKE) start-client -f Makefile.mono
+	@$(MAKE) stop-server -f Makefile.mono
+
+clean:
+	$(MAKE) -C TestServer clean -f Makefile.mono
+	$(MAKE) -C TestClient clean -f Makefile.mono

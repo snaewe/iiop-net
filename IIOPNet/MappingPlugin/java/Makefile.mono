@@ -1,0 +1,38 @@
+include ../../MakeVars.mono
+IDLToCLS=../../../IDLToCLSCompiler/IDLCompiler/bin/IDLToCLSCompiler.exe
+TARGETASMCOLL=javaCollections
+TARGETASMMAP=IIOPNetCustomJavaTypeMapping.dll
+IIOPCHANNEL = ../../IIOPChannel/bin/IIOPChannel.dll
+BIN=bin/ 
+IDL=IDL/ 
+
+build: build-idl build-lib
+
+$(BIN)IIOPChannel.dll: $(IIOPCHANNEL)
+	[ -d $(bin) ] || mkdir $(bin)
+	cp $(IIOPCHANNEL) $(BIN)IIOPChannel.dll
+
+build-idl: 
+	[ -d $(IDL) ] || mkdir $(IDL)
+	cp ../../IDLToCLSCompiler/IDL/*.idl $(IDL)
+	#create the idl for the collection classes and the boxed java base types
+	rmic -d $(IDL) -idl -noValueMethods java.util.ArrayList
+	rmic -d $(IDL) -idl -noValueMethods java.util.HashMap
+	rmic -d $(IDL) -idl -noValueMethods java.lang.Long
+	rmic -d $(IDL) -idl -noValueMethods java.lang.Integer
+	rmic -d $(IDL) -idl -noValueMethods java.lang.Short
+	rmic -d $(IDL) -idl -noValueMethods java.lang.Double
+	rmic -d $(IDL) -idl -noValueMethods java.lang.Float
+	rmic -d $(IDL) -idl -noValueMethods java.lang.Byte
+	rmic -d $(IDL) -idl -noValueMethods java.lang.Boolean
+	rmic -d $(IDL) -idl -noValueMethods java.lang.Character
+	rmic -d $(IDL) -idl -noValueMethods java.util.Date
+	cd $(IDL); mono $(IDLToCLS) -o ../$(BIN) $(TARGETASMCOLL) java/util/HashMap.idl java/util/ArrayList.idl java/lang/Long.idl java/lang/Integer.idl java/lang/Short.idl java/lang/Byte.idl java/lang/Double.idl java/lang/Float.idl java/lang/Boolean.idl java/lang/Character.idl java/util/Date.idl; cd ..
+
+
+build-lib: $(BIN)$(TARGETASMCOLL).dll $(BIN)IIOPChannel.dll CollectionsImpl.cs BaseTypesImpl.cs InstanceMappers.cs
+	$(CSC) $(CSFLAGS) /t:library /r:$(BIN)$(TARGETASMCOLL).dll /r:$(BIN)IIOPChannel.dll /out:$(BIN)$(TARGETASMMAP) CollectionsImpl.cs BaseTypesImpl.cs InstanceMappers.cs
+
+clean:
+	rm -rf $(IDL)
+	rm -rf $(bin)	
