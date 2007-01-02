@@ -4,8 +4,8 @@ LAUNCH = ../../../Utils/launch.exe
 KILL = ../../../Utils/kill.exe
 DELAY = ../../../Utils/delay.exe
 
-bin         = bin/ 
-IDL         = IDL/ 
+bin         = bin/
+IDL         = IDL/
 
 build: build-server build-stubs build-idl
 
@@ -22,7 +22,8 @@ build-stubs:
 
 build-idl:
 	[ -d $(bin) ] || mkdir $(bin)
-	cd $(bin);  rmic -d ..\$(IDL) -idl Ch.Elca.Iiop.IntegrationTests.MappingPlugin.TestServiceImpl; rmic -d ..\$(IDL) -idl Ch.Elca.Iiop.IntegrationTests.MappingPlugin.TestSerializableClassB1; rmic -d ..\$(IDL) -idl Ch.Elca.Iiop.IntegrationTests.MappingPlugin.CustomMappedSerializable; cd ..
+	[ -d $(IDL) ] || mkdir $(IDL)
+	cd $(bin);  rmic -d ../$(IDL) -idl Ch.Elca.Iiop.IntegrationTests.MappingPlugin.TestServiceImpl; rmic -d ../$(IDL) -idl Ch.Elca.Iiop.IntegrationTests.MappingPlugin.TestSerializableClassB1; rmic -d ../$(IDL) -idl Ch.Elca.Iiop.IntegrationTests.MappingPlugin.CustomMappedSerializable; cd ..
 
 start-server:
 	@mono $(LAUNCH) orbd.exe -ORBInitialPort 1050 >> pid
