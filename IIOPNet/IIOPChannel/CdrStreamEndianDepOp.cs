@@ -846,6 +846,84 @@ namespace Ch.Elca.Iiop.Tests {
     	}    	
     	
     	[Test]
+    	public void TestUInt32WBEWToS() {
+    	    MemoryStream stream = new MemoryStream(new byte[] { 0, 0, 0, 1,
+    	                                                        0, 0, 1, 2,
+    	                                                        0xFF, 0xFF, 0xFF, 0xFF,
+    	                                                        0x00, 0x00, 0x00, 0x00 });
+    	    CdrInputStreamImpl cdrIn = new CdrInputStreamImpl(stream);
+    	    cdrIn.ConfigStream(STREAM_BIG_ENDIAN_FLAG, new GiopVersion(1, 2));
+    	    
+    	    System.UInt32 result = cdrIn.ReadULong();
+    		Assertion.AssertEquals("converted wbe uint 32", (uint)1, result);
+    		result = cdrIn.ReadULong();
+    		Assertion.AssertEquals("converted wbe uint 32 (2)", (uint)258, result);
+    		result = cdrIn.ReadULong();    		
+    		Assertion.AssertEquals("converted wbe uint 32 (3)", UInt32.MaxValue, result);    		
+    		result = cdrIn.ReadULong();
+    		Assertion.AssertEquals("converted wbe uint 32 (4)", UInt32.MinValue, result);
+    	}
+
+    	[Test]
+    	public void TestUInt32WLEWToS() {
+    	    MemoryStream stream = new MemoryStream(new byte[] { 1, 0, 0, 0,
+    	                                                        2, 1, 0, 0,
+    	                                                        0xFF, 0xFF, 0xFF, 0xFF,
+    	                                                        0x00, 0x00, 0x00, 0x00 });
+    	    CdrInputStreamImpl cdrIn = new CdrInputStreamImpl(stream);
+    	    cdrIn.ConfigStream(STREAM_LITTLE_ENDIAN_FLAG, new GiopVersion(1, 2));
+    	    
+    	    System.UInt32 result = cdrIn.ReadULong();
+    		Assertion.AssertEquals("converted wbe uint 32", (uint)1, result);
+    		result = cdrIn.ReadULong();			
+			Assertion.AssertEquals("converted wbe uint 32 (2)", (uint)258, result);
+            result = cdrIn.ReadULong();    		
+    		Assertion.AssertEquals("converted wbe uint 32 (3)", UInt32.MaxValue, result);
+            result = cdrIn.ReadULong();    		
+    		Assertion.AssertEquals("converted wbe uint 32 (4)", UInt32.MinValue, result);
+    	}
+
+    	[Test]
+    	public void TestUInt32WBESToW() {
+    	    MemoryStream stream = new MemoryStream();
+    	    CdrOutputStreamImpl cdrOut = new CdrOutputStreamImpl(stream, STREAM_BIG_ENDIAN_FLAG);
+    	    cdrOut.WriteULong((uint)1);
+    	    cdrOut.WriteULong((uint)258);
+    	    cdrOut.WriteULong(UInt32.MaxValue);
+    	    cdrOut.WriteULong(UInt32.MinValue);
+    	    stream.Seek(0, SeekOrigin.Begin);
+    	    byte[] result = new byte[4];
+    	    stream.Read(result, 0, 4);
+    		ArrayAssertion.AssertByteArrayEquals("converted wbe uint 32", new byte[] {  0, 0, 0, 1 }, result);
+    		stream.Read(result, 0, 4);
+    		ArrayAssertion.AssertByteArrayEquals("converted wbe uint 32 (2)", new byte[] { 0, 0, 1, 2 }, result);
+            stream.Read(result, 0, 4);
+    		ArrayAssertion.AssertByteArrayEquals("converted wbe uint 32 (3)", new byte[] { 0xFF, 0xFF, 0xFF, 0xFF }, result);
+            stream.Read(result, 0, 4);
+    		ArrayAssertion.AssertByteArrayEquals("converted wbe uint 32 (4)", new byte[] { 0x00, 0x00, 0x00, 0x00 }, result);
+    	}
+    	
+    	[Test]
+    	public void TestUInt32WLESToW() {
+    	    MemoryStream stream = new MemoryStream();
+    	    CdrOutputStreamImpl cdrOut = new CdrOutputStreamImpl(stream, STREAM_LITTLE_ENDIAN_FLAG);
+    	    cdrOut.WriteULong((uint)1);
+    	    cdrOut.WriteULong((uint)258);
+    	    cdrOut.WriteULong(UInt32.MaxValue);
+    	    cdrOut.WriteULong(UInt32.MinValue);
+    	    stream.Seek(0, SeekOrigin.Begin);
+    	    byte[] result = new byte[4];
+    	    stream.Read(result, 0, 4);
+    		ArrayAssertion.AssertByteArrayEquals("converted lbe uint 32", new byte[] { 1, 0, 0, 0 }, result);
+            stream.Read(result, 0, 4);
+    		ArrayAssertion.AssertByteArrayEquals("converted lbe uint 32 (2)", new byte[] { 2, 1, 0, 0 }, result);
+    	    stream.Read(result, 0, 4);
+    		ArrayAssertion.AssertByteArrayEquals("converted lbe uint 32 (3)", new byte[] { 0xFF, 0xFF, 0xFF, 0xFF }, result);
+    	    stream.Read(result, 0, 4);
+    		ArrayAssertion.AssertByteArrayEquals("converted lbe uint 32 (4)", new byte[] { 0x00, 0x00, 0x00, 0x00 }, result);
+    	}    	
+    	
+    	[Test]
     	public void TestInt64WBEWToS() {
     	    MemoryStream stream = new MemoryStream(new byte[] { 0, 0, 0, 0, 0, 0, 0, 1,
     	                                                        0, 0, 0, 0, 0, 0, 1, 2,
