@@ -3301,6 +3301,45 @@ namespace Ch.Elca.Iiop.Tests {
                                   new long[] { 1, 2 });
         }
         
+        [Test]
+        public void TestUInt16SequenceSer() {            
+            AssertSerialization(new ushort[] { 1, UInt16.MaxValue },
+                                new byte[] { 0, 0, 0, 2, 0, 1, 0xFF, 0xFF});
+        }
+        
+        [Test]
+        public void TestUInt16SequenceDeSer() {
+            AssertDeserialization(new byte[] { 0, 0, 0, 2, 0, 1, 0xFF , 0xFF},
+                                  new ushort[] { 1, UInt16.MaxValue });
+        }        
+        
+        [Test]
+        public void TestUInt32SequenceSer() {            
+            AssertSerialization(new uint[] { 1, UInt32.MaxValue },
+                                new byte[] { 0, 0, 0, 2, 0, 0, 0, 1, 0xFF, 0xFF, 0xFF, 0xFF});
+        }
+        
+        [Test]
+        public void TestUInt32SequenceDeSer() {
+            AssertDeserialization(new byte[] { 0, 0, 0, 2, 0, 0, 0, 1, 0xFF, 0xFF, 0xFF, 0xFF},
+                                  new uint[] { 1, UInt32.MaxValue });
+        }
+                
+        [Test]
+        public void TestUInt64SequenceSer() {            
+            AssertSerialization(new ulong[] { 1, UInt64.MaxValue },
+                                new byte[] { 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 
+                                             0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF});
+        }
+        
+        [Test]
+        public void TestUInt64SequenceDeSer() {
+            AssertDeserialization(new byte[] { 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 
+                                               0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF},
+                                  new ulong[] { 1, UInt64.MaxValue });
+        }
+        
+        
 	    
 	}
 	
