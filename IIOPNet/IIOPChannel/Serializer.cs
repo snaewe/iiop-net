@@ -3365,7 +3365,20 @@ namespace Ch.Elca.Iiop.Tests {
                                                0x7F, 0xEF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 
                                                0x3F, 0x84, 0x7A, 0xE1, 0x47, 0xAE, 0x14, 0x7B },
                                   new double[] { (double)1.0f, Double.MaxValue, 0.01 });
-        }        
+        }     
+        
+        [Test]
+        public void TestEnumSequenceSer() {            
+            AssertSerialization(new TestIdlEnumBI32[] { TestIdlEnumBI32.IDL_A, TestIdlEnumBI32.IDL_B, TestIdlEnumBI32.IDL_C },
+                                new byte[] { 0, 0, 0, 3, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 2 });
+        }
+        
+        [Test]
+        public void TestEnumSequenceDeSer() {
+            AssertDeserialization(new byte[] { 0, 0, 0, 3, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 2 },
+                                  new TestIdlEnumBI32[] { TestIdlEnumBI32.IDL_A, TestIdlEnumBI32.IDL_B, TestIdlEnumBI32.IDL_C });
+        }
+        
 	    
 	}
 	
