@@ -3177,7 +3177,6 @@ namespace Ch.Elca.Iiop.Tests {
 	    private SerializerFactory m_serFactory;
 	    private SerializerFactoryConfig m_config;
 	    private IiopUrlUtil m_iiopUrlUtil;
-	    private Type m_seqType;
 	    private AttributeExtCollection m_seqAttributes;
 	    
 	    [SetUp]
@@ -3194,27 +3193,48 @@ namespace Ch.Elca.Iiop.Tests {
             m_seqAttributes = 
                 AttributeExtCollection.
                     ConvertToAttributeCollection(
-                        new object[] { new IdlSequenceAttribute(0) } );
-            m_seqType = typeof(int[]);
+                        new object[] { new IdlSequenceAttribute(0) } );            
 	    }
 	    
-
-	    private void AssertSerialization(object actual, byte[] expected) {
+	    private Serializer CreateSerializer(object forInstance) {
+	        Type seqType = typeof(int[]); // simplification for null test.
+	        if (forInstance != null) {
+	            seqType = forInstance.GetType();
+	        }	        
 	        m_serFactory.Initalize(m_config, m_iiopUrlUtil);
             
             Serializer ser =
-                m_serFactory.Create(m_seqType, m_seqAttributes);
+                m_serFactory.Create(seqType, m_seqAttributes);
             
             Assertion.AssertNotNull("ser", ser);
 #if NET_2
-            Assertion.AssertEquals("ser type", typeof(IdlSequenceSerializer<>).MakeGenericType(m_seqType.GetElementType()),
+            Assertion.AssertEquals("ser type", typeof(IdlSequenceSerializer<>).MakeGenericType(seqType.GetElementType()),
                                    ser.GetType());
 #else
             Assertion.AssertEquals("ser type", typeof(IdlSequenceSerializer),
                                    ser.GetType());
 #endif
-            
+            return ser;
+	    }
+	    	    	    
+	    private void AssertSerialization(object actual, byte[] expected) {
+	        Serializer ser = CreateSerializer(actual);
             GenericSerTest(ser, actual, expected);            
+	    }
+	    
+	    private void AssertDeserialization(byte[] actual, Array expected) {
+            Serializer ser = CreateSerializer(expected);
+            
+            object result = GenericDeserForTest(ser, actual);          
+            Assertion.Assert("result is array", result.GetType().IsArray);
+            Array resultArray = (Array)result;
+            Assertion.AssertEquals("array length", expected.Length, resultArray.Length);
+                        
+            for (int i = 0; i < resultArray.Length; i++) {
+                object elemIExpected = expected.GetValue(i);
+                object elemIResult = resultArray.GetValue(i);
+                Assertion.AssertEquals("element i", elemIExpected, elemIResult);
+            }
 	    }
 	    
 	    [Test]
@@ -3245,6 +3265,41 @@ namespace Ch.Elca.Iiop.Tests {
                                 new byte[] { 0, 0, 0, 2, 0, 0, 0, 1, 0, 0, 0 , 2});            
         }
         
+        [Test]
+        public void TestInt16SequenceSer() {            
+            AssertSerialization(new short[] { 1, 2 },
+                                new byte[] { 0, 0, 0, 2, 0, 1, 0, 2});
+        }
+        
+        [Test]
+        public void TestInt16SequenceDeSer() {
+            AssertDeserialization(new byte[] { 0, 0, 0, 2, 0, 1, 0 , 2},
+                                  new short[] { 1, 2 });
+        }        
+        
+        [Test]
+        public void TestInt32SequenceSer() {            
+            AssertSerialization(new int[] { 1, 2 },
+                                new byte[] { 0, 0, 0, 2, 0, 0, 0, 1, 0, 0, 0, 2});
+        }
+        
+        [Test]
+        public void TestInt32SequenceDeSer() {
+            AssertDeserialization(new byte[] { 0, 0, 0, 2, 0, 0, 0, 1, 0, 0, 0, 2},
+                                  new int[] { 1, 2 });
+        }
+                
+        [Test]
+        public void TestInt64SequenceSer() {            
+            AssertSerialization(new long[] { 1, 2 },
+                                new byte[] { 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 2});
+        }
+        
+        [Test]
+        public void TestInt64SequenceDeSer() {
+            AssertDeserialization(new byte[] { 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 2},
+                                  new long[] { 1, 2 });
+        }
         
 	    
 	}
