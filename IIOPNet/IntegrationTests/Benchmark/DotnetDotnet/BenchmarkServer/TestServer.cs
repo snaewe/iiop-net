@@ -43,7 +43,11 @@ namespace Ch.Elca.Iiop.Benchmarks {
             int port = 8087;
             IDictionary dict = new Hashtable();
             dict["port"] = port;
-            dict["endian"] = "BigEndian";
+            string endian = "BigEndian";
+            if (args.Length > 0) {
+                endian = args[0];
+            }
+            dict["endian"] = endian;
             IiopChannel chan = new IiopChannel(dict);
             ChannelServices.RegisterChannel(chan);
 

@@ -71,12 +71,13 @@ namespace Ch.Elca.Iiop.Benchmarks {
             m_count = count;
         }
 
-        public void SetupEnvironment(string serviceUrl, string nsUrl, NameComponent[] name) {
+        public void SetupEnvironment(string serviceUrl, string nsUrl, NameComponent[] name,
+                                     string endian) {
             // register the channel
             int port = 0;
             IDictionary dict = new Hashtable();
             dict["port"] = port;
-            dict["endian"] = "BigEndian";
+            dict["endian"] = endian;
             m_channel = new IiopChannel(dict);
             ChannelServices.RegisterChannel(m_channel);
 
@@ -297,8 +298,13 @@ namespace Ch.Elca.Iiop.Benchmarks {
     
 	    string serviceUrl = "corbaloc:iiop:1.2@localhost:8087/test";
             string nsUrl = "corbaloc:iiop:1.0@localhost:8087/NameService";
+            string endian = "BigEndian";
+            if (args.Length > 1) {
+                endian = args[1];
+            }
             tc.SetupEnvironment(serviceUrl, nsUrl, 
-                                new NameComponent[] { new NameComponent("test", "") });
+                                new NameComponent[] { new NameComponent("test", "") },
+                                endian);
             tc.m_localRT = new RefTypeLocalImpl();
             tc.m_remoteRT = tc.m_testService.RefLocal();
     
