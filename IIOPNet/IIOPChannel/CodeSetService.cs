@@ -399,21 +399,44 @@ namespace Ch.Elca.Iiop.Services {
         /// get the char encoding to use for a charset id (endian independant)
         /// </summary>
         internal static System.Text.Encoding GetCharEncoding(int charSet, bool isWChar) {
-            return s_registry.GetEncodingEndianIndependant(charSet); // get Encoding for charSet
+            System.Text.Encoding encoding = s_registry.GetEncodingEndianIndependant(charSet); // get Encoding for charSet
+            if (encoding == null) {
+                throw new BAD_PARAM(987, CompletionStatus.Completed_MayBe, "Char Codeset either not specified or not supported.");
+            }
+            return encoding;
         }
+        
+        /// <summary>
+        /// get the char encoding to use for a charset id (endian dependant)
+        /// </summary>        
+        internal static System.Text.Encoding GetCharEncoding(int charSet, bool isWChar, bool isLittleEndian) {
+            if (isLittleEndian) {
+                return GetCharEncodingLittleEndian(charSet, isWChar);
+            } else {
+                return GetCharEncodingBigEndian(charSet, isWChar);
+            }
+        }        
                
         /// <summary>
         /// get the char encoding to use for a charset id (for big endian)
         /// </summary>
-        internal static System.Text.Encoding GetCharEncodingBigEndian(int charSet, bool isWChar) {
-            return s_registry.GetEncodingBigEndian(charSet); // get Encoding for charSet
+        private static System.Text.Encoding GetCharEncodingBigEndian(int charSet, bool isWChar) {
+            System.Text.Encoding encoding = s_registry.GetEncodingBigEndian(charSet); // get Encoding for charSet
+            if (encoding == null) {
+                throw new BAD_PARAM(987, CompletionStatus.Completed_MayBe, "WChar Codeset either not specified or not supported.");
+            }
+            return encoding;
         }
         
         /// <summary>
         /// get the char encoding to use for a charset id
         /// </summary>
-        internal static System.Text.Encoding GetCharEncodingLittleEndian(int charSet, bool isWChar) {
-            return s_registry.GetEncodingLittleEndian(charSet); // get Encoding for charSet
+        private static System.Text.Encoding GetCharEncodingLittleEndian(int charSet, bool isWChar) {
+            System.Text.Encoding encoding = s_registry.GetEncodingLittleEndian(charSet); // get Encoding for charSet
+            if (encoding == null) {
+                throw new BAD_PARAM(987, CompletionStatus.Completed_MayBe, "WChar Codeset either not specified or not supported.");
+            }
+            return encoding;            
         }
                 
         #endregion SMethods

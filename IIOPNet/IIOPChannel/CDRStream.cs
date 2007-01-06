@@ -856,16 +856,10 @@ namespace Ch.Elca.Iiop.Cdr {
         }
 
         /// <summary>determines, if big/little endian should be used</summary>
-        /// <returns>true for big endian, false for little endian</returns>
+        /// <returns>true for little endian, false for big endian</returns>
         protected bool ParseEndianFlag(byte flag) {
-            if ((flag & 0x01) > 0) {
-                // little endian
-                return false;
-            } else {
-                // big endian
-                return true;
-            }        
-        }
+            return ((flag & 0x01) > 0);
+        }                
         
         #endregion IMethods
     }
@@ -1061,10 +1055,11 @@ namespace Ch.Elca.Iiop.Cdr {
                 // endian flag was already set before
                 throw new INTERNAL(1202, CompletionStatus.Completed_MayBe);
             }
-            if (ParseEndianFlag(endianFlag)) {
-                m_endianOp = new CdrStreamBigEndianReadOP(this, (GiopVersion)m_version);
+            bool isLittleEndian = ParseEndianFlag(endianFlag);
+            if (isLittleEndian != BitConverter.IsLittleEndian) {
+                m_endianOp = new CdrStreamNonNativeEndianReadOP(this, (GiopVersion)m_version);
             } else {
-                m_endianOp = new CdrStreamLittleEndianReadOP(this, (GiopVersion)m_version);
+                m_endianOp = new CdrStreamNativeEndianReadOP(this, (GiopVersion)m_version);
             }
         }
 
@@ -1214,9 +1209,6 @@ namespace Ch.Elca.Iiop.Cdr {
         public char ReadChar() {
             // char is a multibyte format with not fixed length characters, but in IDL one char is one byte
             Encoding encoding = CodeSetService.GetCharEncoding(CharSet, false);
-            if (encoding == null) {
-                throw new INTERNAL(987, CompletionStatus.Completed_MayBe);
-            } 
             byte[] data = new byte[] { ReadOctet() };
             char[] result = encoding.GetChars(data);
             return result[0];
@@ -1271,9 +1263,6 @@ namespace Ch.Elca.Iiop.Cdr {
             byte[] charData = ReadOpaque((int)length - 1); // read string data
             ReadOctet(); // read terminating 0
             Encoding encoding = CodeSetService.GetCharEncoding(CharSet, false);
-            if (encoding == null) {
-                throw new INTERNAL(987, CompletionStatus.Completed_MayBe);
-            }
             char[] data = encoding.GetChars(charData);
             string result = new string(data);
             return result;
@@ -1548,10 +1537,11 @@ namespace Ch.Elca.Iiop.Cdr {
         }
         
         public CdrOutputStreamImpl(Stream stream, byte flags, GiopVersion giopVersion) : base(stream) {
-            if (ParseEndianFlag(flags)) {
-                m_endianOp = new CdrStreamBigEndianWriteOP(this, giopVersion);
+            bool isLittleEndian = ParseEndianFlag(flags);
+            if (isLittleEndian != BitConverter.IsLittleEndian) {
+                m_endianOp = new CdrStreamNonNativeEndianWriteOP(this, giopVersion);
             } else {
-                m_endianOp = new CdrStreamLittleEndianWriteOP(this, giopVersion);
+                m_endianOp = new CdrStreamNativeEndianWriteOP(this, giopVersion);
             }
         }
 
@@ -1617,9 +1607,6 @@ namespace Ch.Elca.Iiop.Cdr {
 
         public void WriteChar(char data) {
             Encoding encoding = CodeSetService.GetCharEncoding(CharSet, false);
-            if (encoding == null) {
-                throw new INTERNAL(987, CompletionStatus.Completed_MayBe);
-            } 
             byte[] toSend = encoding.GetBytes(new char[] { data });
             if (toSend.Length > 1) { 
                 // character can't be sent: only one byte representation allowed
@@ -1663,9 +1650,6 @@ namespace Ch.Elca.Iiop.Cdr {
         
         public void WriteString(string data) {
             Encoding encoding = CodeSetService.GetCharEncoding(CharSet, false);
-            if (encoding == null) {
-                throw new INTERNAL(987, CompletionStatus.Completed_MayBe);
-            }
             byte[] toSend = encoding.GetBytes(data.ToCharArray()); // encode the string
             WriteULong((uint)(toSend.Length + 1));
             WriteOpaque(toSend);

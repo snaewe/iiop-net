@@ -39,12 +39,13 @@ using omg.org.CORBA;
 namespace Ch.Elca.Iiop.Cdr {
     
     /// <summary>
-    /// this is a big-endian implementation for the endian dependent operation for CDRInput-streams
+    /// this is the endian implementation for the endian dependent operation for CDRInput-streams
+    /// to use, when the stream endian is different than the plattform endian (see BitConverter.IsLittleEndian)
     /// </summary>
     /// <remarks>
     /// this class is not intended for use by CDRStream users
     /// </remarks>
-    internal class CdrStreamBigEndianReadOP : CdrEndianDepInputStreamOp {
+    internal class CdrStreamNonNativeEndianReadOP : CdrEndianDepInputStreamOp {
         
         #region IFields
 
@@ -55,25 +56,14 @@ namespace Ch.Elca.Iiop.Cdr {
         #endregion IFields
         #region IConstructors
 
-        public CdrStreamBigEndianReadOP(CdrInputStream stream, GiopVersion version) {
+        public CdrStreamNonNativeEndianReadOP(CdrInputStream stream, GiopVersion version) {
             m_stream = stream;
             m_version = version;
         }
 
         #endregion IConstructors
         #region IMethods
-        
-        /// <summary>
-        /// retrieved the wchar encoding to use for wchar/wstring operations.
-        /// </summary>        
-        private Encoding GetWCharEncoding(int wcharSet) {
-            Encoding encoding = CodeSetService.GetCharEncodingBigEndian(wcharSet, true);
-            if (encoding == null) {
-                throw new BAD_PARAM(987, CompletionStatus.Completed_MayBe, "WChar Codeset either not specified or not supported.");
-            }
-            return encoding;
-        }        
-        
+                
         #region read methods depenant on byte ordering
 
         private void Read(int size, Aligns align) {
@@ -83,42 +73,42 @@ namespace Ch.Elca.Iiop.Cdr {
 
         public short ReadShort() {
             Read(2, Aligns.Align2);
-            return SystemWireBitConverter.ToInt16(m_buf, false);
+            return SystemWireBitConverter.ToInt16(m_buf, !BitConverter.IsLittleEndian);
         }
 
         public ushort ReadUShort() {
             Read(2, Aligns.Align2);
-            return SystemWireBitConverter.ToUInt16(m_buf, false);
+            return SystemWireBitConverter.ToUInt16(m_buf, !BitConverter.IsLittleEndian);
         }
 
         public int ReadLong() {
             Read(4, Aligns.Align4);
-            return SystemWireBitConverter.ToInt32(m_buf, false);
+            return SystemWireBitConverter.ToInt32(m_buf, !BitConverter.IsLittleEndian);
         }
 
         public uint ReadULong() {
             Read(4, Aligns.Align4);
-            return SystemWireBitConverter.ToUInt32(m_buf, false);
+            return SystemWireBitConverter.ToUInt32(m_buf, !BitConverter.IsLittleEndian);
         }
 
         public long ReadLongLong() {
             Read(8, Aligns.Align8);
-            return SystemWireBitConverter.ToInt64(m_buf, false);
+            return SystemWireBitConverter.ToInt64(m_buf, !BitConverter.IsLittleEndian);
         }
 
         public ulong ReadULongLong() {
             Read(8, Aligns.Align8);
-            return SystemWireBitConverter.ToUInt64(m_buf, false);
+            return SystemWireBitConverter.ToUInt64(m_buf, !BitConverter.IsLittleEndian);
         }
 
         public float ReadFloat() {
             Read(4, Aligns.Align4);
-            return SystemWireBitConverter.ToSingle(m_buf, false);
+            return SystemWireBitConverter.ToSingle(m_buf, !BitConverter.IsLittleEndian);
         }
 
         public double ReadDouble() {
             Read(8, Aligns.Align8);
-            return SystemWireBitConverter.ToDouble(m_buf, false);
+            return SystemWireBitConverter.ToDouble(m_buf, !BitConverter.IsLittleEndian);
         }
         
         private byte[] AppendChar(byte[] oldData) {
@@ -129,7 +119,8 @@ namespace Ch.Elca.Iiop.Cdr {
         }
         
         public char ReadWChar() {
-            Encoding encoding = GetWCharEncoding(m_stream.WCharSet);
+            Encoding encoding = CodeSetService.GetCharEncoding(m_stream.WCharSet, true, 
+                                                               !BitConverter.IsLittleEndian);
             byte[] data;
             if ((m_version.Major == 1) && (m_version.Minor <= 1)) { // GIOP 1.1 / 1.0
                 data = new byte[] { m_stream.ReadOctet() };
@@ -145,7 +136,8 @@ namespace Ch.Elca.Iiop.Cdr {
         }
 
         public string ReadWString()    {
-            Encoding encoding = GetWCharEncoding(m_stream.WCharSet);
+            Encoding encoding = CodeSetService.GetCharEncoding(m_stream.WCharSet, true, 
+                                                               !BitConverter.IsLittleEndian);
             uint length = ReadULong(); 
             byte[] data;
             if ((m_version.Major == 1) && (m_version.Minor <= 1)) { // GIOP 1.1 / 1.0
@@ -169,12 +161,13 @@ namespace Ch.Elca.Iiop.Cdr {
 
 
     /// <summary>
-    /// this is a big-endian implementation for the endian dependent operation for CDROutput-streams
+    /// this is the endian implementation for the endian dependent operation for CDROutput-streams
+    /// to use, when the stream endian is different than the plattform endian (see BitConverter.IsLittleEndian)
     /// </summary>
     /// <remarks>
     /// this class is not intended for use by CDRStream users
     /// </remarks>
-    internal class CdrStreamBigEndianWriteOP : CdrEndianDepOutputStreamOp {
+    internal class CdrStreamNonNativeEndianWriteOP : CdrEndianDepOutputStreamOp {
 
         #region IFields
 
@@ -184,25 +177,14 @@ namespace Ch.Elca.Iiop.Cdr {
         #endregion IFields
         #region IConstructors
         
-        public CdrStreamBigEndianWriteOP(CdrOutputStream stream, GiopVersion version) {
+        public CdrStreamNonNativeEndianWriteOP(CdrOutputStream stream, GiopVersion version) {
             m_stream = stream;
             m_version = version;
         }
 
         #endregion IConstructors
         #region IMethods
-        
-        /// <summary>
-        /// retrieved the wchar encoding to use for wchar/wstring operations.
-        /// </summary>        
-        private Encoding GetWCharEncoding(int wcharSet) {
-            Encoding encoding = CodeSetService.GetCharEncodingBigEndian(wcharSet, true);
-            if (encoding == null) {
-                throw new BAD_PARAM(987, CompletionStatus.Completed_MayBe, "WChar Codeset either not specified or not supported.");
-            }
-            return encoding;
-        }        
-        
+                
         #region write methods dependant on byte ordering
 
     	private void Write(byte[] data, int count, Aligns align) {
@@ -211,39 +193,40 @@ namespace Ch.Elca.Iiop.Cdr {
 	    }
         
         public void WriteShort(short data) {
-		    Write(SystemWireBitConverter.GetBytes(data, false), 2, Aligns.Align2);
+		    Write(SystemWireBitConverter.GetBytes(data, !BitConverter.IsLittleEndian), 2, Aligns.Align2);
         }
 
         public void WriteUShort(ushort data) {
-		    Write(SystemWireBitConverter.GetBytes(data, false), 2, Aligns.Align2);
+		    Write(SystemWireBitConverter.GetBytes(data, !BitConverter.IsLittleEndian), 2, Aligns.Align2);
         }
 
         public void WriteLong(int data) {
-		    Write(SystemWireBitConverter.GetBytes(data, false), 4, Aligns.Align4);
+		    Write(SystemWireBitConverter.GetBytes(data, !BitConverter.IsLittleEndian), 4, Aligns.Align4);
         }
 
         public void WriteULong(uint data) {
-		    Write(SystemWireBitConverter.GetBytes(data, false), 4, Aligns.Align4);
+		    Write(SystemWireBitConverter.GetBytes(data, !BitConverter.IsLittleEndian), 4, Aligns.Align4);
         }
 
         public void WriteLongLong(long data) {
-		    Write(SystemWireBitConverter.GetBytes(data, false), 8, Aligns.Align8);
+		    Write(SystemWireBitConverter.GetBytes(data, !BitConverter.IsLittleEndian), 8, Aligns.Align8);
         }
 
         public void WriteULongLong(ulong data) {
-		    Write(SystemWireBitConverter.GetBytes(data, false), 8, Aligns.Align8);
+		    Write(SystemWireBitConverter.GetBytes(data, !BitConverter.IsLittleEndian), 8, Aligns.Align8);
         }
 
         public void WriteFloat(float data) {
-		    Write(SystemWireBitConverter.GetBytes(data, false), 4, Aligns.Align4);
+		    Write(SystemWireBitConverter.GetBytes(data, !BitConverter.IsLittleEndian), 4, Aligns.Align4);
         }
 
         public void WriteDouble(double data) {
-		    Write(SystemWireBitConverter.GetBytes(data, false), 8, Aligns.Align8);
+		    Write(SystemWireBitConverter.GetBytes(data, !BitConverter.IsLittleEndian), 8, Aligns.Align8);
         }
 
         public void WriteWChar(char data) {
-            Encoding encoding = GetWCharEncoding(m_stream.WCharSet);
+            Encoding encoding = CodeSetService.GetCharEncoding(m_stream.WCharSet, true, 
+                                                               !BitConverter.IsLittleEndian);
             byte[] toSend = encoding.GetBytes(new char[] { data } );
             if (!((m_version.Major == 1) && (m_version.Minor <= 1))) { // GIOP 1.2
                 m_stream.WriteOctet((byte)toSend.Length);
@@ -252,7 +235,8 @@ namespace Ch.Elca.Iiop.Cdr {
         }
 
         public void WriteWString(string data) {
-            Encoding encoding = GetWCharEncoding(m_stream.WCharSet);
+            Encoding encoding = CodeSetService.GetCharEncoding(m_stream.WCharSet, true, 
+                                                               !BitConverter.IsLittleEndian);
             byte[] toSend = encoding.GetBytes(data);
             if ((m_version.Major == 1) && (m_version.Minor <= 1)) { // GIOP 1.0, 1.1
                 byte[] sendNew = new byte[toSend.Length + 2];
@@ -275,12 +259,13 @@ namespace Ch.Elca.Iiop.Cdr {
 
 
     /// <summary>
-    /// this is a little-endian implementation for the endian dependent operation for CDRInput-streams
+    /// this is the endian implementation for the endian dependent operation for CDRInput-streams
+    /// to use, when the stream endian is the same as the plattform endian (see BitConverter.IsLittleEndian)
     /// </summary>
     /// <remarks>
     /// this class is not intended for use by CDRStream users
     /// </remarks>
-    internal class CdrStreamLittleEndianReadOP : CdrEndianDepInputStreamOp {
+    internal class CdrStreamNativeEndianReadOP : CdrEndianDepInputStreamOp {
         
         #region IFields
 
@@ -291,25 +276,14 @@ namespace Ch.Elca.Iiop.Cdr {
         #endregion IFields
         #region IConstructors
 
-        public CdrStreamLittleEndianReadOP(CdrInputStream stream, GiopVersion version) {
+        public CdrStreamNativeEndianReadOP(CdrInputStream stream, GiopVersion version) {
             m_stream = stream;
             m_version = version;
         }
 
         #endregion IConstructors
         #region IMethods
-        
-        /// <summary>
-        /// retrieved the wchar encoding to use for wchar/wstring operations.
-        /// </summary>        
-        private Encoding GetWCharEncoding(int wcharSet) {
-            Encoding encoding = CodeSetService.GetCharEncodingLittleEndian(wcharSet, true);
-            if (encoding == null) {
-                throw new BAD_PARAM(987, CompletionStatus.Completed_MayBe, "WChar Codeset either not specified or not supported.");
-            }
-            return encoding;
-        }        
-        
+                
         #region read methods depenant on byte ordering
 
         private void Read(int size, Aligns align) {
@@ -319,42 +293,42 @@ namespace Ch.Elca.Iiop.Cdr {
 
         public short ReadShort() {
             Read(2, Aligns.Align2);
-            return SystemWireBitConverter.ToInt16(m_buf, true);
+            return BitConverter.ToInt16(m_buf, 0);
         }
 
         public ushort ReadUShort() {
             Read(2, Aligns.Align2);
-            return SystemWireBitConverter.ToUInt16(m_buf, true);
+            return BitConverter.ToUInt16(m_buf, 0);
         }
 
         public int ReadLong() {
             Read(4, Aligns.Align4);
-            return SystemWireBitConverter.ToInt32(m_buf, true);
+            return BitConverter.ToInt32(m_buf, 0);
         }
 
         public uint ReadULong() {
             Read(4, Aligns.Align4);
-            return SystemWireBitConverter.ToUInt32(m_buf, true);
+            return BitConverter.ToUInt32(m_buf, 0);
         }
 
         public long ReadLongLong() {
             Read(8, Aligns.Align8);
-            return SystemWireBitConverter.ToInt64(m_buf, true);
+            return BitConverter.ToInt64(m_buf, 0);
         }
 
         public ulong ReadULongLong() {
             Read(8, Aligns.Align8);
-            return SystemWireBitConverter.ToUInt64(m_buf, true);
+            return BitConverter.ToUInt64(m_buf, 0);
         }
 
         public float ReadFloat() {
             Read(4, Aligns.Align4);
-            return SystemWireBitConverter.ToSingle(m_buf, true);
+            return BitConverter.ToSingle(m_buf, 0);
         }
 
         public double ReadDouble() {
             Read(8, Aligns.Align8);
-            return SystemWireBitConverter.ToDouble(m_buf, true);
+            return BitConverter.ToDouble(m_buf, 0);
         }
         
         private byte[] AppendChar(byte[] oldData) {
@@ -365,7 +339,8 @@ namespace Ch.Elca.Iiop.Cdr {
         }
         
         public char ReadWChar() {
-            Encoding encoding = GetWCharEncoding(m_stream.WCharSet);
+            Encoding encoding = CodeSetService.GetCharEncoding(m_stream.WCharSet, true, 
+                                                               BitConverter.IsLittleEndian);
             byte[] data;
             if ((m_version.Major == 1) && (m_version.Minor <= 1)) { // GIOP 1.1 / 1.0
                 data = new byte[] { m_stream.ReadOctet() };
@@ -381,7 +356,8 @@ namespace Ch.Elca.Iiop.Cdr {
         }
 
         public string ReadWString()    {
-            Encoding encoding = GetWCharEncoding(m_stream.WCharSet);
+            Encoding encoding = CodeSetService.GetCharEncoding(m_stream.WCharSet, true, 
+                                                               BitConverter.IsLittleEndian);
             uint length = ReadULong(); 
             byte[] data;
             if ((m_version.Major == 1) && (m_version.Minor <= 1)) { // GIOP 1.1 / 1.0
@@ -405,12 +381,13 @@ namespace Ch.Elca.Iiop.Cdr {
 
 
     /// <summary>
-    /// this is a little-endian implementation for the endian dependent operation for CDROutput-streams
+    /// this is the endian implementation for the endian dependent operation for CDROutput-streams
+    /// to use, when the stream endian is the same as the plattform endian (see BitConverter.IsLittleEndian)
     /// </summary>
     /// <remarks>
     /// this class is not intended for use by CDRStream users
     /// </remarks>
-    internal class CdrStreamLittleEndianWriteOP : CdrEndianDepOutputStreamOp {
+    internal class CdrStreamNativeEndianWriteOP : CdrEndianDepOutputStreamOp {
 
         #region IFields
 
@@ -420,25 +397,14 @@ namespace Ch.Elca.Iiop.Cdr {
         #endregion IFields
         #region IConstructors
         
-        public CdrStreamLittleEndianWriteOP(CdrOutputStream stream, GiopVersion version) {
+        public CdrStreamNativeEndianWriteOP(CdrOutputStream stream, GiopVersion version) {
             m_stream = stream;
             m_version = version;
         }
 
         #endregion IConstructors
         #region IMethods
-        
-        /// <summary>
-        /// retrieved the wchar encoding to use for wchar/wstring operations.
-        /// </summary>        
-        private Encoding GetWCharEncoding(int wcharSet) {
-            Encoding encoding = CodeSetService.GetCharEncodingLittleEndian(wcharSet, true);
-            if (encoding == null) {
-                throw new BAD_PARAM(987, CompletionStatus.Completed_MayBe, "WChar Codeset either not specified or not supported.");
-            }
-            return encoding;
-        }        
-        
+                
         #region write methods dependant on byte ordering
 
        	private void Write(byte[] data, int count, Aligns align) {
@@ -447,39 +413,40 @@ namespace Ch.Elca.Iiop.Cdr {
 	    }
         
         public void WriteShort(short data) {
-		    Write(SystemWireBitConverter.GetBytes(data, true), 2, Aligns.Align2);
+		    Write(BitConverter.GetBytes(data), 2, Aligns.Align2);
         }
 
         public void WriteUShort(ushort data) {
-		    Write(SystemWireBitConverter.GetBytes(data, true), 2, Aligns.Align2);
+		    Write(BitConverter.GetBytes(data), 2, Aligns.Align2);
         }
 
         public void WriteLong(int data) {
-		    Write(SystemWireBitConverter.GetBytes(data, true), 4, Aligns.Align4);
+		    Write(BitConverter.GetBytes(data), 4, Aligns.Align4);
         }
 
         public void WriteULong(uint data) {
-		    Write(SystemWireBitConverter.GetBytes(data, true), 4, Aligns.Align4);
+		    Write(BitConverter.GetBytes(data), 4, Aligns.Align4);
         }
 
         public void WriteLongLong(long data) {
-		    Write(SystemWireBitConverter.GetBytes(data, true), 8, Aligns.Align8);
+		    Write(BitConverter.GetBytes(data), 8, Aligns.Align8);
         }
 
         public void WriteULongLong(ulong data) {
-		    Write(SystemWireBitConverter.GetBytes(data, true), 8, Aligns.Align8);
+		    Write(BitConverter.GetBytes(data), 8, Aligns.Align8);
         }
 
         public void WriteFloat(float data) {
-		    Write(SystemWireBitConverter.GetBytes(data, true), 4, Aligns.Align4);
+		    Write(BitConverter.GetBytes(data), 4, Aligns.Align4);
         }
 
         public void WriteDouble(double data) {
-		    Write(SystemWireBitConverter.GetBytes(data, true), 8, Aligns.Align8);
+		    Write(BitConverter.GetBytes(data), 8, Aligns.Align8);
         }
 
         public void WriteWChar(char data) {
-            Encoding encoding = GetWCharEncoding(m_stream.WCharSet);
+            Encoding encoding = CodeSetService.GetCharEncoding(m_stream.WCharSet, true,
+                                                               BitConverter.IsLittleEndian);
             byte[] toSend = encoding.GetBytes(new char[] { data } );
             if (!((m_version.Major == 1) && (m_version.Minor <= 1))) { // GIOP 1.2
                 m_stream.WriteOctet((byte)toSend.Length);
@@ -488,7 +455,8 @@ namespace Ch.Elca.Iiop.Cdr {
         }
 
         public void WriteWString(string data) {
-            Encoding encoding = GetWCharEncoding(m_stream.WCharSet);
+            Encoding encoding = CodeSetService.GetCharEncoding(m_stream.WCharSet, true, 
+                                                               BitConverter.IsLittleEndian);
             byte[] toSend = encoding.GetBytes(data);
             if ((m_version.Major == 1) && (m_version.Minor <= 1)) { // GIOP 1.0, 1.1
                 byte[] sendNew = new byte[toSend.Length + 2];
