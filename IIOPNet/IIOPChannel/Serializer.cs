@@ -3338,8 +3338,34 @@ namespace Ch.Elca.Iiop.Tests {
                                                0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF},
                                   new ulong[] { 1, UInt64.MaxValue });
         }
+
+        [Test]
+        public void TestSingleSequenceSer() {            
+            AssertSerialization(new float[] { 1.0f, 0.01f },
+                                new byte[] { 0, 0, 0, 2, 0x3F, 0x80, 0x00, 0x00, 0x3C, 0x23, 0xD7, 0x0A});
+        }
         
+        [Test]
+        public void TestSingleSequenceDeSer() {
+            AssertDeserialization(new byte[] { 0, 0, 0, 2, 0x3F, 0x80, 0x00, 0x00, 0x3C, 0x23, 0xD7, 0x0A},
+                                  new float[] { 1.0f, 0.01f });
+        }
+                
+        [Test]
+        public void TestDoubleSequenceSer() {            
+            AssertSerialization(new double[] { (double)1.0f, Double.MaxValue, 0.01 },
+                                new byte[] { 0, 0, 0, 3, 0, 0, 0, 0, 0x3F, 0xF0, 0, 0, 0, 0, 0, 0, 
+                                             0x7F, 0xEF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
+                                             0x3F, 0x84, 0x7A, 0xE1, 0x47, 0xAE, 0x14, 0x7B});
+        }
         
+        [Test]
+        public void TestDoubleSequenceDeSer() {
+            AssertDeserialization(new byte[] { 0, 0, 0, 3, 0, 0, 0, 0, 0x3F, 0xF0, 0, 0, 0, 0, 0, 0, 
+                                               0x7F, 0xEF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 
+                                               0x3F, 0x84, 0x7A, 0xE1, 0x47, 0xAE, 0x14, 0x7B },
+                                  new double[] { (double)1.0f, Double.MaxValue, 0.01 });
+        }        
 	    
 	}
 	
