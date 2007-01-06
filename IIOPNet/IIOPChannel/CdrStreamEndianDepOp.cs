@@ -690,6 +690,83 @@ namespace Ch.Elca.Iiop.Tests {
     	}
     	
     	[Test]
+    	public void TestInt64WBEWToS() {
+    	    MemoryStream stream = new MemoryStream(new byte[] { 0, 0, 0, 0, 0, 0, 0, 1,
+    	                                                        0, 0, 0, 0, 0, 0, 1, 2,
+    	                                                        0x7F, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
+    	                                                        0x80, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 });
+    	    CdrInputStreamImpl cdrIn = new CdrInputStreamImpl(stream);
+    	    cdrIn.ConfigStream(STREAM_BIG_ENDIAN_FLAG, new GiopVersion(1, 2));
+    	    System.Int64 result = cdrIn.ReadLongLong();
+    	    Assertion.AssertEquals("converted wbe int 64", 1, result);
+    		result = cdrIn.ReadLongLong();
+    		Assertion.AssertEquals("converted wbe int 64 (2)", 258, result);
+            result = cdrIn.ReadLongLong();    		
+    		Assertion.AssertEquals("converted wbe int 64 (3)", Int64.MaxValue, result);
+    		result = cdrIn.ReadLongLong();
+    		Assertion.AssertEquals("converted wbe int 64 (4)", Int64.MinValue, result);
+    	}
+    	
+    	[Test]
+    	public void TestInt64WLEWToS() {
+    	    MemoryStream stream = new MemoryStream(new byte[] { 1, 0, 0, 0, 0, 0, 0, 0,
+    	                                                        2, 1, 0, 0, 0, 0, 0, 0,
+    	                                                        0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0x7F,
+    	                                                        0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x80 });
+    	    CdrInputStreamImpl cdrIn = new CdrInputStreamImpl(stream);
+    	    cdrIn.ConfigStream(STREAM_LITTLE_ENDIAN_FLAG, new GiopVersion(1, 2));
+    	    
+    	    System.Int64 result = cdrIn.ReadLongLong();
+    		Assertion.AssertEquals("converted wbe int", (long)1, result);
+    		result = cdrIn.ReadLongLong();			
+			Assertion.AssertEquals("converted wbe int (2)", (long)258, result);
+            result = cdrIn.ReadLongLong();    		
+    		Assertion.AssertEquals("converted wbe int (3)", Int64.MaxValue, result);
+            result = cdrIn.ReadLongLong();    		
+    		Assertion.AssertEquals("converted wbe int (4)", Int64.MinValue, result);
+    	}    	
+    	
+    	[Test]
+    	public void TestInt64WBESToW() {
+    	    MemoryStream stream = new MemoryStream();
+    	    CdrOutputStreamImpl cdrOut = new CdrOutputStreamImpl(stream, STREAM_BIG_ENDIAN_FLAG);
+    	    cdrOut.WriteLongLong((long)1);
+    	    cdrOut.WriteLongLong((long)258);
+    	    cdrOut.WriteLongLong(Int64.MaxValue);
+    	    cdrOut.WriteLongLong(Int64.MinValue);
+    	    stream.Seek(0, SeekOrigin.Begin);
+    	    byte[] result = new byte[8];
+    	    stream.Read(result, 0, 8);
+    		ArrayAssertion.AssertByteArrayEquals("converted wbe int", new byte[] {  0, 0, 0, 0, 0, 0, 0, 1 }, result);
+    		stream.Read(result, 0, 8);
+    		ArrayAssertion.AssertByteArrayEquals("converted wbe int (2)", new byte[] { 0, 0, 0, 0, 0, 0, 1, 2 }, result);
+            stream.Read(result, 0, 8);
+    		ArrayAssertion.AssertByteArrayEquals("converted wbe int (3)", new byte[] { 0x7F, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF }, result);
+            stream.Read(result, 0, 8);
+    		ArrayAssertion.AssertByteArrayEquals("converted wbe int (4)", new byte[] { 0x80, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 }, result);
+    	}
+    	
+    	[Test]
+    	public void TestInt64WLESToW() {
+    	    MemoryStream stream = new MemoryStream();
+    	    CdrOutputStreamImpl cdrOut = new CdrOutputStreamImpl(stream, STREAM_LITTLE_ENDIAN_FLAG);
+    	    cdrOut.WriteLongLong((long)1);
+    	    cdrOut.WriteLongLong((long)258);
+    	    cdrOut.WriteLongLong(Int64.MaxValue);
+    	    cdrOut.WriteLongLong(Int64.MinValue);
+    	    stream.Seek(0, SeekOrigin.Begin);
+    	    byte[] result = new byte[8];
+    	    stream.Read(result, 0, 8);
+    		ArrayAssertion.AssertByteArrayEquals("converted lbe int64", new byte[] { 1, 0, 0, 0, 0, 0, 0, 0 }, result);
+            stream.Read(result, 0, 8);
+    		ArrayAssertion.AssertByteArrayEquals("converted lbe int64 (2)", new byte[] { 2, 1, 0, 0, 0, 0, 0, 0 }, result);
+    	    stream.Read(result, 0, 8);
+    		ArrayAssertion.AssertByteArrayEquals("converted lbe int64 (3)", new byte[] { 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0x7F }, result);
+    	    stream.Read(result, 0, 8);
+    		ArrayAssertion.AssertByteArrayEquals("converted lbe int64 (4)", new byte[] { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x80 }, result);
+    	}    	
+    	
+    	[Test]
     	public void TestUInt64WBEWToS() {
     	    MemoryStream stream = new MemoryStream(new byte[] { 0, 0, 0, 0, 0, 0, 0, 1,
     	                                                        0, 0, 0, 0, 0, 0, 1, 2,
