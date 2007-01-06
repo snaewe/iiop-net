@@ -73,42 +73,42 @@ namespace Ch.Elca.Iiop.Cdr {
 
         public short ReadShort() {
             Read(2, Aligns.Align2);
-            return SystemWireBitConverter.ToInt16(m_buf, !BitConverter.IsLittleEndian);
+            return NonNativeEndianSystemWireBitConverter.ToInt16(m_buf);
         }
 
         public ushort ReadUShort() {
             Read(2, Aligns.Align2);
-            return SystemWireBitConverter.ToUInt16(m_buf, !BitConverter.IsLittleEndian);
+            return NonNativeEndianSystemWireBitConverter.ToUInt16(m_buf);
         }
 
         public int ReadLong() {
             Read(4, Aligns.Align4);
-            return SystemWireBitConverter.ToInt32(m_buf, !BitConverter.IsLittleEndian);
+            return NonNativeEndianSystemWireBitConverter.ToInt32(m_buf);
         }
 
         public uint ReadULong() {
             Read(4, Aligns.Align4);
-            return SystemWireBitConverter.ToUInt32(m_buf, !BitConverter.IsLittleEndian);
+            return NonNativeEndianSystemWireBitConverter.ToUInt32(m_buf);
         }
 
         public long ReadLongLong() {
             Read(8, Aligns.Align8);
-            return SystemWireBitConverter.ToInt64(m_buf, !BitConverter.IsLittleEndian);
+            return NonNativeEndianSystemWireBitConverter.ToInt64(m_buf);
         }
 
         public ulong ReadULongLong() {
             Read(8, Aligns.Align8);
-            return SystemWireBitConverter.ToUInt64(m_buf, !BitConverter.IsLittleEndian);
+            return NonNativeEndianSystemWireBitConverter.ToUInt64(m_buf);
         }
 
         public float ReadFloat() {
             Read(4, Aligns.Align4);
-            return SystemWireBitConverter.ToSingle(m_buf, !BitConverter.IsLittleEndian);
+            return NonNativeEndianSystemWireBitConverter.ToSingle(m_buf);
         }
 
         public double ReadDouble() {
             Read(8, Aligns.Align8);
-            return SystemWireBitConverter.ToDouble(m_buf, !BitConverter.IsLittleEndian);
+            return NonNativeEndianSystemWireBitConverter.ToDouble(m_buf);
         }
         
         private byte[] AppendChar(byte[] oldData) {
@@ -193,35 +193,35 @@ namespace Ch.Elca.Iiop.Cdr {
 	    }
         
         public void WriteShort(short data) {
-		    Write(SystemWireBitConverter.GetBytes(data, !BitConverter.IsLittleEndian), 2, Aligns.Align2);
+		    Write(NonNativeEndianSystemWireBitConverter.GetBytes(data), 2, Aligns.Align2);
         }
 
         public void WriteUShort(ushort data) {
-		    Write(SystemWireBitConverter.GetBytes(data, !BitConverter.IsLittleEndian), 2, Aligns.Align2);
+		    Write(NonNativeEndianSystemWireBitConverter.GetBytes(data), 2, Aligns.Align2);
         }
 
         public void WriteLong(int data) {
-		    Write(SystemWireBitConverter.GetBytes(data, !BitConverter.IsLittleEndian), 4, Aligns.Align4);
+		    Write(NonNativeEndianSystemWireBitConverter.GetBytes(data), 4, Aligns.Align4);
         }
 
         public void WriteULong(uint data) {
-		    Write(SystemWireBitConverter.GetBytes(data, !BitConverter.IsLittleEndian), 4, Aligns.Align4);
+		    Write(NonNativeEndianSystemWireBitConverter.GetBytes(data), 4, Aligns.Align4);
         }
 
         public void WriteLongLong(long data) {
-		    Write(SystemWireBitConverter.GetBytes(data, !BitConverter.IsLittleEndian), 8, Aligns.Align8);
+		    Write(NonNativeEndianSystemWireBitConverter.GetBytes(data), 8, Aligns.Align8);
         }
 
         public void WriteULongLong(ulong data) {
-		    Write(SystemWireBitConverter.GetBytes(data, !BitConverter.IsLittleEndian), 8, Aligns.Align8);
+		    Write(NonNativeEndianSystemWireBitConverter.GetBytes(data), 8, Aligns.Align8);
         }
 
         public void WriteFloat(float data) {
-		    Write(SystemWireBitConverter.GetBytes(data, !BitConverter.IsLittleEndian), 4, Aligns.Align4);
+		    Write(NonNativeEndianSystemWireBitConverter.GetBytes(data), 4, Aligns.Align4);
         }
 
         public void WriteDouble(double data) {
-		    Write(SystemWireBitConverter.GetBytes(data, !BitConverter.IsLittleEndian), 8, Aligns.Align8);
+		    Write(NonNativeEndianSystemWireBitConverter.GetBytes(data), 8, Aligns.Align8);
         }
 
         public void WriteWChar(char data) {
