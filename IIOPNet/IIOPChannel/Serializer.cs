@@ -1430,7 +1430,7 @@ namespace Ch.Elca.Iiop.Marshalling {
             m_forTypeElemType = forType.GetElementType();
 #endif
             m_bound = bound;    
-            // element is not the same than the sequence -> therefore problems with recursion
+            // element is not the same than the sequence -> therefore no problems with recursion
             DetermineElementSerializer(m_forTypeElemType, elemAttrs, serFactory);
         }
         
