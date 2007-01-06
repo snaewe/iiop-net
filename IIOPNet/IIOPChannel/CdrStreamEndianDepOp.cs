@@ -1233,6 +1233,52 @@ namespace Ch.Elca.Iiop.Tests {
     		ArrayAssertion.AssertByteArrayEquals("converted lbe double (4)", new byte[] { 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xEF, 0xFF }, result);
     	}    	    	
     	
+    	
+    	[Test]
+    	public void TestWStringWBEWToS() {
+    	    MemoryStream stream = new MemoryStream(new byte[] {0, 0, 0, 10, 0xFE, 0xFF, 0, 84, 0, 101, 0, 115, 0, 116 });
+    	    CdrInputStreamImpl cdrIn = new CdrInputStreamImpl(stream);
+    	    cdrIn.ConfigStream(STREAM_BIG_ENDIAN_FLAG, new GiopVersion(1, 2));
+    	    cdrIn.WCharSet = (int)WCharSet.UTF16;
+    	    string result = cdrIn.ReadWString();
+    	    Assertion.AssertEquals("converted wbe string", "Test", result);
+    	}    	
+    	
+    	[Test]
+    	public void TestWStringWLEWToS() {
+    	    MemoryStream stream = new MemoryStream(new byte[] {10, 0, 0, 0, 0xFF, 0xFE, 84, 0, 101, 0, 115, 0, 116, 0 });
+    	    CdrInputStreamImpl cdrIn = new CdrInputStreamImpl(stream);
+    	    cdrIn.ConfigStream(STREAM_LITTLE_ENDIAN_FLAG, new GiopVersion(1, 2));
+    	    cdrIn.WCharSet = (int)WCharSet.UTF16;
+    	    string result = cdrIn.ReadWString();
+    		Assertion.AssertEquals("converted lbe string", "Test", result);
+    	}    	    	
+    	
+    	[Test]
+    	public void TestWStringWBESToW() {
+    	    MemoryStream stream = new MemoryStream();
+    	    CdrOutputStreamImpl cdrOut = new CdrOutputStreamImpl(stream, STREAM_BIG_ENDIAN_FLAG);
+    	    cdrOut.WCharSet = (int)WCharSet.UTF16;
+    	    cdrOut.WriteWString("Test");
+    	    stream.Seek(0, SeekOrigin.Begin);
+    	    byte[] result = new byte[12];
+    	    stream.Read(result, 0, 12);
+    		ArrayAssertion.AssertByteArrayEquals("converted wbe string", new byte[] { 0, 0, 0, 8, 0, 84, 0, 101, 0, 115, 0, 116 }, result);
+    	}
+    	
+    	[Test]
+    	public void TestWStringWLESToW() {
+    	    MemoryStream stream = new MemoryStream();
+    	    CdrOutputStreamImpl cdrOut = new CdrOutputStreamImpl(stream, STREAM_LITTLE_ENDIAN_FLAG);
+    	    cdrOut.WCharSet = (int)WCharSet.UTF16;
+    	    cdrOut.WriteWString("Test");
+    	    stream.Seek(0, SeekOrigin.Begin);
+    	    byte[] result = new byte[14];
+    	    stream.Read(result, 0, 14);
+    		ArrayAssertion.AssertByteArrayEquals("converted lbe string", new byte[] { 10, 0, 0, 0, 0xFF, 0xFE, 84, 0, 101, 0, 115, 0, 116, 0 }, result);
+    	}    	    	
+
+    	
     }
 }
 
