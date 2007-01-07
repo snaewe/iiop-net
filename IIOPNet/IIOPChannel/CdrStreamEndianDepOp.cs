@@ -39,26 +39,204 @@ using omg.org.CORBA;
 namespace Ch.Elca.Iiop.Cdr {
     
     /// <summary>
+    /// Base class for endian read op base implementations
+    /// </summary>
+    internal abstract class CdrStreamEndianReadOpBase : CdrEndianDepInputStreamOp {
+        
+        #region IFields
+        
+        protected CdrInputStream m_stream;
+        protected GiopVersion m_version;        
+        
+        #endregion IFields
+        #region IConstructors
+        
+        protected CdrStreamEndianReadOpBase(CdrInputStream stream, GiopVersion version) {
+            m_stream = stream;
+            m_version = version;
+        }
+        
+        #endregion IConstructors
+        
+    	
+		public abstract short ReadShort();
+		
+		public void ReadShortArray(short[] array) {
+		    for (int i = 0; i < array.Length; i++) {
+		        array[i] = ReadShort();
+		    }
+		}
+    	
+		public abstract ushort ReadUShort();
+		
+		public void ReadUShortArray(ushort[] array) {
+		    for (int i = 0; i < array.Length; i++) {
+		        array[i] = ReadUShort();
+		    }
+		}		
+    	
+		public abstract int ReadLong();
+		
+		public void ReadLongArray(int[] array) {
+		    for (int i = 0; i < array.Length; i++) {
+		        array[i] = ReadLong();
+		    }
+		}				
+    	
+		public abstract uint ReadULong();
+		
+		public void ReadULongArray(uint[] array) {
+		    for (int i = 0; i < array.Length; i++) {
+		        array[i] = ReadULong();
+		    }
+		}						
+    	
+		public abstract long ReadLongLong();
+		
+		public void ReadLongLongArray(long[] array) {
+		    for (int i = 0; i < array.Length; i++) {
+		        array[i] = ReadLongLong();
+		    }
+		}								
+    	
+		public abstract ulong ReadULongLong();
+
+		public void ReadULongLongArray(ulong[] array) {
+		    for (int i = 0; i < array.Length; i++) {
+		        array[i] = ReadULongLong();
+		    }
+		}										
+    	
+		public abstract float ReadFloat();
+		
+		public void ReadFloatArray(float[] array) {
+		    for (int i = 0; i < array.Length; i++) {
+		        array[i] = ReadFloat();
+		    }
+		}		
+    	
+		public abstract double ReadDouble();
+    	
+		public void ReadDoubleArray(double[] array) {
+		    for (int i = 0; i < array.Length; i++) {
+		        array[i] = ReadDouble();
+		    }
+		}
+    	
+		public abstract char ReadWChar();
+    	
+		public abstract string ReadWString();
+    }
+
+    /// <summary>
+    /// Base class for endian write op base implementations
+    /// </summary>    
+    internal abstract class CdrStreamEndianWriteOpBase : CdrEndianDepOutputStreamOp {
+        
+        #region IFields
+
+        protected CdrOutputStream m_stream;
+        protected GiopVersion m_version;
+
+        #endregion IFields
+        #region IConstructors
+        
+        public CdrStreamEndianWriteOpBase(CdrOutputStream stream, GiopVersion version) {
+            m_stream = stream;
+            m_version = version;
+        }        
+        
+        #endregion IConstructors
+        #region IMethods
+    	
+		public abstract void WriteShort(short data);
+		
+		public void WriteShortArray(short[] array) {
+		    for (int i = 0; i < array.Length; i++) {
+		        WriteShort(array[i]);
+		    }
+		}
+    	
+		public abstract void WriteUShort(ushort data);
+		
+		public void WriteUShortArray(ushort[] array) {
+		    for (int i = 0; i < array.Length; i++) {
+		        WriteUShort(array[i]);
+		    }
+		}		
+    	
+		public abstract void WriteLong(int data);
+		
+		public void WriteLongArray(int[] array) {
+		    for (int i = 0; i < array.Length; i++) {
+		        WriteLong(array[i]);
+		    }
+		}				
+    	
+		public abstract void WriteULong(uint data);
+		
+		public void WriteULongArray(uint[] array) {
+		    for (int i = 0; i < array.Length; i++) {
+		        WriteULong(array[i]);
+		    }
+		}						
+    	
+		public abstract void WriteLongLong(long data);
+		
+		public void WriteLongLongArray(long[] array) {
+		    for (int i = 0; i < array.Length; i++) {
+		        WriteLongLong(array[i]);
+		    }
+		}
+    	
+		public abstract void WriteULongLong(ulong data);
+		
+		public void WriteULongLongArray(ulong[] array) {
+		    for (int i = 0; i < array.Length; i++) {
+		        WriteULongLong(array[i]);
+		    }
+		}
+    	
+		public abstract void WriteFloat(float data);
+		
+		public void WriteFloatArray(float[] array) {
+		    for (int i = 0; i < array.Length; i++) {
+		        WriteFloat(array[i]);
+		    }
+		}		
+    	
+		public abstract void WriteDouble(double data);
+    	
+		public void WriteDoubleArray(double[] array) {
+		    for (int i = 0; i < array.Length; i++) {
+		        WriteDouble(array[i]);
+		    }
+		}
+    	
+		public abstract void WriteWChar(char data);
+    	
+		public abstract void WriteWString(string data);
+		
+		#endregion IMethods
+    }
+    
+    /// <summary>
     /// this is the endian implementation for the endian dependent operation for CDRInput-streams
     /// to use, when the stream endian is different than the plattform endian (see BitConverter.IsLittleEndian)
     /// </summary>
     /// <remarks>
     /// this class is not intended for use by CDRStream users
     /// </remarks>
-    internal class CdrStreamNonNativeEndianReadOP : CdrEndianDepInputStreamOp {
+    internal class CdrStreamNonNativeEndianReadOP : CdrStreamEndianReadOpBase, CdrEndianDepInputStreamOp {
         
         #region IFields
 
-        private CdrInputStream m_stream;
-        private GiopVersion m_version;
         private byte[] m_buf = new byte[8];
 
         #endregion IFields
         #region IConstructors
 
-        public CdrStreamNonNativeEndianReadOP(CdrInputStream stream, GiopVersion version) {
-            m_stream = stream;
-            m_version = version;
+        public CdrStreamNonNativeEndianReadOP(CdrInputStream stream, GiopVersion version) : base(stream, version) {
         }
 
         #endregion IConstructors
@@ -71,42 +249,42 @@ namespace Ch.Elca.Iiop.Cdr {
             m_stream.ReadBytes(m_buf, 0, size);
         }
 
-        public short ReadShort() {
+        public override short ReadShort() {
             Read(2, Aligns.Align2);
             return NonNativeEndianSystemWireBitConverter.ToInt16(m_buf);
         }
 
-        public ushort ReadUShort() {
+        public override ushort ReadUShort() {
             Read(2, Aligns.Align2);
             return NonNativeEndianSystemWireBitConverter.ToUInt16(m_buf);
         }
 
-        public int ReadLong() {
+        public override int ReadLong() {
             Read(4, Aligns.Align4);
             return NonNativeEndianSystemWireBitConverter.ToInt32(m_buf);
         }
 
-        public uint ReadULong() {
+        public override uint ReadULong() {
             Read(4, Aligns.Align4);
             return NonNativeEndianSystemWireBitConverter.ToUInt32(m_buf);
         }
 
-        public long ReadLongLong() {
+        public override long ReadLongLong() {
             Read(8, Aligns.Align8);
             return NonNativeEndianSystemWireBitConverter.ToInt64(m_buf);
         }
 
-        public ulong ReadULongLong() {
+        public override ulong ReadULongLong() {
             Read(8, Aligns.Align8);
             return NonNativeEndianSystemWireBitConverter.ToUInt64(m_buf);
         }
 
-        public float ReadFloat() {
+        public override float ReadFloat() {
             Read(4, Aligns.Align4);
             return NonNativeEndianSystemWireBitConverter.ToSingle(m_buf);
         }
 
-        public double ReadDouble() {
+        public override double ReadDouble() {
             Read(8, Aligns.Align8);
             return NonNativeEndianSystemWireBitConverter.ToDouble(m_buf);
         }
@@ -118,7 +296,7 @@ namespace Ch.Elca.Iiop.Cdr {
             return newData;
         }
         
-        public char ReadWChar() {
+        public override char ReadWChar() {
             Encoding encoding = CodeSetService.GetCharEncoding(m_stream.WCharSet, true, 
                                                                !BitConverter.IsLittleEndian);
             byte[] data;
@@ -135,7 +313,7 @@ namespace Ch.Elca.Iiop.Cdr {
             return result[0];
         }
 
-        public string ReadWString()    {
+        public override string ReadWString()    {
             Encoding encoding = CodeSetService.GetCharEncoding(m_stream.WCharSet, true, 
                                                                !BitConverter.IsLittleEndian);
             uint length = ReadULong(); 
@@ -167,19 +345,11 @@ namespace Ch.Elca.Iiop.Cdr {
     /// <remarks>
     /// this class is not intended for use by CDRStream users
     /// </remarks>
-    internal class CdrStreamNonNativeEndianWriteOP : CdrEndianDepOutputStreamOp {
+    internal class CdrStreamNonNativeEndianWriteOP : CdrStreamEndianWriteOpBase, CdrEndianDepOutputStreamOp {
 
-        #region IFields
-
-        private CdrOutputStream m_stream;
-        private GiopVersion m_version;
-
-        #endregion IFields
         #region IConstructors
         
-        public CdrStreamNonNativeEndianWriteOP(CdrOutputStream stream, GiopVersion version) {
-            m_stream = stream;
-            m_version = version;
+        public CdrStreamNonNativeEndianWriteOP(CdrOutputStream stream, GiopVersion version) : base(stream, version) {
         }
 
         #endregion IConstructors
@@ -192,39 +362,39 @@ namespace Ch.Elca.Iiop.Cdr {
 		    m_stream.WriteBytes(data, 0, count);
 	    }
         
-        public void WriteShort(short data) {
+        public override void WriteShort(short data) {
 		    Write(NonNativeEndianSystemWireBitConverter.GetBytes(data), 2, Aligns.Align2);
         }
 
-        public void WriteUShort(ushort data) {
+        public override void WriteUShort(ushort data) {
 		    Write(NonNativeEndianSystemWireBitConverter.GetBytes(data), 2, Aligns.Align2);
         }
 
-        public void WriteLong(int data) {
+        public override void WriteLong(int data) {
 		    Write(NonNativeEndianSystemWireBitConverter.GetBytes(data), 4, Aligns.Align4);
         }
 
-        public void WriteULong(uint data) {
+        public override void WriteULong(uint data) {
 		    Write(NonNativeEndianSystemWireBitConverter.GetBytes(data), 4, Aligns.Align4);
         }
 
-        public void WriteLongLong(long data) {
+        public override void WriteLongLong(long data) {
 		    Write(NonNativeEndianSystemWireBitConverter.GetBytes(data), 8, Aligns.Align8);
         }
 
-        public void WriteULongLong(ulong data) {
+        public override void WriteULongLong(ulong data) {
 		    Write(NonNativeEndianSystemWireBitConverter.GetBytes(data), 8, Aligns.Align8);
         }
 
-        public void WriteFloat(float data) {
+        public override void WriteFloat(float data) {
 		    Write(NonNativeEndianSystemWireBitConverter.GetBytes(data), 4, Aligns.Align4);
         }
 
-        public void WriteDouble(double data) {
+        public override void WriteDouble(double data) {
 		    Write(NonNativeEndianSystemWireBitConverter.GetBytes(data), 8, Aligns.Align8);
         }
 
-        public void WriteWChar(char data) {
+        public override void WriteWChar(char data) {
             Encoding encoding = CodeSetService.GetCharEncoding(m_stream.WCharSet, true, 
                                                                !BitConverter.IsLittleEndian);
             byte[] toSend = encoding.GetBytes(new char[] { data } );
@@ -234,7 +404,7 @@ namespace Ch.Elca.Iiop.Cdr {
             m_stream.WriteOpaque(toSend);
         }
 
-        public void WriteWString(string data) {
+        public override void WriteWString(string data) {
             Encoding encoding = CodeSetService.GetCharEncoding(m_stream.WCharSet, true, 
                                                                !BitConverter.IsLittleEndian);
             byte[] toSend = encoding.GetBytes(data);
@@ -265,20 +435,16 @@ namespace Ch.Elca.Iiop.Cdr {
     /// <remarks>
     /// this class is not intended for use by CDRStream users
     /// </remarks>
-    internal class CdrStreamNativeEndianReadOP : CdrEndianDepInputStreamOp {
+    internal class CdrStreamNativeEndianReadOP : CdrStreamEndianReadOpBase, CdrEndianDepInputStreamOp {
         
         #region IFields
 
-        private CdrInputStream m_stream;
-        private GiopVersion m_version;
         private byte[] m_buf = new byte[8];
 
         #endregion IFields
         #region IConstructors
 
-        public CdrStreamNativeEndianReadOP(CdrInputStream stream, GiopVersion version) {
-            m_stream = stream;
-            m_version = version;
+        public CdrStreamNativeEndianReadOP(CdrInputStream stream, GiopVersion version) : base(stream, version) {
         }
 
         #endregion IConstructors
@@ -291,42 +457,42 @@ namespace Ch.Elca.Iiop.Cdr {
             m_stream.ReadBytes(m_buf, 0, size);
         }
 
-        public short ReadShort() {
+        public override short ReadShort() {
             Read(2, Aligns.Align2);
             return BitConverter.ToInt16(m_buf, 0);
         }
 
-        public ushort ReadUShort() {
+        public override ushort ReadUShort() {
             Read(2, Aligns.Align2);
             return BitConverter.ToUInt16(m_buf, 0);
         }
 
-        public int ReadLong() {
+        public override int ReadLong() {
             Read(4, Aligns.Align4);
             return BitConverter.ToInt32(m_buf, 0);
         }
 
-        public uint ReadULong() {
+        public override uint ReadULong() {
             Read(4, Aligns.Align4);
             return BitConverter.ToUInt32(m_buf, 0);
         }
 
-        public long ReadLongLong() {
+        public override long ReadLongLong() {
             Read(8, Aligns.Align8);
             return BitConverter.ToInt64(m_buf, 0);
         }
 
-        public ulong ReadULongLong() {
+        public override ulong ReadULongLong() {
             Read(8, Aligns.Align8);
             return BitConverter.ToUInt64(m_buf, 0);
         }
 
-        public float ReadFloat() {
+        public override float ReadFloat() {
             Read(4, Aligns.Align4);
             return BitConverter.ToSingle(m_buf, 0);
         }
 
-        public double ReadDouble() {
+        public override double ReadDouble() {
             Read(8, Aligns.Align8);
             return BitConverter.ToDouble(m_buf, 0);
         }
@@ -338,7 +504,7 @@ namespace Ch.Elca.Iiop.Cdr {
             return newData;
         }
         
-        public char ReadWChar() {
+        public override char ReadWChar() {
             Encoding encoding = CodeSetService.GetCharEncoding(m_stream.WCharSet, true, 
                                                                BitConverter.IsLittleEndian);
             byte[] data;
@@ -355,7 +521,7 @@ namespace Ch.Elca.Iiop.Cdr {
             return result[0];
         }
 
-        public string ReadWString()    {
+        public override string ReadWString()    {
             Encoding encoding = CodeSetService.GetCharEncoding(m_stream.WCharSet, true, 
                                                                BitConverter.IsLittleEndian);
             uint length = ReadULong(); 
@@ -387,19 +553,11 @@ namespace Ch.Elca.Iiop.Cdr {
     /// <remarks>
     /// this class is not intended for use by CDRStream users
     /// </remarks>
-    internal class CdrStreamNativeEndianWriteOP : CdrEndianDepOutputStreamOp {
+    internal class CdrStreamNativeEndianWriteOP : CdrStreamEndianWriteOpBase, CdrEndianDepOutputStreamOp {
 
-        #region IFields
-
-        private CdrOutputStream m_stream;
-        private GiopVersion m_version;
-
-        #endregion IFields
         #region IConstructors
         
-        public CdrStreamNativeEndianWriteOP(CdrOutputStream stream, GiopVersion version) {
-            m_stream = stream;
-            m_version = version;
+        public CdrStreamNativeEndianWriteOP(CdrOutputStream stream, GiopVersion version) : base(stream, version) {
         }
 
         #endregion IConstructors
@@ -412,39 +570,39 @@ namespace Ch.Elca.Iiop.Cdr {
 		    m_stream.WriteBytes(data, 0, count);
 	    }
         
-        public void WriteShort(short data) {
+        public override void WriteShort(short data) {
 		    Write(BitConverter.GetBytes(data), 2, Aligns.Align2);
         }
 
-        public void WriteUShort(ushort data) {
+        public override void WriteUShort(ushort data) {
 		    Write(BitConverter.GetBytes(data), 2, Aligns.Align2);
         }
 
-        public void WriteLong(int data) {
+        public override void WriteLong(int data) {
 		    Write(BitConverter.GetBytes(data), 4, Aligns.Align4);
         }
 
-        public void WriteULong(uint data) {
+        public override void WriteULong(uint data) {
 		    Write(BitConverter.GetBytes(data), 4, Aligns.Align4);
         }
 
-        public void WriteLongLong(long data) {
+        public override void WriteLongLong(long data) {
 		    Write(BitConverter.GetBytes(data), 8, Aligns.Align8);
         }
 
-        public void WriteULongLong(ulong data) {
+        public override void WriteULongLong(ulong data) {
 		    Write(BitConverter.GetBytes(data), 8, Aligns.Align8);
         }
 
-        public void WriteFloat(float data) {
+        public override void WriteFloat(float data) {
 		    Write(BitConverter.GetBytes(data), 4, Aligns.Align4);
         }
 
-        public void WriteDouble(double data) {
+        public override void WriteDouble(double data) {
 		    Write(BitConverter.GetBytes(data), 8, Aligns.Align8);
         }
 
-        public void WriteWChar(char data) {
+        public override void WriteWChar(char data) {
             Encoding encoding = CodeSetService.GetCharEncoding(m_stream.WCharSet, true,
                                                                BitConverter.IsLittleEndian);
             byte[] toSend = encoding.GetBytes(new char[] { data } );
@@ -454,7 +612,7 @@ namespace Ch.Elca.Iiop.Cdr {
             m_stream.WriteOpaque(toSend);
         }
 
-        public void WriteWString(string data) {
+        public override void WriteWString(string data) {
             Encoding encoding = CodeSetService.GetCharEncoding(m_stream.WCharSet, true, 
                                                                BitConverter.IsLittleEndian);
             byte[] toSend = encoding.GetBytes(data);
@@ -489,42 +647,82 @@ namespace Ch.Elca.Iiop.Cdr {
             // endian flag was not set, operation not available
             throw new INTERNAL(919, CompletionStatus.Completed_MayBe);
         }
+               
+        public void ReadShortArray(short[] array) {
+            // endian flag was not set, operation not available
+            throw new INTERNAL(919, CompletionStatus.Completed_MayBe);            
+        }
         
         public ushort ReadUShort() {
             // endian flag was not set, operation not available
             throw new INTERNAL(919, CompletionStatus.Completed_MayBe);
         }
+        
+        public void ReadUShortArray(ushort[] array) {
+            // endian flag was not set, operation not available
+            throw new INTERNAL(919, CompletionStatus.Completed_MayBe);            
+        }        
 
         public int ReadLong() {
             // endian flag was not set, operation not available
             throw new INTERNAL(919, CompletionStatus.Completed_MayBe);
         }
+        
+        public void ReadLongArray(int[] array) {
+            // endian flag was not set, operation not available
+            throw new INTERNAL(919, CompletionStatus.Completed_MayBe);            
+        }                
 
         public uint ReadULong() {
             // endian flag was not set, operation not available
             throw new INTERNAL(919, CompletionStatus.Completed_MayBe);        
         }
+        
+        public void ReadULongArray(uint[] array) {
+            // endian flag was not set, operation not available
+            throw new INTERNAL(919, CompletionStatus.Completed_MayBe);            
+        }                       
 
         public long ReadLongLong() {
             // endian flag was not set, operation not available
             throw new INTERNAL(919, CompletionStatus.Completed_MayBe);
         }
+        
+        public void ReadLongLongArray(long [] array) {
+            // endian flag was not set, operation not available
+            throw new INTERNAL(919, CompletionStatus.Completed_MayBe);            
+        }                               
 
         public ulong ReadULongLong() {
             // endian flag was not set, operation not available
             throw new INTERNAL(919, CompletionStatus.Completed_MayBe);
         }
+        
+        public void ReadULongLongArray(ulong [] array) {
+            // endian flag was not set, operation not available
+            throw new INTERNAL(919, CompletionStatus.Completed_MayBe);            
+        }                                       
 
         public float ReadFloat() {
             // endian flag was not set, operation not available
             throw new INTERNAL(919, CompletionStatus.Completed_MayBe);
         }
+        
+        public void ReadFloatArray(float[] array) {
+            // endian flag was not set, operation not available
+            throw new INTERNAL(919, CompletionStatus.Completed_MayBe);            
+        }                
 
         public double ReadDouble() {
             // endian flag was not set, operation not available
             throw new INTERNAL(919, CompletionStatus.Completed_MayBe);
         }
 
+        public void ReadDoubleArray(double[] array) {
+            // endian flag was not set, operation not available
+            throw new INTERNAL(919, CompletionStatus.Completed_MayBe);            
+        }        
+        
         public char ReadWChar() {
             // endian flag was not set, operation not available
             throw new INTERNAL(919, CompletionStatus.Completed_MayBe);
@@ -540,40 +738,80 @@ namespace Ch.Elca.Iiop.Cdr {
             // endian flag was not set, operation not available
             throw new INTERNAL(919, CompletionStatus.Completed_MayBe);
         }
+        
+        public void WriteShortArray(short[] data) {
+            // endian flag was not set, operation not available
+            throw new INTERNAL(919, CompletionStatus.Completed_MayBe);            
+        }
 
         public void WriteUShort(ushort data) {
             // endian flag was not set, operation not available
             throw new INTERNAL(919, CompletionStatus.Completed_MayBe);
         }
+        
+        public void WriteUShortArray(ushort[] data) {
+            // endian flag was not set, operation not available
+            throw new INTERNAL(919, CompletionStatus.Completed_MayBe);            
+        }        
 
         public void WriteLong(int data) {
             // endian flag was not set, operation not available
             throw new INTERNAL(919, CompletionStatus.Completed_MayBe);
         }
-
+        
+        public void WriteLongArray(int[] data) {
+            // endian flag was not set, operation not available
+            throw new INTERNAL(919, CompletionStatus.Completed_MayBe);            
+        }        
+        
         public void WriteULong(uint data) {
             // endian flag was not set, operation not available
             throw new INTERNAL(919, CompletionStatus.Completed_MayBe);
         }
+        
+        public void WriteULongArray(uint[] data) {
+            // endian flag was not set, operation not available
+            throw new INTERNAL(919, CompletionStatus.Completed_MayBe);            
+        }               
 
         public void WriteLongLong(long data) {
             // endian flag was not set, operation not available
             throw new INTERNAL(919, CompletionStatus.Completed_MayBe);
         }
+        
+        public void WriteLongLongArray(long[] data) {
+            // endian flag was not set, operation not available
+            throw new INTERNAL(919, CompletionStatus.Completed_MayBe);            
+        }                       
 
         public void WriteULongLong(ulong data) {
             // endian flag was not set, operation not available
             throw new INTERNAL(919, CompletionStatus.Completed_MayBe);
         }
+        
+        public void WriteULongLongArray(ulong[] data) {
+            // endian flag was not set, operation not available
+            throw new INTERNAL(919, CompletionStatus.Completed_MayBe);            
+        }                               
 
         public void WriteFloat(float data) {
             // endian flag was not set, operation not available
             throw new INTERNAL(919, CompletionStatus.Completed_MayBe);
         }
+        
+        public void WriteFloatArray(float[] array) {
+            // endian flag was not set, operation not available
+            throw new INTERNAL(919, CompletionStatus.Completed_MayBe);            
+        }        
 
         public void WriteDouble(double data) {
             // endian flag was not set, operation not available
             throw new INTERNAL(919, CompletionStatus.Completed_MayBe);
+        }
+        
+        public void WriteDoubleArray(double[] array) {
+            // endian flag was not set, operation not available
+            throw new INTERNAL(919, CompletionStatus.Completed_MayBe);            
         }
 
         public void WriteWChar(char data) {
