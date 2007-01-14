@@ -47,6 +47,9 @@ namespace Ch.Elca.Iiop.Demo.Chatroom {
 		public static void Main(string[] args) {
 			// register the channel
 			int port = 8087;
+                        if (args.Length > 0) {
+                            port = Int32.Parse(args[0]);
+                        }
 			IiopChannel chan = new IiopChannel(port);
 			ChannelServices.RegisterChannel(chan);
 		
