@@ -46,7 +46,8 @@ namespace Ch.Elca.Iiop.Cdr {
         #region IFields
         
         protected CdrInputStream m_stream;
-        protected GiopVersion m_version;        
+        protected GiopVersion m_version;  
+        protected byte[] m_buf = new byte[8];
         
         #endregion IFields
         #region IConstructors
@@ -58,68 +59,128 @@ namespace Ch.Elca.Iiop.Cdr {
         
         #endregion IConstructors
         
+        private void Read(int size, Aligns align) {
+            m_stream.ForceReadAlign(align);
+            m_stream.ReadBytes(m_buf, 0, size);
+        }        
     	
-		public abstract short ReadShort();
-		
+        protected abstract short BufferToShort();
+        
+        public short ReadShort() {
+            Read(2, Aligns.Align2);
+		    return BufferToShort();
+        }
+			
 		public void ReadShortArray(short[] array) {
+		    m_stream.ForceReadAlign(Aligns.Align2); // align first element only
 		    for (int i = 0; i < array.Length; i++) {
-		        array[i] = ReadShort();
+		        m_stream.ReadBytes(m_buf, 0, 2);
+		        array[i] = BufferToShort();
 		    }
 		}
+		
+		protected abstract ushort BufferToUShort();
     	
-		public abstract ushort ReadUShort();
+		public ushort ReadUShort() {
+		    Read(2, Aligns.Align2);
+		    return BufferToUShort();
+		}
 		
 		public void ReadUShortArray(ushort[] array) {
+		    m_stream.ForceReadAlign(Aligns.Align2); // align first element only
 		    for (int i = 0; i < array.Length; i++) {
-		        array[i] = ReadUShort();
+		        m_stream.ReadBytes(m_buf, 0, 2);
+		        array[i] = BufferToUShort();
 		    }
 		}		
     	
-		public abstract int ReadLong();
+		protected abstract int BufferToLong();
+		
+		public int ReadLong() {
+		    Read(4, Aligns.Align4);
+		    return BufferToLong();
+		}
 		
 		public void ReadLongArray(int[] array) {
+		    m_stream.ForceReadAlign(Aligns.Align4); // align first element only
 		    for (int i = 0; i < array.Length; i++) {
-		        array[i] = ReadLong();
+		        m_stream.ReadBytes(m_buf, 0, 4);
+		        array[i] = BufferToLong();
 		    }
-		}				
+		}	
+		
+		protected abstract uint BufferToULong();
     	
-		public abstract uint ReadULong();
+		public uint ReadULong() {
+		    Read(4, Aligns.Align4);
+		    return BufferToULong();
+		}
 		
 		public void ReadULongArray(uint[] array) {
+		    m_stream.ForceReadAlign(Aligns.Align4); // align first element only
 		    for (int i = 0; i < array.Length; i++) {
-		        array[i] = ReadULong();
+		        m_stream.ReadBytes(m_buf, 0, 4);
+		        array[i] = BufferToULong();
 		    }
-		}						
+		}	
+		
+		protected abstract long BufferToLongLong();
     	
-		public abstract long ReadLongLong();
+		public long ReadLongLong() {
+		    Read(8, Aligns.Align8);
+		    return BufferToLongLong();
+		}
 		
 		public void ReadLongLongArray(long[] array) {
+		    m_stream.ForceReadAlign(Aligns.Align8); // align first element only
 		    for (int i = 0; i < array.Length; i++) {
-		        array[i] = ReadLongLong();
+		        m_stream.ReadBytes(m_buf, 0, 8);
+		        array[i] = BufferToLongLong();
 		    }
 		}								
     	
-		public abstract ulong ReadULongLong();
+		protected abstract ulong BufferToULongLong();
+		
+		public ulong ReadULongLong() {
+		    Read(8, Aligns.Align8);
+		    return BufferToULongLong();
+		}
 
 		public void ReadULongLongArray(ulong[] array) {
+		    m_stream.ForceReadAlign(Aligns.Align8); // align first element only
 		    for (int i = 0; i < array.Length; i++) {
-		        array[i] = ReadULongLong();
+		        m_stream.ReadBytes(m_buf, 0, 8);
+		        array[i] = BufferToULongLong();
 		    }
 		}										
     	
-		public abstract float ReadFloat();
+		protected abstract float BufferToFloat();
+		
+		public float ReadFloat() {
+		    Read(4, Aligns.Align4);
+		    return BufferToFloat();
+		}
 		
 		public void ReadFloatArray(float[] array) {
+		    m_stream.ForceReadAlign(Aligns.Align4); // align first element only
 		    for (int i = 0; i < array.Length; i++) {
-		        array[i] = ReadFloat();
+		        m_stream.ReadBytes(m_buf, 0, 4);
+		        array[i] = BufferToFloat();
 		    }
 		}		
     	
-		public abstract double ReadDouble();
+		protected abstract double BufferToDouble();
+		
+		public double ReadDouble() {
+		    Read(8, Aligns.Align8);
+		    return BufferToDouble();
+		}
     	
 		public void ReadDoubleArray(double[] array) {
+		    m_stream.ForceReadAlign(Aligns.Align8); // align first element only
 		    for (int i = 0; i < array.Length; i++) {
-		        array[i] = ReadDouble();
+		        m_stream.ReadBytes(m_buf, 0, 8);
+		        array[i] = BufferToDouble();
 		    }
 		}
     	
@@ -149,67 +210,112 @@ namespace Ch.Elca.Iiop.Cdr {
         #endregion IConstructors
         #region IMethods
     	
-		public abstract void WriteShort(short data);
+        private void Write(byte[] data, int count, Aligns align) {
+	        m_stream.ForceWriteAlign(align);
+		    m_stream.WriteBytes(data, 0, count);
+	    }
+        
+        protected abstract byte[] ShortToBytes(short data);
+        
+        public void WriteShort(short data) {
+            Write(ShortToBytes(data), 2, Aligns.Align2);
+        }
 		
 		public void WriteShortArray(short[] array) {
+		    m_stream.ForceWriteAlign(Aligns.Align2); // align first element only
 		    for (int i = 0; i < array.Length; i++) {
-		        WriteShort(array[i]);
+		        m_stream.WriteBytes(ShortToBytes(array[i]), 0, 2);
 		    }
 		}
+		
+		protected abstract byte[] UShortToBytes(ushort data);
     	
-		public abstract void WriteUShort(ushort data);
+		public void WriteUShort(ushort data) {
+		    Write(UShortToBytes(data), 2, Aligns.Align2);
+		}
 		
 		public void WriteUShortArray(ushort[] array) {
+		    m_stream.ForceWriteAlign(Aligns.Align2); // align first element only
 		    for (int i = 0; i < array.Length; i++) {
-		        WriteUShort(array[i]);
+		        m_stream.WriteBytes(UShortToBytes(array[i]), 0, 2);
 		    }
 		}		
     	
-		public abstract void WriteLong(int data);
+		protected abstract byte[] LongToBytes(int data);
+		
+		public void WriteLong(int data) {
+		    Write(LongToBytes(data), 4, Aligns.Align4);
+		}
 		
 		public void WriteLongArray(int[] array) {
+		    m_stream.ForceWriteAlign(Aligns.Align4); // align first element only
 		    for (int i = 0; i < array.Length; i++) {
-		        WriteLong(array[i]);
+		        m_stream.WriteBytes(LongToBytes(array[i]), 0, 4);
 		    }
 		}				
     	
-		public abstract void WriteULong(uint data);
+		protected abstract byte[] ULongToBytes(uint data);
+		
+		public void WriteULong(uint data) {
+		    Write(ULongToBytes(data), 4, Aligns.Align4);
+		}
 		
 		public void WriteULongArray(uint[] array) {
+		    m_stream.ForceWriteAlign(Aligns.Align4); // align first element only
 		    for (int i = 0; i < array.Length; i++) {
-		        WriteULong(array[i]);
+		        m_stream.WriteBytes(ULongToBytes(array[i]), 0, 4);
 		    }
 		}						
     	
-		public abstract void WriteLongLong(long data);
+		protected abstract byte[] LongLongToBytes(long data);
+		
+		public void WriteLongLong(long data) {
+		    Write(LongLongToBytes(data), 8, Aligns.Align8);
+		}
 		
 		public void WriteLongLongArray(long[] array) {
+		    m_stream.ForceWriteAlign(Aligns.Align8); // align first element only
 		    for (int i = 0; i < array.Length; i++) {
-		        WriteLongLong(array[i]);
+		        m_stream.WriteBytes(LongLongToBytes(array[i]), 0, 8);
 		    }
 		}
     	
-		public abstract void WriteULongLong(ulong data);
+		protected abstract byte[] ULongLongToBytes(ulong data);
+		
+		public void WriteULongLong(ulong data) {
+		    Write(ULongLongToBytes(data), 8, Aligns.Align8);
+		}
 		
 		public void WriteULongLongArray(ulong[] array) {
+		    m_stream.ForceWriteAlign(Aligns.Align8); // align first element only
 		    for (int i = 0; i < array.Length; i++) {
-		        WriteULongLong(array[i]);
+		        m_stream.WriteBytes(ULongLongToBytes(array[i]), 0, 8);
 		    }
 		}
     	
-		public abstract void WriteFloat(float data);
+		protected abstract byte[] FloatToBytes(float data);
+		
+		public void WriteFloat(float data) {
+		    Write(FloatToBytes(data), 4, Aligns.Align4);
+		}
 		
 		public void WriteFloatArray(float[] array) {
+		    m_stream.ForceWriteAlign(Aligns.Align4); // align first element only
 		    for (int i = 0; i < array.Length; i++) {
-		        WriteFloat(array[i]);
+		        m_stream.WriteBytes(FloatToBytes(array[i]), 0, 4);
 		    }
 		}		
-    	
-		public abstract void WriteDouble(double data);
+
+		protected abstract byte[] DoubleToBytes(double data);
+		
+		public void WriteDouble(double data) {		    		    
+		    Write(DoubleToBytes(data), 8, Aligns.Align8);
+		}
     	
 		public void WriteDoubleArray(double[] array) {
+		    m_stream.ForceWriteAlign(Aligns.Align8);  // align first element only
 		    for (int i = 0; i < array.Length; i++) {
-		        WriteDouble(array[i]);
+		        m_stream.WriteBytes(DoubleToBytes(array[i]), 0, 8);
 		    }
 		}
     	
@@ -231,8 +337,6 @@ namespace Ch.Elca.Iiop.Cdr {
         
         #region IFields
 
-        private byte[] m_buf = new byte[8];
-
         #endregion IFields
         #region IConstructors
 
@@ -244,48 +348,35 @@ namespace Ch.Elca.Iiop.Cdr {
                 
         #region read methods depenant on byte ordering
 
-        private void Read(int size, Aligns align) {
-            m_stream.ForceReadAlign(align);
-            m_stream.ReadBytes(m_buf, 0, size);
-        }
-
-        public override short ReadShort() {
-            Read(2, Aligns.Align2);
+        protected override short BufferToShort() {
             return NonNativeEndianSystemWireBitConverter.ToInt16(m_buf);
         }
 
-        public override ushort ReadUShort() {
-            Read(2, Aligns.Align2);
+        protected override ushort BufferToUShort() {
             return NonNativeEndianSystemWireBitConverter.ToUInt16(m_buf);
         }
 
-        public override int ReadLong() {
-            Read(4, Aligns.Align4);
+        protected override int BufferToLong() {
             return NonNativeEndianSystemWireBitConverter.ToInt32(m_buf);
         }
 
-        public override uint ReadULong() {
-            Read(4, Aligns.Align4);
+        protected override uint BufferToULong() {
             return NonNativeEndianSystemWireBitConverter.ToUInt32(m_buf);
         }
 
-        public override long ReadLongLong() {
-            Read(8, Aligns.Align8);
+        protected override long BufferToLongLong() {
             return NonNativeEndianSystemWireBitConverter.ToInt64(m_buf);
         }
 
-        public override ulong ReadULongLong() {
-            Read(8, Aligns.Align8);
+        protected override ulong BufferToULongLong() {
             return NonNativeEndianSystemWireBitConverter.ToUInt64(m_buf);
         }
 
-        public override float ReadFloat() {
-            Read(4, Aligns.Align4);
+        protected override float BufferToFloat() {
             return NonNativeEndianSystemWireBitConverter.ToSingle(m_buf);
         }
 
-        public override double ReadDouble() {
-            Read(8, Aligns.Align8);
+        protected override double BufferToDouble() {            
             return NonNativeEndianSystemWireBitConverter.ToDouble(m_buf);
         }
         
@@ -356,43 +447,38 @@ namespace Ch.Elca.Iiop.Cdr {
         #region IMethods
                 
         #region write methods dependant on byte ordering
-
-    	private void Write(byte[] data, int count, Aligns align) {
-	        m_stream.ForceWriteAlign(align);
-		    m_stream.WriteBytes(data, 0, count);
-	    }
         
-        public override void WriteShort(short data) {
-		    Write(NonNativeEndianSystemWireBitConverter.GetBytes(data), 2, Aligns.Align2);
+		protected override byte[] ShortToBytes(short data) {					
+		    return NonNativeEndianSystemWireBitConverter.GetBytes(data);
         }
 
-        public override void WriteUShort(ushort data) {
-		    Write(NonNativeEndianSystemWireBitConverter.GetBytes(data), 2, Aligns.Align2);
+        protected override byte[] UShortToBytes(ushort data) {
+		    return NonNativeEndianSystemWireBitConverter.GetBytes(data);
         }
 
-        public override void WriteLong(int data) {
-		    Write(NonNativeEndianSystemWireBitConverter.GetBytes(data), 4, Aligns.Align4);
+        protected override byte[] LongToBytes(int data) {
+		    return NonNativeEndianSystemWireBitConverter.GetBytes(data);
         }
 
-        public override void WriteULong(uint data) {
-		    Write(NonNativeEndianSystemWireBitConverter.GetBytes(data), 4, Aligns.Align4);
+        protected override byte[] ULongToBytes(uint data) {
+		    return NonNativeEndianSystemWireBitConverter.GetBytes(data);
         }
 
-        public override void WriteLongLong(long data) {
-		    Write(NonNativeEndianSystemWireBitConverter.GetBytes(data), 8, Aligns.Align8);
+        protected override byte[] LongLongToBytes(long data) {
+		    return NonNativeEndianSystemWireBitConverter.GetBytes(data);
         }
 
-        public override void WriteULongLong(ulong data) {
-		    Write(NonNativeEndianSystemWireBitConverter.GetBytes(data), 8, Aligns.Align8);
+        protected override byte[] ULongLongToBytes(ulong data) {
+		    return NonNativeEndianSystemWireBitConverter.GetBytes(data);
         }
 
-        public override void WriteFloat(float data) {
-		    Write(NonNativeEndianSystemWireBitConverter.GetBytes(data), 4, Aligns.Align4);
+        protected override byte[] FloatToBytes(float data) {
+		    return NonNativeEndianSystemWireBitConverter.GetBytes(data);
         }
 
-        public override void WriteDouble(double data) {
-		    Write(NonNativeEndianSystemWireBitConverter.GetBytes(data), 8, Aligns.Align8);
-        }
+        protected override byte[] DoubleToBytes(double data) {
+            return NonNativeEndianSystemWireBitConverter.GetBytes(data);
+        }                
 
         public override void WriteWChar(char data) {
             Encoding encoding = CodeSetService.GetCharEncoding(m_stream.WCharSet, true, 
@@ -439,8 +525,6 @@ namespace Ch.Elca.Iiop.Cdr {
         
         #region IFields
 
-        private byte[] m_buf = new byte[8];
-
         #endregion IFields
         #region IConstructors
 
@@ -452,50 +536,37 @@ namespace Ch.Elca.Iiop.Cdr {
                 
         #region read methods depenant on byte ordering
 
-        private void Read(int size, Aligns align) {
-            m_stream.ForceReadAlign(align);
-            m_stream.ReadBytes(m_buf, 0, size);
-        }
-
-        public override short ReadShort() {
-            Read(2, Aligns.Align2);
+        protected override short BufferToShort() {
             return BitConverter.ToInt16(m_buf, 0);
         }
 
-        public override ushort ReadUShort() {
-            Read(2, Aligns.Align2);
+        protected override ushort BufferToUShort() {
             return BitConverter.ToUInt16(m_buf, 0);
         }
 
-        public override int ReadLong() {
-            Read(4, Aligns.Align4);
+        protected override int BufferToLong() {
             return BitConverter.ToInt32(m_buf, 0);
         }
 
-        public override uint ReadULong() {
-            Read(4, Aligns.Align4);
+        protected override uint BufferToULong() {
             return BitConverter.ToUInt32(m_buf, 0);
         }
 
-        public override long ReadLongLong() {
-            Read(8, Aligns.Align8);
+        protected override long BufferToLongLong() {
             return BitConverter.ToInt64(m_buf, 0);
         }
 
-        public override ulong ReadULongLong() {
-            Read(8, Aligns.Align8);
+        protected override ulong BufferToULongLong() {
             return BitConverter.ToUInt64(m_buf, 0);
         }
 
-        public override float ReadFloat() {
-            Read(4, Aligns.Align4);
+        protected override float BufferToFloat() {
             return BitConverter.ToSingle(m_buf, 0);
         }
 
-        public override double ReadDouble() {
-            Read(8, Aligns.Align8);
-            return BitConverter.ToDouble(m_buf, 0);
-        }
+		protected override double BufferToDouble() {
+			return BitConverter.ToDouble(m_buf, 0);
+		}        
         
         private byte[] AppendChar(byte[] oldData) {
             byte[] newData = new byte[oldData.Length+1];
@@ -564,42 +635,37 @@ namespace Ch.Elca.Iiop.Cdr {
         #region IMethods
                 
         #region write methods dependant on byte ordering
-
-       	private void Write(byte[] data, int count, Aligns align) {
-		    m_stream.ForceWriteAlign(align);
-		    m_stream.WriteBytes(data, 0, count);
-	    }
         
-        public override void WriteShort(short data) {
-		    Write(BitConverter.GetBytes(data), 2, Aligns.Align2);
+        protected override byte[] ShortToBytes(short data) {
+		    return BitConverter.GetBytes(data);
         }
 
-        public override void WriteUShort(ushort data) {
-		    Write(BitConverter.GetBytes(data), 2, Aligns.Align2);
+        protected override byte[] UShortToBytes(ushort data) {
+		    return BitConverter.GetBytes(data);
         }
 
-        public override void WriteLong(int data) {
-		    Write(BitConverter.GetBytes(data), 4, Aligns.Align4);
+        protected override byte[] LongToBytes(int data) {
+		    return BitConverter.GetBytes(data);
         }
 
-        public override void WriteULong(uint data) {
-		    Write(BitConverter.GetBytes(data), 4, Aligns.Align4);
+        protected override byte[] ULongToBytes(uint data) {
+		    return BitConverter.GetBytes(data);
         }
 
-        public override void WriteLongLong(long data) {
-		    Write(BitConverter.GetBytes(data), 8, Aligns.Align8);
+        protected override byte[] LongLongToBytes(long data) {
+		    return BitConverter.GetBytes(data);
         }
 
-        public override void WriteULongLong(ulong data) {
-		    Write(BitConverter.GetBytes(data), 8, Aligns.Align8);
+        protected override byte[] ULongLongToBytes(ulong data) {
+		    return BitConverter.GetBytes(data);
         }
 
-        public override void WriteFloat(float data) {
-		    Write(BitConverter.GetBytes(data), 4, Aligns.Align4);
+        protected override byte[] FloatToBytes(float data) {
+		    return BitConverter.GetBytes(data);
         }
-
-        public override void WriteDouble(double data) {
-		    Write(BitConverter.GetBytes(data), 8, Aligns.Align8);
+        
+        protected override byte[] DoubleToBytes(double data) {        
+		    return BitConverter.GetBytes(data);
         }
 
         public override void WriteWChar(char data) {
