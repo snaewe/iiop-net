@@ -45,14 +45,14 @@ namespace Ch.Elca.Iiop.Cdr {
         
         #region IFields
         
-        protected CdrInputStream m_stream;
+        protected CdrInputStreamImpl m_stream;
         protected GiopVersion m_version;  
         protected byte[] m_buf = new byte[8];
         
         #endregion IFields
         #region IConstructors
         
-        protected CdrStreamEndianReadOpBase(CdrInputStream stream, GiopVersion version) {
+        protected CdrStreamEndianReadOpBase(CdrInputStreamImpl stream, GiopVersion version) {
             m_stream = stream;
             m_version = version;
         }
@@ -196,13 +196,13 @@ namespace Ch.Elca.Iiop.Cdr {
         
         #region IFields
 
-        protected CdrOutputStream m_stream;
+        protected CdrOutputStreamImpl m_stream;
         protected GiopVersion m_version;
 
         #endregion IFields
         #region IConstructors
         
-        public CdrStreamEndianWriteOpBase(CdrOutputStream stream, GiopVersion version) {
+        public CdrStreamEndianWriteOpBase(CdrOutputStreamImpl stream, GiopVersion version) {
             m_stream = stream;
             m_version = version;
         }        
@@ -333,14 +333,14 @@ namespace Ch.Elca.Iiop.Cdr {
     /// <remarks>
     /// this class is not intended for use by CDRStream users
     /// </remarks>
-    internal class CdrStreamNonNativeEndianReadOP : CdrStreamEndianReadOpBase, CdrEndianDepInputStreamOp {
+    internal sealed class CdrStreamNonNativeEndianReadOP : CdrStreamEndianReadOpBase, CdrEndianDepInputStreamOp {
         
         #region IFields
 
         #endregion IFields
         #region IConstructors
 
-        public CdrStreamNonNativeEndianReadOP(CdrInputStream stream, GiopVersion version) : base(stream, version) {
+        public CdrStreamNonNativeEndianReadOP(CdrInputStreamImpl stream, GiopVersion version) : base(stream, version) {
         }
 
         #endregion IConstructors
@@ -436,11 +436,11 @@ namespace Ch.Elca.Iiop.Cdr {
     /// <remarks>
     /// this class is not intended for use by CDRStream users
     /// </remarks>
-    internal class CdrStreamNonNativeEndianWriteOP : CdrStreamEndianWriteOpBase, CdrEndianDepOutputStreamOp {
+    internal sealed class CdrStreamNonNativeEndianWriteOP : CdrStreamEndianWriteOpBase, CdrEndianDepOutputStreamOp {
 
         #region IConstructors
         
-        public CdrStreamNonNativeEndianWriteOP(CdrOutputStream stream, GiopVersion version) : base(stream, version) {
+        public CdrStreamNonNativeEndianWriteOP(CdrOutputStreamImpl stream, GiopVersion version) : base(stream, version) {
         }
 
         #endregion IConstructors
@@ -521,14 +521,14 @@ namespace Ch.Elca.Iiop.Cdr {
     /// <remarks>
     /// this class is not intended for use by CDRStream users
     /// </remarks>
-    internal class CdrStreamNativeEndianReadOP : CdrStreamEndianReadOpBase, CdrEndianDepInputStreamOp {
+    internal sealed class CdrStreamNativeEndianReadOP : CdrStreamEndianReadOpBase, CdrEndianDepInputStreamOp {
         
         #region IFields
 
         #endregion IFields
         #region IConstructors
 
-        public CdrStreamNativeEndianReadOP(CdrInputStream stream, GiopVersion version) : base(stream, version) {
+        public CdrStreamNativeEndianReadOP(CdrInputStreamImpl stream, GiopVersion version) : base(stream, version) {
         }
 
         #endregion IConstructors
@@ -624,11 +624,11 @@ namespace Ch.Elca.Iiop.Cdr {
     /// <remarks>
     /// this class is not intended for use by CDRStream users
     /// </remarks>
-    internal class CdrStreamNativeEndianWriteOP : CdrStreamEndianWriteOpBase, CdrEndianDepOutputStreamOp {
+    internal sealed class CdrStreamNativeEndianWriteOP : CdrStreamEndianWriteOpBase, CdrEndianDepOutputStreamOp {
 
         #region IConstructors
         
-        public CdrStreamNativeEndianWriteOP(CdrOutputStream stream, GiopVersion version) : base(stream, version) {
+        public CdrStreamNativeEndianWriteOP(CdrOutputStreamImpl stream, GiopVersion version) : base(stream, version) {
         }
 
         #endregion IConstructors
@@ -705,7 +705,7 @@ namespace Ch.Elca.Iiop.Cdr {
     /// <summary>
     /// An Instance of this class is used, if the endian flag is not yet specified in a CdrStream.
     /// </summary>
-    internal class CdrEndianOpNotSpecified : CdrEndianDepInputStreamOp, CdrEndianDepOutputStreamOp {
+    internal sealed class CdrEndianOpNotSpecified : CdrEndianDepInputStreamOp, CdrEndianDepOutputStreamOp {
         
         #region IMethods
         
