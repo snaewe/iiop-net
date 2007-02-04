@@ -1,5 +1,20 @@
-version 1.9.0 final (20 august 2006)
-------------------------------------
+version 1.9.0 final (4 february 2007)
+-------------------------------------
+
+bug fixed:
+- explicit field ordering for serialization/deserialization; doesn't depend on ordering by the reflection api any more,
+  because this could lead to issues. -> to get effect, recompile all your idl.
+- support request #1618994: Makefile.mono didn't include MappingPlugin.xsd, so that MappingPlugin was
+  non functional on Mono.
+
+compatibility:
+- fixed IIOP.NET to workaround wrong implementation of Attribute.GetHashCode in newer mono versions.
+
+other improvements:
+- additional performance improvements (mostly for primitive arrays)
+
+version 1.9.0 rc0 (20 august 2006)
+----------------------------------
 
 bug fixed:
 - fixed memory leak on the server side: some resource allocated for clients were not freed until application end
