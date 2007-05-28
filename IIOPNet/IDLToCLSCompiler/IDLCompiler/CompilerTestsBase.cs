@@ -79,11 +79,18 @@ namespace Ch.Elca.Iiop.IdlCompiler.Tests {
         protected Assembly CreateIdl(Stream source, AssemblyName targetName,
                                   bool anyToAnyContainerMapping,
                                   bool makeInterfaceDisposable) {
-            IDLParser parser = new IDLParser(source);
+            return CreateIdl(source, targetName, anyToAnyContainerMapping,
+        	                 makeInterfaceDisposable, new ArrayList());
+        }        
+        
+        protected Assembly CreateIdl(Stream source, AssemblyName targetName,
+                                     bool anyToAnyContainerMapping, bool makeInterfaceDisposable,
+                                     ArrayList refAssemblies) {
+        	IDLParser parser = new IDLParser(source);
             ASTspecification spec = parser.specification();
             // now parsed representation can be visited with the visitors
             MetaDataGenerator generator = new MetaDataGenerator(targetName, ".", 
-                                                                new ArrayList());
+                                                                refAssemblies);
             generator.MapAnyToAnyContainer = anyToAnyContainerMapping;
             if(makeInterfaceDisposable) {
                 generator.InheritedInterface = typeof(System.IDisposable);
@@ -92,7 +99,7 @@ namespace Ch.Elca.Iiop.IdlCompiler.Tests {
             spec.jjtAccept(generator, null);
             Assembly result = generator.ResultAssembly;            
             return result;
-        }        
+        }
         
         
         /// <summary>

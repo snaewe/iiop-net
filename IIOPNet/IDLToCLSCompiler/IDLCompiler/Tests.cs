@@ -922,6 +922,49 @@ namespace Ch.Elca.Iiop.IdlCompiler.Tests {
             CheckPublicInstanceMethodPresent(ifType, "EchoAnyToContainer", 
                                              typeof(object), new Type[] { typeof(object) });
         }
+        
+        private Assembly CreateEnumRefAssembly() {
+        	MemoryStream testSource = new MemoryStream();
+            StreamWriter writer = CreateSourceWriter(testSource);
+
+            // idl:            
+            writer.WriteLine("module Test {");
+            writer.WriteLine("   enum En {En_A, En_B, En_C};");
+            writer.WriteLine("};");
+            
+            writer.Flush();
+            testSource.Seek(0, SeekOrigin.Begin);
+            Assembly result = CreateIdl(testSource, GetAssemblyName(), false, false);
+            writer.Close();
+            return result;
+        }
+        
+        [Test]
+        public void EnumSymboldFromRefAssembliesBugReport() {
+        	Assembly enumAssembly = CreateEnumRefAssembly();
+        	
+        	MemoryStream testSource = new MemoryStream();
+            StreamWriter writer = CreateSourceWriter(testSource);
+
+            // idl:            
+            writer.WriteLine("module Test {");
+            writer.WriteLine("   enum En {En_A, En_B, En_C};");            
+            writer.WriteLine("");
+            writer.WriteLine("   union Un switch (En) { ");
+            writer.WriteLine("     case En_A: long i; ");
+            writer.WriteLine("     case En_B: char c; ");                               
+            writer.WriteLine("   };");
+            writer.WriteLine("};");
+            
+            writer.Flush();
+            testSource.Seek(0, SeekOrigin.Begin);
+            Assembly result = CreateIdl(testSource, GetAssemblyName(), false, false, 
+                                        new ArrayList(new Assembly[] { enumAssembly }));
+            writer.Close();
+                       
+            // check if union is correctly created
+            Type ifType = result.GetType("Test.Un", true);        	        	        	                                    
+        }
 
         #endregion
         

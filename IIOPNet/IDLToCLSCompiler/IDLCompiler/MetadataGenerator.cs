@@ -2158,44 +2158,46 @@ public class MetaDataGenerator : IDLParserVisitor {
         BuildInfo buildInfo = (BuildInfo) data;
         Symbol forSymbol = buildInfo.GetBuildScope().getSymbol(node.getIdent());
         // check if type is known from a previous run over a parse tree --> if so: skip
-        if (m_typeManager.CheckSkip(forSymbol)) { 
-            return m_typeManager.GetKnownType(forSymbol);
-        }
-                
-        TypeAttributes typeAttrs = TypeAttributes.Class | TypeAttributes.Public | TypeAttributes.Sealed;        
-        TypeBuilder enumToCreate = 
-            m_typeManager.StartTypeDefinition(forSymbol, typeAttrs,
-                                              typeof(System.Enum), Type.EmptyTypes, false);                                                                                     
+        TypeContainer resultTypeContainer = null;
+        if (m_typeManager.CheckSkip(forSymbol)) {
+            resultTypeContainer = m_typeManager.GetKnownType(forSymbol);            
+        } else {                
+            TypeAttributes typeAttrs = TypeAttributes.Class | TypeAttributes.Public | TypeAttributes.Sealed;        
+            TypeBuilder enumToCreate = 
+                m_typeManager.StartTypeDefinition(forSymbol, typeAttrs,
+                                                  typeof(System.Enum), Type.EmptyTypes, false);                                                                                     
         
-        // add value__ field, see DefineEnum method of ModuleBuilder
-        enumToCreate.DefineField("value__", typeof(System.Int32), 
-                                 FieldAttributes.Public | FieldAttributes.SpecialName | FieldAttributes.RTSpecialName);
+        	// add value__ field, see DefineEnum method of ModuleBuilder
+            enumToCreate.DefineField("value__", typeof(System.Int32), 
+                                     FieldAttributes.Public | FieldAttributes.SpecialName | FieldAttributes.RTSpecialName);
         
-        // add enum entries
-        for (int i = 0; i < node.jjtGetNumChildren(); i++) {
-            String enumeratorId = ((SimpleNodeWithIdent)node.jjtGetChild(i)).getIdent();
-            FieldBuilder enumVal = enumToCreate.DefineField(enumeratorId, enumToCreate, 
-                                                            FieldAttributes.Public | FieldAttributes.Static | FieldAttributes.Literal);
-            enumVal.SetConstant((System.Int32) i);
+        	// add enum entries
+            for (int i = 0; i < node.jjtGetNumChildren(); i++) {
+                String enumeratorId = ((SimpleNodeWithIdent)node.jjtGetChild(i)).getIdent();
+                FieldBuilder enumVal = enumToCreate.DefineField(enumeratorId, enumToCreate, 
+                	                                            FieldAttributes.Public | FieldAttributes.Static | FieldAttributes.Literal);
+                enumVal.SetConstant((System.Int32) i);
+            }
+
+            // add type specific attributes
+            enumToCreate.SetCustomAttribute(new IdlEnumAttribute().CreateAttributeBuilder());
+            m_ilEmitHelper.AddSerializableAttribute(enumToCreate);
+        
+            // create the type
+            Type resultType = m_typeManager.EndTypeDefinition(forSymbol);
+            resultTypeContainer = new TypeContainer(resultType);
         }
 
-        // add type specific attributes
-        enumToCreate.SetCustomAttribute(new IdlEnumAttribute().CreateAttributeBuilder());
-        m_ilEmitHelper.AddSerializableAttribute(enumToCreate);
-        
-        // create the type
-        Type resultType = m_typeManager.EndTypeDefinition(forSymbol);         
-
-        // update the symbol values:
+        // update the symbol values: (do this also, if type is from another assembly)
         for (int i = 0; i < node.jjtGetNumChildren(); i++) {
             String enumeratorId = ((SimpleNodeWithIdent)node.jjtGetChild(i)).getIdent();
             // update symbol with value
             SymbolValue symbol = (SymbolValue)buildInfo.GetBuildScope().getSymbol(enumeratorId);
-            object enumVal = Enum.ToObject(resultType, (System.Int32) i);
+            object enumVal = Enum.ToObject(resultTypeContainer.GetCompactClsType(), (System.Int32) i);
             symbol.SetValueAsLiteral(new EnumValLiteral(enumVal));
         }
 
-        return new TypeContainer(resultType);
+        return resultTypeContainer;
     }
 
     /**
