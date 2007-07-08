@@ -208,6 +208,15 @@ public class TestClient extends TestCase {
         }
     }
 
+    public void testHashMapWithByteArrayElem() throws Exception {
+        byte[] content1 = new byte[10];
+        for (int i = 0; i < content1.length; i++) {
+            content1[i] = (byte)(i + 1);
+        }
+        String content2 = "content2";
+        HashMap result = m_testService.CreateHashtableWithByteArrayAndStringElement(content1, content2);
+        assertEquals(2, result.size());        
+    }
 
     public void testDate() throws Exception {
         Date arg = new Date();

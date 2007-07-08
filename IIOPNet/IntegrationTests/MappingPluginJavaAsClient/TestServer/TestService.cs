@@ -37,6 +37,20 @@ namespace Ch.Elca.Iiop.IntegrationTests.MappingPlugin {
     public class TestSerializableClassB1 {
         public System.String Msg;
     }
+
+    [Serializable]
+    public class ByteArrayContainer {
+
+        public ByteArrayContainer() {
+        }
+
+        public ByteArrayContainer(byte[] content) {
+            Content = content;
+        }
+
+        [IdlSequence(0L)]
+        public byte[] Content;
+    }
     
 
     [SupportedInterface(typeof(TestService))]
@@ -159,6 +173,14 @@ namespace Ch.Elca.Iiop.IntegrationTests.MappingPlugin {
             }
             return result;
         }
+
+        public Hashtable CreateHashtableWithByteArrayAndStringElement(byte[] content1, string content2) {
+            Hashtable result = new Hashtable();
+            //result["content1"] = content1; // doesn't work, because of java behaviour
+            result["content1"] = new ByteArrayContainer(content1);
+            result["content2"] = content2;
+            return result;
+        }
         
         public DateTime EchoDateTime(DateTime arg) {
             return arg;
@@ -203,6 +225,8 @@ namespace Ch.Elca.Iiop.IntegrationTests.MappingPlugin {
         Hashtable CreateHashtableWithValTypeElems(String msg, int nrOfElems);
 
         Hashtable CreateHashtableWithByRefElems(int nrOfElems);
+
+        Hashtable CreateHashtableWithByteArrayAndStringElement(byte[] content1, string content2);
 
         DateTime  EchoDateTime(DateTime arg);
                         

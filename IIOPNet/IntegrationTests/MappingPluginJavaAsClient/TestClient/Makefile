@@ -14,8 +14,10 @@ build-idl:
 	cd IDL
 	idlj -td .. $(TestService)TestService.idl 
 	idlj -td .. $(TestService)TestSerializableClassB1.idl
+	idlj -td .. $(TestService)ByteArrayContainer.idl
 	idlj -td .. Predef.idl
 	idlj -td .. Ch\Elca\Iiop\GenericUserException.idl
+	idlj -td .. org\omg\BoxedArray\_System\seq1_octet.idl
 	cd ..
 
 copy-valuetypeImpls:

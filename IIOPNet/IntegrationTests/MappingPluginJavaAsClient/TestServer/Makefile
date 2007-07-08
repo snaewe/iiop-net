@@ -39,6 +39,7 @@ build-server: $(bin)IIOPChannel.dll $(bin)$(CUSTOMJAVATYPEMAPPING).dll $(bin)cus
 build-idl: $(bin)customGeneratorMapping.xml
     ..\..\..\CLSToIDLGenerator\bin\CLSIDLGenerator.exe -o IDL -c $(bin)customGeneratorMapping.xml Ch.Elca.Iiop.IntegrationTests.MappingPlugin.TestService $(bin)testServer.exe
     ..\..\..\CLSToIDLGenerator\bin\CLSIDLGenerator.exe -o IDL Ch.Elca.Iiop.IntegrationTests.MappingPlugin.TestSerializableClassB1 $(bin)testServer.exe
+    ..\..\..\CLSToIDLGenerator\bin\CLSIDLGenerator.exe -o IDL Ch.Elca.Iiop.IntegrationTests.MappingPlugin.ByteArrayContainer $(bin)testServer.exe
 
 build-plugin:
         cd $(MAPPINGPLUGINDIR)
