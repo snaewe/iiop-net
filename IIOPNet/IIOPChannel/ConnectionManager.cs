@@ -285,7 +285,15 @@ namespace Ch.Elca.Iiop {
                 // open the connection now outside the locked session, 
                 // to allow other threads to access connection manager during
                 // this lenghty operation.
-                newConnection.OpenConnection();
+                try {
+                    newConnection.OpenConnection();
+                } catch(Exception ex) {
+                    lock(this) {
+                        // clean up dead connection
+                        UnregisterConnection(targetKey, newConnection);
+                    }
+                    throw;
+                }
             }                        
             return result;
         }

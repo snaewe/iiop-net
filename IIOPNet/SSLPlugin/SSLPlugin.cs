@@ -80,19 +80,22 @@ namespace Ch.Elca.Iiop.Security.Ssl {
         
         /// <summary><see cref="Ch.Elca.Iiop.ITranport.CloseConnection/></summary>
         public void CloseConnection() {
-            if (m_socket != null) {
-                try {                
-                    m_socket.Close();            
-                } catch {
-                    // ignore
+            try {                
+                if (m_socket != null) {
+                    m_socket.Close();
                 }
-                m_socket = null;
-                try {
-                    m_stream.Close(); // close the stream and the socket.
-                } catch {
-                    // ignore
-                }
+            } catch {
+                // ignore
             }
+            m_socket = null;
+            try {
+                if(m_stream != null) {
+                    m_stream.Close(); // close the stream and the socket.
+                }
+            } catch {
+                // ignore
+            }
+            m_stream = null;
         }
         
         public IAsyncResult BeginRead(byte[] buffer, int offset, int size, AsyncCallback callback, object state) {
