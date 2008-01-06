@@ -10,7 +10,8 @@ NUNIT_CONSOLE=%NUNITV2_HOME%\bin\nunit-console.exe
 
 NUNITFORMS=$(NUNITFORMS_HOME)\NUnitForms.dll
 
-JUNIT_JAR = $(JUNIT_HOME)\junit.jar
+JUNIT_JAR_NAME=junit.jar
+JUNIT_JAR = $(JUNIT_HOME)\$(JUNIT_JAR_NAME)
 
 
 nunit-var:
