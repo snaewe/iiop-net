@@ -171,7 +171,7 @@ TestService_impl::RetrieveLongTypeDefAsAny(CORBA::Long arg) {
 
 CORBA::WChar* 
 TestService_impl::ExtractFromWStringAny(const CORBA::Any& arg) {
-    CORBA::WChar* result;
+    const CORBA::WChar* result;
     arg >>= result;
     return CORBA::wstring_dup(result);
 }
@@ -359,13 +359,14 @@ TestSimpleServiceInternal_impl::EchoLong(CORBA::Long arg) {
 int
 main (int argc, char *argv[])
 {
-
+  printf("starting...\n");
   try {
   /*
    * Initialize the ORB
    */
 
   CORBA::ORB_var orb = CORBA::ORB_init (argc, argv);
+  printf("orb initialized.\n");
 
   /*
    * Obtain a reference to the RootPOA and its Manager
@@ -373,6 +374,7 @@ main (int argc, char *argv[])
 
   CORBA::Object_var poaobj = orb->resolve_initial_references ("RootPOA");
   PortableServer::POA_var poa = PortableServer::POA::_narrow (poaobj);
+  printf("root poa resolved.\n");
 
   /*
    * Create service objects
@@ -381,6 +383,7 @@ main (int argc, char *argv[])
   TestService_impl * test = new TestService_impl(poa);
   TestSimpleServiceInternal_impl * testInternalIf =
                             new TestSimpleServiceInternal_impl();
+  printf("service object created.\n");
 
   /*
    * Activate the Servants
@@ -388,11 +391,14 @@ main (int argc, char *argv[])
 
   PortableServer::ObjectId_var oidTest = poa->activate_object (test);
   PortableServer::ObjectId_var oidTestInternal = poa->activate_object (testInternalIf);
+  printf("service object activated.\n");
   PortableServer::POAManager_var mgr = poa->the_POAManager();
 
 
   CORBA::Object_var refTest = poa->id_to_reference (oidTest.in());
   CORBA::Object_var refTestInternalIf = poa->id_to_reference (oidTestInternal.in());
+
+  printf("object references aquired.\n");
 
   /*
    * Acquire a reference to the Naming Service
@@ -401,9 +407,12 @@ main (int argc, char *argv[])
   CORBA::Object_var nsobj =
     orb->resolve_initial_references ("NameService");
 
+  printf("naming service reference found.\n");
 
   CosNaming::NamingContext_var nc = 
     CosNaming::NamingContext::_narrow (nsobj);
+
+  printf("root namingcontext resolved.\n");
 
   if (CORBA::is_nil (nc)) {
     fprintf(stderr, "oops, I cannot access the Naming Service!\n");
