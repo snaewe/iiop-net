@@ -74,7 +74,8 @@ namespace Ch.Elca.Iiop.Idl {
 
         private void Initalize() {
             AssemblyName asmname = new AssemblyName();
-            asmname.Name = "dynBoxed";        
+            asmname.Name = "dynBoxed";
+            Repository.RegisterAssemblyForNonAutoRegistration(asmname); // fix for .NET 2.0 SP1; don't call GetTypes on this assembly; otherwise will result in InvalidCastException on next line.
             m_asmBuilder = System.Threading.Thread.GetDomain().
                 DefineDynamicAssembly(asmname, AssemblyBuilderAccess.Run);
             m_modBuilder = m_asmBuilder.DefineDynamicModule("dynBoxed.netmodule");
