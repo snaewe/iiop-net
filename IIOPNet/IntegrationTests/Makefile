@@ -157,7 +157,7 @@ test: nunit-var junit-var
     @if defined OMNIORB_HOME $(MAKE) /C test
     cd ..
     cd GacTest
-    $(MAKE) test
+    @if not defined SKIP_IIOP_NET_GAC_TESTS $(MAKE) test
     cd ..
     cd WAS5
     @if not defined WAS_HOME echo WAS_HOME not set, skipping WAS5 integration test
