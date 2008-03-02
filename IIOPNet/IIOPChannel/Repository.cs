@@ -548,7 +548,7 @@ namespace Ch.Elca.Iiop.Idl {
         /// </summary>
         private bool ShouldSkipAssemblyTypeAutoRegistration(Assembly asm) {
         	AssemblyName asmName = asm.GetName();
-        	foreach (AssemblyName toSkip in s_instance.m_assembliesSkipTypeRegistration) {
+        	foreach (AssemblyName toSkip in m_assembliesSkipTypeRegistration) {
         		if (toSkip.FullName == asmName.FullName) {
         			return true;
         		}
