@@ -31,6 +31,7 @@
 using System;
 using System.Reflection;
 using System.Reflection.Emit;
+using System.Globalization;
 using omg.org.CORBA;
 
 
@@ -70,7 +71,10 @@ namespace Ch.Elca.Iiop.Idl {
 
         private void Initalize() {
             AssemblyName asmname = new AssemblyName();
-            asmname.Name = "dynTypeCode.dll";
+            asmname.Name = "dynTypeCode";
+            asmname.Version = new Version(0, 0, 0, 0);
+            asmname.CultureInfo = CultureInfo.InvariantCulture;            
+            asmname.SetPublicKeyToken(new byte[0]);
             Repository.RegisterAssemblyForNonAutoRegistration(asmname); // fix for .NET 2.0 SP1; don't call GetTypes on this assembly; otherwise will result in InvalidCastException on next line.
             m_asmBuilder = System.Threading.Thread.GetDomain().
                 DefineDynamicAssembly(asmname, AssemblyBuilderAccess.Run);
