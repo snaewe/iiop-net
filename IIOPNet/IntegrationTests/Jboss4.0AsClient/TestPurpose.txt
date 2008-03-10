@@ -1,0 +1,4 @@
+This integration test tests the basic interoperability of IIOP.NET with JBoss 4.0.
+
+
+

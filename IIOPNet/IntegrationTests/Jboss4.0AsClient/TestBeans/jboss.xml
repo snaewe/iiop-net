@@ -1,0 +1,16 @@
+<jboss>
+<enterprise-beans>
+
+<session>
+  <ejb-name>TestBeanForwardToCorbaServer</ejb-name>
+  <jndi-name>IntegrationTest/testForwarder</jndi-name>
+  <configuration-name>Standard Stateless SessionBean</configuration-name>
+  <invoker-bindings>
+  <invoker>
+  <invoker-proxy-binding-name>iiop</invoker-proxy-binding-name>
+  </invoker>
+  </invoker-bindings>
+</session>
+
+</enterprise-beans>
+</jboss>
