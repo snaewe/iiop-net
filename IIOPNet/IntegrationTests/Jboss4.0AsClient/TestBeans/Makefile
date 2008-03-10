@@ -83,3 +83,6 @@ clean:
 	if exist bin rmdir /s /q bin
 	if exist IDL del /s /q IDL
 	if exist IDL rmdir /s /q IDL
+	if exist $(IDLExt) del /s /q $(IDLExt)
+	if exist $(IDLExt) rmdir /s /q $(IDLExt)
+
