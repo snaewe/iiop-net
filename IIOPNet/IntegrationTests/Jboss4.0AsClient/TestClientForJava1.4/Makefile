@@ -14,8 +14,11 @@ $(bin)IIOPChannel.dll: $(bin) $(IIOPCHANNEL)
         copy /y $(IIOPCHANNEL) $(bin)IIOPChannel.dll
         if exist $(IIOPCHANNELPDB) copy /y $(IIOPCHANNELPDB) $(bin)IIOPChannel.pdb
 
-build-client: $(bin) $(bin)IIOPChannel.dll *.cs
+build-client: $(bin) $(bin)IIOPChannel.dll *.cs $(bin)TestImg.jpg
 	$(CSC) $(CSFLAGS) /t:library /r:$(NUNIT_FRAMEWORK_DLL) /r:bin\IIOPChannel.dll /r:bin\Client.dll /out:bin\ClientTest.dll TestClient.cs
+
+$(bin)TestImg.jpg : $(bin)
+	copy /y TestImg.jpg $(bin)TestImg.jpg
 
 copy-idl:
     if not exist IDL\nul mkdir IDL

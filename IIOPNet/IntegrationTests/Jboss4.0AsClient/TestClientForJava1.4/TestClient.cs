@@ -30,6 +30,7 @@ using System;
 using System.Reflection;
 using System.Runtime.Remoting;
 using System.Runtime.Remoting.Channels;
+using System.IO;
 using NUnit.Framework;
 using Ch.Elca.Iiop;
 using Ch.Elca.Iiop.Services;
@@ -86,7 +87,7 @@ namespace Ch.Elca.Iiop.IntegrationTests {
         }
 
         [Test]
-        public void TestByteArrayInContainerForward() {
+        public void TestByteArrayInContainerForwardSmall() {
             System.Byte[] arg = new System.Byte[2];
             arg[0] = 1;
             arg[1] = 2;
@@ -95,6 +96,17 @@ namespace Ch.Elca.Iiop.IntegrationTests {
             Assertion.AssertEquals((System.Byte) 1, result[0]);
             Assertion.AssertEquals((System.Byte) 2, result[1]);
         }
+
+        [Test]
+        public void TestByteArrayInContainerForwardBig() {
+            using (FileStream fs = File.OpenRead("TestImg.jpg")) {
+                System.Byte[] arg = new System.Byte[fs.Length];
+                fs.Read(arg, 0, arg.Length);
+                System.Byte[] result = m_test.TestFwdContainer(arg);
+                Assertion.AssertEquals(arg.Length, result.Length);
+            }
+        }
+
 
     }
 
