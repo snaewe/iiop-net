@@ -708,6 +708,7 @@ jacorb.interop.chunk_custom_rmi_valuetypes=off
 <li>Tina Hofmann
 <li>Dennis Homann
 <li>Aitor Illarramendi
+<li>Thomas Köhler
 <li>Alexander Kornienko 
 <li>Marc R. Lehmann
 <li>Glen Mah
@@ -718,6 +719,7 @@ jacorb.interop.chunk_custom_rmi_valuetypes=off
 <li>Bill Petheram
 <li>Florian Pflug
 <li>Andreas Rullmann
+<li>Justus Schach
 <li>Dirk O. Siebnich
 <li>Angel Silva
 <li>Arne Sostack
