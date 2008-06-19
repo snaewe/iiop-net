@@ -16,8 +16,6 @@
 <li><A target="_blank" href="http://msdn.microsoft.com/netframework/">.NET Framework</A>
 <li><A target="_blank" href="http://msdn.microsoft.com/library/default.asp?url=/library/en-us/cpguide/html/cpconnetremotingoverview.asp">
 .NET Remoting overview</A>
-<li><A target="_blank" href="http://www12.brinkster.com/brianr/remoting.aspx">
-.NET Remoting Central</A>
 </ul>
 
 <p/>
@@ -50,7 +48,6 @@
 <b>Project Environment</b>
 <ul>
 <li><A target="_blank" href="http://www.elca.ch">ELCA</A>
-<li><A target="_blank" href="http://www.elca.ch/Solutions/Technology_Frameworks/LEAF/index.php">LEAF</A>
 <li><A target="_blank" href="http://sourceforge.net/projects/el4net/">el4net</A>
 <li><A target="_blank" href="http://el4j.sourceforge.net/">el4j</A>
 </ul>
@@ -58,3 +55,8 @@
 <li><A target="_blank" href="http://www.ethz.ch">ETH</A>
 <li><A target="_blank" href="http://www.cs.inf.ethz.ch/gutknecht/index.html">Programming Languages and Runtime Systems Research Group</A>
 </ul>
+
+<b>Supplementary software</b>
+<ul>
+<li><A href="http://www.protonet.co.za/">Corba load balancing, IIOP over SSL (ProtoBalance by Shine The Way 238 CC)</A></ul>
+
