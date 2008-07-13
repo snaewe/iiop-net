@@ -55,6 +55,7 @@ namespace Ch.Elca.Iiop.IntegrationTests {
         private ISimpleTestInterface m_svcSingletonCall;
         private ISimpleTestInterface m_contextBound;
         private TestIdlTypesService  m_testIdlTypesService;
+        private TestOneWayService m_testOneWayService;
 
         #endregion IFields
         #region IMethods
@@ -85,6 +86,7 @@ namespace Ch.Elca.Iiop.IntegrationTests {
             m_contextBound = 
                 (ISimpleTestInterface)RemotingServices.Connect(typeof(ISimpleTestInterface), "corbaloc:iiop:1.2@localhost:8087/testContextBound");
             m_testIdlTypesService = (TestIdlTypesService)RemotingServices.Connect(typeof(TestIdlTypesService), "corbaloc:iiop:1.2@localhost:8087/testIdlTypesService");
+            m_testOneWayService = (TestOneWayService)RemotingServices.Connect(typeof(TestOneWayService), "corbaloc:iiop:1.2@localhost:8087/testOneWayService");
         }
 
         [TearDown]
@@ -1353,6 +1355,37 @@ namespace Ch.Elca.Iiop.IntegrationTests {
             Assertion.AssertEquals(arg.Length, result.Length);
             Assertion.AssertEquals(arg[0], result[0]);
             Assertion.AssertEquals(arg[1], result[1]);
+        }
+
+
+        [Test]
+        public void TestVoidFromIdl() {
+            int arg = 11;
+            m_testOneWayService.SetArgumentVoid(arg);
+            Assertion.AssertEquals(arg, m_testOneWayService.GetArgumentVoid());            
+        }
+
+        [Test]
+        public void TestOneWayFromIdl() {
+            int arg = 12;
+            m_testOneWayService.SetArgumentOneWay(arg);
+            int i = 0;
+            int result = 0;
+            while (result != arg && i < 100) {
+                result = m_testOneWayService.GetArgumentOneWay();
+                i++;
+            }
+            Assertion.AssertEquals(arg, result);
+            arg = 13;
+            m_testOneWayService.SetArgumentOneWay(arg);
+
+            i = 0;
+            result = 0;
+            while (result != arg && i < 100) {
+                result = m_testOneWayService.GetArgumentOneWay();
+                i++;
+            }
+            Assertion.AssertEquals(arg, result);
         }
 
         #endregion IMethods

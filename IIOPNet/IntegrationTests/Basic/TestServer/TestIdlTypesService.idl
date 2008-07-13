@@ -43,6 +43,16 @@ module IntegrationTests {
 
     };
 
+    interface TestOneWayService {
+
+        void SetArgumentVoid(in long arg);
+        long GetArgumentVoid();
+
+        oneway void SetArgumentOneWay(in long arg);
+        long GetArgumentOneWay();
+
+    };
+
 
 };
 };

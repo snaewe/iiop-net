@@ -64,6 +64,9 @@ namespace Ch.Elca.Iiop.IntegrationTests {
             TestIdlTypesServiceImpl testIdlTypesService = new TestIdlTypesServiceImpl();
             RemotingServices.Marshal(testIdlTypesService, "testIdlTypesService");
 
+            TestOneWayServiceImpl testOneWayService = new TestOneWayServiceImpl();
+            RemotingServices.Marshal(testOneWayService, "testOneWayService");
+
             Console.WriteLine("server running");
             Thread.Sleep(Timeout.Infinite);
         }

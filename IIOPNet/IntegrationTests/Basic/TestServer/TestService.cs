@@ -802,4 +802,39 @@ namespace Ch.Elca.Iiop.IntegrationTests {
         
     }
 
+
+
+    [SupportedInterface(typeof(TestOneWayService))]
+    public class TestOneWayServiceImpl : MarshalByRefObject, TestOneWayService {
+
+        private int m_setWithVoid;
+        private int m_setWithOneWay;
+
+
+        public void SetArgumentVoid(int arg) {
+            m_setWithVoid = arg;
+        }
+        
+        public int GetArgumentVoid() {
+            return m_setWithVoid;
+        }
+
+        [OneWay]
+        public void SetArgumentOneWay(int arg) {
+            m_setWithOneWay = arg;
+        }
+
+        public int GetArgumentOneWay() {
+            return m_setWithOneWay;
+        }
+        
+        public override object InitializeLifetimeService() {
+            // live forever
+            return null;
+        }
+        
+    }
+
+
+
 }
