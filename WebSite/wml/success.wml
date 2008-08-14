@@ -14,7 +14,8 @@ If you're using IIOP.NET and would like to contribute a success story, please co
 
 <p/>
 
-We
+We use IIOP.NET in a commercial customer provisioning system that serves a large mobile operator in South Africa. 
+Our server clusters process over 100 transactions per second 24/7 and concurrently service thousands of CRM terminals country-wide. We used IIOP.NET as a drop-in replacement for our existing IIOP software.
 
 <p/>
 
