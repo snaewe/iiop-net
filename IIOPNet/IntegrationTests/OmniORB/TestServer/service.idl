@@ -95,6 +95,7 @@ interface TestService {
     any EchoAny(in any arg);
     any RetrieveUnknownUnion();
     any RetrieveWStringAsAny(in wstring arg);
+    any RetrieveStringAsAny(in string arg);
 
     any RetrieveStructWithTypedefMember(in long elemVal);
     any RetrieveTypedefedSeq(in long nrOfElems, in long memberVal);
@@ -105,10 +106,12 @@ interface TestService {
     any RetrieveLongTypeDefAsAny(in long arg);
 
     wstring ExtractFromWStringAny(in any arg);
+    string ExtractFromStringAny(in any arg);
     seq_of_octect_seq ExtractFromOctetOfOctetSeqAny(in any arg);    
 
     wchar EchoWChar(in wchar arg);
     wstring EchoWString(in wstring arg);
+    string EchoString(in string arg);
 
     // test for forum bug report: idl wstring sequences
     wstringSeq RetrieveWstringSeq(in wstring val, in long nrOfElems);

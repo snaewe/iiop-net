@@ -26,10 +26,12 @@ public:
 
   CORBA::WChar EchoWChar(CORBA::WChar arg);
   CORBA::WChar* EchoWString(const CORBA::WChar* arg);
+  char* EchoString(const char* arg);
   ::TestUnion EchoTestUnion(const ::TestUnion& arg);
   ::TestUnionE EchoTestUnionE(const ::TestUnionE& arg);
   CORBA::Any* RetrieveUnknownUnion();
   CORBA::Any* RetrieveWStringAsAny(const CORBA::WChar* arg);
+  CORBA::Any* RetrieveStringAsAny(const char* arg);
   CORBA::Any* EchoAny(const CORBA::Any& arg);
   CORBA::Any* RetrieveStructWithTypedefMember(CORBA::Long elemVal);
   CORBA::Any* RetrieveTypedefedSeq(CORBA::Long nrOfElems, CORBA::Long memberVal);  
@@ -39,6 +41,7 @@ public:
   CORBA::Any* RetrieveLongTypeDefAsAny(CORBA::Long arg);
 
   CORBA::WChar* ExtractFromWStringAny(const CORBA::Any& arg);
+  char* ExtractFromStringAny(const CORBA::Any& arg);
   seq_of_octect_seq* ExtractFromOctetOfOctetSeqAny(const CORBA::Any& arg);
   ::wstringSeq* RetrieveWstringSeq(const CORBA::WChar * val, CORBA::Long nrOrElems);
   ::wstringSeq* EchoWstringSeq(const ::wstringSeq& arg);
@@ -108,6 +111,12 @@ TestService_impl::EchoWString(const CORBA::WChar* arg)
     return CORBA::wstring_dup(arg);
 }
 
+char* 
+TestService_impl::EchoString(const char* arg) 
+{
+    return CORBA::string_dup(arg);
+}
+
 
 ::TestUnion
 TestService_impl::EchoTestUnion (const ::TestUnion& arg)
@@ -135,8 +144,19 @@ TestService_impl::RetrieveWStringAsAny(const CORBA::WChar* arg) {
     CORBA::WChar* argVal = (CORBA::WChar*)arg;
     CORBA::Any* resultAny = new CORBA::Any;
     *resultAny <<= argVal;
+    //printf("value-kind: %u\n", (*(*resultAny).type()).kind());
     return resultAny;
 }
+
+CORBA::Any* 
+TestService_impl::RetrieveStringAsAny(const char* arg) {
+    char* argVal = (char*)arg;
+    CORBA::Any* resultAny = new CORBA::Any;
+    *resultAny <<= argVal;
+    //printf("value: %u\n", (*(*resultAny).type()).kind());
+    return resultAny;
+}
+
 
 CORBA::ULong 
 TestService_impl::ExtractFromULongAny(const CORBA::Any& arg) {
@@ -175,6 +195,14 @@ TestService_impl::ExtractFromWStringAny(const CORBA::Any& arg) {
     arg >>= result;
     return CORBA::wstring_dup(result);
 }
+
+char* 
+TestService_impl::ExtractFromStringAny(const CORBA::Any& arg) {
+    const char* result;
+    arg >>= result;
+    return CORBA::string_dup(result);
+}
+
 
 seq_of_octect_seq* 
 TestService_impl::ExtractFromOctetOfOctetSeqAny(const CORBA::Any& arg) {

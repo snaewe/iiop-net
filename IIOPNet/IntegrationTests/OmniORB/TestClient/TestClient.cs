@@ -148,7 +148,7 @@ namespace Ch.Elca.Iiop.IntegrationTests {
         }
 
         [Test]
-        public void TestPassingStringAsAny() {
+        public void TestPassingWStringAsAny() {
             // explicit mapping
             OrbServices orb = OrbServices.GetSingleton();
             string arg = "test";
@@ -168,10 +168,37 @@ namespace Ch.Elca.Iiop.IntegrationTests {
         }
 
         [Test]
-        public void TestReceivingStringAsAny() {
+        public void TestPassingStringAsAny() {
+            // explicit mapping
+            OrbServices orb = OrbServices.GetSingleton();
+            string arg = "test";
+            omg.org.CORBA.TypeCode stringTC = orb.create_string_tc(0);
+            Any any = new Any(arg, stringTC);
+            
+            string result = (string)m_testService.EchoAny(any);
+            Assertion.AssertEquals(arg, result);
+
+            // check extraction on server side with explicit mapping
+            string result3 = m_testService.ExtractFromStringAny(any);
+            Assertion.AssertEquals(arg, result3);
+        }
+
+
+        [Test]
+        public void TestReceivingWStringAsAny() {
             string arg = "test";
             string result = (string)m_testService.RetrieveWStringAsAny(arg);
             Assertion.AssertEquals(arg, result);
+        }
+
+        [Test]
+        public void TestReceivingStringAsAny() {
+            string arg = "test";
+            string result = (string)m_testService.RetrieveStringAsAny(arg);
+            Assertion.AssertEquals(arg, result);
+            string arg2 = "test2";
+            string result2 = (string)m_testService.RetrieveStringAsAny(arg2);
+            Assertion.AssertEquals(arg2, result2);
         }
 
         [Test]
@@ -402,6 +429,13 @@ namespace Ch.Elca.Iiop.IntegrationTests {
         public void TestWString() {
             string arg = "test";
             string result = m_testService.EchoWString(arg);
+            Assertion.AssertEquals(arg, result);
+        }
+
+        [Test]
+        public void TestString() {
+            string arg = "test";
+            string result = m_testService.EchoString(arg);
             Assertion.AssertEquals(arg, result);
         }
         
