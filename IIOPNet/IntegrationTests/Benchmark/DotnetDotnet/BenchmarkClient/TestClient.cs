@@ -238,6 +238,11 @@ namespace Ch.Elca.Iiop.Benchmarks {
             m_testService.IntIdlSeqEcho(arg);
         }
 
+        void CallBigIntSeqEcho() {
+            int[] arg = new int[40*400000];
+            m_testService.IntIdlSeqEcho(arg);
+        }
+
         void CallDoubleArrCountElems() {
             double[] arg = new double[5000];
             m_testService.DoubleArrCountElems(arg);
@@ -264,13 +269,31 @@ namespace Ch.Elca.Iiop.Benchmarks {
             m_testService.IdlLongArray5times3Echo(arg);
         }
 
+        void CallBigSingleSeqEcho() {
+            float[] arg = new float[40*400000];
+            m_testService.SingleIdlSeqEcho(arg);
+        }
+
+
+        void CallIdlArrayBigSingleEcho() {
+            float[,] arg = new float[40,400000];
+            m_testService.IdlFloatArray40times400000Echo(arg);
+        }
+
+        void CallIdlArrayBigByteEcho() {
+            byte[] arg = new byte[4*40*400000];
+            m_testService.ByteIdlSeqEcho(arg);
+        }
+
         delegate void TestProcedure();
 
-        private void ExecuteTest(bool addtoref, String msg, TestProcedure t) {
+        private void ExecuteTest(bool addtoref, String msg, TestProcedure t, int countreductionDivisor) {
             try {
                 Console.Write("{0,-25}", msg);
+                int nrOfRuns = m_count / countreductionDivisor;
+                nrOfRuns = (nrOfRuns > 0 ? nrOfRuns : 1);
                 PerformanceCounter counter = new PerformanceCounter();
-                for (int i=0; i<m_count; i++) {
+                for (int i=0; i<nrOfRuns; i++) {
                     t();
                 }
                 counter.Stop();                
@@ -278,13 +301,16 @@ namespace Ch.Elca.Iiop.Benchmarks {
                     m_referenceTime += counter.Difference;
                 }
                 Console.WriteLine("{0,-10} ms for {1} calls, per call : {2,-10} ms", 
-                                  counter.Difference.TotalMilliseconds, m_count, 
-                                  counter.Difference.TotalMilliseconds / m_count);
+                                  counter.Difference.TotalMilliseconds, nrOfRuns, 
+                                  counter.Difference.TotalMilliseconds / nrOfRuns);
                 m_totalTime += counter.Difference;
             } catch (Exception e) {
                 Console.WriteLine(e.ToString());
             }
+        }
 
+        private void ExecuteTest(bool addtoref, String msg, TestProcedure t) {
+            ExecuteTest(addtoref, msg, t, 1);
         }
 
         static public void Main(String[] args) {
@@ -343,6 +369,11 @@ namespace Ch.Elca.Iiop.Benchmarks {
             tc.ExecuteTest(false, "(IdlStructA)IdlStructA", new TestProcedure(tc.CallIdlStructEcho));
             tc.ExecuteTest(false, "(enum_sq)enum_sq", new TestProcedure(tc.CallEnumSeqEcho));
             tc.ExecuteTest(false, "(int_ar2d)int_ar2d", new TestProcedure(tc.CallIdlArrayEcho));
+            
+            tc.ExecuteTest(false, "(sng_seq)sng_seq", new TestProcedure(tc.CallBigSingleSeqEcho), 100);
+            tc.ExecuteTest(false, "(sng_ar2d)sng_ar2d", new TestProcedure(tc.CallIdlArrayBigSingleEcho), 100);
+            tc.ExecuteTest(false, "(int_sq)int_sq", new TestProcedure(tc.CallBigIntSeqEcho), 100);
+            tc.ExecuteTest(false, "(byte_sq)byte_sq", new TestProcedure(tc.CallIdlArrayBigByteEcho), 100);
 
             tc.TearDownEnvironment();
 
