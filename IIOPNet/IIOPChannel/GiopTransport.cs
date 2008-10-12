@@ -908,6 +908,8 @@ namespace Ch.Elca.Iiop {
                             m_waitingForResponse.Remove(replyForRequestId);
                             waiter.Response = messageStream;
                             waiter.Notify();
+                        } else {
+                        	Debug.WriteLine("received not expected reply for request with id " + replyForRequestId);
                         }
                     }
                     
