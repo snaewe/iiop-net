@@ -1,3 +1,16 @@
+version 1.9.0 sp1 (12 october 2008)
+-----------------------------------
+
+bug fixed:
+- fixing issue with .NET 2.0 sp1
+  (AssemblyLoaded event handler in Repository prevented DefineDynamicAssembly from succeeding)
+- included patch fixing a connection leak in connection manager, if opening a connection fails.
+- included patch fixing an unnecessary internal NullReferenceException in Connection Wrappers.
+
+other improvements:
+- extended various tests
+
+
 version 1.9.0 final (4 february 2007)
 -------------------------------------
 
