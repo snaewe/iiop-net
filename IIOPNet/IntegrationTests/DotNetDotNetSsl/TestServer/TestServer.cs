@@ -54,7 +54,7 @@ namespace Ch.Elca.Iiop.IntegrationTests {
                 "Ch.Elca.Iiop.Security.Ssl.DefaultServerAuthenticationImpl,SSLPlugin";
 
             props[DefaultServerAuthenticationImpl.SERVER_CERTIFICATE] = 
-                "BCDCAD33286EC145056C7ED780BAE31BFB5B988D";                 
+                "5f4abc1aad19e53857be2a4bbec9297091f0082c";                   
 
             props[DefaultServerAuthenticationImpl.STORE_LOCATION] = "CurrentUser";
 
