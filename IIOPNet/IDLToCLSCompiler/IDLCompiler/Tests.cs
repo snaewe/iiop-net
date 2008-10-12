@@ -965,7 +965,235 @@ namespace Ch.Elca.Iiop.IdlCompiler.Tests {
             // check if union is correctly created
             Type ifType = result.GetType("Test.Un", true);        	        	        	                                    
         }
+        
+        private Assembly CreateEnumInInterfaceRefAssembly() {
+        	MemoryStream testSource = new MemoryStream();
+            StreamWriter writer = CreateSourceWriter(testSource);
 
+            // idl:            
+            writer.WriteLine("module Test {");
+            writer.WriteLine("  interface X {");
+            writer.WriteLine("   enum En {En_A, En_B, En_C};");
+            writer.WriteLine("  };");
+            writer.WriteLine("};");
+            
+            writer.Flush();
+            testSource.Seek(0, SeekOrigin.Begin);
+            Assembly result = CreateIdl(testSource, GetAssemblyName(), false, false);
+            writer.Close();
+            return result;
+        }
+        
+        private Assembly CreateEnumInValueTypeRefAssembly() {
+        	MemoryStream testSource = new MemoryStream();
+            StreamWriter writer = CreateSourceWriter(testSource);
+
+            // idl:            
+            writer.WriteLine("module Test {");
+            writer.WriteLine("  valuetype X {");
+            writer.WriteLine("   enum En {En_A, En_B, En_C};");
+            writer.WriteLine("  };");
+            writer.WriteLine("};");
+            
+            writer.Flush();
+            testSource.Seek(0, SeekOrigin.Begin);
+            Assembly result = CreateIdl(testSource, GetAssemblyName(), false, false);
+            writer.Close();
+            return result;
+        }
+
+        private Assembly CreateEnumInAbstractValueTypeRefAssembly() {
+        	MemoryStream testSource = new MemoryStream();
+            StreamWriter writer = CreateSourceWriter(testSource);
+
+            // idl:            
+            writer.WriteLine("module Test {");
+            writer.WriteLine("  abstract valuetype X {");
+            writer.WriteLine("   enum En {En_A, En_B, En_C};");
+            writer.WriteLine("  };");
+            writer.WriteLine("};");
+            
+            writer.Flush();
+            testSource.Seek(0, SeekOrigin.Begin);
+            Assembly result = CreateIdl(testSource, GetAssemblyName(), false, false);
+            writer.Close();
+            return result;
+        }
+        
+        [Ignore("Shows issue to fix in a next release")]
+        [Test]
+        public void EnumSymboldFromRefAssembliesInsideInterface() {
+        	Assembly enumAssembly = CreateEnumInInterfaceRefAssembly();
+        	
+        	MemoryStream testSource = new MemoryStream();
+            StreamWriter writer = CreateSourceWriter(testSource);
+
+            // idl:            
+            writer.WriteLine("module Test {");
+            writer.WriteLine("  interface X {");
+            writer.WriteLine("   enum En {En_A, En_B, En_C};");
+            writer.WriteLine("  };");                        
+            writer.WriteLine("");
+            writer.WriteLine("   union Un switch (X::En) { ");
+            writer.WriteLine("     case X::En_A: long i; ");
+            writer.WriteLine("     case X::En_B: char c; ");                               
+            writer.WriteLine("   };");
+            writer.WriteLine("};");
+            
+            writer.Flush();
+            testSource.Seek(0, SeekOrigin.Begin);
+            Assembly result = CreateIdl(testSource, GetAssemblyName(), false, false, 
+                                        new ArrayList(new Assembly[] { enumAssembly }));
+            writer.Close();
+                       
+            // check if union is correctly created
+            Type ifType = result.GetType("Test.Un", true);        	        	        	                                    
+        }
+        
+        [Ignore("Shows issue to fix in a next release")]
+        [Test]
+        public void EnumSymboldFromRefAssembliesInsideValueType() {
+        	Assembly enumAssembly = CreateEnumInValueTypeRefAssembly();
+        	
+        	MemoryStream testSource = new MemoryStream();
+            StreamWriter writer = CreateSourceWriter(testSource);
+
+            // idl:            
+            writer.WriteLine("module Test {");
+            writer.WriteLine("  valuetype X {");
+            writer.WriteLine("   enum En {En_A, En_B, En_C};");
+            writer.WriteLine("  };");                        
+            writer.WriteLine("");
+            writer.WriteLine("   union Un switch (X::En) { ");
+            writer.WriteLine("     case X::En_A: long i; ");
+            writer.WriteLine("     case X::En_B: char c; ");                               
+            writer.WriteLine("   };");
+            writer.WriteLine("};");
+            
+            writer.Flush();
+            testSource.Seek(0, SeekOrigin.Begin);
+            Assembly result = CreateIdl(testSource, GetAssemblyName(), false, false, 
+                                        new ArrayList(new Assembly[] { enumAssembly }));
+            writer.Close();
+                       
+            // check if union is correctly created
+            Type ifType = result.GetType("Test.Un", true);        	        	        	                                    
+        }
+        
+        [Ignore("Shows issue to fix in a next release")]        
+        [Test]
+        public void EnumSymboldFromRefAssembliesInsideAbstractValueType() {
+            Assembly enumAssembly = CreateEnumInAbstractValueTypeRefAssembly();
+        	
+            MemoryStream testSource = new MemoryStream();
+            StreamWriter writer = CreateSourceWriter(testSource);
+
+            // idl:            
+            writer.WriteLine("module Test {");
+            writer.WriteLine("  abstract valuetype X {");
+            writer.WriteLine("   enum En {En_A, En_B, En_C};");
+            writer.WriteLine("  };");                        
+            writer.WriteLine("");
+            writer.WriteLine("   union Un switch (X::En) { ");
+            writer.WriteLine("     case X::En_A: long i; ");
+            writer.WriteLine("     case X::En_B: char c; ");                               
+            writer.WriteLine("   };");
+            writer.WriteLine("};");
+            
+            writer.Flush();
+            testSource.Seek(0, SeekOrigin.Begin);
+            Assembly result = CreateIdl(testSource, GetAssemblyName(), false, false, 
+                                        new ArrayList(new Assembly[] { enumAssembly }));
+            writer.Close();
+                       
+            // check if union is correctly created
+            Type ifType = result.GetType("Test.Un", true);        	        	        	                                    
+        }
+        
+        [Test]
+        public void EnumSymboldInsideInterface() {        	
+        	
+            MemoryStream testSource = new MemoryStream();
+            StreamWriter writer = CreateSourceWriter(testSource);
+
+            // idl:            
+            writer.WriteLine("module Test {");
+            writer.WriteLine("  interface X {");
+            writer.WriteLine("   enum En {En_A, En_B, En_C};");
+            writer.WriteLine("  };");                        
+            writer.WriteLine("");
+            writer.WriteLine("   union Un switch (X::En) { ");
+            writer.WriteLine("     case X::En_A: long i; ");
+            writer.WriteLine("     case X::En_B: char c; ");                               
+            writer.WriteLine("   };");
+            writer.WriteLine("};");
+            
+            writer.Flush();
+            testSource.Seek(0, SeekOrigin.Begin);
+            Assembly result = CreateIdl(testSource, GetAssemblyName(), false, false, 
+                                        new ArrayList());
+            writer.Close();
+                       
+            // check if union is correctly created
+            Type ifType = result.GetType("Test.Un", true);        	        	        	                                    
+        }
+        
+        [Test]
+        public void EnumSymboldInsideValueType() {        	
+        	
+        	MemoryStream testSource = new MemoryStream();
+            StreamWriter writer = CreateSourceWriter(testSource);
+
+            // idl:            
+            writer.WriteLine("module Test {");
+            writer.WriteLine("  valuetype X {");
+            writer.WriteLine("   enum En {En_A, En_B, En_C};");
+            writer.WriteLine("  };");                        
+            writer.WriteLine("");
+            writer.WriteLine("   union Un switch (X::En) { ");
+            writer.WriteLine("     case X::En_A: long i; ");
+            writer.WriteLine("     case X::En_B: char c; ");                               
+            writer.WriteLine("   };");
+            writer.WriteLine("};");
+            
+            writer.Flush();
+            testSource.Seek(0, SeekOrigin.Begin);
+            Assembly result = CreateIdl(testSource, GetAssemblyName(), false, false, 
+                                        new ArrayList());
+            writer.Close();
+                       
+            // check if union is correctly created
+            Type ifType = result.GetType("Test.Un", true);        	        	        	                                    
+        }
+
+        [Test]
+        public void EnumSymboldInsideAbstractValueType() {        	
+        	
+        	MemoryStream testSource = new MemoryStream();
+            StreamWriter writer = CreateSourceWriter(testSource);
+
+            // idl:            
+            writer.WriteLine("module Test {");
+            writer.WriteLine("  abstract valuetype X {");
+            writer.WriteLine("   enum En {En_A, En_B, En_C};");
+            writer.WriteLine("  };");                        
+            writer.WriteLine("");
+            writer.WriteLine("   union Un switch (X::En) { ");
+            writer.WriteLine("     case X::En_A: long i; ");
+            writer.WriteLine("     case X::En_B: char c; ");                               
+            writer.WriteLine("   };");
+            writer.WriteLine("};");
+            
+            writer.Flush();
+            testSource.Seek(0, SeekOrigin.Begin);
+            Assembly result = CreateIdl(testSource, GetAssemblyName(), false, false, 
+                                        new ArrayList());
+            writer.Close();
+                       
+            // check if union is correctly created
+            Type ifType = result.GetType("Test.Un", true);        	        	        	                                    
+        }
+        
         #endregion
         
     }
