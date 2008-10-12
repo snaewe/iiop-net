@@ -27,7 +27,7 @@ start-server: omniorb_home_var
         IF EXIST omninames* del /q omninames*
 	$(LAUNCH) $(OMNIORB_HOME)\bin\x86_win32\omniNames.exe -start 11356 -logdir . >> pid
 	$(DELAY) 5
-	$(LAUNCH) server.exe -ORBInitRef NameService=corbaloc::localhost:11356/NameService >> pid
+	$(LAUNCH) server.exe -ORBInitRef NameService=corbaloc::localhost:11356/NameService -ORBendPoint giop:tcp::8102 >> pid
 
 stop-server:
 	@for /F %%p in (pid) do @$(KILL) %%p
