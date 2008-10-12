@@ -90,7 +90,7 @@ namespace Ch.Elca.Iiop.IntegrationTests {
             ArrayList methodRunners = new ArrayList();
             ArrayList threads = new ArrayList();
             for (int i = 0; i < nrOfThreads; i++) {
-                TimeSpan delay = TimeSpan.FromMilliseconds(m_random.Next(100));
+                TimeSpan delay = TimeSpan.FromMilliseconds(m_random.Next(7));
                 RepeatedMethodCaller rmc1 = new RepeatedMethodCaller(nrOfCalls,
                                                                      delay, remoteMethodCaller,
                                                                      m_testService1);
@@ -99,7 +99,7 @@ namespace Ch.Elca.Iiop.IntegrationTests {
                 threads.Add(sv1);
                 sv1.Start();
                 
-                delay = TimeSpan.FromMilliseconds(m_random.Next(50));
+                delay = TimeSpan.FromMilliseconds(m_random.Next(3));
                 RepeatedMethodCaller rmc2 = new RepeatedMethodCaller(nrOfCalls,
                                                                      delay, remoteMethodCaller,
                                                                      m_testService2);
@@ -232,7 +232,7 @@ namespace Ch.Elca.Iiop.IntegrationTests {
         }
 
         private void CallLongBlocking(TestService serviceToUse) {
-            serviceToUse.BlockForTime(4);
+            serviceToUse.BlockForTime(400);
         }       
 
         [Test]

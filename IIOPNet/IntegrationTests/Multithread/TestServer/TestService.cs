@@ -61,8 +61,8 @@ namespace Ch.Elca.Iiop.IntegrationTests {
             return arg;
         }
 
-        public bool BlockForTime(int timeInSec) {
-            System.Threading.Thread.Sleep(timeInSec * 1000);
+        public bool BlockForTime(int timeInMilliSec) {
+            System.Threading.Thread.Sleep(timeInMilliSec);
             return true;
         }
         
