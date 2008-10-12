@@ -101,7 +101,7 @@ public class CustomException extends Exception implements Serializable {
     public String reason;
 
     public CustomException(String message, String reason) throws java.rmi.RemoteException {
-        super(message); 
+        super(message);
 	this.reason = reason;
     }
 }
@@ -165,7 +165,7 @@ namespace tutorial {
             get { return m_data.Msg; }
         }
 
-        public override void printStackTrace__() {    
+        public override void printStackTrace__() {
         }
 
         public override void printStackTrace__java_io_PrintStream(java.io.PrintStream arg) {
@@ -205,20 +205,20 @@ public class ExceptionCommon {
     private java.lang.StackTraceElement[] m_trace;
 
     public java.lang.Throwable Cause {
-        get { 
-            return m_cause; 
+        get {
+            return m_cause;
         }
     }
 
     public string Msg {
-        get { 
-            return m_msg; 
+        get {
+            return m_msg;
         }
     }
 
     public java.lang.StackTraceElement[] Trace {
-        get { 
-            return m_trace; 
+        get {
+            return m_trace;
         }
     }
 
@@ -247,10 +247,10 @@ public class StackTraceElementImpl : StackTraceElement {
 
     public override int hashCode() {
         return GetHashCode();
-    }            
+    }
         
     public override string toString() {
-        return "StackTraceElement:\n" + "in class: " + m_declaringClass + 
+        return "StackTraceElement:\n" + "in class: " + m_declaringClass +
             " (file: " + m_fileName + "); method: " + m_methodName;
     }
 
@@ -322,7 +322,7 @@ public class ThrowableImpl : Throwable {
         get { return m_data.Msg; }
     }
 
-    public override void printStackTrace__() {    
+    public override void printStackTrace__() {
     }
 
     public override void printStackTrace__java_io_PrintStream(java.io.PrintStream arg) {
@@ -380,6 +380,9 @@ as part of Dominic Ullmann's diploma thesis.
 <p>
 <A target="_blank" href="http://www.elca.ch"><img src="images/iiop_logo_elca.gif" border="0" alt=""></A>
 <A target="_blank" href="http://www.ethz.ch"><img src="images/iiop_logo_eth.gif" border="0" alt=""></A>
+<H2 class="ABOUT">IIOP.NET Use Cases</H2>
+<p>
+Read the IIOP.NET <A href="success.html">success stories</A>.
 <H2 class="ABOUT">News</H2>
 <p>
 <IFRAME src="newsFeed.html" width="208px" height="100%">
