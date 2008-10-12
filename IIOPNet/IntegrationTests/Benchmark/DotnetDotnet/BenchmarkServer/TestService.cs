@@ -161,6 +161,23 @@ namespace Ch.Elca.Iiop.Benchmarks {
             return arg;
         }
         
+        [return: IdlArray(0L, 40)]
+        [return: IdlArrayDimension(0L, 1, 400000)]
+        public System.Single[,] IdlFloatArray40times400000Echo([IdlArray(0L, 40)][IdlArrayDimension(0L, 1, 400000)] System.Single[,] arg) {
+            return arg;
+        }
+
+        [return: IdlSequence(0L)]
+        public System.Single[] SingleIdlSeqEcho([IdlSequence(0L)] System.Single[] arg) {
+            return arg;
+        }
+
+        [return: IdlSequence(0L)]
+        public System.Byte[] ByteIdlSeqEcho([IdlSequence(0L)] System.Byte[] arg) {
+            return arg;
+        }
+
+
         public override object InitializeLifetimeService() {
             // live forever
             return null;

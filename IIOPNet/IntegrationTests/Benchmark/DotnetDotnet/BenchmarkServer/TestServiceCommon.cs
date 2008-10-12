@@ -156,6 +156,16 @@ namespace Ch.Elca.Iiop.Benchmarks {
         [return: IdlArrayDimension(0L, 1, 3)]
         System.Int32[,] IdlLongArray5times3Echo([IdlArray(0L, 500)][IdlArrayDimension(0L, 1, 3)] System.Int32[,] arg);
 
+        [return: IdlArray(0L, 40)]
+        [return: IdlArrayDimension(0L, 1, 400000)]
+        System.Single[,] IdlFloatArray40times400000Echo([IdlArray(0L, 40)][IdlArrayDimension(0L, 1, 400000)] System.Single[,] arg);
+
+        [return: IdlSequence(0L)]
+        System.Single[] SingleIdlSeqEcho([IdlSequence(0L)] System.Single[] arg);
+
+        [return: IdlSequence(0L)]
+        System.Byte[] ByteIdlSeqEcho([IdlSequence(0L)] System.Byte[] arg);
+
 
     }
 
