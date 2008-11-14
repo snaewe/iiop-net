@@ -20,5 +20,19 @@ Our server clusters process over 100 transactions per second 24/7 and concurrent
 <p/>
 
 </li>
+
+<li>
+
+<b><A target="_blank" href="www.realtech.com">REALTECH system consulting GmbH</A></b>
+
+
+<p/>
+
+As one of the leading companies in SAP-Monitoring solutions, we are successfully using CORBA as our underlying middleware. In the system management environment we need such a stable and efficient base technology. 
+To give our front end applications a new face, we decided to use Microsoft Forms and if possible we wanted to use C#. With IIOP.NET both requirements comply. We could realized a stable and a robust solution, both to let the new front end generation work with our existing and well known CORBA based server applications. 
+
+</li>
+
+
 </ul>
 
