@@ -967,17 +967,17 @@ namespace Ch.Elca.Iiop.IdlCompiler.Tests {
         
         [Test]
         public void TestIdlFilesReadFromFile() {
-        	string fileWithIdlFiles = Path.GetTempFileName();
-        	try {
-        		string file1 = "test1.idl";
-        		string file2 = "test2.idl";
-	        	using (StreamWriter sw = new StreamWriter(fileWithIdlFiles)) {
-        			sw.WriteLine(file1);
-        			sw.WriteLine(file2);
-	        	}
-        		
-        		IDLToCLSCommandLine commandLine = new IDLToCLSCommandLine(
-                	new string[] { "-fidl:" + fileWithIdlFiles, "testAsm" } );
+            string fileWithIdlFiles = Path.GetTempFileName();
+            try {
+                string file1 = "test1.idl";
+                string file2 = "test2.idl";
+                using (StreamWriter sw = new StreamWriter(fileWithIdlFiles)) {
+                    sw.WriteLine(file1);
+                    sw.WriteLine(file2);
+                }
+                
+                IDLToCLSCommandLine commandLine = new IDLToCLSCommandLine(
+                    new string[] { "-fidl:" + fileWithIdlFiles, "testAsm" } );
                 Assertion.AssertEquals("idl files", 2,
                                    commandLine.InputFileNames.Count);
                 Assertion.AssertEquals("idl file1", 
@@ -988,49 +988,49 @@ namespace Ch.Elca.Iiop.IdlCompiler.Tests {
                                        commandLine.InputFileNames[1]);
             
                 Assertion.Assert("Command line validity", !commandLine.IsInvalid);
-        		
-        	} finally {
-        		if (File.Exists(fileWithIdlFiles)) {
-        		    File.Delete(fileWithIdlFiles);
-        		}
-        	}
+                
+            } finally {
+                if (File.Exists(fileWithIdlFiles)) {
+                    File.Delete(fileWithIdlFiles);
+                }
+            }
         }
         
         [Test]
         public void TestIdlFilesRecursivelyFromDirectory() {
-        	string tempPath = Path.Combine(Path.GetTempPath(), "IDLCommandLineRecursiveFileTest");
-        	if (Directory.Exists(tempPath)) {
-        		Directory.Delete(tempPath, true);
-        	}        	
-        	string subDir1 = Path.Combine(tempPath, "subDir1");
-        	string subDir2 = Path.Combine(tempPath, "subDir2");
-        	
-        	try {        		
-        		Directory.CreateDirectory(tempPath);
-        		Directory.CreateDirectory(subDir1);
-        		Directory.CreateDirectory(subDir2);
-        	
-        		string file1 = Path.Combine(tempPath, "test1.idl");
-        		string file2 = Path.Combine(tempPath, "test2.idl");
-        		string file3 = Path.Combine(subDir1, "test3.idl");
-        		string file4 = Path.Combine(subDir2, "test4.idl");
-        		
-        		
-        		using (FileStream fs = File.Create(file1)) {
-	        		fs.Close();
-	        	}
-	        	using (FileStream fs = File.Create(file2)) {
-	        		fs.Close();
-	        	}
-	        	using (FileStream fs = File.Create(file3)) {
-	        		fs.Close();
-	        	}
-	        	using (FileStream fs = File.Create(file4)) {
-	        		fs.Close();
-	        	}
-        		
-        		IDLToCLSCommandLine commandLine = new IDLToCLSCommandLine(
-                	new string[] { "-pidl:" + tempPath, "testAsm" } );
+            string tempPath = Path.Combine(Path.GetTempPath(), "IDLCommandLineRecursiveFileTest");
+            if (Directory.Exists(tempPath)) {
+                Directory.Delete(tempPath, true);
+            }        	
+            string subDir1 = Path.Combine(tempPath, "subDir1");
+            string subDir2 = Path.Combine(tempPath, "subDir2");
+            
+            try {        		
+                Directory.CreateDirectory(tempPath);
+                Directory.CreateDirectory(subDir1);
+                Directory.CreateDirectory(subDir2);
+            
+                string file1 = Path.Combine(tempPath, "test1.idl");
+                string file2 = Path.Combine(tempPath, "test2.idl");
+                string file3 = Path.Combine(subDir1, "test3.idl");
+                string file4 = Path.Combine(subDir2, "test4.idl");
+                
+                
+                using (FileStream fs = File.Create(file1)) {
+                    fs.Close();
+                }
+                using (FileStream fs = File.Create(file2)) {
+                    fs.Close();
+                }
+                using (FileStream fs = File.Create(file3)) {
+                    fs.Close();
+                }
+                using (FileStream fs = File.Create(file4)) {
+                    fs.Close();
+                }
+                
+                IDLToCLSCommandLine commandLine = new IDLToCLSCommandLine(
+                    new string[] { "-pidl:" + tempPath, "testAsm" } );
                 Assertion.AssertEquals("idl files", 4,
                                    commandLine.InputFileNames.Count);	        	
                 Assertion.AssertEquals("idl file1", 
@@ -1039,20 +1039,20 @@ namespace Ch.Elca.Iiop.IdlCompiler.Tests {
                 Assertion.AssertEquals("idl file2", 
                                        file2,
                                        commandLine.InputFileNames[1]);
-	        	Assertion.AssertEquals("idl file3", 
+                Assertion.AssertEquals("idl file3", 
                                        file3,
                                        commandLine.InputFileNames[2]);
-	        	Assertion.AssertEquals("idl file4", 
+                Assertion.AssertEquals("idl file4", 
                                        file4,
                                        commandLine.InputFileNames[3]);
             
                 Assertion.Assert("Command line validity", !commandLine.IsInvalid);
-        		
-        	} finally {
-        		if (Directory.Exists(tempPath)) {
-        			Directory.Delete(tempPath, true);
-        		}
-        	}
+                
+            } finally {
+                if (Directory.Exists(tempPath)) {
+                    Directory.Delete(tempPath, true);
+                }
+            }
         }        
         
     }
