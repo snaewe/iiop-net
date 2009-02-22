@@ -35,6 +35,7 @@ using System.Net;
 using System.Threading;
 using System.Diagnostics;
 using System.Collections;
+using Ch.Elca.Iiop.Util;
 using Ch.Elca.Iiop.CorbaObjRef;
 using omg.org.CORBA;
 using omg.org.IOP;
@@ -153,10 +154,10 @@ namespace Ch.Elca.Iiop {
     internal class TcpClientTransport : TcpTransportBase, IClientTransport {
                         
         #region IFields
-               
-        private string m_targetHost;
+
+        private string[] m_targetHosts;
         private IPAddress m_targetHostIp;
-        private int m_port;
+        private int[] m_ports;
         private int m_receiveTimeOut = 0;
         private int m_sendTimeOut = 0;
         
@@ -169,9 +170,14 @@ namespace Ch.Elca.Iiop {
         /// <param name="host">a symbolic name, which is resolved using dns</param>
         /// <param name="port">the port to connect to</param>
         public TcpClientTransport(string host, int port) {
-            m_targetHost = host;
-            m_port = port;
+            m_targetHosts = new string[] { host };
+            m_ports = new int[] { port };
             
+        }
+
+        public TcpClientTransport(string[] hosts, int[] ports) {
+            m_targetHosts = hosts;
+            m_ports = ports;
         }
 
         /// <summary>
@@ -179,7 +185,7 @@ namespace Ch.Elca.Iiop {
         /// </summary>        
         public TcpClientTransport(IPAddress hostIp, int port) {
             m_targetHostIp = hostIp;
-            m_port = port;
+            m_ports = new int[] { port };
         }
         
         #endregion IConstructors
@@ -213,9 +219,9 @@ namespace Ch.Elca.Iiop {
             }
             m_socket = new TcpClient();
             if (m_targetHostIp != null) {
-                m_socket.Connect(m_targetHostIp, m_port);
-            } else if (m_targetHost != null) {                
-                m_socket.Connect(m_targetHost, m_port);
+                m_socket.Connect(m_targetHostIp, m_ports[0]);
+            } else if (m_targetHosts != null) {
+                OpenConnectionByHostName();
             } else {
                 throw new INTERNAL(547, CompletionStatus.Completed_No);
             }
@@ -224,7 +230,31 @@ namespace Ch.Elca.Iiop {
             m_socket.SendTimeout = m_sendTimeOut;
             m_stream = m_socket.GetStream();
         }
-                        
+                
+        private void OpenConnectionByHostName() {
+            Exception lastException = null;
+            for (int i = 0; i < m_targetHosts.Length; i++) {
+                lastException = null;
+                try {
+                    Debug.WriteLine(
+                        string.Format(
+                            "OpenConnection(): Try to connect to {0}:{1}",
+                            m_targetHosts[i],
+                            m_ports[i]));
+                    m_socket.Connect(m_targetHosts[i], m_ports[i]);
+                    Debug.WriteLine("OpenConnection(): connection succeeded !");
+                    break;
+                } catch (Exception e) {
+                    Trace.WriteLine("OpenConnection(): connect failed: " +e.ToString());
+                    lastException = e;
+                }
+            }
+            if (lastException != null) {
+                throw lastException;
+            }
+        }
+        
+        
         #endregion IMethods
         
     }
@@ -287,7 +317,24 @@ namespace Ch.Elca.Iiop {
                 IPAddress asIpAddress = ConvertToIpAddress(iiopProf.HostName);
                 IClientTransport result;
                 if (asIpAddress == null) {
-                    result = new TcpClientTransport(iiopProf.HostName, iiopProf.Port);
+                    ArrayList hostNames = new ArrayList();
+                    ArrayList ports = new ArrayList();
+                    hostNames.Add(iiopProf.HostName);
+                    ports.Add(iiopProf.Port);
+                    foreach (TaggedComponent taggedComponent in 
+                             iiopProf.TaggedComponents.GetComponents(ALTERNATE_IIOP_ADDRESS.ConstVal)) {
+                        string hostName = System.Text.ASCIIEncoding.ASCII.GetString(
+                            taggedComponent.component_data,
+                            8,
+                            BitConverter.ToInt32(taggedComponent.component_data, 4) - 1);
+                        ushort port = BitConverter.ToUInt16(taggedComponent.component_data, 
+                                                            taggedComponent.component_data.Length - 2);
+                        hostNames.Add(hostName);
+                        ports.Add(port);
+                        Debug.WriteLine(string.Format("CreateTransport(): host {0}:{1} from IOR added to list", hostName, port));
+                    }                    
+                    result = new TcpClientTransport((string[])hostNames.ToArray(ReflectionHelper.StringType),
+                                                    (int[])ports.ToArray(ReflectionHelper.Int32Type));
                 } else {
                     result = new TcpClientTransport(asIpAddress, iiopProf.Port);
                 }

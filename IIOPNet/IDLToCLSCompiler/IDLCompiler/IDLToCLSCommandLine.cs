@@ -41,6 +41,7 @@ using Microsoft.CSharp;
 using parser;
 using Ch.Elca.Iiop.IdlCompiler.Action;
 using Ch.Elca.Iiop.IdlPreprocessor;
+using Ch.Elca.Iiop.Util;
 
 namespace Ch.Elca.Iiop.IdlCompiler {
 
@@ -339,7 +340,33 @@ namespace Ch.Elca.Iiop.IdlCompiler {
                     i++;
                     m_outputDirectory = new DirectoryInfo(args[i++]);
                 } else if (args[i].StartsWith("-out:")) {                    
-                    m_outputDirectory = new DirectoryInfo(args[i++].Substring(5));                    
+                    m_outputDirectory = new DirectoryInfo(args[i++].Substring(5));
+                } else if (args[i].StartsWith("-fidl:")) {
+                    try {
+                        string idlFilesInFile = ReadAllTextFile(args[i++].Substring(6));            			
+                        string[] idlFiles = idlFilesInFile.
+                            Split(new char[] { ' ', '\t', '\n' });
+                        foreach (string idlFile in idlFiles) {
+                            if (idlFile != null && idlFile.Length > 0) {
+                                this.m_inputFileNames.Add(idlFile.Trim());
+                            }
+                        }
+                    } catch(Exception ex) {
+                        SetIsInvalid("Failed to read file containing idl files: " + ex);
+                    }
+                } else if (args[i].StartsWith("-pidl:")) {
+                    try {
+                        string directoryWithIdlFiles = args[i++].Substring(6);
+                        if (!Directory.Exists(directoryWithIdlFiles)) {
+                            SetIsInvalid("Directory containing idl files to search does not exist: " + directoryWithIdlFiles);
+                        }
+                        string[] idlFiles = FindIdlFilesRecursively(directoryWithIdlFiles);
+                        foreach (string idlFile in idlFiles) {
+                            this.m_inputFileNames.Add(idlFile.Trim());
+                        }
+                    } catch (Exception ex) {
+                        SetIsInvalid("Failed to retrieve all idl files recursively: " + ex);
+                    }
                 } else if (args[i].Equals("-r")) {
                     i++;
                     refAssemblies.Add(args[i++]);                    
@@ -419,9 +446,9 @@ namespace Ch.Elca.Iiop.IdlCompiler {
                     return;
                 }                
             }
-            
-            if ((i + 2) > args.Length) {
-                SetIsInvalid("Error: target assembly name or idl-file missing");
+
+            if (i >= args.Length) { // target assembly name is next argument, which is not already parsed.
+                SetIsInvalid("Error: target assembly name missing");
                 return;
             }
             
@@ -430,9 +457,31 @@ namespace Ch.Elca.Iiop.IdlCompiler {
             
             for (int j = i; j < args.Length; j++) {
                 m_inputFileNames.Add(args[j]);
-            }            
+            }
+
+            if (m_inputFileNames.Count == 0) {
+                SetIsInvalid("Error: idl-file(s) missing");
+                return;
+            }
             
             AddRefAssemblies(refAssemblies, m_libDirectories);
+        }
+        
+        private string ReadAllTextFile(string path) {
+            using (StreamReader sr = new StreamReader(path)) {
+                return sr.ReadToEnd();
+            }
+        }
+        
+        private string[] FindIdlFilesRecursively(string directory) {
+            ArrayList result = new ArrayList();
+            string[] filesInCurrentDirectory = Directory.GetFiles(directory, "*.idl");
+            result.AddRange(filesInCurrentDirectory);
+            string[] subdirectories = Directory.GetDirectories(directory);
+            foreach (string subdirectory in subdirectories) {
+                result.AddRange(FindIdlFilesRecursively(subdirectory));
+            }        	
+            return (string[])result.ToArray(ReflectionHelper.StringType);
         }
         
         #endregion IMethods
@@ -469,6 +518,8 @@ namespace Ch.Elca.Iiop.IdlCompiler {
             target.WriteLine("-delaySign      delay signing of assembly (snk file contains only a pk)");
             target.WriteLine("-asmVersion     the version of the generated assembly");
             target.WriteLine("-mapAnyToCont   maps idl any to the any container omg.org.CORBA.Any; if not specified, any is mapped to object");
+            target.WriteLine("-fidl:listfile  a text file with the input idl files. the files can be seperated with whitespaces");
+            target.WriteLine("-pidl:path      a path, where all (recursive) existinge idl files will be used for input.");
         }        
         
         #endregion SMethods
@@ -482,7 +533,7 @@ namespace Ch.Elca.Iiop.IdlCompiler {
 
 
 namespace Ch.Elca.Iiop.IdlCompiler.Tests {
-	
+    
     using System;
     using System.Reflection;
     using System.Collections;
@@ -549,7 +600,7 @@ namespace Ch.Elca.Iiop.IdlCompiler.Tests {
             Assertion.Assert("Invalid commandLine detection",
                              commandLine.IsInvalid);
             Assertion.AssertEquals("invalid commandLine message",
-                                   "Error: target assembly name or idl-file missing",
+                                   "Error: target assembly name missing",
                                    commandLine.ErrorMessage);
         }
         
@@ -560,7 +611,7 @@ namespace Ch.Elca.Iiop.IdlCompiler.Tests {
             Assertion.Assert("Invalid commandLine detection",
                              commandLine.IsInvalid);
             Assertion.AssertEquals("invalid commandLine message",
-                                   "Error: target assembly name or idl-file missing",
+                                   "Error: idl-file(s) missing",
                                    commandLine.ErrorMessage);
         }
         
@@ -913,6 +964,96 @@ namespace Ch.Elca.Iiop.IdlCompiler.Tests {
             
             Assertion.Assert("Command line validity", !commandLine.IsInvalid);            
         }
+        
+        [Test]
+        public void TestIdlFilesReadFromFile() {
+        	string fileWithIdlFiles = Path.GetTempFileName();
+        	try {
+        		string file1 = "test1.idl";
+        		string file2 = "test2.idl";
+	        	using (StreamWriter sw = new StreamWriter(fileWithIdlFiles)) {
+        			sw.WriteLine(file1);
+        			sw.WriteLine(file2);
+	        	}
+        		
+        		IDLToCLSCommandLine commandLine = new IDLToCLSCommandLine(
+                	new string[] { "-fidl:" + fileWithIdlFiles, "testAsm" } );
+                Assertion.AssertEquals("idl files", 2,
+                                   commandLine.InputFileNames.Count);
+                Assertion.AssertEquals("idl file1", 
+                                       file1,
+                                       commandLine.InputFileNames[0]);
+                Assertion.AssertEquals("idl file2", 
+                                       file2,
+                                       commandLine.InputFileNames[1]);
+            
+                Assertion.Assert("Command line validity", !commandLine.IsInvalid);
+        		
+        	} finally {
+        		if (File.Exists(fileWithIdlFiles)) {
+        		    File.Delete(fileWithIdlFiles);
+        		}
+        	}
+        }
+        
+        [Test]
+        public void TestIdlFilesRecursivelyFromDirectory() {
+        	string tempPath = Path.Combine(Path.GetTempPath(), "IDLCommandLineRecursiveFileTest");
+        	if (Directory.Exists(tempPath)) {
+        		Directory.Delete(tempPath, true);
+        	}        	
+        	string subDir1 = Path.Combine(tempPath, "subDir1");
+        	string subDir2 = Path.Combine(tempPath, "subDir2");
+        	
+        	try {        		
+        		Directory.CreateDirectory(tempPath);
+        		Directory.CreateDirectory(subDir1);
+        		Directory.CreateDirectory(subDir2);
+        	
+        		string file1 = Path.Combine(tempPath, "test1.idl");
+        		string file2 = Path.Combine(tempPath, "test2.idl");
+        		string file3 = Path.Combine(subDir1, "test3.idl");
+        		string file4 = Path.Combine(subDir2, "test4.idl");
+        		
+        		
+        		using (FileStream fs = File.Create(file1)) {
+	        		fs.Close();
+	        	}
+	        	using (FileStream fs = File.Create(file2)) {
+	        		fs.Close();
+	        	}
+	        	using (FileStream fs = File.Create(file3)) {
+	        		fs.Close();
+	        	}
+	        	using (FileStream fs = File.Create(file4)) {
+	        		fs.Close();
+	        	}
+        		
+        		IDLToCLSCommandLine commandLine = new IDLToCLSCommandLine(
+                	new string[] { "-pidl:" + tempPath, "testAsm" } );
+                Assertion.AssertEquals("idl files", 4,
+                                   commandLine.InputFileNames.Count);	        	
+                Assertion.AssertEquals("idl file1", 
+                                       file1,
+                                       commandLine.InputFileNames[0]);
+                Assertion.AssertEquals("idl file2", 
+                                       file2,
+                                       commandLine.InputFileNames[1]);
+	        	Assertion.AssertEquals("idl file3", 
+                                       file3,
+                                       commandLine.InputFileNames[2]);
+	        	Assertion.AssertEquals("idl file4", 
+                                       file4,
+                                       commandLine.InputFileNames[3]);
+            
+                Assertion.Assert("Command line validity", !commandLine.IsInvalid);
+        		
+        	} finally {
+        		if (Directory.Exists(tempPath)) {
+        			Directory.Delete(tempPath, true);
+        		}
+        	}
+        }        
         
     }
 }
