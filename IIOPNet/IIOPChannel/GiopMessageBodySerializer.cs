@@ -887,7 +887,7 @@ namespace Ch.Elca.Iiop.Tests {
             cdrIn.ConfigStream(0, new GiopVersion(1,2));
             omg.org.IOP.ServiceContextList result = new ServiceContextList(cdrIn);
             // check if context is present
-            Assertion.Assert("expected context not in collection", result.ContainsServiceContext(1234567) == true);
+            Assert.IsTrue(result.ContainsServiceContext(1234567), "expected context not in collection");
         }
         
         [Test]
@@ -946,7 +946,7 @@ namespace Ch.Elca.Iiop.Tests {
             ser.SerialiseRequest(request, targetStream, targetProfile,
                                  conDesc);
             
-            ArrayAssertion.AssertByteArrayEquals("serialised message",
+            Assert.AreEqual(
                 new byte[] { 0, 0, 0, 5, 3, 0, 0, 0,
                              0, 0, 0, 0, 
                              0, 0, 0, 7, 116, 101, 115, 116,
@@ -958,7 +958,7 @@ namespace Ch.Elca.Iiop.Tests {
                              0, 1, 0, 1, 0, 1, 1, 9,                              
                              0, 0, 0, 8, 0, 116, 0, 101,
                              0, 115, 0, 116},
-                baseStream.ToArray());
+                baseStream.ToArray(),"serialised message");
         }        
         
         
@@ -1009,11 +1009,11 @@ namespace Ch.Elca.Iiop.Tests {
             }
 
             // now check if values are correct
-            Assertion.Assert("deserialised message is null", result != null);
+            Assert.IsTrue(result != null, "deserialised message is null");
             object[] args = (object[])result.Properties[SimpleGiopMsg.ARGS_KEY];
-            Assertion.Assert("args is null", args != null);
-            Assertion.AssertEquals(1, args.Length);
-            Assertion.AssertEquals("test", args[0]);
+            Assert.IsTrue(args != null, "args is null");
+            Assert.AreEqual(1, args.Length);
+            Assert.AreEqual("test", args[0]);
         }  
         
         [Test]
@@ -1056,12 +1056,10 @@ namespace Ch.Elca.Iiop.Tests {
                 // deserialise request message
                 result = ser.DeserialiseRequest(cdrSourceStream, new GiopVersion(1,2),
                                                 conDesc, InterceptorManager.EmptyInterceptorOptions);
-                Assertion.Fail("no exception, although code set not set");
+                Assert.Fail("no exception, although code set not set");
             } catch (RequestDeserializationException rde) {
-                Assertion.AssertNotNull("rde inner exception",
-                                        rde.Reason);
-                Assertion.AssertEquals("rde type",
-                                       typeof(BAD_PARAM), rde.Reason.GetType());
+                Assert.NotNull(rde.Reason, "rde inner exception");
+                Assert.AreEqual(typeof(BAD_PARAM), rde.Reason.GetType(), "rde type");
             } finally {
                 RemotingServices.Disconnect(service);
             }

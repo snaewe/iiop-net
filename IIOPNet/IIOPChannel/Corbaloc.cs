@@ -438,18 +438,18 @@ namespace Ch.Elca.Iiop.Tests {
 			string testCorbaLoc = "corbaloc:iiop:1.2@elca.ch:1234/test";
 			Corbaloc parsed = new Corbaloc(testCorbaLoc, m_codec, 
 			                               new object[] { m_defaultCodeSetTaggedComponent });
-        	Assertion.AssertEquals("test", parsed.KeyString);
+        	Assert.AreEqual("test", parsed.KeyString);
         	        	        	        	
-        	Assertion.AssertEquals(1, parsed.GetProfiles().Length);
-        	Assertion.AssertEquals(typeof(InternetIiopProfile), parsed.GetProfiles()[0].GetType());
+        	Assert.AreEqual(1, parsed.GetProfiles().Length);
+        	Assert.AreEqual(typeof(InternetIiopProfile), parsed.GetProfiles()[0].GetType());
         	InternetIiopProfile profile = (InternetIiopProfile)parsed.GetProfiles()[0];
-        	Assertion.Assert(profile.TaggedComponents.ContainsTaggedComponent(
+        	Assert.IsTrue(profile.TaggedComponents.ContainsTaggedComponent(
                                 CodeSetService.SERVICE_ID));
 
-        	Assertion.AssertEquals(1, profile.Version.Major);
-        	Assertion.AssertEquals(2, profile.Version.Minor);
-        	Assertion.AssertEquals("elca.ch", profile.HostName);
-        	Assertion.AssertEquals(1234, profile.Port);        	        	        	        	
+        	Assert.AreEqual(1, profile.Version.Major);
+        	Assert.AreEqual(2, profile.Version.Minor);
+        	Assert.AreEqual("elca.ch", profile.HostName);
+        	Assert.AreEqual(1234, profile.Port);        	        	        	        	
         }
         
         [Test]
@@ -457,31 +457,31 @@ namespace Ch.Elca.Iiop.Tests {
         	string testCorbaLoc = "corbaloc:iiop:1.2@elca.ch:1234,:1.2@elca.ch:1235,:1.2@elca.ch:1236/test";
         	Corbaloc parsed = new Corbaloc(testCorbaLoc, m_codec,
         	                               new object[] { m_defaultCodeSetTaggedComponent });
-        	Assertion.AssertEquals("test", parsed.KeyString);
+        	Assert.AreEqual("test", parsed.KeyString);
         	
         	IorProfile[] profiles = parsed.GetProfiles();        	
-        	Assertion.AssertEquals(3, profiles.Length);
-        	Assertion.AssertEquals(typeof(InternetIiopProfile), profiles[0].GetType());
-        	Assertion.AssertEquals(typeof(InternetIiopProfile), profiles[1].GetType());
-        	Assertion.AssertEquals(typeof(InternetIiopProfile), profiles[2].GetType());
+        	Assert.AreEqual(3, profiles.Length);
+        	Assert.AreEqual(typeof(InternetIiopProfile), profiles[0].GetType());
+        	Assert.AreEqual(typeof(InternetIiopProfile), profiles[1].GetType());
+        	Assert.AreEqual(typeof(InternetIiopProfile), profiles[2].GetType());
         	
         	InternetIiopProfile prof = (InternetIiopProfile)(profiles[0]);
-        	Assertion.AssertEquals(1, prof.Version.Major);
-        	Assertion.AssertEquals(2, prof.Version.Minor);
-        	Assertion.AssertEquals("elca.ch", prof.HostName);
-        	Assertion.AssertEquals(1234, prof.Port);
+        	Assert.AreEqual(1, prof.Version.Major);
+        	Assert.AreEqual(2, prof.Version.Minor);
+        	Assert.AreEqual("elca.ch", prof.HostName);
+        	Assert.AreEqual(1234, prof.Port);
         	
         	prof = (InternetIiopProfile)(profiles[1]);
-        	Assertion.AssertEquals(1, prof.Version.Major);
-        	Assertion.AssertEquals(2, prof.Version.Minor);
-        	Assertion.AssertEquals("elca.ch", prof.HostName);
-        	Assertion.AssertEquals(1235, prof.Port);
+        	Assert.AreEqual(1, prof.Version.Major);
+        	Assert.AreEqual(2, prof.Version.Minor);
+        	Assert.AreEqual("elca.ch", prof.HostName);
+        	Assert.AreEqual(1235, prof.Port);
         	
         	prof = (InternetIiopProfile)(profiles[2]);
-        	Assertion.AssertEquals(1, prof.Version.Major);
-        	Assertion.AssertEquals(2, prof.Version.Minor);
-        	Assertion.AssertEquals("elca.ch", prof.HostName);
-        	Assertion.AssertEquals(1236, prof.Port);        	
+        	Assert.AreEqual(1, prof.Version.Major);
+        	Assert.AreEqual(2, prof.Version.Minor);
+        	Assert.AreEqual("elca.ch", prof.HostName);
+        	Assert.AreEqual(1236, prof.Port);        	
         }
         
         /// <summary>test corba loc with iiop addrs, check the defaults</summary>
@@ -490,54 +490,54 @@ namespace Ch.Elca.Iiop.Tests {
         	string testCorbaLoc = "corbaloc::/test";
         	Corbaloc parsed = new Corbaloc(testCorbaLoc, m_codec,
         	                               new object[] { m_defaultCodeSetTaggedComponent });
-        	Assertion.AssertEquals("test", parsed.KeyString);        	
+        	Assert.AreEqual("test", parsed.KeyString);        	
         	IorProfile[] profiles = parsed.GetProfiles();
-        	Assertion.AssertEquals(1, profiles.Length);
-        	Assertion.AssertEquals(typeof(InternetIiopProfile), profiles[0].GetType());
+        	Assert.AreEqual(1, profiles.Length);
+        	Assert.AreEqual(typeof(InternetIiopProfile), profiles[0].GetType());
         	InternetIiopProfile prof = (InternetIiopProfile)(profiles[0]);
-        	Assertion.AssertEquals(1, prof.Version.Major);
-        	Assertion.AssertEquals(0, prof.Version.Minor);
-        	Assertion.AssertEquals("localhost", prof.HostName);
-        	Assertion.AssertEquals(2809, prof.Port);
+        	Assert.AreEqual(1, prof.Version.Major);
+        	Assert.AreEqual(0, prof.Version.Minor);
+        	Assert.AreEqual("localhost", prof.HostName);
+        	Assert.AreEqual(2809, prof.Port);
         	
         	testCorbaLoc = "corbaloc::elca.ch/test";
         	parsed = new Corbaloc(testCorbaLoc, m_codec,
         	                      new object[] { m_defaultCodeSetTaggedComponent });
-        	Assertion.AssertEquals("test", parsed.KeyString);
+        	Assert.AreEqual("test", parsed.KeyString);
         	profiles = parsed.GetProfiles();
-        	Assertion.AssertEquals(1, profiles.Length);
-        	Assertion.AssertEquals(typeof(InternetIiopProfile), profiles[0].GetType());
+        	Assert.AreEqual(1, profiles.Length);
+        	Assert.AreEqual(typeof(InternetIiopProfile), profiles[0].GetType());
         	prof = (InternetIiopProfile)(profiles[0]);
-        	Assertion.AssertEquals(1, prof.Version.Major);
-        	Assertion.AssertEquals(0, prof.Version.Minor);
-        	Assertion.AssertEquals("elca.ch", prof.HostName);
-        	Assertion.AssertEquals(2809, prof.Port);
+        	Assert.AreEqual(1, prof.Version.Major);
+        	Assert.AreEqual(0, prof.Version.Minor);
+        	Assert.AreEqual("elca.ch", prof.HostName);
+        	Assert.AreEqual(2809, prof.Port);
         	
         	testCorbaLoc = "corbaloc:iiop:1.2@elca.ch/test";
         	parsed = new Corbaloc(testCorbaLoc, m_codec,
         	                      new object[] { m_defaultCodeSetTaggedComponent });
-        	Assertion.AssertEquals("test", parsed.KeyString);
+        	Assert.AreEqual("test", parsed.KeyString);
         	profiles = parsed.GetProfiles();
-        	Assertion.AssertEquals(1, profiles.Length);
-        	Assertion.AssertEquals(typeof(InternetIiopProfile), profiles[0].GetType());
+        	Assert.AreEqual(1, profiles.Length);
+        	Assert.AreEqual(typeof(InternetIiopProfile), profiles[0].GetType());
         	prof = (InternetIiopProfile)(profiles[0]);
-        	Assertion.AssertEquals(1, prof.Version.Major);
-        	Assertion.AssertEquals(2, prof.Version.Minor);
-        	Assertion.AssertEquals("elca.ch", prof.HostName);
-        	Assertion.AssertEquals(2809, prof.Port);
+        	Assert.AreEqual(1, prof.Version.Major);
+        	Assert.AreEqual(2, prof.Version.Minor);
+        	Assert.AreEqual("elca.ch", prof.HostName);
+        	Assert.AreEqual(2809, prof.Port);
         	
         	testCorbaLoc = "corbaloc::elca.ch:1234/test";
         	parsed = new Corbaloc(testCorbaLoc, m_codec,
         	                      new object[] { m_defaultCodeSetTaggedComponent });
-        	Assertion.AssertEquals("test", parsed.KeyString);
+        	Assert.AreEqual("test", parsed.KeyString);
         	profiles = parsed.GetProfiles();
-        	Assertion.AssertEquals(1, profiles.Length);
-        	Assertion.AssertEquals(typeof(InternetIiopProfile), profiles[0].GetType());
+        	Assert.AreEqual(1, profiles.Length);
+        	Assert.AreEqual(typeof(InternetIiopProfile), profiles[0].GetType());
         	prof = (InternetIiopProfile)(profiles[0]);
-        	Assertion.AssertEquals(1, prof.Version.Major);
-        	Assertion.AssertEquals(0, prof.Version.Minor);
-        	Assertion.AssertEquals("elca.ch", prof.HostName);
-        	Assertion.AssertEquals(1234, prof.Port);                        
+        	Assert.AreEqual(1, prof.Version.Major);
+        	Assert.AreEqual(0, prof.Version.Minor);
+        	Assert.AreEqual("elca.ch", prof.HostName);
+        	Assert.AreEqual(1234, prof.Port);                        
         }
         
         [Test]
@@ -545,20 +545,20 @@ namespace Ch.Elca.Iiop.Tests {
         	string testCorbaLoc = "corbaloc:iiop-ssl:elca.ch:1234/test";
         	Corbaloc parsed = new Corbaloc(testCorbaLoc, m_codec,
         	                               new object[] { m_defaultCodeSetTaggedComponent });
-        	Assertion.AssertEquals("test", parsed.KeyString);
+        	Assert.AreEqual("test", parsed.KeyString);
         	IorProfile[] profiles = parsed.GetProfiles();
-        	Assertion.AssertEquals(1, profiles.Length);
-        	Assertion.AssertEquals(typeof(InternetIiopProfile), profiles[0].GetType());
+        	Assert.AreEqual(1, profiles.Length);
+        	Assert.AreEqual(typeof(InternetIiopProfile), profiles[0].GetType());
         	InternetIiopProfile prof = (InternetIiopProfile)(profiles[0]);
-        	Assertion.AssertEquals(1, prof.Version.Major);
-        	Assertion.AssertEquals(0, prof.Version.Minor);
-        	Assertion.AssertEquals("elca.ch", prof.HostName);
-        	Assertion.AssertEquals(0, prof.Port);     
+        	Assert.AreEqual(1, prof.Version.Major);
+        	Assert.AreEqual(0, prof.Version.Minor);
+        	Assert.AreEqual("elca.ch", prof.HostName);
+        	Assert.AreEqual(0, prof.Port);     
         	        	
         	
-        	Assertion.Assert(profiles[0].TaggedComponents.ContainsTaggedComponent(
+        	Assert.IsTrue(profiles[0].TaggedComponents.ContainsTaggedComponent(
                                  CodeSetService.SERVICE_ID));
-        	Assertion.Assert(profiles[0].TaggedComponents.ContainsTaggedComponent(
+        	Assert.IsTrue(profiles[0].TaggedComponents.ContainsTaggedComponent(
                                  TAG_SSL_SEC_TRANS.ConstVal));
         }
         
@@ -578,11 +578,11 @@ namespace Ch.Elca.Iiop.Tests {
             string objectUri;
             GiopVersion version;
             Uri channelUri = parsed.ParseUrl(out objectUri, out version);
-            Assertion.AssertEquals("object uri", "test", objectUri);
-            Assertion.AssertEquals("version major", 1, version.Major);
-            Assertion.AssertEquals("version minor", 2, version.Minor);
-            Assertion.AssertEquals("channel uri", "iiop1.2://elca.ch:1234/",
-                                   channelUri.AbsoluteUri);
+            Assert.AreEqual("test", objectUri, "object uri");
+            Assert.AreEqual(1, version.Major, "version major");
+            Assert.AreEqual(2, version.Minor, "version minor");
+            Assert.AreEqual("iiop1.2://elca.ch:1234/",
+                                   channelUri.AbsoluteUri, "channel uri");
         }
         
         [Test]
@@ -593,11 +593,11 @@ namespace Ch.Elca.Iiop.Tests {
             string objectUri;
             GiopVersion version;
             Uri channelUri = parsed.ParseUrl(out objectUri, out version);
-            Assertion.AssertEquals("object uri", "test", objectUri);
-            Assertion.AssertEquals("version major", 1, version.Major);
-            Assertion.AssertEquals("version minor", 2, version.Minor);
-            Assertion.AssertEquals("channel uri", "iiop-ssl1.2://elca.ch:1234/",
-                                   channelUri.AbsoluteUri);
+            Assert.AreEqual("test", objectUri, "object uri");
+            Assert.AreEqual(1, version.Major, "version major");
+            Assert.AreEqual(2, version.Minor, "version minor");
+            Assert.AreEqual("iiop-ssl1.2://elca.ch:1234/",
+                                   channelUri.AbsoluteUri, "channel uri");
         }        
         
     }

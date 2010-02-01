@@ -363,8 +363,8 @@ namespace Ch.Elca.Iiop.Tests {
             CdrInputStreamImpl inStream = new CdrInputStreamImpl(msgStream);
             GiopHeader header = new GiopHeader(inStream);
             
-            Assertion.AssertEquals(GiopMsgTypes.Request, header.GiopType);
-            Assertion.AssertEquals(version, header.Version);
+            Assert.AreEqual(GiopMsgTypes.Request, header.GiopType);
+            Assert.AreEqual(version, header.Version);
             
             uint contentLength = 0;
             uint msgReqId = 0;
@@ -380,11 +380,11 @@ namespace Ch.Elca.Iiop.Tests {
                 msgReqId = inStream.ReadULong();
             }
             
-            Assertion.AssertEquals(contentLength, header.ContentMsgLength);
-            Assertion.AssertEquals(endianFlags, header.GiopFlags);
+            Assert.AreEqual(contentLength, header.ContentMsgLength);
+            Assert.AreEqual(endianFlags, header.GiopFlags);
 
             for (int i = 0; i < expectedContentLength; i++) {
-                Assertion.AssertEquals(i % 255, inStream.ReadOctet());
+                Assert.AreEqual(i % 255, inStream.ReadOctet());
             }            
                                            
         }
@@ -467,7 +467,7 @@ namespace Ch.Elca.Iiop.Tests {
         public void TestTwoFragmentsGiop1_1() {
             try {
                 InternalTestTwoFramgents(new GiopVersion(1, 1));
-                Assertion.Fail("giop 1.1 fragment not detected as unsupported");
+                Assert.Fail("giop 1.1 fragment not detected as unsupported");
             } catch (Exception) {
                 // ok, not supported
             }
@@ -477,7 +477,7 @@ namespace Ch.Elca.Iiop.Tests {
         public void TestThreeFragmentsGiop1_1() {
             try {
                 InternalTestThreeFramgents(new GiopVersion(1, 1));
-                Assertion.Fail("giop 1.1 fragment not detected as unsupported");
+                Assert.Fail("giop 1.1 fragment not detected as unsupported");
             } catch (Exception) {
                 // ok, not supported
             }
@@ -501,7 +501,7 @@ namespace Ch.Elca.Iiop.Tests {
                 // finish fragment
                 GiopHeader combinedHeader;
                 assembler.FinishFragmentedMsg(msgStream, out combinedHeader);                
-                Assertion.Fail("accepted finish fragment, although no start fragment seen");
+                Assert.Fail("accepted finish fragment, although no start fragment seen");
             } catch (IOException) {
                 // ok, no start fragment found
             }
@@ -543,7 +543,7 @@ namespace Ch.Elca.Iiop.Tests {
             try {
                 // finish fragment
                 assembler.FinishFragmentedMsg(msgStream, out combinedHeader);
-                Assertion.Fail("accepted finish fragment, although no start fragment seen");
+                Assert.Fail("accepted finish fragment, although no start fragment seen");
             } catch (IOException) {
                 // ok, no start fragment found
             }                     

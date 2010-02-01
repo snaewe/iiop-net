@@ -836,7 +836,7 @@ namespace Ch.Elca.Iiop.Tests {
     		byte val = 1;
     		DataInputStream inputStream = CreateInputStream(new byte[] { val });
     		byte read = inputStream.read_octet();
-    		Assertion.AssertEquals("read", val, read);
+            Assert.AreEqual(val, read, "read");
     	}
     	
     }
@@ -869,7 +869,7 @@ namespace Ch.Elca.Iiop.Tests {
     		                                                     m_serFactory);
     		doStream.write_octet(val);
     		outputStream.Seek(0, SeekOrigin.Begin);
-    		Assertion.AssertEquals("written", val, outputStream.ReadByte());
+            Assert.AreEqual(val, outputStream.ReadByte(), "written");
     	}
     	
     }

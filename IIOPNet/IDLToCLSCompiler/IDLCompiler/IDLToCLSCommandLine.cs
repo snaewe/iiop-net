@@ -43,16 +43,18 @@ using Ch.Elca.Iiop.IdlCompiler.Action;
 using Ch.Elca.Iiop.IdlPreprocessor;
 using Ch.Elca.Iiop.Util;
 
-namespace Ch.Elca.Iiop.IdlCompiler {
+namespace Ch.Elca.Iiop.IdlCompiler
+{
 
 
     /// <summary>
     /// The class responsible for handling the compiler command line.
     /// </summary>
-    public class IDLToCLSCommandLine {
-        
+    public class IDLToCLSCommandLine
+    {
+
         #region IFields
-        
+
         private string m_targetAssemblyName;
         private IList /* <string> */ m_inputFileNames = new ArrayList();
         private DirectoryInfo m_outputDirectory = new DirectoryInfo(".");
@@ -71,426 +73,557 @@ namespace Ch.Elca.Iiop.IdlCompiler {
         private IList /* <Assembly> */ m_refAssemblies = new ArrayList();
         private IList /* <string> */ m_preprocessorDefines = new ArrayList();
         private IList /* <DirectoryInfo> */ m_libDirectories = new ArrayList();
-        
+
         private bool m_isInvalid = false;
         private string m_errorMessage = String.Empty;
         private bool m_isHelpRequested = false;
-        
+
         #endregion IFields
         #region IConstructors
-        
-        public IDLToCLSCommandLine(string[] args) {
+
+        public IDLToCLSCommandLine(string[] args)
+        {
             ParseArgs(args);
         }
-        
+
         #endregion IConstructors
         #region IProperties
-        
-        
+
+
         /// <summary>
         /// the name of the target assembly.
         /// </summary>
-        public string TargetAssemblyName {
-            get {
+        public string TargetAssemblyName
+        {
+            get
+            {
                 return m_targetAssemblyName;
             }
         }
-        
+
         /// <summary>
         /// the list of input file names; no fileinfo, because relative pathes are relative to base dir not current dir at the moment
         /// </summary>
-        public IList /* <string> */ InputFileNames {
-            get {
+        public IList /* <string> */ InputFileNames
+        {
+            get
+            {
                 return m_inputFileNames;
             }
         }
-        
+
         /// <summary>the directory, the output will be written to.</summary>
-        public DirectoryInfo OutputDirectory {
-            get {
+        public DirectoryInfo OutputDirectory
+        {
+            get
+            {
                 return m_outputDirectory;
             }
         }
 
         /// <summary>the custom mapping files.</summary>
-        public IList /* <FileInfo> */ CustomMappingFiles {
-            get {
+        public IList /* <FileInfo> */ CustomMappingFiles
+        {
+            get
+            {
                 return m_customMappingFiles;
             }
         }
-        
+
         /// <summary>the key file used to sign the resulting assembly</summary>
-        public FileInfo SignKeyFile {
-            get {
+        public FileInfo SignKeyFile
+        {
+            get
+            {
                 return m_signKeyFile;
             }
         }
-        
+
         /// <summary>delay sign the assembly</summary>
-        public bool DelaySign {
-            get {
+        public bool DelaySign
+        {
+            get
+            {
                 return m_delaySign;
             }
         }
-        
+
         /// <summary>the version of the target assembly.</summary>
-        public string AssemblyVersion {
-            get {
+        public string AssemblyVersion
+        {
+            get
+            {
                 return m_asmVersion;
             }
         }
-        
+
         /// <summary>
         /// returns true, if any should be map to the any container type instead of object.
         /// </summary>
-        public bool MapAnyToAnyContainer {
-            get {
+        public bool MapAnyToAnyContainer
+        {
+            get
+            {
                 return m_mapAnyToAnyContainer;
             }
         }
-        
+
         /// <summary>
         /// the directory to change to, before doing any processing.
         /// </summary>
-        public DirectoryInfo BaseDirectory {
-            get {
+        public DirectoryInfo BaseDirectory
+        {
+            get
+            {
                 return m_baseDirectory;
             }
         }
-        
+
         /// <summary>
         /// option to specify, that a generated concrete / abstract interface should inherit from
         /// a certain base interface.
         /// </summary>
-        public Type BaseInterface {
-            get {
-                return m_baseInterface;                
-            }                
+        public Type BaseInterface
+        {
+            get
+            {
+                return m_baseInterface;
+            }
         }
-        
+
         /// <summary>
         /// Generate ValueType skeletons or not.
         /// </summary>
-        public bool GenerateValueTypeSkeletons {
-            get {
+        public bool GenerateValueTypeSkeletons
+        {
+            get
+            {
                 return m_generateVtSkeletons;
             }
         }
-        
+
         /// <summary>
         /// Overwrite already generated value type skeletons or not.
         /// </summary>
-        public bool OverwriteValueTypeSkeletons {
-            get {
+        public bool OverwriteValueTypeSkeletons
+        {
+            get
+            {
                 return m_overwriteVtSkeletons;
             }
-        }        
-        
+        }
+
         /// <summary>
         /// The target directory for the generated value type skeletons.
         /// </summary>
-        public DirectoryInfo ValueTypeSkeletonsTargetDir {
-            get {
+        public DirectoryInfo ValueTypeSkeletonsTargetDir
+        {
+            get
+            {
                 return m_vtSkeletonsTargetDir;
             }
         }
-        
+
         /// <summary>
         /// the codedom provider to use for Valuetype skeleton generation.
         /// </summary>
-        public Type ValueTypeSkeletonCodeDomProviderType {
-            get {
+        public Type ValueTypeSkeletonCodeDomProviderType
+        {
+            get
+            {
                 return m_vtSkelcodeDomProviderType;
             }
         }
-        
+
         /// <summary>
         /// directories to search in for idl files.
         /// </summary>
-        public IList /* <DirectoryInfo> */ IdlSourceDirectories {
-            get {
+        public IList /* <DirectoryInfo> */ IdlSourceDirectories
+        {
+            get
+            {
                 return m_idlSourceDirs;
             }
         }
-        
+
         /// <summary>
         /// the referenced assemblies.
         /// </summary>
-        public IList /* <Assembly> */ ReferencedAssemblies {
-            get {
+        public IList /* <Assembly> */ ReferencedAssemblies
+        {
+            get
+            {
                 return m_refAssemblies;
             }
         }
-        
+
         /// <summary>
         /// the preprocessor defines.
         /// </summary>
-        public IList /* <string> */ PreprocessorDefines {
-            get {
+        public IList /* <string> */ PreprocessorDefines
+        {
+            get
+            {
                 return m_preprocessorDefines;
             }
         }
-        
+
         /// <summary>
         /// the lib directories to search for references.
         /// </summary>
-        public IList /* DirectoryInfo> */ LibDirectories {
-            get {
+        public IList /* DirectoryInfo> */ LibDirectories
+        {
+            get
+            {
                 return m_libDirectories;
             }
         }
-        
+
         /// <summary>returns true, if an error has been detected.</summary>
-        public bool IsInvalid {
-            get {
+        public bool IsInvalid
+        {
+            get
+            {
                 return m_isInvalid;
             }
         }
-        
+
         /// <summary>
         /// if IsInvalid is true, contains the corresponding error message.
         /// </summary>
-        public string ErrorMessage {
-            get {
+        public string ErrorMessage
+        {
+            get
+            {
                 return m_errorMessage;
             }
         }
-        
+
         /// <summary>returns true, if help is requested.</summary>
-        public bool IsHelpRequested {
-            get {
+        public bool IsHelpRequested
+        {
+            get
+            {
                 return m_isHelpRequested;
             }
         }
-        
+
         #endregion IProperties
         #region IMethods
-        
-        private void SetIsInvalid(string message) {
+
+        private void SetIsInvalid(string message)
+        {
             m_isInvalid = true;
             m_errorMessage = message;
         }
-        
-        private bool ContainsFileInfoAlready(IList list, FileInfo info) {
-            for (int i = 0; i < list.Count; i++) {
-                if (((FileInfo)list[i]).FullName == info.FullName) {
+
+        private bool ContainsFileInfoAlready(IList list, FileInfo info)
+        {
+            for (int i = 0; i < list.Count; i++)
+            {
+                if (((FileInfo)list[i]).FullName == info.FullName)
+                {
                     return true;
                 }
             }
             return false;
         }
-        
-        private void AddRefAssemblies(IList refAssemblies, IList libDirectories) {
+
+        private void AddRefAssemblies(IList refAssemblies, IList libDirectories)
+        {
             ArrayList allLibDirectories = new ArrayList();
             allLibDirectories.Add(new DirectoryInfo(".")); // current dir is the first to search
-            allLibDirectories.AddRange(libDirectories);                        
-            for (int j = 0; j < refAssemblies.Count; j++) {
+            allLibDirectories.AddRange(libDirectories);
+            for (int j = 0; j < refAssemblies.Count; j++)
+            {
                 string errorMsg;
-                if (!AddRefAssembly((string)refAssemblies[j], allLibDirectories, out errorMsg)) {
+                if (!AddRefAssembly((string)refAssemblies[j], allLibDirectories, out errorMsg))
+                {
                     SetIsInvalid(errorMsg);
                     return;
                 }
             }
         }
-        
+
         private bool AddRefAssembly(string asmFileName, IList libDirectories,
-                                    out string errorMsg) {
+                                    out string errorMsg)
+        {
             errorMsg = String.Empty;
             Assembly loaded = null;
-            if (!Path.IsPathRooted(asmFileName)) {
-                foreach (DirectoryInfo libDir in libDirectories) {
+            if (!Path.IsPathRooted(asmFileName))
+            {
+                foreach (DirectoryInfo libDir in libDirectories)
+                {
                     string asmFullyQualifiedFile = Path.Combine(libDir.FullName, asmFileName);
-                    if (File.Exists(asmFullyQualifiedFile)) {                    
+                    if (File.Exists(asmFullyQualifiedFile))
+                    {
                         loaded = LoadRefAssembly(asmFullyQualifiedFile, out errorMsg);
-                        if (loaded != null) {
+                        if (loaded != null)
+                        {
                             break;
                         }
-                    }                
+                    }
                 }
             }
-            if (loaded == null) {
+            if (loaded == null)
+            {
                 loaded = LoadRefAssembly(asmFileName, out errorMsg);
             }
-            if (loaded != null) {
+            if (loaded != null)
+            {
                 m_refAssemblies.Add(loaded);
             }
             return (loaded != null);
         }
-        
-        private Assembly LoadRefAssembly(string asmName, out string errorMessage) {
+
+        private Assembly LoadRefAssembly(string asmName, out string errorMessage)
+        {
             errorMessage = String.Empty;
-            try {
+            try
+            {
                 Assembly refAsm = Assembly.LoadFrom(asmName);
                 return refAsm;
-            } catch (Exception ex) {
+            }
+            catch (Exception ex)
+            {
                 errorMessage = "can't load assembly: " + asmName + "\n" + ex;
                 return null;
-            }            
+            }
         }
-        
-        private void ParseArgs(string[] args) {
+
+        private void ParseArgs(string[] args)
+        {
             int i = 0;
             ArrayList refAssemblies = new ArrayList();
 
-            while ((i < args.Length) && (args[i].StartsWith("-"))) {
-                if (args[i].Equals("-h") || args[i].Equals("-help")) {
+            while ((i < args.Length) && (args[i].StartsWith("-")))
+            {
+                if (args[i].Equals("-h") || args[i].Equals("-help"))
+                {
                     m_isHelpRequested = true;
                     return;
-                } else if (args[i].Equals("-o")) {
+                }
+                else if (args[i].Equals("-o"))
+                {
                     i++;
                     m_outputDirectory = new DirectoryInfo(args[i++]);
-                } else if (args[i].StartsWith("-out:")) {                    
+                }
+                else if (args[i].StartsWith("-out:"))
+                {
                     m_outputDirectory = new DirectoryInfo(args[i++].Substring(5));
-                } else if (args[i].StartsWith("-fidl:")) {
-                    try {
-                        string idlFilesInFile = ReadAllTextFile(args[i++].Substring(6));            			
+                }
+                else if (args[i].StartsWith("-fidl:"))
+                {
+                    try
+                    {
+                        string idlFilesInFile = ReadAllTextFile(args[i++].Substring(6));
                         string[] idlFiles = idlFilesInFile.
                             Split(new char[] { ' ', '\t', '\n' });
-                        foreach (string idlFile in idlFiles) {
-                            if (idlFile != null && idlFile.Length > 0) {
+                        foreach (string idlFile in idlFiles)
+                        {
+                            if (idlFile != null && idlFile.Length > 0)
+                            {
                                 this.m_inputFileNames.Add(idlFile.Trim());
                             }
                         }
-                    } catch(Exception ex) {
+                    }
+                    catch (Exception ex)
+                    {
                         SetIsInvalid("Failed to read file containing idl files: " + ex);
                     }
-                } else if (args[i].StartsWith("-pidl:")) {
-                    try {
+                }
+                else if (args[i].StartsWith("-pidl:"))
+                {
+                    try
+                    {
                         string directoryWithIdlFiles = args[i++].Substring(6);
-                        if (!Directory.Exists(directoryWithIdlFiles)) {
+                        if (!Directory.Exists(directoryWithIdlFiles))
+                        {
                             SetIsInvalid("Directory containing idl files to search does not exist: " + directoryWithIdlFiles);
                         }
                         string[] idlFiles = FindIdlFilesRecursively(directoryWithIdlFiles);
-                        foreach (string idlFile in idlFiles) {
+                        foreach (string idlFile in idlFiles)
+                        {
                             this.m_inputFileNames.Add(idlFile.Trim());
                         }
-                    } catch (Exception ex) {
+                    }
+                    catch (Exception ex)
+                    {
                         SetIsInvalid("Failed to retrieve all idl files recursively: " + ex);
                     }
-                } else if (args[i].Equals("-r")) {
+                }
+                else if (args[i].Equals("-r"))
+                {
                     i++;
-                    refAssemblies.Add(args[i++]);                    
-                } else if (args[i].StartsWith("-r:")) {
+                    refAssemblies.Add(args[i++]);
+                }
+                else if (args[i].StartsWith("-r:"))
+                {
                     refAssemblies.Add(args[i++].Substring(3));
-                } else if (args[i].Equals("-c")) {
+                }
+                else if (args[i].Equals("-c"))
+                {
                     i++;
                     FileInfo customMappingFile = new System.IO.FileInfo(args[i++]);
-                    if (!ContainsFileInfoAlready(m_customMappingFiles, customMappingFile)) {
+                    if (!ContainsFileInfoAlready(m_customMappingFiles, customMappingFile))
+                    {
                         m_customMappingFiles.Add(customMappingFile);
-                    } else {
+                    }
+                    else
+                    {
                         SetIsInvalid("tried to add a custom mapping file multiple times: " + customMappingFile.FullName);
                         return;
                     }
-                    
-                } else if (args[i].Equals("-snk")) {
+
+                }
+                else if (args[i].Equals("-snk"))
+                {
                     i++;
                     m_signKeyFile = new FileInfo(args[i++]);
-                } else if (args[i].Equals("-delaySign")) {
+                }
+                else if (args[i].Equals("-delaySign"))
+                {
                     i++;
                     m_delaySign = true;
-                } else if (args[i].Equals("-asmVersion")) {
+                }
+                else if (args[i].Equals("-asmVersion"))
+                {
                     i++;
-                    m_asmVersion = args[i++];                    
-                } else if (args[i].Equals("-mapAnyToCont")) {
+                    m_asmVersion = args[i++];
+                }
+                else if (args[i].Equals("-mapAnyToCont"))
+                {
                     i++;
                     m_mapAnyToAnyContainer = true;
-                } else if (args[i].Equals("-basedir")) {
+                }
+                else if (args[i].Equals("-basedir"))
+                {
                     i++;
                     m_baseDirectory = new DirectoryInfo(args[i++]);
-                    if (!Directory.Exists(m_baseDirectory.FullName)) {
-                        SetIsInvalid(String.Format("Error: base directory {0} does not exist!", 
-                                                   m_baseDirectory.FullName ) );
+                    if (!Directory.Exists(m_baseDirectory.FullName))
+                    {
+                        SetIsInvalid(String.Format("Error: base directory {0} does not exist!",
+                                                   m_baseDirectory.FullName));
                         return;
-                    }                    
-                } else if (args[i].Equals("-idir")) {
+                    }
+                }
+                else if (args[i].Equals("-idir"))
+                {
                     i++;
                     m_idlSourceDirs.Add(new DirectoryInfo(args[i++]));
-                } else if (args[i].Equals("-b")){                    
+                }
+                else if (args[i].Equals("-b"))
+                {
                     i++;
                     string baseInterfaceName = args[i++];
                     m_baseInterface = Type.GetType(baseInterfaceName, false);
-                    if (m_baseInterface == null) {
-                        SetIsInvalid(String.Format("Error: base interface {0} does not exist!", 
+                    if (m_baseInterface == null)
+                    {
+                        SetIsInvalid(String.Format("Error: base interface {0} does not exist!",
                                                    baseInterfaceName));
                         return;
                     }
-                } else if (args[i].Equals("-d")) {
+                }
+                else if (args[i].Equals("-d"))
+                {
                     i++;
                     m_preprocessorDefines.Add(args[i++].Trim());
-                } else if (args[i].Equals("-vtSkel")) {
+                }
+                else if (args[i].Equals("-vtSkel"))
+                {
                     i++;
                     m_generateVtSkeletons = true;
-                } else if (args[i].Equals("-vtSkelProv")) {
+                }
+                else if (args[i].Equals("-vtSkelProv"))
+                {
                     i++;
-                    string providerTypeName = args[i++].Trim();                    
+                    string providerTypeName = args[i++].Trim();
                     m_vtSkelcodeDomProviderType = Type.GetType(providerTypeName, false);
-                    if (m_vtSkelcodeDomProviderType == null) {
+                    if (m_vtSkelcodeDomProviderType == null)
+                    {
                         SetIsInvalid(String.Format("provider {0} not found!",
                                             providerTypeName));
                         return;
                     }
-                } else if (args[i].Equals("-vtSkelTd")) {
+                }
+                else if (args[i].Equals("-vtSkelTd"))
+                {
                     i++;
                     m_vtSkeletonsTargetDir = new DirectoryInfo(args[i++]);
-                } else if (args[i].Equals("-vtSkelO")) {
+                }
+                else if (args[i].Equals("-vtSkelO"))
+                {
                     i++;
                     m_overwriteVtSkeletons = true;
-                } else if (args[i].StartsWith("-lib:")) {
+                }
+                else if (args[i].StartsWith("-lib:"))
+                {
                     string libDirsString = args[i++].Substring(5);
                     string[] libDirs = libDirsString.Split(';');
-                    for (int j = 0; j < libDirs.Length; j++) {
+                    for (int j = 0; j < libDirs.Length; j++)
+                    {
                         m_libDirectories.Add(new DirectoryInfo(libDirs[j]));
                     }
-                } else {
+                }
+                else
+                {
                     SetIsInvalid(String.Format("Error: invalid option {0}", args[i]));
                     return;
-                }                
+                }
             }
 
-            if (i >= args.Length) { // target assembly name is next argument, which is not already parsed.
+            if (i >= args.Length)
+            { // target assembly name is next argument, which is not already parsed.
                 SetIsInvalid("Error: target assembly name missing");
                 return;
             }
-            
+
             m_targetAssemblyName = args[i];
-            i++;            
-            
-            for (int j = i; j < args.Length; j++) {
+            i++;
+
+            for (int j = i; j < args.Length; j++)
+            {
                 m_inputFileNames.Add(args[j]);
             }
 
-            if (m_inputFileNames.Count == 0) {
+            if (m_inputFileNames.Count == 0)
+            {
                 SetIsInvalid("Error: idl-file(s) missing");
                 return;
             }
-            
+
             AddRefAssemblies(refAssemblies, m_libDirectories);
         }
-        
-        private string ReadAllTextFile(string path) {
-            using (StreamReader sr = new StreamReader(path)) {
+
+        private string ReadAllTextFile(string path)
+        {
+            using (StreamReader sr = new StreamReader(path))
+            {
                 return sr.ReadToEnd();
             }
         }
-        
-        private string[] FindIdlFilesRecursively(string directory) {
+
+        private string[] FindIdlFilesRecursively(string directory)
+        {
             ArrayList result = new ArrayList();
             string[] filesInCurrentDirectory = Directory.GetFiles(directory, "*.idl");
             result.AddRange(filesInCurrentDirectory);
             string[] subdirectories = Directory.GetDirectories(directory);
-            foreach (string subdirectory in subdirectories) {
+            foreach (string subdirectory in subdirectories)
+            {
                 result.AddRange(FindIdlFilesRecursively(subdirectory));
-            }        	
+            }
             return (string[])result.ToArray(ReflectionHelper.StringType);
         }
-        
+
         #endregion IMethods
         #region SMethods
-        
+
         /// <summary>
         /// the command line howto for this command line.
         /// </summary>
-        public static void HowTo(TextWriter target) {
+        public static void HowTo(TextWriter target)
+        {
             target.WriteLine("Compiler usage:");
             target.WriteLine("  IDLToCLSCompiler [options] target_assembly_name idl-files");
             target.WriteLine();
@@ -520,20 +653,21 @@ namespace Ch.Elca.Iiop.IdlCompiler {
             target.WriteLine("-mapAnyToCont   maps idl any to the any container omg.org.CORBA.Any; if not specified, any is mapped to object");
             target.WriteLine("-fidl:listfile  a text file with the input idl files. the files can be seperated with whitespaces");
             target.WriteLine("-pidl:path      a path, where all (recursive) existinge idl files will be used for input.");
-        }        
-        
+        }
+
         #endregion SMethods
-                                
+
     }
-    
+
 }
 
 
 #if UnitTest
 
 
-namespace Ch.Elca.Iiop.IdlCompiler.Tests {
-    
+namespace Ch.Elca.Iiop.IdlCompiler.Tests
+{
+
     using System;
     using System.Reflection;
     using System.Collections;
@@ -546,515 +680,541 @@ namespace Ch.Elca.Iiop.IdlCompiler.Tests {
     /// Unit-tests for the IDLToCLS CommandLine handling.
     /// </summary>
     [TestFixture]
-    public class IDLToCLSCommandLineTest {
-                        
-        
+    public class IDLToCLSCommandLineTest
+    {
+
+
         [Test]
-        public void TestDefaultOutputDir() {
+        public void TestDefaultOutputDir()
+        {
             DirectoryInfo testDir = new DirectoryInfo(".");
             IDLToCLSCommandLine commandLine = new IDLToCLSCommandLine(
                 new string[] { "testAsm", "test.idl" });
-            Assertion.AssertEquals("OutputDirectory", testDir.FullName,
-                                   commandLine.OutputDirectory.FullName);            
-            
-            Assertion.Assert("Command line validity", !commandLine.IsInvalid);
+            Assert.AreEqual("OutputDirectory", testDir.FullName,
+                                   commandLine.OutputDirectory.FullName);
+
+            Assert.IsTrue(!commandLine.IsInvalid, "Command line validity");
         }
-        
+
         [Test]
-        public void TestOutDirSpaceSeparator() {            
+        public void TestOutDirSpaceSeparator()
+        {
             DirectoryInfo testDir = new DirectoryInfo(Path.Combine(".", "testOut"));
             IDLToCLSCommandLine commandLine = new IDLToCLSCommandLine(
                 new string[] { "-o", testDir.FullName, "testAsm", "test.idl" });
-            Assertion.AssertEquals("OutputDirectory", testDir.FullName,
+            Assert.AreEqual("OutputDirectory", testDir.FullName,
                                    commandLine.OutputDirectory.FullName);
-            
-            Assertion.Assert("Command line validity", !commandLine.IsInvalid);
+
+            Assert.IsTrue(!commandLine.IsInvalid, "Command line validity");
         }
-        
+
         [Test]
-        public void TestOutDirColonSeparator() {
+        public void TestOutDirColonSeparator()
+        {
             DirectoryInfo testDir = new DirectoryInfo(Path.Combine(".", "testOut"));
             IDLToCLSCommandLine commandLine = new IDLToCLSCommandLine(
                 new string[] { "-out:" + testDir.FullName, "testAsm", "test.idl" });
-            Assertion.AssertEquals("OutputDirectory", testDir.FullName,
+            Assert.AreEqual("OutputDirectory", testDir.FullName,
                                    commandLine.OutputDirectory.FullName);
-            
-            Assertion.Assert("Command line validity", !commandLine.IsInvalid);
+
+            Assert.IsTrue(!commandLine.IsInvalid, "Command line validity");
         }
-        
+
         [Test]
-        public void TestWrongArgument() {
+        public void TestWrongArgument()
+        {
             IDLToCLSCommandLine commandLine = new IDLToCLSCommandLine(
-                new string[] { "-InvalidArg"} );
-            Assertion.Assert("Invalid Arg detection",
-                             commandLine.IsInvalid);
-            Assertion.AssertEquals("invalid arguments message",
+                new string[] { "-InvalidArg" });
+            Assert.IsTrue(commandLine.IsInvalid, "Invalid Arg detection");
+            Assert.AreEqual("invalid arguments message",
                                    "Error: invalid option -InvalidArg",
                                    commandLine.ErrorMessage);
         }
-        
+
         [Test]
-        public void TestMissingTargetAssemblyName() {
+        public void TestMissingTargetAssemblyName()
+        {
             IDLToCLSCommandLine commandLine = new IDLToCLSCommandLine(
-                new string[0] );
-            Assertion.Assert("Invalid commandLine detection",
-                             commandLine.IsInvalid);
-            Assertion.AssertEquals("invalid commandLine message",
+                new string[0]);
+            Assert.IsTrue(commandLine.IsInvalid, "Invalid commandLine detection");
+            Assert.AreEqual("invalid commandLine message",
                                    "Error: target assembly name missing",
                                    commandLine.ErrorMessage);
         }
-        
+
         [Test]
-        public void TestMissingIdlFileName() {
+        public void TestMissingIdlFileName()
+        {
             IDLToCLSCommandLine commandLine = new IDLToCLSCommandLine(
-                new string[] { "testAsm" } );
-            Assertion.Assert("Invalid commandLine detection",
-                             commandLine.IsInvalid);
-            Assertion.AssertEquals("invalid commandLine message",
+                new string[] { "testAsm" });
+            Assert.IsTrue(commandLine.IsInvalid, "Invalid commandLine detection");
+            Assert.AreEqual("invalid commandLine message",
                                    "Error: idl-file(s) missing",
                                    commandLine.ErrorMessage);
         }
-        
-        [Test]
-        public void TestIsHelpRequested() {
-            IDLToCLSCommandLine commandLine = new IDLToCLSCommandLine(
-                new string[] { "-h"} );
-            Assertion.Assert("Help requested",
-                             commandLine.IsHelpRequested);            
-            commandLine = new IDLToCLSCommandLine(
-                new string[] { "-help"} );
-            Assertion.Assert("Help requested",
-                             commandLine.IsHelpRequested);
-            
-            Assertion.Assert("Command line validity", !commandLine.IsInvalid);
-        }
-        
-        [Test]
-        public void TestTargetAssemblyName() {
-            IDLToCLSCommandLine commandLine = new IDLToCLSCommandLine(
-                new string[] { "testAsm", "test.idl" } );
-            Assertion.AssertEquals("targetAssemblyName", "testAsm",
-                                   commandLine.TargetAssemblyName);
-            
-            Assertion.Assert("Command line validity", !commandLine.IsInvalid);
-        }
-        
 
         [Test]
-        public void TestSingleIdlFile() {
-            string file1 = "test1.idl";
-            
+        public void TestIsHelpRequested()
+        {
             IDLToCLSCommandLine commandLine = new IDLToCLSCommandLine(
-                new string[] { "testAsm", file1 } );
-            Assertion.AssertEquals("idl files", 1,
-                                   commandLine.InputFileNames.Count);
-            Assertion.AssertEquals("idl file1", 
-                                   file1,
-                                   commandLine.InputFileNames[0]);
-            
-            Assertion.Assert("Command line validity", !commandLine.IsInvalid);
-        }        
-        
+                new string[] { "-h" });
+            Assert.IsTrue(commandLine.IsHelpRequested, "Help requested");
+            commandLine = new IDLToCLSCommandLine(
+                new string[] { "-help" });
+            Assert.IsTrue(commandLine.IsHelpRequested, "Help requested");
+
+            Assert.IsTrue(!commandLine.IsInvalid, "Command line validity");
+        }
+
         [Test]
-        public void TestIdlFiles() {            
+        public void TestTargetAssemblyName()
+        {
+            IDLToCLSCommandLine commandLine = new IDLToCLSCommandLine(
+                new string[] { "testAsm", "test.idl" });
+            Assert.AreEqual("targetAssemblyName", "testAsm",
+                                   commandLine.TargetAssemblyName);
+
+            Assert.IsTrue(!commandLine.IsInvalid, "Command line validity");
+        }
+
+
+        [Test]
+        public void TestSingleIdlFile()
+        {
+            string file1 = "test1.idl";
+
+            IDLToCLSCommandLine commandLine = new IDLToCLSCommandLine(
+                new string[] { "testAsm", file1 });
+            Assert.AreEqual(1,
+                                   commandLine.InputFileNames.Count, "idl files");
+            Assert.AreEqual(file1, commandLine.InputFileNames[0], "idl file1");
+
+            Assert.IsTrue(!commandLine.IsInvalid, "Command line validity");
+        }
+
+        [Test]
+        public void TestIdlFiles()
+        {
             string file1 = "test1.idl";
             string file2 = "test2.idl";
             string file3 = "test3.idl";
-            
+
             IDLToCLSCommandLine commandLine = new IDLToCLSCommandLine(
-                new string[] { "testAsm", file1, file2, file3 } );
-            Assertion.AssertEquals("idl files", 3,
-                                   commandLine.InputFileNames.Count);
-            Assertion.AssertEquals("idl file1", 
-                                   file1,
-                                   commandLine.InputFileNames[0]);
-            Assertion.AssertEquals("idl file2", 
+                new string[] { "testAsm", file1, file2, file3 });
+            Assert.AreEqual(3,
+                                   commandLine.InputFileNames.Count, "idl files");
+            Assert.AreEqual(file1,
+                                   commandLine.InputFileNames[0], "idl file1");
+            Assert.AreEqual(
                                    file2,
-                                   commandLine.InputFileNames[1]);
-            Assertion.AssertEquals("idl file3", 
+                                   commandLine.InputFileNames[1], "idl file2");
+            Assert.AreEqual(
                                    file3,
-                                   commandLine.InputFileNames[2]);
-            
-            Assertion.Assert("Command line validity", !commandLine.IsInvalid);
-        }           
-        
+                                   commandLine.InputFileNames[2], "idl file3");
+
+            Assert.IsTrue(!commandLine.IsInvalid, "Command line validity");
+        }
+
         [Test]
-        public void TestCustomMappingFiles() {
+        public void TestCustomMappingFiles()
+        {
             string customMappingFile1 = "customMapping1.xml";
             string customMappingFile2 = "customMapping2.xml";
-            
+
             IDLToCLSCommandLine commandLine = new IDLToCLSCommandLine(
                 new string[] { "-c", customMappingFile1, "-c", customMappingFile2,
                                "testAsm", "test.idl" });
-            Assertion.AssertEquals("CustomMappingFiles", 2,
-                                   commandLine.CustomMappingFiles.Count);
-            Assertion.AssertEquals("CustomMappingFile 1", customMappingFile1,
-                                   ((FileInfo)commandLine.CustomMappingFiles[0]).Name);
-            Assertion.AssertEquals("CustomMappingFile 2", customMappingFile2,
-                                   ((FileInfo)commandLine.CustomMappingFiles[1]).Name);
-            
-            Assertion.Assert("Command line validity", !commandLine.IsInvalid);
+            Assert.AreEqual( 2,
+                                   commandLine.CustomMappingFiles.Count, "CustomMappingFiles");
+            Assert.AreEqual(customMappingFile1,
+                                   ((FileInfo)commandLine.CustomMappingFiles[0]).Name, "CustomMappingFile 1");
+            Assert.AreEqual(customMappingFile2,
+                                   ((FileInfo)commandLine.CustomMappingFiles[1]).Name, "CustomMappingFile 2");
+
+            Assert.IsTrue(!commandLine.IsInvalid, "Command line validity");
         }
-        
+
         [Test]
-        public void TestCustomMappingFilesMultipleTheSame() {
+        public void TestCustomMappingFilesMultipleTheSame()
+        {
             string customMappingFile1 = "customMapping1.xml";
             string customMappingFile2 = "customMapping1.xml";
-            
+
             IDLToCLSCommandLine commandLine = new IDLToCLSCommandLine(
                 new string[] { "-c", customMappingFile1, "-c", customMappingFile2,
                                "testAsm", "test.idl" });
-            Assertion.Assert("Invalid commandLine detection",
-                             commandLine.IsInvalid);
-            Assertion.Assert("invalid commandLine message",
-                             commandLine.ErrorMessage.StartsWith(
-                                "tried to add a custom mapping file multiple times: "));
+            Assert.IsTrue(commandLine.IsInvalid, "Invalid commandLine detection");
+            Assert.IsTrue(commandLine.ErrorMessage.StartsWith(
+                                "tried to add a custom mapping file multiple times: "), "invalid commandLine message");
         }
-        
+
         [Test]
-        public void TestSnkFile() {
+        public void TestSnkFile()
+        {
             string snkFile = "test.snk";
             IDLToCLSCommandLine commandLine = new IDLToCLSCommandLine(
                 new string[] { "-snk", snkFile, "testAsm", "test.idl" });
-            Assertion.AssertEquals("Key file", snkFile,
+            Assert.AreEqual("Key file", snkFile,
                                    commandLine.SignKeyFile.Name);
-            
-            Assertion.Assert("Command line validity", !commandLine.IsInvalid);
+
+            Assert.IsTrue(!commandLine.IsInvalid, "Command line validity");
         }
-        
-        [Test]
-        public void TestDelaySign() {            
-            IDLToCLSCommandLine commandLine = new IDLToCLSCommandLine(
-                new string[] { "-delaySign", "testAsm", "test.idl" });
-            Assertion.Assert("DelaySign", commandLine.DelaySign);
-            
-            Assertion.Assert("Command line validity", !commandLine.IsInvalid);
-        }        
 
         [Test]
-        public void TestAsmVersion() {
+        public void TestDelaySign()
+        {
+            IDLToCLSCommandLine commandLine = new IDLToCLSCommandLine(
+                new string[] { "-delaySign", "testAsm", "test.idl" });
+            Assert.IsTrue(commandLine.DelaySign,"DelaySign");
+
+            Assert.IsTrue(!commandLine.IsInvalid, "Command line validity");
+        }
+
+        [Test]
+        public void TestAsmVersion()
+        {
             string asmVersion = "1.0.0.0";
             IDLToCLSCommandLine commandLine = new IDLToCLSCommandLine(
                 new string[] { "-asmVersion", asmVersion, "testAsm", "test.idl" });
-            Assertion.AssertEquals("Target Assembly Version", 
+            Assert.AreEqual("Target Assembly Version",
                                    asmVersion,
                                    commandLine.AssemblyVersion);
-            
-            Assertion.Assert("Command line validity", !commandLine.IsInvalid);
-        }        
-        
+
+            Assert.IsTrue(!commandLine.IsInvalid, "Command line validity");
+        }
+
         [Test]
-        public void TestMapToAnyContainer() {
+        public void TestMapToAnyContainer()
+        {
             IDLToCLSCommandLine commandLine = new IDLToCLSCommandLine(
                 new string[] { "-mapAnyToCont", "testAsm", "test.idl" });
-            Assertion.Assert("Map any to any container", commandLine.MapAnyToAnyContainer);
-            
-            Assertion.Assert("Command line validity", !commandLine.IsInvalid);
+            Assert.IsTrue(commandLine.MapAnyToAnyContainer, "Map any to any container");
+
+            Assert.IsTrue(!commandLine.IsInvalid, "Command line validity");
         }
-        
+
         [Test]
-        public void TestBaseDirectory() {            
+        public void TestBaseDirectory()
+        {
             DirectoryInfo testDir = new DirectoryInfo(".");
             IDLToCLSCommandLine commandLine = new IDLToCLSCommandLine(
                 new string[] { "-basedir", testDir.FullName, "testAsm", "test.idl" });
-            Assertion.AssertEquals("BaseDirectory", testDir.FullName,
+            Assert.AreEqual("BaseDirectory", testDir.FullName,
                                    commandLine.BaseDirectory.FullName);
-            
-            Assertion.Assert("Command line validity", !commandLine.IsInvalid);
-        }        
-        
+
+            Assert.IsTrue(!commandLine.IsInvalid, "Command line validity");
+        }
+
         [Test]
-        public void TestBaseDirectoryNonExisting() {            
+        public void TestBaseDirectoryNonExisting()
+        {
             DirectoryInfo testDir = new DirectoryInfo(Path.Combine(".", "NonExistantBaseDir"));
             IDLToCLSCommandLine commandLine = new IDLToCLSCommandLine(
                 new string[] { "-basedir", testDir.FullName, "testAsm", "test.idl" });
-            Assertion.Assert("Invalid Base directory",
-                             commandLine.IsInvalid);
-            Assertion.AssertEquals("invalid arguments message",
+            Assert.IsTrue(commandLine.IsInvalid, "Invalid Base directory");
+            Assert.AreEqual("invalid arguments message",
                                    String.Format(
                                        "Error: base directory {0} does not exist!", testDir.FullName),
                                    commandLine.ErrorMessage);
-        }        
-        
+        }
+
         [Test]
-        public void TestInheritBaseInterface() {
+        public void TestInheritBaseInterface()
+        {
             Type type = typeof(IDisposable);
             IDLToCLSCommandLine commandLine = new IDLToCLSCommandLine(
                 new string[] { "-b", type.FullName, "testAsm", "test.idl" });
-            Assertion.AssertEquals("BaseInterface", type.FullName,
+            Assert.AreEqual("BaseInterface", type.FullName,
                                    commandLine.BaseInterface.FullName);
-            
-            Assertion.Assert("Command line validity", !commandLine.IsInvalid);
+
+            Assert.IsTrue(!commandLine.IsInvalid, "Command line validity");
         }
-        
+
         [Test]
-        public void TestBaseInterfaceNonExisting() {                        
+        public void TestBaseInterfaceNonExisting()
+        {
             string baseInterfaceName = "System.IDisposableNonExisting";
             IDLToCLSCommandLine commandLine = new IDLToCLSCommandLine(
                 new string[] { "-b", baseInterfaceName, "testAsm", "test.idl" });
-            Assertion.Assert("Invalid base interface",
-                             commandLine.IsInvalid);
-            Assertion.AssertEquals("invalid arguments message",
+            Assert.IsTrue(commandLine.IsInvalid, "Invalid base interface");
+            Assert.AreEqual("invalid arguments message",
                                    String.Format(
                                        "Error: base interface {0} does not exist!", baseInterfaceName),
                                    commandLine.ErrorMessage);
         }
-                
+
         [Test]
-        public void TestVtSkel() {
+        public void TestVtSkel()
+        {
             IDLToCLSCommandLine commandLine = new IDLToCLSCommandLine(
                 new string[] { "-vtSkel", "testAsm", "test.idl" });
-            Assertion.Assert("Value Type Skeleton generation", 
-                             commandLine.GenerateValueTypeSkeletons);
-            
-            Assertion.Assert("Command line validity", !commandLine.IsInvalid);
+            Assert.IsTrue(commandLine.GenerateValueTypeSkeletons, "Value Type Skeleton generation");
+
+            Assert.IsTrue(!commandLine.IsInvalid,"Command line validity");
         }
-        
+
         [Test]
-        public void TestVtSkelOverwrite() {
+        public void TestVtSkelOverwrite()
+        {
             IDLToCLSCommandLine commandLine = new IDLToCLSCommandLine(
                 new string[] { "-vtSkelO", "testAsm", "test.idl" });
-            Assertion.Assert("Value Type Skeleton overwrite", 
-                             commandLine.OverwriteValueTypeSkeletons);
-            
-            Assertion.Assert("Command line validity", !commandLine.IsInvalid);
+            Assert.IsTrue(commandLine.OverwriteValueTypeSkeletons, "Value Type Skeleton overwrite");
+
+            Assert.IsTrue(!commandLine.IsInvalid, "Command line validity");
         }
-        
+
         [Test]
-        public void TestVtTargetDir() {
+        public void TestVtTargetDir()
+        {
             DirectoryInfo testDir = new DirectoryInfo(Path.Combine(".", "testGenVtDir"));
             IDLToCLSCommandLine commandLine = new IDLToCLSCommandLine(
                 new string[] { "-vtSkelTd", testDir.FullName, "testAsm", "test.idl" });
-            Assertion.AssertEquals("Valuetype Skeletons Target Directory", testDir.FullName,
+            Assert.AreEqual("Valuetype Skeletons Target Directory", testDir.FullName,
                                    commandLine.ValueTypeSkeletonsTargetDir.FullName);
-            
-            Assertion.Assert("Command line validity", !commandLine.IsInvalid);
-        }                
-        
+
+            Assert.IsTrue(!commandLine.IsInvalid, "Command line validity");
+        }
+
         [Test]
-        public void TestVtGenerationProvider() {
+        public void TestVtGenerationProvider()
+        {
             Type provider = typeof(Microsoft.CSharp.CSharpCodeProvider);
             string providerName = provider.AssemblyQualifiedName;
             IDLToCLSCommandLine commandLine = new IDLToCLSCommandLine(
                 new string[] { "-vtSkelProv", providerName, "testAsm", "test.idl" });
-            Assertion.Assert("Command Line Validity", !commandLine.IsInvalid);
-            Assertion.AssertEquals("Valuetype Skeletons Generation Provider", provider,
-                                   commandLine.ValueTypeSkeletonCodeDomProviderType);
-        }                        
-        
+            Assert.IsTrue(!commandLine.IsInvalid, "Command Line Validity");
+            Assert.AreEqual(provider, commandLine.ValueTypeSkeletonCodeDomProviderType, "Valuetype Skeletons Generation Provider");
+        }
+
         [Test]
-        public void TestVtGenerationProviderInvalid() {                        
+        public void TestVtGenerationProviderInvalid()
+        {
             string providerName = "System.NonExistingProvider";
             IDLToCLSCommandLine commandLine = new IDLToCLSCommandLine(
                 new string[] { "-vtSkelProv", providerName, "testAsm", "test.idl" });
-            Assertion.Assert("Invalid codedom provider",
-                             commandLine.IsInvalid);
-            Assertion.AssertEquals("invalid arguments message",
+            Assert.IsTrue(commandLine.IsInvalid, "Invalid codedom provider");
+            Assert.AreEqual("invalid arguments message",
                                    String.Format(
                                        "provider {0} not found!", providerName),
                                    commandLine.ErrorMessage);
         }
-        
+
         [Test]
-        public void TestIdlSourceDirectories() {
+        public void TestIdlSourceDirectories()
+        {
             DirectoryInfo dir1 = new DirectoryInfo(".");
             DirectoryInfo dir2 = new DirectoryInfo(Path.Combine(".", "testIdlDir"));
-                        
+
             IDLToCLSCommandLine commandLine = new IDLToCLSCommandLine(
-                new string[] { "-idir", dir1.FullName, "-idir", dir2.FullName, "testAsm", "test.idl" } );
-            Assertion.AssertEquals("idl source dirs", 2,
-                                   commandLine.IdlSourceDirectories.Count);
-            Assertion.AssertEquals("idl source dir 1", 
+                new string[] { "-idir", dir1.FullName, "-idir", dir2.FullName, "testAsm", "test.idl" });
+            Assert.AreEqual(2,
+                                   commandLine.IdlSourceDirectories.Count, "idl source dirs");
+            Assert.AreEqual("idl source dir 1",
                                    dir1.FullName,
                                    ((DirectoryInfo)commandLine.IdlSourceDirectories[0]).FullName);
-            Assertion.AssertEquals("idl source dir 2", 
+            Assert.AreEqual("idl source dir 2",
                                    dir2.FullName,
                                    ((DirectoryInfo)commandLine.IdlSourceDirectories[1]).FullName);
-            
-            Assertion.Assert("Command line validity", !commandLine.IsInvalid);
+
+            Assert.IsTrue(!commandLine.IsInvalid, "Command line validity");
         }
-        
+
         [Test]
-        public void TestRefAssembliesSpaceSeparator() {
+        public void TestRefAssembliesSpaceSeparator()
+        {
             Assembly asm1 = this.GetType().Assembly;
             Assembly asm2 = typeof(TestAttribute).Assembly;
-                        
+
             IDLToCLSCommandLine commandLine = new IDLToCLSCommandLine(
-                new string[] { "-r", asm1.CodeBase, "-r", asm2.CodeBase, "testAsm", "test.idl" } );
-            Assertion.AssertEquals("referenced assemblies", 2,
-                                   commandLine.ReferencedAssemblies.Count);
-            Assertion.AssertEquals("ref assembly 1", 
+                new string[] { "-r", asm1.CodeBase, "-r", asm2.CodeBase, "testAsm", "test.idl" });
+            Assert.AreEqual(2,
+                                   commandLine.ReferencedAssemblies.Count, "referenced assemblies");
+            Assert.AreEqual("ref assembly 1",
                                    asm1.FullName,
                                    ((Assembly)commandLine.ReferencedAssemblies[0]).FullName);
-            Assertion.AssertEquals("ref assembly 2", 
+            Assert.AreEqual("ref assembly 2",
                                    asm2.FullName,
-                                   ((Assembly)commandLine.ReferencedAssemblies[1]).FullName);            
-            
-            Assertion.Assert("Command line validity", !commandLine.IsInvalid);
+                                   ((Assembly)commandLine.ReferencedAssemblies[1]).FullName);
+
+            Assert.IsTrue(!commandLine.IsInvalid, "Command line validity");
         }
-        
+
         [Test]
-        public void TestRefAssembliesColonSeparator() {
+        public void TestRefAssembliesColonSeparator()
+        {
             Assembly asm1 = this.GetType().Assembly;
             Assembly asm2 = typeof(TestAttribute).Assembly;
-                        
+
             IDLToCLSCommandLine commandLine = new IDLToCLSCommandLine(
-                new string[] { "-r:" + asm1.CodeBase, "-r:" + asm2.CodeBase, "testAsm", "test.idl" } );
-            Assertion.AssertEquals("referenced assemblies", 2,
-                                   commandLine.ReferencedAssemblies.Count);
-            Assertion.AssertEquals("ref assembly 1", 
+                new string[] { "-r:" + asm1.CodeBase, "-r:" + asm2.CodeBase, "testAsm", "test.idl" });
+            Assert.AreEqual(2,
+                                   commandLine.ReferencedAssemblies.Count, "referenced assemblies");
+            Assert.AreEqual("ref assembly 1",
                                    asm1.FullName,
                                    ((Assembly)commandLine.ReferencedAssemblies[0]).FullName);
-            Assertion.AssertEquals("ref assembly 2", 
+            Assert.AreEqual("ref assembly 2",
                                    asm2.FullName,
-                                   ((Assembly)commandLine.ReferencedAssemblies[1]).FullName);            
-            
-            Assertion.Assert("Command line validity", !commandLine.IsInvalid);
+                                   ((Assembly)commandLine.ReferencedAssemblies[1]).FullName);
+
+            Assert.IsTrue(!commandLine.IsInvalid, "Command line validity");
         }
-        
+
         [Test]
-        public void TestRefAssembliesInvalid() {                                    
+        public void TestRefAssembliesInvalid()
+        {
             IDLToCLSCommandLine commandLine = new IDLToCLSCommandLine(
-                new string[] { "-r", "inexistientAssembly.dll", "testAsm", "test.idl" } );
-                        
-            Assertion.Assert("Command line validity", commandLine.IsInvalid);
-            Assertion.Assert("invalid arguments message",
-                             commandLine.ErrorMessage.StartsWith("can't load assembly: inexistientAssembly.dll"));
-        }        
-        
+                new string[] { "-r", "inexistientAssembly.dll", "testAsm", "test.idl" });
+
+            Assert.IsTrue(commandLine.IsInvalid, "Command line validity");
+            Assert.IsTrue(commandLine.ErrorMessage.StartsWith("can't load assembly: inexistientAssembly.dll"), "invalid arguments message");
+        }
+
         [Test]
-        public void TestPreprocessorDefines() {
+        public void TestPreprocessorDefines()
+        {
             string def1 = "def1";
-            string def2 = "def2";            
-            
+            string def2 = "def2";
+
             IDLToCLSCommandLine commandLine = new IDLToCLSCommandLine(
-                new string[] { "-d", def1, "-d", def2, "testAsm", "test.idl" } );
-            Assertion.AssertEquals("defines", 2,
-                                   commandLine.PreprocessorDefines.Count);
-            Assertion.AssertEquals("define 1", 
-                                   def1,
-                                   commandLine.PreprocessorDefines[0]);
-            Assertion.AssertEquals("define 2", 
-                                   def2,
-                                   commandLine.PreprocessorDefines[1]);
-            
-            Assertion.Assert("Command line validity", !commandLine.IsInvalid);            
+                new string[] { "-d", def1, "-d", def2, "testAsm", "test.idl" });
+            Assert.AreEqual(2,
+                                   commandLine.PreprocessorDefines.Count, "defines");
+            Assert.AreEqual(def1,
+                                   commandLine.PreprocessorDefines[0], "define 1");
+            Assert.AreEqual(def2,
+                                   commandLine.PreprocessorDefines[1], "define 2");
+
+            Assert.IsTrue(!commandLine.IsInvalid, "Command line validity");
         }
-        
+
         [Test]
-        public void TestLibDirs() {
+        public void TestLibDirs()
+        {
             DirectoryInfo dir1 = new DirectoryInfo(Path.Combine(".", "lib1"));
             DirectoryInfo dir2 = new DirectoryInfo(Path.Combine(".", "lib2"));
             DirectoryInfo dir3 = new DirectoryInfo(Path.Combine(".", "lib3"));
-            
+
             IDLToCLSCommandLine commandLine = new IDLToCLSCommandLine(
                 new string[] { "-lib:" + dir1.FullName + ";" + dir2.FullName, 
-                               "-lib:" + dir3.FullName, "testAsm", "test.idl" } );
-            Assertion.AssertEquals("libs", 3,
-                                   commandLine.LibDirectories.Count);
-            Assertion.AssertEquals("lib dir 1", 
+                               "-lib:" + dir3.FullName, "testAsm", "test.idl" });
+            Assert.AreEqual(3,
+                                   commandLine.LibDirectories.Count, "libs");
+            Assert.AreEqual("lib dir 1",
                                    dir1.FullName,
                                    ((DirectoryInfo)commandLine.LibDirectories[0]).FullName);
-            Assertion.AssertEquals("lib dir 2", 
+            Assert.AreEqual("lib dir 2",
                                    dir2.FullName,
                                    ((DirectoryInfo)commandLine.LibDirectories[1]).FullName);
-            Assertion.AssertEquals("lib dir 3", 
+            Assert.AreEqual("lib dir 3",
                                    dir3.FullName,
-                                   ((DirectoryInfo)commandLine.LibDirectories[2]).FullName);            
-            
-            Assertion.Assert("Command line validity", !commandLine.IsInvalid);            
+                                   ((DirectoryInfo)commandLine.LibDirectories[2]).FullName);
+
+            Assert.IsTrue(!commandLine.IsInvalid, "Command line validity");
         }
-        
+
         [Test]
-        public void TestIdlFilesReadFromFile() {
+        public void TestIdlFilesReadFromFile()
+        {
             string fileWithIdlFiles = Path.GetTempFileName();
-            try {
+            try
+            {
                 string file1 = "test1.idl";
                 string file2 = "test2.idl";
-                using (StreamWriter sw = new StreamWriter(fileWithIdlFiles)) {
+                using (StreamWriter sw = new StreamWriter(fileWithIdlFiles))
+                {
                     sw.WriteLine(file1);
                     sw.WriteLine(file2);
                 }
-                
+
                 IDLToCLSCommandLine commandLine = new IDLToCLSCommandLine(
-                    new string[] { "-fidl:" + fileWithIdlFiles, "testAsm" } );
-                Assertion.AssertEquals("idl files", 2,
-                                   commandLine.InputFileNames.Count);
-                Assertion.AssertEquals("idl file1", 
-                                       file1,
-                                       commandLine.InputFileNames[0]);
-                Assertion.AssertEquals("idl file2", 
+                    new string[] { "-fidl:" + fileWithIdlFiles, "testAsm" });
+                Assert.AreEqual(2,
+                                   commandLine.InputFileNames.Count, "idl files");
+                Assert.AreEqual(file1,
+                                       commandLine.InputFileNames[0], "idl file1");
+                Assert.AreEqual(
                                        file2,
-                                       commandLine.InputFileNames[1]);
-            
-                Assertion.Assert("Command line validity", !commandLine.IsInvalid);
-                
-            } finally {
-                if (File.Exists(fileWithIdlFiles)) {
+                                       commandLine.InputFileNames[1], "idl file2");
+
+                Assert.IsTrue(!commandLine.IsInvalid, "Command line validity");
+
+            }
+            finally
+            {
+                if (File.Exists(fileWithIdlFiles))
+                {
                     File.Delete(fileWithIdlFiles);
                 }
             }
         }
-        
+
         [Test]
-        public void TestIdlFilesRecursivelyFromDirectory() {
+        public void TestIdlFilesRecursivelyFromDirectory()
+        {
             string tempPath = Path.Combine(Path.GetTempPath(), "IDLCommandLineRecursiveFileTest");
-            if (Directory.Exists(tempPath)) {
+            if (Directory.Exists(tempPath))
+            {
                 Directory.Delete(tempPath, true);
-            }        	
+            }
             string subDir1 = Path.Combine(tempPath, "subDir1");
             string subDir2 = Path.Combine(tempPath, "subDir2");
-            
-            try {        		
+
+            try
+            {
                 Directory.CreateDirectory(tempPath);
                 Directory.CreateDirectory(subDir1);
                 Directory.CreateDirectory(subDir2);
-            
+
                 string file1 = Path.Combine(tempPath, "test1.idl");
                 string file2 = Path.Combine(tempPath, "test2.idl");
                 string file3 = Path.Combine(subDir1, "test3.idl");
                 string file4 = Path.Combine(subDir2, "test4.idl");
-                
-                
-                using (FileStream fs = File.Create(file1)) {
+
+
+                using (FileStream fs = File.Create(file1))
+                {
                     fs.Close();
                 }
-                using (FileStream fs = File.Create(file2)) {
+                using (FileStream fs = File.Create(file2))
+                {
                     fs.Close();
                 }
-                using (FileStream fs = File.Create(file3)) {
+                using (FileStream fs = File.Create(file3))
+                {
                     fs.Close();
                 }
-                using (FileStream fs = File.Create(file4)) {
+                using (FileStream fs = File.Create(file4))
+                {
                     fs.Close();
                 }
-                
+
                 IDLToCLSCommandLine commandLine = new IDLToCLSCommandLine(
-                    new string[] { "-pidl:" + tempPath, "testAsm" } );
-                Assertion.AssertEquals("idl files", 4,
-                                   commandLine.InputFileNames.Count);	        	
-                Assertion.AssertEquals("idl file1", 
+                    new string[] { "-pidl:" + tempPath, "testAsm" });
+                Assert.AreEqual(4,
+                                   commandLine.InputFileNames.Count, "idl files");
+                Assert.AreEqual(
                                        file1,
-                                       commandLine.InputFileNames[0]);
-                Assertion.AssertEquals("idl file2", 
+                                       commandLine.InputFileNames[0], "idl file1");
+                Assert.AreEqual(
                                        file2,
-                                       commandLine.InputFileNames[1]);
-                Assertion.AssertEquals("idl file3", 
-                                       file3,
-                                       commandLine.InputFileNames[2]);
-                Assertion.AssertEquals("idl file4", 
-                                       file4,
-                                       commandLine.InputFileNames[3]);
-            
-                Assertion.Assert("Command line validity", !commandLine.IsInvalid);
-                
-            } finally {
-                if (Directory.Exists(tempPath)) {
+                                       commandLine.InputFileNames[1], "idl file2");
+                Assert.AreEqual(file3,
+                                       commandLine.InputFileNames[2], "idl file3");
+                Assert.AreEqual(file4,
+                                       commandLine.InputFileNames[3], "idl file4");
+
+                Assert.IsTrue(!commandLine.IsInvalid, "Command line validity");
+
+            }
+            finally
+            {
+                if (Directory.Exists(tempPath))
+                {
                     Directory.Delete(tempPath, true);
                 }
             }
-        }        
-        
+        }
+
     }
 }
 

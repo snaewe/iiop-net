@@ -1114,7 +1114,7 @@ namespace Ch.Elca.Iiop.Tests {
             MappingToResult mapResult = (MappingToResult)mapper.MapClsType(ReflectionHelper.VoidType, 
                                                                            new AttributeExtCollection(),
                                                                            s_testAction);
-            Assertion.AssertEquals(MappingToResult.IdlVoid, mapResult);        
+            Assert.AreEqual(MappingToResult.IdlVoid, mapResult);        
         }
 
         [Test]
@@ -1123,7 +1123,7 @@ namespace Ch.Elca.Iiop.Tests {
             MappingToResult mapResult = (MappingToResult)mapper.MapClsType(ReflectionHelper.ByteType, 
                                                                            new AttributeExtCollection(),
                                                                            s_testAction);
-            Assertion.AssertEquals(MappingToResult.IdlOctet, mapResult);
+            Assert.AreEqual(MappingToResult.IdlOctet, mapResult);
         }
         
         [Test]
@@ -1132,7 +1132,7 @@ namespace Ch.Elca.Iiop.Tests {
             MappingToResult mapResult = (MappingToResult)mapper.MapClsType(ReflectionHelper.SByteType, 
                                                                            new AttributeExtCollection(),
                                                                            s_testAction);
-            Assertion.AssertEquals(MappingToResult.IdlSByteEquivalent, mapResult);
+            Assert.AreEqual(MappingToResult.IdlSByteEquivalent, mapResult);
         }        
         
         [Test]
@@ -1141,7 +1141,7 @@ namespace Ch.Elca.Iiop.Tests {
             MappingToResult mapResult = (MappingToResult)mapper.MapClsType(ReflectionHelper.Int16Type, 
                                                                            new AttributeExtCollection(),
                                                                            s_testAction);
-            Assertion.AssertEquals(MappingToResult.IdlShort, mapResult);            
+            Assert.AreEqual(MappingToResult.IdlShort, mapResult);            
         }
 
         [Test]
@@ -1150,7 +1150,7 @@ namespace Ch.Elca.Iiop.Tests {
             MappingToResult mapResult = (MappingToResult)mapper.MapClsType(ReflectionHelper.Int32Type, 
                                                                            new AttributeExtCollection(),
                                                                            s_testAction);
-            Assertion.AssertEquals(MappingToResult.IdlLong, mapResult);
+            Assert.AreEqual(MappingToResult.IdlLong, mapResult);
         }
         
         [Test]
@@ -1159,7 +1159,7 @@ namespace Ch.Elca.Iiop.Tests {
             MappingToResult mapResult = (MappingToResult)mapper.MapClsType(ReflectionHelper.Int64Type, 
                                                                            new AttributeExtCollection(),
                                                                            s_testAction);
-            Assertion.AssertEquals(MappingToResult.IdlLongLong, mapResult);
+            Assert.AreEqual(MappingToResult.IdlLongLong, mapResult);
         }
 
         [Test]        
@@ -1170,7 +1170,7 @@ namespace Ch.Elca.Iiop.Tests {
             MappingToResult mapResult = (MappingToResult)mapper.MapClsType(typeof(UInt16), 
                                                                            new AttributeExtCollection(),
                                                                            s_testAction);
-            Assertion.AssertEquals(MappingToResult.IdlUShort, mapResult);
+            Assert.AreEqual(MappingToResult.IdlUShort, mapResult);
         }
 
         [Test]
@@ -1181,7 +1181,7 @@ namespace Ch.Elca.Iiop.Tests {
             MappingToResult mapResult = (MappingToResult)mapper.MapClsType(typeof(UInt32), 
                                                                            new AttributeExtCollection(),
                                                                            s_testAction);
-            Assertion.AssertEquals(MappingToResult.IdlULong, mapResult);
+            Assert.AreEqual(MappingToResult.IdlULong, mapResult);
         }
 
         [Test]
@@ -1192,7 +1192,7 @@ namespace Ch.Elca.Iiop.Tests {
             MappingToResult mapResult = (MappingToResult)mapper.MapClsType(typeof(UInt64), 
                                                                            new AttributeExtCollection(),
                                                                            s_testAction);
-            Assertion.AssertEquals(MappingToResult.IdlULongLong, mapResult);
+            Assert.AreEqual(MappingToResult.IdlULongLong, mapResult);
         }
         
         [Test]
@@ -1203,12 +1203,12 @@ namespace Ch.Elca.Iiop.Tests {
                 MappingToResult mapResult = (MappingToResult)mapper.MapClsType(typeof(System.UIntPtr), 
                                                                                new AttributeExtCollection(),
                                                                                s_testAction);
-                Assertion.Fail("no exception, but expected BAD_PARAM");
+                Assert.Fail("no exception, but expected BAD_PARAM");
             } catch (BAD_PARAM ex) {
-                Assertion.Assert("exception message not enough detailed",
-                                 ex.Message.IndexOf("System.UIntPtr") > 0);
-                Assertion.Assert("exception message not enough detailed",
-                                 ex.Message.IndexOf("is not mappable to idl") > 0);
+                Assert.IsTrue(
+                                 ex.Message.IndexOf("System.UIntPtr") > 0,"exception message not enough detailed");
+                Assert.IsTrue(
+                                 ex.Message.IndexOf("is not mappable to idl") > 0, "exception message not enough detailed");
             }
             
         }
@@ -1219,7 +1219,7 @@ namespace Ch.Elca.Iiop.Tests {
             MappingToResult mapResult = (MappingToResult)mapper.MapClsType(ReflectionHelper.BooleanType, 
                                                                            new AttributeExtCollection(),
                                                                            s_testAction);
-            Assertion.AssertEquals(MappingToResult.IdlBool, mapResult);
+            Assert.AreEqual(MappingToResult.IdlBool, mapResult);
         }
         
         [Test]
@@ -1228,7 +1228,7 @@ namespace Ch.Elca.Iiop.Tests {
             MappingToResult mapResult = (MappingToResult)mapper.MapClsType(ReflectionHelper.SingleType, 
                                                                            new AttributeExtCollection(),
                                                                            s_testAction);
-            Assertion.AssertEquals(MappingToResult.IdlFloat, mapResult);        
+            Assert.AreEqual(MappingToResult.IdlFloat, mapResult);        
         }
         
         [Test]
@@ -1237,7 +1237,7 @@ namespace Ch.Elca.Iiop.Tests {
             MappingToResult mapResult = (MappingToResult)mapper.MapClsType(ReflectionHelper.DoubleType, 
                                                                            new AttributeExtCollection(),
                                                                            s_testAction);
-            Assertion.AssertEquals(MappingToResult.IdlDouble, mapResult);
+            Assert.AreEqual(MappingToResult.IdlDouble, mapResult);
         }
 
         [Test]        
@@ -1246,7 +1246,7 @@ namespace Ch.Elca.Iiop.Tests {
             MappingToResult mapResult = (MappingToResult)mapper.MapClsType(ReflectionHelper.StringType, 
                                                                            new AttributeExtCollection(new Attribute[] { new StringValueAttribute(), new WideCharAttribute(false) }),
                                                                            s_testAction);
-            Assertion.AssertEquals(MappingToResult.IdlString, mapResult);
+            Assert.AreEqual(MappingToResult.IdlString, mapResult);
         }
 
         [Test]
@@ -1255,11 +1255,11 @@ namespace Ch.Elca.Iiop.Tests {
             MappingToResult mapResult = (MappingToResult)mapper.MapClsType(ReflectionHelper.StringType, 
                                                                            new AttributeExtCollection(new Attribute[] { new StringValueAttribute(), new WideCharAttribute(true) }),
                                                                            s_testAction);
-            Assertion.AssertEquals(MappingToResult.IdlWString, mapResult);
+            Assert.AreEqual(MappingToResult.IdlWString, mapResult);
             mapResult = (MappingToResult)mapper.MapClsType(ReflectionHelper.StringType, 
                                                            new AttributeExtCollection(new Attribute[] { new StringValueAttribute() }),
                                                            s_testAction);
-            Assertion.AssertEquals(MappingToResult.IdlWString, mapResult);
+            Assert.AreEqual(MappingToResult.IdlWString, mapResult);
         }
 
         [Test]
@@ -1268,7 +1268,7 @@ namespace Ch.Elca.Iiop.Tests {
             MappingToResult mapResult = (MappingToResult)mapper.MapClsType(ReflectionHelper.StringType, 
                                                                            new AttributeExtCollection(new Attribute[] { new WideCharAttribute(false) }),
                                                                            s_testAction);
-            Assertion.AssertEquals(MappingToResult.IdlStringValue, mapResult);
+            Assert.AreEqual(MappingToResult.IdlStringValue, mapResult);
         }
 
         [Test]
@@ -1277,11 +1277,11 @@ namespace Ch.Elca.Iiop.Tests {
             MappingToResult mapResult = (MappingToResult)mapper.MapClsType(ReflectionHelper.StringType, 
                                                                            new AttributeExtCollection(new Attribute[] { new WideCharAttribute(true) }),
                                                                            s_testAction);
-            Assertion.AssertEquals(MappingToResult.IdlWstringValue, mapResult);
+            Assert.AreEqual(MappingToResult.IdlWstringValue, mapResult);
             mapResult = (MappingToResult)mapper.MapClsType(ReflectionHelper.StringType, 
                                                            new AttributeExtCollection(),
                                                            s_testAction);
-            Assertion.AssertEquals(MappingToResult.IdlWstringValue, mapResult);
+            Assert.AreEqual(MappingToResult.IdlWstringValue, mapResult);
         }
 
         [Test]
@@ -1290,7 +1290,7 @@ namespace Ch.Elca.Iiop.Tests {
             MappingToResult mapResult = (MappingToResult)mapper.MapClsType(ReflectionHelper.CharType, 
                                                                            new AttributeExtCollection(new Attribute[] { new WideCharAttribute(false) }),
                                                                            s_testAction);
-            Assertion.AssertEquals(MappingToResult.IdlChar, mapResult);
+            Assert.AreEqual(MappingToResult.IdlChar, mapResult);
         }
 
         [Test]
@@ -1299,11 +1299,11 @@ namespace Ch.Elca.Iiop.Tests {
             MappingToResult mapResult = (MappingToResult)mapper.MapClsType(ReflectionHelper.CharType, 
                                                                            new AttributeExtCollection(new Attribute[] { new WideCharAttribute(true) }),
                                                                            s_testAction);
-            Assertion.AssertEquals(MappingToResult.IdlWChar, mapResult);
+            Assert.AreEqual(MappingToResult.IdlWChar, mapResult);
             mapResult = (MappingToResult)mapper.MapClsType(ReflectionHelper.CharType, 
                                                            new AttributeExtCollection(),
                                                            s_testAction);
-            Assertion.AssertEquals(MappingToResult.IdlWChar, mapResult);
+            Assert.AreEqual(MappingToResult.IdlWChar, mapResult);
         }
 
         [Test]
@@ -1312,7 +1312,7 @@ namespace Ch.Elca.Iiop.Tests {
             MappingToResult mapResult = (MappingToResult)mapper.MapClsType(typeof(int[]), 
                                                                            new AttributeExtCollection(new Attribute[] { new IdlSequenceAttribute(0) } ),
                                                                            s_testAction);
-            Assertion.AssertEquals(MappingToResult.IdlSequence, mapResult);
+            Assert.AreEqual(MappingToResult.IdlSequence, mapResult);
         }
 
         [Test]
@@ -1321,18 +1321,18 @@ namespace Ch.Elca.Iiop.Tests {
             MappingToResult mapResult = (MappingToResult)mapper.MapClsType(typeof(int[]), 
                                                                            new AttributeExtCollection(new Attribute[] { new IdlArrayAttribute(0, 10) } ),
                                                                            s_testAction);
-            Assertion.AssertEquals(MappingToResult.IdlArray, mapResult);
+            Assert.AreEqual(MappingToResult.IdlArray, mapResult);
 
             mapResult = (MappingToResult)mapper.MapClsType(typeof(int[,]), 
                                                            new AttributeExtCollection(new Attribute[] { new IdlArrayAttribute(0, 10), new IdlArrayDimensionAttribute(0, 1, 20) } ),
                                                            s_testAction);
-            Assertion.AssertEquals(MappingToResult.IdlArray, mapResult);
+            Assert.AreEqual(MappingToResult.IdlArray, mapResult);
 
             mapResult = (MappingToResult)mapper.MapClsType(typeof(int[,,]), 
                                                            new AttributeExtCollection(new Attribute[] { new IdlArrayAttribute(0, 10), 
                                                                                                         new IdlArrayDimensionAttribute(0, 1, 20), new IdlArrayDimensionAttribute(0, 2, 5) } ),
                                                            s_testAction);
-            Assertion.AssertEquals(MappingToResult.IdlArray, mapResult);
+            Assert.AreEqual(MappingToResult.IdlArray, mapResult);
         }
 
         [Test]
@@ -1341,11 +1341,11 @@ namespace Ch.Elca.Iiop.Tests {
             MappingToResult mapResult = (MappingToResult)mapper.MapClsType(ReflectionHelper.ObjectType, 
                                                                            new AttributeExtCollection(),
                                                                            s_testAction);
-            Assertion.AssertEquals(MappingToResult.IdlAny, mapResult);
+            Assert.AreEqual(MappingToResult.IdlAny, mapResult);
             mapResult = (MappingToResult)mapper.MapClsType(ReflectionHelper.ObjectType, 
                                                            new AttributeExtCollection(new Attribute[] { new ObjectIdlTypeAttribute(IdlTypeObject.Any) }),
                                                            s_testAction);
-            Assertion.AssertEquals(MappingToResult.IdlAny, mapResult);
+            Assert.AreEqual(MappingToResult.IdlAny, mapResult);
         }
 
         [Test]
@@ -1354,7 +1354,7 @@ namespace Ch.Elca.Iiop.Tests {
             MappingToResult mapResult = (MappingToResult)mapper.MapClsType(typeof(TestIdlEnumBI32), 
                                                                            AttributeExtCollection.EmptyCollection,
                                                                            s_testAction);
-            Assertion.AssertEquals(MappingToResult.IdlEnum, mapResult);
+            Assert.AreEqual(MappingToResult.IdlEnum, mapResult);
         }
         
         [Test]
@@ -1363,7 +1363,7 @@ namespace Ch.Elca.Iiop.Tests {
             MappingToResult mapResult = (MappingToResult)mapper.MapClsType(typeof(TestEnumBB), 
                                                                            AttributeExtCollection.EmptyCollection,
                                                                            s_testAction);
-            Assertion.AssertEquals(MappingToResult.IdlEnum, mapResult);
+            Assert.AreEqual(MappingToResult.IdlEnum, mapResult);
         }        
         
         [Test]
@@ -1372,7 +1372,7 @@ namespace Ch.Elca.Iiop.Tests {
             MappingToResult mapResult = (MappingToResult)mapper.MapClsType(typeof(TestEnumBI16), 
                                                                            AttributeExtCollection.EmptyCollection,
                                                                            s_testAction);
-            Assertion.AssertEquals(MappingToResult.IdlEnum, mapResult);
+            Assert.AreEqual(MappingToResult.IdlEnum, mapResult);
         }        
 
         [Test]
@@ -1381,7 +1381,7 @@ namespace Ch.Elca.Iiop.Tests {
             MappingToResult mapResult = (MappingToResult)mapper.MapClsType(typeof(TestEnumBI32), 
                                                                            AttributeExtCollection.EmptyCollection,
                                                                            s_testAction);
-            Assertion.AssertEquals(MappingToResult.IdlEnum, mapResult);
+            Assert.AreEqual(MappingToResult.IdlEnum, mapResult);
         }        
         
         [Test]
@@ -1390,7 +1390,7 @@ namespace Ch.Elca.Iiop.Tests {
             MappingToResult mapResult = (MappingToResult)mapper.MapClsType(typeof(TestEnumBI64), 
                                                                            AttributeExtCollection.EmptyCollection,
                                                                            s_testAction);
-            Assertion.AssertEquals(MappingToResult.IdlEnum, mapResult);
+            Assert.AreEqual(MappingToResult.IdlEnum, mapResult);
         }
         
         [Test]
@@ -1399,7 +1399,7 @@ namespace Ch.Elca.Iiop.Tests {
             MappingToResult mapResult = (MappingToResult)mapper.MapClsType(typeof(TestEnumBSB), 
                                                                            AttributeExtCollection.EmptyCollection,
                                                                            s_testAction);
-            Assertion.AssertEquals(MappingToResult.IdlEnum, mapResult);
+            Assert.AreEqual(MappingToResult.IdlEnum, mapResult);
         }        
         
         [Test]
@@ -1408,7 +1408,7 @@ namespace Ch.Elca.Iiop.Tests {
             MappingToResult mapResult = (MappingToResult)mapper.MapClsType(typeof(TestEnumBUI16), 
                                                                            AttributeExtCollection.EmptyCollection,
                                                                            s_testAction);
-            Assertion.AssertEquals(MappingToResult.IdlEnum, mapResult);
+            Assert.AreEqual(MappingToResult.IdlEnum, mapResult);
         }        
 
         [Test]
@@ -1417,7 +1417,7 @@ namespace Ch.Elca.Iiop.Tests {
             MappingToResult mapResult = (MappingToResult)mapper.MapClsType(typeof(TestEnumBUI32), 
                                                                            AttributeExtCollection.EmptyCollection,
                                                                            s_testAction);
-            Assertion.AssertEquals(MappingToResult.IdlEnum, mapResult);
+            Assert.AreEqual(MappingToResult.IdlEnum, mapResult);
         }        
         
         [Test]
@@ -1426,7 +1426,7 @@ namespace Ch.Elca.Iiop.Tests {
             MappingToResult mapResult = (MappingToResult)mapper.MapClsType(typeof(TestEnumBUI64), 
                                                                            AttributeExtCollection.EmptyCollection,
                                                                            s_testAction);
-            Assertion.AssertEquals(MappingToResult.IdlEnum, mapResult);
+            Assert.AreEqual(MappingToResult.IdlEnum, mapResult);
         }
         
         [Test]
@@ -1435,7 +1435,7 @@ namespace Ch.Elca.Iiop.Tests {
             MappingToResult mapResult = (MappingToResult)mapper.MapClsType(typeof(TestFlagsBB), 
                                                                            AttributeExtCollection.EmptyCollection,
                                                                            s_testAction);
-            Assertion.AssertEquals(MappingToResult.IdlFlagsEquivalent, mapResult);
+            Assert.AreEqual(MappingToResult.IdlFlagsEquivalent, mapResult);
         }        
         
         [Test]
@@ -1444,7 +1444,7 @@ namespace Ch.Elca.Iiop.Tests {
             MappingToResult mapResult = (MappingToResult)mapper.MapClsType(typeof(TestFlagsBI16), 
                                                                            AttributeExtCollection.EmptyCollection,
                                                                            s_testAction);
-            Assertion.AssertEquals(MappingToResult.IdlFlagsEquivalent, mapResult);
+            Assert.AreEqual(MappingToResult.IdlFlagsEquivalent, mapResult);
         }        
 
         [Test]
@@ -1453,7 +1453,7 @@ namespace Ch.Elca.Iiop.Tests {
             MappingToResult mapResult = (MappingToResult)mapper.MapClsType(typeof(TestFlagsBI32), 
                                                                            AttributeExtCollection.EmptyCollection,
                                                                            s_testAction);
-            Assertion.AssertEquals(MappingToResult.IdlFlagsEquivalent, mapResult);
+            Assert.AreEqual(MappingToResult.IdlFlagsEquivalent, mapResult);
         }        
         
         [Test]
@@ -1462,7 +1462,7 @@ namespace Ch.Elca.Iiop.Tests {
             MappingToResult mapResult = (MappingToResult)mapper.MapClsType(typeof(TestFlagsBI64), 
                                                                            AttributeExtCollection.EmptyCollection,
                                                                            s_testAction);
-            Assertion.AssertEquals(MappingToResult.IdlFlagsEquivalent, mapResult);
+            Assert.AreEqual(MappingToResult.IdlFlagsEquivalent, mapResult);
         }
         
         [Test]
@@ -1471,7 +1471,7 @@ namespace Ch.Elca.Iiop.Tests {
             MappingToResult mapResult = (MappingToResult)mapper.MapClsType(typeof(TestFlagsBSB), 
                                                                            AttributeExtCollection.EmptyCollection,
                                                                            s_testAction);
-            Assertion.AssertEquals(MappingToResult.IdlFlagsEquivalent, mapResult);
+            Assert.AreEqual(MappingToResult.IdlFlagsEquivalent, mapResult);
         }        
         
         [Test]
@@ -1480,7 +1480,7 @@ namespace Ch.Elca.Iiop.Tests {
             MappingToResult mapResult = (MappingToResult)mapper.MapClsType(typeof(TestFlagsBUI16), 
                                                                            AttributeExtCollection.EmptyCollection,
                                                                            s_testAction);
-            Assertion.AssertEquals(MappingToResult.IdlFlagsEquivalent, mapResult);
+            Assert.AreEqual(MappingToResult.IdlFlagsEquivalent, mapResult);
         }        
 
         [Test]
@@ -1489,7 +1489,7 @@ namespace Ch.Elca.Iiop.Tests {
             MappingToResult mapResult = (MappingToResult)mapper.MapClsType(typeof(TestFlagsBUI32), 
                                                                            AttributeExtCollection.EmptyCollection,
                                                                            s_testAction);
-            Assertion.AssertEquals(MappingToResult.IdlFlagsEquivalent, mapResult);
+            Assert.AreEqual(MappingToResult.IdlFlagsEquivalent, mapResult);
         }        
         
         [Test]
@@ -1498,7 +1498,7 @@ namespace Ch.Elca.Iiop.Tests {
             MappingToResult mapResult = (MappingToResult)mapper.MapClsType(typeof(TestFlagsBUI64), 
                                                                            AttributeExtCollection.EmptyCollection,
                                                                            s_testAction);
-            Assertion.AssertEquals(MappingToResult.IdlFlagsEquivalent, mapResult);
+            Assert.AreEqual(MappingToResult.IdlFlagsEquivalent, mapResult);
         }        
         
         [Test]
@@ -1507,7 +1507,7 @@ namespace Ch.Elca.Iiop.Tests {
             MappingToResult mapResult = (MappingToResult)mapper.MapClsType(typeof(TestIdlStruct), 
                                                                            new AttributeExtCollection(),
                                                                            s_testAction);
-            Assertion.AssertEquals(MappingToResult.IdlStruct, mapResult);
+            Assert.AreEqual(MappingToResult.IdlStruct, mapResult);
         }
 
         [Test]
@@ -1516,7 +1516,7 @@ namespace Ch.Elca.Iiop.Tests {
             MappingToResult mapResult = (MappingToResult)mapper.MapClsType(typeof(TestIdlUnion), 
                                                                            new AttributeExtCollection(),
                                                                            s_testAction);
-            Assertion.AssertEquals(MappingToResult.IdlUnion, mapResult);
+            Assert.AreEqual(MappingToResult.IdlUnion, mapResult);
         }
         
         [Test]
@@ -1525,11 +1525,11 @@ namespace Ch.Elca.Iiop.Tests {
             MappingToResult mapResult = (MappingToResult)mapper.MapClsType(typeof(TestClsSerializableStruct), 
                                                                            new AttributeExtCollection(),
                                                                            s_testAction);
-            Assertion.AssertEquals(MappingToResult.IdlConcreteValue, mapResult);
+            Assert.AreEqual(MappingToResult.IdlConcreteValue, mapResult);
             mapResult = (MappingToResult)mapper.MapClsType(typeof(TestClsSerializableClass), 
                                                            new AttributeExtCollection(),
                                                            s_testAction);
-            Assertion.AssertEquals(MappingToResult.IdlConcreteValue, mapResult);                        
+            Assert.AreEqual(MappingToResult.IdlConcreteValue, mapResult);                        
         }
         
         [Test]
@@ -1538,15 +1538,15 @@ namespace Ch.Elca.Iiop.Tests {
             MappingToResult mapResult = (MappingToResult)mapper.MapClsType(typeof(TestClsNonSerializableStruct), 
                                                                            new AttributeExtCollection(),
                                                                            s_testAction);
-            Assertion.AssertEquals(MappingToResult.IdlAbstractValue, mapResult);
+            Assert.AreEqual(MappingToResult.IdlAbstractValue, mapResult);
             mapResult = (MappingToResult)mapper.MapClsType(typeof(TestClsNonSerializableClass), 
                                                            new AttributeExtCollection(),
                                                            s_testAction);
-            Assertion.AssertEquals(MappingToResult.IdlAbstractValue, mapResult);    
+            Assert.AreEqual(MappingToResult.IdlAbstractValue, mapResult);    
             mapResult = (MappingToResult)mapper.MapClsType(typeof(TestAbsValInterface), 
                                                            new AttributeExtCollection(),
                                                            s_testAction);
-            Assertion.AssertEquals(MappingToResult.IdlAbstractValue, mapResult);    
+            Assert.AreEqual(MappingToResult.IdlAbstractValue, mapResult);    
         }
 
         [Test]        
@@ -1555,15 +1555,15 @@ namespace Ch.Elca.Iiop.Tests {
             MappingToResult mapResult = (MappingToResult)mapper.MapClsType(typeof(Int16[]), 
                                                                            new AttributeExtCollection(),
                                                                            s_testAction);
-            Assertion.AssertEquals(MappingToResult.IdlBoxedValue, mapResult);
+            Assert.AreEqual(MappingToResult.IdlBoxedValue, mapResult);
             mapResult = (MappingToResult)mapper.MapClsType(typeof(TestBoxedVal ), 
                                                            new AttributeExtCollection(),
                                                            s_testAction);
-            Assertion.AssertEquals(MappingToResult.IdlBoxedValue, mapResult);
+            Assert.AreEqual(MappingToResult.IdlBoxedValue, mapResult);
             mapResult = (MappingToResult)mapper.MapClsType(ReflectionHelper.Int16Type, 
                                                            new AttributeExtCollection(new Attribute[] { new BoxedValueAttribute("IDL:Ch/Elca/Iiop/Tests/TestBoxedVal:1.0") }),
                                                            s_testAction);
-            Assertion.AssertEquals(MappingToResult.IdlBoxedValue, mapResult);
+            Assert.AreEqual(MappingToResult.IdlBoxedValue, mapResult);
         }
 
         [Test]
@@ -1572,11 +1572,11 @@ namespace Ch.Elca.Iiop.Tests {
             MappingToResult mapResult = (MappingToResult)mapper.MapClsType(typeof(TestRemotableByRef), 
                                                                            new AttributeExtCollection(),
                                                                            s_testAction);
-            Assertion.AssertEquals(MappingToResult.IdlConcreteIf, mapResult);
+            Assert.AreEqual(MappingToResult.IdlConcreteIf, mapResult);
             mapResult = (MappingToResult)mapper.MapClsType(typeof(TestConInterface), 
                                                            new AttributeExtCollection(),
                                                            s_testAction);
-            Assertion.AssertEquals(MappingToResult.IdlConcreteIf, mapResult);            
+            Assert.AreEqual(MappingToResult.IdlConcreteIf, mapResult);            
         }
 
         [Test]
@@ -1585,7 +1585,7 @@ namespace Ch.Elca.Iiop.Tests {
             MappingToResult mapResult = (MappingToResult)mapper.MapClsType(typeof(TestAbsInterface), 
                                                                            new AttributeExtCollection(),
                                                                            s_testAction);
-            Assertion.AssertEquals(MappingToResult.IdlAbstractIf, mapResult);
+            Assert.AreEqual(MappingToResult.IdlAbstractIf, mapResult);
         }
         
         [Test]
@@ -1594,7 +1594,7 @@ namespace Ch.Elca.Iiop.Tests {
             MappingToResult mapResult = (MappingToResult)mapper.MapClsType(typeof(TestLocalInterface), 
                                                                            new AttributeExtCollection(),
                                                                            s_testAction);
-            Assertion.AssertEquals(MappingToResult.IdlLocalIf, mapResult);
+            Assert.AreEqual(MappingToResult.IdlLocalIf, mapResult);
         }
         
         [Test]
@@ -1603,7 +1603,7 @@ namespace Ch.Elca.Iiop.Tests {
             MappingToResult mapResult = (MappingToResult)mapper.MapClsType(typeof(Exception), 
                                                                            new AttributeExtCollection(),
                                                                            s_testAction);
-            Assertion.AssertEquals(MappingToResult.IdlException, mapResult);
+            Assert.AreEqual(MappingToResult.IdlException, mapResult);
         }
         
         [Test]
@@ -1612,7 +1612,7 @@ namespace Ch.Elca.Iiop.Tests {
             MappingToResult mapResult = (MappingToResult)mapper.MapClsType(ReflectionHelper.ObjectType, 
                                                                            new AttributeExtCollection(new Attribute[] { new ObjectIdlTypeAttribute(IdlTypeObject.AbstractBase) }),
                                                                            s_testAction);
-            Assertion.AssertEquals(MappingToResult.IdlAbstractBase, mapResult);
+            Assert.AreEqual(MappingToResult.IdlAbstractBase, mapResult);
         }
         
         [Test]
@@ -1621,7 +1621,7 @@ namespace Ch.Elca.Iiop.Tests {
             MappingToResult mapResult = (MappingToResult)mapper.MapClsType(ReflectionHelper.ObjectType, 
                                                                            new AttributeExtCollection(new Attribute[] { new ObjectIdlTypeAttribute(IdlTypeObject.ValueBase) }),
                                                                            s_testAction);
-            Assertion.AssertEquals(MappingToResult.IdlValueBase, mapResult);
+            Assert.AreEqual(MappingToResult.IdlValueBase, mapResult);
         }
         
         [Test]
@@ -1630,7 +1630,7 @@ namespace Ch.Elca.Iiop.Tests {
             MappingToResult mapResult = (MappingToResult)mapper.MapClsType(ReflectionHelper.TypeType, 
                                                                            new AttributeExtCollection(),
                                                                            s_testAction);
-            Assertion.AssertEquals(MappingToResult.IdlTypeDesc, mapResult);
+            Assert.AreEqual(MappingToResult.IdlTypeDesc, mapResult);
         }
         
         [Test]
@@ -1639,11 +1639,11 @@ namespace Ch.Elca.Iiop.Tests {
             MappingToResult mapResult = (MappingToResult)mapper.MapClsType(typeof(TypeCodeImpl), 
                                                                            new AttributeExtCollection(),
                                                                            s_testAction);
-            Assertion.AssertEquals(MappingToResult.IdlTypeCode, mapResult);
+            Assert.AreEqual(MappingToResult.IdlTypeCode, mapResult);
             mapResult = (MappingToResult)mapper.MapClsType(ReflectionHelper.CorbaTypeCodeType, 
                                                            new AttributeExtCollection(),
                                                            s_testAction);
-            Assertion.AssertEquals(MappingToResult.IdlTypeCode, mapResult);            
+            Assert.AreEqual(MappingToResult.IdlTypeCode, mapResult);            
         }
         
         #endregion

@@ -153,7 +153,7 @@ namespace Ch.Elca.Iiop.Tests {
             source.Seek(0, SeekOrigin.Begin);            
             for (int i = 0; i < nrOfBytes; i++) {
                 int expected = source.ReadByte();
-                Assertion.AssertEquals(expected, target.ReadByte());
+                Assert.AreEqual(expected, target.ReadByte());
             }
         }
         
@@ -172,7 +172,7 @@ namespace Ch.Elca.Iiop.Tests {
             source.Seek(0, SeekOrigin.Begin);            
             for (int i = 0; i < nrOfBytes; i++) {
                 int expected = source.ReadByte();
-                Assertion.AssertEquals(expected, target[i]);
+                Assert.AreEqual(expected, target[i]);
             }                        
             
         }

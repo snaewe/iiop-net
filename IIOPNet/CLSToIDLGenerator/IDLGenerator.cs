@@ -209,6 +209,7 @@ namespace Ch.Elca.Iiop.Idl {
         /// <param name="assemblyToMap">the assembly containing the type to map</param>
         private static void SetupAppDomain(Assembly assemblyToMap) {
             AppDomain curDomain = AppDomain.CurrentDomain;
+
             curDomain.AppendPrivatePath(curDomain.BaseDirectory);
             // directory of the assembly containing the typ to map
             // make sure to probe in directory containing type to map, if not found itself ...

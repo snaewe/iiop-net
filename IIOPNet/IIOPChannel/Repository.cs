@@ -682,19 +682,18 @@ namespace Ch.Elca.Iiop.Tests {
             Type required = typeof(IRepositoryTestIf1);
             
             Type typeForId;
-            Assertion.Assert("type compatibility for TestIf2", 
-                             Repository.IsInterfaceCompatible(required,
+            Assert.IsTrue(Repository.IsInterfaceCompatible(required,
                                                               repIdIf,
-                                                              out typeForId));
-            Assertion.AssertEquals("type for if id", typeof(IRepositoryTestIf2),
-                                   typeForId);
+                                                              out typeForId),"type compatibility for TestIf2" );
+            Assert.AreEqual(typeof(IRepositoryTestIf2),
+                                   typeForId, "type for if id");
             
-            Assertion.Assert("type compatibility for TestClassImpl", 
+            Assert.IsTrue( 
                              Repository.IsInterfaceCompatible(required,
                                                               repIdCl,
-                                                              out typeForId));
-            Assertion.AssertEquals("type for cl id", typeof(RepositoryTestClassImpl),
-                                   typeForId);            
+                                                              out typeForId), "type compatibility for TestClassImpl");
+            Assert.AreEqual(typeof(RepositoryTestClassImpl),
+                                   typeForId,"type for cl id");            
         }
         
         [Test]
@@ -708,9 +707,9 @@ namespace Ch.Elca.Iiop.Tests {
                 Repository.IsInterfaceCompatible(required, repIdCl, 
                                                  out typeForId);
             // for non-verifiable type compatibility, return required Type for the id
-            Assertion.AssertEquals("type for incompatible id", required,
-                                   typeForId);
-            Assertion.Assert("type compatibility for TestIf2", !isCompatible);
+            Assert.AreEqual( required,
+                                   typeForId, "type for incompatible id");
+            Assert.IsTrue(!isCompatible, "type compatibility for TestIf2");
         }                
         
         

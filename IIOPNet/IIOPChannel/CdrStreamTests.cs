@@ -58,7 +58,7 @@ namespace Ch.Elca.Iiop.Tests {
 	        byte[] testData = new byte[] { 0, 0, 0, 5, 65, 66, 67, 68, 0 };
 	        CdrInputStream inputStream = PrepareStream(testData);
 	        string result = inputStream.ReadString();
-	        Assertion.AssertEquals("read string", "ABCD", result);
+	        Assert.AreEqual("read string", "ABCD", result);
 	    }
 	    
 	    [Test]
@@ -67,7 +67,7 @@ namespace Ch.Elca.Iiop.Tests {
 	        CdrInputStream inputStream = PrepareStream(testData);
 	        inputStream.WCharSet = (int)Ch.Elca.Iiop.Services.WCharSet.UTF16;
 	        string result = inputStream.ReadWString();
-	        Assertion.AssertEquals("read string", "ABCD", result);
+	        Assert.AreEqual("read string", "ABCD", result);
 	    }
 	    
 	    [Test]	    
@@ -76,7 +76,7 @@ namespace Ch.Elca.Iiop.Tests {
                 byte[] testData = new byte[] { 0, 0, 0, 8, 0, 65, 0, 66, 0, 67, 0, 68 };
 	            CdrInputStream inputStream = PrepareStream(testData);
 	            string result = inputStream.ReadWString();	            
-	            Assertion.Fail("no exception, although no wchar code set set");
+	            Assert.Fail("no exception, although no wchar code set set");
 	        } catch (BAD_PARAM) {
 	            // ok, expected
 	        }
@@ -101,7 +101,7 @@ namespace Ch.Elca.Iiop.Tests {
 	    
 	    private void AssertOutput(byte[] expected, MemoryStream actual) {
 	        byte[] actualArray = actual.ToArray();
-	        ArrayAssertion.AssertByteArrayEquals("output", expected, actualArray);
+	        Assert.AreEqual(expected, actualArray,"output");
 	    }
 	    
 	    [Test]
@@ -135,7 +135,7 @@ namespace Ch.Elca.Iiop.Tests {
 	            using (MemoryStream outBase = new MemoryStream()) {
 	                CdrOutputStream outputStream = PrepareStream(outBase);
 	                outputStream.WriteWString(testData);
-	                Assertion.Fail("no exception, although no wchar code set set");
+	                Assert.Fail("no exception, although no wchar code set set");
 	            }
 	        } catch (BAD_PARAM) {
 	            // ok, expected

@@ -308,12 +308,12 @@ namespace Ch.Elca.Iiop.Tests {
         
         [Test]
         public void TestGetHeaderFlagsForBigEndian() {
-            Assertion.AssertEquals(0, GiopHeader.GetDefaultHeaderFlagsForEndian(Endian.BigEndian));
+            Assert.AreEqual(0, GiopHeader.GetDefaultHeaderFlagsForEndian(Endian.BigEndian));
         }
         
         [Test]
         public void TestGetHeaderFlagsForLittleEndian() {
-            Assertion.AssertEquals(1, GiopHeader.GetDefaultHeaderFlagsForEndian(Endian.LittleEndian));
+            Assert.AreEqual(1, GiopHeader.GetDefaultHeaderFlagsForEndian(Endian.LittleEndian));
         }        
         
         [Test]
@@ -324,7 +324,7 @@ namespace Ch.Elca.Iiop.Tests {
             } else {
                 expected = 0;
             }
-            Assertion.AssertEquals(expected,
+            Assert.AreEqual(expected,
                                    GiopHeader.GetDefaultHeaderFlagsForPlatform());
         }
         

@@ -2267,8 +2267,7 @@ namespace Ch.Elca.Iiop.Tests {
                 ser.Serialize(actual, cdrOut);
                 outStream.Seek(0, SeekOrigin.Begin);
                 byte[] result = outStream.ToArray();
-                ArrayAssertion.AssertByteArrayEquals("value " + actual + " incorrectly serialized.",
-                                                     expected, result);
+                Assert.AreEqual(expected, result, "value " + actual + " incorrectly serialized.");
             } finally {
                 outStream.Close();
             }
@@ -2291,8 +2290,7 @@ namespace Ch.Elca.Iiop.Tests {
         internal void GenericDeserTest(Serializer ser, byte[] actual, object expected,
                                       out object deserialized) {
             deserialized = GenericDeserForTest(ser, actual);
-            Assertion.AssertEquals("value " + expected + " not deserialized.",
-                                       expected, deserialized);
+            Assert.AreEqual(expected, deserialized,"value " + expected + " not deserialized.");
         }
         
         internal void GenericDeserTest(Serializer ser, byte[] actual, object expected) {
@@ -2931,9 +2929,9 @@ namespace Ch.Elca.Iiop.Tests {
             Serializer ser = new ObjRefSerializer(typeof(omg.org.CosNaming.NamingContext),
                                                   m_iiopUrlUtil);
             object result = ser.Deserialize(cdrIn);
-            Assertion.AssertNotNull("not correctly deserialised proxy for ior", result);
-            Assertion.Assert(RemotingServices.IsTransparentProxy(result));
-            Assertion.AssertEquals("IOR:000000000000002849444C3A6F6D672E6F72672F436F734E616D696E672F4E616D696E67436F6E746578743A312E3000000000010000000000000074000102000000000A3132372E302E302E3100041900000030AFABCB0000000022000003E80000000100000000000000010000000C4E616D655365727669636500000000034E43300A0000000100000001000000200000000000010001000000020501000100010020000101090000000100010100",
+            Assert.NotNull(result, "not correctly deserialised proxy for ior");
+            Assert.IsTrue(RemotingServices.IsTransparentProxy(result));
+            Assert.AreEqual("IOR:000000000000002849444C3A6F6D672E6F72672F436F734E616D696E672F4E616D696E67436F6E746578743A312E3000000000010000000000000074000102000000000A3132372E302E302E3100041900000030AFABCB0000000022000003E80000000100000000000000010000000C4E616D655365727669636500000000034E43300A0000000100000001000000200000000000010001000000020501000100010020000101090000000100010100",
                                    RemotingServices.GetObjectUri((MarshalByRefObject)result));
             ChannelServices.UnregisterChannel(testChannel);
             
@@ -2991,8 +2989,8 @@ namespace Ch.Elca.Iiop.Tests {
             object deser;
             GenericDeserTest(anySer, new byte[] { 0, 0, 0, 5, 0, 0, 0, 4 }, (int)4,
                              out deser);
-            Assertion.AssertEquals("deser type", ReflectionHelper.Int32Type,
-                                   deser.GetType());            
+            Assert.AreEqual(ReflectionHelper.Int32Type,
+                                   deser.GetType(), "deser type");            
         }
         
         [Test]
@@ -3008,8 +3006,8 @@ namespace Ch.Elca.Iiop.Tests {
             object deser;
             GenericDeserTest(anySer, new byte[] { 0, 0, 0, 10, 2 }, (sbyte)2,
                              out deser);
-            Assertion.AssertEquals("deser type", ReflectionHelper.ByteType,
-                                   deser.GetType());            
+            Assert.AreEqual(ReflectionHelper.ByteType,
+                                   deser.GetType(), "deser type");            
         }        
         
         [Test]
@@ -3062,8 +3060,8 @@ namespace Ch.Elca.Iiop.Tests {
                                                   0, 115, 0, 116 },
                              "test",
                              out deser);
-            Assertion.AssertEquals("deser type", ReflectionHelper.StringType,
-                                   deser.GetType());
+            Assert.AreEqual(ReflectionHelper.StringType,
+                                   deser.GetType(), "deser type");
         }        
         
         [Test]
@@ -3185,10 +3183,10 @@ namespace Ch.Elca.Iiop.Tests {
                                                   117, 101, 58, 49, 46, 48, 0, 0,                                                     
                                                   0, 0, 0, 8, 0, 116, 0, 101, // "test"
                                                   0, 115, 0, 116 });
-            Assertion.AssertEquals("deser value", val.Value,
-                                   ((Any)deser).Value);
-            Assertion.AssertEquals("deser type", ReflectionHelper.StringType,
-                                   ((Any)deser).Value.GetType());
+            Assert.AreEqual(val.Value,
+                                   ((Any)deser).Value, "deser value");
+            Assert.AreEqual(ReflectionHelper.StringType,
+                                   ((Any)deser).Value.GetType(), "deser type");
         }
 
     }
@@ -3296,8 +3294,8 @@ namespace Ch.Elca.Iiop.Tests {
                                               117, 101, 58, 49, 46, 48, 0, 0,                                                     
                                               0, 0, 0, 8, 0, 116, 0, 101, // "test"
                                               0, 115, 0, 116 } );
-			Assertion.AssertEquals("deserialised value wrong", 
-                                   testVal, deser.Unbox());			
+			Assert.AreEqual(
+                                   testVal, deser.Unbox(), "deserialised value wrong");			
 		}
 		
 		[Test]
@@ -3382,14 +3380,14 @@ namespace Ch.Elca.Iiop.Tests {
             
             Serializer ser =
                 m_serFactory.Create(seqType, m_seqAttributes);
-            
-            Assertion.AssertNotNull("ser", ser);
+
+            Assert.NotNull(ser, "ser");
 #if NET_2
-            Assertion.AssertEquals("ser type", typeof(IdlSequenceSerializer<>).MakeGenericType(seqType.GetElementType()),
+            Assert.AreEqual("ser type", typeof(IdlSequenceSerializer<>).MakeGenericType(seqType.GetElementType()),
                                    ser.GetType());
 #else
-            Assertion.AssertEquals("ser type", typeof(IdlSequenceSerializer),
-                                   ser.GetType());
+            Assert.AreEqual(typeof(IdlSequenceSerializer),
+                                   ser.GetType(), "ser type");
 #endif
             return ser;
 	    }
@@ -3402,15 +3400,15 @@ namespace Ch.Elca.Iiop.Tests {
 	    private void AssertDeserialization(byte[] actual, Array expected) {
             Serializer ser = CreateSerializer(expected);
             
-            object result = GenericDeserForTest(ser, actual);          
-            Assertion.Assert("result is array", result.GetType().IsArray);
+            object result = GenericDeserForTest(ser, actual);
+            Assert.IsTrue(result.GetType().IsArray, "result is array");
             Array resultArray = (Array)result;
-            Assertion.AssertEquals("array length", expected.Length, resultArray.Length);
+            Assert.AreEqual(expected.Length, resultArray.Length, "array length");
                         
             for (int i = 0; i < resultArray.Length; i++) {
                 object elemIExpected = expected.GetValue(i);
                 object elemIResult = resultArray.GetValue(i);
-                Assertion.AssertEquals("element i", elemIExpected, elemIResult);
+                Assert.AreEqual(elemIExpected, elemIResult, "element i");
             }
 	    }
 	    
@@ -3620,10 +3618,10 @@ namespace Ch.Elca.Iiop.Tests {
             
             Serializer ser =
                 m_serFactory.Create(m_arrayType, m_arrayAttributes);
-            
-            Assertion.AssertNotNull("ser", ser);
-            Assertion.AssertEquals("ser type", typeof(IdlArraySerializer),
-                                   ser.GetType());
+
+            Assert.NotNull(ser, "ser");
+            Assert.AreEqual(typeof(IdlArraySerializer),
+                                   ser.GetType(), "ser type");
             
             GenericSerTest(ser, actual, expected);            
 	    }

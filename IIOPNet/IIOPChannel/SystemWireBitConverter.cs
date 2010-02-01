@@ -240,7 +240,7 @@ namespace Ch.Elca.Iiop.Tests {
             Array.Reverse(arg);
             Int16 result =
     			NonNativeEndianSystemWireBitConverter.ToInt16(arg);
-    		Assertion.AssertEquals("converted int 16" , numberToTest, result);
+            Assert.AreEqual(numberToTest, result, "converted int 16");
         }
         
     	[Test]
@@ -257,7 +257,7 @@ namespace Ch.Elca.Iiop.Tests {
             Array.Reverse(arg);
             Int32 result =
     			NonNativeEndianSystemWireBitConverter.ToInt32(arg);
-    		Assertion.AssertEquals("converted int 32" , numberToTest, result);
+            Assert.AreEqual(numberToTest, result, "converted int 32");
         }
 
     	
@@ -274,7 +274,7 @@ namespace Ch.Elca.Iiop.Tests {
             Array.Reverse(arg);
             Int64 result =
     			NonNativeEndianSystemWireBitConverter.ToInt64(arg);
-    		Assertion.AssertEquals("converted int 64" , numberToTest, result);
+            Assert.AreEqual(numberToTest, result, "converted int 64");
         }    	
     	
     	[Test]
@@ -290,7 +290,7 @@ namespace Ch.Elca.Iiop.Tests {
             Array.Reverse(arg);
             UInt16 result =
     			NonNativeEndianSystemWireBitConverter.ToUInt16(arg);
-    		Assertion.AssertEquals("converted uint 16" , numberToTest, result);
+    		Assert.AreEqual( numberToTest, result,"converted uint 16" );
         }    	    	
     	
     	[Test]
@@ -306,7 +306,7 @@ namespace Ch.Elca.Iiop.Tests {
             Array.Reverse(arg);
             UInt32 result =
     			NonNativeEndianSystemWireBitConverter.ToUInt32(arg);
-    		Assertion.AssertEquals("converted uint 32" , numberToTest, result);
+            Assert.AreEqual(numberToTest, result, "converted uint 32");
         }    	    	    	
     	    	    	
     	[Test]
@@ -322,7 +322,7 @@ namespace Ch.Elca.Iiop.Tests {
             Array.Reverse(arg);
             UInt64 result =
     			NonNativeEndianSystemWireBitConverter.ToUInt64(arg);
-    		Assertion.AssertEquals("converted uint 64" , numberToTest, result);
+            Assert.AreEqual(numberToTest, result, "converted uint 64");
         }    	    	    	
     	    	    	
     	[Test]
@@ -338,7 +338,7 @@ namespace Ch.Elca.Iiop.Tests {
             Array.Reverse(arg);
             Single result =
     			NonNativeEndianSystemWireBitConverter.ToSingle(arg);
-    		Assertion.AssertEquals("converted single" , numberToTest, result);
+            Assert.AreEqual(numberToTest, result, "converted single");
         }    	    	    	    	
     	
     	[Test]
@@ -354,7 +354,7 @@ namespace Ch.Elca.Iiop.Tests {
             Array.Reverse(arg);
             Double result =
     			NonNativeEndianSystemWireBitConverter.ToDouble(arg);
-    		Assertion.AssertEquals("converted double" , numberToTest, result);
+            Assert.AreEqual(numberToTest, result, "converted double");
         }    	    	    	    	    	
     	
     	[Test]
@@ -370,7 +370,7 @@ namespace Ch.Elca.Iiop.Tests {
             Array.Reverse(expected);
             byte[] result =
     			NonNativeEndianSystemWireBitConverter.GetBytes(numberToTest);
-    		ArrayAssertion.AssertByteArrayEquals("converted int16" , expected, result);
+            Assert.AreEqual(expected, result, "converted int16");
         }    	    	    	    	    	
     	
     	[Test]
@@ -386,7 +386,7 @@ namespace Ch.Elca.Iiop.Tests {
             Array.Reverse(expected);
             byte[] result =
     			NonNativeEndianSystemWireBitConverter.GetBytes(numberToTest);
-    		ArrayAssertion.AssertByteArrayEquals("converted int32" , expected, result);
+            Assert.AreEqual(expected, result, "converted int32");
         }    	    	    	    	    	
     	
     	[Test]
@@ -402,7 +402,7 @@ namespace Ch.Elca.Iiop.Tests {
             Array.Reverse(expected);
             byte[] result =
     			NonNativeEndianSystemWireBitConverter.GetBytes(numberToTest);
-    		ArrayAssertion.AssertByteArrayEquals("converted int64" , expected, result);
+    		Assert.AreEqual( expected, result,"converted int64" );
         }    	    	    	    	    	
     	
     	[Test]
@@ -418,7 +418,7 @@ namespace Ch.Elca.Iiop.Tests {
             Array.Reverse(expected);
             byte[] result =
     			NonNativeEndianSystemWireBitConverter.GetBytes(numberToTest);
-    		ArrayAssertion.AssertByteArrayEquals("converted uint16" , expected, result);
+    		Assert.AreEqual(expected, result,"converted uint16" );
         }    	    	    	    	    	
     	
     	[Test]
@@ -434,7 +434,7 @@ namespace Ch.Elca.Iiop.Tests {
             Array.Reverse(expected);
             byte[] result =
     			NonNativeEndianSystemWireBitConverter.GetBytes(numberToTest);
-    		ArrayAssertion.AssertByteArrayEquals("converted uint32" , expected, result);
+    		Assert.AreEqual(expected, result,"converted uint32");
         }    	    	    	    	    	
     	
     	[Test]
@@ -450,7 +450,7 @@ namespace Ch.Elca.Iiop.Tests {
             Array.Reverse(expected);
             byte[] result =
     			NonNativeEndianSystemWireBitConverter.GetBytes(numberToTest);
-    		ArrayAssertion.AssertByteArrayEquals("converted uint64" , expected, result);
+    		Assert.AreEqual(expected, result,"converted uint64" );
         }    	    	    	    	    	
     	
     	[Test]
@@ -466,7 +466,7 @@ namespace Ch.Elca.Iiop.Tests {
             Array.Reverse(expected);
             byte[] result =
     			NonNativeEndianSystemWireBitConverter.GetBytes(numberToTest);
-    		ArrayAssertion.AssertByteArrayEquals("converted single" , expected, result);
+            Assert.AreEqual(expected, result, "converted single");
         }    	    	    	    	    	
     	
     	[Test]
@@ -482,7 +482,7 @@ namespace Ch.Elca.Iiop.Tests {
             Array.Reverse(expected);
             byte[] result =
     			NonNativeEndianSystemWireBitConverter.GetBytes(numberToTest);
-    		ArrayAssertion.AssertByteArrayEquals("converted double" , expected, result);
+            Assert.AreEqual(expected, result, "converted double");
         }    	    	    	    	    	
     	
     	[Test]

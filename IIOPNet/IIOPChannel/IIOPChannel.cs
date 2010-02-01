@@ -1261,13 +1261,13 @@ namespace Ch.Elca.Iiop.Tests {
         
         [Test]
         public void TestCorrectCreation() {
-            Assertion.AssertEquals("Host", HOST, m_channelData.HostName);
-            Assertion.AssertEquals("Port", PORT, m_channelData.Port);
-            Assertion.AssertEquals("No components by default", 0, 
-                                   m_channelData.AdditionalTaggedComponents.Length);
-            Assertion.AssertEquals("chan uris length", 1,
-                                   m_channelData.ChannelUris.Length);
-            Assertion.AssertEquals("chan uri 1", "iiop://" + HOST + ":" + PORT,
+            Assert.AreEqual(HOST, m_channelData.HostName, "Host");
+            Assert.AreEqual(PORT, m_channelData.Port, "Port");
+            Assert.AreEqual(0,
+                                   m_channelData.AdditionalTaggedComponents.Length, "No components by default");
+            Assert.AreEqual( 1,
+                                   m_channelData.ChannelUris.Length, "chan uris length");
+            Assert.AreEqual("chan uri 1", "iiop://" + HOST + ":" + PORT,
                                    m_channelData.ChannelUris[0]);
         }
         
@@ -1281,10 +1281,10 @@ namespace Ch.Elca.Iiop.Tests {
                                                                           20000,
                                                                           new int[0])));
             m_channelData.AddAdditionalTaggedComponent(comp);
-            Assertion.AssertEquals("Component not added correctly", 1, 
-                                   m_channelData.AdditionalTaggedComponents.Length);
-            Assertion.AssertEquals("Component not added correctly", comp.tag, 
-                                   m_channelData.AdditionalTaggedComponents[0].tag);
+            Assert.AreEqual(1,
+                                   m_channelData.AdditionalTaggedComponents.Length, "Component not added correctly");
+            Assert.AreEqual(comp.tag,
+                                   m_channelData.AdditionalTaggedComponents[0].tag, "Component not added correctly");
         }
         
     }
@@ -1343,7 +1343,7 @@ namespace Ch.Elca.Iiop.Tests {
                     RemotingServices.Connect(typeof(ISimpleCallTestOnChannel),
                                              "iiop://localhost:" + TEST_PORT + "/" + uri);
                 byte arg = 1;
-                Assertion.AssertEquals(1, proxy.EchoByte(arg));
+                Assert.AreEqual(1, proxy.EchoByte(arg));
             } finally {
                 RemotingServices.Disconnect(mbr);
             }
@@ -1397,11 +1397,11 @@ namespace Ch.Elca.Iiop.Tests {
                     RemotingServices.Connect(typeof(ISimpleCallTestOnChannel),
                                              url);
                 proxy.EchoByte(1); // should fail
-                Assertion.Fail("not detected, that connectivity to server is not available");
+                Assert.Fail("not detected, that connectivity to server is not available");
             } catch (TRANSIENT tEx) {
-                Assertion.AssertEquals("minor code", 
+                Assert.AreEqual( 
                                        CorbaSystemExceptionCodes.TRANSIENT_CANTCONNECT,
-                                       tEx.Minor);
+                                       tEx.Minor, "minor code");
             }
         }
     }
@@ -1579,7 +1579,7 @@ namespace Ch.Elca.Iiop.Tests {
                 RemotingServices.Connect(typeof(ISimpleCallTestOnChannel),
                                          m_targetIor.ToString());
             byte arg = 1;
-            Assertion.AssertEquals(1, proxy.EchoByte(arg));            
+            Assert.AreEqual(1, proxy.EchoByte(arg));            
         }
         
         [Test]
@@ -1589,7 +1589,7 @@ namespace Ch.Elca.Iiop.Tests {
                 RemotingServices.Connect(typeof(ISimpleCallTestOnChannel),
                                         m_targetIor.ToString());
             byte arg = 1;
-            Assertion.AssertEquals(1, proxy.EchoByte(arg));            
+            Assert.AreEqual(1, proxy.EchoByte(arg));            
         }        
         
         [Test]
@@ -1600,7 +1600,7 @@ namespace Ch.Elca.Iiop.Tests {
                 RemotingServices.Connect(typeof(ISimpleCallTestOnChannel),
                                         m_targetIor.ToString());
             byte arg = 1;
-            Assertion.AssertEquals(1, proxy.EchoByte(arg));            
+            Assert.AreEqual(1, proxy.EchoByte(arg));            
         }        
         
         delegate System.Byte TestEchoByteDelegate(System.Byte arg);
@@ -1618,7 +1618,7 @@ namespace Ch.Elca.Iiop.Tests {
             IAsyncResult ar = ebd.BeginInvoke(arg, null, null);
             // wait for response
             System.Byte result = ebd.EndInvoke(ar);                                    
-            Assertion.AssertEquals(arg, result);
+            Assert.AreEqual(arg, result);
         }
         
         [Test]
@@ -1634,7 +1634,7 @@ namespace Ch.Elca.Iiop.Tests {
             IAsyncResult ar = ebd.BeginInvoke(arg, null, null);
             // wait for response
             System.Byte result = ebd.EndInvoke(ar);                                    
-            Assertion.AssertEquals(arg, result);
+            Assert.AreEqual(arg, result);
         }
         
         [Test]
@@ -1651,7 +1651,7 @@ namespace Ch.Elca.Iiop.Tests {
             IAsyncResult ar = ebd.BeginInvoke(arg, null, null);
             // wait for response
             System.Byte result = ebd.EndInvoke(ar);                                    
-            Assertion.AssertEquals(arg, result);
+            Assert.AreEqual(arg, result);
         }
         
         
@@ -1662,7 +1662,7 @@ namespace Ch.Elca.Iiop.Tests {
                 RemotingServices.Connect(typeof(ISimpleCallTestOnChannel),
                                          m_targetIiopLoc);
             byte arg = 1;
-            Assertion.AssertEquals(1, proxy.EchoByte(arg));            
+            Assert.AreEqual(1, proxy.EchoByte(arg));            
         }        
 
         

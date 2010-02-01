@@ -114,8 +114,7 @@ namespace Ch.Elca.Iiop.IdlCompiler.Tests {
                 Assembly result = CreateIdl(testSource, GetAssemblyName(), false, setFlag);
                            
                 Type ifType = result.GetType("testmod.Test", true);
-                Assertion.AssertEquals("Additional Interface not correctly handled for " + ifModifier + " Interfaces.",
-                        expectBase, typeof(IDisposable).IsAssignableFrom(ifType));
+                Assert.AreEqual(expectBase, typeof(IDisposable).IsAssignableFrom(ifType), "Additional Interface not correctly handled for " + ifModifier + " Interfaces.");
             } finally {
                 writer.Close();
             }
@@ -180,8 +179,7 @@ namespace Ch.Elca.Iiop.IdlCompiler.Tests {
             FieldInfo[] fields = enumType.GetFields(BindingFlags.Public | 
                                                     BindingFlags.Static | 
                                                     BindingFlags.DeclaredOnly);
-            Assertion.AssertEquals("wrong number of fields in enum", 
-                                   3, fields.Length);
+            Assert.AreEqual(3, fields.Length, "wrong number of fields in enum");
             
             CheckEnumField(fields[0], "A");
             CheckEnumField(fields[1], "B");
@@ -261,7 +259,7 @@ namespace Ch.Elca.Iiop.IdlCompiler.Tests {
             Type valType = result.GetType("testmod.Test", true);
             // check if if-type is correctly created
             Type ifType = result.GetType("testmod.TestIf", true);
-            Assertion.Assert("no inheritance from TestIf", ifType.IsAssignableFrom(valType));
+            Assert.IsTrue(ifType.IsAssignableFrom(valType), "no inheritance from TestIf");
                        
             CheckImplClassAttr(valType, "testmod.TestImpl");
             CheckSerializableAttributePresent(valType);
@@ -309,7 +307,7 @@ namespace Ch.Elca.Iiop.IdlCompiler.Tests {
             // check if struct is correctly created
             Type structType = result.GetType("testmod.Test", true);
             // must be a struct
-            Assertion.Assert("is a struct", structType.IsValueType);
+            Assert.IsTrue(structType.IsValueType, "is a struct");
             CheckIdlStructAttributePresent(structType);
             CheckSerializableAttributePresent(structType);
             CheckExplicitSerializationOrderedAttributePresent(structType);
@@ -348,13 +346,13 @@ namespace Ch.Elca.Iiop.IdlCompiler.Tests {
             // check if container interface created
             Type containerIfType = result.GetType("testmod.ContainerIf",
                                                 true);
-            Assertion.AssertNotNull(containerIfType);
+            Assert.NotNull(containerIfType);
             
             // check if struct in if is correctly created
             Type structType1 = result.GetType("testmod.ContainerIf_package.Test", 
                                              true);
             // must be a struct
-            Assertion.Assert("is a struct", structType1.IsValueType);
+            Assert.IsTrue(structType1.IsValueType, "is a struct");
             CheckIdlStructAttributePresent(structType1);
             CheckSerializableAttributePresent(structType1);
             CheckExplicitSerializationOrderedAttributePresent(structType1);
@@ -368,13 +366,13 @@ namespace Ch.Elca.Iiop.IdlCompiler.Tests {
             // check if container interface created
             Type containerValType = result.GetType("testmod.ContainerValType",
                                                 true);
-            Assertion.AssertNotNull(containerValType);
+            Assert.NotNull(containerValType);
             
             // check if struct in if is correctly created
             Type structType2 = result.GetType("testmod.ContainerValType_package.Test", 
                                              true);
             // must be a struct
-            Assertion.Assert("is a struct", structType2.IsValueType);
+            Assert.IsTrue(structType2.IsValueType, "is a struct");
             CheckIdlStructAttributePresent(structType2);
             CheckSerializableAttributePresent(structType2);
             CheckExplicitSerializationOrderedAttributePresent(structType2);
@@ -410,7 +408,7 @@ namespace Ch.Elca.Iiop.IdlCompiler.Tests {
             // check if union is correctly created
             Type unionType = result.GetType("testmod.Test", true);
             // must be a struct
-            Assertion.Assert("is a struct", unionType.IsValueType);
+            Assert.IsTrue(unionType.IsValueType, "is a struct");
             CheckIdlUnionAttributePresent(unionType);
 
             CheckFieldPresent(unionType, "m_discriminator", typeof(System.Int32), 
@@ -464,15 +462,12 @@ namespace Ch.Elca.Iiop.IdlCompiler.Tests {
             Type ifContainerType = result.GetType("testmod.Test", true);
             
             MethodInfo seqMethod = ifContainerType.GetMethod("EchoSeqLong",
-                                                             BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly);                            
-            Assertion.AssertNotNull("method not found in seqTest", seqMethod);
+                                                             BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly);
+            Assert.NotNull(seqMethod, "method not found in seqTest");
             ParameterInfo[] parameters = seqMethod.GetParameters();
-            Assertion.AssertEquals("wrong number of paramters; seqTestMethod", 
-                                   1, parameters.Length);
-            Assertion.AssertEquals("wrong parameter type; seqTestMethod",
-                                   typeof(int[]), parameters[0].ParameterType);
-            Assertion.AssertEquals("wrong return type; seqTestMethod",
-                                   typeof(int[]), seqMethod.ReturnType);
+            Assert.AreEqual(1, parameters.Length, "wrong number of paramters; seqTestMethod");
+            Assert.AreEqual(typeof(int[]), parameters[0].ParameterType, "wrong parameter type; seqTestMethod");
+            Assert.AreEqual(typeof(int[]), seqMethod.ReturnType, "wrong return type; seqTestMethod");
             object[] paramAttrs = parameters[0].GetCustomAttributes(false);
             CheckOnlySpecificCustomAttrInCollection(paramAttrs, typeof(IdlSequenceAttribute));
             object[] returnAttrs = seqMethod.ReturnTypeCustomAttributes.GetCustomAttributes(false);
@@ -585,10 +580,10 @@ namespace Ch.Elca.Iiop.IdlCompiler.Tests {
 
             object[] bseqAttrs = 
                 boundedElemField.GetCustomAttributes(typeof(IdlSequenceAttribute), true);
-            Assertion.AssertNotNull(bseqAttrs);
-            Assertion.AssertEquals(1, bseqAttrs.Length);
-            Assertion.AssertEquals(true, ((IdlSequenceAttribute)bseqAttrs[0]).IsBounded());
-            Assertion.AssertEquals(3, ((IdlSequenceAttribute)bseqAttrs[0]).Bound);
+            Assert.NotNull(bseqAttrs);
+            Assert.AreEqual(1, bseqAttrs.Length);
+            Assert.AreEqual(true, ((IdlSequenceAttribute)bseqAttrs[0]).IsBounded());
+            Assert.AreEqual(3, ((IdlSequenceAttribute)bseqAttrs[0]).Bound);
 
             FieldInfo unboundedElemField = structType.GetField("unboundedSeqElem",
                                                                BindingFlags.Public | BindingFlags.Instance |
@@ -596,10 +591,10 @@ namespace Ch.Elca.Iiop.IdlCompiler.Tests {
 
             object[] ubseqAttrs = 
                 unboundedElemField.GetCustomAttributes(typeof(IdlSequenceAttribute), true);
-            Assertion.AssertNotNull(ubseqAttrs);
-            Assertion.AssertEquals(1, ubseqAttrs.Length);
-            Assertion.AssertEquals(false, ((IdlSequenceAttribute)ubseqAttrs[0]).IsBounded());
-            Assertion.AssertEquals(0, ((IdlSequenceAttribute)ubseqAttrs[0]).Bound);
+            Assert.NotNull(ubseqAttrs);
+            Assert.AreEqual(1, ubseqAttrs.Length);
+            Assert.AreEqual(false, ((IdlSequenceAttribute)ubseqAttrs[0]).IsBounded());
+            Assert.AreEqual(0, ((IdlSequenceAttribute)ubseqAttrs[0]).Bound);
                         
             writer.Close();
         }
@@ -630,7 +625,7 @@ namespace Ch.Elca.Iiop.IdlCompiler.Tests {
                 MethodInfo testMethod = ifB.GetMethod("g", 
                                                        BindingFlags.Public | BindingFlags.Instance,
                                                        null, Type.EmptyTypes, null);
-                Assertion.AssertNotNull(testMethod);
+                Assert.NotNull(testMethod);
                 // not possible to check directly for exceptoin attribute, because Exception type
                 // not resolvable because assembly not written to disk!
             } finally {           
@@ -666,8 +661,7 @@ namespace Ch.Elca.Iiop.IdlCompiler.Tests {
             FieldInfo[] fields = enumType.GetFields(BindingFlags.Public | 
                                                     BindingFlags.Static | 
                                                     BindingFlags.DeclaredOnly);
-            Assertion.AssertEquals("wrong number of fields in enum", 
-                                   3, fields.Length);
+            Assert.AreEqual(3, fields.Length, "wrong number of fields in enum");
             
             CheckEnumField(fields[0], "\u00DF");
             CheckEnumField(fields[1], "B");
@@ -699,7 +693,7 @@ namespace Ch.Elca.Iiop.IdlCompiler.Tests {
             // check if struct is correctly created
             Type structType = result.GetType("testmod.Test", true);
             // must be a struct
-            Assertion.Assert("is a struct", structType.IsValueType);
+            Assert.IsTrue(structType.IsValueType, "is a struct");
             CheckIdlStructAttributePresent(structType);
             CheckSerializableAttributePresent(structType);
             
@@ -805,7 +799,7 @@ namespace Ch.Elca.Iiop.IdlCompiler.Tests {
             // check if struct is correctly created
             Type structType = result.GetType("C2.Generic", true);
             // must be a struct
-            Assertion.Assert("is a struct", structType.IsValueType);
+            Assert.IsTrue(structType.IsValueType, "is a struct");
             CheckIdlStructAttributePresent(structType);
             CheckSerializableAttributePresent(structType);
             
@@ -854,7 +848,7 @@ namespace Ch.Elca.Iiop.IdlCompiler.Tests {
             // check if struct is correctly created
             Type structType = result.GetType("C2.L1", true);
             // must be a struct
-            Assertion.Assert("is a struct", structType.IsValueType);
+            Assert.IsTrue(structType.IsValueType, "is a struct");
             CheckIdlStructAttributePresent(structType);
             CheckSerializableAttributePresent(structType);
             

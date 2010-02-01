@@ -457,54 +457,54 @@ namespace Ch.Elca.Iiop.Tests {
             
             AttributeExtCollection result1 = testColl1.RemoveAttributeOfType(typeof(TestAttributeForCollT1), 
                                                                              out removed);
-            Assertion.AssertEquals("wrong removed", a1, removed);
-            Assertion.AssertEquals("wrong removed", a2, result1.GetAttributeAt(0));
-            Assertion.AssertEquals("wrong removed", a3, result1.GetAttributeAt(1));
-            Assertion.AssertEquals("wrong removed", a4, result1.GetAttributeAt(2));
-            Assertion.AssertEquals("wrong removed", a5, result1.GetAttributeAt(3));
-            Assertion.AssertEquals("result length", 4, result1.Count);
+            Assert.AreEqual(a1, removed, "wrong removed");
+            Assert.AreEqual(a2, result1.GetAttributeAt(0), "wrong removed");
+            Assert.AreEqual(a3, result1.GetAttributeAt(1), "wrong removed");
+            Assert.AreEqual(a4, result1.GetAttributeAt(2), "wrong removed");
+            Assert.AreEqual(a5, result1.GetAttributeAt(3), "wrong removed");
+            Assert.AreEqual(4, result1.Count, "result length");
 
             result1 = testColl1.RemoveAttributeOfType(typeof(TestAttributeForCollT2), 
                                                       out removed);
-            
-            Assertion.AssertEquals("wrong removed", a2, removed);
-            Assertion.AssertEquals("wrong removed", a1, result1.GetAttributeAt(0));
-            Assertion.AssertEquals("wrong removed", a3, result1.GetAttributeAt(1));
-            Assertion.AssertEquals("wrong removed", a4, result1.GetAttributeAt(2));
-            Assertion.AssertEquals("wrong removed", a5, result1.GetAttributeAt(3));
-            Assertion.AssertEquals("result length", 4, result1.Count);
+
+            Assert.AreEqual(a2, removed, "wrong removed");
+            Assert.AreEqual(a1, result1.GetAttributeAt(0), "wrong removed");
+            Assert.AreEqual(a3, result1.GetAttributeAt(1), "wrong removed");
+            Assert.AreEqual(a4, result1.GetAttributeAt(2), "wrong removed");
+            Assert.AreEqual(a5, result1.GetAttributeAt(3), "wrong removed");
+            Assert.AreEqual(4, result1.Count, "result length");
 
             result1 = testColl1.RemoveAttributeOfType(typeof(TestAttributeForCollT3), 
                                                       out removed);
-            
-            Assertion.AssertEquals("wrong removed", a3, removed);
-            Assertion.AssertEquals("wrong removed", a1, result1.GetAttributeAt(0));
-            Assertion.AssertEquals("wrong removed", a2, result1.GetAttributeAt(1));
-            Assertion.AssertEquals("wrong removed", a4, result1.GetAttributeAt(2));
-            Assertion.AssertEquals("wrong removed", a5, result1.GetAttributeAt(3));
-            Assertion.AssertEquals("result length", 4, result1.Count);
+
+            Assert.AreEqual(a3, removed, "wrong removed");
+            Assert.AreEqual(a1, result1.GetAttributeAt(0), "wrong removed");
+            Assert.AreEqual(a2, result1.GetAttributeAt(1), "wrong removed");
+            Assert.AreEqual(a4, result1.GetAttributeAt(2), "wrong removed");
+            Assert.AreEqual(a5, result1.GetAttributeAt(3), "wrong removed");
+            Assert.AreEqual(4, result1.Count, "result length");
             
             
             result1 = testColl1.RemoveAttributeOfType(typeof(TestAttributeForCollT4), 
                                                       out removed);
-            
-            Assertion.AssertEquals("wrong removed", a4, removed);
-            Assertion.AssertEquals("wrong removed", a1, result1.GetAttributeAt(0));
-            Assertion.AssertEquals("wrong removed", a2, result1.GetAttributeAt(1));
-            Assertion.AssertEquals("wrong removed", a3, result1.GetAttributeAt(2));
-            Assertion.AssertEquals("wrong removed", a5, result1.GetAttributeAt(3));
-            Assertion.AssertEquals("result length", 4, result1.Count);
+
+            Assert.AreEqual(a4, removed, "wrong removed");
+            Assert.AreEqual(a1, result1.GetAttributeAt(0), "wrong removed");
+            Assert.AreEqual(a2, result1.GetAttributeAt(1), "wrong removed");
+            Assert.AreEqual(a3, result1.GetAttributeAt(2), "wrong removed");
+            Assert.AreEqual(a5, result1.GetAttributeAt(3), "wrong removed");
+            Assert.AreEqual(4, result1.Count, "result length");
             
             
             result1 = testColl1.RemoveAttributeOfType(typeof(TestAttributeForCollT5), 
                                                       out removed);
-            
-            Assertion.AssertEquals("wrong removed", a5, removed);
-            Assertion.AssertEquals("wrong removed", a1, result1.GetAttributeAt(0));
-            Assertion.AssertEquals("wrong removed", a2, result1.GetAttributeAt(1));
-            Assertion.AssertEquals("wrong removed", a3, result1.GetAttributeAt(2));
-            Assertion.AssertEquals("wrong removed", a4, result1.GetAttributeAt(3));
-            Assertion.AssertEquals("result length", 4, result1.Count);
+
+            Assert.AreEqual(a5, removed, "wrong removed");
+            Assert.AreEqual(a1, result1.GetAttributeAt(0), "wrong removed");
+            Assert.AreEqual(a2, result1.GetAttributeAt(1), "wrong removed");
+            Assert.AreEqual(a3, result1.GetAttributeAt(2), "wrong removed");
+            Assert.AreEqual(a4, result1.GetAttributeAt(3), "wrong removed");
+            Assert.AreEqual(4, result1.Count, "result length");
             
             // start with one elem coll
             
@@ -512,8 +512,8 @@ namespace Ch.Elca.Iiop.Tests {
                 AttributeExtCollection.ConvertToAttributeCollection(new object[] { a1 });
             AttributeExtCollection result2 = testColl2.RemoveAttributeOfType(typeof(TestAttributeForCollT1), 
                                                                              out removed);
-            Assertion.AssertEquals("wrong removed", a1, removed);
-            Assertion.AssertEquals("result length", 0, result2.Count);
+            Assert.AreEqual(a1, removed, "wrong removed");
+            Assert.AreEqual(0, result2.Count, "result length");
             
             
             // start with two elem coll
@@ -523,17 +523,17 @@ namespace Ch.Elca.Iiop.Tests {
             
             AttributeExtCollection result3 = testColl3.RemoveAttributeOfType(typeof(TestAttributeForCollT1), 
                                                                              out removed);
-            Assertion.AssertEquals("wrong removed", a1, removed);
-            Assertion.AssertEquals("wrong removed", a2, result3.GetAttributeAt(0));
-            Assertion.AssertEquals("result length", 1, result3.Count);
+            Assert.AreEqual(a1, removed, "wrong removed");
+            Assert.AreEqual(a2, result3.GetAttributeAt(0), "wrong removed");
+            Assert.AreEqual(1, result3.Count, "result length");
             
             
             result3 = testColl3.RemoveAttributeOfType(typeof(TestAttributeForCollT2), 
                                                       out removed);
 
-            Assertion.AssertEquals("wrong removed", a2, removed);
-            Assertion.AssertEquals("wrong removed", a1, result3.GetAttributeAt(0));
-            Assertion.AssertEquals("result length", 1, result3.Count);
+            Assert.AreEqual(a2, removed, "wrong removed");
+            Assert.AreEqual(a1, result3.GetAttributeAt(0), "wrong removed");
+            Assert.AreEqual(1, result3.Count, "result length");
 
             
         }
@@ -554,20 +554,20 @@ namespace Ch.Elca.Iiop.Tests {
                 AttributeExtCollection.ConvertToAttributeCollection(new object[] { a3, a4, a5 });
             
             AttributeExtCollection merged1 = testColl1.MergeAttributeCollections(testColl2);
-            Assertion.AssertEquals("wrong merged", a3, merged1.GetAttributeAt(0));
-            Assertion.AssertEquals("wrong merged", a4, merged1.GetAttributeAt(1));
-            Assertion.AssertEquals("wrong merged", a5, merged1.GetAttributeAt(2));
-            Assertion.AssertEquals("wrong merged", a1, merged1.GetAttributeAt(3));
-            Assertion.AssertEquals("wrong merged", a2, merged1.GetAttributeAt(4));
-            Assertion.AssertEquals("result length", 5, merged1.Count);
+            Assert.AreEqual(a3, merged1.GetAttributeAt(0), "wrong merged");
+            Assert.AreEqual(a4, merged1.GetAttributeAt(1), "wrong merged");
+            Assert.AreEqual(a5, merged1.GetAttributeAt(2), "wrong merged");
+            Assert.AreEqual(a1, merged1.GetAttributeAt(3), "wrong merged");
+            Assert.AreEqual(a2, merged1.GetAttributeAt(4), "wrong merged");
+            Assert.AreEqual(5, merged1.Count, "result length");
             
             AttributeExtCollection merged2 = testColl2.MergeAttributeCollections(testColl1);
-            Assertion.AssertEquals("wrong merged", a1, merged2.GetAttributeAt(0));
-            Assertion.AssertEquals("wrong merged", a2, merged2.GetAttributeAt(1));
-            Assertion.AssertEquals("wrong merged", a3, merged2.GetAttributeAt(2));
-            Assertion.AssertEquals("wrong merged", a4, merged2.GetAttributeAt(3));
-            Assertion.AssertEquals("wrong merged", a5, merged2.GetAttributeAt(4));
-            Assertion.AssertEquals("result length", 5, merged2.Count);
+            Assert.AreEqual(a1, merged2.GetAttributeAt(0), "wrong merged");
+            Assert.AreEqual(a2, merged2.GetAttributeAt(1), "wrong merged");
+            Assert.AreEqual(a3, merged2.GetAttributeAt(2), "wrong merged");
+            Assert.AreEqual(a4, merged2.GetAttributeAt(3), "wrong merged");
+            Assert.AreEqual(a5, merged2.GetAttributeAt(4), "wrong merged");
+            Assert.AreEqual(5, merged2.Count, "result length");
             
         }
         
@@ -584,12 +584,12 @@ namespace Ch.Elca.Iiop.Tests {
                 AttributeExtCollection.ConvertToAttributeCollection(new object[] { a1, a2, a3, a4 });
                       
             AttributeExtCollection merged1 = testColl1.MergeAttribute(a5);
-            Assertion.AssertEquals("wrong merged", a5, merged1.GetAttributeAt(0));
-            Assertion.AssertEquals("wrong merged", a1, merged1.GetAttributeAt(1));
-            Assertion.AssertEquals("wrong merged", a2, merged1.GetAttributeAt(2));
-            Assertion.AssertEquals("wrong merged", a3, merged1.GetAttributeAt(3));
-            Assertion.AssertEquals("wrong merged", a4, merged1.GetAttributeAt(4));
-            Assertion.AssertEquals("result length", 5, merged1.Count);
+            Assert.AreEqual(a5, merged1.GetAttributeAt(0), "wrong merged");
+            Assert.AreEqual(a1, merged1.GetAttributeAt(1), "wrong merged");
+            Assert.AreEqual(a2, merged1.GetAttributeAt(2), "wrong merged");
+            Assert.AreEqual(a3, merged1.GetAttributeAt(3), "wrong merged");
+            Assert.AreEqual(a4, merged1.GetAttributeAt(4), "wrong merged");
+            Assert.AreEqual(5, merged1.Count, "result length");
         }
         
         [Test]
@@ -600,8 +600,8 @@ namespace Ch.Elca.Iiop.Tests {
             
             AttributeExtCollection c1 = new AttributeExtCollection(new Attribute[] { a1, a2, a3 });
             AttributeExtCollection c2 = new AttributeExtCollection(new Attribute[] { a3, a2, a1 });
-            
-            Assertion.Assert("collection equality", c1.Equals(c2));
+
+            Assert.IsTrue(c1.Equals(c2), "collection equality");
         }
         
         [Test]
@@ -612,8 +612,8 @@ namespace Ch.Elca.Iiop.Tests {
             
             AttributeExtCollection c1 = new AttributeExtCollection(new Attribute[] { a1, a2, a3 });
             AttributeExtCollection c2 = new AttributeExtCollection(new Attribute[] { a3, a2 });
-            
-            Assertion.Assert("collection equality", !c1.Equals(c2));
+
+            Assert.IsTrue(!c1.Equals(c2), "collection equality");
         }
 
         

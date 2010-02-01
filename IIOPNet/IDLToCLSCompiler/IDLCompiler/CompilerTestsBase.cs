@@ -29,8 +29,9 @@
 
 #if UnitTest
 
-namespace Ch.Elca.Iiop.IdlCompiler.Tests {
-	
+namespace Ch.Elca.Iiop.IdlCompiler.Tests
+{
+
     using System;
     using System.Reflection;
     using System.Collections;
@@ -47,258 +48,269 @@ namespace Ch.Elca.Iiop.IdlCompiler.Tests {
     /// <summary>
     /// Base class for unit tests
     /// </summary>    
-    public abstract class CompilerTestsBase {
-        
+    public abstract class CompilerTestsBase
+    {
+
         #region SFields
-        
+
         private static Encoding s_latin1 = Encoding.GetEncoding("ISO-8859-1");
-        
+
         #endregion
         #region IMethods
-        
-        
+
+
         /// <summary>
         /// Get an assembly name for a string name.
         /// </summary>
-        protected AssemblyName GetAssemblyName(string name) {
+        protected AssemblyName GetAssemblyName(string name)
+        {
             AssemblyName result = new AssemblyName();
             result.Name = name;
             return result;
         }
-        
+
         /// <summary>
         /// Parses the idl and generates an assembly.
         /// </summary>
-        protected Assembly CreateIdl(Stream source, AssemblyName targetName) {
+        protected Assembly CreateIdl(Stream source, AssemblyName targetName)
+        {
             return CreateIdl(source, targetName, false, false);
-        }                
-        
+        }
+
         /// <summary>
         /// Parses the idl and generates an assembly.
         /// </summary>
         protected Assembly CreateIdl(Stream source, AssemblyName targetName,
                                   bool anyToAnyContainerMapping,
-                                  bool makeInterfaceDisposable) {
+                                  bool makeInterfaceDisposable)
+        {
             return CreateIdl(source, targetName, anyToAnyContainerMapping,
-        	                 makeInterfaceDisposable, new ArrayList());
-        }        
-        
+                             makeInterfaceDisposable, new ArrayList());
+        }
+
         protected Assembly CreateIdl(Stream source, AssemblyName targetName,
                                      bool anyToAnyContainerMapping, bool makeInterfaceDisposable,
-                                     ArrayList refAssemblies) {
-        	IDLParser parser = new IDLParser(source);
+                                     ArrayList refAssemblies)
+        {
+            IDLParser parser = new IDLParser(source);
             ASTspecification spec = parser.specification();
             // now parsed representation can be visited with the visitors
-            MetaDataGenerator generator = new MetaDataGenerator(targetName, ".", 
+            MetaDataGenerator generator = new MetaDataGenerator(targetName, ".",
                                                                 refAssemblies);
             generator.MapAnyToAnyContainer = anyToAnyContainerMapping;
-            if(makeInterfaceDisposable) {
+            if (makeInterfaceDisposable)
+            {
                 generator.InheritedInterface = typeof(System.IDisposable);
             }
             generator.InitalizeForSource(parser.getSymbolTable());
             spec.jjtAccept(generator, null);
-            Assembly result = generator.ResultAssembly;            
+            Assembly result = generator.ResultAssembly;
             return result;
         }
-        
-        
+
+
         /// <summary>
         /// Creates a stream writer for a stream
         /// to place the source into.
         /// </summary>
-        protected StreamWriter CreateSourceWriter(Stream stream) {            
-            StreamWriter writer = new StreamWriter(stream, s_latin1);            
+        protected StreamWriter CreateSourceWriter(Stream stream)
+        {
+            StreamWriter writer = new StreamWriter(stream, s_latin1);
             return writer;
         }
-        
+
         /// <summary>
         /// Check, that the repository id attribute is present with
         /// the given id.
         /// </summary>
-        protected void CheckRepId(Type testType, string expected) {
-            object[] repAttrs = 
+        protected void CheckRepId(Type testType, string expected)
+        {
+            object[] repAttrs =
                 testType.GetCustomAttributes(ReflectionHelper.RepositoryIDAttributeType,
                                              false);
-            Assertion.AssertEquals("wrong number of RepIDAttrs", 1, repAttrs.Length);
-            RepositoryIDAttribute repId = (RepositoryIDAttribute) repAttrs[0];
-            Assertion.AssertEquals("wrong repId", expected,
-                                   repId.Id);            
-        }                
-        
+            Assert.AreEqual(1, repAttrs.Length, "wrong number of RepIDAttrs");
+            RepositoryIDAttribute repId = (RepositoryIDAttribute)repAttrs[0];
+            Assert.AreEqual("wrong repId", expected,
+                                   repId.Id);
+        }
+
         /// <summary>
         /// Check, that the correct interface type attribute has been placed.
         /// </summary>
-        protected void CheckInterfaceAttr(Type testType, IdlTypeInterface expected) {
-            object[] ifAttrs = testType.GetCustomAttributes(typeof(InterfaceTypeAttribute), 
+        protected void CheckInterfaceAttr(Type testType, IdlTypeInterface expected)
+        {
+            object[] ifAttrs = testType.GetCustomAttributes(typeof(InterfaceTypeAttribute),
                                                             false);
-            Assertion.AssertEquals("wrong number of InterfaceTypeAttribute", 1, ifAttrs.Length);
-            InterfaceTypeAttribute ifAttr = (InterfaceTypeAttribute) ifAttrs[0];
-            Assertion.AssertEquals("wrong ifattr", expected,
-                                   ifAttr.IdlType);            
+            Assert.AreEqual(1, ifAttrs.Length, "wrong number of InterfaceTypeAttribute");
+            InterfaceTypeAttribute ifAttr = (InterfaceTypeAttribute)ifAttrs[0];
+            Assert.AreEqual(expected,
+                                   ifAttr.IdlType, "wrong ifattr");
         }
-        
+
         /// <summary>
         /// Check, that the impl class attribute has been placed specifying the correct class.
         /// </summary>
-        protected void CheckImplClassAttr(Type toCheck, string implClassName) {
-            object[] attrs = toCheck.GetCustomAttributes(ReflectionHelper.ImplClassAttributeType, 
+        protected void CheckImplClassAttr(Type toCheck, string implClassName)
+        {
+            object[] attrs = toCheck.GetCustomAttributes(ReflectionHelper.ImplClassAttributeType,
                                                          false);
-            Assertion.AssertEquals("wrong number of ImplClassAttribute", 1, attrs.Length);
-            ImplClassAttribute attr = (ImplClassAttribute) attrs[0];
-            Assertion.AssertEquals("wrong implclass attr", implClassName,
-                                   attr.ImplClass);            
-        }                
-        
+            Assert.AreEqual(1, attrs.Length, "wrong number of ImplClassAttribute");
+            ImplClassAttribute attr = (ImplClassAttribute)attrs[0];
+            Assert.AreEqual("wrong implclass attr", implClassName,
+                                   attr.ImplClass);
+        }
+
         /// <summary>
         /// Check, that an idl enum attribute has been placed.
         /// </summary>        
-        protected void CheckIdlEnumAttributePresent(Type enumType) {
-            object[] attrs = enumType.GetCustomAttributes(ReflectionHelper.IdlEnumAttributeType, 
+        protected void CheckIdlEnumAttributePresent(Type enumType)
+        {
+            object[] attrs = enumType.GetCustomAttributes(ReflectionHelper.IdlEnumAttributeType,
                                                           false);
-            Assertion.AssertEquals("wrong number of IdlEnumAttribute", 1, attrs.Length);
+            Assert.AreEqual(1, attrs.Length, "wrong number of IdlEnumAttribute");
         }
-        
+
         /// <summary>
         /// Check, that the idl struct attribute has been placed.
         /// </summary>
-        protected void CheckIdlStructAttributePresent(Type structType) {
-            object[] attrs = structType.GetCustomAttributes(ReflectionHelper.IdlStructAttributeType, 
+        protected void CheckIdlStructAttributePresent(Type structType)
+        {
+            object[] attrs = structType.GetCustomAttributes(ReflectionHelper.IdlStructAttributeType,
                                                             false);
-            Assertion.AssertEquals("wrong number of IdlStructAttribute", 1, attrs.Length);
+            Assert.AreEqual(1, attrs.Length, "wrong number of IdlStructAttribute");
         }
-        
+
         /// <summary>
         /// Check, that the idl union attribute has been placed.
         /// </summary>
-        protected void CheckIdlUnionAttributePresent(Type unionType) {
-            object[] attrs = unionType.GetCustomAttributes(ReflectionHelper.IdlUnionAttributeType, 
+        protected void CheckIdlUnionAttributePresent(Type unionType)
+        {
+            object[] attrs = unionType.GetCustomAttributes(ReflectionHelper.IdlUnionAttributeType,
                                                            false);
-            Assertion.AssertEquals("wrong number of IdlUnionAttribute", 1, attrs.Length);
+            Assert.AreEqual(1, attrs.Length, "wrong number of IdlUnionAttribute");
         }
-        
+
         /// <summary>
         /// Check, that the class is serializable.
         /// </summary>
-        protected void CheckSerializableAttributePresent(Type toCheck) {
-            Assertion.AssertEquals("not serializable", true, toCheck.IsSerializable);
+        protected void CheckSerializableAttributePresent(Type toCheck)
+        {
+            Assert.AreEqual(true, toCheck.IsSerializable, "not serializable");
         }
-        
+
         /// <summary>
         /// Check, that the ExplicitSerializationOrdered attribute has been placed.
         /// </summary>
-        protected void CheckExplicitSerializationOrderedAttributePresent(Type type) {
-            object[] attrs = type.GetCustomAttributes(ReflectionHelper.ExplicitSerializationOrderedType, 
+        protected void CheckExplicitSerializationOrderedAttributePresent(Type type)
+        {
+            object[] attrs = type.GetCustomAttributes(ReflectionHelper.ExplicitSerializationOrderedType,
                                                       false);
-            Assertion.AssertNotNull("attrs null?", attrs);
-            Assertion.AssertEquals("wrong number of ExplicitSerializationOrderedAttribute", 1, attrs.Length);
+            Assert.NotNull(attrs, "attrs null?");
+            Assert.AreEqual(1, attrs.Length, "wrong number of ExplicitSerializationOrderedAttribute");
         }
-        
+
         /// <summary>
         /// Check, that a given public method is present.
         /// </summary>
         protected void CheckPublicInstanceMethodPresent(Type testType, string methodName,
-                                                      Type returnType, Type[] paramTypes) {
+                                                      Type returnType, Type[] paramTypes)
+        {
             CheckMethodPresent(testType, methodName, returnType, paramTypes,
                                BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly);
 
         }
-        
+
         /// <summary>
         /// Check, that a given method is present.
         /// </summary>
         protected void CheckMethodPresent(Type testType, string methodName,
-                                        Type returnType, Type[] paramTypes, BindingFlags attrs) {
-            MethodInfo testMethod = testType.GetMethod(methodName, 
+                                        Type returnType, Type[] paramTypes, BindingFlags attrs)
+        {
+            MethodInfo testMethod = testType.GetMethod(methodName,
                                                        attrs,
                                                        null, paramTypes, null);
-            Assertion.AssertNotNull(String.Format("method {0} not found", methodName),
-                                    testMethod);
-            
-            Assertion.AssertEquals(String.Format("wrong return type {0} in method {1}", testMethod.ReturnType, methodName),
-                                   returnType, testMethod.ReturnType);                                            
+            Assert.NotNull(testMethod, String.Format("method {0} not found", methodName));
+
+            Assert.AreEqual(returnType, testMethod.ReturnType, String.Format("wrong return type {0} in method {1}", testMethod.ReturnType, methodName));
         }
-        
+
         /// <summary>
         /// Check, that a given property is present.
         /// </summary>
-        protected void CheckPropertyPresent(Type testType, string propName, 
-                                        Type propType, BindingFlags attrs) {            
+        protected void CheckPropertyPresent(Type testType, string propName,
+                                        Type propType, BindingFlags attrs)
+        {
             PropertyInfo testProp = testType.GetProperty(propName, attrs,
                                                        null, propType, Type.EmptyTypes,
                                                        null);
-            Assertion.AssertNotNull(String.Format("property {0} not found", propName),
-                                    testProp);
-            
-            Assertion.AssertEquals(String.Format("wrong type {0} in property {1}", testProp.PropertyType, propName),
-                                   propType, testProp.PropertyType);                                            
+            Assert.NotNull(testProp, String.Format("property {0} not found", propName));
+
+            Assert.AreEqual(propType, testProp.PropertyType, String.Format("wrong type {0} in property {1}", testProp.PropertyType, propName));
         }
-        
+
         /// <summary>
         /// Check, that a given field is present.
         /// </summary>
         protected void CheckFieldPresent(Type testType, string fieldName,
-                                       Type fieldType, BindingFlags flags) {
-            FieldInfo testField = testType.GetField(fieldName, flags);                                           
-            Assertion.AssertNotNull(String.Format("field {0} not found in type {1}", fieldName, testType.FullName),
-                                    testField);
-            Assertion.AssertEquals(String.Format("wrong field type {0} in field {1}", 
-                                                 testField.FieldType, testField.Name),
-                                   fieldType, testField.FieldType);        
+                                       Type fieldType, BindingFlags flags)
+        {
+            FieldInfo testField = testType.GetField(fieldName, flags);
+            Assert.NotNull(testField, String.Format("field {0} not found in type {1}", fieldName, testType.FullName));
+            Assert.AreEqual(fieldType, testField.FieldType, String.Format("wrong field type {0} in field {1}",
+                                                 testField.FieldType, testField.Name));
         }
-        
+
         /// <summary>
         /// Check, that the given number of fields are present.
         /// </summary>
         protected void CheckNumberOfFields(Type testType, BindingFlags flags,
-                                         System.Int32 expected) {
+                                         System.Int32 expected)
+        {
             FieldInfo[] fields = testType.GetFields(flags);
-            Assertion.AssertEquals("wrong number of fields found in type: " + testType.FullName,
-                                   expected, fields.Length);        
+            Assert.AreEqual(expected, fields.Length, "wrong number of fields found in type: " + testType.FullName);
         }
-        
+
         /// <summary>
         /// Check, that exactly one custom attribute is present in the given array.
         /// </summary>
         protected void CheckOnlySpecificCustomAttrInCollection(object[] testAttrs,
-                                                             Type attrType) {
-            Assertion.AssertEquals("wrong nr of custom attrs found",
-                                   1, testAttrs.Length);
-            Assertion.AssertEquals("wrong custom attr found",
-                                   attrType,
-                                   testAttrs[0].GetType());                                                             
+                                                             Type attrType)
+        {
+            Assert.AreEqual(1, testAttrs.Length, "wrong nr of custom attrs found");
+            Assert.AreEqual(attrType,
+                                   testAttrs[0].GetType(), "wrong custom attr found");
         }
-        
+
         /// <summary>
         /// Check, that the type implements IIdlEntity.
         /// </summary>
-        protected void CheckIIdlEntityInheritance(Type testType) {
+        protected void CheckIIdlEntityInheritance(Type testType)
+        {
             Type idlEntityIf = testType.GetInterface("IIdlEntity");
-            Assertion.AssertNotNull(String.Format("type {0} doesn't inherit from IIdlEntity", testType.FullName),
-                                    idlEntityIf);
+            Assert.NotNull(idlEntityIf, String.Format("type {0} doesn't inherit from IIdlEntity", testType.FullName));
         }
-        
+
         /// <summary>
         /// Check an enum field.
         /// </summary>
-        protected void CheckEnumField(FieldInfo field, string idlEnumValName) {
+        protected void CheckEnumField(FieldInfo field, string idlEnumValName)
+        {
             Type enumType = field.DeclaringType;
-            Assertion.AssertEquals("wrong enum val field type", 
-                                   enumType, field.FieldType);
-            Assertion.AssertEquals("wrong enum val field name",
-                                   idlEnumValName, field.Name);
+            Assert.AreEqual(enumType, field.FieldType, "wrong enum val field type");
+            Assert.AreEqual(idlEnumValName, field.Name, "wrong enum val field name");
         }
-        
 
-        
+
+
         #endregion
 
-        
-        
-        
-    
+
+
+
+
     }
-    
-    
+
+
 }
 
 #endif

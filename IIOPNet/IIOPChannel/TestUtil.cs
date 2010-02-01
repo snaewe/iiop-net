@@ -19,12 +19,11 @@ namespace Ch.Elca.Iiop.Tests {
         
         public static void AssertEquals(string message, Array expected, Array actual) {
             if (expected == null) {
-                Assertion.AssertNull(message + " [actual not null]", actual);
+                Assert.IsNull(actual, message + " [actual not null]");
             }
-            Assertion.AssertEquals(message + " [actual length not equal to expected]", expected.Length, actual.Length);
+            Assert.AreEqual(expected.Length, actual.Length, message + " [actual length not equal to expected]");
             for (int i = 0; i < expected.Length; i++) {
-                Assertion.AssertEquals(message + " [actual element " + i + " differs from expected]", 
-                                       expected.GetValue(i), actual.GetValue(i));
+                Assert.AreEqual(expected.GetValue(i), actual.GetValue(i), message + " [actual element " + i + " differs from expected]");
             }
         }
         

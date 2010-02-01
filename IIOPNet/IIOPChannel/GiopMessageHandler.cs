@@ -495,7 +495,7 @@ namespace Ch.Elca.Iiop.Tests {
         private void AssertBytesFollowing(byte[] expected, CdrInputStream cdrIn) {
             for (int i = 0; i < expected.Length; i++) {
                 byte data = (byte) cdrIn.ReadOctet();
-                Assertion.AssertEquals(expected[i], data);
+                Assert.AreEqual(expected[i], data);
             }
         }
         
@@ -541,41 +541,41 @@ namespace Ch.Elca.Iiop.Tests {
             AssertBytesFollowing(m_giopMagic, cdrIn);
             // Giop version
             data = (byte) cdrIn.ReadOctet();
-            Assertion.AssertEquals(1, data);
+            Assert.AreEqual(1, data);
             data = (byte) cdrIn.ReadOctet();
-            Assertion.AssertEquals(2, data);
+            Assert.AreEqual(2, data);
             // flags: big-endian, no fragements
             data = (byte) cdrIn.ReadOctet();
-            Assertion.AssertEquals(0, data);
+            Assert.AreEqual(0, data);
             // Giop Msg type: request
             data = (byte) cdrIn.ReadOctet();
-            Assertion.AssertEquals(0, data);
+            Assert.AreEqual(0, data);
             // Giop Msg length
             uint msgLength = cdrIn.ReadULong();
             cdrIn.SetMaxLength(msgLength);
             // req-id
-            Assertion.AssertEquals(reqId, cdrIn.ReadULong());
+            Assert.AreEqual(reqId, cdrIn.ReadULong());
             // response flags
             data = (byte) cdrIn.ReadOctet();
-            Assertion.AssertEquals(3, data);
+            Assert.AreEqual(3, data);
             cdrIn.ReadPadding(3); // reserved
             // target
-            Assertion.AssertEquals(0, cdrIn.ReadUShort());
+            Assert.AreEqual(0, cdrIn.ReadUShort());
             // target must be testuri encoded as ascii-characters
-            Assertion.AssertEquals(7 , cdrIn.ReadULong());
+            Assert.AreEqual(7 , cdrIn.ReadULong());
             AssertBytesFollowing(
                 new byte[] { 116, 101, 115, 116, 117, 114, 105 }, 
                 cdrIn);
             // now the target method follows: Add (string is terminated by a zero)
-            Assertion.AssertEquals(4, cdrIn.ReadULong());
+            Assert.AreEqual(4, cdrIn.ReadULong());
             AssertBytesFollowing(new byte[] { 65, 100, 100, 0}, cdrIn);
             // now service contexts are following
             SkipServiceContexts(cdrIn);
             // Giop 1.2, must be aligned on 8
             cdrIn.ForceReadAlign(Aligns.Align8);
             // now params are following
-            Assertion.AssertEquals(1, cdrIn.ReadLong());
-            Assertion.AssertEquals(2, cdrIn.ReadLong());
+            Assert.AreEqual(1, cdrIn.ReadLong());
+            Assert.AreEqual(2, cdrIn.ReadLong());
         }
         
         [Test]
@@ -612,28 +612,28 @@ namespace Ch.Elca.Iiop.Tests {
             AssertBytesFollowing(m_giopMagic, cdrIn);
             // Giop version
             data = (byte) cdrIn.ReadOctet();
-            Assertion.AssertEquals(1, data);
+            Assert.AreEqual(1, data);
             data = (byte) cdrIn.ReadOctet();
-            Assertion.AssertEquals(2, data);
+            Assert.AreEqual(2, data);
             // flags: big-endian, no fragements
             data = (byte) cdrIn.ReadOctet();
-            Assertion.AssertEquals(0, data);
+            Assert.AreEqual(0, data);
             // Giop Msg type: reply
             data = (byte) cdrIn.ReadOctet();
-            Assertion.AssertEquals(1, data);
+            Assert.AreEqual(1, data);
             // Giop Msg length
             uint msgLength = cdrIn.ReadULong();
             cdrIn.SetMaxLength(msgLength);
             // req-id
-            Assertion.AssertEquals(5, cdrIn.ReadULong());
+            Assert.AreEqual(5, cdrIn.ReadULong());
             // response status: NO_EXCEPTION
-            Assertion.AssertEquals(0, cdrIn.ReadULong());
+            Assert.AreEqual(0, cdrIn.ReadULong());
             // ignore service contexts
             SkipServiceContexts(cdrIn);
             // Giop 1.2, must be aligned on 8
             cdrIn.ForceReadAlign(Aligns.Align8);
             // now return value is following
-            Assertion.AssertEquals(3, cdrIn.ReadLong());
+            Assert.AreEqual(3, cdrIn.ReadLong());
         }
         
         [Test]
@@ -699,18 +699,18 @@ namespace Ch.Elca.Iiop.Tests {
             }
 
             // now check if values are correct
-            Assertion.Assert("deserialised message is null", result != null);
-            Assertion.AssertEquals(requestId, result.Properties[SimpleGiopMsg.REQUEST_ID_KEY]);
-            Assertion.AssertEquals(version, result.Properties[SimpleGiopMsg.GIOP_VERSION_KEY]);
-            Assertion.AssertEquals(responseFlags, result.Properties[SimpleGiopMsg.RESPONSE_FLAGS_KEY]);
-            Assertion.AssertEquals("testobject", result.Properties[SimpleGiopMsg.URI_KEY]);
-            Assertion.AssertEquals("Ch.Elca.Iiop.Tests.TestService", result.Properties[SimpleGiopMsg.TYPENAME_KEY]);
-            Assertion.AssertEquals(methodName, result.Properties[SimpleGiopMsg.METHODNAME_KEY]);
+            Assert.IsTrue(result != null, "deserialised message is null");
+            Assert.AreEqual(requestId, result.Properties[SimpleGiopMsg.REQUEST_ID_KEY]);
+            Assert.AreEqual(version, result.Properties[SimpleGiopMsg.GIOP_VERSION_KEY]);
+            Assert.AreEqual(responseFlags, result.Properties[SimpleGiopMsg.RESPONSE_FLAGS_KEY]);
+            Assert.AreEqual("testobject", result.Properties[SimpleGiopMsg.URI_KEY]);
+            Assert.AreEqual("Ch.Elca.Iiop.Tests.TestService", result.Properties[SimpleGiopMsg.TYPENAME_KEY]);
+            Assert.AreEqual(methodName, result.Properties[SimpleGiopMsg.METHODNAME_KEY]);
             object[] args = (object[])result.Properties[SimpleGiopMsg.ARGS_KEY];
-            Assertion.Assert("args is null", args != null);
-            Assertion.AssertEquals(nrOfArgs, args.Length);
-            Assertion.AssertEquals(arg1, args[0]);
-            Assertion.AssertEquals(arg2, args[1]);
+            Assert.IsTrue(args != null, "args is null");
+            Assert.AreEqual(nrOfArgs, args.Length);
+            Assert.AreEqual(arg1, args[0]);
+            Assert.AreEqual(arg2, args[1]);
         }
         
         [Test]
@@ -749,8 +749,8 @@ namespace Ch.Elca.Iiop.Tests {
             // check deser of msg:
             sourceStream.Seek(0, SeekOrigin.Begin);            
             ReturnMessage result = (ReturnMessage) m_handler.ParseIncomingReplyMessage(sourceStream, requestMsg, conDesc);
-            Assertion.AssertEquals(3, result.ReturnValue);
-            Assertion.AssertEquals(0, result.OutArgCount);
+            Assert.AreEqual(3, result.ReturnValue);
+            Assert.AreEqual(0, result.OutArgCount);
         }                
                 
         //[Ignore("can prevent the test domain from unloading, find a solution for this before adding definitively")]
@@ -778,12 +778,12 @@ namespace Ch.Elca.Iiop.Tests {
                     (IMessage) m_handler.ParseIncomingReplyMessage(locFwdStream, requestMsg, conDesc);
                 MarshalByRefObject fwdToTarget;
                 bool isFwd = GiopMessageHandler.IsLocationForward(resultMsg, out fwdToTarget);
-                Assertion.Assert("is a forward?", isFwd);
-                Assertion.AssertNotNull("new target reference null?", fwdToTarget);
+                Assert.IsTrue(isFwd, "is a forward?");
+                Assert.NotNull(fwdToTarget,"new target reference null?");
                 ReturnMessage result = (ReturnMessage)
                     m_handler.ForwardRequest(requestMsg, fwdToTarget);
-                Assertion.AssertEquals(3, result.ReturnValue);
-                Assertion.AssertEquals(0, result.OutArgCount);                
+                Assert.AreEqual(3, result.ReturnValue);
+                Assert.AreEqual(0, result.OutArgCount);                
             } finally {
                 // unpublish target + channel
                 RemotingServices.Disconnect(target);
@@ -819,12 +819,12 @@ namespace Ch.Elca.Iiop.Tests {
                     m_handler.ParseIncomingReplyMessage(locFwdStream, requestMsg, conDesc);                
                 MarshalByRefObject fwdToTarget;
                 bool isFwd = GiopMessageHandler.IsLocationForward(resultMsg, out fwdToTarget);
-                Assertion.Assert("is a forward?", isFwd);
-                Assertion.AssertNotNull("new target reference null?", fwdToTarget);
+                Assert.IsTrue(isFwd, "is a forward?");
+                Assert.NotNull(fwdToTarget,"new target reference null?");
                 ReturnMessage result = (ReturnMessage)
                     m_handler.ForwardRequest(requestMsg, fwdToTarget);                
-                Assertion.AssertEquals(true, result.ReturnValue);
-                Assertion.AssertEquals(0, result.OutArgCount);                
+                Assert.AreEqual(true, result.ReturnValue);
+                Assert.AreEqual(0, result.OutArgCount);                
             } finally {
                 // unpublish target + channel
                 RemotingServices.Disconnect(target);
@@ -921,11 +921,11 @@ namespace Ch.Elca.Iiop.Tests {
             LocateRequestMessage result = m_handler.ParseIncomingLocateRequestMessage(sourceStream);
 
             // now check if values are correct
-            Assertion.Assert("deserialised message is null", result != null);
-            Assertion.AssertEquals(requestId, result.RequestId);
-            Assertion.AssertNotNull(result.ObjectKey);
-            Assertion.AssertNotNull(result.TargetUri);            
-            Assertion.AssertEquals("testobject", result.TargetUri);
+            Assert.IsTrue(result != null, "deserialised message is null");
+            Assert.AreEqual(requestId, result.RequestId);
+            Assert.NotNull(result.ObjectKey);
+            Assert.NotNull(result.TargetUri);            
+            Assert.AreEqual("testobject", result.TargetUri);
         }
         
         [Test]
@@ -957,22 +957,22 @@ namespace Ch.Elca.Iiop.Tests {
             AssertBytesFollowing(m_giopMagic, cdrIn);
             // Giop version
             data = (byte) cdrIn.ReadOctet();
-            Assertion.AssertEquals(1, data);
+            Assert.AreEqual(1, data);
             data = (byte) cdrIn.ReadOctet();
-            Assertion.AssertEquals(2, data);
+            Assert.AreEqual(2, data);
             // flags: big-endian, no fragements
             data = (byte) cdrIn.ReadOctet();
-            Assertion.AssertEquals(0, data);
+            Assert.AreEqual(0, data);
             // Giop Msg type: locate reply
             data = (byte) cdrIn.ReadOctet();
-            Assertion.AssertEquals((byte)GiopMsgTypes.LocateReply, data);
+            Assert.AreEqual((byte)GiopMsgTypes.LocateReply, data);
             // Giop Msg length
             uint msgLength = cdrIn.ReadULong();
             cdrIn.SetMaxLength(msgLength);
             // req-id
-            Assertion.AssertEquals(requestId, cdrIn.ReadULong());
+            Assert.AreEqual(requestId, cdrIn.ReadULong());
             // the location status
-            Assertion.AssertEquals((uint)replyStatus, cdrIn.ReadULong());
+            Assert.AreEqual((uint)replyStatus, cdrIn.ReadULong());
         }
 
     

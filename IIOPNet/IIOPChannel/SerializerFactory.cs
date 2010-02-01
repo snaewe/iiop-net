@@ -507,7 +507,7 @@ namespace Ch.Elca.Iiop.Tests {
             
             Serializer ser = factory.Create(createFor, 
                                             AttributeExtCollection.EmptyCollection);
-            Assertion.AssertEquals("wrong serializer type", expectedSerType, ser.GetType());            
+            Assert.AreEqual(expectedSerType, ser.GetType(), "wrong serializer type");            
         }
         
         [Test]

@@ -29,9 +29,9 @@
 
 using System;
 using System.Collections;
-using System.IO;
 using System.Net;
-using Org.Mentalis.Security.Certificates; 
+using Org.Mentalis.Security.Certificates;
+
 
 namespace Ch.Elca.Iiop.Security.Ssl {
  
@@ -117,6 +117,7 @@ namespace Ch.Elca.Iiop.Security.Ssl {
         }
         
         protected Certificate LoadCertificateFromStore(StoreLocation storeLocation, string storeName, string certHashString, string certSubject) {
+
             CertificateStore store = new CertificateStore(storeLocation, storeName);            
             if (certHashString != null) {
                 byte[] certHash = GetKeyHashForKeyHashString(certHashString);
@@ -206,7 +207,7 @@ namespace Ch.Elca.Iiop.Security.Ssl {
         public override void SetupClientOptions(IDictionary options) {
             base.SetupClientOptions(options);
             
-            StoreLocation storeLocation = StoreLocation.Unknown;
+            StoreLocation storeLocation = StoreLocation.LocalMachine;
             string storeName = MY_STORE_NAME;
             string certificateHash = null;
             string certificateSubject = null;
@@ -378,7 +379,7 @@ namespace Ch.Elca.Iiop.Security.Ssl {
         
         
         public virtual void SetupServerOptions(IDictionary options) {
-            StoreLocation storeLocation = StoreLocation.Unknown;
+            StoreLocation storeLocation = StoreLocation.LocalMachine;
             string storeName = MY_STORE_NAME;
             string certificateHash = null;
             string certificateSubject = null;

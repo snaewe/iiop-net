@@ -136,9 +136,9 @@ namespace Ch.Elca.Iiop.Tests {
         }
         
         private void CheckArrayEqual(object[] a1, object[] a2) {
-            Assertion.AssertEquals(a1.Length, a2.Length);
+            Assert.AreEqual(a1.Length, a2.Length);
             for (int i = 0; i < a1.Length; i++) {
-                Assertion.AssertEquals(a1[i], a2[i]);
+                Assert.AreEqual(a1[i], a2[i]);
             }            
         }
         
@@ -181,7 +181,7 @@ namespace Ch.Elca.Iiop.Tests {
                 object[] deserOut;
                 object deser = MarshalAndUnmarshalResponeArgsOnce(testMethod, returnValue, outArgs, 
                                                                   out deserOut);
-                Assertion.AssertEquals(returnValue, deser);
+                Assert.AreEqual(returnValue, deser);
                 CheckArrayEqual(outArgs, deserOut);
             }
             

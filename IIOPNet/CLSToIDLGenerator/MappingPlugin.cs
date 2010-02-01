@@ -156,6 +156,8 @@ namespace Ch.Elca.Iiop.Idl {
             FileStream stream = new FileStream(configFile.FullName, FileMode.Open);
             XmlTextReader textReader = new XmlTextReader(stream);            
             XmlValidatingReader validatingReader = new XmlValidatingReader(textReader);
+
+
             try {
                 validatingReader.Schemas.Add(m_mappingPluginSchema);
                 doc.Load(validatingReader);
