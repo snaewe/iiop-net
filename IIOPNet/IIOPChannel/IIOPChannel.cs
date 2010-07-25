@@ -1267,8 +1267,8 @@ namespace Ch.Elca.Iiop.Tests {
                                    m_channelData.AdditionalTaggedComponents.Length, "No components by default");
             Assert.AreEqual( 1,
                                    m_channelData.ChannelUris.Length, "chan uris length");
-            Assert.AreEqual("chan uri 1", "iiop://" + HOST + ":" + PORT,
-                                   m_channelData.ChannelUris[0]);
+            Assert.AreEqual("iiop://" + HOST + ":" + PORT,
+                                   m_channelData.ChannelUris[0], "chan uri 1");
         }
         
         [Test]

@@ -1669,9 +1669,9 @@ namespace Ch.Elca.Iiop.Tests
             CdrInputStreamImpl cdrIn = new CdrInputStreamImpl(stream);
             cdrIn.ConfigStream(STREAM_BIG_ENDIAN_FLAG, new GiopVersion(1, 2));
             double result = cdrIn.ReadDouble();
-            Assert.AreEqual(1.0f, result, "converted wbe double");
+            Assert.AreEqual(1.0, result, "converted wbe double");
             result = cdrIn.ReadDouble();
-            Assert.AreEqual(0.01f, result, "converted wbe double (2)");
+            Assert.AreEqual(0.01, result, "converted wbe double (2)");
             result = cdrIn.ReadDouble();
             Assert.AreEqual(Double.MaxValue, result, "converted wbe double (3)");
             result = cdrIn.ReadDouble();
@@ -1688,9 +1688,9 @@ namespace Ch.Elca.Iiop.Tests
             CdrInputStreamImpl cdrIn = new CdrInputStreamImpl(stream);
             cdrIn.ConfigStream(STREAM_LITTLE_ENDIAN_FLAG, new GiopVersion(1, 2));
             double result = cdrIn.ReadDouble();
-            Assert.AreEqual(1.0f, result, "converted lbe double");
+            Assert.AreEqual(1.0, result, "converted lbe double");
             result = cdrIn.ReadDouble();
-            Assert.AreEqual(0.01f, result, "converted lbe double (2)");
+            Assert.AreEqual(0.01, result, "converted lbe double (2)");
             result = cdrIn.ReadDouble();
             Assert.AreEqual(Double.MaxValue, result, "converted lbe double (3)");
             result = cdrIn.ReadDouble();
@@ -1748,7 +1748,7 @@ namespace Ch.Elca.Iiop.Tests
             cdrIn.ConfigStream(STREAM_BIG_ENDIAN_FLAG, new GiopVersion(1, 2));
             cdrIn.WCharSet = (int)WCharSet.UTF16;
             string result = cdrIn.ReadWString();
-            Assert.AreEqual("converted wbe string", "Test", result);
+            Assert.AreEqual("Test", result, "converted wbe string");
         }
 
         [Test]
@@ -1759,7 +1759,7 @@ namespace Ch.Elca.Iiop.Tests
             cdrIn.ConfigStream(STREAM_LITTLE_ENDIAN_FLAG, new GiopVersion(1, 2));
             cdrIn.WCharSet = (int)WCharSet.UTF16;
             string result = cdrIn.ReadWString();
-            Assert.AreEqual("converted lbe string", "Test", result);
+            Assert.AreEqual("Test", result, "converted lbe string");
         }
 
         [Test]

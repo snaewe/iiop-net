@@ -115,290 +115,297 @@ namespace Ch.Elca.Iiop.Idl {
 
 #if UnitTest
 
-namespace Ch.Elca.Iiop.Tests {
-    
+namespace Ch.Elca.Iiop.Tests
+{
     using System;
     using System.Reflection;
     using NUnit.Framework;
     using omg.org.CORBA;
     using Ch.Elca.Iiop.Idl;
-    
+
     /// <summary>
     /// Unit-tests for testing type from typecode code generation for value types.
     /// </summary>
     [TestFixture]
-    public class TypeFromTypeCodeGeneratorValueTypeTest {
-    	
-    	private TypeFromTypeCodeRuntimeGenerator m_gen;
-    	
-    	[SetUp]
-    	public void SetUp() {
-    		m_gen = TypeFromTypeCodeRuntimeGenerator.GetSingleton();
-    	}
-    	
-    	[Test]
-    	public void TestGenerate() {
-    		string name = "TestGenForTypeCodeType";
-    		string typeName = "Ch.Elca.Iiop.Tests." + name;
-    		string repId = "IDL:Ch/Elca/Iiop/Tests/TestGenForTypeCodeType:1.0";
-    		ValueMember m1 = new ValueMember("M1", new LongTC(), 0);
-    		ValueTypeTC vt = new ValueTypeTC(repId,
-    		                                 name, new ValueMember[] { m1 },
-    		                                 new NullTC(), 0);
-    		
-    		Type res = m_gen.CreateOrGetType(typeName, vt);
-    		Assert.NotNull(res);
-            Assert.AreEqual("type name", typeName, res.FullName);
-    		Assert.AreEqual("rep id", repId, Repository.GetRepositoryID(res));
-    		Assert.NotNull(res.GetField(m1.name,
-    		                                     BindingFlags.Public | BindingFlags.Instance),"field M1");
-    		Assert.IsTrue(res.IsSerializable,"Serializable");
-    	}
-    	   	
-    	[Test]
-    	public void TestGenerateSpecialNameRepId() {
-    	    string name = "TestGenForTypeCodeType3";
-    		string typeName = "Ch.Elca.Iiop.Tests." + name;
-    		string repId = "IDL:Ch/Elca/Iiop/Tests/Special_TestGenForTypeCodeType3:1.0";
-    		ValueTypeTC vt = new ValueTypeTC(repId,
-    		                                 name, new ValueMember[0],
-    		                                 new NullTC(), 0);
-    		
-    		Type res = m_gen.CreateOrGetType(typeName, vt);
-    		Assert.NotNull(res);
-    		Assert.AreEqual("type name", typeName, res.FullName);
-    		Assert.AreEqual("rep id", repId, Repository.GetRepositoryID(res));
-    	}
+    public class TypeFromTypeCodeGeneratorValueTypeTest
+    {
+        private TypeFromTypeCodeRuntimeGenerator m_gen;
 
-    	
+        [SetUp]
+        public void SetUp()
+        {
+            m_gen = TypeFromTypeCodeRuntimeGenerator.GetSingleton();
+        }
+
+        [Test]
+        public void TestGenerate()
+        {
+            string name = "TestGenForTypeCodeType";
+            string typeName = "Ch.Elca.Iiop.Tests." + name;
+            string repId = "IDL:Ch/Elca/Iiop/Tests/TestGenForTypeCodeType:1.0";
+            ValueMember m1 = new ValueMember("M1", new LongTC(), 0);
+            ValueTypeTC vt = new ValueTypeTC(repId,
+                                             name, new ValueMember[] { m1 },
+                                             new NullTC(), 0);
+
+            Type res = m_gen.CreateOrGetType(typeName, vt);
+            Assert.NotNull(res);
+            Assert.AreEqual(typeName, res.FullName, "type name");
+            Assert.AreEqual(repId, Repository.GetRepositoryID(res), "rep id");
+            Assert.NotNull(res.GetField(m1.name,
+                                                 BindingFlags.Public | BindingFlags.Instance), "field M1");
+            Assert.IsTrue(res.IsSerializable, "Serializable");
+        }
+
+        [Test]
+        public void TestGenerateSpecialNameRepId()
+        {
+            string name = "TestGenForTypeCodeType3";
+            string typeName = "Ch.Elca.Iiop.Tests." + name;
+            string repId = "IDL:Ch/Elca/Iiop/Tests/Special_TestGenForTypeCodeType3:1.0";
+            ValueTypeTC vt = new ValueTypeTC(repId,
+                                             name, new ValueMember[0],
+                                             new NullTC(), 0);
+
+            Type res = m_gen.CreateOrGetType(typeName, vt);
+            Assert.NotNull(res);
+            Assert.AreEqual(typeName, res.FullName, "type name");
+            Assert.AreEqual(repId, Repository.GetRepositoryID(res), "rep id");
+        }
+
     }
-    
+
     /// <summary>
     /// Unit-tests for testing type from typecode code generation for boxed value types.
     /// </summary>
     [TestFixture]
-    public class TypeFromTypeCodeGeneratorBoxedValueTypeTest {
+    public class TypeFromTypeCodeGeneratorBoxedValueTypeTest
+    {
+        private TypeFromTypeCodeRuntimeGenerator m_gen;
 
-    	private TypeFromTypeCodeRuntimeGenerator m_gen;
-    	
-    	[SetUp]
-    	public void SetUp() {
-    		m_gen = TypeFromTypeCodeRuntimeGenerator.GetSingleton();
-    	}
-    	
-    	[Test]
-    	public void TestGenerate() {
-    		string name = "TestBoxedGenForTypeCodeType";
-    		string typeName = "Ch.Elca.Iiop.Tests." + name;
-    		string repId = "IDL:Ch/Elca/Iiop/Tests/TestBoxedGenForTypeCodeType:1.0";
-    		LongTC boxedTC = new LongTC();
-    		ValueBoxTC vt = new ValueBoxTC(repId,
-    		                               name,
-    		                               boxedTC);
-    		
-    		Type res = m_gen.CreateOrGetType(typeName, vt);
-    		Assert.NotNull(res);
-            Assert.AreEqual("type name", typeName, res.FullName);
-    		Assert.AreEqual("rep id", repId, Repository.GetRepositoryID(res));
+        [SetUp]
+        public void SetUp()
+        {
+            m_gen = TypeFromTypeCodeRuntimeGenerator.GetSingleton();
+        }
+
+        [Test]
+        public void TestGenerate()
+        {
+            string name = "TestBoxedGenForTypeCodeType";
+            string typeName = "Ch.Elca.Iiop.Tests." + name;
+            string repId = "IDL:Ch/Elca/Iiop/Tests/TestBoxedGenForTypeCodeType:1.0";
+            LongTC boxedTC = new LongTC();
+            ValueBoxTC vt = new ValueBoxTC(repId,
+                                           name,
+                                           boxedTC);
+
+            Type res = m_gen.CreateOrGetType(typeName, vt);
+            Assert.NotNull(res);
+            Assert.AreEqual(typeName, res.FullName, "type name");
+            Assert.AreEqual(repId, Repository.GetRepositoryID(res), "rep id");
 
             Assert.IsTrue(res.IsSerializable, "Serializable");
-    	}    	
-    	    	
-    	[Test]
-    	public void TestGenerateSpecialNameRepId() {
-    		string name = "TestBoxedGenForTypeCodeType3";
-    		string typeName = "Ch.Elca.Iiop.Tests." + name;
-    		string repId = "IDL:Ch/Elca/Iiop/Tests/Special_TestBoxedGenForTypeCodeType3:1.0";
-    		LongTC boxedTC = new LongTC();
-    		ValueBoxTC vt = new ValueBoxTC(repId,
-    		                               name,
-    		                               boxedTC);
-    		
-    		Type res = m_gen.CreateOrGetType(typeName, vt);
-    		Assert.NotNull(res);
-            Assert.AreEqual("type name", typeName, res.FullName);
-    		Assert.AreEqual("rep id", repId, Repository.GetRepositoryID(res));
-    	}        
-        
+        }
+
+        [Test]
+        public void TestGenerateSpecialNameRepId()
+        {
+            string name = "TestBoxedGenForTypeCodeType3";
+            string typeName = "Ch.Elca.Iiop.Tests." + name;
+            string repId = "IDL:Ch/Elca/Iiop/Tests/Special_TestBoxedGenForTypeCodeType3:1.0";
+            LongTC boxedTC = new LongTC();
+            ValueBoxTC vt = new ValueBoxTC(repId,
+                                           name,
+                                           boxedTC);
+
+            Type res = m_gen.CreateOrGetType(typeName, vt);
+            Assert.NotNull(res);
+            Assert.AreEqual(typeName, res.FullName, "type name");
+            Assert.AreEqual(repId, Repository.GetRepositoryID(res), "rep id");
+        }
+
     }
-    
+
     /// <summary>
     /// Unit-tests for testing type from typecode code generation for boxed value types.
     /// </summary>
     [TestFixture]
-    public class TypeFromTypeCodeGeneratorEnumTypeTest {
-        
-    	private TypeFromTypeCodeRuntimeGenerator m_gen;
-    	
-    	[SetUp]
-    	public void SetUp() {
-    		m_gen = TypeFromTypeCodeRuntimeGenerator.GetSingleton();
-    	}
-    	
-    	[Test]
-    	public void TestGenerate() {
-    		string name = "TestEnumGenForTypeCodeType";
-    		string typeName = "Ch.Elca.Iiop.Tests." + name;
-    		string repId = "IDL:Ch/Elca/Iiop/Tests/TestEnumGenForTypeCodeType:1.0";    		
-    		string[] enumFields = new string[] { name + "_1", name + "_2" };
-    		EnumTC tc = new EnumTC(repId,
-    		                       name,
-    		                       enumFields);
-    		
-    		Type res = m_gen.CreateOrGetType(typeName, tc);
-    		Assert.NotNull(res);
-            Assert.AreEqual("type name", typeName, res.FullName);
-    		Assert.AreEqual("rep id", repId, Repository.GetRepositoryID(res));
-    		string[] genEnumNames = Enum.GetNames(res);
+    public class TypeFromTypeCodeGeneratorEnumTypeTest
+    {
+        private TypeFromTypeCodeRuntimeGenerator m_gen;
+
+        [SetUp]
+        public void SetUp()
+        {
+            m_gen = TypeFromTypeCodeRuntimeGenerator.GetSingleton();
+        }
+
+        [Test]
+        public void TestGenerate()
+        {
+            string name = "TestEnumGenForTypeCodeType";
+            string typeName = "Ch.Elca.Iiop.Tests." + name;
+            string repId = "IDL:Ch/Elca/Iiop/Tests/TestEnumGenForTypeCodeType:1.0";
+            string[] enumFields = new string[] { name + "_1", name + "_2" };
+            EnumTC tc = new EnumTC(repId,
+                                   name,
+                                   enumFields);
+
+            Type res = m_gen.CreateOrGetType(typeName, tc);
+            Assert.NotNull(res);
+            Assert.AreEqual(typeName, res.FullName, "type name");
+            Assert.AreEqual(repId, Repository.GetRepositoryID(res), "rep id");
+            string[] genEnumNames = Enum.GetNames(res);
             Assert.AreEqual(enumFields.Length, genEnumNames.Length, "nr of enum entries");
-    		Assert.AreEqual("enum entry 1", enumFields[0], genEnumNames[0]);
-    		Assert.AreEqual("enum entry 2", enumFields[1], genEnumNames[1]);
+            Assert.AreEqual(enumFields[0], genEnumNames[0], "enum entry 1");
+            Assert.AreEqual(enumFields[1], genEnumNames[1], "enum entry 2");
             Assert.IsTrue(res.IsSerializable, "Serializable");
-    	}        
-    	        
-    	[Test]
-    	public void TestGenerateSpecialNameRepId() {
-    		string name = "TestEnumGenForTypeCodeType3";
-    		string typeName = "Ch.Elca.Iiop.Tests." + name;
-    		string repId = "IDL:Ch/Elca/Iiop/Tests/Special_TestEnumGenForTypeCodeType3:1.0";    		
-    		EnumTC tc = new EnumTC(repId,
-    		                       name,
-    		                       new string[] { name + "_1", name + "_2" });
-    		
-    		Type res = m_gen.CreateOrGetType(typeName, tc);
-    		Assert.NotNull(res);
-            Assert.AreEqual("type name", typeName, res.FullName);
-    		Assert.AreEqual("rep id", repId, Repository.GetRepositoryID(res));    	    
-    	    
-    	}
-        
-        
+        }
+
+        [Test]
+        public void TestGenerateSpecialNameRepId()
+        {
+            string name = "TestEnumGenForTypeCodeType3";
+            string typeName = "Ch.Elca.Iiop.Tests." + name;
+            string repId = "IDL:Ch/Elca/Iiop/Tests/Special_TestEnumGenForTypeCodeType3:1.0";
+            EnumTC tc = new EnumTC(repId,
+                                   name,
+                                   new string[] { name + "_1", name + "_2" });
+
+            Type res = m_gen.CreateOrGetType(typeName, tc);
+            Assert.NotNull(res);
+            Assert.AreEqual(typeName, res.FullName, "type name");
+            Assert.AreEqual(repId, Repository.GetRepositoryID(res), "rep id");
+        }
+
     }
-    
-    
+
+
     /// <summary>
     /// Unit-tests for testing type from typecode code generation for struct types.
     /// </summary>
     [TestFixture]
-    public class TypeFromTypeCodeGeneratorStructTypeTest {
-    	
-    	private TypeFromTypeCodeRuntimeGenerator m_gen;
-    	
-    	[SetUp]
-    	public void SetUp() {
-    		m_gen = TypeFromTypeCodeRuntimeGenerator.GetSingleton();
-    	}
-    	
-    	[Test]
-    	public void TestGenerate() {
-    		string name = "TestStructGenForTypeCodeType";
-    		string typeName = "Ch.Elca.Iiop.Tests." + name;
-    		string repId = "IDL:Ch/Elca/Iiop/Tests/TestStructGenForTypeCodeType:1.0";
-    		StructMember m1 = new StructMember("M1", new LongTC());
-    		StructTC tc = new StructTC(repId,
-    		                           name, new StructMember[] {
-    		                               m1 });
-    		Type res = m_gen.CreateOrGetType(typeName, tc);
-    		Assert.NotNull(res);
-            Assert.AreEqual("type name", typeName, res.FullName);
-    		Assert.AreEqual("rep id", repId, Repository.GetRepositoryID(res));
-    		Assert.NotNull(res.GetField(m1.name,
+    public class TypeFromTypeCodeGeneratorStructTypeTest
+    {
+        private TypeFromTypeCodeRuntimeGenerator m_gen;
+
+        [SetUp]
+        public void SetUp()
+        {
+            m_gen = TypeFromTypeCodeRuntimeGenerator.GetSingleton();
+        }
+
+        [Test]
+        public void TestGenerate()
+        {
+            string name = "TestStructGenForTypeCodeType";
+            string typeName = "Ch.Elca.Iiop.Tests." + name;
+            string repId = "IDL:Ch/Elca/Iiop/Tests/TestStructGenForTypeCodeType:1.0";
+            StructMember m1 = new StructMember("M1", new LongTC());
+            StructTC tc = new StructTC(repId,
+                                       name, new StructMember[] {
+                                       m1 });
+            Type res = m_gen.CreateOrGetType(typeName, tc);
+            Assert.NotNull(res);
+            Assert.AreEqual(typeName, res.FullName, "type name");
+            Assert.AreEqual(repId, Repository.GetRepositoryID(res), "rep id");
+            Assert.NotNull(res.GetField(m1.name,
                                                  BindingFlags.Public | BindingFlags.Instance), "field M1");
             Assert.IsTrue(res.IsSerializable, "Serializable");
-    	}
-    	    	
-    	[Test]
-    	public void TestGenerateSpecialNameRepId() {
-    		string name = "TestStructGenForTypeCodeType3";
-    		string typeName = "Ch.Elca.Iiop.Tests." + name;
-    		string repId = "IDL:Ch/Elca/Iiop/Tests/Special_TestStructGenForTypeCodeType3:1.0";
-    		StructTC tc = new StructTC(repId,
-    		                           name, new StructMember[] {
-    		                               new StructMember("M1", new LongTC()) });
-    		Type res = m_gen.CreateOrGetType(typeName, tc);
-    		Assert.NotNull(res);
-            Assert.AreEqual("type name", typeName, res.FullName);
-    		Assert.AreEqual("rep id", repId, Repository.GetRepositoryID(res));    	    
-    	}
-    	
-    	
-    	
+        }
+
+        [Test]
+        public void TestGenerateSpecialNameRepId()
+        {
+            string name = "TestStructGenForTypeCodeType3";
+            string typeName = "Ch.Elca.Iiop.Tests." + name;
+            string repId = "IDL:Ch/Elca/Iiop/Tests/Special_TestStructGenForTypeCodeType3:1.0";
+            StructTC tc = new StructTC(repId,
+                                       name, new StructMember[] {
+                                       new StructMember("M1", new LongTC()) });
+            Type res = m_gen.CreateOrGetType(typeName, tc);
+            Assert.NotNull(res);
+            Assert.AreEqual(typeName, res.FullName, "type name");
+            Assert.AreEqual(repId, Repository.GetRepositoryID(res), "rep id");
+        }
+
     }
-    
-    
-    
+
+
     /// <summary>
     /// Unit-tests for testing type from typecode code generation for union types.
     /// </summary>
     [TestFixture]
-    public class TypeFromTypeCodeGeneratorUnionTypeTest {
-    	
-    	private TypeFromTypeCodeRuntimeGenerator m_gen;
-    	
-    	[SetUp]
-    	public void SetUp() {
-    		m_gen = TypeFromTypeCodeRuntimeGenerator.GetSingleton();
-    	}
-    	
-    	[Test]
-    	public void TestGenerate() {
-    		string name = "TestUnionGenForTypeCodeType";
-    		string typeName = "Ch.Elca.Iiop.Tests." + name;
-    		string repId = "IDL:Ch/Elca/Iiop/Tests/TestUnionGenForTypeCodeType:1.0";
-    		
-    		UnionSwitchCase s1 = new UnionSwitchCase((int)0, "val_0", new LongTC());
-    		UnionSwitchCase s2 = new UnionSwitchCase((int)1, "val_1", new FloatTC());
-    		TypeCodeImpl discrTC = new LongTC();
-    		UnionTC tc = new UnionTC(repId, name, discrTC, 0,
-    		                         new UnionSwitchCase[] { s1, s2 });
-    		Type res = m_gen.CreateOrGetType(typeName, tc);
-    		Assert.NotNull(res);
-            Assert.AreEqual("type name", typeName, res.FullName);
-    		Assert.AreEqual("rep id", repId, Repository.GetRepositoryID(res));
-    		
-    		MethodInfo getFieldForDiscrMethod = 
-    		    res.GetMethod(UnionGenerationHelper.GET_FIELD_FOR_DISCR_METHOD, BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic);
+    public class TypeFromTypeCodeGeneratorUnionTypeTest
+    {
+        private TypeFromTypeCodeRuntimeGenerator m_gen;
+
+        [SetUp]
+        public void SetUp()
+        {
+            m_gen = TypeFromTypeCodeRuntimeGenerator.GetSingleton();
+        }
+
+        [Test]
+        public void TestGenerate()
+        {
+            string name = "TestUnionGenForTypeCodeType";
+            string typeName = "Ch.Elca.Iiop.Tests." + name;
+            string repId = "IDL:Ch/Elca/Iiop/Tests/TestUnionGenForTypeCodeType:1.0";
+
+            UnionSwitchCase s1 = new UnionSwitchCase((int)0, "val_0", new LongTC());
+            UnionSwitchCase s2 = new UnionSwitchCase((int)1, "val_1", new FloatTC());
+            TypeCodeImpl discrTC = new LongTC();
+            UnionTC tc = new UnionTC(repId, name, discrTC, 0,
+                                     new UnionSwitchCase[] { s1, s2 });
+            Type res = m_gen.CreateOrGetType(typeName, tc);
+            Assert.NotNull(res);
+            Assert.AreEqual(typeName, res.FullName, "type name");
+            Assert.AreEqual(repId, Repository.GetRepositoryID(res), "rep id");
+
+            MethodInfo getFieldForDiscrMethod =
+                res.GetMethod(UnionGenerationHelper.GET_FIELD_FOR_DISCR_METHOD, BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic);
             Assert.NotNull(getFieldForDiscrMethod, "get field for Discr method");
-    		FieldInfo fieldForDiscr1 = (FieldInfo)
-        		getFieldForDiscrMethod.Invoke(null, new object[] { s1.DiscriminatorValue });
-    		FieldInfo fieldForDiscr2 = (FieldInfo)
-        		getFieldForDiscrMethod.Invoke(null, new object[] { s2.DiscriminatorValue });
+            FieldInfo fieldForDiscr1 = (FieldInfo)
+                getFieldForDiscrMethod.Invoke(null, new object[] { s1.DiscriminatorValue });
+            FieldInfo fieldForDiscr2 = (FieldInfo)
+                getFieldForDiscrMethod.Invoke(null, new object[] { s2.DiscriminatorValue });
             Assert.NotNull(fieldForDiscr1, "fieldForDiscr1");
             Assert.NotNull(fieldForDiscr2, "fieldForDiscr2");
-    		Assert.AreEqual(((TypeCodeImpl)s1.ElementType).GetClsForTypeCode(), 
-    		                       fieldForDiscr1.FieldType,"fieldForDiscr1 Type");
-    		Assert.AreEqual( 
-    		                       ((TypeCodeImpl)s2.ElementType).GetClsForTypeCode(),
+            Assert.AreEqual(((TypeCodeImpl)s1.ElementType).GetClsForTypeCode(),
+                                   fieldForDiscr1.FieldType, "fieldForDiscr1 Type");
+            Assert.AreEqual(
+                                   ((TypeCodeImpl)s2.ElementType).GetClsForTypeCode(),
                                    fieldForDiscr2.FieldType, "fieldForDiscr2 Type");
-    		PropertyInfo discrProperty = res.GetProperty(UnionGenerationHelper.DISCR_PROPERTY_NAME,
-    		                                             BindingFlags.Public | BindingFlags.Instance);
+            PropertyInfo discrProperty = res.GetProperty(UnionGenerationHelper.DISCR_PROPERTY_NAME,
+                                                         BindingFlags.Public | BindingFlags.Instance);
             Assert.NotNull(discrProperty, "discr property");
-    		Assert.AreEqual(discrTC.GetClsForTypeCode(),
+            Assert.AreEqual(discrTC.GetClsForTypeCode(),
                                    discrProperty.PropertyType, "discr property type");
-    		Assert.IsTrue(res.IsSerializable,"Serializable");
-    	}
-    	
-    	[Test]
-    	public void TestGenerateSpecialNameRepId() {
-    		string name = "TestUnionGenForTypeCodeType3";
-    		string typeName = "Ch.Elca.Iiop.Tests." + name;
-    		string repId = "IDL:Ch/Elca/Iiop/Tests/Special_TestUnionGenForTypeCodeType3:1.0";
-    		    		
-    		UnionSwitchCase s1 = new UnionSwitchCase((int)0, "val_0", new LongTC());
-    		UnionSwitchCase s2 = new UnionSwitchCase((int)1, "val_1", new FloatTC());
-    		TypeCodeImpl discrTC = new LongTC();
-    		UnionTC tc = new UnionTC(repId, name, discrTC, 0,
-    		                         new UnionSwitchCase[] { s1, s2 });
-    		Type res = m_gen.CreateOrGetType(typeName, tc);
-    		Assert.NotNull(res);
-            Assert.AreEqual("type name", typeName, res.FullName);
-    		Assert.AreEqual("rep id", repId, Repository.GetRepositoryID(res));
-    	}
-    	
-    }
-    
+            Assert.IsTrue(res.IsSerializable, "Serializable");
+        }
 
-    
+        [Test]
+        public void TestGenerateSpecialNameRepId()
+        {
+            string name = "TestUnionGenForTypeCodeType3";
+            string typeName = "Ch.Elca.Iiop.Tests." + name;
+            string repId = "IDL:Ch/Elca/Iiop/Tests/Special_TestUnionGenForTypeCodeType3:1.0";
+
+            UnionSwitchCase s1 = new UnionSwitchCase((int)0, "val_0", new LongTC());
+            UnionSwitchCase s2 = new UnionSwitchCase((int)1, "val_1", new FloatTC());
+            TypeCodeImpl discrTC = new LongTC();
+            UnionTC tc = new UnionTC(repId, name, discrTC, 0,
+                                     new UnionSwitchCase[] { s1, s2 });
+            Type res = m_gen.CreateOrGetType(typeName, tc);
+            Assert.NotNull(res);
+            Assert.AreEqual(typeName, res.FullName, "type name");
+            Assert.AreEqual(repId, Repository.GetRepositoryID(res), "rep id");
+        }
+
+    }
+
 }
 
 #endif

@@ -388,7 +388,7 @@ namespace Ch.Elca.Iiop.Tests
         {
             byte[] encoded = new byte[] { 0, 0, 0, 8, 0, 84, 0, 101, 0, 115, 0, 116 }; // Test
             CdrInputStream cdrStream = CreateInputStream(encoded, false);
-            Assert.AreEqual("wrongly decoded", "Test", cdrStream.ReadWString());
+            Assert.AreEqual("Test", cdrStream.ReadWString(), "wrongly decoded");
         }
 
         /// <summary>
@@ -401,7 +401,7 @@ namespace Ch.Elca.Iiop.Tests
         {
             byte[] encoded = new byte[] { 8, 0, 0, 0, 0, 84, 0, 101, 0, 115, 0, 116 }; // Test
             CdrInputStream cdrStream = CreateInputStream(encoded, true);
-            Assert.AreEqual("wrongly decoded", "Test", cdrStream.ReadWString());
+            Assert.AreEqual("Test", cdrStream.ReadWString(), "wrongly decoded");
         }
 
         /// <summary>
@@ -414,7 +414,7 @@ namespace Ch.Elca.Iiop.Tests
         {
             byte[] encoded = new byte[] { 0, 0, 0, 10, 0xFF, 0xFE, 84, 0, 101, 0, 115, 0, 116, 0 }; // Test
             CdrInputStream cdrStream = CreateInputStream(encoded, false);
-            Assert.AreEqual("wrongly decoded", "Test", cdrStream.ReadWString());
+            Assert.AreEqual("Test", cdrStream.ReadWString(), "wrongly decoded");
         }
 
         /// <summary>
@@ -427,7 +427,7 @@ namespace Ch.Elca.Iiop.Tests
         {
             byte[] encoded = new byte[] { 10, 0, 0, 0, 0xFF, 0xFE, 84, 0, 101, 0, 115, 0, 116, 0 }; // Test
             CdrInputStream cdrStream = CreateInputStream(encoded, true);
-            Assert.AreEqual("wrongly decoded", "Test", cdrStream.ReadWString());
+            Assert.AreEqual("Test", cdrStream.ReadWString(), "wrongly decoded");
         }
 
         /// <summary>
@@ -440,7 +440,7 @@ namespace Ch.Elca.Iiop.Tests
         {
             byte[] encoded = new byte[] { 0, 0, 0, 10, 0xFE, 0xFF, 0, 84, 0, 101, 0, 115, 0, 116 }; // Test
             CdrInputStream cdrStream = CreateInputStream(encoded, false);
-            Assert.AreEqual("wrongly decoded", "Test", cdrStream.ReadWString());
+            Assert.AreEqual("Test", cdrStream.ReadWString(), "wrongly decoded");
         }
 
         /// <summary>
@@ -453,7 +453,7 @@ namespace Ch.Elca.Iiop.Tests
         {
             byte[] encoded = new byte[] { 10, 0, 0, 0, 0xFE, 0xFF, 0, 84, 0, 101, 0, 115, 0, 116 }; // Test
             CdrInputStream cdrStream = CreateInputStream(encoded, true);
-            Assert.AreEqual("wrongly decoded", "Test", cdrStream.ReadWString());
+            Assert.AreEqual("Test", cdrStream.ReadWString(), "wrongly decoded");
         }
 
         /// <summary>
@@ -529,7 +529,7 @@ namespace Ch.Elca.Iiop.Tests
         {
             byte[] encoded = new byte[] { 0, 0, 0, 5, 0, 84, 0, 101, 0, 115, 0, 116, 0, 0 }; // Test
             CdrInputStream cdrStream = CreateInputStream(encoded, false);
-            Assert.AreEqual("wrongly decoded", "Test", cdrStream.ReadWString());
+            Assert.AreEqual("Test", cdrStream.ReadWString(), "wrongly decoded");
         }
 
         /// <summary>
@@ -542,7 +542,7 @@ namespace Ch.Elca.Iiop.Tests
         {
             byte[] encoded = new byte[] { 5, 0, 0, 0, 0, 84, 0, 101, 0, 115, 0, 116, 0, 0 }; // Test
             CdrInputStream cdrStream = CreateInputStream(encoded, true);
-            Assert.AreEqual("wrongly decoded", "Test", cdrStream.ReadWString());
+            Assert.AreEqual("Test", cdrStream.ReadWString(), "wrongly decoded");
         }
 
         /// <summary>
@@ -555,7 +555,7 @@ namespace Ch.Elca.Iiop.Tests
         {
             byte[] encoded = new byte[] { 0, 0, 0, 6, 0xFF, 0xFE, 84, 0, 101, 0, 115, 0, 116, 0, 0, 0 }; // Test
             CdrInputStream cdrStream = CreateInputStream(encoded, false);
-            Assert.AreEqual("wrongly decoded", "Test", cdrStream.ReadWString());
+            Assert.AreEqual("Test", cdrStream.ReadWString(), "wrongly decoded");
         }
 
         /// <summary>
@@ -568,7 +568,7 @@ namespace Ch.Elca.Iiop.Tests
         {
             byte[] encoded = new byte[] { 6, 0, 0, 0, 0xFF, 0xFE, 84, 0, 101, 0, 115, 0, 116, 0, 0, 0 }; // Test
             CdrInputStream cdrStream = CreateInputStream(encoded, true);
-            Assert.AreEqual("wrongly decoded", "Test", cdrStream.ReadWString());
+            Assert.AreEqual("Test", cdrStream.ReadWString(), "wrongly decoded");
         }
 
         /// <summary>
@@ -581,7 +581,7 @@ namespace Ch.Elca.Iiop.Tests
         {
             byte[] encoded = new byte[] { 0, 0, 0, 6, 0xFE, 0xFF, 0, 84, 0, 101, 0, 115, 0, 116, 0, 0 }; // Test
             CdrInputStream cdrStream = CreateInputStream(encoded, false);
-            Assert.AreEqual("wrongly decoded", "Test", cdrStream.ReadWString());
+            Assert.AreEqual("Test", cdrStream.ReadWString(), "wrongly decoded");
         }
 
         /// <summary>
@@ -594,7 +594,7 @@ namespace Ch.Elca.Iiop.Tests
         {
             byte[] encoded = new byte[] { 6, 0, 0, 0, 0xFE, 0xFF, 0, 84, 0, 101, 0, 115, 0, 116, 0, 0 }; // Test
             CdrInputStream cdrStream = CreateInputStream(encoded, true);
-            Assert.AreEqual("wrongly decoded", "Test", cdrStream.ReadWString());
+            Assert.AreEqual("Test", cdrStream.ReadWString(), "wrongly decoded");
         }
 
         /// <summary>
@@ -635,9 +635,7 @@ namespace Ch.Elca.Iiop.Tests
             }
         }
 
-
     }
-
 
 }
 

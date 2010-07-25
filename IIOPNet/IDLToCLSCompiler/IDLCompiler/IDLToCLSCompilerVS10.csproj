@@ -1,0 +1,262 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="4.0">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{3874C0C0-0AFF-4D8F-BFEB-EDB6499AEA8F}</ProjectGuid>
+    <RootNamespace>IDLToCLSCompiler</RootNamespace>
+    <AssemblyName>IDLToCLSCompiler</AssemblyName>
+    <OutputType>Exe</OutputType>
+    <WarningLevel>4</WarningLevel>
+    <NoStdLib>False</NoStdLib>
+    <NoConfig>False</NoConfig>
+    <RunPostBuildEvent>OnSuccessfulBuild</RunPostBuildEvent>
+    <TargetFrameworkVersion>v2.0</TargetFrameworkVersion>
+    <RegisterForComInterop>False</RegisterForComInterop>
+    <GenerateSerializationAssemblies>Auto</GenerateSerializationAssemblies>
+    <BaseAddress>4194304</BaseAddress>
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <FileAlignment>4096</FileAlignment>
+    <FileUpgradeFlags>
+    </FileUpgradeFlags>
+    <OldToolsVersion>3.5</OldToolsVersion>
+    <UpgradeBackupLocation>
+    </UpgradeBackupLocation>
+    <IsWebBootstrapper>false</IsWebBootstrapper>
+    <PublishUrl>publish\</PublishUrl>
+    <Install>true</Install>
+    <InstallFrom>Disk</InstallFrom>
+    <UpdateEnabled>false</UpdateEnabled>
+    <UpdateMode>Foreground</UpdateMode>
+    <UpdateInterval>7</UpdateInterval>
+    <UpdateIntervalUnits>Days</UpdateIntervalUnits>
+    <UpdatePeriodically>false</UpdatePeriodically>
+    <UpdateRequired>false</UpdateRequired>
+    <MapFileExtensions>true</MapFileExtensions>
+    <ApplicationRevision>0</ApplicationRevision>
+    <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
+    <UseApplicationTrust>false</UseApplicationTrust>
+    <BootstrapperEnabled>true</BootstrapperEnabled>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <Optimize>False</Optimize>
+    <AllowUnsafeBlocks>False</AllowUnsafeBlocks>
+    <CheckForOverflowUnderflow>True</CheckForOverflowUnderflow>
+    <DefineConstants>DISABLE_STRONG_NAME UnitTest</DefineConstants>
+    <OutputPath>bin\Debug\</OutputPath>
+    <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
+    <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <Optimize>True</Optimize>
+    <AllowUnsafeBlocks>False</AllowUnsafeBlocks>
+    <CheckForOverflowUnderflow>True</CheckForOverflowUnderflow>
+    <OutputPath>bin\Release\</OutputPath>
+    <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
+    <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
+    <DefineConstants>DISABLE_STRONG_NAME</DefineConstants>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
+    <DebugType>Full</DebugType>
+    <DebugSymbols>true</DebugSymbols>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
+    <DebugType>Full</DebugType>
+    <DebugSymbols>True</DebugSymbols>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.Xml" />
+    <Reference Include="nunit.framework" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="TypesInAssembliesManager.cs" />
+    <Compile Include="ASTadd_expr.cs" />
+    <Compile Include="ASTand_expr.cs" />
+    <Compile Include="ASTany_type.cs" />
+    <Compile Include="ASTarray_declarator.cs" />
+    <Compile Include="ASTattr_dcl.cs" />
+    <Compile Include="ASTbase_type_spec.cs" />
+    <Compile Include="ASTboolean_type.cs" />
+    <Compile Include="ASTcase_label.cs" />
+    <Compile Include="ASTcasex.cs" />
+    <Compile Include="ASTchar_type.cs" />
+    <Compile Include="ASTcomplex_declarator.cs" />
+    <Compile Include="ASTconst_dcl.cs" />
+    <Compile Include="ASTconst_exp.cs" />
+    <Compile Include="ASTconst_type.cs" />
+    <Compile Include="ASTconstr_type_spec.cs" />
+    <Compile Include="ASTcontext_expr.cs" />
+    <Compile Include="ASTdeclarator.cs" />
+    <Compile Include="ASTdeclarators.cs" />
+    <Compile Include="ASTdefinition.cs" />
+    <Compile Include="ASTelement_spec.cs" />
+    <Compile Include="ASTenum_type.cs" />
+    <Compile Include="ASTenumerator.cs" />
+    <Compile Include="ASTexcept_dcl.cs" />
+    <Compile Include="ASTexport.cs" />
+    <Compile Include="ASTfixed_array_size.cs" />
+    <Compile Include="ASTfixed_pt_const_type.cs" />
+    <Compile Include="ASTfixed_pt_type.cs" />
+    <Compile Include="ASTfloating_pt_type.cs" />
+    <Compile Include="ASTfloating_pt_type_double.cs" />
+    <Compile Include="ASTfloating_pt_type_float.cs" />
+    <Compile Include="ASTfloating_pt_type_longdouble.cs" />
+    <Compile Include="ASTforward_dcl.cs" />
+    <Compile Include="ASTinit_decl.cs" />
+    <Compile Include="ASTinit_param_attribute.cs" />
+    <Compile Include="ASTinit_param_decl.cs" />
+    <Compile Include="ASTinit_param_delcs.cs" />
+    <Compile Include="ASTinteger_type.cs" />
+    <Compile Include="ASTinterface_body.cs" />
+    <Compile Include="ASTinterface_dcl.cs" />
+    <Compile Include="ASTinterface_header.cs" />
+    <Compile Include="ASTinterface_inheritance_spec.cs" />
+    <Compile Include="ASTinterface_name.cs" />
+    <Compile Include="ASTinterfacex.cs" />
+    <Compile Include="ASTliteral.cs" />
+    <Compile Include="ASTmember.cs" />
+    <Compile Include="ASTmember_list.cs" />
+    <Compile Include="ASTmodule.cs" />
+    <Compile Include="ASTmult_expr.cs" />
+    <Compile Include="ASTobject_type.cs" />
+    <Compile Include="ASToctet_type.cs" />
+    <Compile Include="ASTop_dcl.cs" />
+    <Compile Include="ASTop_type_spec.cs" />
+    <Compile Include="ASTor_expr.cs" />
+    <Compile Include="ASTparam_attribute.cs" />
+    <Compile Include="ASTparam_dcl.cs" />
+    <Compile Include="ASTparam_type_spec.cs" />
+    <Compile Include="ASTparameter_dcls.cs" />
+    <Compile Include="ASTpositive_int_const.cs" />
+    <Compile Include="ASTraises_expr.cs" />
+    <Compile Include="ASTscoped_name.cs" />
+    <Compile Include="ASTsequence_type.cs" />
+    <Compile Include="ASTshift_expr.cs" />
+    <Compile Include="ASTsigned_int.cs" />
+    <Compile Include="ASTsigned_long_int.cs" />
+    <Compile Include="ASTsigned_longlong_int.cs" />
+    <Compile Include="ASTsigned_short_int.cs" />
+    <Compile Include="ASTsimple_declarator.cs" />
+    <Compile Include="ASTsimple_type_spec.cs" />
+    <Compile Include="ASTspecification.cs" />
+    <Compile Include="ASTstate_member.cs" />
+    <Compile Include="ASTstring_type.cs" />
+    <Compile Include="ASTstruct_type.cs" />
+    <Compile Include="ASTswitch_body.cs" />
+    <Compile Include="ASTswitch_type_spec.cs" />
+    <Compile Include="ASTtemplate_type_spec.cs" />
+    <Compile Include="ASTtype_dcl.cs" />
+    <Compile Include="ASTtype_declarator.cs" />
+    <Compile Include="ASTtype_spec.cs" />
+    <Compile Include="ASTunary_expr.cs" />
+    <Compile Include="ASTunion_type.cs" />
+    <Compile Include="ASTunsigned_int.cs" />
+    <Compile Include="ASTunsigned_long_int.cs" />
+    <Compile Include="ASTunsigned_longlong_int.cs" />
+    <Compile Include="ASTunsigned_short_int.cs" />
+    <Compile Include="ASTvalue.cs" />
+    <Compile Include="ASTvalue_abs_decl.cs" />
+    <Compile Include="ASTvalue_base_inheritance_spec.cs" />
+    <Compile Include="ASTvalue_base_type.cs" />
+    <Compile Include="ASTvalue_box_decl.cs" />
+    <Compile Include="ASTvalue_decl.cs" />
+    <Compile Include="ASTvalue_element.cs" />
+    <Compile Include="ASTvalue_forward_decl.cs" />
+    <Compile Include="ASTvalue_header.cs" />
+    <Compile Include="ASTvalue_name.cs" />
+    <Compile Include="ASTvalue_support_inheritance_spec.cs" />
+    <Compile Include="ASTwide_char_type.cs" />
+    <Compile Include="ASTwide_string_type.cs" />
+    <Compile Include="ASTxor_expr.cs" />
+    <Compile Include="Error.cs" />
+    <Compile Include="IDLParser.cs" />
+    <Compile Include="IDLParserConstants.cs" />
+    <Compile Include="IDLParserTokenManager.cs" />
+    <Compile Include="IDLParserTreeConstants.cs" />
+    <Compile Include="IDLParserVisitor.cs" />
+    <Compile Include="IDLToCLS.cs" />
+    <Compile Include="IDLToCLSCommandLine.cs" />
+    <Compile Include="InternalCompilerException.cs" />
+    <Compile Include="InvalidIdlException.cs" />
+    <Compile Include="JJTIDLParserState.cs" />
+    <Compile Include="MappingPlugin.cs" />
+    <Compile Include="MetadataGenerator.cs" />
+    <Compile Include="Node.cs" />
+    <Compile Include="ParseException.cs" />
+    <Compile Include="PragmaScope.cs" />
+    <Compile Include="Scope.cs" />
+    <Compile Include="ScopeException.cs" />
+    <Compile Include="SimpleNode.cs" />
+    <Compile Include="SimpleNodeWithIdent.cs" />
+    <Compile Include="Symbol.cs" />
+    <Compile Include="SymbolDefinition.cs" />
+    <Compile Include="SymbolFwdDecl.cs" />
+    <Compile Include="SymbolTable.cs" />
+    <Compile Include="SymbolTypedef.cs" />
+    <Compile Include="SymbolValue.cs" />
+    <Compile Include="Tests.cs" />
+    <Compile Include="Token.cs" />
+    <Compile Include="TokenMgrError.cs" />
+    <Compile Include="TypeManager.cs" />
+    <Compile Include="AssemblyInfo.cs" />
+    <Compile Include="SimpleCharStream.cs" />
+    <Compile Include="Literal.cs" />
+    <Compile Include="CompileTimeTypeContainer.cs" />
+    <Compile Include="ValueTypeImplGenerator.cs" />
+    <Compile Include="StringToIntConverter.cs" />
+    <Compile Include="ExpressionTests.cs" />
+    <Compile Include="CompilerTestsBase.cs" />
+    <Compile Include="ASTprimary_expr.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\IIOPChannel\IIOPChannelVS10.csproj">
+      <Project>{06B8BCFF-7887-4DCE-B451-0DCA831D4A2D}</Project>
+      <Name>IIOPChannel</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\IDLPreprocessor\IDLPreprocessorVS10.csproj">
+      <Project>{76FDDBCE-9A94-48F4-9502-067736AC0533}</Project>
+      <Name>IDLPreprocessor</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <BootstrapperPackage Include="Microsoft.Net.Client.3.5">
+      <Visible>False</Visible>
+      <ProductName>.NET Framework 3.5 SP1 Client Profile</ProductName>
+      <Install>false</Install>
+    </BootstrapperPackage>
+    <BootstrapperPackage Include="Microsoft.Net.Framework.2.0">
+      <Visible>False</Visible>
+      <ProductName>.NET Framework 2.0 %28x86%29</ProductName>
+      <Install>false</Install>
+    </BootstrapperPackage>
+    <BootstrapperPackage Include="Microsoft.Net.Framework.3.0">
+      <Visible>False</Visible>
+      <ProductName>.NET Framework 3.0 %28x86%29</ProductName>
+      <Install>false</Install>
+    </BootstrapperPackage>
+    <BootstrapperPackage Include="Microsoft.Net.Framework.3.5">
+      <Visible>False</Visible>
+      <ProductName>.NET Framework 3.5</ProductName>
+      <Install>true</Install>
+    </BootstrapperPackage>
+    <BootstrapperPackage Include="Microsoft.Net.Framework.3.5.SP1">
+      <Visible>False</Visible>
+      <ProductName>.NET Framework 3.5 SP1</ProductName>
+      <Install>false</Install>
+    </BootstrapperPackage>
+    <BootstrapperPackage Include="Microsoft.Windows.Installer.3.1">
+      <Visible>False</Visible>
+      <ProductName>Windows Installer 3.1</ProductName>
+      <Install>true</Install>
+    </BootstrapperPackage>
+  </ItemGroup>
+  <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
+  <PropertyGroup>
+    <PreBuildEvent>
+    </PreBuildEvent>
+    <PostBuildEvent>
+    </PostBuildEvent>
+  </PropertyGroup>
+</Project>

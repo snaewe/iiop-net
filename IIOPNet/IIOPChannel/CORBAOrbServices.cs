@@ -936,7 +936,7 @@ namespace Ch.Elca.Iiop.Tests
             TypeCodeImpl aliasedTC = (TypeCodeImpl)m_orb.create_long_tc();
             omg.org.CORBA.TypeCode alias_TC =
                 m_orb.create_alias_tc(aliasRepId, name, aliasedTC);
-            Assert.AreEqual("alias id", aliasRepId, alias_TC.id());
+            Assert.AreEqual(aliasRepId, alias_TC.id(), "alias id");
             Assert.AreEqual(TCKind.tk_alias, alias_TC.kind(), "alias kind");
             Assert.AreEqual(aliasedTC.GetClsForTypeCode(),
                                    ((TypeCodeImpl)alias_TC).GetClsForTypeCode(), "alias cls type");
@@ -963,7 +963,7 @@ namespace Ch.Elca.Iiop.Tests
             omg.org.CORBA.TypeCode tc =
                 m_orb.create_struct_tc(repId, name,
                                        new StructMember[] { m1 });
-            Assert.AreEqual("id", repId, tc.id());
+            Assert.AreEqual(repId, tc.id(), "id");
             Assert.AreEqual(TCKind.tk_struct, tc.kind(), "king");
             Assert.AreEqual(1, tc.member_count(), "nr of members");
             Assert.AreEqual(m1.name, tc.member_name(0), "member m1 name");
@@ -980,7 +980,7 @@ namespace Ch.Elca.Iiop.Tests
             omg.org.CORBA.TypeCode tc =
                 m_orb.create_value_tc(repId, name, 0, m_orb.create_null_tc(),
                                       new ValueMember[] { m1 });
-            Assert.AreEqual("id", repId, tc.id());
+            Assert.AreEqual(repId, tc.id(), "id");
             Assert.AreEqual(TCKind.tk_value, tc.kind(), "king");
             Assert.AreEqual(1, tc.member_count(), "nr of members");
             Assert.AreEqual(m1.name, tc.member_name(0), "member m1 name");
@@ -997,7 +997,7 @@ namespace Ch.Elca.Iiop.Tests
             omg.org.CORBA.TypeCode tc =
                 m_orb.create_exception_tc(repId, name,
                                        new StructMember[] { m1 });
-            Assert.AreEqual("id", repId, tc.id());
+            Assert.AreEqual(repId, tc.id(), "id");
             Assert.AreEqual(TCKind.tk_except, tc.kind(), "king");
             Assert.AreEqual(1, tc.member_count(), "nr of members");
             Assert.AreEqual(m1.name, tc.member_name(0), "member m1 name");

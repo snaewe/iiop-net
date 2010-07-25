@@ -348,33 +348,36 @@ namespace Ch.Elca.Iiop.Tests {
     /// Unit-test for class Corbaloc
     /// </summary>
     [TestFixture]
-    public class IioplocTest {
-        
+    public class IioplocTest
+    {
         private object m_defaultCodeSetTaggedComponent;
         private Codec m_codec;
-        
-        public IioplocTest() {
+
+        public IioplocTest()
+        {
         }
 
-    	[SetUp]
-    	public void SetUp() {
-    	    SerializerFactory serFactory =
-    	        new SerializerFactory();
+        [SetUp]
+        public void SetUp()
+        {
+            SerializerFactory serFactory =
+                new SerializerFactory();
             CodecFactory codecFactory =
                 new CodecFactoryImpl(serFactory);
-            m_codec = 
+            m_codec =
                 codecFactory.create_codec(
-                    new omg.org.IOP.Encoding(ENCODING_CDR_ENCAPS.ConstVal, 1, 2));            
-            IiopUrlUtil iiopUrlUtil = 
+                    new omg.org.IOP.Encoding(ENCODING_CDR_ENCAPS.ConstVal, 1, 2));
+            IiopUrlUtil iiopUrlUtil =
                 IiopUrlUtil.Create(m_codec, new object[] { 
-                    Services.CodeSetService.CreateDefaultCodesetComponent(m_codec)});                        
+                    Services.CodeSetService.CreateDefaultCodesetComponent(m_codec)});
             serFactory.Initalize(new SerializerFactoryConfig(), iiopUrlUtil);
-            m_defaultCodeSetTaggedComponent = 
+            m_defaultCodeSetTaggedComponent =
                 Services.CodeSetService.CreateDefaultCodesetComponent(m_codec);
-    	}        
+        }
         
         [Test]
-        public void TestIiopLoc() {
+        public void TestIiopLoc()
+        {
             string testIiopLoc = "iiop://elca.ch:1234/test";
             IiopLoc parsed = new IiopLoc(testIiopLoc, m_codec,
                                          new object[] { m_defaultCodeSetTaggedComponent });
@@ -397,13 +400,14 @@ namespace Ch.Elca.Iiop.Tests {
             Assert.AreEqual(1, prof.Version.Major);
             Assert.AreEqual(1, prof.Version.Minor);
             Assert.AreEqual("elca.ch", prof.HostName);
-            Assert.AreEqual(1234, prof.Port);            
-        	Assert.IsTrue(parsed.GetProfiles()[0].TaggedComponents.ContainsTaggedComponent(
+            Assert.AreEqual(1234, prof.Port);
+            Assert.IsTrue(parsed.GetProfiles()[0].TaggedComponents.ContainsTaggedComponent(
                                 CodeSetService.SERVICE_ID));
         }
         
         [Test]
-        public void TestIiopSslLoc() {
+        public void TestIiopSslLoc()
+        {
             string testIiopLoc = "iiop-ssl://elca.ch:1234/test";
             IiopLoc parsed = new IiopLoc(testIiopLoc, m_codec,
                                          new object[] { m_defaultCodeSetTaggedComponent });
@@ -426,22 +430,23 @@ namespace Ch.Elca.Iiop.Tests {
             Assert.AreEqual(1, prof.Version.Major);
             Assert.AreEqual(1, prof.Version.Minor);
             Assert.AreEqual("elca.ch", prof.HostName);
-            Assert.AreEqual(0, prof.Port);            
-        	Assert.IsTrue(prof.TaggedComponents.ContainsTaggedComponent(
+            Assert.AreEqual(0, prof.Port);
+            Assert.IsTrue(prof.TaggedComponents.ContainsTaggedComponent(
                                  CodeSetService.SERVICE_ID));
-        	Assert.IsTrue(prof.TaggedComponents.ContainsTaggedComponent(
-                                 TAG_SSL_SEC_TRANS.ConstVal));            
+            Assert.IsTrue(prof.TaggedComponents.ContainsTaggedComponent(
+                                 TAG_SSL_SEC_TRANS.ConstVal));
         }
         
         [Test]
-        public void TestParseUrl() {
+        public void TestParseUrl()
+        {
             string testIiopLoc = "iiop://elca.ch:1234/test";
             IiopLoc parsed = new IiopLoc(testIiopLoc, m_codec,
                                          new object[] { m_defaultCodeSetTaggedComponent });
             string objectUri;
             GiopVersion version;
             Uri channelUri = parsed.ParseUrl(out objectUri, out version);
-            Assert.AreEqual("object uri", "test", objectUri);
+            Assert.AreEqual("test", objectUri, "object uri");
             Assert.AreEqual(1, version.Major, "version major");
             Assert.AreEqual(2, version.Minor, "version minor");
             Assert.AreEqual("iiop1.2://elca.ch:1234/",
@@ -449,21 +454,21 @@ namespace Ch.Elca.Iiop.Tests {
         }
         
         [Test]
-        public void TestParseUrlSsl() {
+        public void TestParseUrlSsl()
+        {
             string testIiopLoc = "iiop-ssl://elca.ch:1234/test";
             IiopLoc parsed = new IiopLoc(testIiopLoc, m_codec, 
                                          new object[] { m_defaultCodeSetTaggedComponent });
             string objectUri;
             GiopVersion version;
             Uri channelUri = parsed.ParseUrl(out objectUri, out version);
-            Assert.AreEqual("object uri", "test", objectUri);
+            Assert.AreEqual("test", objectUri, "object uri");
             Assert.AreEqual(1, version.Major,"version major");
             Assert.AreEqual(2, version.Minor, "version minor");
-            Assert.AreEqual("channel uri", "iiop-ssl1.2://elca.ch:1234/",
-                                   channelUri.AbsoluteUri);
+            Assert.AreEqual("iiop-ssl1.2://elca.ch:1234/",
+                                   channelUri.AbsoluteUri, "channel uri");
         }
 
-        
     }
 
 }

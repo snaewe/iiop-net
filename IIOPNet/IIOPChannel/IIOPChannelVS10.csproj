@@ -1,0 +1,153 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="4.0">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{06B8BCFF-7887-4DCE-B451-0DCA831D4A2D}</ProjectGuid>
+    <TargetFrameworkVersion>v2.0</TargetFrameworkVersion>
+    <AssemblyName>IIOPChannel</AssemblyName>
+    <OutputType>Library</OutputType>
+    <WarningLevel>4</WarningLevel>
+    <NoStdLib>False</NoStdLib>
+    <NoConfig>False</NoConfig>
+    <RunPostBuildEvent>OnSuccessfulBuild</RunPostBuildEvent>
+    <RegisterForComInterop>False</RegisterForComInterop>
+    <GenerateSerializationAssemblies>Auto</GenerateSerializationAssemblies>
+    <BaseAddress>4194304</BaseAddress>
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <FileAlignment>4096</FileAlignment>
+    <FileUpgradeFlags>
+    </FileUpgradeFlags>
+    <OldToolsVersion>3.5</OldToolsVersion>
+    <UpgradeBackupLocation>
+    </UpgradeBackupLocation>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <Optimize>True</Optimize>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <CheckForOverflowUnderflow>false</CheckForOverflowUnderflow>
+    <DefineConstants>DISABLE_STRONG_NAME UnitTest</DefineConstants>
+    <OutputPath>bin\Debug\</OutputPath>
+    <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
+    <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <Optimize>true</Optimize>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <CheckForOverflowUnderflow>false</CheckForOverflowUnderflow>
+    <OutputPath>bin\Release\</OutputPath>
+    <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
+    <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
+    <DefineConstants>DISABLE_STRONG_NAME</DefineConstants>
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugType>none</DebugType>
+    <DebugSymbols>false</DebugSymbols>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
+    <DebugType>Full</DebugType>
+    <DebugSymbols>true</DebugSymbols>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
+    <DebugType>None</DebugType>
+    <DebugSymbols>True</DebugSymbols>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="nunit.framework, Version=2.5.3.9345, Culture=neutral, PublicKeyToken=96d09a1eb7f44a77, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\..\..\..\..\Program Files (x86)\NUnit 2.5.3\bin\net-2.0\framework\nunit.framework.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Xml" />
+    <Reference Include="System.Runtime.Remoting" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="AssemblyCache.cs" />
+    <Compile Include="AssemblyInfo.cs" />
+    <Compile Include="AttributeExtCollection.cs" />
+    <Compile Include="BoxedArrayHelper.cs" />
+    <Compile Include="BoxedValue.cs" />
+    <Compile Include="BoxedValueTypeGenerator.cs" />
+    <Compile Include="CDRStream.cs" />
+    <Compile Include="CdrStreamEndianDepOp.cs" />
+    <Compile Include="ClsToIDLMapper.cs" />
+    <Compile Include="CodeSetConversion.cs" />
+    <Compile Include="CodeSetService.cs" />
+    <Compile Include="Connection.cs" />
+    <Compile Include="ConnectionManager.cs" />
+    <Compile Include="CORBAExceptions.cs" />
+    <Compile Include="CORBAInit.cs" />
+    <Compile Include="CORBAInitService.cs" />
+    <Compile Include="Corbaloc.cs" />
+    <Compile Include="CORBANameService.cs" />
+    <Compile Include="CustomMarshalling.cs" />
+    <Compile Include="FragmentedMsgAssembler.cs" />
+    <Compile Include="GIOPHeader.cs" />
+    <Compile Include="GiopMessageBodySerializer.cs" />
+    <Compile Include="GiopMessageHandler.cs" />
+    <Compile Include="GiopMsgTypes.cs" />
+    <Compile Include="GiopRequestNumberHelper.cs" />
+    <Compile Include="IDLAttributes.cs" />
+    <Compile Include="IDLNaming.cs" />
+    <Compile Include="IIOPChannel.cs" />
+    <Compile Include="IIOPFormatter.cs" />
+    <Compile Include="IIOPTransport.cs" />
+    <Compile Include="IIOPURLUtil.cs" />
+    <Compile Include="IOR.cs" />
+    <Compile Include="MappingPlugin.cs" />
+    <Compile Include="PeekSupportingStream.cs" />
+    <Compile Include="ReflectUtil.cs" />
+    <Compile Include="Repository.cs" />
+    <Compile Include="RepositoryTypes.cs" />
+    <Compile Include="Serializer.cs" />
+    <Compile Include="Services.cs" />
+    <Compile Include="StandardCorbaOps.cs" />
+    <Compile Include="StringUtil.cs" />
+    <Compile Include="TypeCode.cs" />
+    <Compile Include="TypeFromTypeCodeGenerator.cs" />
+    <Compile Include="AppServerCompatibility.cs" />
+    <Compile Include="UnionGenerationHelper.cs" />
+    <Compile Include="TypeContainer.cs" />
+    <Compile Include="ILEmitHelper.cs" />
+    <Compile Include="Debug.cs" />
+    <Compile Include="GiopTransport.cs" />
+    <Compile Include="IOUtil.cs" />
+    <Compile Include="TransportWrapper.cs" />
+    <Compile Include="TcpTransportWrapper.cs" />
+    <Compile Include="SSL.cs" />
+    <Compile Include="Any.cs" />
+    <Compile Include="CORBAOrbServices.cs" />
+    <Compile Include="IiopLoc.cs" />
+    <Compile Include="CorbaContextElement.cs" />
+    <Compile Include="PortableInterceptor.cs" />
+    <Compile Include="InterceptorManager.cs" />
+    <Compile Include="InterceptionFlow.cs" />
+    <Compile Include="AlternateIiopAddress.cs" />
+    <Compile Include="GiopRequest.cs" />
+    <Compile Include="InterceptionInfo.cs" />
+    <Compile Include="TaggedComponent.cs" />
+    <Compile Include="Policy.cs" />
+    <Compile Include="Codec.cs" />
+    <Compile Include="Current.cs" />
+    <Compile Include="PICurrentImpl.cs" />
+    <Compile Include="TaggedProfile.cs" />
+    <Compile Include="BidirIiop.cs" />
+    <Compile Include="TypeCodeCreator.cs" />
+    <Compile Include="SerializerFactory.cs" />
+    <Compile Include="ArgumentsSerializerFactory.cs" />
+    <Compile Include="ArgumentsSerializer.cs" />
+    <Compile Include="Messages.cs" />
+    <Compile Include="TestUtil.cs" />
+    <Compile Include="CdrStreamTests.cs" />
+    <Compile Include="IORUtil.cs" />
+    <Compile Include="SystemWireBitConverter.cs" />
+    <Compile Include="SerializationOrderFieldinfoComparer.cs" />
+  </ItemGroup>
+  <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
+  <PropertyGroup>
+    <PreBuildEvent>
+    </PreBuildEvent>
+    <PostBuildEvent>
+    </PostBuildEvent>
+  </PropertyGroup>
+</Project>
