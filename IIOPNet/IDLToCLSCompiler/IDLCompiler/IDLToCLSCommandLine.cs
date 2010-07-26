@@ -690,8 +690,8 @@ namespace Ch.Elca.Iiop.IdlCompiler.Tests
             DirectoryInfo testDir = new DirectoryInfo(".");
             IDLToCLSCommandLine commandLine = new IDLToCLSCommandLine(
                 new string[] { "testAsm", "test.idl" });
-            Assert.AreEqual("OutputDirectory", testDir.FullName,
-                                   commandLine.OutputDirectory.FullName);
+            Assert.AreEqual(testDir.FullName,
+                                   commandLine.OutputDirectory.FullName, "OutputDirectory");
 
             Assert.IsTrue(!commandLine.IsInvalid, "Command line validity");
         }
@@ -702,8 +702,8 @@ namespace Ch.Elca.Iiop.IdlCompiler.Tests
             DirectoryInfo testDir = new DirectoryInfo(Path.Combine(".", "testOut"));
             IDLToCLSCommandLine commandLine = new IDLToCLSCommandLine(
                 new string[] { "-o", testDir.FullName, "testAsm", "test.idl" });
-            Assert.AreEqual("OutputDirectory", testDir.FullName,
-                                   commandLine.OutputDirectory.FullName);
+            Assert.AreEqual(testDir.FullName,
+                                   commandLine.OutputDirectory.FullName, "OutputDirectory");
 
             Assert.IsTrue(!commandLine.IsInvalid, "Command line validity");
         }
@@ -714,8 +714,8 @@ namespace Ch.Elca.Iiop.IdlCompiler.Tests
             DirectoryInfo testDir = new DirectoryInfo(Path.Combine(".", "testOut"));
             IDLToCLSCommandLine commandLine = new IDLToCLSCommandLine(
                 new string[] { "-out:" + testDir.FullName, "testAsm", "test.idl" });
-            Assert.AreEqual("OutputDirectory", testDir.FullName,
-                                   commandLine.OutputDirectory.FullName);
+            Assert.AreEqual(testDir.FullName,
+                                   commandLine.OutputDirectory.FullName, "OutputDirectory");
 
             Assert.IsTrue(!commandLine.IsInvalid, "Command line validity");
         }
@@ -726,9 +726,8 @@ namespace Ch.Elca.Iiop.IdlCompiler.Tests
             IDLToCLSCommandLine commandLine = new IDLToCLSCommandLine(
                 new string[] { "-InvalidArg" });
             Assert.IsTrue(commandLine.IsInvalid, "Invalid Arg detection");
-            Assert.AreEqual("invalid arguments message",
-                                   "Error: invalid option -InvalidArg",
-                                   commandLine.ErrorMessage);
+            Assert.AreEqual("Error: invalid option -InvalidArg",
+                                   commandLine.ErrorMessage, "invalid arguments message");
         }
 
         [Test]
@@ -737,9 +736,8 @@ namespace Ch.Elca.Iiop.IdlCompiler.Tests
             IDLToCLSCommandLine commandLine = new IDLToCLSCommandLine(
                 new string[0]);
             Assert.IsTrue(commandLine.IsInvalid, "Invalid commandLine detection");
-            Assert.AreEqual("invalid commandLine message",
-                                   "Error: target assembly name missing",
-                                   commandLine.ErrorMessage);
+            Assert.AreEqual("Error: target assembly name missing",
+                                   commandLine.ErrorMessage, "invalid commandLine message");
         }
 
         [Test]
@@ -748,9 +746,8 @@ namespace Ch.Elca.Iiop.IdlCompiler.Tests
             IDLToCLSCommandLine commandLine = new IDLToCLSCommandLine(
                 new string[] { "testAsm" });
             Assert.IsTrue(commandLine.IsInvalid, "Invalid commandLine detection");
-            Assert.AreEqual("invalid commandLine message",
-                                   "Error: idl-file(s) missing",
-                                   commandLine.ErrorMessage);
+            Assert.AreEqual("Error: idl-file(s) missing",
+                                   commandLine.ErrorMessage, "invalid commandLine message");
         }
 
         [Test]
@@ -771,8 +768,7 @@ namespace Ch.Elca.Iiop.IdlCompiler.Tests
         {
             IDLToCLSCommandLine commandLine = new IDLToCLSCommandLine(
                 new string[] { "testAsm", "test.idl" });
-            Assert.AreEqual("targetAssemblyName", "testAsm",
-                                   commandLine.TargetAssemblyName);
+            Assert.AreEqual("testAsm", commandLine.TargetAssemblyName, "targetAssemblyName");
 
             Assert.IsTrue(!commandLine.IsInvalid, "Command line validity");
         }
@@ -854,8 +850,7 @@ namespace Ch.Elca.Iiop.IdlCompiler.Tests
             string snkFile = "test.snk";
             IDLToCLSCommandLine commandLine = new IDLToCLSCommandLine(
                 new string[] { "-snk", snkFile, "testAsm", "test.idl" });
-            Assert.AreEqual("Key file", snkFile,
-                                   commandLine.SignKeyFile.Name);
+            Assert.AreEqual(snkFile, commandLine.SignKeyFile.Name, "Key file");
 
             Assert.IsTrue(!commandLine.IsInvalid, "Command line validity");
         }
@@ -876,9 +871,7 @@ namespace Ch.Elca.Iiop.IdlCompiler.Tests
             string asmVersion = "1.0.0.0";
             IDLToCLSCommandLine commandLine = new IDLToCLSCommandLine(
                 new string[] { "-asmVersion", asmVersion, "testAsm", "test.idl" });
-            Assert.AreEqual("Target Assembly Version",
-                                   asmVersion,
-                                   commandLine.AssemblyVersion);
+            Assert.AreEqual(asmVersion, commandLine.AssemblyVersion, "Target Assembly Version");
 
             Assert.IsTrue(!commandLine.IsInvalid, "Command line validity");
         }
@@ -899,8 +892,7 @@ namespace Ch.Elca.Iiop.IdlCompiler.Tests
             DirectoryInfo testDir = new DirectoryInfo(".");
             IDLToCLSCommandLine commandLine = new IDLToCLSCommandLine(
                 new string[] { "-basedir", testDir.FullName, "testAsm", "test.idl" });
-            Assert.AreEqual("BaseDirectory", testDir.FullName,
-                                   commandLine.BaseDirectory.FullName);
+            Assert.AreEqual(testDir.FullName, commandLine.BaseDirectory.FullName, "BaseDirectory");
 
             Assert.IsTrue(!commandLine.IsInvalid, "Command line validity");
         }
@@ -912,10 +904,8 @@ namespace Ch.Elca.Iiop.IdlCompiler.Tests
             IDLToCLSCommandLine commandLine = new IDLToCLSCommandLine(
                 new string[] { "-basedir", testDir.FullName, "testAsm", "test.idl" });
             Assert.IsTrue(commandLine.IsInvalid, "Invalid Base directory");
-            Assert.AreEqual("invalid arguments message",
-                                   String.Format(
-                                       "Error: base directory {0} does not exist!", testDir.FullName),
-                                   commandLine.ErrorMessage);
+            Assert.AreEqual(string.Format("Error: base directory {0} does not exist!", testDir.FullName),
+                                   commandLine.ErrorMessage, "invalid arguments message");
         }
 
         [Test]
@@ -924,8 +914,7 @@ namespace Ch.Elca.Iiop.IdlCompiler.Tests
             Type type = typeof(IDisposable);
             IDLToCLSCommandLine commandLine = new IDLToCLSCommandLine(
                 new string[] { "-b", type.FullName, "testAsm", "test.idl" });
-            Assert.AreEqual("BaseInterface", type.FullName,
-                                   commandLine.BaseInterface.FullName);
+            Assert.AreEqual(type.FullName, commandLine.BaseInterface.FullName, "BaseInterface");
 
             Assert.IsTrue(!commandLine.IsInvalid, "Command line validity");
         }
@@ -937,10 +926,8 @@ namespace Ch.Elca.Iiop.IdlCompiler.Tests
             IDLToCLSCommandLine commandLine = new IDLToCLSCommandLine(
                 new string[] { "-b", baseInterfaceName, "testAsm", "test.idl" });
             Assert.IsTrue(commandLine.IsInvalid, "Invalid base interface");
-            Assert.AreEqual("invalid arguments message",
-                                   String.Format(
-                                       "Error: base interface {0} does not exist!", baseInterfaceName),
-                                   commandLine.ErrorMessage);
+            Assert.AreEqual(string.Format("Error: base interface {0} does not exist!", baseInterfaceName),
+                                   commandLine.ErrorMessage, "invalid arguments message");
         }
 
         [Test]
@@ -969,8 +956,8 @@ namespace Ch.Elca.Iiop.IdlCompiler.Tests
             DirectoryInfo testDir = new DirectoryInfo(Path.Combine(".", "testGenVtDir"));
             IDLToCLSCommandLine commandLine = new IDLToCLSCommandLine(
                 new string[] { "-vtSkelTd", testDir.FullName, "testAsm", "test.idl" });
-            Assert.AreEqual("Valuetype Skeletons Target Directory", testDir.FullName,
-                                   commandLine.ValueTypeSkeletonsTargetDir.FullName);
+            Assert.AreEqual(testDir.FullName, commandLine.ValueTypeSkeletonsTargetDir.FullName,
+                                "Valuetype Skeletons Target Directory");
 
             Assert.IsTrue(!commandLine.IsInvalid, "Command line validity");
         }
@@ -993,10 +980,8 @@ namespace Ch.Elca.Iiop.IdlCompiler.Tests
             IDLToCLSCommandLine commandLine = new IDLToCLSCommandLine(
                 new string[] { "-vtSkelProv", providerName, "testAsm", "test.idl" });
             Assert.IsTrue(commandLine.IsInvalid, "Invalid codedom provider");
-            Assert.AreEqual("invalid arguments message",
-                                   String.Format(
-                                       "provider {0} not found!", providerName),
-                                   commandLine.ErrorMessage);
+            Assert.AreEqual(string.Format("provider {0} not found!", providerName),
+                                   commandLine.ErrorMessage, "invalid arguments message");
         }
 
         [Test]
@@ -1009,12 +994,12 @@ namespace Ch.Elca.Iiop.IdlCompiler.Tests
                 new string[] { "-idir", dir1.FullName, "-idir", dir2.FullName, "testAsm", "test.idl" });
             Assert.AreEqual(2,
                                    commandLine.IdlSourceDirectories.Count, "idl source dirs");
-            Assert.AreEqual("idl source dir 1",
-                                   dir1.FullName,
-                                   ((DirectoryInfo)commandLine.IdlSourceDirectories[0]).FullName);
-            Assert.AreEqual("idl source dir 2",
-                                   dir2.FullName,
-                                   ((DirectoryInfo)commandLine.IdlSourceDirectories[1]).FullName);
+            Assert.AreEqual(dir1.FullName,
+                                   ((DirectoryInfo)commandLine.IdlSourceDirectories[0]).FullName, 
+                                   "idl source dir 1");
+            Assert.AreEqual(dir2.FullName,
+                                   ((DirectoryInfo)commandLine.IdlSourceDirectories[1]).FullName,
+                                   "idl source dir 2");
 
             Assert.IsTrue(!commandLine.IsInvalid, "Command line validity");
         }
@@ -1029,12 +1014,12 @@ namespace Ch.Elca.Iiop.IdlCompiler.Tests
                 new string[] { "-r", asm1.CodeBase, "-r", asm2.CodeBase, "testAsm", "test.idl" });
             Assert.AreEqual(2,
                                    commandLine.ReferencedAssemblies.Count, "referenced assemblies");
-            Assert.AreEqual("ref assembly 1",
-                                   asm1.FullName,
-                                   ((Assembly)commandLine.ReferencedAssemblies[0]).FullName);
-            Assert.AreEqual("ref assembly 2",
-                                   asm2.FullName,
-                                   ((Assembly)commandLine.ReferencedAssemblies[1]).FullName);
+            Assert.AreEqual(asm1.FullName,
+                                   ((Assembly)commandLine.ReferencedAssemblies[0]).FullName,
+                                   "ref assembly 1");
+            Assert.AreEqual(asm2.FullName,
+                                   ((Assembly)commandLine.ReferencedAssemblies[1]).FullName,
+                                   "ref assembly 2");
 
             Assert.IsTrue(!commandLine.IsInvalid, "Command line validity");
         }
@@ -1049,12 +1034,12 @@ namespace Ch.Elca.Iiop.IdlCompiler.Tests
                 new string[] { "-r:" + asm1.CodeBase, "-r:" + asm2.CodeBase, "testAsm", "test.idl" });
             Assert.AreEqual(2,
                                    commandLine.ReferencedAssemblies.Count, "referenced assemblies");
-            Assert.AreEqual("ref assembly 1",
-                                   asm1.FullName,
-                                   ((Assembly)commandLine.ReferencedAssemblies[0]).FullName);
-            Assert.AreEqual("ref assembly 2",
-                                   asm2.FullName,
-                                   ((Assembly)commandLine.ReferencedAssemblies[1]).FullName);
+            Assert.AreEqual(asm1.FullName,
+                                   ((Assembly)commandLine.ReferencedAssemblies[0]).FullName,
+                                   "ref assembly 1");
+            Assert.AreEqual(asm2.FullName,
+                                   ((Assembly)commandLine.ReferencedAssemblies[1]).FullName,
+                                   "ref assembly 2");
 
             Assert.IsTrue(!commandLine.IsInvalid, "Command line validity");
         }
@@ -1099,15 +1084,15 @@ namespace Ch.Elca.Iiop.IdlCompiler.Tests
                                "-lib:" + dir3.FullName, "testAsm", "test.idl" });
             Assert.AreEqual(3,
                                    commandLine.LibDirectories.Count, "libs");
-            Assert.AreEqual("lib dir 1",
-                                   dir1.FullName,
-                                   ((DirectoryInfo)commandLine.LibDirectories[0]).FullName);
-            Assert.AreEqual("lib dir 2",
-                                   dir2.FullName,
-                                   ((DirectoryInfo)commandLine.LibDirectories[1]).FullName);
-            Assert.AreEqual("lib dir 3",
-                                   dir3.FullName,
-                                   ((DirectoryInfo)commandLine.LibDirectories[2]).FullName);
+            Assert.AreEqual(dir1.FullName,
+                                   ((DirectoryInfo)commandLine.LibDirectories[0]).FullName,
+                                   "lib dir 1");
+            Assert.AreEqual(dir2.FullName,
+                                   ((DirectoryInfo)commandLine.LibDirectories[1]).FullName,
+                                   "lib dir 2");
+            Assert.AreEqual(dir3.FullName,
+                                   ((DirectoryInfo)commandLine.LibDirectories[2]).FullName,
+                                   "lib dir 3");
 
             Assert.IsTrue(!commandLine.IsInvalid, "Command line validity");
         }

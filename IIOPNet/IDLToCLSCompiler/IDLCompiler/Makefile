@@ -35,6 +35,7 @@ $(DestUt)IDLPreprocessor.dll: $(IDLPreprocessor)
 
 $(DestUt)IDLToCLSCompiler.exe: $(DestUt)IIOPChannel.dll $(DestUt)IDLPreprocessor.dll *.cs $(Key)
 	$(CSC) $(CSFLAGS) /d:UnitTest /res:MappingPluginSchema.xsd /r:$(NUNIT_FRAMEWORK_DLL) /r:$(DestUt)IIOPChannel.dll /r:$(DestUt)IDLPreprocessor.dll /t:exe /out:$@ *.cs
+	copy $(NUNIT_FRAMEWORK_DLL) $(DestUt)
 
 
 test: build-tests

@@ -1508,7 +1508,7 @@ System.Double floating_pt_literal() #void :
       if (floatVal.EndsWith("f") || floatVal.EndsWith("F") || floatVal.EndsWith("l") || floatVal.EndsWith("L")) {
         floatVal = floatVal.Substring(0, floatVal.Length - 1);
       }
-      return Double.Parse(floatVal);
+      return Double.Parse(floatVal, System.Globalization.CultureInfo.InvariantCulture);
     }
  )
 |
@@ -1534,7 +1534,7 @@ System.Decimal fixed_pt_literal() #void :
     if (fixedVal.EndsWith("d") || fixedVal.EndsWith("D")) {
         fixedVal = fixedVal.Substring(0, fixedVal.Length - 1);
     }
-    return Decimal.Parse(fixedVal);
+    return Decimal.Parse(fixedVal, System.Globalization.CultureInfo.InvariantCulture);
 }
 
 }

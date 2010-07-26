@@ -4235,7 +4235,7 @@ public class IDLParser{/*@bgen(jjtree)*/
       if (floatVal.EndsWith("f") || floatVal.EndsWith("F") || floatVal.EndsWith("l") || floatVal.EndsWith("L")) {
         floatVal = floatVal.Substring(0, floatVal.Length - 1);
       }
-      {if (true) return Double.Parse(floatVal);}
+      {if (true) return Double.Parse(floatVal, System.Globalization.CultureInfo.InvariantCulture);}
       break;
     case 33:
       jj_consume_token(33);
@@ -4261,7 +4261,7 @@ public class IDLParser{/*@bgen(jjtree)*/
     if (fixedVal.EndsWith("d") || fixedVal.EndsWith("D")) {
         fixedVal = fixedVal.Substring(0, fixedVal.Length - 1);
     }
-    {if (true) return Decimal.Parse(fixedVal);}
+    {if (true) return Decimal.Parse(fixedVal, System.Globalization.CultureInfo.InvariantCulture);}
     throw new Error("Missing return statement in function");
   }
 

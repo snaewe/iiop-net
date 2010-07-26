@@ -14,6 +14,7 @@ $(Dest)IIOPChannel.dll: *.cs $(Key)
 build-unit-tests: build nunit-var *.cs
 	if not exist $(UnitTestDest)nul mkdir $(UnitTestDest)
 	$(CSC) /nowarn:0618 $(CSFLAGS) /d:UnitTest /r:$(NUNIT_FRAMEWORK_DLL) /res:MappingPluginSchema.xsd /t:library /out:$(UnitTestDest)IIOPChannel.dll *.cs
+	copy $(NUNIT_FRAMEWORK_DLL) $(UnitTestDest)
 
 test: build-unit-tests
 	$(NUNIT_CONSOLE) $(NUNIT_ASSEMBLY_ARG_OPTION)$(UnitTestDest)IIOPChannel.dll

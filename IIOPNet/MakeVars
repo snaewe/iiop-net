@@ -3,8 +3,8 @@
 MAKE=$(MAKE) /nologo
 CSC=$(NET_FRAMEWORK_DIR)csc /nologo
 GACUTIL="$(NET_FRAMEWORK_SDK_DIR)gacutil" /nologo
-NUNIT_FRAMEWORK_DLL=$(NUNITV2_HOME)\bin\nunit.framework.dll
-NUNIT_CONSOLE=%NUNITV2_HOME%\bin\nunit-console.exe
+NUNIT_FRAMEWORK_DLL="$(NUNITV2_HOME)\bin\net-2.0\framework\nunit.framework.dll"
+NUNIT_CONSOLE="$(NUNITV2_HOME)\bin\net-2.0\nunit-console.exe"
 # the following option can be set to /assembly: to support older versions of nunit
 # NUNIT_ASSEMBLY_ARG_OPTION=/assembly:
 

@@ -130,8 +130,7 @@ namespace Ch.Elca.Iiop.IdlCompiler.Tests
                                              false);
             Assert.AreEqual(1, repAttrs.Length, "wrong number of RepIDAttrs");
             RepositoryIDAttribute repId = (RepositoryIDAttribute)repAttrs[0];
-            Assert.AreEqual("wrong repId", expected,
-                                   repId.Id);
+            Assert.AreEqual(expected, repId.Id, "wrong repId");
         }
 
         /// <summary>
@@ -156,8 +155,7 @@ namespace Ch.Elca.Iiop.IdlCompiler.Tests
                                                          false);
             Assert.AreEqual(1, attrs.Length, "wrong number of ImplClassAttribute");
             ImplClassAttribute attr = (ImplClassAttribute)attrs[0];
-            Assert.AreEqual("wrong implclass attr", implClassName,
-                                   attr.ImplClass);
+            Assert.AreEqual(implClassName, attr.ImplClass, "wrong implclass attr");
         }
 
         /// <summary>
@@ -300,16 +298,9 @@ namespace Ch.Elca.Iiop.IdlCompiler.Tests
             Assert.AreEqual(idlEnumValName, field.Name, "wrong enum val field name");
         }
 
-
-
         #endregion
 
-
-
-
-
     }
-
 
 }
 
