@@ -1063,7 +1063,7 @@ namespace Ch.Elca.Iiop.Tests
                                         new byte[] { 1, 0, 0, 0 });
 
             m_clientChannel = new IiopClientChannel();
-            ChannelServices.RegisterChannel(m_clientChannel);
+            ChannelServices.RegisterChannel(m_clientChannel, false);
         }
 
         [TearDown]
@@ -1121,7 +1121,7 @@ namespace Ch.Elca.Iiop.Tests
             m_orb = OrbServices.GetSingleton();
 
             m_channel = new IiopChannel(TEST_PORT);
-            ChannelServices.RegisterChannel(m_channel);
+            ChannelServices.RegisterChannel(m_channel, false);
         }
 
         [TearDown]

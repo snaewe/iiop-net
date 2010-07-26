@@ -757,7 +757,7 @@ namespace Ch.Elca.Iiop.Tests {
         [Test]  
         public void TestLocationForward() {
             IiopChannel chan = new IiopChannel(8090);
-            ChannelServices.RegisterChannel(chan);
+            ChannelServices.RegisterChannel(chan, false);
             // publish location fwd target
             TestService target = new TestService();            
             string fwdTargetUri = "testuriFwd";
@@ -797,7 +797,7 @@ namespace Ch.Elca.Iiop.Tests {
         public void TestLocationForwardOnIsA() {
             // tests location forward, if we forward on is_a call            
             IiopChannel chan = new IiopChannel(8090);
-            ChannelServices.RegisterChannel(chan);
+            ChannelServices.RegisterChannel(chan, false);
             // publish location fwd target
             TestService target = new TestService();            
             string fwdTargetUri = "testuriFwdForIsA";

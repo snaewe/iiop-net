@@ -60,25 +60,31 @@ namespace Ch.Elca.Iiop.Idl {
             internal AssemblyLoader(Repository forRepository) {
                 m_forRepository = forRepository;
                 AppDomain.CurrentDomain.AssemblyResolve += new ResolveEventHandler(this.AssemblyNotResolvable);
-                AppDomain.CurrentDomain.AssemblyLoad += new AssemblyLoadEventHandler(this.AssemblyLoaded);                
+                AppDomain.CurrentDomain.AssemblyLoad += new AssemblyLoadEventHandler(this.AssemblyLoaded);
                 Assembly[] alreadyLoaded = AppDomain.CurrentDomain.GetAssemblies();
-                for (int i = 0; i < alreadyLoaded.Length; i++) {                    
+                for (int i = 0; i < alreadyLoaded.Length; i++) {
                     RegisterTypes(alreadyLoaded[i]);
-                }                
+                }
             }
             
             #endregion IConstructors
             #region IMethods
-                        
+
             private void AssemblyLoaded(object sender, AssemblyLoadEventArgs args) {
-            	if (m_forRepository.ShouldSkipAssemblyTypeAutoRegistration(args.LoadedAssembly)) {
-            		return;
-            	}
-                RegisterTypes(args.LoadedAssembly);                
+                // !!! BUG on .Net 2 SP1: going further breaks DefineDynamicAssembly in very strange manner, so don't process dynamic assemblies
+                // simple test:
+                // AppDomain.CurrentDomain.DefineDynamicAssembly(new System.Reflection.AssemblyName("dynBoxed" + Guid.NewGuid().ToString()), System.Reflection.Emit.AssemblyBuilderAccess.Run);
+                // previous workaround using RegisterAssemblyForNonAutoRegistration/ShouldSkipAssemblyTypeAutoRegistration 
+                // is deficient, there may be dynamic assemblies irrelevant to IIOPNet.
+                // So this patch is simple and universal:
+                if (args.LoadedAssembly is System.Reflection.Emit.AssemblyBuilder)
+                    return;
+
+                RegisterTypes(args.LoadedAssembly);
                 AssemblyName[] refAssemblies =
                     args.LoadedAssembly.GetReferencedAssemblies();
                 if (refAssemblies != null) {
-                    for (int i = 0; i <refAssemblies.Length; i++) {                        
+                    for (int i = 0; i <refAssemblies.Length; i++) {
                         try {
                             if (refAssemblies[i] != null) {
                                 Assembly.Load(refAssemblies[i]); // this will call AssemblyLoaded for this assembly
@@ -96,7 +102,7 @@ namespace Ch.Elca.Iiop.Idl {
                     }
                 }
             }
-                        
+
 
             private string ParseAssemblyNamePart(string part) {
                 int valueIndex = part.IndexOf("=");
@@ -111,7 +117,7 @@ namespace Ch.Elca.Iiop.Idl {
                 version = null;
                 publicKeyToken = null;
                 culture = null;
-                string[] nameParts = asmName.Split(',');                
+                string[] nameParts = asmName.Split(',');
                 simpleName = nameParts[0].Trim();
                 for (int i = 1; i < nameParts.Length; i++) {
                     string trimmedPart = nameParts[i].Trim();
@@ -152,10 +158,10 @@ namespace Ch.Elca.Iiop.Idl {
                             ParseAssemblyName(((Assembly)assemblies[i]).FullName, 
                                               out candidateName, out candidateVersion,
                                               out candidatePkToken, out candidateCulture);
-                            if ((candidateVersion == toResolveVersion) && 
+                            if ((candidateVersion == toResolveVersion) &&
                                 (candidatePkToken == toResolvePkToken)) {
                                 return assemblies[i];
-                            }                                
+                            }
                     }
                     }
                 }
@@ -165,7 +171,7 @@ namespace Ch.Elca.Iiop.Idl {
             private void RegisterTypes(Assembly forAssembly) {
                 lock(m_loadedAssemblies.SyncRoot) {
                     if (!m_loadedAssemblies.ContainsKey(forAssembly.FullName)) {
-                        m_loadedAssemblies[forAssembly.FullName] = forAssembly;                        
+                        m_loadedAssemblies[forAssembly.FullName] = forAssembly;
                     } else {
                         return; // already loaded
                     }
@@ -173,7 +179,7 @@ namespace Ch.Elca.Iiop.Idl {
                 // locking is done by register type
                 Type[] types;
                 try {
-                    types = forAssembly.GetTypes();                    
+                    types = forAssembly.GetTypes();
                 } catch (ReflectionTypeLoadException rtle) { // can happen for dynamic assemblies
                     Debug.WriteLine(String.Format("Couldn't load all types from assembly {0}; exception: {1}",
                                                   forAssembly.FullName, rtle));
@@ -184,7 +190,7 @@ namespace Ch.Elca.Iiop.Idl {
                         if (types[i] != null) { // null, if type coudln't be loaded
                             m_forRepository.RegisterType(types[i]);
                         }
-                    }                
+                    }
                 }
             }
             
@@ -199,19 +205,12 @@ namespace Ch.Elca.Iiop.Idl {
         private Hashtable m_repIdsByLoadedTypes = new Hashtable(); // for types not dynamically generated by IIOP.NET
         private Hashtable m_valueTypeImpls = new Hashtable();
         
-        /// <summary>
-        /// the following member contains a list of assembly names, for which Repository will not register types
-        /// inside the assembly itself. Instead, an outside entity must make sure, that Repository will get to know
-        /// all types serialized/deserialized by IIOP.NET.
-        /// </summary>
-        private ArrayList m_assembliesSkipTypeRegistration = new ArrayList();
-        
         #endregion IFields
 
         #region IConstructors
 
         private Repository() {
-            m_assemblyLoader = new Repository.AssemblyLoader(this);            
+            m_assemblyLoader = new Repository.AssemblyLoader(this);
         }
 
         #endregion IConstructors
@@ -332,8 +331,8 @@ namespace Ch.Elca.Iiop.Idl {
             return typeName;
         }
         
-        private static string ResolveRmiInnerTypeMapping(string typeName) {            
-            return typeName.Replace(@"\U0024", "__");            
+        private static string ResolveRmiInnerTypeMapping(string typeName) {
+            return typeName.Replace(@"\U0024", "__");
         }
         
         /// <param name="elemNamespace">the namespace of the elementType</param>
@@ -448,17 +447,7 @@ namespace Ch.Elca.Iiop.Idl {
         internal static void RegisterDynamicallyCreatedType(Type type) {
             s_instance.RegisterType(type);
         }
-        
-        /// <summary>
-        /// Method can be used to skip auto registration of types on assembly load with the repository.
-        /// </summary>
-        /// <remarks>This method is mainly used because of an issue in MS .NET 2.0 SP1, which leads to a 
-        /// InvalidCastException when creating a dynamic assembly, when GetTypes is called on the 
-        /// dynamic assembly.</remarks>
-        public static void RegisterAssemblyForNonAutoRegistration(AssemblyName asmName) {
-        	s_instance.m_assembliesSkipTypeRegistration.Add(asmName);
-        }               
-                
+
         #endregion dynamically created types
         #region verifying types
         
@@ -487,7 +476,7 @@ namespace Ch.Elca.Iiop.Idl {
             // for requiredType MarshalByRefObject and omg.org.CORBA.IObject
             // everything is possible (i.e. every remote object type can be assigned to it),
             // the other requiredType types must be checked remote if not locally verifable
-            if ((!requiredType.Equals(ReflectionHelper.MarshalByRefObjectType)) &&                
+            if ((!requiredType.Equals(ReflectionHelper.MarshalByRefObjectType)) &&
                 (!requiredType.Equals(ReflectionHelper.IObjectType)) && 
                 ((interfaceType == null) || (!IsCompatible(requiredType, interfaceType)))) {
                 // remote type not known or locally assignability not verifable
@@ -496,7 +485,7 @@ namespace Ch.Elca.Iiop.Idl {
             }
             // interface is assignable (or required type is compatible with all -> do a null check for this case)
             useTypeForId = (interfaceType != null ? interfaceType : requiredType);
-            return true;            
+            return true;
         }
         
         #endregion verifying types
@@ -506,7 +495,7 @@ namespace Ch.Elca.Iiop.Idl {
         /// creates a CORBA type code for a CLS type
         /// </summary>
         /// <returns>the typecode for the CLS type</returns>
-        internal static TypeCodeImpl CreateTypeCodeForType(Type forType,  
+        internal static TypeCodeImpl CreateTypeCodeForType(Type forType,
                                                           AttributeExtCollection attributes) {
             return CreateTypeCodeForTypeInternal(forType, attributes, new TypeCodeCreater());
         }
@@ -514,7 +503,7 @@ namespace Ch.Elca.Iiop.Idl {
         /// <summary>used by type code creating methods</summary>
         internal static TypeCodeImpl CreateTypeCodeForTypeInternal(Type forType, AttributeExtCollection attributes,
                                                                    TypeCodeCreater typeCodeCreator) {
-            if (forType != null) {                        
+            if (forType != null) {
                 ClsToIdlMapper mapper = ClsToIdlMapper.GetSingleton();
                 return (TypeCodeImpl)mapper.MapClsType(forType, attributes, typeCodeCreator);
             } else {
@@ -542,20 +531,7 @@ namespace Ch.Elca.Iiop.Idl {
         #endregion for typecodes
         #endregion SMethods
         #region IMethods
-                       
-		/// <summary>
-        /// Should the auto-registration of types in the given assembly be skipped?
-        /// </summary>
-        private bool ShouldSkipAssemblyTypeAutoRegistration(Assembly asm) {
-        	AssemblyName asmName = asm.GetName();
-        	foreach (AssemblyName toSkip in m_assembliesSkipTypeRegistration) {
-        		if (toSkip.FullName == asmName.FullName) {
-        			return true;
-        		}
-        	}
-        	return false;
-        }        
-        
+
         /// <summary>
         /// returns the repository id to use for type. In the repIdForType the string identifing the
         /// type is returned. The result and the repIdForType can be different (e.g. SuppertedInterface)
@@ -565,9 +541,9 @@ namespace Ch.Elca.Iiop.Idl {
             object[] attr = type.GetCustomAttributes(ReflectionHelper.RepositoryIDAttributeType, false);
             if (attr != null && attr.Length > 0) {
                 RepositoryIDAttribute repIDAttr = (RepositoryIDAttribute) attr[0];
-                result = repIDAttr.Id;                
+                result = repIDAttr.Id;
             } else {
-                result = IdlNaming.MapFullTypeNameToIdlRepId(type);                
+                result = IdlNaming.MapFullTypeNameToIdlRepId(type);
             }
             repIdForType = result;
             if (type.IsMarshalByRef) {
@@ -592,7 +568,7 @@ namespace Ch.Elca.Iiop.Idl {
         private bool IsValueTypeImplClass(Type type) {
             Type baseType = type.BaseType;
             if (baseType != null) {
-                object[] attr = baseType.GetCustomAttributes(ReflectionHelper.ImplClassAttributeType, false);               
+                object[] attr = baseType.GetCustomAttributes(ReflectionHelper.ImplClassAttributeType, false);
                 if (attr != null && attr.Length > 0) {
                     string implClassName = ((ImplClassAttribute)attr[0]).ImplClass;
                     return (implClassName == type.FullName); // implClassName must be the name of type
@@ -603,7 +579,7 @@ namespace Ch.Elca.Iiop.Idl {
         
         
         private void RegisterType(Type type) {
-            lock(this) {                
+            lock(this) {
                 if ((type.IsPublic) &&
                     (!m_repIdsByLoadedTypes.ContainsKey(type))) {
                     string repIdForType; // the rep-id, which should be resolved to the Type type
@@ -620,7 +596,7 @@ namespace Ch.Elca.Iiop.Idl {
                                                       type.AssemblyQualifiedName));
                         // throw new INTERNAL(905, CompletionStatus.Completed_MayBe);
                     }
-                    // check if it's a value type impl class                    
+                    // check if it's a value type impl class
                     if (IsValueTypeImplClass(type)) {
                         m_valueTypeImpls[type.FullName] = type;
                     }
@@ -638,33 +614,33 @@ namespace Ch.Elca.Iiop.Idl {
 
 #if UnitTest
 
-namespace Ch.Elca.Iiop.Tests {   
-    
-    using System.IO;        
-    using NUnit.Framework;    
+namespace Ch.Elca.Iiop.Tests {
+
+    using System.IO;
+    using NUnit.Framework;
     using omg.org.CORBA;
     using Ch.Elca.Iiop.Services;
-    using Ch.Elca.Iiop;    
+    using Ch.Elca.Iiop;
     using Ch.Elca.Iiop.Idl;
-    
+
     [RepositoryID("IDL:Ch/Elca/Iiop/Tests/IRepositoryTestIf1:1.0")]
     public interface IRepositoryTestIf1 {
-        
+
     }
-    
+
     [RepositoryID("IDL:Ch/Elca/Iiop/Tests/IRepositoryTestIf2:1.0")]
     public interface IRepositoryTestIf2 : IRepositoryTestIf1 {
-        
+
     }
-    
+
     [RepositoryID("IDL:Ch/Elca/Iiop/Tests/IRepositoryTestIf3:1.0")]
     public interface IRepositoryTestIf3 {
-        
-    }    
-    
+
+    }
+
     [RepositoryID("IDL:Ch/Elca/Iiop/Tests/RepositoryTestClassImpl:1.0")]
     public class RepositoryTestClassImpl : IRepositoryTestIf2 {
-        
+
     }
     
     /// <summary>
@@ -693,28 +669,28 @@ namespace Ch.Elca.Iiop.Tests {
                                                               repIdCl,
                                                               out typeForId), "type compatibility for TestClassImpl");
             Assert.AreEqual(typeof(RepositoryTestClassImpl),
-                                   typeForId,"type for cl id");            
+                                   typeForId,"type for cl id");
         }
         
         [Test]
-        public void TestInterfaceNotCompatible() {            
+        public void TestInterfaceNotCompatible() {
             string repIdCl = "IDL:Ch/Elca/Iiop/Tests/RepositoryTestClassImpl:1.0";
             
             Type required = typeof(IRepositoryTestIf3);
             
             Type typeForId;
             bool isCompatible =
-                Repository.IsInterfaceCompatible(required, repIdCl, 
+                Repository.IsInterfaceCompatible(required, repIdCl,
                                                  out typeForId);
             // for non-verifiable type compatibility, return required Type for the id
             Assert.AreEqual( required,
                                    typeForId, "type for incompatible id");
             Assert.IsTrue(!isCompatible, "type compatibility for TestIf2");
-        }                
-        
-        
+        }
+
+
     }
-    
+
 }
 
 #endif

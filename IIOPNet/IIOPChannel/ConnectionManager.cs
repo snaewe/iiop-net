@@ -287,7 +287,7 @@ namespace Ch.Elca.Iiop {
                 // this lenghty operation.
                 try {
                     newConnection.OpenConnection();
-                } catch(Exception ex) {
+                } catch(Exception) {
                     lock(this) {
                         // clean up dead connection
                         UnregisterConnection(targetKey, newConnection);

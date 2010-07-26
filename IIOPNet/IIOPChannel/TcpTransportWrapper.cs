@@ -61,25 +61,25 @@ namespace Ch.Elca.Iiop {
                 
         #endregion IFields
         #region IProperties
-        
+
         /// <summary><see cref="Ch.Elca.Iiop.ITransport.TransportStream"/></summary>
         public Stream TransportStream {
             get {
                 return m_stream;
             }
         }
-        
+
         #endregion IProperties
         #region IMethods
-                
+
         /// <summary><see cref="Ch.Elca.Iiop.ITranport.IsDataAvailable/></summary>
         public bool IsDataAvailable() {
             return m_stream.DataAvailable;
         }
-                
+
         /// <summary><see cref="Ch.Elca.Iiop.ITranport.CloseConnection/></summary>
         public void CloseConnection() {
-            try {                
+            try {
                 if (m_socket != null) {
                     m_socket.Close();
                 }
@@ -141,7 +141,7 @@ namespace Ch.Elca.Iiop {
                     m_socket.GetStream(); // TODO, search a better way to do this
                 } catch (Exception) {
                     return false;
-                }                                
+                }
                 return true; 
             }
         }
@@ -152,7 +152,7 @@ namespace Ch.Elca.Iiop {
     
     /// <summary>represnets a tcp/iiop connection to a server</summary>
     internal class TcpClientTransport : TcpTransportBase, IClientTransport {
-                        
+
         #region IFields
 
         private string[] m_targetHosts;
@@ -210,11 +210,11 @@ namespace Ch.Elca.Iiop {
         }
         
         #endregion IProperties
-        #region IMethods                        
+        #region IMethods
         
         /// <summary><see cref="Ch.Elca.Iiop.IClientTranport.OpenConnection/></summary>
         public void OpenConnection() {
-            if (IsConnectionOpen()) { 
+            if (IsConnectionOpen()) {
                 return; // already open
             }
             m_socket = new TcpClient();
@@ -230,7 +230,7 @@ namespace Ch.Elca.Iiop {
             m_socket.SendTimeout = m_sendTimeOut;
             m_stream = m_socket.GetStream();
         }
-                
+
         private void OpenConnectionByHostName() {
             Exception lastException = null;
             for (int i = 0; i < m_targetHosts.Length; i++) {
@@ -261,7 +261,7 @@ namespace Ch.Elca.Iiop {
     
     /// <summary>represnets a tcp/iiop connection to a client</summary>
     internal class TcpServerTransport : TcpTransportBase, IServerTransport {
-                        
+
         #region SFields
         
         private static Type s_socketExType = typeof(SocketException);
@@ -276,15 +276,15 @@ namespace Ch.Elca.Iiop {
         
         #endregion Ionstructors
         #region IMethods
-                        
+
         /// <summary><see cref="Ch.Elca.Iiop.IServerTransport.IsConnectionCloseException"/></summary>
         public bool IsConnectionCloseException(Exception e) {
-            return s_socketExType.IsInstanceOfType(e.InnerException);            
+            return s_socketExType.IsInstanceOfType(e.InnerException);
         }
-                        
+
         #endregion IMethods
         
-    }        
+    }
     
     /// <summary>
     /// creates TCP transports
@@ -340,7 +340,7 @@ namespace Ch.Elca.Iiop {
                 }
                 result.ReceiveTimeOut = m_receiveTimeOut;
                 result.SendTimeOut = m_sendTimeOut;
-                return result;            
+                return result;
             } else {
                 throw new INTERNAL(3001, CompletionStatus.Completed_No);
             }
@@ -355,12 +355,12 @@ namespace Ch.Elca.Iiop {
                     return true;
                 }
             }
-            return false;            
+            return false;
         }
         
         /// <summary>
         /// <see cref="Ch.Elca.Iiop.IClientTransportFactory.CanUseProfile"/>
-        /// </summary>        
+        /// </summary>
         public bool CanUseProfile(IIorProfile profile) {
             if (profile.ProfileId == TAG_INTERNET_IOP.ConstVal) {
                 IInternetIiopProfile iiopProf = (IInternetIiopProfile)profile;
@@ -376,17 +376,15 @@ namespace Ch.Elca.Iiop {
         /// returns the IPAddress if hostName is a valid ipAdress, otherwise returns null.
         /// </summary>
         private IPAddress ConvertToIpAddress(string hostName) {
-            // is there a good way to tell if hostName represents an IpAddress or not?
-            try {
-                return IPAddress.Parse(hostName);
-            } catch (Exception) {
-                // not parsable
-                return null;
-            }            
-        }        
+            IPAddress addr;
+            if(IPAddress.TryParse(hostName, out addr))
+                return addr;
+
+            return null;
+        }
         
         /// <summary><see cref="Ch.Elca.Iiop.IClientTransportFactory.GetEndpointKey(Ior)"/></summary>
-        public string GetEndpointKey(IIorProfile target) {            
+        public string GetEndpointKey(IIorProfile target) {
             if (target.ProfileId ==  TAG_INTERNET_IOP.ConstVal) {
                 IInternetIiopProfile prof = (IInternetIiopProfile)target;
                 return "iiop" + prof.Version.Major + "." +
@@ -406,7 +404,7 @@ namespace Ch.Elca.Iiop {
             }
         }
 
-        /// <summary><see cref="Ch.Elca.Iiop.IServerTransportFactory.GetListenPoints(object)"/></summary>        
+        /// <summary><see cref="Ch.Elca.Iiop.IServerTransportFactory.GetListenPoints(object)"/></summary>
         public object[] GetListenPoints(IiopChannelData chanData) {
             object[] result = new object[] { new omg.org.IIOP.ListenPoint(chanData.HostName,
                                                                           (short)((ushort)chanData.Port)) };
@@ -434,7 +432,7 @@ namespace Ch.Elca.Iiop {
         }
         
         #endregion IMethods
-                
+
     }
     
     /// <summary>implementers wait for and accept client connections on their supported transport mechanism.
@@ -445,14 +443,14 @@ namespace Ch.Elca.Iiop {
         
         private ClientAccepted m_clientAcceptCallback;
         
-        private Thread m_listenerThread;        
+        private Thread m_listenerThread;
         private TcpListener m_listener;
         
         private bool m_listenerActive = false;
         private bool m_isInitalized = false;
         
         #endregion IFields
-        #region IMethods        
+        #region IMethods
         
         private void SetupListenerThread() {
             ThreadStart listenerStart = new ThreadStart(ListenForMessages);
@@ -480,8 +478,8 @@ namespace Ch.Elca.Iiop {
                     throw;
                 } catch (Exception e) {
                     Debug.WriteLine("Exception in server listener thread: " + e);
-                    if (client != null)  { 
-                        client.Close(); 
+                    if (client != null)  {
+                        client.Close();
                     }
                 }
             }
@@ -494,7 +492,7 @@ namespace Ch.Elca.Iiop {
             }
             m_isInitalized = true;
             m_clientAcceptCallback = clientAcceptCallback;
-            SetupListenerThread();            
+            SetupListenerThread();
         }
         
         /// <summary><see cref="Ch.Elca.Iiop.IServerConnectionListener.IsInitalized"</summary>
@@ -511,14 +509,14 @@ namespace Ch.Elca.Iiop {
                 throw CreateAlreadyListeningException();
             }
             additionalTaggedComponents = new TaggedComponent[0];
-            int resultPort = listeningPortSuggestion;            
+            int resultPort = listeningPortSuggestion;
             
             m_listener = new TcpListener(bindTo, listeningPortSuggestion);
             // start TCP-Listening
             m_listener.Start();
-            if (listeningPortSuggestion == 0) { 
+            if (listeningPortSuggestion == 0) {
                 // auto-assign port selected
-                resultPort = ((IPEndPoint)m_listener.LocalEndpoint).Port; 
+                resultPort = ((IPEndPoint)m_listener.LocalEndpoint).Port;
             }
             m_listenerActive = true;
             // start the handler thread
@@ -528,7 +526,7 @@ namespace Ch.Elca.Iiop {
         
         /// <summary><see cref="Ch.Elca.Iiop.IServerConnectionListener.IsListening"</summary>
         public bool IsListening() {
-            return m_listenerActive;    
+            return m_listenerActive;
         }
         
         /// <summary><see cref="Ch.Elca.Iiop.IServerConnectionListener.StopListening"</summary>
@@ -537,12 +535,12 @@ namespace Ch.Elca.Iiop {
                 throw CreateNotListeningException();
             }
             m_listenerActive = false;
-            if (m_listenerThread != null) { 
+            if (m_listenerThread != null) {
                 try {
-                    m_listenerThread.Interrupt(); m_listenerThread.Abort(); 
+                    m_listenerThread.Interrupt(); m_listenerThread.Abort();
                 } catch (Exception) { }
             }
-            if (m_listener != null) { 
+            if (m_listener != null) {
                 m_listener.Stop();
             }
         }
@@ -551,24 +549,20 @@ namespace Ch.Elca.Iiop {
         #region Exceptions
         
         private Exception CreateNotListeningException() {
-            return new InvalidOperationException("Listener is not listening");    
+            return new InvalidOperationException("Listener is not listening");
         }
         
         private Exception CreateAlreadyListeningException() {
-            return new InvalidOperationException("Listener is already listening");    
+            return new InvalidOperationException("Listener is already listening");
         }
         
         private Exception CreateNotInitalizedException() {
             return new InvalidOperationException("Listener not initalized; call setup first");
         }
                 
-        #endregion Exceptions        
+        #endregion Exceptions
         #endregion IMethods
         
     }
-
-    
-
-
 
 }
