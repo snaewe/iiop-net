@@ -145,21 +145,14 @@ namespace Ch.Elca.Iiop.Util {
         }
 
         public override int ReadByte() {
-            int result = ReadOrPeekByte();
-            if (result < 0) { 
-                throw new IOException("underlying stream has not enough data"); 
-            }
-            return result;
-        }
+            int result = 0;
+            lock(this) 
+                result = m_isPeeking ? PeekByte() : InternalReadByte();
 
-        private int ReadOrPeekByte() {
-            lock(this) {    
-                if (m_isPeeking) {
-                    return PeekByte();
-                } else {
-                    return InternalReadByte();
-                }
-            }
+            if (result < 0)
+                throw new IOException("underlying stream has not enough data"); 
+            
+            return result;
         }
 
         private int InternalReadByte() {

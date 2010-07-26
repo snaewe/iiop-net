@@ -43,7 +43,7 @@ namespace Ch.Elca.Iiop.Util {
         
         #region SFields
         
-        private static AttributeExtCollection s_emptyCollection = new AttributeExtCollection();        
+        private static AttributeExtCollection s_emptyCollection = new AttributeExtCollection();
         
         public static readonly Type ClassType = typeof(AttributeExtCollection);
         
@@ -51,6 +51,7 @@ namespace Ch.Elca.Iiop.Util {
         #region IFields
         
         private object[] m_attributes;
+        private int hashCode = 0;
         
         #endregion IFields
         #region IConstructors
@@ -65,6 +66,7 @@ namespace Ch.Elca.Iiop.Util {
         }
 
         public AttributeExtCollection(AttributeExtCollection coll) {
+            hashCode = coll.hashCode;
             m_attributes = (object[])coll.m_attributes.Clone();
         }
         
@@ -106,7 +108,7 @@ namespace Ch.Elca.Iiop.Util {
             get {
                 return m_attributes[index];
             }
-        }        
+        }
 
         #endregion IProperties
         #region SMethods
@@ -154,7 +156,7 @@ namespace Ch.Elca.Iiop.Util {
             if (ReflectionHelper.IOrderedAttributeType.IsAssignableFrom(attrType)) {
                 isOrdered = true;
             }
-            for (int i = 0; i < m_attributes.Length; i++) {            
+            for (int i = 0; i < m_attributes.Length; i++) {
                 Attribute attr = (Attribute)m_attributes[i];
                 if (attr.GetType() == attrType) { 
                     if (!isOrdered) {
@@ -165,13 +167,13 @@ namespace Ch.Elca.Iiop.Util {
                         if ((result == null) ||
                            (((IOrderedAttribute)result).OrderNr <
                             ((IOrderedAttribute)attr).OrderNr)) {
-                            result = attr;        
+                            result = attr;
                             position = i;
                         }
                     }
                 }
             }
-            return result;            
+            return result;
         }
 
         /// <summary>
@@ -194,13 +196,13 @@ namespace Ch.Elca.Iiop.Util {
         /// </remarks>
         public Attribute GetHighestOrderAttribute() {
             Attribute result = null;
-            for (int i = 0; i < m_attributes.Length; i++) {            
+            for (int i = 0; i < m_attributes.Length; i++) {
                 Attribute attr = (Attribute)m_attributes[i];
                 if ((attr is IOrderedAttribute) && 
                     ((result == null) ||
                     (((IOrderedAttribute)result).OrderNr <
                      ((IOrderedAttribute)attr).OrderNr))) {
-                    result = attr;        
+                    result = attr;
                 }
             }
             return result;
@@ -211,13 +213,16 @@ namespace Ch.Elca.Iiop.Util {
             object[] newCollection = new object[m_attributes.Length - 1]; // m_attributes.Length must be >= 0, because attr found
             // copy elements before position to newCollection; don't use Array.Copy, because only few elements
             for (int i = 0; i < position; i++) {
-                newCollection[i] = m_attributes[i];                
-            }                
+                newCollection[i] = m_attributes[i];
+            }
             // copy elements after position to newCollection; don't use Array.Copy, because only few elements
             for (int i = position + 1; i < m_attributes.Length; i++) {
-                newCollection[i-1] = m_attributes[i];                
+                newCollection[i-1] = m_attributes[i];
             }
-            return new AttributeExtCollection(newCollection);            
+            AttributeExtCollection result = new AttributeExtCollection(newCollection);
+            if(hashCode != 0)
+                result.hashCode = hashCode ^ m_attributes[position].GetHashCode();
+            return result;
         }
 
         /// <summary>
@@ -298,7 +303,7 @@ namespace Ch.Elca.Iiop.Util {
         /// returns an attribute collection produced by merging this collection and the argument collection.
         /// </summary>
         public AttributeExtCollection MergeAttributeCollections(AttributeExtCollection coll) {
-            object[] resultList = new object[coll.m_attributes.Length + m_attributes.Length];            
+            object[] resultList = new object[coll.m_attributes.Length + m_attributes.Length];
             // first the new ones
             coll.m_attributes.CopyTo(resultList, 0);
             // append content of this collection
@@ -326,7 +331,7 @@ namespace Ch.Elca.Iiop.Util {
                 if (!other.Contains(this.m_attributes[i])) {
                     return false; 
                 }
-            }            
+            }
             for (int i = 0; i < other.m_attributes.Length; i++) {
                 if (!this.Contains(other.m_attributes[i])) {
                     return false;
@@ -337,11 +342,13 @@ namespace Ch.Elca.Iiop.Util {
         }
 
         public override int GetHashCode() {
-            int result = 0;
+            if(hashCode != 0)
+                return hashCode;
+            
             for (int i = 0; i < m_attributes.Length; i++) {
-                result = result ^ m_attributes[i].GetHashCode();
+                hashCode ^= m_attributes[i].GetHashCode();
             }
-            return result;
+            return hashCode;
         }
 
         #region Implementation of ICollection
@@ -380,7 +387,7 @@ namespace Ch.Elca.Iiop.Tests {
     using System.Collections;
     using System.IO;
     using NUnit.Framework;
-    using Ch.Elca.Iiop;    
+    using Ch.Elca.Iiop;
     using Ch.Elca.Iiop.Util;
     
     internal class TestAttributeForColl : Attribute {
@@ -395,14 +402,14 @@ namespace Ch.Elca.Iiop.Tests {
             get {
                 return m_val;
             }
-        }        
+        }
         
     }
     
     internal class TestAttributeForCollT1 : TestAttributeForColl {
     
         internal TestAttributeForCollT1(int val) : base(val) {
-        }                
+        }
         
     }
     
@@ -545,7 +552,7 @@ namespace Ch.Elca.Iiop.Tests {
             TestAttributeForCollT2 a2 = new TestAttributeForCollT2(2);
             TestAttributeForCollT3 a3 = new TestAttributeForCollT3(3);
             TestAttributeForCollT4 a4 = new TestAttributeForCollT4(4);
-            TestAttributeForCollT5 a5 = new TestAttributeForCollT5(5);            
+            TestAttributeForCollT5 a5 = new TestAttributeForCollT5(5);
             
             AttributeExtCollection testColl1 = 
                 AttributeExtCollection.ConvertToAttributeCollection(new object[] { a1, a2 });
@@ -578,7 +585,7 @@ namespace Ch.Elca.Iiop.Tests {
             TestAttributeForCollT2 a2 = new TestAttributeForCollT2(2);
             TestAttributeForCollT3 a3 = new TestAttributeForCollT3(3);
             TestAttributeForCollT4 a4 = new TestAttributeForCollT4(4);
-            TestAttributeForCollT5 a5 = new TestAttributeForCollT5(5);            
+            TestAttributeForCollT5 a5 = new TestAttributeForCollT5(5);
             
             AttributeExtCollection testColl1 = 
                 AttributeExtCollection.ConvertToAttributeCollection(new object[] { a1, a2, a3, a4 });
