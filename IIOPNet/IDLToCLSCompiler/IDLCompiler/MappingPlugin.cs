@@ -109,10 +109,11 @@ public class CompilerMappingPlugin {
         // load the xml-file
         XmlDocument doc = new XmlDocument();
         FileStream stream = new FileStream(configFile.FullName, FileMode.Open);
-        XmlTextReader textReader = new XmlTextReader(stream);            
-        XmlValidatingReader validatingReader = new XmlValidatingReader(textReader);
+        XmlReaderSettings settings = new XmlReaderSettings();
+        settings.ValidationType = ValidationType.Schema;
+        settings.Schemas.Add(m_mappingPluginSchema);
+        XmlReader validatingReader = XmlReader.Create(stream, settings);
         try {
-            validatingReader.Schemas.Add(m_mappingPluginSchema);
             doc.Load(validatingReader);
             // process the file
             XmlNodeList elemList = doc.GetElementsByTagName("mapping");

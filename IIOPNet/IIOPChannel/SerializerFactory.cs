@@ -267,17 +267,11 @@ namespace Ch.Elca.Iiop.Marshalling {
         }
         
         public object MapToIdlSequence(System.Type clsType, int bound, AttributeExtCollection allAttributes, AttributeExtCollection elemTypeAttributes) {
-#if NET_2
 			Type serializerType = typeof(IdlSequenceSerializer<>).MakeGenericType(clsType.GetElementType());
 			ConstructorInfo ci = serializerType.GetConstructor(new Type[] { 
 														AttributeExtCollection.ClassType, ReflectionHelper.Int32Type, ReflectionHelper.BooleanType, 
 														SerializerFactory.ClassType });
             return ci.Invoke(new object[] { elemTypeAttributes, bound, m_config.SequenceSerializationAllowNull, this });
-#else
-            return new IdlSequenceSerializer(clsType, elemTypeAttributes, bound,
-                                             m_config.SequenceSerializationAllowNull,
-                                             this);
-#endif
         }
         public object MapToIdlArray(System.Type clsType, int[] dimensions, AttributeExtCollection allAttributes, AttributeExtCollection elemTypeAttributes) {            
             return new IdlArraySerializer(clsType, elemTypeAttributes, dimensions,

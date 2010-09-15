@@ -69,36 +69,20 @@ namespace Ch.Elca.Iiop.Marshalling {
         /// <returns></returns>
         internal abstract object Deserialize(CdrInputStream sourceStream);
                                                                                 
-        #if NET_2        
         internal virtual void SerializeElementArray<T>(Array actual, CdrOutputStream targetStream) {
             T[] actualArray = (T[]) actual;
-        #else
-        internal virtual void SerializeElementArray(Array actual, CdrOutputStream targetStream) {
-        #endif
             for (int i = 0; i < actual.Length; i++) {
                 Serialize(
-#if NET_2
                             actualArray[i],
-#else                                              
-                            actual.GetValue(i),
-#endif
                             targetStream);
             }
         }
         
-        #if NET_2
         internal virtual void DeserializeElementArray<T>(Array toFill, CdrInputStream sourceStream) {
             T[] toFillArray = (T[]) toFill;        
-        #else
-        internal virtual void DeserializeElementArray(Array toFill, CdrInputStream sourceStream) {
-        #endif
             for (int i = 0; i < toFill.Length; i++) {
                 object entry = Deserialize(sourceStream);
-#if NET_2
                 toFillArray[i] = (T) entry;
-#else
-                toFill.SetValue(entry, i);
-#endif                
             }
         }
                                 
@@ -161,19 +145,11 @@ namespace Ch.Elca.Iiop.Marshalling {
             return sourceStream.ReadOctet();
         }
         
-        #if NET_2        
         internal override void SerializeElementArray<T>(Array actual, CdrOutputStream targetStream) {
-        #else
-        internal override void SerializeElementArray(Array actual, CdrOutputStream targetStream) {
-        #endif
             targetStream.WriteOctetArray((byte[])actual);
         }
         
-        #if NET_2
         internal override void DeserializeElementArray<T>(Array toFill, CdrInputStream sourceStream) {
-        #else
-        internal override void DeserializeElementArray(Array toFill, CdrInputStream sourceStream) {
-        #endif        
             sourceStream.ReadOctetArray((byte[])toFill);
         }                
 
@@ -216,19 +192,11 @@ namespace Ch.Elca.Iiop.Marshalling {
             return sourceStream.ReadBool();
         }
         
-        #if NET_2        
         internal override void SerializeElementArray<T>(Array actual, CdrOutputStream targetStream) {
-        #else
-        internal override void SerializeElementArray(Array actual, CdrOutputStream targetStream) {
-        #endif
             targetStream.WriteBoolArray((bool[])actual);
         }
         
-        #if NET_2
         internal override void DeserializeElementArray<T>(Array toFill, CdrInputStream sourceStream) {
-        #else
-        internal override void DeserializeElementArray(Array toFill, CdrInputStream sourceStream) {
-        #endif        
             sourceStream.ReadBoolArray((bool[])toFill);
         }                        
 
@@ -250,19 +218,11 @@ namespace Ch.Elca.Iiop.Marshalling {
             return sourceStream.ReadShort();
         }
         
-        #if NET_2        
         internal override void SerializeElementArray<T>(Array actual, CdrOutputStream targetStream) {
-        #else
-        internal override void SerializeElementArray(Array actual, CdrOutputStream targetStream) {
-        #endif
             targetStream.WriteShortArray((short[])actual);
         }
         
-        #if NET_2
         internal override void DeserializeElementArray<T>(Array toFill, CdrInputStream sourceStream) {
-        #else
-        internal override void DeserializeElementArray(Array toFill, CdrInputStream sourceStream) {
-        #endif        
             sourceStream.ReadShortArray((short[])toFill);
         }                                
 
@@ -284,19 +244,11 @@ namespace Ch.Elca.Iiop.Marshalling {
             return sourceStream.ReadUShort();
         }
         
-        #if NET_2        
         internal override void SerializeElementArray<T>(Array actual, CdrOutputStream targetStream) {
-        #else
-        internal override void SerializeElementArray(Array actual, CdrOutputStream targetStream) {
-        #endif
             targetStream.WriteUShortArray((ushort[])actual);
         }
         
-        #if NET_2
         internal override void DeserializeElementArray<T>(Array toFill, CdrInputStream sourceStream) {
-        #else
-        internal override void DeserializeElementArray(Array toFill, CdrInputStream sourceStream) {
-        #endif        
             sourceStream.ReadUShortArray((ushort[])toFill);
         }                                        
 
@@ -318,19 +270,11 @@ namespace Ch.Elca.Iiop.Marshalling {
             return sourceStream.ReadLong();
         }
         
-        #if NET_2        
         internal override void SerializeElementArray<T>(Array actual, CdrOutputStream targetStream) {
-        #else
-        internal override void SerializeElementArray(Array actual, CdrOutputStream targetStream) {
-        #endif
             targetStream.WriteLongArray((int[])actual);
         }
         
-        #if NET_2
         internal override void DeserializeElementArray<T>(Array toFill, CdrInputStream sourceStream) {
-        #else
-        internal override void DeserializeElementArray(Array toFill, CdrInputStream sourceStream) {
-        #endif        
             sourceStream.ReadLongArray((int[])toFill);
         }                                                
 
@@ -352,19 +296,11 @@ namespace Ch.Elca.Iiop.Marshalling {
             return sourceStream.ReadULong();
         }
         
-        #if NET_2        
         internal override void SerializeElementArray<T>(Array actual, CdrOutputStream targetStream) {
-        #else
-        internal override void SerializeElementArray(Array actual, CdrOutputStream targetStream) {
-        #endif
             targetStream.WriteULongArray((uint[])actual);
         }
         
-        #if NET_2
         internal override void DeserializeElementArray<T>(Array toFill, CdrInputStream sourceStream) {
-        #else
-        internal override void DeserializeElementArray(Array toFill, CdrInputStream sourceStream) {
-        #endif        
             sourceStream.ReadULongArray((uint[])toFill);
         }                                                        
 
@@ -386,19 +322,11 @@ namespace Ch.Elca.Iiop.Marshalling {
             return sourceStream.ReadLongLong();
         }
         
-        #if NET_2        
         internal override void SerializeElementArray<T>(Array actual, CdrOutputStream targetStream) {
-        #else
-        internal override void SerializeElementArray(Array actual, CdrOutputStream targetStream) {
-        #endif
             targetStream.WriteLongLongArray((long[])actual);
         }
         
-        #if NET_2
         internal override void DeserializeElementArray<T>(Array toFill, CdrInputStream sourceStream) {
-        #else
-        internal override void DeserializeElementArray(Array toFill, CdrInputStream sourceStream) {
-        #endif        
             sourceStream.ReadLongLongArray((long[])toFill);
         }                                                                
 
@@ -420,19 +348,11 @@ namespace Ch.Elca.Iiop.Marshalling {
             return sourceStream.ReadULongLong();
         }      
         
-        #if NET_2        
         internal override void SerializeElementArray<T>(Array actual, CdrOutputStream targetStream) {
-        #else
-        internal override void SerializeElementArray(Array actual, CdrOutputStream targetStream) {
-        #endif
             targetStream.WriteULongLongArray((ulong[])actual);
         }
         
-        #if NET_2
         internal override void DeserializeElementArray<T>(Array toFill, CdrInputStream sourceStream) {
-        #else
-        internal override void DeserializeElementArray(Array toFill, CdrInputStream sourceStream) {
-        #endif        
             sourceStream.ReadULongLongArray((ulong[])toFill);
         }         
         
@@ -454,19 +374,11 @@ namespace Ch.Elca.Iiop.Marshalling {
             return sourceStream.ReadFloat();
         }
         
-        #if NET_2        
         internal override void SerializeElementArray<T>(Array actual, CdrOutputStream targetStream) {
-        #else
-        internal override void SerializeElementArray(Array actual, CdrOutputStream targetStream) {
-        #endif
             targetStream.WriteFloatArray((float[])actual);
         }
         
-        #if NET_2
         internal override void DeserializeElementArray<T>(Array toFill, CdrInputStream sourceStream) {
-        #else
-        internal override void DeserializeElementArray(Array toFill, CdrInputStream sourceStream) {
-        #endif        
             sourceStream.ReadFloatArray((float[])toFill);
         }        
 
@@ -488,19 +400,11 @@ namespace Ch.Elca.Iiop.Marshalling {
             return sourceStream.ReadDouble();
         }
         
-        #if NET_2        
         internal override void SerializeElementArray<T>(Array actual, CdrOutputStream targetStream) {
-        #else
-        internal override void SerializeElementArray(Array actual, CdrOutputStream targetStream) {
-        #endif
             targetStream.WriteDoubleArray((double[])actual);
         }
         
-        #if NET_2
         internal override void DeserializeElementArray<T>(Array toFill, CdrInputStream sourceStream) {
-        #else
-        internal override void DeserializeElementArray(Array toFill, CdrInputStream sourceStream) {
-        #endif        
             sourceStream.ReadDoubleArray((double[])toFill);
         }
         
@@ -1584,11 +1488,7 @@ namespace Ch.Elca.Iiop.Marshalling {
     }
 
     /// <summary>serializes idl sequences</summary>
-#if NET_2
     internal class IdlSequenceSerializer<T> : Serializer {
-#else
-    internal class IdlSequenceSerializer : Serializer {
-#endif
         
         #region IFields
         
@@ -1603,26 +1503,16 @@ namespace Ch.Elca.Iiop.Marshalling {
         /// <summary>
         /// default constructor.
         /// </summary>
-#if !NET_2
-        /// <param name="forType">The sequence type</param>
-#endif
         /// <param name="elemAttrs">The sequence element type attributes</param>
         /// <param name="bound">the number of elements allowed maximally</param>
         /// <param name="allowNull">Allow to serialize null or not. If allowed, serialize it
         /// as empty sequence.</param>
         /// <param name="serFactory">The serializer factory created this serializer</param>
         public IdlSequenceSerializer(
-#if !NET_2                                     
-                                     Type forType,
-#endif                                     
                                      AttributeExtCollection elemAttrs,
                                      int bound, bool allowNull, SerializerFactory serFactory) {
             m_allowNull = allowNull;
-#if NET_2
             m_forTypeElemType = typeof(T);
-#else
-            m_forTypeElemType = forType.GetElementType();
-#endif
             m_bound = bound;    
             // element is not the same than the sequence -> therefore no problems with recursion
             DetermineElementSerializer(m_forTypeElemType, elemAttrs, serFactory);
@@ -1659,11 +1549,7 @@ namespace Ch.Elca.Iiop.Marshalling {
             CheckBound((uint)array.Length);
             targetStream.WriteULong((uint)array.Length);
             // serialize sequence elements
-#if NET_2
             m_elementSerializer.SerializeElementArray<T>(array, targetStream);
-#else
-            m_elementSerializer.SerializeElementArray(array, targetStream);
-#endif
         }
 
         internal override object Deserialize(CdrInputStream sourceStream) {
@@ -1671,13 +1557,8 @@ namespace Ch.Elca.Iiop.Marshalling {
             uint nrOfElements = sourceStream.ReadULong();
             CheckBound(nrOfElements);
             Array result;
-#if NET_2
             result = new T[nrOfElements];
             m_elementSerializer.DeserializeElementArray<T>(result, sourceStream);
-#else
-            result = Array.CreateInstance(m_forTypeElemType, (int)nrOfElements);
-            m_elementSerializer.DeserializeElementArray(result, sourceStream);
-#endif
             return result;
         }
 
@@ -3382,16 +3263,11 @@ namespace Ch.Elca.Iiop.Tests {
                 m_serFactory.Create(seqType, m_seqAttributes);
 
             Assert.NotNull(ser, "ser");
-#if NET_2
-            Assert.AreEqual("ser type", typeof(IdlSequenceSerializer<>).MakeGenericType(seqType.GetElementType()),
-                                   ser.GetType());
-#else
-            Assert.AreEqual(typeof(IdlSequenceSerializer),
-                                   ser.GetType(), "ser type");
-#endif
+            Assert.AreEqual(typeof(IdlSequenceSerializer<>).MakeGenericType(seqType.GetElementType()),
+                            ser.GetType(), "ser type");
             return ser;
-	    }
-	    	    	    
+        }
+
 	    private void AssertSerialization(object actual, byte[] expected) {
 	        Serializer ser = CreateSerializer(actual);
             GenericSerTest(ser, actual, expected);            

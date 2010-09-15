@@ -188,10 +188,11 @@ namespace Ch.Elca.Iiop.Idl {
                 throw new Exception("schema loading problem");
             }
             XmlDocument doc = new XmlDocument();
-            XmlTextReader textReader = new XmlTextReader(configStream);            
-            XmlValidatingReader validatingReader = new XmlValidatingReader(textReader);
-        	try {
-                validatingReader.Schemas.Add(m_mappingPluginSchema);
+            XmlReaderSettings settings = new XmlReaderSettings();
+            settings.ValidationType = ValidationType.Schema;
+            settings.Schemas.Add(m_mappingPluginSchema);
+            XmlReader validatingReader = XmlReader.Create(configStream, settings);
+            try {
                 doc.Load(validatingReader);
                 // process the file
                 XmlNodeList elemList = doc.GetElementsByTagName("mapping");
