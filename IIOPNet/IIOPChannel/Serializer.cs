@@ -68,7 +68,7 @@ namespace Ch.Elca.Iiop.Marshalling {
         /// <param name="sourceStream"></param>
         /// <returns></returns>
         internal abstract object Deserialize(CdrInputStream sourceStream);
-                                                                                
+
         internal virtual void SerializeElementArray<T>(Array actual, CdrOutputStream targetStream) {
             T[] actualArray = (T[]) actual;
             for (int i = 0; i < actual.Length; i++) {
@@ -77,15 +77,15 @@ namespace Ch.Elca.Iiop.Marshalling {
                             targetStream);
             }
         }
-        
+
         internal virtual void DeserializeElementArray<T>(Array toFill, CdrInputStream sourceStream) {
-            T[] toFillArray = (T[]) toFill;        
+            T[] toFillArray = (T[]) toFill;
             for (int i = 0; i < toFill.Length; i++) {
                 object entry = Deserialize(sourceStream);
                 toFillArray[i] = (T) entry;
             }
         }
-                                
+
         /// <summary>
         /// Creates a serializer for serialising/deserialing a field
         /// </summary>
@@ -94,14 +94,14 @@ namespace Ch.Elca.Iiop.Marshalling {
             AttributeExtCollection fieldAttrs = 
                 ReflectionHelper.GetCustomAttriutesForField(fieldToSer, true);
             return serFactory.Create(fieldType, fieldAttrs);
-        }                
+        }
 
         /// <summary>
         /// serialises a field of a value-type
         /// </summary>
         /// <param name="fieldToSer"></param>
         protected static void SerializeField(FieldInfo fieldToSer, object actual, Serializer ser,
-                                      CdrOutputStream targetStream) {            
+                                      CdrOutputStream targetStream) {
             ser.Serialize(fieldToSer.GetValue(actual), targetStream);
         }
 
@@ -110,19 +110,19 @@ namespace Ch.Elca.Iiop.Marshalling {
         /// </summary>
         /// <returns>the deserialised value</returns>
         protected static object DeserializeField(FieldInfo fieldToDeser, object actual, Serializer ser,
-                                          CdrInputStream sourceStream) {            
+                                          CdrInputStream sourceStream) {
             object fieldVal = ser.Deserialize(sourceStream);
             fieldToDeser.SetValue(actual, fieldVal);
             return fieldVal;
         }
 
-        protected void CheckActualNotNull(object actual) {            
+        protected void CheckActualNotNull(object actual) {
             if (actual == null) {
                 // not allowed
                 throw new BAD_PARAM(3433, CompletionStatus.Completed_MayBe);
             }
             // ok
-        }        
+        }
 
         #endregion IMethods
 
@@ -144,22 +144,22 @@ namespace Ch.Elca.Iiop.Marshalling {
         internal override object Deserialize(CdrInputStream sourceStream) {
             return sourceStream.ReadOctet();
         }
-        
+
         internal override void SerializeElementArray<T>(Array actual, CdrOutputStream targetStream) {
             targetStream.WriteOctetArray((byte[])actual);
         }
-        
+
         internal override void DeserializeElementArray<T>(Array toFill, CdrInputStream sourceStream) {
             sourceStream.ReadOctetArray((byte[])toFill);
-        }                
+        }
 
         #endregion IMethods
 
     }
-    
+
     /// <summary>serializes instances of System.SByte</summary>
     internal class SByteSerializer : Serializer {
-        
+
         #region IMethods
 
         internal override void Serialize(object actual, 
@@ -175,7 +175,7 @@ namespace Ch.Elca.Iiop.Marshalling {
         }
 
         #endregion IMethods
-        
+
     }
 
     /// <summary>serializes instances of System.Boolean</summary> 
@@ -191,14 +191,14 @@ namespace Ch.Elca.Iiop.Marshalling {
         internal override object Deserialize(CdrInputStream sourceStream) {
             return sourceStream.ReadBool();
         }
-        
+
         internal override void SerializeElementArray<T>(Array actual, CdrOutputStream targetStream) {
             targetStream.WriteBoolArray((bool[])actual);
         }
-        
+
         internal override void DeserializeElementArray<T>(Array toFill, CdrInputStream sourceStream) {
             sourceStream.ReadBoolArray((bool[])toFill);
-        }                        
+        }
 
         #endregion IMethods
 
@@ -208,7 +208,7 @@ namespace Ch.Elca.Iiop.Marshalling {
     internal class Int16Serializer : Serializer {
 
         #region IMethods
-        
+
         internal override void Serialize(object actual,
                                        CdrOutputStream targetStream) {
             targetStream.WriteShort((short)actual);
@@ -217,24 +217,24 @@ namespace Ch.Elca.Iiop.Marshalling {
         internal override object Deserialize(CdrInputStream sourceStream) {
             return sourceStream.ReadShort();
         }
-        
+
         internal override void SerializeElementArray<T>(Array actual, CdrOutputStream targetStream) {
             targetStream.WriteShortArray((short[])actual);
         }
-        
+
         internal override void DeserializeElementArray<T>(Array toFill, CdrInputStream sourceStream) {
             sourceStream.ReadShortArray((short[])toFill);
-        }                                
+        }
 
         #endregion IMethods
 
     }
-    
+
     /// <summary>serializes instances of System.UInt16</summary>
     internal class UInt16Serializer : Serializer {
-        
+
         #region IMethods
-        
+
         internal override void Serialize(object actual,
                                        CdrOutputStream targetStream) {
             targetStream.WriteUShort((ushort)actual);
@@ -243,24 +243,24 @@ namespace Ch.Elca.Iiop.Marshalling {
         internal override object Deserialize(CdrInputStream sourceStream) {
             return sourceStream.ReadUShort();
         }
-        
+
         internal override void SerializeElementArray<T>(Array actual, CdrOutputStream targetStream) {
             targetStream.WriteUShortArray((ushort[])actual);
         }
-        
+
         internal override void DeserializeElementArray<T>(Array toFill, CdrInputStream sourceStream) {
             sourceStream.ReadUShortArray((ushort[])toFill);
-        }                                        
+        }
 
-        #endregion IMethods        
-        
+        #endregion IMethods
+
     }
-    
+
     /// <summary>serializes instances of System.Int32</summary>
     internal class Int32Serializer : Serializer {
 
         #region IMethods
-        
+
         internal override void Serialize(object actual, 
                                        CdrOutputStream targetStream) {
             targetStream.WriteLong((int)actual);
@@ -269,24 +269,24 @@ namespace Ch.Elca.Iiop.Marshalling {
         internal override object Deserialize(CdrInputStream sourceStream) {
             return sourceStream.ReadLong();
         }
-        
+
         internal override void SerializeElementArray<T>(Array actual, CdrOutputStream targetStream) {
             targetStream.WriteLongArray((int[])actual);
         }
-        
+
         internal override void DeserializeElementArray<T>(Array toFill, CdrInputStream sourceStream) {
             sourceStream.ReadLongArray((int[])toFill);
-        }                                                
+        }
 
         #endregion IMethods
 
     }
-    
+
     /// <summary>serializes instances of System.UInt32</summary>
     internal class UInt32Serializer : Serializer {
 
         #region IMethods
-        
+
         internal override void Serialize(object actual, 
                                        CdrOutputStream targetStream) {
             targetStream.WriteULong((uint)actual);
@@ -295,17 +295,17 @@ namespace Ch.Elca.Iiop.Marshalling {
         internal override object Deserialize(CdrInputStream sourceStream) {
             return sourceStream.ReadULong();
         }
-        
+
         internal override void SerializeElementArray<T>(Array actual, CdrOutputStream targetStream) {
             targetStream.WriteULongArray((uint[])actual);
         }
-        
+
         internal override void DeserializeElementArray<T>(Array toFill, CdrInputStream sourceStream) {
             sourceStream.ReadULongArray((uint[])toFill);
-        }                                                        
+        }
 
-        #endregion IMethods        
-        
+        #endregion IMethods
+
     }
 
     /// <summary>serializes instances of System.Int64</summary>
@@ -321,24 +321,24 @@ namespace Ch.Elca.Iiop.Marshalling {
         internal override object Deserialize(CdrInputStream sourceStream) {
             return sourceStream.ReadLongLong();
         }
-        
+
         internal override void SerializeElementArray<T>(Array actual, CdrOutputStream targetStream) {
             targetStream.WriteLongLongArray((long[])actual);
         }
-        
+
         internal override void DeserializeElementArray<T>(Array toFill, CdrInputStream sourceStream) {
             sourceStream.ReadLongLongArray((long[])toFill);
-        }                                                                
+        }
 
         #endregion IMethods
 
     }
-    
+
     /// <summary>serializes instances of System.UInt64</summary>
     internal class UInt64Serializer : Serializer {
-        
+
         #region IMethods
-        
+
         internal override void Serialize(object actual,
                                        CdrOutputStream targetStream) {
             targetStream.WriteULongLong((ulong)actual);
@@ -346,25 +346,25 @@ namespace Ch.Elca.Iiop.Marshalling {
 
         internal override object Deserialize(CdrInputStream sourceStream) {
             return sourceStream.ReadULongLong();
-        }      
-        
+        }
+
         internal override void SerializeElementArray<T>(Array actual, CdrOutputStream targetStream) {
             targetStream.WriteULongLongArray((ulong[])actual);
         }
-        
+
         internal override void DeserializeElementArray<T>(Array toFill, CdrInputStream sourceStream) {
             sourceStream.ReadULongLongArray((ulong[])toFill);
-        }         
-        
+        }
+
         #endregion IMethods
-        
+
     }
 
     /// <summary>serializes instances of System.Single</summary>
     internal class SingleSerializer : Serializer {
 
         #region IMethods
-    
+
         internal override void Serialize(object actual,
                                        CdrOutputStream targetStream) {
             targetStream.WriteFloat((float)actual);
@@ -373,14 +373,14 @@ namespace Ch.Elca.Iiop.Marshalling {
         internal override object Deserialize(CdrInputStream sourceStream) {
             return sourceStream.ReadFloat();
         }
-        
+
         internal override void SerializeElementArray<T>(Array actual, CdrOutputStream targetStream) {
             targetStream.WriteFloatArray((float[])actual);
         }
-        
+
         internal override void DeserializeElementArray<T>(Array toFill, CdrInputStream sourceStream) {
             sourceStream.ReadFloatArray((float[])toFill);
-        }        
+        }
 
         #endregion IMethods
 
@@ -399,15 +399,15 @@ namespace Ch.Elca.Iiop.Marshalling {
         internal override object Deserialize(CdrInputStream sourceStream) {
             return sourceStream.ReadDouble();
         }
-        
+
         internal override void SerializeElementArray<T>(Array actual, CdrOutputStream targetStream) {
             targetStream.WriteDoubleArray((double[])actual);
         }
-        
+
         internal override void DeserializeElementArray<T>(Array toFill, CdrInputStream sourceStream) {
             sourceStream.ReadDoubleArray((double[])toFill);
         }
-        
+
 
         #endregion IMethods
 
@@ -417,21 +417,21 @@ namespace Ch.Elca.Iiop.Marshalling {
     internal class CharSerializer : Serializer {
 
         #region IFields
-        
+
         private bool m_useWide;
-        
+
         #endregion IFields
         #region IConstructors
-        
+
         public CharSerializer(bool useWide) {
             m_useWide = useWide;
         }
-        
+
         #endregion IConstructors
         #region IMethods
 
         internal override void Serialize(object actual,
-                                       CdrOutputStream targetStream) {            
+                                       CdrOutputStream targetStream) {
             if (m_useWide) {
                 targetStream.WriteWChar((char)actual);
             } else {
@@ -440,7 +440,7 @@ namespace Ch.Elca.Iiop.Marshalling {
             }
         }
 
-        internal override object Deserialize(CdrInputStream sourceStream) {            
+        internal override object Deserialize(CdrInputStream sourceStream) {
             char result;
             if (m_useWide) {
                 result = sourceStream.ReadWChar();
@@ -458,13 +458,13 @@ namespace Ch.Elca.Iiop.Marshalling {
     internal class StringSerializer : Serializer {
 
         #region IFields
-        
+
         private bool m_useWide;
         private bool m_allowNull;
-        
+
         #endregion IFields
         #region IConstructors
-        
+
         /// <summary>
         /// default constructor.
         /// </summary>
@@ -475,12 +475,12 @@ namespace Ch.Elca.Iiop.Marshalling {
             m_useWide = useWide;
             m_allowNull = allowNull;
         }
-        
+
         #endregion IConstructors
         #region IMethods
 
         internal override void Serialize(object actual,
-                                       CdrOutputStream targetStream) {            
+                                       CdrOutputStream targetStream) {
             // string may not be null by default, if StringValueAttriubte is set
             if (m_allowNull && actual == null) {
                 actual = String.Empty;
@@ -510,36 +510,36 @@ namespace Ch.Elca.Iiop.Marshalling {
 
     #endregion
     // **************************************************************************************************
-    
-    // **************************************************************************************************    
+
+    // **************************************************************************************************
     #region serializer for marshalbyref types
-    
+
     /// <summary>serializes object references</summary>
     internal class ObjRefSerializer : Serializer {
 
         #region IFields
-        
+
         private Type m_forType;
         private IiopUrlUtil m_iiopUrlUtil;
-        
+
         #endregion IFields
         #region IConstructors
-        
+
         public ObjRefSerializer(Type forType, IiopUrlUtil iiopUrlUtil) {
             m_forType = forType;
             m_iiopUrlUtil = iiopUrlUtil;
         }
-        
+
         #endregion IConstructors
         #region IMethods
-        
+
         internal override void Serialize(object actual, CdrOutputStream targetStream) {
             if (actual == null) { 
                 WriteNullReference(targetStream); // null must be handled specially
                 return;
             }
             MarshalByRefObject target = (MarshalByRefObject) actual; // this could be a proxy or the server object
-            
+
             // create the IOR for this URI, possibilities:
             // is a server object -> create ior from key and channel-data
             // is a proxy --> create IOR from url
@@ -594,13 +594,13 @@ namespace Ch.Elca.Iiop.Marshalling {
                 Trace.WriteLine(String.Format("ObjRef deser, not locally verifiable, that ior type-id " +
                                               "{0} is compatible to required formal type {1}. " + 
                                               "Remote check will be done on first call to this ior.",
-                                              ior.TypID, m_forType.FullName));                
-            }                        
+                                              ior.TypID, m_forType.FullName));
+            }
             // create a proxy
             object proxy = RemotingServices.Connect(interfaceType, url);
             return proxy;
         }
-        
+
         #endregion IMethods
 
     }
@@ -616,11 +616,11 @@ namespace Ch.Elca.Iiop.Marshalling {
     internal class ValueObjectSerializer : Serializer {
 
         #region Types
-        
+
         /// <summary>
         /// Serialises/deserialises a concrete instance of a value type.
         /// This is a helper to improve performance, and is only used by the ValueObjectSerializer.
-        /// It's not directly selected by the SerializerFactory as Serializer.        
+        /// It's not directly selected by the SerializerFactory as Serializer.
         /// </summary>
         /// <remarks>
         /// This class can't inherit from the Serializer base class, because additional
@@ -629,16 +629,16 @@ namespace Ch.Elca.Iiop.Marshalling {
         /// it should not be used like other Serializers.
         /// </remarks>
         internal class ValueConcreteInstanceSerializer {
-            
-            private Type m_forConcreteType;            
-            private Type m_forConcreteInstanceType;  
+
+            private Type m_forConcreteType;
+            private Type m_forConcreteInstanceType;
             private bool m_isCustomMarshalled;
             private FieldInfo[] m_fieldInfos;
             private Serializer[] m_fieldSerializers;
             private SerializerFactory m_serFactory;
             private bool m_initalized;
             private string m_repositoryIDOfType;
-            
+
             internal ValueConcreteInstanceSerializer(Type concreteType, SerializerFactory serFactory) {
                 m_forConcreteType = concreteType;
                 m_serFactory = serFactory;
@@ -647,9 +647,9 @@ namespace Ch.Elca.Iiop.Marshalling {
                 // determine instance to instantiate for concreteType: 
                 // check for a value type implementation class
                 m_forConcreteInstanceType = DetermineInstanceToCreateType(m_forConcreteType);
-                m_isCustomMarshalled = CheckForCustomMarshalled(m_forConcreteType);                
+                m_isCustomMarshalled = CheckForCustomMarshalled(m_forConcreteType);
             }
-            
+
             private Type DetermineInstanceToCreateType(Type concreteType) {
                 Type result = concreteType;
                 object[] implAttr =
@@ -675,13 +675,13 @@ namespace Ch.Elca.Iiop.Marshalling {
                 }
                 return result;
             }
-            
+
             /// <summary>checks, if custom marshalling must be used</summary>
             private bool CheckForCustomMarshalled(Type forType) {
                 // subclasses of a custom marshalled type are automatically also custom marshalled: CORBA-spec-99-10-07: page 3-27
                 return ReflectionHelper.ICustomMarshalledType.IsAssignableFrom(forType);
             }
-            
+
             /// <summary>checks, if the type is an implementation of a value-type</summary>
             /// <remarks>fields of implementation classes are not serialized/deserialized</remarks>
             private bool IsImplClass(Type forType) {
@@ -704,8 +704,8 @@ namespace Ch.Elca.Iiop.Marshalling {
                     }
                 }
                 return false;
-            }            
-            
+            }
+
             /// <summary>
             /// initalize the serializer for usage. Before, the serializer is non-usable
             /// </summary>
@@ -720,16 +720,16 @@ namespace Ch.Elca.Iiop.Marshalling {
                     // possible recursive chain
                     // but to be consistent with IdlStruct, do it this way.
                     DetermineFieldSerializers(m_serFactory);
-                }                
+                }
                 m_initalized = true;
-            }   
-        
+            }
+
             private void CheckInitalized() {
                 if (!m_initalized) {
                     throw new BAD_INV_ORDER(1678, CompletionStatus.Completed_MayBe);
                 }
-            }            
-            
+            }
+
             private void DetermineFieldSerializers(SerializerFactory serFactory) {
                 ArrayList allFields = new ArrayList();
                 ArrayList allSerializers = new ArrayList();
@@ -757,7 +757,7 @@ namespace Ch.Elca.Iiop.Marshalling {
                     if (!IsImplClass(currentType)) { // ignore impl-classes in serialization code
                         typeHierarchy.Push(currentType);
                     }
-    
+
                     currentType = currentType.BaseType;
                     if (currentType == ReflectionHelper.ObjectType || currentType == ReflectionHelper.ValueTypeType ||
                        (ClsToIdlMapper.IsMappedToAbstractValueType(currentType,
@@ -767,7 +767,7 @@ namespace Ch.Elca.Iiop.Marshalling {
                 }
                 return typeHierarchy;
             }
-            
+
             private string DetermineRepositoryID(Type forType) {
                 string repId;
                 if (!IsImplClass(forType)) {
@@ -777,7 +777,7 @@ namespace Ch.Elca.Iiop.Marshalling {
                 }
                 return repId;
             }
-            
+
             /// <summary>writes all the fields of the instance</summary>
             private void WriteFields(object instance, 
                                      CdrOutputStream targetStream) {
@@ -788,7 +788,7 @@ namespace Ch.Elca.Iiop.Marshalling {
                     }
                 }
             }
-                        
+
             /// <summary>reads and sets the all the fields of the instance</summary>
             private void ReadFields(object instance,
                                     CdrInputStream sourceStream) {
@@ -797,9 +797,9 @@ namespace Ch.Elca.Iiop.Marshalling {
                         DeserializeField(m_fieldInfos[i], instance, m_fieldSerializers[i],
                                          sourceStream);
                     }
-                }                                
-            }                                    
-            
+                }
+            }
+
             /// <summary>
             /// Serialize an instance of the type, this concrete serializer is for,
             /// i.e. actual.GetType() is the same type as the one passed to the constructor
@@ -811,7 +811,7 @@ namespace Ch.Elca.Iiop.Marshalling {
                 // attentition here: if formal type represents an IDL abstract interface, writing no type information is not ok.
                 // do not use no typing information option, because java orb can't handle it
                 valueTag = valueTag | 0x00000002;
-                StreamPosition indirPos = targetStream.WriteIndirectableInstanceTag(valueTag);                                
+                StreamPosition indirPos = targetStream.WriteIndirectableInstanceTag(valueTag);
                 targetStream.WriteIndirectableString(m_repositoryIDOfType, IndirectionType.IndirRepId,
                                                      IndirectionUsage.ValueType);
 
@@ -832,9 +832,9 @@ namespace Ch.Elca.Iiop.Marshalling {
                     }
                     ((ICustomMarshalled)actual).Serialize(
                         new DataOutputStreamImpl(targetStream, m_serFactory));
-                }                
+                }
             }
-            
+
             internal object Deserialize(CdrInputStream sourceStream,
                                         StreamPosition instanceStartPos, uint valueTag) {
                 CheckInitalized();
@@ -846,8 +846,8 @@ namespace Ch.Elca.Iiop.Marshalling {
                                               result);
 
                 // now the value fields follow
-                sourceStream.BeginReadValueBody(valueTag);                
-                
+                sourceStream.BeginReadValueBody(valueTag);
+
                 // value content
                 if (!m_isCustomMarshalled) {
                     ReadFields(result, 
@@ -861,30 +861,30 @@ namespace Ch.Elca.Iiop.Marshalling {
                     ((ICustomMarshalled)result).Deserialise(
                         new DataInputStreamImpl(sourceStream, m_serFactory));
                 }
-                
+
                 sourceStream.EndReadValue(valueTag);
-                return result;             
+                return result;
             }
-            
-            
+
+
         }
-        
+
         #endregion Types
-        
+
         #region IFields
-        
-        private Type m_forType;        
+
+        private Type m_forType;
         private SerializerFactory m_serFactory;
-        
+
         #endregion IFields
         #region IConstructors
-        
+
         internal ValueObjectSerializer(Type forType, 
                                        SerializerFactory serFactory) {
             m_forType = forType;
             m_serFactory = serFactory;
         }
-        
+
         #endregion IConstructors
         #region IMethods
 
@@ -925,11 +925,11 @@ namespace Ch.Elca.Iiop.Marshalling {
                                                                           IndirectionType.IndirValue,
                                                                           IndirectionUsage.ValueType),
                                                       true);
-            } else {             
+            } else {
                 if (IsNullValue(valueTag)) {
                     return null;
                 }
-                
+
                 // non-null value
                 if (HasCodeBaseUrl(valueTag)) {
                     HandleCodeBaseUrl(sourceStream);
@@ -964,7 +964,7 @@ namespace Ch.Elca.Iiop.Marshalling {
         /// <summary>
         /// gets the type of which the actual parameter is / should be ...
         /// </summary>
-        private Type GetActualType(Type formal, CdrInputStream sourceStream, uint valueTag) {            
+        private Type GetActualType(Type formal, CdrInputStream sourceStream, uint valueTag) {
             Type actualType = null;
             switch (valueTag & 0x00000006) {
                 case 0: 
@@ -1023,18 +1023,18 @@ namespace Ch.Elca.Iiop.Marshalling {
 
         #endregion IFields
         #region IConstructors
-        
+
         public BoxedValueSerializer(Type forType, bool convertMultiDimArray,
                                     SerializerFactory serFactory) {
             CheckFormalIsBoxedValueType(forType);
             m_forType = forType;
             m_convertMultiDimArray = convertMultiDimArray;
-            m_valueSer = new ValueObjectSerializer(forType, serFactory);            
+            m_valueSer = new ValueObjectSerializer(forType, serFactory);
         }
 
         #endregion IConstructors
         #region IMethods
-        
+
         private void CheckFormalIsBoxedValueType(Type formal) {
             if (!formal.IsSubclassOf(ReflectionHelper.BoxedValueBaseType)) { 
                 // BoxedValueSerializer can only serialize formal types, 
@@ -1042,7 +1042,7 @@ namespace Ch.Elca.Iiop.Marshalling {
                 throw new INTERNAL(10041, CompletionStatus.Completed_MayBe);
             }
         }
-        
+
         internal override void Serialize(object actual,
                                          CdrOutputStream targetStream) {
             Debug.WriteLine("Begin serialization of boxed value type");
@@ -1059,7 +1059,7 @@ namespace Ch.Elca.Iiop.Marshalling {
             m_valueSer.Serialize(boxed, targetStream);
         }
 
-        internal override object Deserialize(CdrInputStream sourceStream) {  
+        internal override object Deserialize(CdrInputStream sourceStream) {
             Debug.WriteLine("Begin deserialization of boxed value type");
             BoxedValueBase boxedResult = (BoxedValueBase) 
                 m_valueSer.Deserialize(sourceStream);
@@ -1105,23 +1105,23 @@ namespace Ch.Elca.Iiop.Marshalling {
         /// </summary>
         internal IdlStructSerializer(Type forType, SerializerFactory serFactory) : base() {
             m_forType = forType;
-            m_serFactory = serFactory;			
+            m_serFactory = serFactory;
         }
 
         #endregion IConstructors
         #region IMethods
-        
+
         /// <summary>
         /// initalize the serializer for usage. Before, the serializer is non-usable
-        /// </summary>        
+        /// </summary>
         internal void Initalize() {
             if (m_initalized) {
                 throw new BAD_INV_ORDER(1678, CompletionStatus.Completed_MayBe);
             }
             DetermineFieldMapping();
             m_initalized = true;
-        }   
-        
+        }
+
         private void CheckInitalized() {
             if (!m_initalized) {
                 throw new BAD_INV_ORDER(1678, CompletionStatus.Completed_MayBe);
@@ -1132,15 +1132,15 @@ namespace Ch.Elca.Iiop.Marshalling {
             m_fields = ReflectionHelper.GetAllDeclaredInstanceFieldsOrdered(m_forType);
             m_fieldSerializers = new Serializer[m_fields.Length];
             for (int i = 0; i < m_fields.Length; i++) {
-                m_fieldSerializers[i] = CreateSerializerForField(m_fields[i], m_serFactory);           
+                m_fieldSerializers[i] = CreateSerializerForField(m_fields[i], m_serFactory);
             }
         }
-    
+
         internal override object Deserialize(CdrInputStream sourceStream) {
             CheckInitalized();
             object instance = Activator.CreateInstance(m_forType);
             for (int i = 0; i < m_fieldSerializers.Length; i++) {
-                DeserializeField(m_fields[i], instance, m_fieldSerializers[i], sourceStream);                
+                DeserializeField(m_fields[i], instance, m_fieldSerializers[i], sourceStream);
             }
             return instance;
         }
@@ -1148,10 +1148,10 @@ namespace Ch.Elca.Iiop.Marshalling {
         internal override void Serialize(object actual, CdrOutputStream targetStream) {
             CheckInitalized();
             for (int i = 0; i < m_fieldSerializers.Length; i++) {
-                SerializeField(m_fields[i], actual, m_fieldSerializers[i], targetStream);                
+                SerializeField(m_fields[i], actual, m_fieldSerializers[i], targetStream);
             }
         }
-    
+
         #endregion IMethods
 
     }
@@ -1168,16 +1168,16 @@ namespace Ch.Elca.Iiop.Marshalling {
 
         #endregion Constants
         #region IFields
-        
-        private Type m_forType;        
+
+        private Type m_forType;
         private FieldInfo m_discrField;
         private FieldInfo m_initField;
         private Serializer m_discrSerializer;
         private SerializerFactory m_serFactory;
-        
+
         #endregion IFields
         #region IConstructors
-        
+
         internal IdlUnionSerializer(Type forType, SerializerFactory serFactory) {
             m_forType = forType;
             // disciminator can't be the same type then the union -> therefore no recursive problem here.
@@ -1185,8 +1185,8 @@ namespace Ch.Elca.Iiop.Marshalling {
             m_discrSerializer = CreateSerializerForField(m_discrField, serFactory);
             m_initField = GetInitalizedField(m_forType);
             m_serFactory = serFactory;
-        }        
-        
+        }
+
         #endregion IConstructors
         #region IMethods
 
@@ -1195,10 +1195,10 @@ namespace Ch.Elca.Iiop.Marshalling {
                                                       BindingFlags.Instance | BindingFlags.NonPublic);
             if (discrValField == null) {
                 throw new INTERNAL(898, CompletionStatus.Completed_MayBe);
-            }            
+            }
             return discrValField;
         }
-        
+
         private FieldInfo GetValFieldForDiscriminator(Type formal, object discrValue) {
             MethodInfo getCurrentField = formal.GetMethod(GET_FIELD_FOR_DISCR_METHOD_NAME, 
                                                           BindingFlags.Static | BindingFlags.NonPublic);
@@ -1213,37 +1213,37 @@ namespace Ch.Elca.Iiop.Marshalling {
                                                         BindingFlags.Instance | BindingFlags.NonPublic);
             if (initalizedField == null) {
                 throw new INTERNAL(898, CompletionStatus.Completed_MayBe);
-            }            
+            }
             return initalizedField;
         }
 
-        internal override object Deserialize(CdrInputStream sourceStream) {            
+        internal override object Deserialize(CdrInputStream sourceStream) {
             // instantiate the resulting union
             object result = Activator.CreateInstance(m_forType);
-            // deserialise discriminator value            
+            // deserialise discriminator value
             object discrVal = DeserializeField(m_discrField, result, m_discrSerializer, sourceStream);
-            
+
             // determine value to deser
             FieldInfo curField = GetValFieldForDiscriminator(m_forType, discrVal);
             if (curField != null) {
                 // deserialise value
                 Serializer curFieldSer = CreateSerializerForField(curField, m_serFactory);
                 DeserializeField(curField, result, curFieldSer, sourceStream);
-            }            
+            }
             m_initField.SetValue(result, true);
             return result;
         }
 
-        internal override void Serialize(object actual, CdrOutputStream targetStream) {            
+        internal override void Serialize(object actual, CdrOutputStream targetStream) {
             bool isInit = (bool)m_initField.GetValue(actual);
             if (isInit == false) {
                 throw new BAD_PARAM(34, CompletionStatus.Completed_MayBe);
             }
-            // determine value of the discriminator            
+            // determine value of the discriminator
             object discrVal = m_discrField.GetValue(actual);
             // get the field matching the current discriminator
             FieldInfo curField = GetValFieldForDiscriminator(m_forType, discrVal);
-            
+
             m_discrSerializer.Serialize(discrVal, targetStream);
             if (curField != null) {
                 // seraialise value
@@ -1260,16 +1260,16 @@ namespace Ch.Elca.Iiop.Marshalling {
     internal class AbstractValueSerializer : Serializer {
 
         #region IFields
-        
+
         private ValueObjectSerializer m_valObjectSer;
 
         #endregion IFields
         #region IConstructors
-        
+
         internal AbstractValueSerializer(Type forType, SerializerFactory serFactory) {
             m_valObjectSer = new ValueObjectSerializer(forType, serFactory);
         }
-        
+
         #endregion IConstructors
         #region IMethods
 
@@ -1305,16 +1305,16 @@ namespace Ch.Elca.Iiop.Marshalling {
     internal class TypeSerializer : Serializer {
 
         #region IFields
-        
+
         private TypeCodeSerializer m_typeCodeSer;
 
         #endregion IFields
         #region IConstructors
-        
+
         internal TypeSerializer(SerializerFactory serFactory) {
             m_typeCodeSer = new TypeCodeSerializer(serFactory);
         }
-        
+
         #endregion IConstructors
         #region IMethods
 
@@ -1324,7 +1324,7 @@ namespace Ch.Elca.Iiop.Marshalling {
             m_typeCodeSer.Serialize(tc, targetStream);
         }
 
-        internal override object Deserialize(CdrInputStream sourceStream) {            
+        internal override object Deserialize(CdrInputStream sourceStream) {
             omg.org.CORBA.TypeCode tc = 
                 (omg.org.CORBA.TypeCode)m_typeCodeSer.Deserialize(sourceStream);
             Type result = null;
@@ -1337,26 +1337,26 @@ namespace Ch.Elca.Iiop.Marshalling {
         #endregion IMethods
 
     }
-   
+
     /// <summary>
     /// base class for enum serializers
     /// </summary>
     internal abstract class EnumSerializerBase : Serializer {
-        
+
         #region IFields
-        
+
         protected Type m_forType;
-        
+
         #endregion IFields
         #region IConstructors
-        
+
         protected EnumSerializerBase(Type forType) {
             m_forType = forType;
         }
-        
-        #endregion IConstructors        
+
+        #endregion IConstructors
         #region IMethods
-        
+
         protected object CheckedConvertToEnum(object enumBaseVal) {
             if (!Enum.IsDefined(m_forType, enumBaseVal)) { 
                 // illegal enum value for enum: formal, val: val
@@ -1364,71 +1364,71 @@ namespace Ch.Elca.Iiop.Marshalling {
             }
             return Enum.ToObject(m_forType, enumBaseVal);
         }
-        
+
         protected Exception CreateInvalidEnumValException(object val) {
             return new BAD_PARAM(10041, CompletionStatus.Completed_MayBe, "val: " + val);
         }
-        
+
         #endregion IMethods
-        
+
     }
-    
+
     /// <summary>serializes enums mapped from idl to cls</summary>
     internal class IdlEnumSerializer : EnumSerializerBase {
 
         #region IConstructors
-        
+
         internal IdlEnumSerializer(Type forType) : base(forType) {
         }
-        
+
         #endregion IConstructors
         #region IMethods
-        
+
         internal override void Serialize(object actual,
                                          CdrOutputStream targetStream) {
             // all possible 2^32 values of an int based enum can be represented in idl enum range
             int enumVal = (int)actual;
             targetStream.WriteULong((uint)enumVal);
-        }        
-        
+        }
+
         internal override object Deserialize(CdrInputStream sourceStream) {
             int valAsInt = (int)sourceStream.ReadULong();
             return CheckedConvertToEnum(valAsInt);
         }
-        
+
         #endregion IMethods
-        
+
     }
-        
+
     /// <summary>serializes enums by mapping the cls range to idl range in
     /// the following way: </summary>
     internal class EnumMapClsToIdlRangeSerializer : EnumSerializerBase {
-        
+
         #region IFields
-        
-        private Array m_enumVals;        
-        
+
+        private Array m_enumVals;
+
         #endregion IFields
         #region IConstructors
-        
+
         internal EnumMapClsToIdlRangeSerializer(Type forType) : base(forType) {
-            m_enumVals = (Array)Enum.GetValues(forType);            
+            m_enumVals = (Array)Enum.GetValues(forType);
         }
-        
+
         #endregion IConstructors
         #region IMethods
-        
+
         private int MapEnumValToIndexVal(object enumVal) {
             return Array.IndexOf(m_enumVals, enumVal);
         }
-        
+
         internal override void Serialize(object actual,
                                          CdrOutputStream targetStream) {
             int mappedVal = MapEnumValToIndexVal(actual);
             targetStream.WriteULong((uint)mappedVal);
         }
 
-        internal override object Deserialize(CdrInputStream sourceStream) {            
+        internal override object Deserialize(CdrInputStream sourceStream) {
             int index = (int)sourceStream.ReadULong();
             object val;
             if (index >= 0 && index < m_enumVals.Length) {
@@ -1438,24 +1438,24 @@ namespace Ch.Elca.Iiop.Marshalling {
             }
             return CheckedConvertToEnum(val);
         }
-    
+
         #endregion IMethods
 
     }
-    
+
     /// <summary>
     /// Serializer for cls flags mapped to idl equivalents
     /// </summary>
     internal class FlagsSerializer : Serializer {
-        
+
         #region IFields
-        
-        private Serializer m_netFlagsValSerializer;   
+
+        private Serializer m_netFlagsValSerializer;
         private Type m_forType;
-        
+
         #endregion IFields
         #region IConstructors
-        
+
         internal FlagsSerializer(Type forType, SerializerFactory serFactory) {
             m_forType = forType;
             Type underlyingType = Enum.GetUnderlyingType(m_forType);
@@ -1465,41 +1465,41 @@ namespace Ch.Elca.Iiop.Marshalling {
             m_netFlagsValSerializer =
                 serFactory.Create(underlyingType, AttributeExtCollection.EmptyCollection);
         }
-        
+
         #endregion IConstructors
         #region IMethods
-        
+
         internal override void Serialize(object actual,
                                          CdrOutputStream targetStream) {
             // map to the base-type of the enum, write the value of the enum
             m_netFlagsValSerializer.Serialize(actual, targetStream);
         }
 
-        
-        internal override object Deserialize(CdrInputStream sourceStream) {            
+
+        internal override object Deserialize(CdrInputStream sourceStream) {
             // .NET flags handled with .NET to IDL mapping
             object val = m_netFlagsValSerializer.Deserialize(sourceStream);
             // every value is allowed for flags -> therefore no checks
             return Enum.ToObject(m_forType, val);
         }
-        
+
         #endregion IMethods
-        
+
     }
 
     /// <summary>serializes idl sequences</summary>
     internal class IdlSequenceSerializer<T> : Serializer {
-        
+
         #region IFields
-        
+
         private int m_bound;
         private bool m_allowNull;
         private Type m_forTypeElemType;
         private Serializer m_elementSerializer;
-        
+
         #endregion IFields
         #region IConstructors
-        
+
         /// <summary>
         /// default constructor.
         /// </summary>
@@ -1513,18 +1513,18 @@ namespace Ch.Elca.Iiop.Marshalling {
                                      int bound, bool allowNull, SerializerFactory serFactory) {
             m_allowNull = allowNull;
             m_forTypeElemType = typeof(T);
-            m_bound = bound;    
+            m_bound = bound;
             // element is not the same than the sequence -> therefore no problems with recursion
             DetermineElementSerializer(m_forTypeElemType, elemAttrs, serFactory);
         }
-        
+
         #endregion IConstructors
         #region IMethods
 
         private void DetermineElementSerializer(Type elemType,
-												AttributeExtCollection elemAttrs,
+                                                AttributeExtCollection elemAttrs,
                                                 SerializerFactory serFactory) {
-			m_elementSerializer =
+            m_elementSerializer =
                 serFactory.Create(elemType, elemAttrs);
         }
 
@@ -1536,14 +1536,14 @@ namespace Ch.Elca.Iiop.Marshalling {
                 throw new BAD_PARAM(3434, CompletionStatus.Completed_MayBe);
             }
         }
-        
+
         internal override void Serialize(object actual, CdrOutputStream targetStream) {
             if (m_allowNull && actual == null) {
                 // if null allowed, handle null as empty sequence.
                 targetStream.WriteULong(0);
                 return;
             }
-            Array array = (Array) actual;
+            T[] array = (T[]) actual;
             // not allowed for a sequence:
             CheckActualNotNull(array);
             CheckBound((uint)array.Length);
@@ -1570,15 +1570,15 @@ namespace Ch.Elca.Iiop.Marshalling {
     internal class IdlArraySerializer : Serializer {
 
         #region IFields
-        
+
         private int[] m_dimensions;
-        private Type m_forTypeElemType;        
+        private Type m_forTypeElemType;
         private Serializer m_elementSer;
         private bool m_allowNull;
-        
+
         #endregion IFields
         #region IConstructors
-        
+
         /// <summary>
         /// default constructor.
         /// </summary>
@@ -1591,13 +1591,13 @@ namespace Ch.Elca.Iiop.Marshalling {
         public IdlArraySerializer(Type forType, AttributeExtCollection elemAttributes, 
                                   int[] dimensions, bool allowNull,
                                   SerializerFactory serFactory) {
-            m_dimensions = dimensions;    
-            m_forTypeElemType = forType.GetElementType();            
+            m_dimensions = dimensions;
+            m_forTypeElemType = forType.GetElementType();
             // element is not the same than the sequence -> therefore problems with recursion
             m_elementSer = serFactory.Create(m_forTypeElemType, elemAttributes);
             m_allowNull = allowNull;
         }
-        
+
         #endregion IConstructors
         #region IMethods
 
@@ -1621,12 +1621,12 @@ namespace Ch.Elca.Iiop.Marshalling {
             } else {
                 // the first dimension index in the array is increased slower than the second and so on ...
                 for (int j = 0; j < m_dimensions[currentDimension]; j++) {
-                    indices[currentDimension] = j;                    
+                    indices[currentDimension] = j;
                     SerialiseDimension(array, elementSer, targetStream, indices, currentDimension + 1);
                 }
             }
         }
-        
+
         internal override void Serialize(object actual, CdrOutputStream targetStream) {
             Array array = (Array) actual;
             // null not allowed for an idl array by default:
@@ -1636,7 +1636,7 @@ namespace Ch.Elca.Iiop.Marshalling {
             }
             CheckActualNotNull(array);
             CheckInstanceDimensions(array);
-            // get marshaller for elemtype                        
+            // get marshaller for elemtype
             SerialiseDimension(array, m_elementSer, targetStream, new int[m_dimensions.Length], 0);
         }
 
@@ -1648,20 +1648,20 @@ namespace Ch.Elca.Iiop.Marshalling {
             } else {
                 // the first dimension index in the array is increased slower than the second and so on ...
                 for (int j = 0; j < m_dimensions[currentDimension]; j++) {
-                    indices[currentDimension] = j;                    
+                    indices[currentDimension] = j;
                     DeserialiseDimension(array, elementSer, sourceStream, indices, currentDimension + 1);
                 }
-            }            
+            }
         }
 
-        internal override object Deserialize(CdrInputStream sourceStream) {           
+        internal override object Deserialize(CdrInputStream sourceStream) {
             Array result = Array.CreateInstance(m_forTypeElemType, m_dimensions);
-            // get marshaller for array element type                        
+            // get marshaller for array element type
             DeserialiseDimension(result, m_elementSer, sourceStream, new int[m_dimensions.Length], 0);
             return result;
         }
 
-        #endregion IMethods        
+        #endregion IMethods
 
     }
 
@@ -1674,7 +1674,7 @@ namespace Ch.Elca.Iiop.Marshalling {
 
         #endregion SFields
         #region IFields
-        
+
         private TypeCodeSerializer m_typeCodeSer;
         private SerializerFactory m_serFactory;
         private bool m_formalIsAnyContainer;
@@ -1682,18 +1682,18 @@ namespace Ch.Elca.Iiop.Marshalling {
 
         #endregion IFields
         #region IConstructors
-        
+
         internal AnySerializer(SerializerFactory serFactory, bool formalIsAnyContainer) : base() {
             m_serFactory = serFactory;
             m_formalIsAnyContainer = formalIsAnyContainer;
             m_typeCodeSer = new TypeCodeSerializer(serFactory);
         }
-        
+
         #endregion IConstructors
         #region IMethods
 
         /// <summary>
-        /// get the type to use for serialisation.        
+        /// get the type to use for serialisation.
         /// </summary>
         /// <remarks>
         /// If a supported-interface attr is present on a MarshalByRefObject, then, the serialisation
@@ -1715,8 +1715,8 @@ namespace Ch.Elca.Iiop.Marshalling {
             }
             return result;
         }
-        
-        
+
+
         internal override void Serialize(object actual,
                                        CdrOutputStream targetStream) {
             TypeCodeImpl typeCode = new NullTC();
@@ -1729,7 +1729,7 @@ namespace Ch.Elca.Iiop.Marshalling {
                     if (typeCode == null) {
                         throw new INTERNAL(457, CompletionStatus.Completed_MayBe);
                     }
-                    // type, which should be used to serialise value is determined by typecode!                    
+                    // type, which should be used to serialise value is determined by typecode!
                     if ((!(typeCode is NullTC)) && (!(typeCode is VoidTC))) {
                         actualType = Repository.GetTypeForTypeCode(typeCode); // no .NET type for null-tc, void-tc
                     }
@@ -1743,10 +1743,10 @@ namespace Ch.Elca.Iiop.Marshalling {
             }
             m_typeCodeSer.Serialize(typeCode, targetStream);
             if (actualType != null) {
-                AttributeExtCollection typeAttributes = Repository.GetAttrsForTypeCode(typeCode);                
+                AttributeExtCollection typeAttributes = Repository.GetAttrsForTypeCode(typeCode);
                 Serializer actualSer = 
                     m_serFactory.Create(actualType, typeAttributes);
-                actualSer.Serialize(actualToSerialise, targetStream);              
+                actualSer.Serialize(actualToSerialise, targetStream);
             }
         }
 
@@ -1759,8 +1759,8 @@ namespace Ch.Elca.Iiop.Marshalling {
                 Type dotNetType = Repository.GetTypeForTypeCode(typeCode);
                 AttributeExtCollection typeAttributes = Repository.GetAttrsForTypeCode(typeCode);
                 Serializer actualSer = 
-                    m_serFactory.Create(dotNetType, typeAttributes);                
-                result = actualSer.Deserialize(sourceStream);                
+                    m_serFactory.Create(dotNetType, typeAttributes);
+                result = actualSer.Deserialize(sourceStream);
                 // e.g. for boxed valueTypes, do an unbox here; for non cls complian types, 
                 // perform a conversion, if m_unboxAnyToCls.
                 result = typeCode.ConvertToExternalRepresentation(result, m_unboxAnyToCls);
@@ -1773,25 +1773,25 @@ namespace Ch.Elca.Iiop.Marshalling {
                 return new Any(result, typeCode);
             }
         }
-        
+
         #endregion IMethods
 
     }
 
     /// <summary>serializes a typecode</summary>
     internal class TypeCodeSerializer : Serializer {
-        
+
         #region IFields
-        
+
         private SerializerFactory m_serFactory;
-        
+
         #endregion IFields
         #region IConstructors
-        
+
         internal TypeCodeSerializer(SerializerFactory serFactory) : base() {
             m_serFactory = serFactory;
-        }        
-        
+        }
+
         #endregion IConstructors
         #region IMethods
 
@@ -1802,7 +1802,7 @@ namespace Ch.Elca.Iiop.Marshalling {
             uint kindVal = (uint)sourceStream.ReadInstanceOrIndirectionTag(out indirPos, 
                                                                            out isIndirection);
             if (!isIndirection) {
-            
+
                 omg.org.CORBA.TCKind kind = (omg.org.CORBA.TCKind)Enum.ToObject(typeof(omg.org.CORBA.TCKind),
                                                                                 (int)kindVal);
                 omg.org.CORBA.TypeCodeImpl result;
@@ -1903,7 +1903,7 @@ namespace Ch.Elca.Iiop.Marshalling {
                         result = new omg.org.CORBA.WCharTC();
                         break;
                     case omg.org.CORBA.TCKind.tk_wstring:
-                        result = new omg.org.CORBA.WStringTC();                                    
+                        result = new omg.org.CORBA.WStringTC();
                         break;
                     default:
                         // unknown typecode: kind
@@ -1916,13 +1916,13 @@ namespace Ch.Elca.Iiop.Marshalling {
                                                                 IndirectionUsage.TypeCode);
                 sourceStream.StoreIndirection(indirInfo, result);
                 // read additional parts of typecode, if present
-                result.ReadFromStream(sourceStream, m_serFactory);                                
+                result.ReadFromStream(sourceStream, m_serFactory);
                 return result;
             } else {
                 // resolve indirection:
-                StreamPosition indirectionPosition = sourceStream.ReadIndirectionOffset();                                
+                StreamPosition indirectionPosition = sourceStream.ReadIndirectionOffset();
                 return sourceStream.GetObjectForIndir(new IndirectionInfo(indirectionPosition.GlobalPosition,
-                                                                          IndirectionType.TypeCode,        
+                                                                          IndirectionType.TypeCode,
                                                                           IndirectionUsage.TypeCode), 
                                                       true);
             }
@@ -1944,26 +1944,26 @@ namespace Ch.Elca.Iiop.Marshalling {
         #endregion IMethods
 
     }
-    
+
     /// <summary>serializes an instance as IDL abstract-interface</summary>
     internal class AbstractInterfaceSerializer : Serializer {
 
         #region IFields
-        
+
         private Type m_forType;
         private Serializer m_objRefSer;
         private Serializer m_valueSer;
 
         #endregion IFields
         #region IConstructors
-        
+
         internal AbstractInterfaceSerializer(Type forType, SerializerFactory serFactory,
                                              IiopUrlUtil iiopUrlUtil) {
             m_forType = forType;
             m_objRefSer = new ObjRefSerializer(forType, iiopUrlUtil);
             m_valueSer = new ValueObjectSerializer(forType, serFactory);
         }
-        
+
         #endregion IConstructors
         #region IMethods
 
@@ -1992,7 +1992,7 @@ namespace Ch.Elca.Iiop.Marshalling {
                     // to base type of all objref for deserialization
                     formal = ReflectionHelper.MarshalByRefObjectType;
                 }
-                object result = m_objRefSer.Deserialize(sourceStream);    
+                object result = m_objRefSer.Deserialize(sourceStream);
                 return result;
             } else {
                 object result = m_valueSer.Deserialize(sourceStream);
@@ -2001,24 +2001,24 @@ namespace Ch.Elca.Iiop.Marshalling {
         }
 
         #endregion IMethods
-    
+
     }
 
-    
+
     /// <summary>serializes .NET exceptions as IDL-Exceptions</summary>
     internal class ExceptionSerializer : Serializer {
 
         #region IFields
-        
+
         private SerializerFactory m_serFactory;
-        
+
         #endregion IFields
         #region IConstructors
-        
+
         public ExceptionSerializer(SerializerFactory serFactory) {
             m_serFactory = serFactory;
         }
-        
+
         #endregion IConstructors
         #region IMethods
 
@@ -2035,13 +2035,13 @@ namespace Ch.Elca.Iiop.Marshalling {
             } else {
                 Exception exception = (Exception)Activator.CreateInstance(exceptionType);
                 // deserialise fields
-                FieldInfo[] fields = ReflectionHelper.GetAllDeclaredInstanceFieldsOrdered(exceptionType);                
+                FieldInfo[] fields = ReflectionHelper.GetAllDeclaredInstanceFieldsOrdered(exceptionType);
                 foreach (FieldInfo field in fields) {
                     Serializer ser = m_serFactory.Create(field.FieldType, 
                                                          ReflectionHelper.GetCustomAttriutesForField(field, true));
                     object fieldVal = ser.Deserialize(sourceStream);
                     field.SetValue(exception, fieldVal);
-                }                
+                }
                 return exception;
             }
         }
@@ -2056,10 +2056,10 @@ namespace Ch.Elca.Iiop.Marshalling {
                 targetStream.WriteULong((uint)sysEx.Minor);
                 targetStream.WriteULong((uint)sysEx.Status);
             } else {
-                FieldInfo[] fields = ReflectionHelper.GetAllDeclaredInstanceFieldsOrdered(actual.GetType());                
+                FieldInfo[] fields = ReflectionHelper.GetAllDeclaredInstanceFieldsOrdered(actual.GetType());
                 foreach (FieldInfo field in fields) {
                     object fieldVal = field.GetValue(actual);
-                    Serializer ser = m_serFactory.Create(field.FieldType,                     
+                    Serializer ser = m_serFactory.Create(field.FieldType,
                                                          ReflectionHelper.GetCustomAttriutesForField(field, true));
                     ser.Serialize(fieldVal, targetStream);
                 }
@@ -2069,38 +2069,38 @@ namespace Ch.Elca.Iiop.Marshalling {
         #endregion IMethods
 
     }
-    
+
     /// <summary>
     /// Serializer decorator for handling custom mapping.
     /// </summary>
     internal class CustomMappingDecorator : Serializer {
-        
+
         #region IFields
-        
+
         private CustomMappingDesc m_customMappingUsed;
         private Serializer m_decorated;
-        
+
         #endregion IFields
         #region IConstructors
-        
+
         internal CustomMappingDecorator(CustomMappingDesc customMappingUsed, Serializer decorated) {
             m_decorated = decorated;
             m_customMappingUsed = customMappingUsed;
         }
-        
+
         #endregion IConstructors
         #region IMethods
-        
+
         internal override void Serialize(object actual, CdrOutputStream targetStream) {
             if (actual != null) {
                 CustomMapperRegistry cReg = CustomMapperRegistry.GetSingleton();
                 // custom mapping maps the actual object to an instance of 
                 // the idl formal type.
                 actual = cReg.CreateIdlForClsInstance(actual, m_customMappingUsed.IdlType);
-            }            
+            }
             m_decorated.Serialize(actual, targetStream);
         }
-        
+
         internal override object Deserialize(CdrInputStream sourceStream) {
             object result =
                 m_decorated.Deserialize(sourceStream);
@@ -2110,10 +2110,10 @@ namespace Ch.Elca.Iiop.Marshalling {
             if (result != null) {
                 CustomMapperRegistry cReg = CustomMapperRegistry.GetSingleton();
                 result = cReg.CreateClsForIdlInstance(result, m_customMappingUsed.ClsType);
-            }                      
+            }
             return result;
         }
-        
+
         #endregion IMethods
     }
 
@@ -2122,7 +2122,7 @@ namespace Ch.Elca.Iiop.Marshalling {
 #if UnitTest
 
 namespace Ch.Elca.Iiop.Tests {
-    
+
     using System.IO;
     using System.Runtime.Remoting.Channels;
     using NUnit.Framework;
@@ -2130,16 +2130,16 @@ namespace Ch.Elca.Iiop.Tests {
     using Ch.Elca.Iiop.Cdr;
     using Ch.Elca.Iiop.Util;
     using omg.org.CORBA;
-    
+
     public enum TestEnumWithValueNotIndexBI32 : int {
         a1 = 10, b1 = 20, c1 = 30
-    }    
-    
+    }
+
     /// <summary>
     /// constains helper methods for serializer tests.
     /// </summary>
     public class AbstractSerializerTest {
-    	
+
         internal void GenericSerTest(Serializer ser, object actual, byte[] expected) {
             MemoryStream outStream = new MemoryStream();
             try {
@@ -2152,53 +2152,53 @@ namespace Ch.Elca.Iiop.Tests {
             } finally {
                 outStream.Close();
             }
-        }                
-        
+        }
+
         internal object GenericDeserForTest(Serializer ser, byte[] actual) {
             MemoryStream inStream = new MemoryStream();
             try {
                 inStream.Write(actual, 0, actual.Length);
                 inStream.Seek(0, SeekOrigin.Begin);
                 CdrInputStreamImpl cdrIn = new CdrInputStreamImpl(inStream);
-                cdrIn.ConfigStream(0, new GiopVersion(1, 2));            
+                cdrIn.ConfigStream(0, new GiopVersion(1, 2));
                 cdrIn.WCharSet = (int)Ch.Elca.Iiop.Services.WCharSet.UTF16;
                 return ser.Deserialize(cdrIn);
             } finally {
-                inStream.Close();        
+                inStream.Close();
             }
         }
-        
+
         internal void GenericDeserTest(Serializer ser, byte[] actual, object expected,
                                       out object deserialized) {
             deserialized = GenericDeserForTest(ser, actual);
             Assert.AreEqual(expected, deserialized,"value " + expected + " not deserialized.");
         }
-        
+
         internal void GenericDeserTest(Serializer ser, byte[] actual, object expected) {
             object deser;
             GenericDeserTest(ser, actual, expected, out deser);
-        }            	
-    	
+        }
+
     }
-    
+
     /// <summary>
     /// Unit-tests for the serialisers
     /// </summary>
-    [TestFixture]        
+    [TestFixture]
     public class SerialiserTestBaseTypes : AbstractSerializerTest {
-        
+
         public SerialiserTestBaseTypes() {
         }
-        
+
         [Test]
         public void TestByteSerialise() {
             Serializer ser = new ByteSerializer();
             GenericSerTest(ser, (byte)0, new byte[] { 0 });
             GenericSerTest(ser, (byte)11, new byte[] { 11 });
             GenericSerTest(ser, (byte)12, new byte[] { 12 });
-            GenericSerTest(ser, (byte)225, new byte[] { 225 });            
+            GenericSerTest(ser, (byte)225, new byte[] { 225 });
         }
-        
+
         [Test]
         public void TestByteDeserialise() {
             Serializer ser = new ByteSerializer();
@@ -2207,7 +2207,7 @@ namespace Ch.Elca.Iiop.Tests {
             GenericDeserTest(ser, new byte[] { 12 }, (byte)12);
             GenericDeserTest(ser, new byte[] { 225 }, (byte)225);
         }
-        
+
         [Test]
         public void TestSByteSerialise() {
             Serializer ser = new SByteSerializer();
@@ -2216,9 +2216,9 @@ namespace Ch.Elca.Iiop.Tests {
             GenericSerTest(ser, (sbyte)12, new byte[] { 12 });
             GenericSerTest(ser, (sbyte)-1, new byte[] { 0xFF });
             GenericSerTest(ser, SByte.MaxValue, new byte[] { 0x7F });
-            GenericSerTest(ser, SByte.MinValue, new byte[] { 0x80 });            
+            GenericSerTest(ser, SByte.MinValue, new byte[] { 0x80 });
         }
-        
+
         [Test]
         public void TestSByteDeserialise() {
             Serializer ser = new SByteSerializer();
@@ -2228,8 +2228,8 @@ namespace Ch.Elca.Iiop.Tests {
             GenericDeserTest(ser, new byte[] { 0xFF }, (sbyte)-1);
             GenericDeserTest(ser, new byte[] { 0x7F }, SByte.MaxValue);
             GenericDeserTest(ser, new byte[] { 0x80 }, SByte.MinValue);
-        }        
-        
+        }
+
         [Test]
         public void TestInt16Serialise() {
             Serializer ser = new Int16Serializer();
@@ -2239,7 +2239,7 @@ namespace Ch.Elca.Iiop.Tests {
             GenericSerTest(ser, Int16.MaxValue, new byte[] { 0x7F, 0xFF });
             GenericSerTest(ser, Int16.MinValue, new byte[] { 0x80, 0x00 });
         }
-        
+
         [Test]
         public void TestInt16Deserialise() {
             Serializer ser = new Int16Serializer();
@@ -2248,24 +2248,24 @@ namespace Ch.Elca.Iiop.Tests {
             GenericDeserTest(ser, new byte[] { 0xFF, 0xFF }, (short)-1);
             GenericDeserTest(ser, new byte[] { 0x7F, 0xFF }, Int16.MaxValue);
             GenericDeserTest(ser, new byte[] { 0x80, 0x00 }, Int16.MinValue);
-        }        
-        
+        }
+
         [Test]
         public void TestUInt16Serialise() {
             Serializer ser = new UInt16Serializer();
             GenericSerTest(ser, (ushort)0, new byte[] { 0, 0 });
-            GenericSerTest(ser, (ushort)225, new byte[] { 0, 225 });            
+            GenericSerTest(ser, (ushort)225, new byte[] { 0, 225 });
             GenericSerTest(ser, UInt16.MaxValue, new byte[] { 0xFF, 0xFF });
         }
-        
+
         [Test]
         public void TestUInt16Deserialise() {
             Serializer ser = new UInt16Serializer();
             GenericDeserTest(ser, new byte[] { 0, 0 }, (ushort)0);
             GenericDeserTest(ser, new byte[] { 0, 225 }, (ushort)225);
             GenericDeserTest(ser, new byte[] { 0xFF, 0xFF }, UInt16.MaxValue);
-        }                
-        
+        }
+
         [Test]
         public void TestInt32Serialise() {
             Serializer ser = new Int32Serializer();
@@ -2275,7 +2275,7 @@ namespace Ch.Elca.Iiop.Tests {
             GenericSerTest(ser, Int32.MaxValue, new byte[] { 0x7F, 0xFF, 0xFF, 0xFF });
             GenericSerTest(ser, Int32.MinValue, new byte[] { 0x80, 0x00, 0x00, 0x00 });
         }
-        
+
         [Test]
         public void TestInt32Deserialise() {
             Serializer ser = new Int32Serializer();
@@ -2284,8 +2284,8 @@ namespace Ch.Elca.Iiop.Tests {
             GenericDeserTest(ser, new byte[] { 0xFF, 0xFF, 0xFF, 0xFF }, (int)-1);
             GenericDeserTest(ser, new byte[] { 0x7F, 0xFF, 0xFF, 0xFF }, Int32.MaxValue);
             GenericDeserTest(ser, new byte[] { 0x80, 0x00, 0x00, 0x00 }, Int32.MinValue);
-        }        
-        
+        }
+
         [Test]
         public void TestUInt32Serialise() {
             Serializer ser = new UInt32Serializer();
@@ -2293,15 +2293,15 @@ namespace Ch.Elca.Iiop.Tests {
             GenericSerTest(ser, (uint)225, new byte[] { 0, 0, 0, 225 });
             GenericSerTest(ser, UInt32.MaxValue, new byte[] { 0xFF, 0xFF, 0xFF, 0xFF });
         }
-        
+
         [Test]
         public void TestUInt32Deserialise() {
             Serializer ser = new UInt32Serializer();
             GenericDeserTest(ser, new byte[] { 0, 0, 0, 0 }, (uint)0);
-            GenericDeserTest(ser, new byte[] { 0, 0, 0, 225 }, (uint)225);            
+            GenericDeserTest(ser, new byte[] { 0, 0, 0, 225 }, (uint)225);
             GenericDeserTest(ser, new byte[] { 0xFF, 0xFF, 0xFF, 0xFF }, UInt32.MaxValue);
-        }        
-        
+        }
+
         [Test]
         public void TestInt64Serialise() {
             Serializer ser = new Int64Serializer();
@@ -2311,7 +2311,7 @@ namespace Ch.Elca.Iiop.Tests {
             GenericSerTest(ser, Int64.MaxValue, new byte[] { 0x7F, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF });
             GenericSerTest(ser, Int64.MinValue, new byte[] { 0x80, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 });
         }
-        
+
         [Test]
         public void TestInt64Deserialise() {
             Serializer ser = new Int64Serializer();
@@ -2320,8 +2320,8 @@ namespace Ch.Elca.Iiop.Tests {
             GenericDeserTest(ser, new byte[] { 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF }, (long)-1);
             GenericDeserTest(ser, new byte[] { 0x7F, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF }, Int64.MaxValue);
             GenericDeserTest(ser, new byte[] { 0x80, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 }, Int64.MinValue);
-        }        
-        
+        }
+
         [Test]
         public void TestUInt64Serialise() {
             Serializer ser = new UInt64Serializer();
@@ -2330,7 +2330,7 @@ namespace Ch.Elca.Iiop.Tests {
             GenericSerTest(ser, UInt64.MaxValue, 
                            new byte[] { 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF });
         }
-        
+
         [Test]
         public void TestUInt64Deserialise() {
             Serializer ser = new UInt64Serializer();
@@ -2340,117 +2340,117 @@ namespace Ch.Elca.Iiop.Tests {
                              UInt64.MaxValue);
         }
 
-        [Test]        
+        [Test]
         public void TestBooleanSerialise() {
             Serializer ser = new BooleanSerializer();
             GenericSerTest(ser, false, new byte[] { 0 });
             GenericSerTest(ser, true, new byte[] { 1 });
         }
-        
+
         [Test]
         public void TestBooleanDeserialise() {
             Serializer ser = new BooleanSerializer();
             GenericDeserTest(ser, new byte[] { 0 }, false);
             GenericDeserTest(ser, new byte[] { 1 }, true);
         }
-        
+
         [Test]
         [ExpectedException(typeof(BAD_PARAM))]
         public void TestBooleanDeserialiseInvalidValue() {
             Serializer ser = new BooleanSerializer();
-            GenericDeserTest(ser, new byte[] { 2 }, null);            
-        }                
-        
+            GenericDeserTest(ser, new byte[] { 2 }, null);
+        }
+
         [Test]
         public void TestDeserializeEmptyStringNonWide() {
             Serializer ser = new StringSerializer(false, false);
             GenericDeserTest(ser, new byte[] { 0, 0, 0, 1, 0 }, String.Empty);
-            GenericDeserTest(ser, new byte[] { 0, 0, 0, 0 }, String.Empty); // visibroker interop            
+            GenericDeserTest(ser, new byte[] { 0, 0, 0, 0 }, String.Empty); // visibroker interop
         }
-        
+
         [Test]
         public void TestSerializeEmptyStringNonWide() {
             Serializer ser = new StringSerializer(false, false);
             GenericSerTest(ser, String.Empty, new byte[] { 0, 0, 0, 1, 0 });
         }
-        
+
         [Test]
         public void TestDeserializeEmptyStringWide() {
-            Serializer ser = new StringSerializer(true, false);            
+            Serializer ser = new StringSerializer(true, false);
             GenericDeserTest(ser, new byte[] { 0, 0, 0, 0 }, String.Empty); // giop 1.2, no terminating null char
         }
-        
+
         [Test]
         public void TestSerializeEmptyStringWide() {
             Serializer ser = new StringSerializer(true, false);
             GenericSerTest(ser, String.Empty, new byte[] { 0, 0, 0, 0 }); // giop 1.2, no terminating null char
-        }        
-        
+        }
+
         [Test]
         public void TestDeserializeStringNonWide() {
             Serializer ser = new StringSerializer(false, false);
             GenericDeserTest(ser, new byte[] { 0, 0, 0, 9, 73, 73, 79, 80, 46, 78, 69, 84, 0}, "IIOP.NET");
         }
-        
+
         [Test]
         public void TestSerializeStringNonWide() {
             Serializer ser = new StringSerializer(false, false);
             GenericSerTest(ser, "IIOP.NET", new byte[] { 0, 0, 0, 9, 73, 73, 79, 80, 46, 78, 69, 84, 0});
         }
-        
+
         [Test]
         public void TestDeserializeStringWide() {
             Serializer ser = new StringSerializer(true, false);
             GenericDeserTest(ser, new byte[] { 0, 0, 0, 16, 0, 73, 0, 73, 0, 79, 0, 80, 0, 46, 0, 78, 0, 69, 0, 84 }, 
                              "IIOP.NET");
-        }        
-        
+        }
+
         [Test]
         public void TestSerializeStringWide() {
             Serializer ser = new StringSerializer(true, false);
             GenericSerTest(ser, "IIOP.NET", 
                            new byte[] { 0, 0, 0, 16, 0, 73, 0, 73, 0, 79, 0, 80, 0, 46, 0, 78, 0, 69, 0, 84 });
-        }                
-        
+        }
+
     }
-    
+
     /// <summary>
     /// Serializer tests for WString / String Serialization.
     /// </summary>
     /// <remarks>move later all string ser tests here.</remarks>
     [TestFixture]
     public class AdvancedStringSerializerTest : AbstractSerializerTest {
-        
+
 
         [Test]
         [ExpectedException(typeof(BAD_PARAM))]
         public void TestNotAllowNullStringForBasicStrings() {
             StringSerializer stringSer = new StringSerializer(false, false);
             MemoryStream outStream = new MemoryStream();
-            try {            
-                CdrOutputStream cdrOut = new CdrOutputStreamImpl(outStream, 0);            
+            try {
+                CdrOutputStream cdrOut = new CdrOutputStreamImpl(outStream, 0);
                 stringSer.Serialize(null, cdrOut);
             } finally {
                 outStream.Close();
-            }            
-        }        
-        
+            }
+        }
+
         [Test]
         public void TestAllowNullStringForBasicStringsIfConfigured() {
             StringSerializer stringSer = new StringSerializer(false, true);
             GenericSerTest(stringSer, null, new byte[] { 0, 0, 0, 1, 0 });
         }
-        
+
     }
-    
+
 	/// <summary>
 	/// Serializer tests for enum / flags.
 	/// </summary>
 	[TestFixture]
     public class SerializerTestEnumFalgs : AbstractSerializerTest {
-	    
+
 	    private SerializerFactory m_serFactory;
-	    
+
 	    [SetUp]
 	    public void SetUp() {
 	        m_serFactory = new SerializerFactory();
@@ -2461,33 +2461,33 @@ namespace Ch.Elca.Iiop.Tests {
                     new omg.org.IOP.Encoding(omg.org.IOP.ENCODING_CDR_ENCAPS.ConstVal, 1, 2));
             m_serFactory.Initalize(new SerializerFactoryConfig(), IiopUrlUtil.Create(codec));
 	    }
-        
+
         private void FlagsGenericSerTest(Type flagsType, object actual, byte[] expected) {
             GenericSerTest(new FlagsSerializer(flagsType, m_serFactory),
                            actual, expected);
         }
-        
+
         private void FlagsGenericDeserTest(Type flagsType, byte[] actual, object expected) {
             GenericDeserTest(new FlagsSerializer(flagsType, m_serFactory),
                              actual, expected);
-        }        
-        
-        [Test]        
+        }
+
+        [Test]
         public void TestIdlEnumSerialise() {
             Serializer ser = new IdlEnumSerializer(typeof(TestIdlEnumBI32));
             GenericSerTest(ser, TestIdlEnumBI32.IDL_A, new byte[] { 0, 0, 0, 0});
             GenericSerTest(ser, TestIdlEnumBI32.IDL_B, new byte[] { 0, 0, 0, 1});
             GenericSerTest(ser, TestIdlEnumBI32.IDL_C, new byte[] { 0, 0, 0, 2});
         }
-        
+
         [Test]
         public void TestIdlEnumDeserialise() {
             Serializer ser = new IdlEnumSerializer(typeof(TestIdlEnumBI32));
             GenericDeserTest(ser, new byte[] { 0, 0, 0, 0}, TestIdlEnumBI32.IDL_A);
             GenericDeserTest(ser, new byte[] { 0, 0, 0, 1}, TestIdlEnumBI32.IDL_B);
             GenericDeserTest(ser, new byte[] { 0, 0, 0, 2}, TestIdlEnumBI32.IDL_C);
-        }        
-        
+        }
+
         [Test]
         public void TestEnumBI16Serialise() {
             Serializer ser = new EnumMapClsToIdlRangeSerializer(typeof(TestEnumBI16));
@@ -2495,15 +2495,15 @@ namespace Ch.Elca.Iiop.Tests {
             GenericSerTest(ser, TestEnumBI16.b2, new byte[] { 0, 0, 0, 1});
             GenericSerTest(ser, TestEnumBI16.c2, new byte[] { 0, 0, 0, 2});
         }
-        
+
         [Test]
         public void TestEnumBI16Deserialise() {
             Serializer ser = new EnumMapClsToIdlRangeSerializer(typeof(TestEnumBI16));
             GenericDeserTest(ser, new byte[] { 0, 0, 0, 0}, TestEnumBI16.a2);
             GenericDeserTest(ser, new byte[] { 0, 0, 0, 1}, TestEnumBI16.b2);
             GenericDeserTest(ser, new byte[] { 0, 0, 0, 2}, TestEnumBI16.c2);
-        }        
-        
+        }
+
         [Test]
         public void TestEnumBI32Serialise() {
             Serializer ser = new EnumMapClsToIdlRangeSerializer(typeof(TestEnumBI32));
@@ -2511,15 +2511,15 @@ namespace Ch.Elca.Iiop.Tests {
             GenericSerTest(ser, TestEnumBI32.b1, new byte[] { 0, 0, 0, 1});
             GenericSerTest(ser, TestEnumBI32.c1, new byte[] { 0, 0, 0, 2});
         }
-        
+
         [Test]
         public void TestEnumBI32Deserialise() {
             Serializer ser = new EnumMapClsToIdlRangeSerializer(typeof(TestEnumBI32));
             GenericDeserTest(ser, new byte[] { 0, 0, 0, 0}, TestEnumBI32.a1);
             GenericDeserTest(ser, new byte[] { 0, 0, 0, 1}, TestEnumBI32.b1);
             GenericDeserTest(ser, new byte[] { 0, 0, 0, 2}, TestEnumBI32.c1);
-        }        
-        
+        }
+
         [Test]
         public void TestEnumBI32ValueNotIndexSerialise() {
             Serializer ser = new EnumMapClsToIdlRangeSerializer(typeof(TestEnumWithValueNotIndexBI32));
@@ -2527,15 +2527,15 @@ namespace Ch.Elca.Iiop.Tests {
             GenericSerTest(ser, TestEnumWithValueNotIndexBI32.b1, new byte[] { 0, 0, 0, 1});
             GenericSerTest(ser, TestEnumWithValueNotIndexBI32.c1, new byte[] { 0, 0, 0, 2});
         }
-        
+
         [Test]
         public void TestEnumBI32ValueNotIndexDeserialise() {
             Serializer ser = new EnumMapClsToIdlRangeSerializer(typeof(TestEnumWithValueNotIndexBI32));
             GenericDeserTest(ser, new byte[] { 0, 0, 0, 0}, TestEnumWithValueNotIndexBI32.a1);
             GenericDeserTest(ser, new byte[] { 0, 0, 0, 1}, TestEnumWithValueNotIndexBI32.b1);
             GenericDeserTest(ser, new byte[] { 0, 0, 0, 2}, TestEnumWithValueNotIndexBI32.c1);
-        }        
-        
+        }
+
         [Test]
         public void TestEnumBBSerialise() {
             Serializer ser = new EnumMapClsToIdlRangeSerializer(typeof(TestEnumBB));
@@ -2543,31 +2543,31 @@ namespace Ch.Elca.Iiop.Tests {
             GenericSerTest(ser, TestEnumBB.b4, new byte[] { 0, 0, 0, 1});
             GenericSerTest(ser, TestEnumBB.c4, new byte[] { 0, 0, 0, 2});
         }
-        
+
         [Test]
         public void TestEnumBBDeserialise() {
             Serializer ser = new EnumMapClsToIdlRangeSerializer(typeof(TestEnumBB));
             GenericDeserTest(ser, new byte[] { 0, 0, 0, 0}, TestEnumBB.a4);
             GenericDeserTest(ser, new byte[] { 0, 0, 0, 1}, TestEnumBB.b4);
             GenericDeserTest(ser, new byte[] { 0, 0, 0, 2}, TestEnumBB.c4);
-        }        
-        
-        [Test]        
+        }
+
+        [Test]
         public void TestEnumI64Serialise() {
             Serializer ser = new EnumMapClsToIdlRangeSerializer(typeof(TestEnumBI64));
             GenericSerTest(ser, TestEnumBI64.a3, new byte[] { 0, 0, 0, 0});
             GenericSerTest(ser, TestEnumBI64.b3, new byte[] { 0, 0, 0, 1});
             GenericSerTest(ser, TestEnumBI64.c3, new byte[] { 0, 0, 0, 2});
         }
-        
+
         [Test]
         public void TestEnumI64Deserialise() {
             Serializer ser = new EnumMapClsToIdlRangeSerializer(typeof(TestEnumBI64));
             GenericDeserTest(ser, new byte[] { 0, 0, 0, 0}, TestEnumBI64.a3);
             GenericDeserTest(ser, new byte[] { 0, 0, 0, 1}, TestEnumBI64.b3);
             GenericDeserTest(ser, new byte[] { 0, 0, 0, 2}, TestEnumBI64.c3);
-        }        
-        
+        }
+
         [Test]
         public void TestEnumBUI16Serialise() {
             Serializer ser = new EnumMapClsToIdlRangeSerializer(typeof(TestEnumBUI16));
@@ -2575,31 +2575,31 @@ namespace Ch.Elca.Iiop.Tests {
             GenericSerTest(ser, TestEnumBUI16.b6, new byte[] { 0, 0, 0, 1});
             GenericSerTest(ser, TestEnumBUI16.c6, new byte[] { 0, 0, 0, 2});
         }
-        
+
         [Test]
         public void TestEnumBUI16Deserialise() {
             Serializer ser = new EnumMapClsToIdlRangeSerializer(typeof(TestEnumBUI16));
             GenericDeserTest(ser, new byte[] { 0, 0, 0, 0}, TestEnumBUI16.a6);
             GenericDeserTest(ser, new byte[] { 0, 0, 0, 1}, TestEnumBUI16.b6);
             GenericDeserTest(ser, new byte[] { 0, 0, 0, 2}, TestEnumBUI16.c6);
-        }        
-        
-        [Test]        
+        }
+
+        [Test]
         public void TestEnumBUI32Serialise() {
             Serializer ser = new EnumMapClsToIdlRangeSerializer(typeof(TestEnumBUI32));
             GenericSerTest(ser, TestEnumBUI32.a7, new byte[] { 0, 0, 0, 0});
             GenericSerTest(ser, TestEnumBUI32.b7, new byte[] { 0, 0, 0, 1});
             GenericSerTest(ser, TestEnumBUI32.c7, new byte[] { 0, 0, 0, 2});
         }
-        
+
         [Test]
         public void TestEnumBUI32Deserialise() {
             Serializer ser = new EnumMapClsToIdlRangeSerializer(typeof(TestEnumBUI32));
             GenericDeserTest(ser, new byte[] { 0, 0, 0, 0}, TestEnumBUI32.a7);
             GenericDeserTest(ser, new byte[] { 0, 0, 0, 1}, TestEnumBUI32.b7);
             GenericDeserTest(ser, new byte[] { 0, 0, 0, 2}, TestEnumBUI32.c7);
-        }        
-        
+        }
+
         [Test]
         public void TestEnumBSBSerialise() {
             Serializer ser = new EnumMapClsToIdlRangeSerializer(typeof(TestEnumBSB));
@@ -2607,143 +2607,143 @@ namespace Ch.Elca.Iiop.Tests {
             GenericSerTest(ser, TestEnumBSB.b5, new byte[] { 0, 0, 0, 1});
             GenericSerTest(ser, TestEnumBSB.c5, new byte[] { 0, 0, 0, 2});
         }
-        
+
         [Test]
         public void TestEnumBSBDeserialise() {
             Serializer ser = new EnumMapClsToIdlRangeSerializer(typeof(TestEnumBSB));
             GenericDeserTest(ser, new byte[] { 0, 0, 0, 0}, TestEnumBSB.a5);
             GenericDeserTest(ser, new byte[] { 0, 0, 0, 1}, TestEnumBSB.b5);
             GenericDeserTest(ser, new byte[] { 0, 0, 0, 2}, TestEnumBSB.c5);
-        }        
-        
-        [Test]        
+        }
+
+        [Test]
         public void TestEnumUI64Serialise() {
             Serializer ser = new EnumMapClsToIdlRangeSerializer(typeof(TestEnumBUI64));
             GenericSerTest(ser, TestEnumBUI64.a8, new byte[] { 0, 0, 0, 0});
             GenericSerTest(ser, TestEnumBUI64.b8, new byte[] { 0, 0, 0, 1});
             GenericSerTest(ser, TestEnumBUI64.c8, new byte[] { 0, 0, 0, 2});
         }
-        
+
         [Test]
         public void TestEnumUI64Deserialise() {
             Serializer ser = new EnumMapClsToIdlRangeSerializer(typeof(TestEnumBUI64));
             GenericDeserTest(ser, new byte[] { 0, 0, 0, 0}, TestEnumBUI64.a8);
             GenericDeserTest(ser, new byte[] { 0, 0, 0, 1}, TestEnumBUI64.b8);
             GenericDeserTest(ser, new byte[] { 0, 0, 0, 2}, TestEnumBUI64.c8);
-        }        
-                
-        [Test]        
+        }
+
+        [Test]
         public void TestFlagsBI16Serialise() {
             FlagsGenericSerTest(typeof(TestFlagsBI16), TestFlagsBI16.a2, new byte[] { 0, 0});
             FlagsGenericSerTest(typeof(TestFlagsBI16), TestFlagsBI16.b2, new byte[] { 0, 1});
             FlagsGenericSerTest(typeof(TestFlagsBI16), TestFlagsBI16.c2, new byte[] { 0, 2});
         }
-        
+
         [Test]
         public void TestFlagsBI16Deserialise() {
             FlagsGenericDeserTest(typeof(TestFlagsBI16), new byte[] { 0, 0}, TestFlagsBI16.a2);
             FlagsGenericDeserTest(typeof(TestFlagsBI16), new byte[] { 0, 1}, TestFlagsBI16.b2);
             FlagsGenericDeserTest(typeof(TestFlagsBI16), new byte[] { 0, 2}, TestFlagsBI16.c2);
-        }        
-        
-        [Test]        
+        }
+
+        [Test]
         public void TestFlagsBI32Serialise() {
             FlagsGenericSerTest(typeof(TestFlagsBI32), TestFlagsBI32.a1, new byte[] { 0, 0, 0, 0});
             FlagsGenericSerTest(typeof(TestFlagsBI32), TestFlagsBI32.b1, new byte[] { 0, 0, 0, 1});
             FlagsGenericSerTest(typeof(TestFlagsBI32), TestFlagsBI32.c1, new byte[] { 0, 0, 0, 2});
         }
-        
+
         [Test]
         public void TestFlagsBI32Deserialise() {
             FlagsGenericDeserTest(typeof(TestFlagsBI32), new byte[] { 0, 0, 0, 0}, TestFlagsBI32.a1);
             FlagsGenericDeserTest(typeof(TestFlagsBI32), new byte[] { 0, 0, 0, 1}, TestFlagsBI32.b1);
             FlagsGenericDeserTest(typeof(TestFlagsBI32), new byte[] { 0, 0, 0, 2}, TestFlagsBI32.c1);
-        }        
-        
-        [Test]        
+        }
+
+        [Test]
         public void TestFlagsBBSerialise() {
             FlagsGenericSerTest(typeof(TestFlagsBB), TestFlagsBB.a4, new byte[] { 0});
             FlagsGenericSerTest(typeof(TestFlagsBB), TestFlagsBB.b4, new byte[] { 1});
             FlagsGenericSerTest(typeof(TestFlagsBB), TestFlagsBB.c4, new byte[] { 2});
         }
-        
+
         [Test]
         public void TestFlagsBBDeserialise() {
             FlagsGenericDeserTest(typeof(TestFlagsBB), new byte[] { 0}, TestFlagsBB.a4);
             FlagsGenericDeserTest(typeof(TestFlagsBB), new byte[] { 1}, TestFlagsBB.b4);
             FlagsGenericDeserTest(typeof(TestFlagsBB), new byte[] { 2}, TestFlagsBB.c4);
-        }        
-        
-        [Test]        
+        }
+
+        [Test]
         public void TestFlagsI64Serialise() {
             FlagsGenericSerTest(typeof(TestFlagsBI64), TestFlagsBI64.a3, new byte[] { 0, 0, 0, 0, 0, 0, 0, 0});
             FlagsGenericSerTest(typeof(TestFlagsBI64), TestFlagsBI64.b3, new byte[] { 0, 0, 0, 0, 0, 0, 0, 1});
             FlagsGenericSerTest(typeof(TestFlagsBI64), TestFlagsBI64.c3, new byte[] { 0, 0, 0, 0, 0, 0, 0, 2});
         }
-        
+
         [Test]
         public void TestFlagsI64Deserialise() {
             FlagsGenericDeserTest(typeof(TestFlagsBI64), new byte[] { 0, 0, 0, 0, 0, 0, 0, 0}, TestFlagsBI64.a3);
             FlagsGenericDeserTest(typeof(TestFlagsBI64), new byte[] { 0, 0, 0, 0, 0, 0, 0, 1}, TestFlagsBI64.b3);
             FlagsGenericDeserTest(typeof(TestFlagsBI64), new byte[] { 0, 0, 0, 0, 0, 0, 0, 2}, TestFlagsBI64.c3);
-        }        
-        
-        [Test]        
+        }
+
+        [Test]
         public void TestFlagsBUI16Serialise() {
             FlagsGenericSerTest(typeof(TestFlagsBUI16), TestFlagsBUI16.a6, new byte[] { 0, 0});
             FlagsGenericSerTest(typeof(TestFlagsBUI16), TestFlagsBUI16.b6, new byte[] { 0, 1});
             FlagsGenericSerTest(typeof(TestFlagsBUI16), TestFlagsBUI16.c6, new byte[] { 0, 2});
         }
-        
+
         [Test]
         public void TestFlagsBUI16Deserialise() {
             FlagsGenericDeserTest(typeof(TestFlagsBUI16), new byte[] { 0, 0}, TestFlagsBUI16.a6);
             FlagsGenericDeserTest(typeof(TestFlagsBUI16), new byte[] { 0, 1}, TestFlagsBUI16.b6);
             FlagsGenericDeserTest(typeof(TestFlagsBUI16), new byte[] { 0, 2}, TestFlagsBUI16.c6);
-        }        
-        
-        [Test]        
+        }
+
+        [Test]
         public void TestFlagsBUI32Serialise() {
             FlagsGenericSerTest(typeof(TestFlagsBUI32), TestFlagsBUI32.a7, new byte[] { 0, 0, 0, 0});
             FlagsGenericSerTest(typeof(TestFlagsBUI32), TestFlagsBUI32.b7, new byte[] { 0, 0, 0, 1});
             FlagsGenericSerTest(typeof(TestFlagsBUI32), TestFlagsBUI32.c7, new byte[] { 0, 0, 0, 2});
         }
-        
+
         [Test]
         public void TestFlagsBUI32Deserialise() {
             FlagsGenericDeserTest(typeof(TestFlagsBUI32), new byte[] { 0, 0, 0, 0}, TestFlagsBUI32.a7);
             FlagsGenericDeserTest(typeof(TestFlagsBUI32), new byte[] { 0, 0, 0, 1}, TestFlagsBUI32.b7);
             FlagsGenericDeserTest(typeof(TestFlagsBUI32), new byte[] { 0, 0, 0, 2}, TestFlagsBUI32.c7);
-        }        
-        
-        [Test]        
+        }
+
+        [Test]
         public void TestFlagsBSBSerialise() {
             FlagsGenericSerTest(typeof(TestFlagsBSB), TestFlagsBSB.a5, new byte[] { 0});
             FlagsGenericSerTest(typeof(TestFlagsBSB), TestFlagsBSB.b5, new byte[] { 1});
             FlagsGenericSerTest(typeof(TestFlagsBSB), TestFlagsBSB.c5, new byte[] { 2});
         }
-        
+
         [Test]
         public void TestFlagsBSBDeserialise() {
             FlagsGenericDeserTest(typeof(TestFlagsBSB), new byte[] { 0 }, TestFlagsBSB.a5);
             FlagsGenericDeserTest(typeof(TestFlagsBSB), new byte[] { 1 }, TestFlagsBSB.b5);
             FlagsGenericDeserTest(typeof(TestFlagsBSB), new byte[] { 2 }, TestFlagsBSB.c5);
-        }        
-        
-        [Test]        
+        }
+
+        [Test]
         public void TestFlagsUI64Serialise() {
             FlagsGenericSerTest(typeof(TestFlagsBUI64), TestFlagsBUI64.a8, new byte[] { 0, 0, 0, 0, 0, 0, 0, 0});
             FlagsGenericSerTest(typeof(TestFlagsBUI64), TestFlagsBUI64.b8, new byte[] { 0, 0, 0, 0, 0, 0, 0, 1});
             FlagsGenericSerTest(typeof(TestFlagsBUI64), TestFlagsBUI64.c8, new byte[] { 0, 0, 0, 0, 0, 0, 0, 2});
         }
-        
+
         [Test]
         public void TestFlagsUI64Deserialise() {
             FlagsGenericDeserTest(typeof(TestFlagsBUI64), new byte[] { 0, 0, 0, 0, 0, 0, 0, 0}, TestFlagsBUI64.a8);
             FlagsGenericDeserTest(typeof(TestFlagsBUI64), new byte[] { 0, 0, 0, 0, 0, 0, 0, 1}, TestFlagsBUI64.b8);
             FlagsGenericDeserTest(typeof(TestFlagsBUI64), new byte[] { 0, 0, 0, 0, 0, 0, 0, 2}, TestFlagsBUI64.c8);
-        }        
-        
+        }
+
 	}
 	
 	/// <summary>
@@ -2751,11 +2751,11 @@ namespace Ch.Elca.Iiop.Tests {
 	/// </summary>
 	[TestFixture]
 	public class SerializerTestObjRef : AbstractSerializerTest {
-	    
+
 	    private omg.org.IOP.Codec m_codec;
 	    private SerializerFactory m_serFactory;
 	    private IiopUrlUtil m_iiopUrlUtil;
-	    
+
     	[SetUp]
     	public void SetUp() {
     	    m_serFactory =
@@ -2771,14 +2771,14 @@ namespace Ch.Elca.Iiop.Tests {
                     Services.CodeSetService.CreateDefaultCodesetComponent(m_codec)});
             m_serFactory.Initalize(new SerializerFactoryConfig(), m_iiopUrlUtil);
     	}
-        
+
 		[Test]
         public void TestIorDeserialisation() {
             IiopClientChannel testChannel = new IiopClientChannel();
             ChannelServices.RegisterChannel(testChannel);
-        
+
             MemoryStream inStream = new MemoryStream();
-            byte[] testIor = new byte[] {                 
+            byte[] testIor = new byte[] {
                 0x00, 0x00, 0x00, 0x28, 0x49, 0x44, 0x4C, 0x3A,
                 0x6F, 0x6D, 0x67, 0x2E, 0x6F, 0x72, 0x67, 0x2F,
                 0x43, 0x6F, 0x73, 0x4E, 0x61, 0x6D, 0x69, 0x6E,
@@ -2805,8 +2805,8 @@ namespace Ch.Elca.Iiop.Tests {
             inStream.Write(testIor, 0, testIor.Length);
             inStream.Seek(0, SeekOrigin.Begin);
             CdrInputStreamImpl cdrIn = new CdrInputStreamImpl(inStream);
-            cdrIn.ConfigStream(0, new GiopVersion(1, 2));            
-            
+            cdrIn.ConfigStream(0, new GiopVersion(1, 2));
+
             Serializer ser = new ObjRefSerializer(typeof(omg.org.CosNaming.NamingContext),
                                                   m_iiopUrlUtil);
             object result = ser.Deserialize(cdrIn);
@@ -2815,9 +2815,9 @@ namespace Ch.Elca.Iiop.Tests {
             Assert.AreEqual("IOR:000000000000002849444C3A6F6D672E6F72672F436F734E616D696E672F4E616D696E67436F6E746578743A312E3000000000010000000000000074000102000000000A3132372E302E302E3100041900000030AFABCB0000000022000003E80000000100000000000000010000000C4E616D655365727669636500000000034E43300A0000000100000001000000200000000000010001000000020501000100010020000101090000000100010100",
                                    RemotingServices.GetObjectUri((MarshalByRefObject)result));
             ChannelServices.UnregisterChannel(testChannel);
-            
+
         }
-		
+
 	}
 	
 	/// <summary>
@@ -2825,9 +2825,9 @@ namespace Ch.Elca.Iiop.Tests {
 	/// </summary>
 	[TestFixture]
 	public class SerializerTestAny : AbstractSerializerTest {
-	    
+
 	    private SerializerFactory m_serFactory;
-	    
+
     	[SetUp]
     	public void SetUp() {
     	    m_serFactory =
@@ -2840,9 +2840,9 @@ namespace Ch.Elca.Iiop.Tests {
                                              1, 2));
             IiopUrlUtil iiopUrlUtil = 
                 IiopUrlUtil.Create(codec, new object[] { 
-                    Services.CodeSetService.CreateDefaultCodesetComponent(codec)});            
+                    Services.CodeSetService.CreateDefaultCodesetComponent(codec)});
             m_serFactory.Initalize(new SerializerFactoryConfig(), iiopUrlUtil);
-    	}	    
+    	}
 
 		[Test]
         public void TestSerLongAsAnyNoAnyContainer() {
@@ -2858,10 +2858,10 @@ namespace Ch.Elca.Iiop.Tests {
         }
 
         [Test]
-        public void TestSerULongAsAnyNoAnyContainer() {            
+        public void TestSerULongAsAnyNoAnyContainer() {
             uint val = 4;
             AnySerializer anySer = new AnySerializer(m_serFactory, false);
-            GenericSerTest(anySer, val, new byte[] { 0, 0, 0, 5, 0, 0, 0, 4 });            
+            GenericSerTest(anySer, val, new byte[] { 0, 0, 0, 5, 0, 0, 0, 4 });
         }
 
         [Test]
@@ -2871,14 +2871,14 @@ namespace Ch.Elca.Iiop.Tests {
             GenericDeserTest(anySer, new byte[] { 0, 0, 0, 5, 0, 0, 0, 4 }, (int)4,
                              out deser);
             Assert.AreEqual(ReflectionHelper.Int32Type,
-                                   deser.GetType(), "deser type");            
+                                   deser.GetType(), "deser type");
         }
-        
+
         [Test]
-        public void TestSerSbyteAsAnyNoAnyContainer() {            
+        public void TestSerSbyteAsAnyNoAnyContainer() {
             sbyte val = 2;
             AnySerializer anySer = new AnySerializer(m_serFactory, false);
-            GenericSerTest(anySer, val, new byte[] { 0, 0, 0, 10, 2 });            
+            GenericSerTest(anySer, val, new byte[] { 0, 0, 0, 10, 2 });
         }
 
         [Test]
@@ -2888,11 +2888,11 @@ namespace Ch.Elca.Iiop.Tests {
             GenericDeserTest(anySer, new byte[] { 0, 0, 0, 10, 2 }, (sbyte)2,
                              out deser);
             Assert.AreEqual(ReflectionHelper.ByteType,
-                                   deser.GetType(), "deser type");            
-        }        
-        
+                                   deser.GetType(), "deser type");
+        }
+
         [Test]
-        public void TestSerBoxedStringAsAnyNoAnyContainer() {            
+        public void TestSerBoxedStringAsAnyNoAnyContainer() {
             string val = "test";
             AnySerializer anySer = new AnySerializer(m_serFactory, false);
             GenericSerTest(anySer, val, new byte[] { 0, 0, 0, 30, // tc-kind
@@ -2911,7 +2911,7 @@ namespace Ch.Elca.Iiop.Tests {
                                                      111, 109, 103, 46, 111, 114, 103, 47, 
                                                      67, 79, 82, 66, 65, 47, 87, 83,
                                                      116, 114, 105, 110, 103, 86, 97, 108,
-                                                     117, 101, 58, 49, 46, 48, 0, 0,                                                     
+                                                     117, 101, 58, 49, 46, 48, 0, 0,
                                                      0, 0, 0, 8, 0, 116, 0, 101, // "test"
                                                      0, 115, 0, 116 });
         }
@@ -2936,17 +2936,17 @@ namespace Ch.Elca.Iiop.Tests {
                                                   111, 109, 103, 46, 111, 114, 103, 47, 
                                                   67, 79, 82, 66, 65, 47, 87, 83,
                                                   116, 114, 105, 110, 103, 86, 97, 108,
-                                                  117, 101, 58, 49, 46, 48, 0, 0,                                                     
+                                                  117, 101, 58, 49, 46, 48, 0, 0,
                                                   0, 0, 0, 8, 0, 116, 0, 101, // "test"
                                                   0, 115, 0, 116 },
                              "test",
                              out deser);
             Assert.AreEqual(ReflectionHelper.StringType,
                                    deser.GetType(), "deser type");
-        }        
-        
+        }
+
         [Test]
-        public void TestSerNullAsAnyNoAnyContainer() {            
+        public void TestSerNullAsAnyNoAnyContainer() {
             AnySerializer anySer = new AnySerializer(m_serFactory, false);
             object val = null;
             GenericSerTest(anySer, val, new byte[] { 0, 0, 0, 0 });
@@ -2957,8 +2957,8 @@ namespace Ch.Elca.Iiop.Tests {
             AnySerializer anySer = new AnySerializer(m_serFactory, false);
             object val = null;
             GenericDeserTest(anySer, new byte[] { 0, 0, 0, 0 }, val);
-        }        
-        
+        }
+
         [Test]
         public void TestSerLongAsAnyAnyContainer() {
             Any any = new Any((int)2);
@@ -2974,7 +2974,7 @@ namespace Ch.Elca.Iiop.Tests {
         }
 
         [Test]
-        public void TestSerULongAsAnyAnyContainer() {            
+        public void TestSerULongAsAnyAnyContainer() {
             AnySerializer anySer = new AnySerializer(m_serFactory, true);
             Any any = new Any((uint)4);
             GenericSerTest(anySer, any, new byte[] { 0, 0, 0, 5, 0, 0, 0, 4 });
@@ -2986,9 +2986,9 @@ namespace Ch.Elca.Iiop.Tests {
             Any any = new Any((uint)4);
             GenericDeserTest(anySer, new byte[] { 0, 0, 0, 5, 0, 0, 0, 4 }, any);
         }
-        
+
         [Test]
-        public void TestSerNullAsAnyAnyContainer() {            
+        public void TestSerNullAsAnyAnyContainer() {
             AnySerializer anySer = new AnySerializer(m_serFactory, true);
             Any any = new Any(null);
             GenericSerTest(anySer, any, new byte[] { 0, 0, 0, 0 });
@@ -3000,23 +3000,23 @@ namespace Ch.Elca.Iiop.Tests {
             Any any = new Any(null);
             GenericDeserTest(anySer, new byte[] { 0, 0, 0, 0 }, any);
         }
-        
+
         [Test]
-        public void TestSerNullAsAnyWithVoidTcAnyContainer() {            
+        public void TestSerNullAsAnyWithVoidTcAnyContainer() {
             AnySerializer anySer = new AnySerializer(m_serFactory, true);
             Any any = new Any(null, new VoidTC());
             GenericSerTest(anySer, any, new byte[] { 0, 0, 0, 1 });
-        }        
-        
+        }
+
         [Test]
         public void TestDeSerNullAsAnyWithVoidTcAnyContainer() {
             AnySerializer anySer = new AnySerializer(m_serFactory, true);
             Any any = new Any(null, new VoidTC());
             GenericDeserTest(anySer, new byte[] { 0, 0, 0, 1 }, any);
         }
-        
+
         [Test]
-        public void TestSerBoxedStringAsAnyAnyContainer() {            
+        public void TestSerBoxedStringAsAnyAnyContainer() {
             Any val = new Any("test");
             AnySerializer anySer = new AnySerializer(m_serFactory, true);
             GenericSerTest(anySer, val, new byte[] { 0, 0, 0, 30, // tc-kind
@@ -3035,7 +3035,7 @@ namespace Ch.Elca.Iiop.Tests {
                                                      111, 109, 103, 46, 111, 114, 103, 47, 
                                                      67, 79, 82, 66, 65, 47, 87, 83,
                                                      116, 114, 105, 110, 103, 86, 97, 108,
-                                                     117, 101, 58, 49, 46, 48, 0, 0,                                                     
+                                                     117, 101, 58, 49, 46, 48, 0, 0,
                                                      0, 0, 0, 8, 0, 116, 0, 101, // "test"
                                                      0, 115, 0, 116 });
         }
@@ -3061,7 +3061,7 @@ namespace Ch.Elca.Iiop.Tests {
                                                   111, 109, 103, 46, 111, 114, 103, 47, 
                                                   67, 79, 82, 66, 65, 47, 87, 83,
                                                   116, 114, 105, 110, 103, 86, 97, 108,
-                                                  117, 101, 58, 49, 46, 48, 0, 0,                                                     
+                                                  117, 101, 58, 49, 46, 48, 0, 0,
                                                   0, 0, 0, 8, 0, 116, 0, 101, // "test"
                                                   0, 115, 0, 116 });
             Assert.AreEqual(val.Value,
@@ -3071,25 +3071,25 @@ namespace Ch.Elca.Iiop.Tests {
         }
 
     }
-    
+
 	[Serializable]
 	[ExplicitSerializationOrdered()]
 	[RepositoryID("IDL:Ch/Elca/Iiop/Tests/SimpleValueTypeWith2Ints")]
 	public class SimpleValueTypeWith2Ints {
-		
+
 		[ExplicitSerializationOrderNr(0)]
 	    private int m_val1;
 		[ExplicitSerializationOrderNr(1)]
 	    private int m_val2;
-		
-		public SimpleValueTypeWith2Ints() {			
+
+		public SimpleValueTypeWith2Ints() {
 		}
-		
+
 		public SimpleValueTypeWith2Ints(int val1, int val2) {
 			Val1 = val1;
 			Val2 = val2;
-		}		
-		
+		}
+
 		public int Val1 {
 			get {
 				return m_val1;
@@ -3098,7 +3098,7 @@ namespace Ch.Elca.Iiop.Tests {
 				m_val1 = value;
 			}
 		}
-		
+
 		public int Val2 {
 			get {
 				return m_val2;
@@ -3107,7 +3107,7 @@ namespace Ch.Elca.Iiop.Tests {
 				m_val2 = value;
 			}
 		}
-		
+
 		public override bool Equals(object obj) {
 			SimpleValueTypeWith2Ints other = 
 				obj as SimpleValueTypeWith2Ints;
@@ -3117,19 +3117,19 @@ namespace Ch.Elca.Iiop.Tests {
 			return other.Val1 == Val1 &&
 				   other.Val2 == Val2;
 		}
-		
+
 		public override int GetHashCode() {
 			return Val1.GetHashCode() ^
 				Val2.GetHashCode();
 		}
-		
+
 	}
 	
 	[TestFixture]
 	public class SerializerTestValueTypes : AbstractSerializerTest {
-    
+
 	    private SerializerFactory m_serFactory;
-	    
+
     	[SetUp]
     	public void SetUp() {
     	    m_serFactory =
@@ -3142,7 +3142,7 @@ namespace Ch.Elca.Iiop.Tests {
                                              1, 2));
             m_serFactory.Initalize(new SerializerFactoryConfig(), 
                                    IiopUrlUtil.Create(codec));
-    	}	    
+    	}
 
 		[Test]
 		public void TestSerWStringValue() {
@@ -3155,12 +3155,12 @@ namespace Ch.Elca.Iiop.Tests {
                                               111, 109, 103, 46, 111, 114, 103, 47, 
                                               67, 79, 82, 66, 65, 47, 87, 83,
                                               116, 114, 105, 110, 103, 86, 97, 108,
-                                              117, 101, 58, 49, 46, 48, 0, 0,                                                     
+                                              117, 101, 58, 49, 46, 48, 0, 0,
                                               0, 0, 0, 8, 0, 116, 0, 101, // "test"
                                               0, 115, 0, 116 } );
-			
+
 		}
-		
+
 		[Test]
 		public void TestDeSerWStringValue() {
 			Serializer ser = new ValueObjectSerializer(typeof(WStringValue),
@@ -3172,20 +3172,20 @@ namespace Ch.Elca.Iiop.Tests {
                                               111, 109, 103, 46, 111, 114, 103, 47, 
                                               67, 79, 82, 66, 65, 47, 87, 83,
                                               116, 114, 105, 110, 103, 86, 97, 108,
-                                              117, 101, 58, 49, 46, 48, 0, 0,                                                     
+                                              117, 101, 58, 49, 46, 48, 0, 0,
                                               0, 0, 0, 8, 0, 116, 0, 101, // "test"
                                               0, 115, 0, 116 } );
 			Assert.AreEqual(
-                                   testVal, deser.Unbox(), "deserialised value wrong");			
+                                   testVal, deser.Unbox(), "deserialised value wrong");
 		}
-		
+
 		[Test]
 		public void TestSerBasicContainingValueType() {
 			Serializer ser = new ValueObjectSerializer(typeof(SimpleValueTypeWith2Ints),
 			                                           m_serFactory);
-			
+
 			SimpleValueTypeWith2Ints toSer = new SimpleValueTypeWith2Ints(1, 2);
-            	
+
             GenericSerTest(ser, toSer, new byte[] { 127, 255, 255, 2, // start value tag
                                               0, 0, 0, 48, 73, 68, 76, 58, // rep-id of value
                                               67, 104, 47, 69, 108, 99, 97, 47, 
@@ -3195,16 +3195,16 @@ namespace Ch.Elca.Iiop.Tests {
                                               112, 101, 87, 105, 116, 104, 50, 73,
                                               110, 116, 115, 0,
                                               0, 0, 0, 1, // 1
-                                              0, 0, 0, 2 } ); // 2			
+                                              0, 0, 0, 2 } ); // 2
 		}
 
 		[Test]
 		public void TestDeserBasicContainingValueType() {
 			Serializer ser = new ValueObjectSerializer(typeof(SimpleValueTypeWith2Ints),
 			                                           m_serFactory);
-			
+
 			SimpleValueTypeWith2Ints toDeser = new SimpleValueTypeWith2Ints(1, 2);
-            	
+
             GenericDeserTest(ser, new byte[] { 127, 255, 255, 2, // start value tag
                                               0, 0, 0, 48, 73, 68, 76, 58, // rep-id of value
                                               67, 104, 47, 69, 108, 99, 97, 47, 
@@ -3214,14 +3214,14 @@ namespace Ch.Elca.Iiop.Tests {
                                               112, 101, 87, 105, 116, 104, 50, 73,
                                               110, 116, 115, 0,
                                               0, 0, 0, 1, // 1
-                                              0, 0, 0, 2 }, // 2			
-										      toDeser );			
+                                              0, 0, 0, 2 }, // 2
+										      toDeser );
 		}
-		
-		
 
-		
-		
+
+
+
+
     }
 
 	/// <summary>
@@ -3229,12 +3229,12 @@ namespace Ch.Elca.Iiop.Tests {
 	/// </summary>
 	[TestFixture]
 	public class SerializerTestSequence : AbstractSerializerTest {
-		    
+
 	    private SerializerFactory m_serFactory;
 	    private SerializerFactoryConfig m_config;
 	    private IiopUrlUtil m_iiopUrlUtil;
 	    private AttributeExtCollection m_seqAttributes;
-	    
+
 	    [SetUp]
 	    public void SetUp() {
 	        m_serFactory = new SerializerFactory();
@@ -3244,21 +3244,21 @@ namespace Ch.Elca.Iiop.Tests {
                 codecFactory.create_codec(
                     new omg.org.IOP.Encoding(omg.org.IOP.ENCODING_CDR_ENCAPS.ConstVal, 1, 2));
             m_iiopUrlUtil = IiopUrlUtil.Create(codec);
-            m_config = new SerializerFactoryConfig();  
-            
+            m_config = new SerializerFactoryConfig();
+
             m_seqAttributes = 
                 AttributeExtCollection.
                     ConvertToAttributeCollection(
-                        new object[] { new IdlSequenceAttribute(0) } );            
+                        new object[] { new IdlSequenceAttribute(0) } );
 	    }
-	    
+
 	    private Serializer CreateSerializer(object forInstance) {
 	        Type seqType = typeof(int[]); // simplification for null test.
 	        if (forInstance != null) {
 	            seqType = forInstance.GetType();
-	        }	        
+	        }
 	        m_serFactory.Initalize(m_config, m_iiopUrlUtil);
-            
+
             Serializer ser =
                 m_serFactory.Create(seqType, m_seqAttributes);
 
@@ -3270,119 +3270,119 @@ namespace Ch.Elca.Iiop.Tests {
 
 	    private void AssertSerialization(object actual, byte[] expected) {
 	        Serializer ser = CreateSerializer(actual);
-            GenericSerTest(ser, actual, expected);            
+            GenericSerTest(ser, actual, expected);
 	    }
-	    
+
 	    private void AssertDeserialization(byte[] actual, Array expected) {
             Serializer ser = CreateSerializer(expected);
-            
+
             object result = GenericDeserForTest(ser, actual);
             Assert.IsTrue(result.GetType().IsArray, "result is array");
             Array resultArray = (Array)result;
             Assert.AreEqual(expected.Length, resultArray.Length, "array length");
-                        
+
             for (int i = 0; i < resultArray.Length; i++) {
                 object elemIExpected = expected.GetValue(i);
                 object elemIResult = resultArray.GetValue(i);
                 Assert.AreEqual(elemIExpected, elemIResult, "element i");
             }
 	    }
-	    
+
 	    [Test]
         [ExpectedException(typeof(BAD_PARAM))]
         public void TestNotAllowNullIdlSeuqnece() {
             m_config.SequenceSerializationAllowNull = false;
             AssertSerialization(null, new byte[0]);
-            
-        }        
-        
+
+        }
+
         [Test]
         public void TestAllowNullSequenceIfConfigured() {
             m_config.SequenceSerializationAllowNull = true;
             AssertSerialization(null, new byte[] { 0, 0, 0, 0 });
-        }	    
-        
+        }
+
         [Test]
         public void TestNotEmptySequenceNullNotAllowed() {
             m_config.SequenceSerializationAllowNull = false;
             AssertSerialization(new int[] { 1, 2 },
                                 new byte[] { 0, 0, 0, 2, 0, 0, 0, 1, 0, 0, 0 , 2});
-        }        
-        
+        }
+
         [Test]
         public void TestNotEmptySequenceNullAllowed() {
             m_config.SequenceSerializationAllowNull = true;
             AssertSerialization(new int[] { 1, 2 },
-                                new byte[] { 0, 0, 0, 2, 0, 0, 0, 1, 0, 0, 0 , 2});            
+                                new byte[] { 0, 0, 0, 2, 0, 0, 0, 1, 0, 0, 0 , 2});
         }
-        
+
         [Test]
-        public void TestInt16SequenceSer() {            
+        public void TestInt16SequenceSer() {
             AssertSerialization(new short[] { 1, 2 },
                                 new byte[] { 0, 0, 0, 2, 0, 1, 0, 2});
         }
-        
+
         [Test]
         public void TestInt16SequenceDeSer() {
             AssertDeserialization(new byte[] { 0, 0, 0, 2, 0, 1, 0 , 2},
                                   new short[] { 1, 2 });
-        }        
-        
+        }
+
         [Test]
-        public void TestInt32SequenceSer() {            
+        public void TestInt32SequenceSer() {
             AssertSerialization(new int[] { 1, 2 },
                                 new byte[] { 0, 0, 0, 2, 0, 0, 0, 1, 0, 0, 0, 2});
         }
-        
+
         [Test]
         public void TestInt32SequenceDeSer() {
             AssertDeserialization(new byte[] { 0, 0, 0, 2, 0, 0, 0, 1, 0, 0, 0, 2},
                                   new int[] { 1, 2 });
         }
-                
+
         [Test]
-        public void TestInt64SequenceSer() {            
+        public void TestInt64SequenceSer() {
             AssertSerialization(new long[] { 1, 2 },
                                 new byte[] { 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 2});
         }
-        
+
         [Test]
         public void TestInt64SequenceDeSer() {
             AssertDeserialization(new byte[] { 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 2},
                                   new long[] { 1, 2 });
         }
-        
+
         [Test]
-        public void TestUInt16SequenceSer() {            
+        public void TestUInt16SequenceSer() {
             AssertSerialization(new ushort[] { 1, UInt16.MaxValue },
                                 new byte[] { 0, 0, 0, 2, 0, 1, 0xFF, 0xFF});
         }
-        
+
         [Test]
         public void TestUInt16SequenceDeSer() {
             AssertDeserialization(new byte[] { 0, 0, 0, 2, 0, 1, 0xFF , 0xFF},
                                   new ushort[] { 1, UInt16.MaxValue });
-        }        
-        
+        }
+
         [Test]
-        public void TestUInt32SequenceSer() {            
+        public void TestUInt32SequenceSer() {
             AssertSerialization(new uint[] { 1, UInt32.MaxValue },
                                 new byte[] { 0, 0, 0, 2, 0, 0, 0, 1, 0xFF, 0xFF, 0xFF, 0xFF});
         }
-        
+
         [Test]
         public void TestUInt32SequenceDeSer() {
             AssertDeserialization(new byte[] { 0, 0, 0, 2, 0, 0, 0, 1, 0xFF, 0xFF, 0xFF, 0xFF},
                                   new uint[] { 1, UInt32.MaxValue });
         }
-                
+
         [Test]
-        public void TestUInt64SequenceSer() {            
+        public void TestUInt64SequenceSer() {
             AssertSerialization(new ulong[] { 1, UInt64.MaxValue },
                                 new byte[] { 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 
                                              0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF});
         }
-        
+
         [Test]
         public void TestUInt64SequenceDeSer() {
             AssertDeserialization(new byte[] { 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 
@@ -3391,70 +3391,70 @@ namespace Ch.Elca.Iiop.Tests {
         }
 
         [Test]
-        public void TestSingleSequenceSer() {            
+        public void TestSingleSequenceSer() {
             AssertSerialization(new float[] { 1.0f, 0.01f },
                                 new byte[] { 0, 0, 0, 2, 0x3F, 0x80, 0x00, 0x00, 0x3C, 0x23, 0xD7, 0x0A});
         }
-        
+
         [Test]
         public void TestSingleSequenceDeSer() {
             AssertDeserialization(new byte[] { 0, 0, 0, 2, 0x3F, 0x80, 0x00, 0x00, 0x3C, 0x23, 0xD7, 0x0A},
                                   new float[] { 1.0f, 0.01f });
         }
-                
+
         [Test]
-        public void TestDoubleSequenceSer() {            
+        public void TestDoubleSequenceSer() {
             AssertSerialization(new double[] { (double)1.0f, Double.MaxValue, 0.01 },
                                 new byte[] { 0, 0, 0, 3, 0, 0, 0, 0, 0x3F, 0xF0, 0, 0, 0, 0, 0, 0, 
                                              0x7F, 0xEF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
                                              0x3F, 0x84, 0x7A, 0xE1, 0x47, 0xAE, 0x14, 0x7B});
         }
-        
+
         [Test]
         public void TestDoubleSequenceDeSer() {
             AssertDeserialization(new byte[] { 0, 0, 0, 3, 0, 0, 0, 0, 0x3F, 0xF0, 0, 0, 0, 0, 0, 0, 
                                                0x7F, 0xEF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 
                                                0x3F, 0x84, 0x7A, 0xE1, 0x47, 0xAE, 0x14, 0x7B },
                                   new double[] { (double)1.0f, Double.MaxValue, 0.01 });
-        }     
-        
+        }
+
         [Test]
-        public void TestByteSequenceSer() {            
+        public void TestByteSequenceSer() {
             AssertSerialization(new byte[] { 1, 2 },
                                 new byte[] { 0, 0, 0, 2, 1, 2});
         }
-        
+
         [Test]
         public void TestByteSequenceDeSer() {
             AssertDeserialization(new byte[] { 0, 0, 0, 2, 1, 2},
                                   new byte[] { 1, 2 });
-        }                
-        
+        }
+
         [Test]
-        public void TestBoolSequenceSer() {            
+        public void TestBoolSequenceSer() {
             AssertSerialization(new bool[] { true, false },
                                 new byte[] { 0, 0, 0, 2, 1, 0});
         }
-        
+
         [Test]
         public void TestBoolSequenceDeSer() {
             AssertDeserialization(new byte[] { 0, 0, 0, 2, 1, 0},
                                   new bool[] { true, false });
-        }                        
-        
+        }
+
         [Test]
-        public void TestEnumSequenceSer() {            
+        public void TestEnumSequenceSer() {
             AssertSerialization(new TestIdlEnumBI32[] { TestIdlEnumBI32.IDL_A, TestIdlEnumBI32.IDL_B, TestIdlEnumBI32.IDL_C },
                                 new byte[] { 0, 0, 0, 3, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 2 });
         }
-        
+
         [Test]
         public void TestEnumSequenceDeSer() {
             AssertDeserialization(new byte[] { 0, 0, 0, 3, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 2 },
                                   new TestIdlEnumBI32[] { TestIdlEnumBI32.IDL_A, TestIdlEnumBI32.IDL_B, TestIdlEnumBI32.IDL_C });
         }
-        
-	    
+
+
 	}
 	
 	
@@ -3463,13 +3463,13 @@ namespace Ch.Elca.Iiop.Tests {
 	/// </summary>
 	[TestFixture]
 	public class SerializerTestArray : AbstractSerializerTest {
-		    
+
 	    private SerializerFactory m_serFactory;
 	    private SerializerFactoryConfig m_config;
 	    private IiopUrlUtil m_iiopUrlUtil;
 	    private Type m_arrayType;
 	    private AttributeExtCollection m_arrayAttributes;
-	    
+
 	    [SetUp]
 	    public void SetUp() {
 	        m_serFactory = new SerializerFactory();
@@ -3479,143 +3479,143 @@ namespace Ch.Elca.Iiop.Tests {
                 codecFactory.create_codec(
                     new omg.org.IOP.Encoding(omg.org.IOP.ENCODING_CDR_ENCAPS.ConstVal, 1, 2));
             m_iiopUrlUtil = IiopUrlUtil.Create(codec);
-            m_config = new SerializerFactoryConfig();  
-            
+            m_config = new SerializerFactoryConfig();
+
             m_arrayAttributes = 
                 AttributeExtCollection.
                     ConvertToAttributeCollection(
                         new object[] { new IdlArrayAttribute(0, 2) } );
             m_arrayType = typeof(int[]);
-	    }
-	    
+        }
 
-	    private void AssertSerialization(object actual, byte[] expected) {
-	        m_serFactory.Initalize(m_config, m_iiopUrlUtil);
-            
+
+        private void AssertSerialization(object actual, byte[] expected) {
+            m_serFactory.Initalize(m_config, m_iiopUrlUtil);
+
             Serializer ser =
                 m_serFactory.Create(m_arrayType, m_arrayAttributes);
 
             Assert.NotNull(ser, "ser");
             Assert.AreEqual(typeof(IdlArraySerializer),
                                    ser.GetType(), "ser type");
-            
-            GenericSerTest(ser, actual, expected);            
-	    }
-	    
-	    [Test]
+
+            GenericSerTest(ser, actual, expected);
+        }
+
+        [Test]
         [ExpectedException(typeof(BAD_PARAM))]
         public void TestNotAllowNullIdlArray() {
             m_config.ArraySerializationAllowNull = false;
             AssertSerialization(null, new byte[0]);
-            
-        }                        
-        
-        [Test]        
+
+        }
+
+        [Test]
         public void TestAllowNullIdlArray() {
             m_config.ArraySerializationAllowNull = true;
             AssertSerialization(null, new byte[] { 0, 0, 0, 0, 0, 0, 0, 0 });
-        }                        
-        
+        }
+
         [Test]
         public void TestNotNullIdlArray1DimNotAllowNull() {
             m_config.ArraySerializationAllowNull = false;
             AssertSerialization(new int[] { 1, 2 },
                                 new byte[] { 0, 0, 0, 1, 0, 0, 0 , 2});
         }
-        
+
         [Test]
-        public void TestNotNullIdlArray1DimAllowNull() {            
+        public void TestNotNullIdlArray1DimAllowNull() {
             m_config.ArraySerializationAllowNull = true;
             AssertSerialization(new int[] { 1, 2 },
                                 new byte[] { 0, 0, 0, 1, 0, 0, 0 , 2});
         }
-        
+
         [Test]
         public void Test2DimArrayNotNull() {
             m_config.ArraySerializationAllowNull = false;
             m_arrayType = typeof(int[,]);
-            m_arrayAttributes =  
+            m_arrayAttributes =
                 AttributeExtCollection.
                     ConvertToAttributeCollection(
                         new object[] { new IdlArrayAttribute(0, 2),
                                        new IdlArrayDimensionAttribute(0, 1, 3) } );
-            
+
             AssertSerialization(new int[,] { { 1, 2, 3 }, { 4, 5, 6 } },
                                 new byte[] { 0, 0, 0, 1, 0, 0, 0, 2,  0, 0, 0, 3, 
                                              0, 0, 0, 4, 0, 0, 0, 5, 0, 0, 0, 6 });
         }
-        
+
         [Test]
         public void Test2DimArrayNullAllowNull() {
             m_config.ArraySerializationAllowNull = true;
             m_arrayType = typeof(int[,]);
-            m_arrayAttributes =  
+            m_arrayAttributes =
                 AttributeExtCollection.
                     ConvertToAttributeCollection(
                         new object[] { new IdlArrayAttribute(0, 2),
                                        new IdlArrayDimensionAttribute(0, 1, 3) } );
-            
+
             AssertSerialization(null,
                                 new byte[] { 0, 0, 0, 0, 0, 0, 0, 0,  0, 0, 0, 0, 
                                              0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 });
-        }        
-	    
-	}	
-	
-	
-	[ExplicitSerializationOrdered()]
-	[IdlStruct]
-	public struct TestExplicitelyOrderedStruct {
-	    	    	            
-	    [ExplicitSerializationOrderNr(1)]
-	    public int FieldB;
-	    
-	    [ExplicitSerializationOrderNr(2)]
-	    public int FieldC;
-	    
-	    [ExplicitSerializationOrderNr(0)]
-	    public int FieldA;
-	    
-	    [ExplicitSerializationOrderNr(3)]
-	    public int FieldD;
-	    
-	    public TestExplicitelyOrderedStruct(int a, int b, int c, int d) {
-	        FieldA = a;
-	        FieldB = b;
-	        FieldC = c;
-	        FieldD = d;
-	    }	    		
-	    
-	    public override string ToString() {
-			return "a: " + FieldA + "; b: " + FieldB + "; c: " + FieldC +
-			    ";d: " + FieldD;
-		}
-	    
-	}
-	
+        }
+
+    }
+
+
+    [ExplicitSerializationOrdered()]
+    [IdlStruct]
+    public struct TestExplicitelyOrderedStruct {
+
+        [ExplicitSerializationOrderNr(1)]
+        public int FieldB;
+
+        [ExplicitSerializationOrderNr(2)]
+        public int FieldC;
+
+        [ExplicitSerializationOrderNr(0)]
+        public int FieldA;
+
+        [ExplicitSerializationOrderNr(3)]
+        public int FieldD;
+
+        public TestExplicitelyOrderedStruct(int a, int b, int c, int d) {
+            FieldA = a;
+            FieldB = b;
+            FieldC = c;
+            FieldD = d;
+        }
+
+        public override string ToString() {
+            return "a: " + FieldA + "; b: " + FieldB + "; c: " + FieldC +
+                ";d: " + FieldD;
+        }
+
+    }
+
 	[IdlStruct]
 	public struct TestImplicitelyOrderedStruct {
-	    	    	            	    
+
 	    public int FieldB;
-	    
+
 	    public int FieldC;
-	    
+
 	    public int FieldA;
-	    
+
 	    public int FieldD;
-	    
+
 	    public TestImplicitelyOrderedStruct(int a, int b, int c, int d) {
 	        FieldA = a;
 	        FieldB = b;
 	        FieldC = c;
 	        FieldD = d;
-	    }	    		
-	    
+	    }
+
 	    public override string ToString() {
 			return "a: " + FieldA + "; b: " + FieldB + "; c: " + FieldC +
 			    ";d: " + FieldD;
 		}
-	    
+
 	}
 
 	
@@ -3624,11 +3624,11 @@ namespace Ch.Elca.Iiop.Tests {
 	/// </summary>
 	[TestFixture]
     public class SerializerTestIdlStruct : AbstractSerializerTest {
-	    
+
 	    private SerializerFactory m_serFactory;
 	    private IdlStructSerializer m_explicitelyOrderedStructSer;
 	    private IdlStructSerializer m_implicitelyOrderedStructSer;
-	    
+
 	    [SetUp]
 	    public void SetUp() {
 	        m_serFactory = new SerializerFactory();
@@ -3638,7 +3638,7 @@ namespace Ch.Elca.Iiop.Tests {
                 codecFactory.create_codec(
                     new omg.org.IOP.Encoding(omg.org.IOP.ENCODING_CDR_ENCAPS.ConstVal, 1, 2));
             m_serFactory.Initalize(new SerializerFactoryConfig(), IiopUrlUtil.Create(codec));
-            
+
             m_explicitelyOrderedStructSer = 
                 new IdlStructSerializer(typeof(TestExplicitelyOrderedStruct), 
                                         m_serFactory);
@@ -3648,16 +3648,16 @@ namespace Ch.Elca.Iiop.Tests {
                                         m_serFactory);
             m_implicitelyOrderedStructSer.Initalize();
 	    }
-	    
+
 	    [Test]
-	    public void TestExplicitelyOrderedStrutSer() {	   
-	        
+	    public void TestExplicitelyOrderedStrutSer() {
+
 	        TestExplicitelyOrderedStruct toSer = new TestExplicitelyOrderedStruct(1, 2, 3, 4);
 	        GenericSerTest(m_explicitelyOrderedStructSer,
 	                       toSer, new byte[] { 0, 0, 0, 1, 0, 0, 0, 2, 0, 0, 0, 3,
 	                           0, 0, 0, 4 });
 	    }
-	    
+
 	    [Test]
 	    public void TestExplicitelyOrderedStructDeser() {
 	        TestExplicitelyOrderedStruct toDeser = new TestExplicitelyOrderedStruct(1, 2, 3, 4);
@@ -3666,16 +3666,16 @@ namespace Ch.Elca.Iiop.Tests {
 	                                      0, 0, 0, 4 },
 	                         toDeser);
 	    }
-	    
+
 	    [Test]
-	    public void TestImplicitelyOrderedStrutSer() {	   
-	        
+	    public void TestImplicitelyOrderedStrutSer() {
+
 	        TestImplicitelyOrderedStruct toSer = new TestImplicitelyOrderedStruct(1, 2, 3, 4);
 	        GenericSerTest(m_implicitelyOrderedStructSer,
 	                       toSer, new byte[] { 0, 0, 0, 1, 0, 0, 0, 2, 0, 0, 0, 3,
 	                           0, 0, 0, 4 });
 	    }
-	    
+
 	    [Test]
 	    public void TestImplicitelyOrderedStructDeser() {
 	        TestImplicitelyOrderedStruct toDeser = new TestImplicitelyOrderedStruct(1, 2, 3, 4);
@@ -3684,11 +3684,10 @@ namespace Ch.Elca.Iiop.Tests {
 	                                      0, 0, 0, 4 },
 	                         toDeser);
 	    }
-	    
-	    
+
+
 	}
 	
 }
 
-    
 #endif

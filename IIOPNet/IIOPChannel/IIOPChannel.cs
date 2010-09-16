@@ -999,7 +999,8 @@ namespace Ch.Elca.Iiop {
             } else {
                 string hostName = Dns.GetHostName();
                 if (m_useIpAddr) {
-                    IPHostEntry ipEntry = Dns.GetHostEntry(hostName);
+                    IPHostEntry ipEntry = Dns.GetHostByName(hostName);
+//                    IPHostEntry ipEntry = Dns.GetHostEntry(hostName); !!! this does strange things: on win7 it tends to return IPv6 address
                     IPAddress[] ipAddrs = ipEntry.AddressList;
                     if ((ipAddrs == null) || (ipAddrs.Length == 0)) { 
                         throw new ArgumentException("can't determine ip-addr of local machine, abort channel creation"); 
