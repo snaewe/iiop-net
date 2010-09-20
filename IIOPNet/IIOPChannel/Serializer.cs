@@ -2775,7 +2775,7 @@ namespace Ch.Elca.Iiop.Tests {
 		[Test]
         public void TestIorDeserialisation() {
             IiopClientChannel testChannel = new IiopClientChannel();
-            ChannelServices.RegisterChannel(testChannel);
+            ChannelServices.RegisterChannel(testChannel, false);
 
             MemoryStream inStream = new MemoryStream();
             byte[] testIor = new byte[] {
