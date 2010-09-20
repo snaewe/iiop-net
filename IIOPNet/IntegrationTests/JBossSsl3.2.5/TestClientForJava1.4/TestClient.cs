@@ -69,7 +69,7 @@ namespace ch.elca.iiop.integrationTests {
          
             m_channel = new IiopClientChannel(props);
             // register the channel
-            ChannelServices.RegisterChannel(m_channel);
+            ChannelServices.RegisterChannel(m_channel, false);
         }
 
 

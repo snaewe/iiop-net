@@ -73,7 +73,7 @@ namespace Ch.Elca.Iiop.IntegrationTests {
             // register the channel
             if (m_channel == null) {
                 m_channel = new IiopClientChannel();
-                ChannelServices.RegisterChannel(m_channel);
+                ChannelServices.RegisterChannel(m_channel, false);
 
                 RegisterInterceptors();
 

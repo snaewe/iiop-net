@@ -55,7 +55,7 @@ namespace ch.elca.iiop.integrationTests {
         public void SetupEnvironment() {
             // register the channel
             m_channel = new IiopClientChannel();
-            ChannelServices.RegisterChannel(m_channel);
+            ChannelServices.RegisterChannel(m_channel, false);
 
             // access COS nameing service
             RmiIiopInit init = new RmiIiopInit("localhost", 2809);

@@ -71,7 +71,7 @@ namespace Ch.Elca.Iiop.IntegrationTests {
             properties[IiopClientChannel.ALLOW_REQUEST_MULTIPLEX_KEY] = false;
             properties[IiopClientChannel.CLIENT_CONNECTION_LIMIT_KEY] = 10;
             m_channel = new IiopClientChannel(properties);
-            ChannelServices.RegisterChannel(m_channel);
+            ChannelServices.RegisterChannel(m_channel, false);
 
             // get the reference to the test-service
             m_testService1 = (TestService)RemotingServices.Connect(typeof(TestService), "iiop://localhost:8087/test1");

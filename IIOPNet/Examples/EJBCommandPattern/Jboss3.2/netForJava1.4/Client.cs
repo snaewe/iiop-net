@@ -47,7 +47,7 @@ namespace ch.elca.iiop.demo.ejbCommand {
                 }                
             
                 IiopClientChannel channel = new IiopClientChannel();
-                ChannelServices.RegisterChannel(channel);
+                ChannelServices.RegisterChannel(channel, false);
 
                 NamingContext nameService = (NamingContext)RemotingServices.Connect(typeof(NamingContext), nameserviceLoc);
 

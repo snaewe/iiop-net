@@ -77,7 +77,7 @@ namespace Ch.Elca.Iiop.Demo.Chatroom {
 
         private void SetupChannel(int callbackPort) {
             m_channel = new IiopChannel(callbackPort);
-            ChannelServices.RegisterChannel(m_channel);
+            ChannelServices.RegisterChannel(m_channel, false);
         }
 
         private void RetrieveChatRoom(string nameServiceHost, 

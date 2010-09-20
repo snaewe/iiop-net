@@ -53,7 +53,7 @@ namespace Ch.Elca.Iiop.Tutorial.GettingStarted {
 			
                 // register the channel
                 IiopClientChannel channel = new IiopClientChannel();
-                ChannelServices.RegisterChannel(channel);
+                ChannelServices.RegisterChannel(channel, false);
 
                 // access COS nameing service
                 CorbaInit init = CorbaInit.GetInit();

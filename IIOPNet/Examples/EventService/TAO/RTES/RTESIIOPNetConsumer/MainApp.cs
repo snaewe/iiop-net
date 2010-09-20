@@ -285,7 +285,7 @@ namespace RTES {
 				IDictionary property = new Hashtable();
 				channel = new IiopChannel(0);
 				
-				ChannelServices.RegisterChannel(channel);
+				ChannelServices.RegisterChannel(channel, false);
 				CorbaInit init = CorbaInit.GetInit();
 				NamingContext nameService = (NamingContext)RemotingServices.Connect(typeof(NamingContext),
 					String.Format("corbaloc:iiop:{0}:{1}/NameService", host, port));

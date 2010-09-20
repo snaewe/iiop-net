@@ -105,7 +105,7 @@ namespace Ch.Elca.Iiop.IntegrationTests {
                 props[IiopChannel.BIDIR_KEY] = true;
                 m_channel = new IiopChannel(props);
             }
-            ChannelServices.RegisterChannel(m_channel);
+            ChannelServices.RegisterChannel(m_channel, false);
 
             NamingContext nameService = GetNameService();
             NameComponent[] name = new NameComponent[] { new NameComponent("test", "") };

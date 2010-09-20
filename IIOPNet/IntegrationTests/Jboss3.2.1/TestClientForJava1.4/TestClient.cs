@@ -55,7 +55,7 @@ namespace ch.elca.iiop.integrationTests {
         public void SetupEnvironment() {
             // register the channel
             m_channel = new IiopClientChannel();
-            ChannelServices.RegisterChannel(m_channel);
+            ChannelServices.RegisterChannel(m_channel, false);
 
             // access COS nameing service
             string nameserviceLoc = "corbaloc::localhost:3528/JBoss/Naming/root";

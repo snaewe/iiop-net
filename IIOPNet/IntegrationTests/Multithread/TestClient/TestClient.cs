@@ -68,7 +68,7 @@ namespace Ch.Elca.Iiop.IntegrationTests {
         public void SetupEnvironment() {
             // register the channel
             m_channel = new IiopClientChannel();
-            ChannelServices.RegisterChannel(m_channel);
+            ChannelServices.RegisterChannel(m_channel, false);
 
             // get the reference to the test-service
             m_testService1 = (TestService)RemotingServices.Connect(typeof(TestService), "iiop://localhost:8087/test1");

@@ -77,7 +77,7 @@ namespace Ch.Elca.Iiop.IntegrationTests {
             
             // register the channel
             m_channel = new IiopClientChannel(props);
-            ChannelServices.RegisterChannel(m_channel);
+            ChannelServices.RegisterChannel(m_channel, false);
 
             // get the reference to the test-service
             m_testService = (TestService)RemotingServices.Connect(typeof(TestService), 

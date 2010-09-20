@@ -56,7 +56,7 @@ namespace Ch.Elca.Iiop.IntegrationTests.MappingPlugin {
         public void SetupEnvironment() {
             // register the channel
             m_channel = new IiopClientChannel();
-            ChannelServices.RegisterChannel(m_channel);
+            ChannelServices.RegisterChannel(m_channel, false);
 
             // access COS nameing service
             CorbaInit init = CorbaInit.GetInit();

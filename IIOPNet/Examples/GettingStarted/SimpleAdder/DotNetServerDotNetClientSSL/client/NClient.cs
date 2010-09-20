@@ -75,7 +75,7 @@ namespace Ch.Elca.Iiop.Tutorial.GettingStarted {
             
                 // register the channel
                 IiopClientChannel channel = new IiopClientChannel(props);
-                ChannelServices.RegisterChannel(channel);
+                ChannelServices.RegisterChannel(channel, false);
 
                 // get the reference to the adder
                 Adder adder = (Adder)RemotingServices.Connect(typeof(Adder), ior);

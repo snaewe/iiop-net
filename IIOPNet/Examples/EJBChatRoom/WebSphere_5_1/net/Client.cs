@@ -58,7 +58,7 @@ namespace ch.elca.iiop.demo.ejbChatroom {
                 }
             
                 IiopChannel channel = new IiopChannel(callbackPort);
-                ChannelServices.RegisterChannel(channel);
+                ChannelServices.RegisterChannel(channel, false);
 
                 RmiIiopInit init = new RmiIiopInit(ejbNameServiceHost, ejbNameServicePort);
                 NamingContext nameService = (NamingContext)init.GetService("NameServiceServerRoot");

@@ -62,7 +62,7 @@ namespace Ch.Elca.Iiop.IntegrationTests {
             IDictionary properties = new Hashtable();
             properties[IiopClientChannel.ALLOW_REQUEST_MULTIPLEX_KEY] = false;
             m_channel = new IiopClientChannel(properties);
-            ChannelServices.RegisterChannel(m_channel);
+            ChannelServices.RegisterChannel(m_channel, false);
 
             // get the reference to the test-service
             m_testService = (TestService)RemotingServices.Connect(typeof(TestService), "corbaloc:iiop:1.2@localhost:8087/test");

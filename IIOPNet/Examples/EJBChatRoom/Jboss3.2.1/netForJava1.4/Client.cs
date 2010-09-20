@@ -52,7 +52,7 @@ namespace ch.elca.iiop.demo.ejbChatroom {
                 }
             
                 IiopChannel channel = new IiopChannel(callbackPort);
-                ChannelServices.RegisterChannel(channel);
+                ChannelServices.RegisterChannel(channel, false);
 
                 NamingContext nameService = (NamingContext)RemotingServices.Connect(typeof(NamingContext), nameserviceLoc);
 

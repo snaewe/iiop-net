@@ -67,7 +67,7 @@ namespace Ch.Elca.Iiop.IntegrationTests {
             IDictionary props = new Hashtable();
             props[IiopClientChannel.CLIENT_REQUEST_TIMEOUT_KEY] = 1000;
             m_channel = new IiopClientChannel(props);
-            ChannelServices.RegisterChannel(m_channel);
+            ChannelServices.RegisterChannel(m_channel, false);
 
             // get the reference to the test-service
             m_testService = (TestService)RemotingServices.Connect(typeof(TestService), "corbaloc:iiop:1.2@localhost:8087/test");

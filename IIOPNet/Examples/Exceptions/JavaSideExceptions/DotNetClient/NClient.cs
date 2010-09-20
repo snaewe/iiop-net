@@ -40,7 +40,7 @@ namespace Tutorial {
 
                 // register the channel
                 IiopClientChannel channel = new IiopClientChannel();
-                ChannelServices.RegisterChannel(channel);
+                ChannelServices.RegisterChannel(channel, false);
 
                 // access COS naming service
                 CorbaInit init = CorbaInit.GetInit();

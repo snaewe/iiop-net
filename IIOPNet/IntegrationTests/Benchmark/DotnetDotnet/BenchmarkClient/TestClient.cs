@@ -79,7 +79,7 @@ namespace Ch.Elca.Iiop.Benchmarks {
             dict["port"] = port;
             dict["endian"] = endian;
             m_channel = new IiopChannel(dict);
-            ChannelServices.RegisterChannel(m_channel);
+            ChannelServices.RegisterChannel(m_channel, false);
 
             m_testService = (TestService)RemotingServices.Connect(typeof(TestService), serviceUrl);
             m_testServiceIorUrl = (TestService)

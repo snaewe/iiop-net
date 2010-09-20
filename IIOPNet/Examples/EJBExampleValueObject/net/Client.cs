@@ -46,7 +46,7 @@ namespace Ch.Elca.Iiop.Demo.ValueObjectDemo {
 
                 // register the channel
                 IiopClientChannel channel = new IiopClientChannel();
-                ChannelServices.RegisterChannel(channel);
+                ChannelServices.RegisterChannel(channel, false);
 
                 // access COS nameing service
                 RmiIiopInit init = new RmiIiopInit(nameServiceHost, nameServicePort);

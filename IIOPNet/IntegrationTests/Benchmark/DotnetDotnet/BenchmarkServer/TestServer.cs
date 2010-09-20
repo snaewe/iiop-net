@@ -49,7 +49,7 @@ namespace Ch.Elca.Iiop.Benchmarks {
             }
             dict["endian"] = endian;
             IiopChannel chan = new IiopChannel(dict);
-            ChannelServices.RegisterChannel(chan);
+            ChannelServices.RegisterChannel(chan, false);
 
             TestServiceImpl test = new TestServiceImpl();
             string objectURI = "test";

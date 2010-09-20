@@ -60,7 +60,7 @@ namespace Ch.Elca.Iiop.IntegrationTests {
             IDictionary props = new Hashtable();
             props[IiopServerChannel.PORT_KEY] = 0;
             m_channel = new IiopChannel(props);
-            ChannelServices.RegisterChannel(m_channel);
+            ChannelServices.RegisterChannel(m_channel, false);
             // get the reference to the test-service
             m_testService = (TestService)RemotingServices.Connect(typeof(TestService), "corbaloc:iiop:1.2@localhost:8087/test");
         }

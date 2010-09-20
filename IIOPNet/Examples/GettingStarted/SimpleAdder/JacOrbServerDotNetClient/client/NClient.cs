@@ -54,7 +54,7 @@ namespace Ch.Elca.Iiop.Tutorial.GettingStarted {
 			
                 // register the channel
                 IiopClientChannel channel = new IiopClientChannel();
-                ChannelServices.RegisterChannel(channel);
+                ChannelServices.RegisterChannel(channel, false);
 
                 // get reference to nameservice
                 NamingContext nc = (NamingContext)RemotingServices.Connect(typeof(NamingContext), nameserviceLoc);
