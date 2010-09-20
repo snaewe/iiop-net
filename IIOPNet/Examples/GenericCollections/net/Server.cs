@@ -39,7 +39,7 @@ public class Server {
             // register the channel
             int port = 8087;
             IiopChannel chan = new IiopChannel(port);
-            ChannelServices.RegisterChannel(chan);
+            ChannelServices.RegisterChannel(chan, false);
 
             // publish the storage service manager
             Manager manager = new Manager();

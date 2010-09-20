@@ -68,7 +68,7 @@ namespace Ch.Elca.Iiop.Tutorial.GettingStarted {
                             port = Int32.Parse(args[0]);
                         }
 			IiopChannel chan = new IiopChannel(port);
-			ChannelServices.RegisterChannel(chan);
+			ChannelServices.RegisterChannel(chan, false);
 		
 			AdderImpl adder = new AdderImpl();
 			string objectURI = "adder";

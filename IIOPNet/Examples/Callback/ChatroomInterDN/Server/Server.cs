@@ -51,7 +51,7 @@ namespace Ch.Elca.Iiop.Demo.Chatroom {
                             port = Int32.Parse(args[0]);
                         }
 			IiopChannel chan = new IiopChannel(port);
-			ChannelServices.RegisterChannel(chan);
+			ChannelServices.RegisterChannel(chan, false);
 		
 			ChatroomImpl chatroom = new ChatroomImpl();
 			string objectURI = "chatroom";

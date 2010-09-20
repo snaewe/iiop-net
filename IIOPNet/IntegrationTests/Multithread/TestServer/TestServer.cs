@@ -42,7 +42,7 @@ namespace Ch.Elca.Iiop.IntegrationTests {
             properties[IiopServerChannel.PORT_KEY] = 8087;
             properties[IiopServerChannel.SERVERTHREADS_MAX_PER_CONNECTION_KEY] = 20;            
             IiopChannel chan = new IiopChannel(properties);
-            ChannelServices.RegisterChannel(chan);
+            ChannelServices.RegisterChannel(chan, false);
 
             TestService test1 = new TestService();
             string objectURI1 = "test1";

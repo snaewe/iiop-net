@@ -43,7 +43,7 @@ namespace Ch.Elca.Iiop.IntegrationTests {
             IDictionary properties = new Hashtable();
             properties[IiopServerChannel.PORT_KEY] = port;
             IiopChannel chan = new IiopChannel(properties);
-            ChannelServices.RegisterChannel(chan);
+            ChannelServices.RegisterChannel(chan, false);
 
             TestService test = new TestService();
             string objectURI = "test";

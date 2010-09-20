@@ -83,7 +83,7 @@ namespace Ch.Elca.Iiop.Tutorial.GettingStarted {
             props[DefaultServerAuthenticationImpl.STORE_LOCATION] = "CurrentUser";
 
             IiopChannel chan = new IiopChannel(props);
-            ChannelServices.RegisterChannel(chan);
+            ChannelServices.RegisterChannel(chan, false);
         
             AdderImpl adder = new AdderImpl();
             string objectURI = "adder";

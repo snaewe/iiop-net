@@ -48,7 +48,7 @@ namespace Ch.Elca.Iiop.Tutorial.GettingStarted {
 			// register the channel
 			int port = 8087;
 			IiopChannel chan = new IiopChannel(port);
-			ChannelServices.RegisterChannel(chan);
+			ChannelServices.RegisterChannel(chan, false);
 		
 			AdderImpl adder = new AdderImpl();
 			string objectURI = "adder";

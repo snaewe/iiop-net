@@ -59,7 +59,7 @@ namespace Ch.Elca.Iiop.IntegrationTests {
             props[DefaultServerAuthenticationImpl.STORE_LOCATION] = "CurrentUser";
 
             IiopChannel chan = new IiopChannel(props);
-            ChannelServices.RegisterChannel(chan);
+            ChannelServices.RegisterChannel(chan, false);
 
             TestService test = new TestService();
             string objectURI = "test";
