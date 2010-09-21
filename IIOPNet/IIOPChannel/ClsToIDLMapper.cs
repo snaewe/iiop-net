@@ -31,6 +31,7 @@ using System;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Collections;
+using System.Collections.Generic;
 using Ch.Elca.Iiop.Util;
 using Corba;
 using omg.org.CORBA;
@@ -473,6 +474,32 @@ namespace Ch.Elca.Iiop.Idl {
             return MapClsTypeWithTransform(ref clsType, ref attributes, action, out usedCustomMapping);
         }
         
+        private enum MapType {
+            Unknown,
+            
+            BoxedValueNotFound,
+            BoxedValue,
+            Interface,
+            MarshalByRef,
+            Primitive,
+            Flags,
+            Enum,
+            Array,
+            BoxedValue2,
+            Exception,
+            Struct,
+            Union,
+            Object,
+            Any,
+            TypeDesc,
+            TypeCode,
+            ConcreteValue,
+            AbstractValue,
+            Unmappable
+        }
+        
+        private static Dictionary<TypeCodeCreater.TypecodeForTypeKey, MapType> mapTypes = new Dictionary<TypeCodeCreater.TypecodeForTypeKey, MapType>();
+        
         /// <summary>uses MappingAction action while mapping a CLS-type to an IDL-type</summary>
         /// <param name="clsType">the type to map. The mapper can decide to transform the type during the mapping, the result of the transformation is returned. Transformation occurs, for example because of attributes</param>
         /// <param name="action">the action to take for the determined mapping</param>
@@ -480,6 +507,14 @@ namespace Ch.Elca.Iiop.Idl {
         /// <param name="usedCustomMapping">the custom mapping used if any; otherwise null</param>
         public object MapClsTypeWithTransform(ref Type clsType, ref AttributeExtCollection attributes, MappingAction action,
                                               out CustomMappingDesc usedCustomMapping) {
+                                              
+            TypeCodeCreater.TypecodeForTypeKey key = new TypeCodeCreater.TypecodeForTypeKey(clsType, attributes);
+            MapType mapType = MapType.Unknown;
+            
+            lock(mapTypes)
+                if(mapTypes.ContainsKey(key))
+                    mapType = mapTypes[key];
+            
             // handle out, ref types correctly: no other action needs to be taken than for in-types
             usedCustomMapping = null;
             AttributeExtCollection originalAttributes = attributes; // used to save reference to the passed in attributes
@@ -497,62 +532,120 @@ namespace Ch.Elca.Iiop.Idl {
             // check some standard cases
             Attribute boxedValAttr;
             attributes = originalAttributes.RemoveAttributeOfType(s_boxedValAttrType, out boxedValAttr);
-            if (boxedValAttr != null) { 
-                // load the boxed value-type for this attribute
-                Type boxed = GetBoxedValueType((BoxedValueAttribute)boxedValAttr);
-                if (boxed == null) { 
+            
+            if(mapType == MapType.Unknown)
+            {
+                if (boxedValAttr != null) { 
+                    // load the boxed value-type for this attribute
+                    Type boxed = GetBoxedValueType((BoxedValueAttribute)boxedValAttr);
+                    if (boxed == null) { 
+                        Trace.WriteLine("boxed type not found for boxed value attribute"); 
+                        mapType = MapType.BoxedValueNotFound;
+                    } else {
+                        Type needsBoxingFrom = clsType;
+                        clsType = boxed; // transformation
+                        mapType = MapType.BoxedValue;
+                    }
+                } else if (IsInterface(clsType) && !(clsType.Equals(ReflectionHelper.CorbaTypeCodeType))) {
+                    mapType = MapType.Interface;
+                } else if (IsMarshalByRef(clsType)) {
+                    mapType = MapType.MarshalByRef;
+                } else if (IsMappablePrimitiveType(clsType)) {
+                    mapType = MapType.Primitive;
+                } else if (IsEnum(clsType)) { 
+                    if (HasEnumFlagsAttributes(clsType)) {
+                        mapType = MapType.Flags;
+                    } else {
+                        // enums with more than Int32.MaxValue elements can't be mapped to idl.
+                        // but not possibly to check this, because in .NET 1.0, no support for Array.LongLength.
+                        mapType = MapType.Enum;
+                    }
+                } else if (IsArray(clsType)) { 
+                    mapType = MapType.Array;
+                } else if (clsType.IsSubclassOf(ReflectionHelper.BoxedValueBaseType)) {
+                    // a boxed value type, which needs not to be boxed/unboxed but should be handled like a normal value type
+                    mapType = MapType.BoxedValue2;
+                } else if (clsType.IsSubclassOf(s_exceptType) || clsType.Equals(s_exceptType)) {
+                    mapType = MapType.Exception;
+                } else if (IsMarshalledAsStruct(clsType)) {
+                     mapType = MapType.Struct;
+                } else if (IsMarshalledAsUnion(clsType)) {
+                    mapType = MapType.Union;
+                } else if (clsType.Equals(ReflectionHelper.ObjectType)) {
+                    mapType = MapType.Object;
+                } else if (clsType.Equals(s_anyType)) {
+                    mapType = MapType.Any;
+                } else if (clsType.Equals(ReflectionHelper.TypeType) || clsType.IsSubclassOf(ReflectionHelper.TypeType)) {
+                    mapType = MapType.TypeDesc;
+                } else if (clsType.Equals(s_corbaTypeCodeImplType) || clsType.IsSubclassOf(s_corbaTypeCodeImplType) ||
+                           clsType.Equals(ReflectionHelper.CorbaTypeCodeType)) {
+                    mapType = MapType.TypeCode;
+                } else if (!UnmappableType(clsType)) {
+                    if (IsValueTypeConcrete(clsType)) {
+                        mapType = MapType.ConcreteValue;
+                    } else {
+                        // other types are mapped to an abstract value type
+                        mapType = MapType.AbstractValue;
+                    }
+                } else {
+                    // not mappable: clsType
+                    mapType = MapType.Unmappable;
+                }
+                
+                lock(mapTypes)
+                    mapTypes.Add(key, mapType);
+            }            
+            
+            switch(mapType)
+            {
+                case MapType.BoxedValueNotFound:
                     Trace.WriteLine("boxed type not found for boxed value attribute"); 
                     throw new NO_IMPLEMENT(10001, CompletionStatus.Completed_MayBe);
-                }
-                Type needsBoxingFrom = clsType;
-                clsType = boxed; // transformation
-                return action.MapToIdlBoxedValueType(boxed, needsBoxingFrom);
-            } else if (IsInterface(clsType) && !(clsType.Equals(ReflectionHelper.CorbaTypeCodeType))) {
-                return CallActionForDNInterface(ref clsType, action);
-            } else if (IsMarshalByRef(clsType)) {
-                return action.MapToIdlConcreteInterface(clsType);
-            } else if (IsMappablePrimitiveType(clsType)) {
-                return CallActionForDNPrimitveType(ref clsType, ref attributes, action);
-            } else if (IsEnum(clsType)) { 
-                if (HasEnumFlagsAttributes(clsType)) {
+                case MapType.BoxedValue:
+                    Type boxed = GetBoxedValueType((BoxedValueAttribute)boxedValAttr);
+                    Type needsBoxingFrom = clsType;
+                    clsType = boxed; // transformation
+                    return action.MapToIdlBoxedValueType(boxed, needsBoxingFrom);
+                case MapType.Interface:
+                    return CallActionForDNInterface(ref clsType, action);
+                case MapType.MarshalByRef:
+                    return action.MapToIdlConcreteInterface(clsType);
+                case MapType.Primitive:
+                    return CallActionForDNPrimitveType(ref clsType, ref attributes, action);
+                case MapType.Flags:
                     return action.MapToIdlFlagsEquivalent(clsType);
-                } else {
+                case MapType.Enum:
                     // enums with more than Int32.MaxValue elements can't be mapped to idl.
                     // but not possibly to check this, because in .NET 1.0, no support for Array.LongLength.
                     return action.MapToIdlEnum(clsType);
-                }
-            } else if (IsArray(clsType)) { 
-                return CallActionForDNArray(ref clsType, ref attributes, originalAttributes, action);
-            } else if (clsType.IsSubclassOf(ReflectionHelper.BoxedValueBaseType)) {
-                // a boxed value type, which needs not to be boxed/unboxed but should be handled like a normal value type
-                return action.MapToIdlBoxedValueType(clsType, null);
-            } else if (clsType.IsSubclassOf(s_exceptType) || clsType.Equals(s_exceptType)) {
-                return action.MapException(clsType);
-            } else if (IsMarshalledAsStruct(clsType)) {
-                 return action.MapToIdlStruct(clsType);
-            } else if (IsMarshalledAsUnion(clsType)) {
-                return action.MapToIdlUnion(clsType);
-            } else if (clsType.Equals(ReflectionHelper.ObjectType)) {
-                return CallActionForDNObject(ref clsType, ref attributes, action);
-            } else if (clsType.Equals(s_anyType)) {
-                return action.MapToIdlAny(clsType);
-            } else if (clsType.Equals(ReflectionHelper.TypeType) || clsType.IsSubclassOf(ReflectionHelper.TypeType)) {
-                return action.MapToTypeDesc(clsType);
-            } else if (clsType.Equals(s_corbaTypeCodeImplType) || clsType.IsSubclassOf(s_corbaTypeCodeImplType) ||
-                       clsType.Equals(ReflectionHelper.CorbaTypeCodeType)) {
-                return action.MapToTypeCode(clsType);
-            } else if (!UnmappableType(clsType)) {
-                if (IsValueTypeConcrete(clsType)) {
+                case MapType.Array:
+                    return CallActionForDNArray(ref clsType, ref attributes, originalAttributes, action);
+                case MapType.BoxedValue2:
+                    // a boxed value type, which needs not to be boxed/unboxed but should be handled like a normal value type
+                    return action.MapToIdlBoxedValueType(clsType, null);
+                case MapType.Exception:
+                    return action.MapException(clsType);
+                case MapType.Struct:
+                     return action.MapToIdlStruct(clsType);
+                case MapType.Union:
+                    return action.MapToIdlUnion(clsType);
+                case MapType.Object:
+                    return CallActionForDNObject(ref clsType, ref attributes, action);
+                case MapType.Any:
+                    return action.MapToIdlAny(clsType);
+                case MapType.TypeDesc:
+                    return action.MapToTypeDesc(clsType);
+                case MapType.TypeCode:
+                    return action.MapToTypeCode(clsType);
+                case MapType.ConcreteValue:
                     return action.MapToIdlConcreateValueType(clsType);
-                } else {
+                case MapType.AbstractValue:
                     // other types are mapped to an abstract value type
                     return action.MapToIdlAbstractValueType(clsType);                   
-                }
-            } else {
-                // not mappable: clsType
-                throw new BAD_PARAM(18800, CompletionStatus.Completed_MayBe, "The type " + clsType.AssemblyQualifiedName +
-                                   " is not mappable to idl");
             }
+            // not mappable: clsType
+            throw new BAD_PARAM(18800, CompletionStatus.Completed_MayBe, "The type " + clsType.AssemblyQualifiedName +
+                               " is not mappable to idl");
         }
 
         /// <summary>determines the mapping for primitive types</summary>
@@ -602,7 +695,7 @@ namespace Ch.Elca.Iiop.Idl {
         /// helper for string/char mapping; removes the wchar attribute if present
         /// </summary>
         private bool UseWideOk(ref AttributeExtCollection modifiedAttributes) {
-            bool useWide = true;            
+            bool useWide = true;
             Attribute wideAttr;
             modifiedAttributes = modifiedAttributes.RemoveAttributeOfType(ReflectionHelper.WideCharAttributeType, out wideAttr);
             if (wideAttr != null) {

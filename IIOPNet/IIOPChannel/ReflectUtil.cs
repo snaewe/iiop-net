@@ -31,6 +31,7 @@ using System;
 using System.Reflection;
 using Ch.Elca.Iiop.Idl;
 using System.Collections;
+using System.Collections.Generic;
 
 namespace Ch.Elca.Iiop.Util {
     
@@ -477,6 +478,8 @@ namespace Ch.Elca.Iiop.Util {
             return type.GetFields(flags);
         }  
         
+        private static Dictionary<Type, FieldInfo[]> orderedFields = new Dictionary<Type, FieldInfo[]>();
+        
         /// <summary>
         /// Get all the instance fields directly declared in Type type in the serialization order.
         /// </summary>
@@ -484,15 +487,21 @@ namespace Ch.Elca.Iiop.Util {
         /// <remarks>the order is either defined by the ExplicitSerializationOrderNr attributes or
         /// by the field name, if implicitely ordered.</remarks>
         public static FieldInfo[] GetAllDeclaredInstanceFieldsOrdered(Type type) {
-            FieldInfo[] fields = GetAllDeclaredInstanceFields(type);
-            IComparer comparer;
-            if (type.IsDefined(ReflectionHelper.ExplicitSerializationOrderedType, false)) {
-                comparer = ExplicitOrderFieldInfoComparer.Instance;    
-            } else {
-                comparer = ImplicitOrderFieldInfoComparer.Instance;
+            lock(orderedFields) {
+                if(orderedFields.ContainsKey(type)) {
+                    return orderedFields[type];
+                }
+                FieldInfo[] fields = GetAllDeclaredInstanceFields(type);
+                IComparer comparer;
+                if (type.IsDefined(ReflectionHelper.ExplicitSerializationOrderedType, false)) {
+                    comparer = ExplicitOrderFieldInfoComparer.Instance;    
+                } else {
+                     comparer = ImplicitOrderFieldInfoComparer.Instance;
+                }
+                Array.Sort(fields, comparer);            
+                orderedFields.Add(type, fields);
+                return fields;
             }
-            Array.Sort(fields, comparer);            
-            return fields;
         }
         
         /// <summary>

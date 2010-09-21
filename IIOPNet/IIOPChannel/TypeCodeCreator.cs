@@ -42,7 +42,7 @@ namespace Ch.Elca.Iiop.Idl {
         
         #region Types
         
-        private class TypecodeForTypeKey {
+        internal class TypecodeForTypeKey {
         
             #region IFields
             
