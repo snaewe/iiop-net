@@ -29,7 +29,6 @@
 
 using System;
 using System.Collections;
-using System.Collections.Generic;
 using System.Reflection;
 using Ch.Elca.Iiop.Util;
 using omg.org.CORBA;
@@ -118,7 +117,11 @@ namespace Ch.Elca.Iiop.Idl {
         private TypeCodeImpl CreateOrGetTypeCodeForType(Type forType,
                                                         AttributeExtCollection attributes) {
             TypecodeForTypeKey key = new TypecodeForTypeKey(forType, attributes);
-            TypeCodeImpl result = m_alreadyCreatedTypeCodes[key] as TypeCodeImpl;
+            TypeCodeImpl result;
+
+            lock(m_alreadyCreatedTypeCodes)
+                result = m_alreadyCreatedTypeCodes[key] as TypeCodeImpl;
+
             if (result == null)
                 result = Repository.CreateTypeCodeForTypeInternal(forType, attributes, this);
 
@@ -132,7 +135,8 @@ namespace Ch.Elca.Iiop.Idl {
                                                     AttributeExtCollection attributes,
                                                     TypeCodeImpl typeCode) {
             TypecodeForTypeKey key = new TypecodeForTypeKey(forType, attributes);
-            m_alreadyCreatedTypeCodes[key] = typeCode;
+            lock(m_alreadyCreatedTypeCodes)
+                m_alreadyCreatedTypeCodes[key] = typeCode;
         }
         
         private static IDictionary structTCs = new Hashtable();
