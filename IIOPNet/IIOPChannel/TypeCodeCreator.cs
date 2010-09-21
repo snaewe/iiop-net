@@ -29,6 +29,7 @@
 
 using System;
 using System.Collections;
+using System.Collections.Generic;
 using System.Reflection;
 using Ch.Elca.Iiop.Util;
 using omg.org.CORBA;
@@ -117,11 +118,11 @@ namespace Ch.Elca.Iiop.Idl {
         private TypeCodeImpl CreateOrGetTypeCodeForType(Type forType,
                                                         AttributeExtCollection attributes) {
             TypecodeForTypeKey key = new TypecodeForTypeKey(forType, attributes);
-            if (m_alreadyCreatedTypeCodes[key] == null) {
-                return Repository.CreateTypeCodeForTypeInternal(forType, attributes, this);
-            } else {
-                return (TypeCodeImpl)m_alreadyCreatedTypeCodes[key];
-            }
+            TypeCodeImpl result = m_alreadyCreatedTypeCodes[key] as TypeCodeImpl;
+            if (result == null)
+                result = Repository.CreateTypeCodeForTypeInternal(forType, attributes, this);
+
+            return result;
         }
         
         /// <summary>
@@ -130,29 +131,41 @@ namespace Ch.Elca.Iiop.Idl {
         private void RegisterCreatedTypeCodeForType(Type forType,
                                                     AttributeExtCollection attributes,
                                                     TypeCodeImpl typeCode) {
-            TypecodeForTypeKey key = new TypecodeForTypeKey(forType, attributes);    
+            TypecodeForTypeKey key = new TypecodeForTypeKey(forType, attributes);
             m_alreadyCreatedTypeCodes[key] = typeCode;
         }
         
+        private static IDictionary structTCs = new Hashtable();
+        
         #region Implementation of MappingAction
         public object MapToIdlStruct(Type clsType) {
-            StructTC result = new StructTC();
-            RegisterCreatedTypeCodeForType(clsType, AttributeExtCollection.EmptyCollection,
-                                           result);
+            lock(structTCs)
+            {
+                StructTC result = structTCs[clsType] as StructTC;
+                if(result != null)
+                    return result;
             
-            FieldInfo[] members = ReflectionHelper.GetAllDeclaredInstanceFieldsOrdered(clsType);
-            StructMember[] structMembers = new StructMember[members.Length];
-            for (int i = 0; i < members.Length; i++) {                
-                omg.org.CORBA.TypeCode memberType = 
-                    CreateOrGetTypeCodeForType(members[i].FieldType,
-                                               ReflectionHelper.GetCustomAttriutesForField(members[i], 
-                                                                                           true));
-                structMembers[i] = new StructMember(members[i].Name, memberType);
+                result = new StructTC();
+                RegisterCreatedTypeCodeForType(clsType, AttributeExtCollection.EmptyCollection,
+                                               result);
+                
+                FieldInfo[] members = ReflectionHelper.GetAllDeclaredInstanceFieldsOrdered(clsType);
+                StructMember[] structMembers = new StructMember[members.Length];
+                for (int i = 0; i < members.Length; i++) {                
+                    omg.org.CORBA.TypeCode memberType = 
+                        CreateOrGetTypeCodeForType(members[i].FieldType,
+                                                   ReflectionHelper.GetCustomAttriutesForField(members[i], 
+                                                                                               true));
+                    structMembers[i] = new StructMember(members[i].Name, memberType);
+                }
+                result.Initalize(Repository.GetRepositoryID(clsType), 
+                                 IdlNaming.ReverseIdlToClsNameMapping(clsType.Name),
+                                 structMembers);
+                
+                structTCs[clsType] = result;
+                
+                return result;
             }
-            result.Initalize(Repository.GetRepositoryID(clsType), 
-                             IdlNaming.ReverseIdlToClsNameMapping(clsType.Name),
-                             structMembers);
-            return result;
         }
         public object MapToIdlUnion(Type clsType) {
             UnionTC result = new UnionTC();            
