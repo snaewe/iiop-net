@@ -28,6 +28,7 @@
 
 
 using System;
+using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.Remoting;
 using System.Runtime.Remoting.Channels;
@@ -44,28 +45,28 @@ namespace Ch.Elca.Iiop.Benchmarks {
     public class RefTypeLocalImpl : MarshalByRefObject, RefType {
     }
     
-
-
+      
+      
     public class TestClient {
         
         #region IFields
     
         private IiopChannel m_channel;
-
+      
         private TestService m_testService;
         private TestService m_testServiceIorUrl;
         private TestService m_testServiceFromNs;
-
+      
         private int  m_count;
         private TimeSpan m_totalTime = new TimeSpan(0);      
         private TimeSpan m_referenceTime = new TimeSpan(0); 
-
+      
         private RefType m_localRT;
         private RefType m_remoteRT;
-
-
+      
+      
         #endregion IFields
-
+      
 
         public TestClient(int count) {
             m_count = count;
@@ -259,6 +260,18 @@ namespace Ch.Elca.Iiop.Benchmarks {
             m_testService.EchoStruct(arg);
         }
 
+        void CallIdlStructSeqEcho() {
+            IdlStructA[] arg = new IdlStructA[10000];
+            m_testService.EchoStructSeq(arg);
+        }
+
+        void CallIdlAnySeqEcho() {
+            object[] arg = new object[10000];
+            for(int i = 0; i < arg.Length; ++i)
+            	arg[i] = new IdlStructA(9, 8, 7, 6, 5, 4);
+            m_testService.EchoAnySeq(arg);
+        }
+
         void CallEnumSeqEcho() {
             EnumA[] arg = new EnumA[1000];
             m_testService.EnumIdlSeqEcho(arg);
@@ -292,18 +305,18 @@ namespace Ch.Elca.Iiop.Benchmarks {
                 Console.Write("{0,-25}", msg);
                 int nrOfRuns = m_count / countreductionDivisor;
                 nrOfRuns = (nrOfRuns > 0 ? nrOfRuns : 1);
-                PerformanceCounter counter = new PerformanceCounter();
+                Stopwatch stopWatch = Stopwatch.StartNew();
                 for (int i=0; i<nrOfRuns; i++) {
                     t();
                 }
-                counter.Stop();                
+                stopWatch.Stop();
                 if (addtoref) {
-                    m_referenceTime += counter.Difference;
+                    m_referenceTime += stopWatch.Elapsed;
                 }
                 Console.WriteLine("{0,-10} ms for {1} calls, per call : {2,-10} ms", 
-                                  counter.Difference.TotalMilliseconds, nrOfRuns, 
-                                  counter.Difference.TotalMilliseconds / nrOfRuns);
-                m_totalTime += counter.Difference;
+                                  stopWatch.Elapsed.TotalMilliseconds, nrOfRuns, 
+                                  stopWatch.Elapsed.TotalMilliseconds / nrOfRuns);
+                m_totalTime += stopWatch.Elapsed;
             } catch (Exception e) {
                 Console.WriteLine(e.ToString());
             }
@@ -367,6 +380,8 @@ namespace Ch.Elca.Iiop.Benchmarks {
             tc.ExecuteTest(false, "(int_sq)int_sq", new TestProcedure(tc.CallIntSeqEcho));
             tc.ExecuteTest(false, "(EnumA)EnumA", new TestProcedure(tc.CallEnumEcho));
             tc.ExecuteTest(false, "(IdlStructA)IdlStructA", new TestProcedure(tc.CallIdlStructEcho));
+            tc.ExecuteTest(false, "(IdlStruct[])IdlStruct[]", new TestProcedure(tc.CallIdlStructSeqEcho), 10);
+            tc.ExecuteTest(false, "(any[])any[]", new TestProcedure(tc.CallIdlAnySeqEcho), 10);
             tc.ExecuteTest(false, "(enum_sq)enum_sq", new TestProcedure(tc.CallEnumSeqEcho));
             tc.ExecuteTest(false, "(int_ar2d)int_ar2d", new TestProcedure(tc.CallIdlArrayEcho));
             

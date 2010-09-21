@@ -147,6 +147,13 @@ namespace Ch.Elca.Iiop.Benchmarks {
         int[] IntIdlSeqEcho([IdlSequence(0L)] int[] arg);
 
         IdlStructA EchoStruct(IdlStructA arg);
+
+        [return: IdlSequence(0L)]
+        IdlStructA[] EchoStructSeq(IdlStructA[] arg);
+
+        [return: IdlSequence(0L)]
+        object[] EchoAnySeq(object[] arg);
+
         EnumA EchoEnum(EnumA arg);
 
         [return: IdlSequence(0L)]

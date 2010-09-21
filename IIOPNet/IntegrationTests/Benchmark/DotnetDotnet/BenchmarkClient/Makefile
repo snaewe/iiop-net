@@ -32,7 +32,7 @@ $(bin)$(CLSFORIDL): $(IDL)$(ServiceIDLFileName)
 
         
 build-client: $(bin)IIOPChannel.dll $(bin)$(CLSFORIDL) *.cs
-    $(CSC) $(CSFLAGS) /t:exe /r:$(bin)$(CLSFORIDL) /r:$(bin)IIOPChannel.dll /out:bin\ClientTest.exe TestClient.cs PerformanceCounter.cs ValueTypeImpls.cs
+    $(CSC) $(CSFLAGS) /t:exe /r:$(bin)$(CLSFORIDL) /r:$(bin)IIOPChannel.dll /out:bin\ClientTest.exe TestClient.cs ValueTypeImpls.cs
 
 start-client:
     @echo "Benchmark .NET <-> .NET"
