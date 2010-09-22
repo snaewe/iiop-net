@@ -120,7 +120,7 @@ namespace omg.org.CORBA {
         
         #region IFields
         
-        [StringValue]
+        [StringValue][WideCharAttribute(true)]
         private string m_val;
 
         #endregion IFields
