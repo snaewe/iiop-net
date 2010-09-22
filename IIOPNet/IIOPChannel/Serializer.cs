@@ -2892,53 +2892,119 @@ namespace Ch.Elca.Iiop.Tests {
         }
 
         [Test]
-        public void TestSerBoxedStringAsAnyNoAnyContainer() {
+        public void TestSerBoxedStringAsAnyNoAnyContainer1() {
+            bool oldUseWideChar = ClsToIdlMapper.UseWideCharByDefault;
+            ClsToIdlMapper.UseWideCharByDefault = true;
+
             string val = "test";
             AnySerializer anySer = new AnySerializer(m_serFactory, false);
-            GenericSerTest(anySer, val, new byte[] { 0, 0, 0, 30, // tc-kind
-                                                     0, 0, 0, 72, // encap length
-                                                     0, 0, 0, 0, // flags
-                                                     0, 0, 0, 35, 73, 68, 76, 58, // rep-id
-                                                     111, 109, 103, 46, 111, 114, 103, 47, 
-                                                     67, 79, 82, 66, 65, 47, 87, 83,
-                                                     116, 114, 105, 110, 103, 86, 97, 108,
-                                                     117, 101, 58, 49, 46, 48, 0, 0,
-                                                     0, 0, 0, 13, 87, 83, 116, 114, // name
-                                                     105, 110, 103, 86, 97, 108, 117, 101,
-                                                     0, 0, 0, 0, 0, 0, 0, 27,  // boxed value tc for wstring
-                                                     0, 0, 0, 0, 127, 255, 255, 2, // bound, value
-                                                     0, 0, 0, 35, 73, 68, 76, 58, // rep-id of value
-                                                     111, 109, 103, 46, 111, 114, 103, 47, 
-                                                     67, 79, 82, 66, 65, 47, 87, 83,
-                                                     116, 114, 105, 110, 103, 86, 97, 108,
-                                                     117, 101, 58, 49, 46, 48, 0, 0,
-                                                     0, 0, 0, 8, 0, 116, 0, 101, // "test"
-                                                     0, 115, 0, 116 });
+            GenericSerTest(anySer, val, new byte[] {   0,   0,   0,  30,                     // tc-kind
+                                                       0,   0,   0,  72,                     // encap length
+                                                       0,   0,   0,   0,                     // flags
+                                                       0,   0,   0,  35,  73,  68,  76,  58, // rep-id:          <35>"IDL:"
+                                                     111, 109, 103,  46, 111, 114, 103,  47, //                  "omg.org/"  
+                                                      67,  79,  82,  66,  65,  47,  87,  83, //                  "CORBA/WS"  
+                                                     116, 114, 105, 110, 103,  86,  97, 108, //                  "tringVal"  
+                                                     117, 101,  58,  49,  46,  48,   0,   0, //                  "ue:1.0\0"<padding>
+                                                       0,   0,   0,  13,  87,  83, 116, 114, // name
+                                                     105, 110, 103,  86,  97, 108, 117, 101,
+                                                       0,   0,   0,   0,   0,   0,   0,  27, // boxed value tc for wstring
+                                                       0,   0,   0,   0, 127, 255, 255,   2, // bound, value
+                                                       0,   0,   0,  35,  73,  68,  76,  58, // rep-id of value: <35>"IDL:"
+                                                     111, 109, 103,  46, 111, 114, 103,  47, //                  "omg.org/"  
+                                                      67,  79,  82,  66,  65,  47,  87,  83, //                  "CORBA/WS"  
+                                                     116, 114, 105, 110, 103,  86,  97, 108, //                  "tringVal"  
+                                                     117, 101,  58,  49,  46,  48,   0,   0, //                  "ue:1.0\0"<padding>
+                                                       0,   0,   0,   8,   0, 116,   0, 101, // value:           <8>"test"
+                                                       0, 115,   0, 116 });                  // "For GIOP version 1.2 and 1.3 a wstring is not terminated by a null character"
+
+            ClsToIdlMapper.UseWideCharByDefault = oldUseWideChar;
         }
 
         [Test]
-        public void TestDeSerBoxedStringAsAnyNoAnyContainer() {
+        public void TestSerBoxedStringAsAnyNoAnyContainer2() {
+            bool oldUseWideChar = ClsToIdlMapper.UseWideCharByDefault;
+            ClsToIdlMapper.UseWideCharByDefault = false;
+
+            string val = "test";
+            AnySerializer anySer = new AnySerializer(m_serFactory, false);
+            GenericSerTest(anySer, val, new byte[] {   0,   0,   0,  30,                     // tc-kind
+                                                       0,   0,   0,  68,                     // encap length
+                                                       0,   0,   0,   0,                     // flags
+                                                       0,   0,   0,  34,  73,  68,  76,  58, // rep-id:          <34>"IDL:"
+                                                     111, 109, 103,  46, 111, 114, 103,  47, //                  "omg.org/"
+                                                      67,  79,  82,  66,  65,  47,  83, 116, //                  "CORBA/S"
+                                                     114, 105, 110, 103,  86,  97, 108, 117, //                  "tringVal"
+                                                     101,  58,  49,  46,  48,   0,   0,   0, //                  "ue:1.0\0"<padding>
+                                                       0,   0,   0,  12,  83, 116, 114, 105, // name:            <12>"Stri"
+                                                     110, 103,  86,  97, 108, 117, 101,   0, //                  "ngValue"
+                                                       0,   0,   0,  18,                     // boxed value tc for string
+                                                       0,   0,   0,   0, 127, 255, 255,   2, // bound, value
+                                                       0,   0,   0,  34,  73,  68,  76,  58, // rep-id of value: <34>"IDL:"
+                                                     111, 109, 103,  46, 111, 114, 103,  47, //                  "omg.org/"  
+                                                      67,  79,  82,  66,  65,  47,  83, 116, //                  "CORBA/S"  
+                                                     114, 105, 110, 103,  86,  97, 108, 117, //                  "tringVal"  
+                                                     101,  58,  49,  46,  48,   0,   0,   0, //                  "ue:1.0\0"<padding>
+                                                       0,   0,   0,   5, 116, 101, 115, 116, // value:           <4>"test"
+                                                       0                                     //                  "\0"
+                                                     });                                     // "The string contents include a single terminating null character."
+
+            ClsToIdlMapper.UseWideCharByDefault = oldUseWideChar;
+        }
+
+        [Test]
+        public void TestDeSerBoxedStringAsAnyNoAnyContainer1() {
             AnySerializer anySer = new AnySerializer(m_serFactory, false);
             object deser;
-            GenericDeserTest(anySer, new byte[] { 0, 0, 0, 30, // tc-kind
-                                                  0, 0, 0, 72, // encap length
-                                                  0, 0, 0, 0, // flags
-                                                  0, 0, 0, 35, 73, 68, 76, 58, // rep-id
-                                                  111, 109, 103, 46, 111, 114, 103, 47, 
-                                                  67, 79, 82, 66, 65, 47, 87, 83,
-                                                  116, 114, 105, 110, 103, 86, 97, 108,
-                                                  117, 101, 58, 49, 46, 48, 0, 0,
-                                                  0, 0, 0, 13, 87, 83, 116, 114, // name
-                                                  105, 110, 103, 86, 97, 108, 117, 101,
-                                                  0, 0, 0, 0, 0, 0, 0, 27,  // boxed value tc for wstring
-                                                  0, 0, 0, 0, 127, 255, 255, 2, // bound, value
-                                                  0, 0, 0, 35, 73, 68, 76, 58, // rep-id of value
-                                                  111, 109, 103, 46, 111, 114, 103, 47, 
-                                                  67, 79, 82, 66, 65, 47, 87, 83,
-                                                  116, 114, 105, 110, 103, 86, 97, 108,
-                                                  117, 101, 58, 49, 46, 48, 0, 0,
-                                                  0, 0, 0, 8, 0, 116, 0, 101, // "test"
-                                                  0, 115, 0, 116 },
+            GenericDeserTest(anySer, new byte[] {      0,   0,   0,  30,                     // tc-kind
+                                                       0,   0,   0,  72,                     // encap length
+                                                       0,   0,   0,   0,                     // flags
+                                                       0,   0,   0,  35,  73,  68,  76,  58, // rep-id:          <35>"IDL:"
+                                                     111, 109, 103,  46, 111, 114, 103,  47, //                  "omg.org/"  
+                                                      67,  79,  82,  66,  65,  47,  87,  83, //                  "CORBA/WS"  
+                                                     116, 114, 105, 110, 103,  86,  97, 108, //                  "tringVal"  
+                                                     117, 101,  58,  49,  46,  48,   0,   0, //                  "ue:1.0\0"<padding>
+                                                       0,   0,   0,  13,  87,  83, 116, 114, // name
+                                                     105, 110, 103,  86,  97, 108, 117, 101,
+                                                       0,   0,   0,   0,   0,   0,   0,  27, // boxed value tc for wstring
+                                                       0,   0,   0,   0, 127, 255, 255,   2, // bound, value
+                                                       0,   0,   0,  35,  73,  68,  76,  58, // rep-id of value: <35>"IDL:"
+                                                     111, 109, 103,  46, 111, 114, 103,  47, //                  "omg.org/"  
+                                                      67,  79,  82,  66,  65,  47,  87,  83, //                  "CORBA/WS"  
+                                                     116, 114, 105, 110, 103,  86,  97, 108, //                  "tringVal"  
+                                                     117, 101,  58,  49,  46,  48,   0,   0, //                  "ue:1.0\0"<padding>
+                                                       0,   0,   0,   8,   0, 116,   0, 101, // value:           <8>"test"
+                                                       0, 115,   0, 116 },                  // "For GIOP version 1.2 and 1.3 a wstring is not terminated by a null character"
+                             "test",
+                             out deser);
+            Assert.AreEqual(ReflectionHelper.StringType,
+                                   deser.GetType(), "deser type");
+        }
+
+        [Test]
+        public void TestDeSerBoxedStringAsAnyNoAnyContainer2() {
+            AnySerializer anySer = new AnySerializer(m_serFactory, false);
+            object deser;
+            GenericDeserTest(anySer, new byte[] {      0,   0,   0,  30,                     // tc-kind
+                                                       0,   0,   0,  68,                     // encap length
+                                                       0,   0,   0,   0,                     // flags
+                                                       0,   0,   0,  34,  73,  68,  76,  58, // rep-id:          <34>"IDL:"
+                                                     111, 109, 103,  46, 111, 114, 103,  47, //                  "omg.org/"
+                                                      67,  79,  82,  66,  65,  47,  83, 116, //                  "CORBA/S"
+                                                     114, 105, 110, 103,  86,  97, 108, 117, //                  "tringVal"
+                                                     101,  58,  49,  46,  48,   0,   0,   0, //                  "ue:1.0\0"<padding>
+                                                       0,   0,   0,  12,  83, 116, 114, 105, // name:            <12>"Stri"
+                                                     110, 103,  86,  97, 108, 117, 101,   0, //                  "ngValue"
+                                                       0,   0,   0,  18,                     // boxed value tc for string
+                                                       0,   0,   0,   0, 127, 255, 255,   2, // bound, value
+                                                       0,   0,   0,  34,  73,  68,  76,  58, // rep-id of value: <34>"IDL:"
+                                                     111, 109, 103,  46, 111, 114, 103,  47, //                  "omg.org/"  
+                                                      67,  79,  82,  66,  65,  47,  83, 116, //                  "CORBA/S"  
+                                                     114, 105, 110, 103,  86,  97, 108, 117, //                  "tringVal"  
+                                                     101,  58,  49,  46,  48,   0,   0,   0, //                  "ue:1.0\0"<padding>
+                                                       0,   0,   0,   5, 116, 101, 115, 116, // value:           <4>"test"
+                                                       0                                     //                  "\0"
+                                                     },                                      // "The string contents include a single terminating null character."
                              "test",
                              out deser);
             Assert.AreEqual(ReflectionHelper.StringType,
@@ -3016,54 +3082,123 @@ namespace Ch.Elca.Iiop.Tests {
         }
 
         [Test]
-        public void TestSerBoxedStringAsAnyAnyContainer() {
+        public void TestSerBoxedStringAsAnyAnyContainer1() {
+            bool oldUseWideChar = ClsToIdlMapper.UseWideCharByDefault;
+            ClsToIdlMapper.UseWideCharByDefault = true;
+
             Any val = new Any("test");
             AnySerializer anySer = new AnySerializer(m_serFactory, true);
-            GenericSerTest(anySer, val, new byte[] { 0, 0, 0, 30, // tc-kind
-                                                     0, 0, 0, 72, // encap length
-                                                     0, 0, 0, 0, // flags
-                                                     0, 0, 0, 35, 73, 68, 76, 58, // rep-id
-                                                     111, 109, 103, 46, 111, 114, 103, 47, 
-                                                     67, 79, 82, 66, 65, 47, 87, 83,
-                                                     116, 114, 105, 110, 103, 86, 97, 108,
-                                                     117, 101, 58, 49, 46, 48, 0, 0,
-                                                     0, 0, 0, 13, 87, 83, 116, 114, // name
-                                                     105, 110, 103, 86, 97, 108, 117, 101,
-                                                     0, 0, 0, 0, 0, 0, 0, 27,  // boxed value tc for wstring
-                                                     0, 0, 0, 0, 127, 255, 255, 2, // bound, value
-                                                     0, 0, 0, 35, 73, 68, 76, 58, // rep-id of value
-                                                     111, 109, 103, 46, 111, 114, 103, 47, 
-                                                     67, 79, 82, 66, 65, 47, 87, 83,
-                                                     116, 114, 105, 110, 103, 86, 97, 108,
-                                                     117, 101, 58, 49, 46, 48, 0, 0,
-                                                     0, 0, 0, 8, 0, 116, 0, 101, // "test"
-                                                     0, 115, 0, 116 });
+            GenericSerTest(anySer, val, new byte[] {   0,   0,   0,  30,                     // tc-kind
+                                                       0,   0,   0,  72,                     // encap length
+                                                       0,   0,   0,   0,                     // flags
+                                                       0,   0,   0,  35,  73,  68,  76,  58, // rep-id:          <35>"IDL:"
+                                                     111, 109, 103,  46, 111, 114, 103,  47, //                  "omg.org/"  
+                                                      67,  79,  82,  66,  65,  47,  87,  83, //                  "CORBA/WS"  
+                                                     116, 114, 105, 110, 103,  86,  97, 108, //                  "tringVal"  
+                                                     117, 101,  58,  49,  46,  48,   0,   0, //                  "ue:1.0\0"<padding>
+                                                       0,   0,   0,  13,  87,  83, 116, 114, // name
+                                                     105, 110, 103,  86,  97, 108, 117, 101,
+                                                       0,   0,   0,   0,   0,   0,   0,  27, // boxed value tc for wstring
+                                                       0,   0,   0,   0, 127, 255, 255,   2, // bound, value
+                                                       0,   0,   0,  35,  73,  68,  76,  58, // rep-id of value: <35>"IDL:"
+                                                     111, 109, 103,  46, 111, 114, 103,  47, //                  "omg.org/"  
+                                                      67,  79,  82,  66,  65,  47,  87,  83, //                  "CORBA/WS"  
+                                                     116, 114, 105, 110, 103,  86,  97, 108, //                  "tringVal"  
+                                                     117, 101,  58,  49,  46,  48,   0,   0, //                  "ue:1.0\0"<padding>
+                                                       0,   0,   0,   8,   0, 116,   0, 101, // value:           <8>"test"
+                                                       0, 115,   0, 116 });                  // "For GIOP version 1.2 and 1.3 a wstring is not terminated by a null character"
+
+            ClsToIdlMapper.UseWideCharByDefault = oldUseWideChar;
         }
 
         [Test]
-        public void TestDeSerBoxedStringAsAnyAnyContainer() {
+        public void TestSerBoxedStringAsAnyAnyContainer2() {
+            bool oldUseWideChar = ClsToIdlMapper.UseWideCharByDefault;
+            ClsToIdlMapper.UseWideCharByDefault = false;
+
+            Any val = new Any("test");
+            AnySerializer anySer = new AnySerializer(m_serFactory, true);
+            GenericSerTest(anySer, val, new byte[] {   0,   0,   0,  30,                     // tc-kind
+                                                       0,   0,   0,  68,                     // encap length
+                                                       0,   0,   0,   0,                     // flags
+                                                       0,   0,   0,  34,  73,  68,  76,  58, // rep-id:          <34>"IDL:"
+                                                     111, 109, 103,  46, 111, 114, 103,  47, //                  "omg.org/"
+                                                      67,  79,  82,  66,  65,  47,  83, 116, //                  "CORBA/S"
+                                                     114, 105, 110, 103,  86,  97, 108, 117, //                  "tringVal"
+                                                     101,  58,  49,  46,  48,   0,   0,   0, //                  "ue:1.0\0"<padding>
+                                                       0,   0,   0,  12,  83, 116, 114, 105, // name:            <12>"Stri"
+                                                     110, 103,  86,  97, 108, 117, 101,   0, //                  "ngValue"
+                                                       0,   0,   0,  18,                     // boxed value tc for string
+                                                       0,   0,   0,   0, 127, 255, 255,   2, // bound, value
+                                                       0,   0,   0,  34,  73,  68,  76,  58, // rep-id of value: <34>"IDL:"
+                                                     111, 109, 103,  46, 111, 114, 103,  47, //                  "omg.org/"  
+                                                      67,  79,  82,  66,  65,  47,  83, 116, //                  "CORBA/S"  
+                                                     114, 105, 110, 103,  86,  97, 108, 117, //                  "tringVal"  
+                                                     101,  58,  49,  46,  48,   0,   0,   0, //                  "ue:1.0\0"<padding>
+                                                       0,   0,   0,   5, 116, 101, 115, 116, // value:           <4>"test"
+                                                       0                                     //                  "\0"
+                                                     });                                     // "The string contents include a single terminating null character."
+
+            ClsToIdlMapper.UseWideCharByDefault = oldUseWideChar;
+        }
+
+        [Test]
+        public void TestDeSerBoxedStringAsAnyAnyContainer1() {
             AnySerializer anySer = new AnySerializer(m_serFactory, true);
             Any val = new Any("test");
             object deser =
-                GenericDeserForTest(anySer, new byte[] { 0, 0, 0, 30, // tc-kind
-                                                  0, 0, 0, 72, // encap length
-                                                  0, 0, 0, 0, // flags
-                                                  0, 0, 0, 35, 73, 68, 76, 58, // rep-id
-                                                  111, 109, 103, 46, 111, 114, 103, 47, 
-                                                  67, 79, 82, 66, 65, 47, 87, 83,
-                                                  116, 114, 105, 110, 103, 86, 97, 108,
-                                                  117, 101, 58, 49, 46, 48, 0, 0,
-                                                  0, 0, 0, 13, 87, 83, 116, 114, // name
-                                                  105, 110, 103, 86, 97, 108, 117, 101,
-                                                  0, 0, 0, 0, 0, 0, 0, 27,  // boxed value tc for wstring
-                                                  0, 0, 0, 0, 127, 255, 255, 2, // bound, value
-                                                  0, 0, 0, 35, 73, 68, 76, 58, // rep-id of value
-                                                  111, 109, 103, 46, 111, 114, 103, 47, 
-                                                  67, 79, 82, 66, 65, 47, 87, 83,
-                                                  116, 114, 105, 110, 103, 86, 97, 108,
-                                                  117, 101, 58, 49, 46, 48, 0, 0,
-                                                  0, 0, 0, 8, 0, 116, 0, 101, // "test"
-                                                  0, 115, 0, 116 });
+                GenericDeserForTest(anySer, new byte[] {   0,   0,   0,  30,                     // tc-kind
+                                                           0,   0,   0,  72,                     // encap length
+                                                           0,   0,   0,   0,                     // flags
+                                                           0,   0,   0,  35,  73,  68,  76,  58, // rep-id:          <35>"IDL:"
+                                                         111, 109, 103,  46, 111, 114, 103,  47, //                  "omg.org/"  
+                                                          67,  79,  82,  66,  65,  47,  87,  83, //                  "CORBA/WS"  
+                                                         116, 114, 105, 110, 103,  86,  97, 108, //                  "tringVal"  
+                                                         117, 101,  58,  49,  46,  48,   0,   0, //                  "ue:1.0\0"<padding>
+                                                           0,   0,   0,  13,  87,  83, 116, 114, // name
+                                                         105, 110, 103,  86,  97, 108, 117, 101,
+                                                           0,   0,   0,   0,   0,   0,   0,  27, // boxed value tc for wstring
+                                                           0,   0,   0,   0, 127, 255, 255,   2, // bound, value
+                                                           0,   0,   0,  35,  73,  68,  76,  58, // rep-id of value: <35>"IDL:"
+                                                         111, 109, 103,  46, 111, 114, 103,  47, //                  "omg.org/"  
+                                                          67,  79,  82,  66,  65,  47,  87,  83, //                  "CORBA/WS"  
+                                                         116, 114, 105, 110, 103,  86,  97, 108, //                  "tringVal"  
+                                                         117, 101,  58,  49,  46,  48,   0,   0, //                  "ue:1.0\0"<padding>
+                                                           0,   0,   0,   8,   0, 116,   0, 101, // value:           <8>"test"
+                                                           0, 115,   0, 116 });                  // "For GIOP version 1.2 and 1.3 a wstring is not terminated by a null character"
+
+            Assert.AreEqual(val.Value,
+                                   ((Any)deser).Value, "deser value");
+            Assert.AreEqual(ReflectionHelper.StringType,
+                                   ((Any)deser).Value.GetType(), "deser type");
+        }
+
+        [Test]
+        public void TestDeSerBoxedStringAsAnyAnyContainer2() {
+            AnySerializer anySer = new AnySerializer(m_serFactory, true);
+            Any val = new Any("test");
+            object deser =
+                GenericDeserForTest(anySer, new byte[] {   0,   0,   0,  30,                     // tc-kind
+                                                           0,   0,   0,  68,                     // encap length
+                                                           0,   0,   0,   0,                     // flags
+                                                           0,   0,   0,  34,  73,  68,  76,  58, // rep-id:          <34>"IDL:"
+                                                         111, 109, 103,  46, 111, 114, 103,  47, //                  "omg.org/"
+                                                          67,  79,  82,  66,  65,  47,  83, 116, //                  "CORBA/S"
+                                                         114, 105, 110, 103,  86,  97, 108, 117, //                  "tringVal"
+                                                         101,  58,  49,  46,  48,   0,   0,   0, //                  "ue:1.0\0"<padding>
+                                                           0,   0,   0,  12,  83, 116, 114, 105, // name:            <12>"Stri"
+                                                         110, 103,  86,  97, 108, 117, 101,   0, //                  "ngValue"
+                                                           0,   0,   0,  18,                     // boxed value tc for string
+                                                           0,   0,   0,   0, 127, 255, 255,   2, // bound, value
+                                                           0,   0,   0,  34,  73,  68,  76,  58, // rep-id of value: <34>"IDL:"
+                                                         111, 109, 103,  46, 111, 114, 103,  47, //                  "omg.org/"  
+                                                          67,  79,  82,  66,  65,  47,  83, 116, //                  "CORBA/S"  
+                                                         114, 105, 110, 103,  86,  97, 108, 117, //                  "tringVal"  
+                                                         101,  58,  49,  46,  48,   0,   0,   0, //                  "ue:1.0\0"<padding>
+                                                           0,   0,   0,   5, 116, 101, 115, 116, // value:           <4>"test"
+                                                           0                                     //                  "\0"
+                                                         });                                     // "The string contents include a single terminating null character."
+
             Assert.AreEqual(val.Value,
                                    ((Any)deser).Value, "deser value");
             Assert.AreEqual(ReflectionHelper.StringType,
