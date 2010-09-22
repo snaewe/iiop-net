@@ -37,16 +37,16 @@ public class Kill {
 			Console.WriteLine("Usage:");
 			Console.WriteLine("Kill pid");
 			return 2;
-		} else {
-			try {
-				Process p = Process.GetProcessById(Int32.Parse(args[0]));
-				p.Kill();
-			} catch (FormatException) {
-				// ignore, caused by text in pid file
-				// Console.WriteLine("FormatException for >{0}<: {1}", args[0], e.ToString());
-			} catch (Exception e) {
-				Console.WriteLine("Exception: {0}", e);
-			}
 		}
+		try {
+			Process p = Process.GetProcessById(Int32.Parse(args[0]));
+			p.Kill();
+		} catch (FormatException) {
+			// ignore, caused by text in pid file
+			// Console.WriteLine("FormatException for >{0}<: {1}", args[0], e.ToString());
+		} catch (Exception e) {
+			Console.WriteLine("Exception: {0}", e);
+		}
+		return 0;
 	}
 }

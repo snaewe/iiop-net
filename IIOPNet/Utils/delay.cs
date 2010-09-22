@@ -37,16 +37,16 @@ public class Delay {
 			Console.WriteLine("Usage:");
 			Console.WriteLine("Delay seconds");
 			return 2;
-		} else {
-			int s = Int32.Parse(args[0]);
-			if (s <= 0) {
-				Console.WriteLine("Usage:");
-				Console.WriteLine("Delay seconds");
-				return 2;
-			} else {
-				Thread.Sleep(TimeSpan.FromSeconds(s));
-			}
 		}
+		int s = Int32.Parse(args[0]);
+		if (s <= 0) {
+			Console.WriteLine("Usage:");
+			Console.WriteLine("Delay seconds");
+			return 2;
+		} else {
+			Thread.Sleep(TimeSpan.FromSeconds(s));
+		}
+		return 0;
 	}
 }
 
