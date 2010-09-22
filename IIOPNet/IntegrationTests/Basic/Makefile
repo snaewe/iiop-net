@@ -8,11 +8,11 @@ build: build-server build-client
 build-server:
 	cd TestServer
 	$(MAKE) build
-        cd ..
+	cd ..
 
 build-client:
 	cd TestClient
-	$(MAKE) build	
+	$(MAKE) build
 	cd ..
 
 start-server:
@@ -23,7 +23,7 @@ start-server:
 stop-server:
 	@cd TestServer
 	@$(MAKE) /C stop-server
-	@cd ..	
+	@cd ..
 
 start-client:
 	@cd TestClient
@@ -31,8 +31,8 @@ start-client:
 	@cd ..
 
 test:
-        @echo Basic integration test starting at:
-        @$(PRCURRENTTIME)
+	@echo Basic integration test starting at:
+	@$(PRCURRENTTIME)
 	@$(MAKE) /C start-server
 	@$(DELAY) 10
 	@$(MAKE) /C start-client
@@ -41,7 +41,7 @@ test:
 clean:
 	cd TestServer
 	$(MAKE) clean
-        cd ..
+	cd ..
 	cd TestClient
-	$(MAKE) clean	
+	$(MAKE) clean
 	cd ..

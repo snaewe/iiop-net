@@ -31,8 +31,8 @@ start-client:
 	@cd ..
 
 test:
-        @echo Basic integration test starting at:
-        @$(PRCURRENTTIME)
+	@echo Basic integration test starting at:
+	@$(PRCURRENTTIME)
 	@$(MAKE) /C start-server
 	@$(DELAY) 10
 	@$(MAKE) /C start-client
@@ -41,7 +41,7 @@ test:
 clean:
 	cd TestServer
 	$(MAKE) clean
-        cd ..
+	cd ..
 	cd TestClient
 	$(MAKE) clean	
 	cd ..

@@ -8,7 +8,7 @@ build: build-server build-client
 build-server:
     cd TestServer
     $(MAKE) build
-        cd ..
+    cd ..
 
 build-client:
     cd TestClient
@@ -41,7 +41,7 @@ test:
 clean:
     cd TestServer
     $(MAKE) clean
-        cd ..
+    cd ..
     cd TestClient
     $(MAKE) clean   
     cd ..

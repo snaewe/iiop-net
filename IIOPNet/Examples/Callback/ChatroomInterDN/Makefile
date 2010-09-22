@@ -31,8 +31,8 @@ start-client:
 	@cd ..
 
 test:
-        @echo Chatroom example test starting at:
-        @$(PRCURRENTTIME)
+	@echo Chatroom example test starting at:
+	@$(PRCURRENTTIME)
 	@$(MAKE) /C start-server
 	@$(DELAY) 10
 	@$(MAKE) /C start-client
