@@ -129,11 +129,11 @@ namespace Ch.Elca.Iiop.IntegrationTests {
         private void RunTestWithCallback(TestService serviceToUse) {
             System.Byte arg = (byte)m_random.Next(100);
             System.Byte result = m_testService.TestIncByte(arg);
-            Assertion.AssertEquals((System.Byte)(arg + 1), result);
+            Assert.AreEqual((System.Byte)(arg + 1), result);
 
             System.Int32 arg1 = (System.Int32)m_random.Next(100);
             System.Int32 result1 = m_testService.IncrementWithCallbackIncrementer(arg1);
-            Assertion.AssertEquals((System.Int32)(arg1 + 1), result1);            
+            Assert.AreEqual((System.Int32)(arg1 + 1), result1);            
         }
 
         
@@ -141,7 +141,7 @@ namespace Ch.Elca.Iiop.IntegrationTests {
         public void Test() {
             System.Byte arg = 1;
             System.Byte result = m_testService.TestIncByte(arg);
-            Assertion.AssertEquals((System.Byte)(arg + 1), result);
+            Assert.AreEqual((System.Byte)(arg + 1), result);
 
             CallbackIntIncrementerImpl callback = new CallbackIntIncrementerImpl();
             m_testService.RegisterCallbackIntIncrementer(callback);

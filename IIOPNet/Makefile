@@ -11,6 +11,7 @@ key:
     if not exist Key.snk sn -k Key.snk
 
 build-base: key
+    set CSFLAGS=/o
     cd IIOPChannel
     $(MAKE) build
     cd ..
