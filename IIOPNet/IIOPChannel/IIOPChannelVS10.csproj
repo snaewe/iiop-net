@@ -27,7 +27,7 @@
     <Optimize>True</Optimize>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <CheckForOverflowUnderflow>false</CheckForOverflowUnderflow>
-    <DefineConstants>DISABLE_STRONG_NAME UnitTest</DefineConstants>
+    <DefineConstants>UnitTest</DefineConstants>
     <OutputPath>bin\Debug\</OutputPath>
     <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
     <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
@@ -39,7 +39,6 @@
     <OutputPath>bin\Release\</OutputPath>
     <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
     <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
-    <DefineConstants>DISABLE_STRONG_NAME</DefineConstants>
     <PlatformTarget>AnyCPU</PlatformTarget>
     <DebugType>none</DebugType>
     <DebugSymbols>false</DebugSymbols>

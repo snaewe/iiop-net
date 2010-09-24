@@ -43,7 +43,7 @@
     <Optimize>True</Optimize>
     <AllowUnsafeBlocks>False</AllowUnsafeBlocks>
     <CheckForOverflowUnderflow>True</CheckForOverflowUnderflow>
-    <DefineConstants>DISABLE_STRONG_NAME</DefineConstants>
+    <DefineConstants>UnitTest</DefineConstants>
     <OutputPath>..\bin\Debug\</OutputPath>
     <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
     <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
@@ -55,7 +55,6 @@
     <OutputPath>..\bin\Release\</OutputPath>
     <TreatWarningsAsErrors>False</TreatWarningsAsErrors>
     <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
-    <DefineConstants>DISABLE_STRONG_NAME</DefineConstants>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
     <DebugType>None</DebugType>

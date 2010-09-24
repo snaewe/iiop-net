@@ -57,11 +57,3 @@ using System.Runtime.CompilerServices;
 [assembly: AssemblyVersion("1.9.0001.0")]
 [assembly: CLSCompliant(true)]
 
-// The following attributes specify the key for the sign of your assembly. See the
-// .NET Framework documentation for more information about signing.
-// This is not required, if you don't want signing let these attributes like they're.
-[assembly: AssemblyDelaySign(false)]
-#if (!DISABLE_STRONG_NAME)
-[assembly: AssemblyKeyFile(@"../Key.snk")]
-#endif
-[assembly: AssemblyKeyName("")]

@@ -42,7 +42,6 @@
     <Optimize>True</Optimize>
     <AllowUnsafeBlocks>False</AllowUnsafeBlocks>
     <CheckForOverflowUnderflow>True</CheckForOverflowUnderflow>
-    <DefineConstants>DISABLE_STRONG_NAME</DefineConstants>
     <OutputPath>binSD\</OutputPath>
     <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
   </PropertyGroup>

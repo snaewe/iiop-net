@@ -9,9 +9,11 @@ build-examples:
 
 key:
     if not exist Key.snk sn -k Key.snk
+    set KEY=$(MAKEDIR)\Key.snk
 
 build-base: key
-    set CSFLAGS=/o
+    if "%CSFLAGS%" == "" set CSFLAGS=
+    set CSFLAGS= %CSFLAGS% /o /keyfile:"%KEY%" 
     cd IIOPChannel
     $(MAKE) build
     cd ..
