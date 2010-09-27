@@ -12,8 +12,7 @@ key:
     set KEY=$(MAKEDIR)\Key.snk
 
 build-base: key
-    if "%CSFLAGS%" == "" set CSFLAGS=
-    set CSFLAGS= %CSFLAGS% /o /keyfile:"%KEY%" 
+    set CSFLAGS=/o /keyfile:"%KEY%"
     cd IIOPChannel
     $(MAKE) build
     cd ..
@@ -29,7 +28,18 @@ build-base: key
 
 build-base-debug:
     set CSFLAGS=/debug+ /d:DEBUG /d:TRACE /d:DEBUG_LOGFILE
-    $(MAKE) build-base
+    cd IIOPChannel
+    $(MAKE) build
+    cd ..
+    cd CLSToIDLGenerator
+    $(MAKE) build
+    cd ..
+    cd IDLToCLSCompiler
+    $(MAKE) build
+    cd ..
+    cd Utils
+    $(MAKE) build
+    cd ..
     
 build-ssl: build-base
     cd thirdparty\SSL\seclib
