@@ -1,5 +1,7 @@
 include MakeVars.mono
 
+MAKEDIR:=`pwd`
+
 build: build-base build-examples
 
 build-examples:
@@ -9,13 +11,16 @@ key:
 	[ -f Key.snk ] || sn -k Key.snk
 
 build-base: key
-	$(MAKE) -C IIOPChannel -f Makefile.mono build
-	$(MAKE) -C CLSToIDLGenerator -f Makefile.mono build
-	$(MAKE) -C IDLToCLSCompiler -f Makefile.mono build
-	$(MAKE) -C Utils build -f Makefile.mono
+	$(MAKE) CSFLAGS="/o /keyfile:$(MAKEDIR)/Key.snk" -C IIOPChannel -f Makefile.mono build
+	$(MAKE) CSFLAGS="/o /keyfile:$(MAKEDIR)/Key.snk" -C CLSToIDLGenerator -f Makefile.mono build
+	$(MAKE) CSFLAGS="/o /keyfile:$(MAKEDIR)/Key.snk" -C IDLToCLSCompiler -f Makefile.mono build
+	$(MAKE) CSFLAGS="/o /keyfile:$(MAKEDIR)/Key.snk" -C Utils build -f Makefile.mono
 
 build-base-debug:
-	$(MAKE) CSFLAGS='/debug+ /d:DEBUG /d:TRACE /d:DEBUG_LOGFILE' -f Makefile.mono build-base
+	$(MAKE) CSFLAGS="/debug+ /d:DEBUG /d:TRACE /d:DEBUG_LOGFILE" -C IIOPChannel -f Makefile.mono build
+	$(MAKE) CSFLAGS="/debug+ /d:DEBUG /d:TRACE /d:DEBUG_LOGFILE" -C CLSToIDLGenerator -f Makefile.mono build
+	$(MAKE) CSFLAGS="/debug+ /d:DEBUG /d:TRACE /d:DEBUG_LOGFILE" -C IDLToCLSCompiler -f Makefile.mono build
+	$(MAKE) CSFLAGS="/debug+ /d:DEBUG /d:TRACE /d:DEBUG_LOGFILE" -C Utils build -f Makefile.mono
 
 build-tests: build-base
 	$(MAKE) -C IIOPChannel -f Makefile.mono build-unit-tests

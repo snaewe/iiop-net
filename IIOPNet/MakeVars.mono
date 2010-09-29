@@ -1,2 +1,2 @@
-CSC=mcs
+CSC=gmcs
 NUNIT_BIN_SUBDIR=bin/
