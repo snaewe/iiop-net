@@ -367,6 +367,7 @@ namespace Ch.Elca.Iiop.Idl {
         #region IFields
                 
         private bool m_useBoxedInAny;
+        private bool m_useWideCharByDefault;
         
         #endregion IFields
         #region SFields
@@ -378,6 +379,7 @@ namespace Ch.Elca.Iiop.Idl {
         
         private MappingConfiguration() {
             m_useBoxedInAny = true; // default is optimal for java rmi/iiop
+            m_useWideCharByDefault = true; // default is optimal for java rmi/iiop
         }
         
         #endregion IConstructors
@@ -392,14 +394,23 @@ namespace Ch.Elca.Iiop.Idl {
         /// No need to create any wrapper objects; e.g. with string typecode to prevent passing 
         /// a boxed string.</remarks>
         public bool UseBoxedInAny {
-            get {
-                return m_useBoxedInAny;
-            }
-            set {
-                m_useBoxedInAny = value;
-            }
+            get { return m_useBoxedInAny; }
+            set { m_useBoxedInAny = value; }
         }
         
+        /// <summary>
+        /// gets or sets value indicating wether wide char should be used by default 
+        /// when no WideCharAttribute is specified
+        /// Default is true.
+        /// </summary>
+        /// <remarks>for ACE+TAO, ... disable this property to simplify any usage:
+        /// No need to create any wrapper objects; e.g. with string typecode to prevent passing 
+        /// a wstring.</remarks>
+        public bool UseWideCharByDefault {
+            get { return m_useWideCharByDefault; }
+            set { m_useWideCharByDefault = value; }
+        }
+
         #endregion IProperties
         #region SProperties
         

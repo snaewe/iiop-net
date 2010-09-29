@@ -209,8 +209,6 @@ namespace Ch.Elca.Iiop.Idl {
         private static Type s_intPtrType = typeof(System.IntPtr);
         private static Type s_uintPtrType = typeof(System.UIntPtr);
 
-        private static bool s_useWideCharByDefault = true;
-
         #endregion SFields
         #region IConstructors
 
@@ -218,15 +216,6 @@ namespace Ch.Elca.Iiop.Idl {
         }
 
         #endregion IConstructors
-        #region SProperties
-
-        /// <summary>gets or sets value indicating wether wide char should be used by default (default is true)</summary>
-        public static bool UseWideCharByDefault {
-            get { return s_useWideCharByDefault; }
-            set { s_useWideCharByDefault = value; }
-        }
-
-        #endregion SProperties
         #region SMethods
 
         /// <summary>returns the singleton instance</summary>
@@ -706,7 +695,7 @@ namespace Ch.Elca.Iiop.Idl {
         /// helper for string/char mapping; removes the wchar attribute if present
         /// </summary>
         private bool UseWideOk(ref AttributeExtCollection modifiedAttributes) {
-            bool useWide = s_useWideCharByDefault;
+            bool useWide = MappingConfiguration.Instance.UseWideCharByDefault;
             Attribute wideAttr;
             modifiedAttributes = modifiedAttributes.RemoveAttributeOfType(ReflectionHelper.WideCharAttributeType, out wideAttr);
             if (wideAttr != null) {
