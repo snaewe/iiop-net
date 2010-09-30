@@ -1,7 +1,7 @@
 /*
  *   Mentalis.org Security Library
  * 
- *     Copyright © 2002-2005, The KPD-Team
+ *     Copyright © 2002-2005, The Mentalis.org Team
  *     All rights reserved.
  *     http://www.mentalis.org/
  *
@@ -13,7 +13,7 @@
  *     - Redistributions of source code must retain the above copyright
  *        notice, this list of conditions and the following disclaimer. 
  *
- *     - Neither the name of the KPD-Team, nor the names of its contributors
+ *     - Neither the name of the Mentalis.org Team, nor the names of its contributors
  *        may be used to endorse or promote products derived from this
  *        software without specific prior written permission. 
  *
@@ -738,10 +738,35 @@ namespace Org.Mentalis.Security.Certificates {
 		/// Disposes of the <see cref="CertificateStore"/>.
 		/// </summary>
 		~CertificateStore() {
-			if (Handle != IntPtr.Zero) {
-				SspiProvider.CertCloseStore(Handle, 0);
+			Dispose();
+		}
+		/// <summary>
+		/// Disposes of the <see cref="CertificateStore"/>.
+		/// </summary>
+		internal void Dispose() {
+			if (m_Handle != IntPtr.Zero) {
+				SspiProvider.CertCloseStore(m_Handle, 0);
 				m_Handle = IntPtr.Zero;
 			}
+			try {
+				GC.SuppressFinalize(this);
+			} catch {}
+		}
+		/// <summary>
+		/// Returns a CertificateStore from a list of cached stores. If the store is not yet cached, it will be created first.
+		/// </summary>
+		/// <param name="name">The name of the store.</param>
+		/// <returns>The cached store.</returns>
+		internal static CertificateStore GetCachedStore(string name) {
+			CertificateStore cs = null;
+			lock(m_CachedStores) {
+				cs = m_CachedStores[name] as CertificateStore;
+				if (cs == null) {
+					cs = new CertificateStore(name);
+					m_CachedStores.Add(name, cs);
+				}
+			}
+			return cs;
 		}
 		/// <summary>
 		/// Holds the handle of the certificate store.
@@ -759,5 +784,9 @@ namespace Org.Mentalis.Security.Certificates {
 		public const string UnTrustedStore = "Disallowed";
 		/// <summary>Represents the software publisher certificate store. This field is constant.</summary>
 		public const string SoftwarePublisherStore = "SPC";
+		/// <summary>
+		/// Holds the cached stores
+		/// </summary>
+		private static Hashtable m_CachedStores = new Hashtable();
 	}
 }

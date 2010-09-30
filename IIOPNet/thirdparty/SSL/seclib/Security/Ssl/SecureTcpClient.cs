@@ -1,7 +1,7 @@
 /*
  *   Mentalis.org Security Library
  * 
- *     Copyright © 2002-2005, The KPD-Team
+ *     Copyright © 2002-2005, The Mentalis.org Team
  *     All rights reserved.
  *     http://www.mentalis.org/
  *
@@ -13,7 +13,7 @@
  *     - Redistributions of source code must retain the above copyright
  *        notice, this list of conditions and the following disclaimer. 
  *
- *     - Neither the name of the KPD-Team, nor the names of its contributors
+ *     - Neither the name of the Mentalis.org Team, nor the names of its contributors
  *        may be used to endorse or promote products derived from this
  *        software without specific prior written permission. 
  *
@@ -105,6 +105,16 @@ namespace Org.Mentalis.Security.Ssl {
 			m_Client = socket;
 			m_Active = true;
 		}
+		/// <summary>
+        /// Create a new SecureTcpClient based on an existing one.
+        /// </summary>
+        /// <param name="client">The SecureTcpClient to copy from.</param>
+        public SecureTcpClient(SecureTcpClient client) : base() {
+            m_Client = client.Client;
+            m_Active = client.Active;
+            m_CleanedUp = client.CleanedUp;
+            m_DataStream = client.DataStream;
+        } 
 		/// <summary>
 		/// Connects the client to a remote TCP host using the specified remote network endpoint.
 		/// </summary>

@@ -1,7 +1,7 @@
 /*
  *   Mentalis.org Security Library
  * 
- *     Copyright © 2002-2005, The KPD-Team
+ *     Copyright © 2002-2005, The Mentalis.org Team
  *     All rights reserved.
  *     http://www.mentalis.org/
  *
@@ -13,7 +13,7 @@
  *     - Redistributions of source code must retain the above copyright
  *        notice, this list of conditions and the following disclaimer. 
  *
- *     - Neither the name of the KPD-Team, nor the names of its contributors
+ *     - Neither the name of the Mentalis.org Team, nor the names of its contributors
  *        may be used to endorse or promote products derived from this
  *        software without specific prior written permission. 
  *
@@ -977,6 +977,13 @@ namespace Org.Mentalis.Security.Certificates {
 			get {
 				return m_Handle;
 			}
+		}
+		/// <summary>
+		/// Duplicates the handle of the Certificate.
+		/// </summary>
+		/// <returns>A duplicate handle of the Certificate.</returns>
+		internal IntPtr DuplicateHandle() {
+			return SspiProvider.CertDuplicateCertificateContext(this.Handle);
 		}
 		/// <summary>
 		/// Gets the handle of the associated <see cref="CertificateStore"/>, if any.

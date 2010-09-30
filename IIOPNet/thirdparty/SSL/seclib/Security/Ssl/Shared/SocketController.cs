@@ -1,7 +1,7 @@
 /*
  *   Mentalis.org Security Library
  * 
- *     Copyright © 2002-2005, The KPD-Team
+ *     Copyright © 2002-2005, The Mentalis.org Team
  *     All rights reserved.
  *     http://www.mentalis.org/
  *
@@ -13,7 +13,7 @@
  *     - Redistributions of source code must retain the above copyright
  *        notice, this list of conditions and the following disclaimer. 
  *
- *     - Neither the name of the KPD-Team, nor the names of its contributors
+ *     - Neither the name of the Mentalis.org Team, nor the names of its contributors
  *        may be used to endorse or promote products derived from this
  *        software without specific prior written permission. 
  *
@@ -177,8 +177,10 @@ namespace Org.Mentalis.Security.Ssl.Shared {
 					ret = (TransferItem)m_SentList[index];
 				}
 			}
-			if (!ret.AsyncResult.IsCompleted) // do _not_ call this method inside the critical section, or the code may deadlock!
-				ret.AsyncResult.AsyncWaitHandle.WaitOne();
+			// do _not_ call this method inside the critical section, or the code may deadlock!
+			while (!ret.AsyncResult.IsCompleted) {
+				ret.AsyncResult.AsyncWaitHandle.WaitOne(200, false);
+			}
 			lock(this) {
 				m_SentList.Remove(ret);
 			}
@@ -238,8 +240,10 @@ namespace Org.Mentalis.Security.Ssl.Shared {
 					ret = m_ActiveReceive;
 				}
 			}
-			if (!ret.AsyncResult.IsCompleted) // do _not_ call this method inside the critical section, or the code may deadlock!
-				ret.AsyncResult.AsyncWaitHandle.WaitOne();
+			// do _not_ call this method inside the critical section, or the code may deadlock!
+			while (!ret.AsyncResult.IsCompleted) {
+				ret.AsyncResult.AsyncWaitHandle.WaitOne(200, false);
+			}
 			lock(this) {
 				m_ActiveReceive = null;
 			}
@@ -366,8 +370,10 @@ namespace Org.Mentalis.Security.Ssl.Shared {
 				ret = m_ShutdownCallback;
 				m_ShutdownCallback = null;
 			}
-			if (!ret.IsCompleted) // do _not_ call this method inside the critical section, or the code may deadlock!
-				ret.AsyncWaitHandle.WaitOne();
+			// do _not_ call this method inside the critical section, or the code may deadlock!
+			while (!ret.IsCompleted) { 
+				ret.AsyncWaitHandle.WaitOne(200, false);
+			}
 			return ret;
 		}
 		public void QueueRenegotiate() {

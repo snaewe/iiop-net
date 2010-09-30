@@ -1,7 +1,7 @@
 /*
  *   Mentalis.org Security Library
  * 
- *     Copyright © 2002-2005, The KPD-Team
+ *     Copyright © 2002-2005, The Mentalis.org Team
  *     All rights reserved.
  *     http://www.mentalis.org/
  *
@@ -13,7 +13,7 @@
  *     - Redistributions of source code must retain the above copyright
  *        notice, this list of conditions and the following disclaimer. 
  *
- *     - Neither the name of the KPD-Team, nor the names of its contributors
+ *     - Neither the name of the Mentalis.org Team, nor the names of its contributors
  *        may be used to endorse or promote products derived from this
  *        software without specific prior written permission. 
  *
@@ -104,26 +104,34 @@ namespace Org.Mentalis.Security.Certificates {
 		/// <remarks>
 		/// The certificate with index 0 is the end certificate in the chain, the certificate with the highest index is the root certificate [if it can be found].
 		/// </remarks>
-		// Thanks go out to Hernan de Lahitte for notifying us about a bug in this method.
+		// Thanks go out to Hernan de Lahitte and Neil for notifying us about a bug in this method.
 		public virtual Certificate[] GetCertificates() {
 			ArrayList ret = new ArrayList();
-			IntPtr cert = ((Certificate)this.Certificate.Clone()).Handle;
 			int dwVerificationFlags;
 			IntPtr store;
-			CertificateStoreCollection csc = this.Certificate.Store as CertificateStoreCollection;
-			if (csc != null) {
-				csc = new CertificateStoreCollection(csc);
+			CertificateStoreCollection csc, cs = this.Certificate.Store as CertificateStoreCollection;
+			if (cs != null) {
+				csc = new CertificateStoreCollection(cs);
 			} else {
 				csc = new CertificateStoreCollection(new CertificateStore[0]);
+				if (this.Certificate.Store == null)
 				csc.AddStore(new CertificateStore(this.Certificate.m_Context.hCertStore, true));
+				else
+					csc.AddStore(this.Certificate.Store);
 			}
-			csc.AddStore(new CertificateStore(CertificateStore.RootStore));
+			csc.AddStore(CertificateStore.GetCachedStore(CertificateStore.RootStore));
+			csc.AddStore(CertificateStore.GetCachedStore(CertificateStore.CAStore));
 			store = csc.Handle;
+
+			IntPtr cert = this.Certificate.DuplicateHandle();
 			while(cert != IntPtr.Zero) {
-				ret.Add(new Certificate(cert, true));
+				ret.Add(new Certificate(cert, false));
 				dwVerificationFlags = 0;
 				cert = SspiProvider.CertGetIssuerCertificateFromStore(store, cert, IntPtr.Zero, ref dwVerificationFlags);
 			}
+
+			csc.Dispose(); // don't use csc anymore after this line!!!
+
 			return (Certificate[])ret.ToArray(typeof(Certificate));
 		}
 		/// <summary>

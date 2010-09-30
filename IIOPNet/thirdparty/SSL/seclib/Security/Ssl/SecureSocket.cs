@@ -1,7 +1,7 @@
 /*
  *   Mentalis.org Security Library
  * 
- *     Copyright © 2002-2005, The KPD-Team
+ *     Copyright © 2002-2005, The Mentalis.org Team
  *     All rights reserved.
  *     http://www.mentalis.org/
  *
@@ -13,7 +13,7 @@
  *     - Redistributions of source code must retain the above copyright
  *        notice, this list of conditions and the following disclaimer. 
  *
- *     - Neither the name of the KPD-Team, nor the names of its contributors
+ *     - Neither the name of the Mentalis.org Team, nor the names of its contributors
  *        may be used to endorse or promote products derived from this
  *        software without specific prior written permission. 
  *
@@ -185,8 +185,8 @@ namespace Org.Mentalis.Security.Ssl {
 			// Process the (secure) EndConnect
 			// block if the operation hasn't ended yet
 			AsyncResult ar = m_ConnectResult;
-			if (!ar.IsCompleted)
-				ar.AsyncWaitHandle.WaitOne();
+			while (!ar.IsCompleted)
+				ar.AsyncWaitHandle.WaitOne(200, false);
 			m_ConnectResult = null;
 			if (ar.AsyncException != null)
 				throw ar.AsyncException;
@@ -249,8 +249,8 @@ namespace Org.Mentalis.Security.Ssl {
 			AsyncAcceptResult ar = m_AcceptResult;
 			// Process the (secure) EndAccept
 			// block if the operation hasn't ended yet
-			if (!ar.IsCompleted)
-				ar.AsyncWaitHandle.WaitOne();
+			while (!ar.IsCompleted)
+				ar.AsyncWaitHandle.WaitOne(200, false);
 			m_AcceptResult = null;
 			if (ar.AsyncException != null)
 				throw ar.AsyncException;
@@ -301,8 +301,6 @@ namespace Org.Mentalis.Security.Ssl {
 		/// <exception cref="ObjectDisposedException">The SecureSocket has been closed.</exception>
 		/// <exception cref="SecurityException">Unable to encrypt the data.</exception>
 		public override int Send(byte[] buffer, int size, SocketFlags socketFlags) {
-			if (buffer == null)
-				throw new ArgumentNullException();
 			return this.Send(buffer, 0, size, socketFlags);
 		}
 		/// <summary>
@@ -374,8 +372,8 @@ namespace Org.Mentalis.Security.Ssl {
 			TransferItem ti = m_Controller.EndSend(asyncResult);
 			if (ti == null)
 				throw new ArgumentException();
-			if (!ti.AsyncResult.IsCompleted)
-				ti.AsyncResult.AsyncWaitHandle.WaitOne();
+			while (!ti.AsyncResult.IsCompleted)
+				ti.AsyncResult.AsyncWaitHandle.WaitOne(200, false);
 			if (ti.AsyncResult.AsyncException != null)
 				throw new SecurityException("An error occurs while communicating with the remote host.", ti.AsyncResult.AsyncException);
 			return ti.OriginalSize;
@@ -422,8 +420,6 @@ namespace Org.Mentalis.Security.Ssl {
 		/// <exception cref="ObjectDisposedException">The SecureSocket has been closed.</exception>
 		/// <exception cref="SecurityException">An error occurred while decrypting the received data.</exception>
 		public override int Receive(byte[] buffer, int size, SocketFlags socketFlags) {
-			if (buffer == null)
-				throw new ArgumentNullException();
 			return this.Receive(buffer, 0, size, socketFlags);
 		}
 		/// <summary>
@@ -493,8 +489,8 @@ namespace Org.Mentalis.Security.Ssl {
 				throw new ArgumentException();
 			// Process the (secure) EndReceive
 			// block if the operation hasn't ended yet
-			if (!ti.AsyncResult.IsCompleted)
-				ti.AsyncResult.AsyncWaitHandle.WaitOne();
+			while (!ti.AsyncResult.IsCompleted)
+				ti.AsyncResult.AsyncWaitHandle.WaitOne(200, false);
 			if (ti.AsyncResult.AsyncException != null)
 				throw new SecurityException("An error occurs while communicating with the remote host.\r\n" + ti.AsyncResult.AsyncException.ToString(), ti.AsyncResult.AsyncException);
 			if (ti.Transferred == 0)
@@ -563,8 +559,8 @@ namespace Org.Mentalis.Security.Ssl {
 			// Process the EndSecureShutdown
 			// block if the operation hasn't ended yet
 			AsyncResult ar = m_ShutdownResult;
-			if (!ar.IsCompleted)
-				ar.AsyncWaitHandle.WaitOne();
+			while (!ar.IsCompleted)
+				ar.AsyncWaitHandle.WaitOne(200, false);
 			m_ShutdownResult = null;
 			//if (ar.AsyncException != null)  // eat exceptions; they're not really important
 			//	throw ar.AsyncException;

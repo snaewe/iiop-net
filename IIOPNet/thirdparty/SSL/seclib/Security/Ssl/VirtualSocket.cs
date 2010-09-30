@@ -1,7 +1,7 @@
 /*
  *   Mentalis.org Security Library
  * 
- *     Copyright © 2002-2005, The KPD-Team
+ *     Copyright © 2002-2005, The Mentalis.org Team
  *     All rights reserved.
  *     http://www.mentalis.org/
  *
@@ -13,7 +13,7 @@
  *     - Redistributions of source code must retain the above copyright
  *        notice, this list of conditions and the following disclaimer. 
  *
- *     - Neither the name of the KPD-Team, nor the names of its contributors
+ *     - Neither the name of the Mentalis.org Team, nor the names of its contributors
  *        may be used to endorse or promote products derived from this
  *        software without specific prior written permission. 
  *
@@ -316,7 +316,8 @@ namespace Org.Mentalis.Security.Ssl {
 		/// </summary>
 		/// <remarks><p>The <see cref="Connected"/> property is set to <b>false</b> when the socket is closed.</p><p>The application should call <see cref="Shutdown"/> before calling Close to ensure that all pending data is sent or received before the VirtualSocket is closed.</p></remarks>
 		public virtual void Close() {
-			InternalSocket.Close();
+			if (InternalSocket != null)
+				InternalSocket.Close();
 		}
 		/// <summary>
 		/// Establishes a connection to a remote device.

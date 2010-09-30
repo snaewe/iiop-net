@@ -1,7 +1,7 @@
 /*
  *   Mentalis.org Security Library
  * 
- *     Copyright © 2002-2005, The KPD-Team
+ *     Copyright © 2002-2005, The Mentalis.org Team
  *     All rights reserved.
  *     http://www.mentalis.org/
  *
@@ -13,7 +13,7 @@
  *     - Redistributions of source code must retain the above copyright
  *        notice, this list of conditions and the following disclaimer. 
  *
- *     - Neither the name of the KPD-Team, nor the names of its contributors
+ *     - Neither the name of the Mentalis.org Team, nor the names of its contributors
  *        may be used to endorse or promote products derived from this
  *        software without specific prior written permission. 
  *
@@ -45,7 +45,7 @@ using System.Runtime.CompilerServices;
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("The Mentalis.org Team")]
 [assembly: AssemblyProduct("Mentalis.org Security Library")]
-[assembly: AssemblyCopyright("Copyright © 2002-2005, The Mentalis.org Team")]
+[assembly: AssemblyCopyright("Copyright © 2002-2007, The Mentalis.org Team")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 [assembly: CLSCompliant(true)]
@@ -68,10 +68,14 @@ using System.Runtime.CompilerServices;
 //		Gabriele Zannoni	[method implementation]
 //		Stefan Bernbo		[bugfix]
 //		Martin Plante		[bugfix]
+//		Neil			[bugfix]
+//		Alfonso Ferrandez	[bugfix]
+//		Dmytro			[bugfix]
+//		Paul Grebenc		[bugfix]
 //
 
 //
 // Version information for an assembly consists of the following four values:
 //
-[assembly: AssemblyVersion("1.0.13.711")]
+[assembly: AssemblyVersion("1.0.13.718")]
 

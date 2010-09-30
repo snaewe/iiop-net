@@ -1,7 +1,7 @@
 /*
  *   Mentalis.org Security Library
  * 
- *     Copyright © 2002-2005, The KPD-Team
+ *     Copyright © 2002-2005, The Mentalis.org Team
  *     All rights reserved.
  *     http://www.mentalis.org/
  *
@@ -13,7 +13,7 @@
  *     - Redistributions of source code must retain the above copyright
  *        notice, this list of conditions and the following disclaimer. 
  *
- *     - Neither the name of the KPD-Team, nor the names of its contributors
+ *     - Neither the name of the Mentalis.org Team, nor the names of its contributors
  *        may be used to endorse or promote products derived from this
  *        software without specific prior written permission. 
  *
@@ -134,8 +134,8 @@ namespace Org.Mentalis.Security.Ssl.Shared {
 				new CipherDefinition(SslAlgorithms.RSA_DES_56_SHA, typeof(DESCryptoServiceProvider), 8, 8, 8, typeof(SHA1CryptoServiceProvider), HashType.SHA1, 20, false),
 				new CipherDefinition(SslAlgorithms.RSA_3DES_168_SHA, typeof(TripleDESCryptoServiceProvider), 24, 8, 24, typeof(SHA1CryptoServiceProvider), HashType.SHA1, 20, false),
 				new CipherDefinition(SslAlgorithms.RSA_DES_40_SHA, typeof(DESCryptoServiceProvider), 5, 8, 8, typeof(SHA1CryptoServiceProvider), HashType.SHA1, 20, true),
-				new CipherDefinition(SslAlgorithms.RSA_AES_128_SHA, typeof(RijndaelCryptoServiceProvider), 16, 16, 16, typeof(SHA1CryptoServiceProvider), HashType.SHA1, 20, false),
-				new CipherDefinition(SslAlgorithms.RSA_AES_256_SHA, typeof(RijndaelCryptoServiceProvider), 32, 16, 32, typeof(SHA1CryptoServiceProvider), HashType.SHA1, 20, false)
+				new CipherDefinition(SslAlgorithms.RSA_AES_128_SHA, typeof(RijndaelManaged), 16, 16, 16, typeof(SHA1CryptoServiceProvider), HashType.SHA1, 20, false),
+				new CipherDefinition(SslAlgorithms.RSA_AES_256_SHA, typeof(RijndaelManaged), 32, 16, 32, typeof(SHA1CryptoServiceProvider), HashType.SHA1, 20, false)
 			};
 	}
 	internal class CipherSuite {
