@@ -2893,8 +2893,8 @@ namespace Ch.Elca.Iiop.Tests {
 
         [Test]
         public void TestSerBoxedStringAsAnyNoAnyContainer1() {
-            bool oldUseWideChar = ClsToIdlMapper.UseWideCharByDefault;
-            ClsToIdlMapper.UseWideCharByDefault = true;
+            bool oldUseWideChar = MappingConfiguration.Instance.UseWideCharByDefault;
+            MappingConfiguration.Instance.UseWideCharByDefault = true;
 
             string val = "test";
             AnySerializer anySer = new AnySerializer(m_serFactory, false);
@@ -2918,13 +2918,13 @@ namespace Ch.Elca.Iiop.Tests {
                                                        0,   0,   0,   8,   0, 116,   0, 101, // value:           <8>"test"
                                                        0, 115,   0, 116 });                  // "For GIOP version 1.2 and 1.3 a wstring is not terminated by a null character"
 
-            ClsToIdlMapper.UseWideCharByDefault = oldUseWideChar;
+            MappingConfiguration.Instance.UseWideCharByDefault = oldUseWideChar;
         }
 
         [Test]
         public void TestSerBoxedStringAsAnyNoAnyContainer2() {
-            bool oldUseWideChar = ClsToIdlMapper.UseWideCharByDefault;
-            ClsToIdlMapper.UseWideCharByDefault = false;
+            bool oldUseWideChar = MappingConfiguration.Instance.UseWideCharByDefault;
+            MappingConfiguration.Instance.UseWideCharByDefault = false;
 
             string val = "test";
             AnySerializer anySer = new AnySerializer(m_serFactory, false);
@@ -2949,7 +2949,7 @@ namespace Ch.Elca.Iiop.Tests {
                                                        0                                     //                  "\0"
                                                      });                                     // "The string contents include a single terminating null character."
 
-            ClsToIdlMapper.UseWideCharByDefault = oldUseWideChar;
+            MappingConfiguration.Instance.UseWideCharByDefault = oldUseWideChar;
         }
 
         [Test]
@@ -3083,8 +3083,8 @@ namespace Ch.Elca.Iiop.Tests {
 
         [Test]
         public void TestSerBoxedStringAsAnyAnyContainer1() {
-            bool oldUseWideChar = ClsToIdlMapper.UseWideCharByDefault;
-            ClsToIdlMapper.UseWideCharByDefault = true;
+            bool oldUseWideChar = MappingConfiguration.Instance.UseWideCharByDefault;
+            MappingConfiguration.Instance.UseWideCharByDefault = true;
 
             Any val = new Any("test");
             AnySerializer anySer = new AnySerializer(m_serFactory, true);
@@ -3108,13 +3108,13 @@ namespace Ch.Elca.Iiop.Tests {
                                                        0,   0,   0,   8,   0, 116,   0, 101, // value:           <8>"test"
                                                        0, 115,   0, 116 });                  // "For GIOP version 1.2 and 1.3 a wstring is not terminated by a null character"
 
-            ClsToIdlMapper.UseWideCharByDefault = oldUseWideChar;
+            MappingConfiguration.Instance.UseWideCharByDefault = oldUseWideChar;
         }
 
         [Test]
         public void TestSerBoxedStringAsAnyAnyContainer2() {
-            bool oldUseWideChar = ClsToIdlMapper.UseWideCharByDefault;
-            ClsToIdlMapper.UseWideCharByDefault = false;
+            bool oldUseWideChar = MappingConfiguration.Instance.UseWideCharByDefault;
+            MappingConfiguration.Instance.UseWideCharByDefault = false;
 
             Any val = new Any("test");
             AnySerializer anySer = new AnySerializer(m_serFactory, true);
@@ -3139,7 +3139,7 @@ namespace Ch.Elca.Iiop.Tests {
                                                        0                                     //                  "\0"
                                                      });                                     // "The string contents include a single terminating null character."
 
-            ClsToIdlMapper.UseWideCharByDefault = oldUseWideChar;
+            MappingConfiguration.Instance.UseWideCharByDefault = oldUseWideChar;
         }
 
         [Test]

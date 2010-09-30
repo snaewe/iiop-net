@@ -1340,7 +1340,7 @@ namespace Ch.Elca.Iiop.Tests {
                                                                            new AttributeExtCollection(new Attribute[] { new StringValueAttribute(), new WideCharAttribute(false) }),
                                                                            s_testAction);
             Assert.AreEqual(MappingToResult.IdlString, mapResult);
-            if(!ClsToIdlMapper.UseWideCharByDefault) {
+            if(!MappingConfiguration.Instance.UseWideCharByDefault) {
                 mapResult = (MappingToResult)mapper.MapClsType(ReflectionHelper.StringType, 
                                                                new AttributeExtCollection(new Attribute[] { new StringValueAttribute() }),
                                                                s_testAction);
@@ -1355,7 +1355,7 @@ namespace Ch.Elca.Iiop.Tests {
                                                                            new AttributeExtCollection(new Attribute[] { new StringValueAttribute(), new WideCharAttribute(true) }),
                                                                            s_testAction);
             Assert.AreEqual(MappingToResult.IdlWString, mapResult);
-            if(ClsToIdlMapper.UseWideCharByDefault) {
+            if(MappingConfiguration.Instance.UseWideCharByDefault) {
                 mapResult = (MappingToResult)mapper.MapClsType(ReflectionHelper.StringType, 
                                                                new AttributeExtCollection(new Attribute[] { new StringValueAttribute() }),
                                                                s_testAction);
@@ -1370,7 +1370,7 @@ namespace Ch.Elca.Iiop.Tests {
                                                                            new AttributeExtCollection(new Attribute[] { new WideCharAttribute(false) }),
                                                                            s_testAction);
             Assert.AreEqual(MappingToResult.IdlStringValue, mapResult);
-            if(!ClsToIdlMapper.UseWideCharByDefault) {
+            if(!MappingConfiguration.Instance.UseWideCharByDefault) {
                 mapResult = (MappingToResult)mapper.MapClsType(ReflectionHelper.StringType, 
                                                                new AttributeExtCollection(),
                                                                s_testAction);
@@ -1385,7 +1385,7 @@ namespace Ch.Elca.Iiop.Tests {
                                                                            new AttributeExtCollection(new Attribute[] { new WideCharAttribute(true) }),
                                                                            s_testAction);
             Assert.AreEqual(MappingToResult.IdlWstringValue, mapResult);
-            if(ClsToIdlMapper.UseWideCharByDefault) {
+            if(MappingConfiguration.Instance.UseWideCharByDefault) {
                 mapResult = (MappingToResult)mapper.MapClsType(ReflectionHelper.StringType, 
                                                                new AttributeExtCollection(),
                                                                s_testAction);
@@ -1400,7 +1400,7 @@ namespace Ch.Elca.Iiop.Tests {
                                                                            new AttributeExtCollection(new Attribute[] { new WideCharAttribute(false) }),
                                                                            s_testAction);
             Assert.AreEqual(MappingToResult.IdlChar, mapResult);
-            if(!ClsToIdlMapper.UseWideCharByDefault) {
+            if(!MappingConfiguration.Instance.UseWideCharByDefault) {
                 mapResult = (MappingToResult)mapper.MapClsType(ReflectionHelper.CharType, 
                                                                new AttributeExtCollection(),
                                                                s_testAction);
@@ -1415,7 +1415,7 @@ namespace Ch.Elca.Iiop.Tests {
                                                                            new AttributeExtCollection(new Attribute[] { new WideCharAttribute(true) }),
                                                                            s_testAction);
             Assert.AreEqual(MappingToResult.IdlWChar, mapResult);
-            if(ClsToIdlMapper.UseWideCharByDefault) {
+            if(MappingConfiguration.Instance.UseWideCharByDefault) {
                 mapResult = (MappingToResult)mapper.MapClsType(ReflectionHelper.CharType, 
                                                                new AttributeExtCollection(),
                                                                s_testAction);
