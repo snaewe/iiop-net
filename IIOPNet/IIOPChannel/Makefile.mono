@@ -14,6 +14,7 @@ $(Dest)IIOPChannel.dll: *.cs $(Key)
 build-unit-tests: build nunit-var
 	[ -d $(UnitTestDest) ] || mkdir $(UnitTestDest)
 	$(CSC) /nowarn:0618 $(CSFLAGS) /d:UnitTest /r:System.Runtime.Remoting.dll /r:${NUNITV2_HOME}/$(NUNIT_BIN_SUBDIR)nunit.framework.dll /res:MappingPluginSchema.xsd /t:library /out:$(UnitTestDest)IIOPChannel.dll *.cs Mono/*.cs
+	cp ${NUNITV2_HOME}/$(NUNIT_BIN_SUBDIR)nunit.framework.dll $(UnitTestDest)
 
 test: build-unit-tests
 	mono ${NUNITV2_HOME}/$(NUNIT_BIN_SUBDIR)nunit-console.exe $(UnitTestDest)IIOPChannel.dll

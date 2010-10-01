@@ -23,6 +23,7 @@ $(bin)IIOPChannel.dll: $(IIOPCHANNEL)
 
 $(bin)ClientTest.dll: $(bin)IIOPChannel.dll $(bin)Client.dll *.cs
 	$(CSC) $(CSFLAGS) /t:library /r:$(NUNIT) /r:$(bin)IIOPChannel.dll /r:$(bin)Client.dll /out:$(bin)ClientTest.dll TestClient.cs ValueTypeImpls.cs
+	cp $(NUNIT) $(bin)
 
 start-client:
 	@echo "Basic IntegrationTest"

@@ -36,6 +36,7 @@ $(DestUt)IDLPreprocessor.dll: $(IDLPreprocessor)
 
 $(DestUt)IDLToCLSCompiler.exe: $(DestUt)IIOPChannel.dll $(DestUt)IDLPreprocessor.dll *.cs $(Key)
 	$(CSC) $(CSFLAGS) /d:UnitTest /res:MappingPluginSchema.xsd /r:${NUNITV2_HOME}/$(NUNIT_BIN_SUBDIR)nunit.framework.dll /r:$(DestUt)IIOPChannel.dll /r:$(DestUt)IDLPreprocessor.dll /t:exe /out:$(DestUt)IDLToCLSCompiler.exe *.cs
+	cp ${NUNITV2_HOME}/$(NUNIT_BIN_SUBDIR)nunit.framework.dll $(DestUt)
 
 test: build-tests
 	mono ${NUNITV2_HOME}/$(NUNIT_BIN_SUBDIR)nunit-console.exe $(DestUt)IDLToCLSCompiler.exe

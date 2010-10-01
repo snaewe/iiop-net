@@ -1,2 +1,2 @@
 CSC=gmcs
-NUNIT_BIN_SUBDIR=bin/
+NUNIT_BIN_SUBDIR=bin/net-2.0/
