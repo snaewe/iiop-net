@@ -134,16 +134,7 @@ namespace Ch.Elca.Iiop {
         
         /// <summary><see cref="Ch.Elca.Iiop.IClientTranport.IsConnectionOpen/></summary>
         public bool IsConnectionOpen() {
-            if (m_socket == null) {
-                return false;
-            } else {
-                try {
-                    m_socket.GetStream(); // TODO, search a better way to do this
-                } catch (Exception) {
-                    return false;
-                }
-                return true; 
-            }
+            return m_socket != null && m_socket.Client != null && m_socket.Client.Connected;
         }
         
         #endregion IMethods
