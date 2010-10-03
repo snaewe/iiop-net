@@ -593,8 +593,8 @@ namespace Ch.Elca.Iiop.Idl {
                 }
                 
                 lock(mapTypes)
-                    mapTypes.Add(key, mapType);
-            }            
+                    mapTypes[key] = mapType;
+            }
             
             switch(mapType)
             {
