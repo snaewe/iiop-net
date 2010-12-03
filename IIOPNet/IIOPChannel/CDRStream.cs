@@ -390,7 +390,7 @@ namespace Ch.Elca.Iiop.Cdr {
         /// <summary>reads a long from the stream</summary>
         int ReadLong();
         /// <summary>reads multiple long elements from the stream</summary>
-        void ReadLongArray(int[] array);        
+        void ReadLongArray(int[] array);
         /// <summary>reads an unsigned long from the stream</summary>
         uint ReadULong();
         /// <summary>reads multiple ulong elements from the stream</summary>
@@ -658,6 +658,11 @@ namespace Ch.Elca.Iiop.Cdr {
         /// <summary>gets the indirection info stored for the value or null if not present</summary>
         IndirectionInfo GetIndirectionInfoFor(object forVal);
 
+        /// <summary>
+        /// gets stream flags
+        /// </summary>
+        byte Flags { get; }
+
         #endregion IMethods
     }
        
@@ -808,9 +813,9 @@ namespace Ch.Elca.Iiop.Cdr {
         private uint m_index = 0;
 
         // default for this is latin1
-        private int m_charSet = (int)Ch.Elca.Iiop.Services.CharSet.LATIN1;
+        private int m_charSet = Ch.Elca.Iiop.Services.CodeSetService.DefaultCharSet;
         // no default for this available
-        private int m_wcharSet = WCHARSET_NOT_SET;        
+        private int m_wcharSet = Ch.Elca.Iiop.Services.CodeSetService.DefaultWCharSet;
         
         #endregion IFields
         #region IConstructors
@@ -860,9 +865,9 @@ namespace Ch.Elca.Iiop.Cdr {
 
         /// <summary>gets the nr of bytes which are missing to next aligned position</summary>
         protected uint GetAlignBytes(byte requiredAlignement) {
-            uint alignBytes = GetAlignedBytesInternal(requiredAlignement);            
+            uint alignBytes = GetAlignedBytesInternal(requiredAlignement);
             return alignBytes;
-        }                
+        }
         
         private uint GetAlignedBytesInternal(byte requiredAlignement) {
             // nr of bytes the index is after the last aligned index
@@ -871,12 +876,12 @@ namespace Ch.Elca.Iiop.Cdr {
             if (afterLastAlign != 0) {
                 alignBytes = (requiredAlignement - afterLastAlign);
             }
-            return alignBytes;            
+            return alignBytes;
         }
 
         /// <summary>update the bookkeeping</summary>
         /// <param name="bytes"></param>
-        protected void IncrementPosition(uint bytes) {            
+        protected void IncrementPosition(uint bytes) {
             m_index += bytes;
         }
         public uint GetPosition() {
@@ -899,7 +904,7 @@ namespace Ch.Elca.Iiop.Cdr {
         /// <returns>true for little endian, false for big endian</returns>
         protected bool ParseEndianFlag(byte flag) {
             return ((flag & 0x01) > 0);
-        }                
+        }
         
         #endregion IMethods
     }
@@ -1599,7 +1604,10 @@ namespace Ch.Elca.Iiop.Cdr {
         
         /// <summary>responsible for implementing the endian dependant operation</summary>
         private CdrEndianDepOutputStreamOp m_endianOp = s_endianNotSpec;
-        
+
+        /// <summary>stores stream flags for use for derived encapsulation streams</summary>
+        private byte flags;
+
         /// <summary>used to store indirections encountered in this stream</summary>
         private IndirectionStoreValueKey m_indirections = new IndirectionStoreValueKey();
 
@@ -1611,6 +1619,7 @@ namespace Ch.Elca.Iiop.Cdr {
         }
         
         public CdrOutputStreamImpl(Stream stream, byte flags, GiopVersion giopVersion) : base(stream) {
+            this.flags = flags;
             bool isLittleEndian = ParseEndianFlag(flags);
             if (isLittleEndian != BitConverter.IsLittleEndian) {
                 m_endianOp = new CdrStreamNonNativeEndianWriteOP(this, giopVersion);
@@ -1670,16 +1679,16 @@ namespace Ch.Elca.Iiop.Cdr {
             BaseStream.WriteByte(data);
             IncrementPosition(1);
         }
-        
+
         public void WriteOctetArray(byte[] array) {
             WriteBytes(array, 0, array.Length);
         }
         
         public void WriteBool(bool data) {
-            if (data == false) {
-                WriteOctet(0);
-            } else {
+            if (data) {
                 WriteOctet(1);
+            } else {
+                WriteOctet(0);
             }
         }
         
@@ -1729,13 +1738,13 @@ namespace Ch.Elca.Iiop.Cdr {
         }
         public void WriteLongLongArray(long[] data) {
             m_endianOp.WriteLongLongArray(data);
-        }        
+        }
         public void WriteULongLong(ulong data) {
             m_endianOp.WriteULongLong(data);
         }
         public void WriteULongLongArray(ulong[] data) {
             m_endianOp.WriteULongLongArray(data);
-        }                
+        }
         public void WriteFloat(float data) {
             m_endianOp.WriteFloat(data);
         }
@@ -1747,7 +1756,7 @@ namespace Ch.Elca.Iiop.Cdr {
         }
         public void WriteFloatArray(float[] array) {
             m_endianOp.WriteFloatArray(array);
-        }        
+        }
         public void WriteWChar(char data) {
             m_endianOp.WriteWChar(data);
         }
@@ -1834,6 +1843,10 @@ namespace Ch.Elca.Iiop.Cdr {
             } else {
                 throw CreateReplaceIndirectionException();
             }
+        }
+
+        public byte Flags {
+            get { return flags; }
         }
         
         protected virtual bool IsAllowedToStore(object val, IndirectionInfo indirInfo) {
@@ -1942,25 +1955,25 @@ namespace Ch.Elca.Iiop.Cdr {
         private uint m_targetPosition = 0;
         private uint m_indirectionOffsetPosition = 0;
         
-        #endregion IFields        
+        #endregion IFields
         #region IConstructors
-        
+
         public CdrEncapsulationOutputStream(byte flags) :
-            this(flags, new GiopVersion(1,2), null) { // for Encapsulation, GIOP-Version dep operation must be compatible with GIOP-1.2, if not specified otherwise
+            this(flags, new GiopVersion(1, 2), null) { // for Encapsulation, GIOP-Version dep operation must be compatible with GIOP-1.2, if not specified otherwise
         }
         
-        public CdrEncapsulationOutputStream(byte flags, GiopVersion version) :
-            this(flags, version, null) { 
-        }        
+        public CdrEncapsulationOutputStream(GiopVersion version) :
+            this(GiopHeader.GetDefaultHeaderFlagsForPlatform(), version, null) {
+        }
         
-        public CdrEncapsulationOutputStream(byte flags, CdrOutputStream targetStream) : 
-            this(flags, new GiopVersion(1,2), targetStream) {
+        public CdrEncapsulationOutputStream(CdrOutputStream targetStream) : 
+            this(targetStream.Flags, new GiopVersion(1, 2), targetStream) {
         }
 
         private CdrEncapsulationOutputStream(byte flags, GiopVersion version, 
                                              CdrOutputStream targetStream) :
             base(new MemoryStream(), flags, version) {
-            m_targetStream = targetStream;           
+            m_targetStream = targetStream;
             if (targetStream != null) {
                 // store target position:
                 m_targetPosition = targetStream.GetPosition();
@@ -1987,7 +2000,7 @@ namespace Ch.Elca.Iiop.Cdr {
             } else {
                 throw CreateInvalidTargetStreamException();
             }
-        }                
+        }
         
         /// <summary>this method is used, if encapsulation is targeted for a specific stream</summary>
         public void WriteToTargetStream() {

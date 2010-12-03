@@ -278,15 +278,13 @@ namespace Ch.Elca.Iiop {
         
         /// <summary>
         /// Gets the default header flags for the platform endian.
-        /// </summary>        
+        /// </summary>
         internal static byte GetDefaultHeaderFlagsForPlatform() {
-            Endian endian;
             if (BitConverter.IsLittleEndian) {
-                endian = Endian.LittleEndian;
+                return 1;
             } else {
-                endian = Endian.BigEndian;
+                return 0;
             }
-            return GetDefaultHeaderFlagsForEndian(endian);
         }
         
         #endregion SMethods

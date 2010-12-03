@@ -290,8 +290,8 @@ namespace Ch.Elca.Iiop.Interception {
         [ThrowsIdlException(typeof(omg.org.IOP.Codec_package.InvalidTypeForEncoding))]
         [return: IdlSequence(0L)]
         public byte[] encode (object data) {
-            CdrEncapsulationOutputStream outputStream = new CdrEncapsulationOutputStream(0, m_version);
-            m_serializerForAnyType.Serialize(data, outputStream);            
+            CdrEncapsulationOutputStream outputStream = new CdrEncapsulationOutputStream(m_version);
+            m_serializerForAnyType.Serialize(data, outputStream);
             return outputStream.GetEncapsulationData();
         }
         
@@ -300,8 +300,8 @@ namespace Ch.Elca.Iiop.Interception {
         /// </summary>
         [ThrowsIdlException(typeof(omg.org.IOP.Codec_package.FormatMismatch))]
         public object decode ([IdlSequence(0L)] byte[] data) {
-            CdrEncapsulationInputStream inputStream = new CdrEncapsulationInputStream(data, m_version);            
-            return m_serializerForAnyType.Deserialize(inputStream);            
+            CdrEncapsulationInputStream inputStream = new CdrEncapsulationInputStream(data, m_version);
+            return m_serializerForAnyType.Deserialize(inputStream);
         }
 
         /// <summary>
@@ -310,7 +310,7 @@ namespace Ch.Elca.Iiop.Interception {
         [ThrowsIdlException(typeof(omg.org.IOP.Codec_package.InvalidTypeForEncoding))]
         [return: IdlSequence(0L)]        
         public byte[] encode_value (object data) {
-            CdrEncapsulationOutputStream outputStream = new CdrEncapsulationOutputStream(0, m_version);
+            CdrEncapsulationOutputStream outputStream = new CdrEncapsulationOutputStream(m_version);
             if (!(data is Any)) {
                 Serializer ser =
                     m_serFactory.Create(data.GetType(), 

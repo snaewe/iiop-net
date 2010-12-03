@@ -84,7 +84,7 @@ namespace Ch.Elca.Iiop {
 
         /// <summary>
         /// if true, use big endian; if false use little endian.
-        /// If option is not specified, big endian is used.
+        /// If option is not specified, platform endian is used.
         /// </summary>
         public const string ENDIAN_KEY = "endian";
 
@@ -418,7 +418,7 @@ namespace Ch.Elca.Iiop {
         /// The header flags to use for message initiated from this channel.
         /// </summary>
         private byte m_headerFlags =
-            GiopHeader.GetDefaultHeaderFlagsForEndian(Endian.BigEndian);
+            GiopHeader.GetDefaultHeaderFlagsForPlatform();
 
         private RetryConfig m_retryConfig = new RetryConfig(MAX_NUMBER_OF_RETRIES,
                                                             RETRY_DELAY);
@@ -789,7 +789,7 @@ namespace Ch.Elca.Iiop {
         /// The header flags to use for message initiated from this channel.
         /// </summary>
         private byte m_headerFlags =
-            GiopHeader.GetDefaultHeaderFlagsForEndian(Endian.BigEndian);
+            GiopHeader.GetDefaultHeaderFlagsForPlatform();
 
         private IInterceptionOption[] m_interceptionOptions =
             InterceptorManager.EmptyInterceptorOptions;
