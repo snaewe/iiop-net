@@ -222,25 +222,16 @@ public class Scope {
     /// <summary>returns the fully qualified CLS name of this scope (usable for type generation)</summary>
     /// <remarks>for type-scopes, returns the nested scope name, because this one is needed for type generation</remarks>
     private String GetFullyQualifiedScopeName() {
-        if (getParentScope() == null) { 
-            return ""; 
+        string result = "";
+
+        for (Scope scope = this; scope.getParentScope() != null; scope = scope.getParentScope()) {
+            string scopeName = IdlNaming.MapIdlNameToClsName(scope.getTypeScopeName());
+            if(result == "")
+                result = scopeName;
+            else
+                result = scopeName + '.' + result;
         }
-        Stack scopeStack = new Stack();        
-        scopeStack.Push(getTypeScopeName());        
-        Scope parent = getParentScope();
-        while (parent.getParentScope() != null) {
-            scopeStack.Push(parent.getTypeScopeName());
-            parent = parent.getParentScope();
-        }
-        
-        String result = "";
-        int stackSize = scopeStack.Count;
-        for (int i = 0; i < stackSize; i++) {
-            if (i > 0) { 
-                result += "."; 
-            }
-            result += IdlNaming.MapIdlNameToClsName((String)scopeStack.Pop());
-        }
+
         return result;
     }
 

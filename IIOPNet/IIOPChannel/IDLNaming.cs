@@ -99,7 +99,8 @@ namespace Ch.Elca.Iiop.Idl {
         /// <returns></returns>
         public static string MapIdlNameToClsName(string idlName) {
             string result = idlName;
-            if (NameClashesWithClsKeyWord(idlName)) {
+            if (NameClashesWithClsKeyWord(idlName)
+                || !(char.IsLetter(idlName[0]) || idlName[0] == '_')) {
                 result = "_" + result;
             }
             return result;

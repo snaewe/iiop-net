@@ -46,8 +46,7 @@
          
          #region IFields
          
-         private ICodeGenerator m_codeGenerator;
-         private string m_fileExtension = null;
+         private CodeDomProvider m_codeDomProvider;
          private DirectoryInfo m_targetDir = null;
          
          private bool m_overwriteWhenExist = false;
@@ -67,8 +66,7 @@
          public ValueTypeImplGenerator(CodeDomProvider provider,
                                        DirectoryInfo targetDir,
                                        bool overwriteWhenExist) {
-             m_codeGenerator = provider.CreateGenerator();
-             m_fileExtension = provider.FileExtension;
+             m_codeDomProvider = provider;
              m_targetDir = targetDir;
              m_overwriteWhenExist = overwriteWhenExist;
          }
@@ -84,7 +82,7 @@
              // create the fileName from targetDirectory and 
              // full type name
              string fileName = forValueType.FullName;
-             fileName = fileName.Replace(".", "_") + "." + m_fileExtension;
+             fileName = fileName.Replace(".", "_") + "." + m_codeDomProvider.FileExtension;
              fileName = Path.Combine(m_targetDir.FullName, fileName);
              
              if (File.Exists(fileName) && !m_overwriteWhenExist) {
@@ -128,7 +126,7 @@
              
              AddMembers(forValueType, valTypeImpl, targetNamespace);
 
-             m_codeGenerator.GenerateCodeFromNamespace(targetNamespace,
+             m_codeDomProvider.GenerateCodeFromNamespace(targetNamespace,
                                                        targetWriter, 
                                                        new CodeGeneratorOptions());
          }
