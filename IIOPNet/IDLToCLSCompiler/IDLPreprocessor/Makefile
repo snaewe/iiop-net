@@ -14,4 +14,4 @@ $(Dest)IDLPreprocessor.dll: *.cs $(Key)
 
 clean:
 	if exist $(Dest)* del /s /q $(Dest)*
-	if exist $(Dest) rmdir $(Dest)
+	if exist $(Dest) rmdir /s /q $(Dest)
