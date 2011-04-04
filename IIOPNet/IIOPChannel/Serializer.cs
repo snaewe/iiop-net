@@ -558,14 +558,13 @@ namespace Ch.Elca.Iiop.Marshalling {
                     actualType = m_forType;
                 }
                 // get the repository id for the type of this MarshalByRef object
-                string repositoryID = Repository.GetRepositoryID(actualType);
-                if (actualType.Equals(ReflectionHelper.MarshalByRefObjectType)) { 
-                    repositoryID = ""; 
-                } // CORBA::Object has "" repository id
+                string repositoryID = actualType == ReflectionHelper.MarshalByRefObjectType
+                    ? string.Empty // CORBA::Object has "" repository id
+                    : Repository.GetRepositoryID(actualType);
                 ior = m_iiopUrlUtil.CreateIorForUrl(url, repositoryID);
             } else {
                 // server object
-                ior = IorUtil.CreateIorForObjectFromThisDomain(target);
+                ior = IorUtil.CreateIorForObjectFromThisDomain(target, m_forType);
             }
 
             Debug.WriteLine("connection information for objRef, nr of profiles: " + ior.Profiles.Length);
@@ -2141,30 +2140,24 @@ namespace Ch.Elca.Iiop.Tests {
     public class AbstractSerializerTest {
 
         internal void GenericSerTest(Serializer ser, object actual, byte[] expected) {
-            MemoryStream outStream = new MemoryStream();
-            try {
+            using (MemoryStream outStream = new MemoryStream()) {
                 CdrOutputStream cdrOut = new CdrOutputStreamImpl(outStream, 0);
                 cdrOut.WCharSet = (int)Ch.Elca.Iiop.Services.WCharSet.UTF16;
                 ser.Serialize(actual, cdrOut);
                 outStream.Seek(0, SeekOrigin.Begin);
                 byte[] result = outStream.ToArray();
                 Assert.AreEqual(expected, result, "value " + actual + " incorrectly serialized.");
-            } finally {
-                outStream.Close();
             }
         }
 
         internal object GenericDeserForTest(Serializer ser, byte[] actual) {
-            MemoryStream inStream = new MemoryStream();
-            try {
+            using (MemoryStream inStream = new MemoryStream()) {
                 inStream.Write(actual, 0, actual.Length);
                 inStream.Seek(0, SeekOrigin.Begin);
                 CdrInputStreamImpl cdrIn = new CdrInputStreamImpl(inStream);
                 cdrIn.ConfigStream(0, new GiopVersion(1, 2));
                 cdrIn.WCharSet = (int)Ch.Elca.Iiop.Services.WCharSet.UTF16;
                 return ser.Deserialize(cdrIn);
-            } finally {
-                inStream.Close();
             }
         }
 
@@ -2426,12 +2419,9 @@ namespace Ch.Elca.Iiop.Tests {
         [ExpectedException(typeof(BAD_PARAM))]
         public void TestNotAllowNullStringForBasicStrings() {
             StringSerializer stringSer = new StringSerializer(false, false);
-            MemoryStream outStream = new MemoryStream();
-            try {
+            using (MemoryStream outStream = new MemoryStream()) {
                 CdrOutputStream cdrOut = new CdrOutputStreamImpl(outStream, 0);
                 stringSer.Serialize(null, cdrOut);
-            } finally {
-                outStream.Close();
             }
         }
 
@@ -2777,8 +2767,8 @@ namespace Ch.Elca.Iiop.Tests {
             IiopClientChannel testChannel = new IiopClientChannel();
             ChannelServices.RegisterChannel(testChannel, false);
 
-            MemoryStream inStream = new MemoryStream();
-            byte[] testIor = new byte[] {
+            try {
+                byte[] testIor = new byte[] {
                 0x00, 0x00, 0x00, 0x28, 0x49, 0x44, 0x4C, 0x3A,
                 0x6F, 0x6D, 0x67, 0x2E, 0x6F, 0x72, 0x67, 0x2F,
                 0x43, 0x6F, 0x73, 0x4E, 0x61, 0x6D, 0x69, 0x6E,
@@ -2801,20 +2791,22 @@ namespace Ch.Elca.Iiop.Tests {
                 0x05, 0x01, 0x00, 0x01, 0x00, 0x01, 0x00, 0x20,
                 0x00, 0x01, 0x01, 0x09, 0x00, 0x00, 0x00, 0x01,
                 0x00, 0x01, 0x01, 0x00
-            };
-            inStream.Write(testIor, 0, testIor.Length);
-            inStream.Seek(0, SeekOrigin.Begin);
-            CdrInputStreamImpl cdrIn = new CdrInputStreamImpl(inStream);
-            cdrIn.ConfigStream(0, new GiopVersion(1, 2));
+                };
+                MemoryStream inStream = new MemoryStream(testIor);
+                CdrInputStreamImpl cdrIn = new CdrInputStreamImpl(inStream);
+                cdrIn.ConfigStream(0, new GiopVersion(1, 2));
 
-            Serializer ser = new ObjRefSerializer(typeof(omg.org.CosNaming.NamingContext),
-                                                  m_iiopUrlUtil);
-            object result = ser.Deserialize(cdrIn);
-            Assert.NotNull(result, "not correctly deserialised proxy for ior");
-            Assert.IsTrue(RemotingServices.IsTransparentProxy(result));
-            Assert.AreEqual("IOR:000000000000002849444C3A6F6D672E6F72672F436F734E616D696E672F4E616D696E67436F6E746578743A312E3000000000010000000000000074000102000000000A3132372E302E302E3100041900000030AFABCB0000000022000003E80000000100000000000000010000000C4E616D655365727669636500000000034E43300A0000000100000001000000200000000000010001000000020501000100010020000101090000000100010100",
-                                   RemotingServices.GetObjectUri((MarshalByRefObject)result));
-            ChannelServices.UnregisterChannel(testChannel);
+                Serializer ser = new ObjRefSerializer(typeof(omg.org.CosNaming.NamingContext),
+                                                      m_iiopUrlUtil);
+                object result = ser.Deserialize(cdrIn);
+                Assert.NotNull(result, "not correctly deserialised proxy for ior");
+                Assert.IsTrue(RemotingServices.IsTransparentProxy(result));
+                Assert.AreEqual("IOR:000000000000002849444C3A6F6D672E6F72672F436F734E616D696E672F4E616D696E67436F6E746578743A312E3000000000010000000000000074000102000000000A3132372E302E302E3100041900000030AFABCB0000000022000003E80000000100000000000000010000000C4E616D655365727669636500000000034E43300A0000000100000001000000200000000000010001000000020501000100010020000101090000000100010100",
+                                       RemotingServices.GetObjectUri((MarshalByRefObject)result));
+            }
+            finally {
+                ChannelServices.UnregisterChannel(testChannel);
+            }
 
         }
 
