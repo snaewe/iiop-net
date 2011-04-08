@@ -27,10 +27,8 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
-using System;
-using System.Collections;
+using System.Collections.Generic;
 using System.Text;
-using Ch.Elca.Iiop.Services;
 using omg.org.CORBA;
 
 namespace Ch.Elca.Iiop.CodeSet
@@ -45,16 +43,15 @@ namespace Ch.Elca.Iiop.CodeSet
         #region IFields
 
         /// <summary>stores the encodings</summary>
-        private Hashtable m_codeSetsEndianIndep = new Hashtable();
-        private Hashtable m_codeSetsBigEndian = new Hashtable();
-        private Hashtable m_codeSetsLittleEndian = new Hashtable();
+        private IDictionary<int, Encoding> m_codeSetsEndianIndep = new SortedList<int, Encoding>();
+        private IDictionary<int, Encoding> m_codeSetsBigEndian = new SortedList<int, Encoding>();
+        private IDictionary<int, Encoding> m_codeSetsLittleEndian = new SortedList<int, Encoding>();
 
         #endregion IFields
         #region IConstructors
 
         internal CodeSetConversionRegistry()
-        {
-        }
+        {}
 
         #endregion IConstructors
         #region IMethods
@@ -63,7 +60,7 @@ namespace Ch.Elca.Iiop.CodeSet
         /// <summary>
         /// adds an encoding for both endians (endian independant)
         /// </summary>
-        internal void AddEncodingAllEndian(int id, System.Text.Encoding encoding)
+        internal void AddEncodingAllEndian(int id, Encoding encoding)
         {
             m_codeSetsEndianIndep.Add(id, encoding);
             AddEncodingBigEndian(id, encoding);
@@ -73,7 +70,7 @@ namespace Ch.Elca.Iiop.CodeSet
         /// <summary>
         /// adds an encoding for only big endian
         /// </summary>            
-        internal void AddEncodingBigEndian(int id, System.Text.Encoding encoding)
+        internal void AddEncodingBigEndian(int id, Encoding encoding)
         {
             m_codeSetsBigEndian.Add(id, encoding);
         }
@@ -81,7 +78,7 @@ namespace Ch.Elca.Iiop.CodeSet
         /// <summary>
         /// adds an encoding for little endian
         /// </summary>                        
-        internal void AddEncodingLittleEndian(int id, System.Text.Encoding encoding)
+        internal void AddEncodingLittleEndian(int id, Encoding encoding)
         {
             m_codeSetsLittleEndian.Add(id, encoding);
         }
@@ -89,25 +86,28 @@ namespace Ch.Elca.Iiop.CodeSet
         /// <summary>
         /// gets an endian independant encoding
         /// </summary>                                    
-        internal System.Text.Encoding GetEncodingEndianIndependant(int id)
+        internal Encoding GetEncodingEndianIndependant(int id)
         {
-            return (System.Text.Encoding)m_codeSetsEndianIndep[id];
+            Encoding encoding;
+            return m_codeSetsEndianIndep.TryGetValue(id, out encoding) ? encoding : null;
         }
 
         /// <summary>
         /// gets an encoding usable with big endian
         /// </summary>                                    
-        internal System.Text.Encoding GetEncodingBigEndian(int id)
+        internal Encoding GetEncodingBigEndian(int id)
         {
-            return (System.Text.Encoding)m_codeSetsBigEndian[id];
+            Encoding encoding;
+            return m_codeSetsBigEndian.TryGetValue(id, out encoding) ? encoding : null;
         }
 
         /// <summary>
         /// gets an encoding usable with little endian
         /// </summary>                                    
-        internal System.Text.Encoding GetEncodingLittleEndian(int id)
+        internal Encoding GetEncodingLittleEndian(int id)
         {
-            return (System.Text.Encoding)m_codeSetsLittleEndian[id];
+            Encoding encoding;
+            return m_codeSetsLittleEndian.TryGetValue(id, out encoding) ? encoding : null;
         }
 
         #endregion IMethods
@@ -203,35 +203,26 @@ namespace Ch.Elca.Iiop.CodeSet
         private static UnicodeEncoding s_unicodeEncodingBe =
             new UnicodeEncoding(true, false);
 
+        // for little endian, a bom is required, because default is big endian.
         private static UnicodeEncoding s_unicodeEncodingLe =
-            new UnicodeEncoding(false, false);
+            new UnicodeEncoding(false, true);
 
         #endregion SFields
         #region IFields
 
-        private bool m_encodeAsBigEndian = true;
-        private bool m_encodeBom = false;
         /// <summary>
         /// the encoding instance used to convert char[] to byte[], for the reverse,
         /// the decision is based on bom in byte[].
         /// </summary>
-        private UnicodeEncoding m_encoderToUse;
+        private readonly UnicodeEncoding m_encoderToUse;
 
         #endregion IFields
         #region IConstructors
 
         public UnicodeEncodingExt(bool encodeAsBigEndian)
         {
-            m_encodeAsBigEndian = encodeAsBigEndian;
-            m_encodeBom = !encodeAsBigEndian; // for little endian, a bom is required, because default is big endian.
-            if (m_encodeAsBigEndian)
-            {
-                m_encoderToUse = s_unicodeEncodingBe;
-            }
-            else
-            {
-                m_encoderToUse = s_unicodeEncodingLe;
-            }
+            m_encoderToUse = encodeAsBigEndian ? s_unicodeEncodingBe
+                                               : s_unicodeEncodingLe;
         }
 
         #endregion IConsturctors
@@ -239,38 +230,17 @@ namespace Ch.Elca.Iiop.CodeSet
 
         public override int GetByteCount(char[] chars, int index, int count)
         {
-            int result = m_encoderToUse.GetByteCount(chars, index, count);
-            if (m_encodeBom)
-            {
-                result += 2;
-            }
-            return result;
+            return m_encoderToUse.GetByteCount(chars, index, count) +
+                   m_encoderToUse.GetPreamble().Length;
         }
 
         public override int GetBytes(char[] chars, int charIndex, int charCount,
                                      byte[] bytes, int byteIndex)
         {
-            if (m_encodeBom)
-            {
-                if (m_encodeAsBigEndian)
-                {
-                    bytes[byteIndex] = 254;
-                    bytes[byteIndex + 1] = 255;
-                }
-                else
-                {
-                    bytes[byteIndex] = 255;
-                    bytes[byteIndex + 1] = 254;
-                }
-                int result = m_encoderToUse.GetBytes(chars, charIndex, charCount,
-                                                     bytes, byteIndex + 2);
-                return result + 2;
-            }
-            else
-            {
-                return m_encoderToUse.GetBytes(chars, charIndex, charCount,
-                                               bytes, byteIndex);
-            }
+            m_encoderToUse.GetPreamble().CopyTo(bytes, byteIndex);
+            return m_encoderToUse.GetBytes(chars, charIndex, charCount,
+                                           bytes, byteIndex + m_encoderToUse.GetPreamble().Length) +
+                   m_encoderToUse.GetPreamble().Length;
         }
 
         public override int GetCharCount(byte[] bytes, int index, int count)
@@ -285,14 +255,12 @@ namespace Ch.Elca.Iiop.CodeSet
             {
                 return s_unicodeEncodingBe.GetCharCount(bytes, index + 2, count - 2);
             }
-            else if (bytes[index] == 255 && (bytes[index + 1] == 254))
+            if (bytes[index] == 255 && (bytes[index + 1] == 254))
             {
                 return s_unicodeEncodingLe.GetCharCount(bytes, index + 2, count - 2);
             }
-            else
-            {
-                return s_unicodeEncodingBe.GetCharCount(bytes, index, count); // no endian mark present
-            }
+            // no endian mark present
+            return s_unicodeEncodingBe.GetCharCount(bytes, index, count);
         }
 
         public override int GetChars(byte[] bytes, int byteIndex, int byteCount,
@@ -309,28 +277,21 @@ namespace Ch.Elca.Iiop.CodeSet
                 return s_unicodeEncodingBe.GetChars(bytes, byteIndex + 2, byteCount - 2,
                                                     chars, charIndex);
             }
-            else if (bytes[byteIndex] == 255 && (bytes[byteIndex + 1] == 254))
+            if (bytes[byteIndex] == 255 && (bytes[byteIndex + 1] == 254))
             {
                 return s_unicodeEncodingLe.GetChars(bytes, byteIndex + 2, byteCount - 2,
                                                     chars, charIndex);
             }
-            else
-            {
-                // no endian mark present
-                return s_unicodeEncodingBe.GetChars(bytes, byteIndex, byteCount,
-                                                    chars, charIndex);
-            }
+            // no endian mark present
+            return s_unicodeEncodingBe.GetChars(bytes, byteIndex, byteCount,
+                                                chars, charIndex);
         }
 
         public override int GetMaxByteCount(int charCount)
         {
             // one char results in two byte; if a bom is encoded, add 2.
-            int result = m_encoderToUse.GetMaxByteCount(charCount);
-            if (m_encodeBom)
-            {
-                result += 2;
-            }
-            return result;
+            return m_encoderToUse.GetMaxByteCount(charCount) +
+                   m_encoderToUse.GetPreamble().Length;
         }
 
         public override int GetMaxCharCount(int byteCount)
@@ -352,9 +313,9 @@ namespace Ch.Elca.Iiop.Tests
 {
 
     using System.IO;
-    using NUnit.Framework;
     using Ch.Elca.Iiop;
     using Ch.Elca.Iiop.Cdr;
+    using NUnit.Framework;
 
     /// <summary>
     /// test the encoding/decoding of UTF 16 strings

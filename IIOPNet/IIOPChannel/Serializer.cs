@@ -2801,6 +2801,7 @@ namespace Ch.Elca.Iiop.Tests {
                 object result = ser.Deserialize(cdrIn);
                 Assert.NotNull(result, "not correctly deserialised proxy for ior");
                 Assert.IsTrue(RemotingServices.IsTransparentProxy(result));
+                
                 Assert.AreEqual("IOR:000000000000002849444C3A6F6D672E6F72672F436F734E616D696E672F4E616D696E67436F6E746578743A312E3000000000010000000000000074000102000000000A3132372E302E302E3100041900000030AFABCB0000000022000003E80000000100000000000000010000000C4E616D655365727669636500000000034E43300A0000000100000001000000200000000000010001000000020501000100010020000101090000000100010100",
                                        RemotingServices.GetObjectUri((MarshalByRefObject)result));
             }

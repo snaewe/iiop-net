@@ -26,18 +26,17 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
- 
+
 using System;
-using System.Text;
-using System.Globalization;
 using System.Diagnostics;
 using System.Runtime.Remoting;
+using System.Text;
 using System.Threading;
-using omg.org.CORBA;
-using omg.org.PortableInterceptor;
 using Ch.Elca.Iiop.CorbaObjRef;
 using Ch.Elca.Iiop.Idl;
 using Ch.Elca.Iiop.Interception;
+using omg.org.CORBA;
+using omg.org.PortableInterceptor;
 
 namespace Ch.Elca.Iiop.Util {
 
@@ -47,11 +46,6 @@ namespace Ch.Elca.Iiop.Util {
     /// </summary>    
     internal static class IorUtil {
          
-        #region SFields
-         
-        private static ASCIIEncoding s_asciiEncoder = new ASCIIEncoding();
-         
-        #endregion SFields
         #region SMethods
          
          
@@ -61,11 +55,15 @@ namespace Ch.Elca.Iiop.Util {
         /// <param name="id"></param>
         /// <returns></returns>
         internal static byte[] GetKeyBytesForId(string id) {
-            return s_asciiEncoder.GetBytes(id);
+            return Encoding.ASCII.GetBytes(id);
+        }
+
+        internal static byte[] GetKeyBytesForId(string id, int startIndex) {
+            return Encoding.ASCII.GetBytes(id.ToCharArray(startIndex, id.Length - startIndex));
         }
         
         internal static string GetObjectUriForObjectKey(byte[] objectKey) {
-            string result = s_asciiEncoder.GetString(objectKey);
+            string result = Encoding.ASCII.GetString(objectKey);
             return UnescapeNonAscii(result);
         }        
          
@@ -74,78 +72,133 @@ namespace Ch.Elca.Iiop.Util {
         /// </summary>
         /// <param name="uri"></param>
         /// <returns></returns>
-        internal static string EscapeNonAscii(string uri) {
-            StringBuilder result = new StringBuilder();
-            string escaped = uri.Replace(@"\u", @"\\u");  // escape \u            
-            for (int i = 0; i < escaped.Length; i++) {
-                // replace non-ascii char by \u****
-                if (escaped[i] <= 0x7f) {
-                    result.Append(escaped[i]);    
-            } else {
-                    result.Append(@"\u" + 
-                                  String.Format("{0:X4}", 
-                                                Convert.ToInt32(escaped[i])));
-                }                
+        internal static string EscapeNonAscii(string uri, ref int startIndex) {
+            StringBuilder result = null;
+            bool inEscapeMode = false;
+            for (int i = startIndex; i != uri.Length; ++i) {
+                if (uri[i] == '\\') {
+                    inEscapeMode = true;
+                }
+                else if (inEscapeMode && uri[i] == 'u') {
+                    inEscapeMode = false;
+                    if (result == null) {
+                        result = new StringBuilder(uri, startIndex, i, uri.Length - startIndex);
+                    }
+                    // escape \u in \\u
+                    result.Append('\\');
+                }
+                else {
+                    inEscapeMode = false;
+                    if (uri[i] > 0x7f) {
+                        if (result == null) {
+                            result = new StringBuilder(uri, startIndex, i, uri.Length - startIndex);
+                        }
+                        // replace non-ascii char by \u****
+                        result.Append(@"\u").Append(Convert.ToInt32(uri[i]).ToString("X4"));
+                        continue;
+                    }
+                }
+                if (result != null) {
+                    result.Append(uri[i]);
+                }
             }
-            return result.ToString();
+            if (result != null) {
+                startIndex = 0;
+                return result.ToString();
+            }
+            // Nothing to escape
+            return uri;
         }
 
         /// <summary>
         /// reverse the effect of EscapeNonAscii
         /// </summary>
-        private static string UnescapeNonAscii(string uri) {
-            StringBuilder result = new StringBuilder();
-            StringBuilder potentialEscapeChar = new StringBuilder();            
-            for (int i = 0; i < uri.Length; i++) {
-                
-                if ((uri[i] != '\\') && (potentialEscapeChar.Length == 0)) {
-                    result.Append(uri[i]);    
-                } else {
+        internal static string UnescapeNonAscii(string uri) {
+            StringBuilder result = null;
+            int escapeSequenceStartIndex = 0;
+            for (int i = 0; i != uri.Length; ++i) {
+                bool endOfSequence;
+                if (IsPotentiallyEscapedCharacterRepresentation1(uri, i, i - escapeSequenceStartIndex, out endOfSequence)) {
                     // either new escape sequence starting with \ or continue of a sequence
-                    potentialEscapeChar.Append(uri[i]);
-                    if (!IsPotentiallyEscapedCharacterRepresentation(potentialEscapeChar.ToString())) {
-                        // no escape sequence, add string directly to result
-                        result.Append(potentialEscapeChar.ToString());
-                        potentialEscapeChar.Remove(0, potentialEscapeChar.Length);
-                    } else if (potentialEscapeChar.Length == 6) {
+                    if (endOfSequence) {
                         // it's an escape char in form \uQRST
-                        int charNr = Int32.Parse(potentialEscapeChar.ToString().Substring(2),
-                                                 NumberStyles.HexNumber);
-                        char unescaped = Convert.ToChar(charNr);
-                        result.Append(unescaped);
-                        // chars are handled, remove
-                        potentialEscapeChar.Remove(0, potentialEscapeChar.Length);
+                        if (result == null) {
+                            result = new StringBuilder(uri, 0, escapeSequenceStartIndex, uri.Length);
+                        }
+                        int charNr = StringConversions.Parse(uri, escapeSequenceStartIndex + 2, 4);
+                        result.Append(Convert.ToChar(charNr));
+                        escapeSequenceStartIndex = i;
                     }
-                }                
+                    else {
+                        continue;
+                    }
+                }
+                else if (IsPotentiallyEscapedCharacterRepresentation2(uri, i, i - escapeSequenceStartIndex, out endOfSequence)) {
+                    if (endOfSequence) {
+                        // it's an escape char in form \\u
+                        if (result == null) {
+                            result = new StringBuilder(uri, 0, escapeSequenceStartIndex, uri.Length);
+                        }
+                        result.Append(@"\u");
+                        escapeSequenceStartIndex = i;
+                    }
+                    else {
+                        continue;
+                    }
+                }
+                else {
+                    // no escape sequence, add string directly to result
+                    if (result != null) {
+                        result.Append(uri, escapeSequenceStartIndex, i - escapeSequenceStartIndex + 1);
+                    }
+                    escapeSequenceStartIndex = i;
+                }
+                ++escapeSequenceStartIndex;
             }
-            // undo \u transformation for non-ascii
-            result = result.Replace(@"\\u", @"\u");
-            return result.ToString();
+            return result != null ? result.ToString() : uri;
         }
 
         /// <summary>
         /// checks, if a given candidate sequence may represent an escaped character
         /// </summary>
         /// <returns>true, if possible, otherwise false</returns>
-        private static bool IsPotentiallyEscapedCharacterRepresentation(string candidate) {
-            // look for \uQRST
-            if (candidate.Length > 6) {
-                return false;
+        private static bool IsPotentiallyEscapedCharacterRepresentation1(string candidate, int index, int escapedCharRepIndex,
+                                                                         out bool lastChar) {
+            // look for '\uQRST'
+            lastChar = escapedCharRepIndex == 5;
+            switch (escapedCharRepIndex)
+            {
+                case 0:
+                    return candidate[index] == '\\';
+                case 1:
+                    return candidate[index] == 'u';
+                case 2:
+                case 3:
+                case 4:
+                case 5:
+                    return Char.IsDigit(candidate, index) ||
+                           (candidate[index] >= 'A' && candidate[index] <= 'F') ||
+                           (candidate[index] >= 'a' && candidate[index] <= 'f');
+                default:
+                    return false;
             }
-            if (!candidate.StartsWith(@"\")) {
-                    return false; 
-                }
-            if ((candidate.Length > 1) && (candidate[1] != 'u')) {
-                return false;
-            }                
-            if (candidate.Length > 2) {
-                for (int i = 2; i < candidate.Length; i++) {
-                    if (!Char.IsDigit(candidate[i])) {
-                        return false;
-                    }
-                }
+        }
+
+        private static bool IsPotentiallyEscapedCharacterRepresentation2(string candidate, int index, int escapedCharRepIndex,
+                                                                         out bool lastChar) {
+            lastChar = false;
+            // look for \\u
+            switch (escapedCharRepIndex)
+            {
+                case 0:
+                case 1:
+                    return candidate[index] == '\\';
+                case 2:
+                    lastChar = true;
+                    return candidate[index] == 'u';
+                default:
+                    return false;
             }
-            return true;
         }
         
         /// <summary>
@@ -154,23 +207,21 @@ namespace Ch.Elca.Iiop.Util {
         /// </summary>
         private static bool IsSystemGeneratedId(string uri) {
             // checks if uri endswith _seqNr.rem, where seqNr is a base 10 number
-            bool result = true;
             if (uri == null) {
                 throw new INTERNAL(58, CompletionStatus.Completed_MayBe);
-            } else {
-                int endPartIndex = uri.LastIndexOf("_");
-                if ((endPartIndex >= 0) && (uri.EndsWith(".rem"))) {
-                    string lastPart = uri.Substring(endPartIndex + 1);
-                    for (int i = 0; i < lastPart.Length - 4; i++) {
-                        if (!Char.IsDigit(lastPart, i)) {
-                            result = false;
-                        }
-                    }              
-                } else {
-                    result = false;
-                }
             }
-            return result;
+
+            int endPartIndex = uri.LastIndexOf("_");
+            if ((endPartIndex >= 0) && (uri.EndsWith(".rem"))) {
+                for (int i = endPartIndex + 1; i < uri.Length - 4; ++i) {
+                    if (!Char.IsDigit(uri, i)) {
+                        return false;
+                    }
+                }              
+            } else {
+                return false;
+            }
+            return true;
         }
         
         /// <summary>
@@ -183,18 +234,20 @@ namespace Ch.Elca.Iiop.Util {
             if (objectUri == null) { 
                 throw new INTERNAL(57, CompletionStatus.Completed_MayBe);
             }
-            
-            if (!IsSystemGeneratedId(objectUri)) {
+
+            int startIndex = 0;
+            if (!IsSystemGeneratedId(objectUri))
+            {
                 // remove appdomain-id in front of uri which is automatically appended 
                 // (see comment for RemotingServices.SetObjectUriForMarshal);
                 // to support user-id policy, this appdomain-guid must be removed!
                 if (objectUri.StartsWith("/")) {
-                    objectUri = objectUri.Substring(1);
+                    startIndex = 1;
                 }
-                int appdomainGuidEndIndex = objectUri.IndexOf("/");
+                int appdomainGuidEndIndex = objectUri.IndexOf('/', startIndex);
                 if (appdomainGuidEndIndex >= 0) {
                     // remove appdomain-guid part
-                    objectUri = objectUri.Substring(appdomainGuidEndIndex + 1);
+                    startIndex = appdomainGuidEndIndex + 1;
                 } else {
                     Debug.WriteLine("warning, appdomain guid not found in object-uri: " +
                                     objectUri);
@@ -205,8 +258,8 @@ namespace Ch.Elca.Iiop.Util {
             // generation of the same ids
             
             // use ASCII-encoder + unicode escaped to encode uri string
-            objectUri = EscapeNonAscii(objectUri);
-            return s_asciiEncoder.GetBytes(objectUri);
+            objectUri = EscapeNonAscii(objectUri, ref startIndex);
+            return Encoding.ASCII.GetBytes(objectUri.ToCharArray(startIndex, objectUri.Length - startIndex));
         }      
         
         /// <summary>
@@ -214,8 +267,7 @@ namespace Ch.Elca.Iiop.Util {
         /// </summary>
         /// <param name="obj"></param>
         /// <returns></returns>
-        internal static Ior CreateIorForObjectFromThisDomain(MarshalByRefObject obj)
-        {
+        internal static Ior CreateIorForObjectFromThisDomain(MarshalByRefObject obj) {
             return CreateIorForObjectFromThisDomain(obj, obj.GetType());
         }
 
@@ -292,11 +344,33 @@ namespace Ch.Elca.Iiop.Util {
                 }
             }
         }
-        
-         
-        #endregion SMethods
-         
+        #endregion SMethods    
     }
-     
-     
 }
+
+#if UnitTest
+
+namespace Ch.Elca.Iiop.Tests
+{
+    using NUnit.Framework;
+    using Ch.Elca.Iiop.Util;
+
+    [TestFixture]
+    public class IORUtilTest
+    {
+        [Test]
+        public void EscapeNonAsciiTest()
+        {
+            int startIndex = 0;
+            string result = IorUtil.EscapeNonAscii("foo", ref startIndex);
+            Assert.AreEqual(0, startIndex);
+            Assert.AreEqual("foo", result);
+            Assert.AreEqual(@"fran\u00E7ois", IorUtil.EscapeNonAscii("françois", ref startIndex));
+            Assert.AreEqual("françois", IorUtil.UnescapeNonAscii(@"fran\u00E7ois"));
+            Assert.AreEqual(@"fran\u00E7\\u00B9ois", IorUtil.EscapeNonAscii(@"franç\u00B9ois", ref startIndex));
+            Assert.AreEqual(@"franç\u00B9ois", IorUtil.UnescapeNonAscii(@"fran\u00E7\\u00B9ois"));
+        }
+    }
+}
+
+#endif

@@ -67,8 +67,7 @@ namespace Ch.Elca.Iiop.CorbaObjRef
             // iorAsString contains only characters 0-9, A-F and IOR --> all of this are short characters
             if (iorAsString.StartsWith("IOR:"))
             {
-                string tmp = iorAsString.Substring(4);
-                MemoryStream memStream = new MemoryStream(StringConversions.Destringify(tmp));
+                MemoryStream memStream = new MemoryStream(StringConversions.Destringify(iorAsString, 4));
                 CdrInputStreamImpl cdrStream = new CdrInputStreamImpl(memStream);
                 byte flags = cdrStream.ReadOctet();
                 cdrStream.ConfigStream(flags, new GiopVersion(1, 2)); // giop dep operation are not used for IORs

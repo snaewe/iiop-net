@@ -37,19 +37,13 @@ namespace Ch.Elca.Iiop.Util {
     /// <summary>
     /// Summary description for Conversions.
     /// </summary>
-    public sealed class StringConversions {
+    public static class StringConversions {
 
         #region SFields
 
         private static Char[] s_hexMap = new Char[]{'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F'};
 
         #endregion SFields
-        #region IConstructors
-
-        private StringConversions() {
-        }
-
-        #endregion IConstructors
         #region SMethods
 
         /// <summary>
@@ -69,20 +63,42 @@ namespace Ch.Elca.Iiop.Util {
             return new String(res);
         }
 
+        public static int Parse(string s, int startIndex, int length)
+        {
+            int result = 0;
+            for (int i = 0; i != length; ++i) {
+                char c = s[startIndex + i];
+                if (c >= '0' && c <= '9') {
+                    result = (result << 4) + (c - '0');
+                }
+                else if (c >= 'A' && c <= 'F') {
+                    result = (result << 4) + 10 + (c - 'A');
+                }
+                else if (c >= 'a' && c <= 'f') {
+                    result = (result << 4) + 10 + (c - 'a');
+                }
+                else {
+                    throw new FormatException(string.Format("Unexpected '{0}' while parsing an hexadecimal number", c));
+                }
+            }
+            return result;
+        }
+
         /// <summary>
         /// Convert a string containing a byte array in literal form to a byte array
         /// </summary>
         /// <param name="s">String to be parsed</param>
         /// <returns></returns>
-        public static byte[] Destringify(String s) {
-            if (s.Length % 2 == 1) {
+        public static byte[] Destringify(string s, int startIndex)
+        {
+            int count = s.Length - startIndex;
+            if (count % 2 == 1) {
                 throw new ArgumentException("String length must be even");
             }
-            byte[] res = new byte[s.Length >> 1];
+            byte[] res = new byte[count >> 1];
 
-            for (int i = 0; i < res.Length; i++) {
-                String sub = s.Substring(i*2, 2);
-                res[i] = byte.Parse(sub, System.Globalization.NumberStyles.HexNumber);
+            for (int i = 0; i != res.Length; ++i) {
+                res[i] = Convert.ToByte(Parse(s, startIndex + i * 2, 2));
             }
             return res;
         }

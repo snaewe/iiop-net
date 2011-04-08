@@ -29,17 +29,13 @@
 
 
 using System;
-using System.Runtime.Remoting.Messaging;
-using System.Collections;
-using System.IO;
-using System.Text;
 using Ch.Elca.Iiop.Cdr;
+using Ch.Elca.Iiop.CodeSet;
 using Ch.Elca.Iiop.CorbaObjRef;
 using Ch.Elca.Iiop.Idl;
+using Ch.Elca.Iiop.Util;
 using omg.org.CORBA;
 using omg.org.IOP;
-using Ch.Elca.Iiop.CodeSet;
-using Ch.Elca.Iiop.Util;
 
 namespace Ch.Elca.Iiop.Services {
     
@@ -111,7 +107,7 @@ namespace Ch.Elca.Iiop.Services {
     /// <summary>
     /// This service handles code-set conversion.
     /// </summary>
-    internal sealed class CodeSetService {
+    internal static class CodeSetService {
     
         #region Constants
 
@@ -159,27 +155,24 @@ namespace Ch.Elca.Iiop.Services {
             s_registry = new CodeSetConversionRegistry();
             // add the non-endian dependant encodings here
             s_registry.AddEncodingAllEndian((int)CharSet.LATIN1, new Latin1Encoding());
-            s_registry.AddEncodingAllEndian((int)CharSet.ISO646IEC_SINGLE, new ASCIIEncoding());
-            s_registry.AddEncodingAllEndian((int)CharSet.UTF8, new UTF8Encoding());
+            s_registry.AddEncodingAllEndian((int)CharSet.ISO646IEC_SINGLE, System.Text.Encoding.ASCII);
+            s_registry.AddEncodingAllEndian((int)CharSet.UTF8, System.Text.Encoding.UTF8);
             // big endian
+
+            System.Text.Encoding bigEndian = new UnicodeEncodingExt(true);
             s_registry.AddEncodingBigEndian((int)WCharSet.UTF16,
-                                            new UnicodeEncodingExt(true)); // use big endian encoding here
+                                            bigEndian); // use big endian encoding here
             s_registry.AddEncodingBigEndian((int)WCharSet.ISO646IEC_MULTI,
-                                            new UnicodeEncodingExt(true));
+                                            bigEndian);
             // little endian
+            System.Text.Encoding littleEndian = new UnicodeEncodingExt(false);
             s_registry.AddEncodingLittleEndian((int)WCharSet.UTF16,
-                                               new UnicodeEncodingExt(false)); // use little endian encoding here
+                                               littleEndian); // use little endian encoding here
             s_registry.AddEncodingLittleEndian((int)WCharSet.ISO646IEC_MULTI,
-                                               new UnicodeEncodingExt(false));
+                                               littleEndian);
         }
         
         #endregion SConstructor
-        #region IConstructors
-        
-        private CodeSetService() {
-        }
-
-        #endregion IConstructors
         #region SProperties
         
         /// <summary>
