@@ -268,17 +268,7 @@ namespace Ch.Elca.Iiop.Util {
         /// <param name="obj"></param>
         /// <returns></returns>
         internal static Ior CreateIorForObjectFromThisDomain(MarshalByRefObject obj) {
-            return CreateIorForObjectFromThisDomain(obj, obj.GetType());
-        }
-
-        /// <summary>
-        /// creates an IOR for an object hosted in the local appdomain.
-        /// </summary>
-        /// <param name="obj"></param>
-        /// <returns></returns>
-        internal static Ior CreateIorForObjectFromThisDomain(MarshalByRefObject obj,
-                                                             Type forType) {
-            ObjRef objRef = RemotingServices.Marshal(obj, null, forType); // make sure, the object is marshalled and get obj-ref
+            ObjRef objRef = RemotingServices.Marshal(obj); // make sure, the object is marshalled and get obj-ref
             byte[] objectKey = GetObjectKeyForObj(obj);
             IiopChannelData serverData = GetIiopChannelData(objRef);
             if (serverData != null) {
@@ -290,9 +280,9 @@ namespace Ch.Elca.Iiop.Util {
                     // hostName=host, objectKey=objectKey
                     throw new INV_OBJREF(1961, CompletionStatus.Completed_MayBe);
                 }
-                string repositoryID = forType != ReflectionHelper.MarshalByRefObjectType
-                    ? Repository.GetRepositoryID(forType)
-                    : string.Empty;
+                string repositoryID = obj.GetType().Equals(ReflectionHelper.MarshalByRefObjectType)
+                    ? Repository.GetRepositoryID(obj.GetType())
+                    : "";
                 // this server support GIOP 1.2 --> create an GIOP 1.2 profile
                 InternetIiopProfile profile = new InternetIiopProfile(new GiopVersion(1, 2), host,
                                                                       (short)port, objectKey);
