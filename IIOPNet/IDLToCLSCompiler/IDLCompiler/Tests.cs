@@ -716,10 +716,12 @@ namespace Ch.Elca.Iiop.IdlCompiler.Tests {
             using(StreamWriter writer = CreateSourceWriter(testSource)) {
                 // idl:
 
-                writer.WriteLine("#pragma prefix \"xxx1\"");
-                writer.WriteLine("module testmod {");
-                writer.WriteLine("    interface Test1 {};");
-                writer.WriteLine("};");
+                writer.WriteLine(@"
+                    #pragma prefix ""xxx1""
+                    module testmod {
+                        interface Test1 {};
+                    };
+                ");
 
                 writer.Flush();
                 testSource.Seek(0, SeekOrigin.Begin);
@@ -739,15 +741,16 @@ namespace Ch.Elca.Iiop.IdlCompiler.Tests {
             MemoryStream testSource = new MemoryStream();
             using(StreamWriter writer = CreateSourceWriter(testSource)) {
                 // idl:
-                writer.WriteLine("module testmod {");
-                writer.WriteLine("    interface Test1 {};");
-                writer.WriteLine("};");
+                writer.WriteLine(@"
+                    module testmod {
+                        interface Test1 {};
+                    };
 
-                writer.WriteLine("#pragma prefix \"xxx1\"");
-                writer.WriteLine("module testmod2 {");
-                writer.WriteLine("    interface Test2 {};");
-                writer.WriteLine("};");
-//                writer.WriteLine("interface Test2a {};");
+                    #pragma prefix ""xxx1""
+                    module testmod2 {
+                        interface Test2 {};
+                    };
+                ");
 
                 writer.Flush();
                 testSource.Seek(0, SeekOrigin.Begin);
@@ -759,9 +762,6 @@ namespace Ch.Elca.Iiop.IdlCompiler.Tests {
 
                 Type test2 = result.GetType("xxx1.testmod2.Test2", true);
                 Assert.NotNull(test2);
-
-                // Type test2a = result.GetType("xxx1.Test2a", true);
-                // Assert.NotNull(test2a);
             }
         }
 
@@ -774,15 +774,16 @@ namespace Ch.Elca.Iiop.IdlCompiler.Tests {
             using(StreamWriter writer = CreateSourceWriter(testSource)) {
                 // idl:
 
-                writer.WriteLine("#pragma prefix \"xxx1\"");
-                writer.WriteLine("interface Test1 {");
-                writer.WriteLine("};");
+                writer.WriteLine(@"
+                    #pragma prefix ""xxx1""
+                    interface Test1 {};
+                ");
 
                 writer.Flush();
                 testSource.Seek(0, SeekOrigin.Begin);
                 Assembly result = CreateIdl(testSource, GetAssemblyName());
                 
-                // check if interfaces is correctly created
+                // check if interface is correctly created
                 Type test1 = result.GetType("xxx1.Test1", true);
                 Assert.NotNull(test1);
             }
@@ -796,34 +797,36 @@ namespace Ch.Elca.Iiop.IdlCompiler.Tests {
             MemoryStream testSource = new MemoryStream();
             using(StreamWriter writer = CreateSourceWriter(testSource)) {
                 // idl:
-                writer.WriteLine("module testmod {");
-                writer.WriteLine("    interface Test1 {};");
-                writer.WriteLine("};");
+                writer.WriteLine(@"
+                    module testmod {
+                        interface Test1 {};
+                    };
 
-                writer.WriteLine("#pragma prefix \"xxx1\"");
-                writer.WriteLine("module testmod2 {");
-                writer.WriteLine("    interface Test2 {};");
-                writer.WriteLine("};");
-                writer.WriteLine("interface Test2a {};");
+                    #pragma prefix ""xxx1""
+                    module testmod2 {
+                        interface Test2 {};
+                    };
+                    interface Test2a {};
 
-                writer.WriteLine("#pragma prefix \"yyy2\"");
-                writer.WriteLine("#pragma prefix \"xxx2\"");
-                writer.WriteLine("module testmod3 {");
-                writer.WriteLine("    interface Test3 {};");
-                writer.WriteLine("};");
-                writer.WriteLine("interface Test3a {};");
+                    #pragma prefix ""yyy2""
+                    #pragma prefix ""xxx2""
+                    module testmod3 {
+                        interface Test3 {};
+                    };
+                    interface Test3a {};
 
-                writer.WriteLine("#pragma prefix \"\"");
-                writer.WriteLine("module testmod4 {");
-                writer.WriteLine("    interface Test4 {};");
-                writer.WriteLine("};");
-                writer.WriteLine("interface Test4a {};");
+                    #pragma prefix """"
+                    module testmod4 {
+                        interface Test4 {};
+                    };
+                    interface Test4a {};
+                ");
                 
                 writer.Flush();
                 testSource.Seek(0, SeekOrigin.Begin);
                 Assembly result = CreateIdl(testSource, GetAssemblyName());
                            
-                // check if interfaces is correctly created
+                // check if interfaces are correctly created
                 Type test1 = result.GetType("testmod.Test1", true);
                 Assert.NotNull(test1);
 
@@ -844,6 +847,83 @@ namespace Ch.Elca.Iiop.IdlCompiler.Tests {
 
                 Type test4a = result.GetType("Test4a", true);
                 Assert.NotNull(test4a);
+            }
+        }
+
+        /// <summary>
+        /// modified test #1 for repeated #pragma prefix from CORBA spec 10.6.5.4
+        /// </summary>
+        [Test]
+        public void TestPragmaPrefixComplex1() {
+            MemoryStream testSource = new MemoryStream();
+            using(StreamWriter writer = CreateSourceWriter(testSource)) {
+                // idl:
+                writer.WriteLine(@"
+                    module M1 {
+                        interface T1 {};
+                        interface T2 {};
+                    };
+//                    #pragma ID T2 ""DCE:d62207a2-011e-11ce-88b4-0800090b5d3e:3""
+                    #pragma prefix ""P1""
+                    module M2 {
+                        module M3 {
+                            #pragma prefix ""P2""
+                            interface T3 {};
+                        };
+                        interface T4 {};
+//                        #pragma version T4 2.4
+                    };
+				");
+                
+                writer.Flush();
+                testSource.Seek(0, SeekOrigin.Begin);
+                Assembly result = CreateIdl(testSource, GetAssemblyName());
+                           
+                // check if interfaces are correctly created
+                Type t1 = result.GetType("M1.T1", true);
+                Assert.NotNull(t1);
+
+                Type t2 = result.GetType("M1.T2", true);
+                Assert.NotNull(t2);
+
+                Type t3 = result.GetType("P2.T3", true);
+                Assert.NotNull(t3);
+
+                Type t4 = result.GetType("P1.M2.T4", true);
+                Assert.NotNull(t4);
+            }
+        }
+
+        /// <summary>
+        /// modified test #2 for repeated #pragma prefix from CORBA spec 10.6.5.4
+        /// </summary>
+        [Test]
+        public void TestPragmaPrefixComplex2() {
+            MemoryStream testSource = new MemoryStream();
+            using(StreamWriter writer = CreateSourceWriter(testSource)) {
+                // idl:
+                writer.WriteLine(@"
+                    module M4 {
+                        #pragma prefix ""P1/M2""
+                        module M3 {
+                            #pragma prefix ""P2""
+                            interface T3 {};
+                        };
+                        interface T4 {};
+//                        #pragma version T4 2.4
+                    };
+				");
+                
+                writer.Flush();
+                testSource.Seek(0, SeekOrigin.Begin);
+                Assembly result = CreateIdl(testSource, GetAssemblyName());
+                           
+                // check if interfaces are correctly created
+                Type t3 = result.GetType("P2.T3", true);
+                Assert.NotNull(t3);
+
+                Type t4 = result.GetType("P1.M2.T4", true);
+                Assert.NotNull(t4);
             }
         }
 
