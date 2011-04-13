@@ -705,8 +705,148 @@ namespace Ch.Elca.Iiop.IdlCompiler.Tests {
                                             BindingFlags.Instance | BindingFlags.DeclaredOnly,
                                 2);
             writer.Close();
-        }        
-        
+        }
+
+        /// <summary>
+        /// test for #pragma prefix
+        /// </summary>
+        [Test]
+        public void TestPragmaPrefix() {
+            MemoryStream testSource = new MemoryStream();
+            using(StreamWriter writer = CreateSourceWriter(testSource)) {
+                // idl:
+
+                writer.WriteLine("#pragma prefix \"xxx1\"");
+                writer.WriteLine("module testmod {");
+                writer.WriteLine("    interface Test1 {};");
+                writer.WriteLine("};");
+
+                writer.Flush();
+                testSource.Seek(0, SeekOrigin.Begin);
+                Assembly result = CreateIdl(testSource, GetAssemblyName());
+                           
+                // check if interfaces is correctly created
+                Type test1 = result.GetType("xxx1.testmod.Test1", true);
+                Assert.NotNull(test1);
+            }
+        }
+
+        /// <summary>
+        /// test for #pragma prefix not at the start of file
+        /// </summary>
+        [Test]
+        public void TestPragmaPrefix2() {
+            MemoryStream testSource = new MemoryStream();
+            using(StreamWriter writer = CreateSourceWriter(testSource)) {
+                // idl:
+                writer.WriteLine("module testmod {");
+                writer.WriteLine("    interface Test1 {};");
+                writer.WriteLine("};");
+
+                writer.WriteLine("#pragma prefix \"xxx1\"");
+                writer.WriteLine("module testmod2 {");
+                writer.WriteLine("    interface Test2 {};");
+                writer.WriteLine("};");
+//                writer.WriteLine("interface Test2a {};");
+
+                writer.Flush();
+                testSource.Seek(0, SeekOrigin.Begin);
+                Assembly result = CreateIdl(testSource, GetAssemblyName());
+                           
+                // check if interfaces is correctly created
+                Type test1 = result.GetType("testmod.Test1", true);
+                Assert.NotNull(test1);
+
+                Type test2 = result.GetType("xxx1.testmod2.Test2", true);
+                Assert.NotNull(test2);
+
+                // Type test2a = result.GetType("xxx1.Test2a", true);
+                // Assert.NotNull(test2a);
+            }
+        }
+
+        /// <summary>
+        /// test case for bug #1483276
+        /// </summary>
+        [Test]
+        public void TestPragmaPrefix3() {
+            MemoryStream testSource = new MemoryStream();
+            using(StreamWriter writer = CreateSourceWriter(testSource)) {
+                // idl:
+
+                writer.WriteLine("#pragma prefix \"xxx1\"");
+                writer.WriteLine("interface Test1 {");
+                writer.WriteLine("};");
+
+                writer.Flush();
+                testSource.Seek(0, SeekOrigin.Begin);
+                Assembly result = CreateIdl(testSource, GetAssemblyName());
+                
+                // check if interfaces is correctly created
+                Type test1 = result.GetType("xxx1.Test1", true);
+                Assert.NotNull(test1);
+            }
+        }
+
+        /// <summary>
+        /// test for repeated #pragma prefix, see CORBA specification, 10.6.5.2 for details
+        /// </summary>
+        [Test]
+        public void TestPragmaPrefixRepeated() {
+            MemoryStream testSource = new MemoryStream();
+            using(StreamWriter writer = CreateSourceWriter(testSource)) {
+                // idl:
+                writer.WriteLine("module testmod {");
+                writer.WriteLine("    interface Test1 {};");
+                writer.WriteLine("};");
+
+                writer.WriteLine("#pragma prefix \"xxx1\"");
+                writer.WriteLine("module testmod2 {");
+                writer.WriteLine("    interface Test2 {};");
+                writer.WriteLine("};");
+                writer.WriteLine("interface Test2a {};");
+
+                writer.WriteLine("#pragma prefix \"yyy2\"");
+                writer.WriteLine("#pragma prefix \"xxx2\"");
+                writer.WriteLine("module testmod3 {");
+                writer.WriteLine("    interface Test3 {};");
+                writer.WriteLine("};");
+                writer.WriteLine("interface Test3a {};");
+
+                writer.WriteLine("#pragma prefix \"\"");
+                writer.WriteLine("module testmod4 {");
+                writer.WriteLine("    interface Test4 {};");
+                writer.WriteLine("};");
+                writer.WriteLine("interface Test4a {};");
+                
+                writer.Flush();
+                testSource.Seek(0, SeekOrigin.Begin);
+                Assembly result = CreateIdl(testSource, GetAssemblyName());
+                           
+                // check if interfaces is correctly created
+                Type test1 = result.GetType("testmod.Test1", true);
+                Assert.NotNull(test1);
+
+                Type test2 = result.GetType("xxx1.testmod2.Test2", true);
+                Assert.NotNull(test2);
+
+                Type test2a = result.GetType("xxx1.Test2a", true);
+                Assert.NotNull(test2a);
+
+                Type test3 = result.GetType("xxx2.testmod3.Test3", true);
+                Assert.NotNull(test3);
+
+                Type test3a = result.GetType("xxx2.Test3a", true);
+                Assert.NotNull(test3a);
+
+                Type test4 = result.GetType("testmod4.Test4", true);
+                Assert.NotNull(test4);
+
+                Type test4a = result.GetType("Test4a", true);
+                Assert.NotNull(test4a);
+            }
+        }
+
         [Test]
         [ExpectedException(typeof(InvalidIdlException))]
         public void TestInvalidIdlBoxedValueType() {
