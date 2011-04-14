@@ -549,7 +549,7 @@ namespace Ch.Elca.Iiop.CorbaObjRef
             encapStream.WriteUShort((ushort)m_port);
             encapStream.WriteULong((uint)m_objectKey.Length);
             encapStream.WriteOpaque(m_objectKey);
-            // the tagged components            
+            // the tagged components
             if (!(m_giopVersion.Major == 1 && m_giopVersion.Minor == 0))
             { // for GIOP >= 1.1, tagged components are possible
                 m_taggedComponents.WriteTaggedComponentList(encapStream);
@@ -960,7 +960,6 @@ namespace Ch.Elca.Iiop.Tests
         }
 
     }
-
 
 }
 

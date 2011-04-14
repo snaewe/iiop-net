@@ -117,9 +117,9 @@ namespace Ch.Elca.Iiop.MessageHandling {
         #endregion IFields
         #region IConstructors
 
-        internal GiopMessageBodySerialiser(ArgumentsSerializerFactory argSerFactory) {      
+        internal GiopMessageBodySerialiser(ArgumentsSerializerFactory argSerFactory) {
             m_serFactory = argSerFactory.SerializerFactory;
-            m_argSerFactory = argSerFactory;   
+            m_argSerFactory = argSerFactory;
             m_codecFactory = new CodecFactoryImpl(m_serFactory);
         }
 
@@ -231,7 +231,7 @@ namespace Ch.Elca.Iiop.MessageHandling {
         /// set the codesets for the stream after codeset service descision
         /// </summary>
         /// <param name="cdrStream"></param>
-        private void SetCodeSet(CdrOutputStream cdrStream, GiopConnectionDesc conDesc) {            
+        private void SetCodeSet(CdrOutputStream cdrStream, GiopConnectionDesc conDesc) {
             if (conDesc.IsCodeSetDefined()) {
                 // set the codeset, if one is chosen
                 cdrStream.CharSet = conDesc.CharSet;
@@ -242,11 +242,11 @@ namespace Ch.Elca.Iiop.MessageHandling {
         /// <summary>read the target for the request</summary>
         /// <returns>the objectURI extracted from this msg</returns>
         private string ReadTarget(CdrInputStream cdrStream, GiopVersion version,
-                                  out byte[] objectKey) {            
+                                  out byte[] objectKey) {
             if (version.IsBeforeGiop1_2()) {
                 // for GIOP 1.0 / 1.1 only object key is possible
                 objectKey = ReadTargetKey(cdrStream);
-            } else {            
+            } else {
                 // for GIOP >= 1.2, a union is used for target information
                 ushort targetAdrType = cdrStream.ReadUShort();
                 switch (targetAdrType) {
@@ -266,7 +266,7 @@ namespace Ch.Elca.Iiop.MessageHandling {
             uint length = cdrStream.ReadULong();
             Debug.WriteLine("object key follows:");
             byte[] objectKey = cdrStream.ReadOpaque((int)length);
-            return objectKey;            
+            return objectKey;
         }
 
         #endregion Common
@@ -286,15 +286,15 @@ namespace Ch.Elca.Iiop.MessageHandling {
             Debug.WriteLine("writing object key with length: " + objectKey.Length);
             cdrStream.WriteULong((uint)objectKey.Length); // object-key length
             cdrStream.WriteOpaque(objectKey);
-        }               
+        }
 
         /// <summary>
         /// serialises the message body for a GIOP request
         /// </summary>
         /// <param name="clientRequest">the giop request Msg</param>
         /// <param name="targetStream"></param>
-        /// <param name="version">the Giop version to use</param>      
-        /// <param name="conDesc">the connection used for this request</param>  
+        /// <param name="version">the Giop version to use</param>
+        /// <param name="conDesc">the connection used for this request</param>
         internal void SerialiseRequest(GiopClientRequest clientRequest,
                                        CdrOutputStream targetStream, 
                                        IIorProfile targetProfile, GiopConnectionDesc conDesc) {
@@ -344,7 +344,7 @@ namespace Ch.Elca.Iiop.MessageHandling {
                 } else { // GIOP 1.2
                     SerialiseContext(targetStream, cntxColl); // service context
                 }
-                SerialiseRequestBody(targetStream, clientRequest, version, ser);                
+                SerialiseRequestBody(targetStream, clientRequest, version, ser);
             } catch (Exception ex) {
                 Debug.WriteLine("exception while serialising request: " + ex);
                 Exception newException = clientRequest.InterceptReceiveException(ex); // interception point may change exception
@@ -379,18 +379,18 @@ namespace Ch.Elca.Iiop.MessageHandling {
         /// <returns></returns>
         internal IMessage DeserialiseRequest(CdrInputStream cdrStream, GiopVersion version,
                                              GiopConnectionDesc conDesc, IInterceptionOption[] interceptionOptions) {
-            MethodCall methodCallInfo = null;            
+            MethodCall methodCallInfo = null;
             GiopServerRequest serverRequest = new GiopServerRequest(conDesc, interceptionOptions);
             serverRequest.Version = version;
             try {
                 ServiceContextList cntxColl = null;
                 if (version.IsBeforeGiop1_2()) { // GIOP 1.0 / 1.1
-                    cntxColl = DeserialiseContext(cdrStream); // Service context deser                    
+                    cntxColl = DeserialiseContext(cdrStream); // Service context deser
                 }
                 
                 // read the request-ID and set it as a message property
                 uint requestId = cdrStream.ReadULong(); 
-                serverRequest.RequestId = requestId;                
+                serverRequest.RequestId = requestId;
                 Trace.WriteLine("received a message with reqId: " + requestId);
                 // read response-flags:
                 byte respFlags = cdrStream.ReadOctet(); Debug.WriteLine("response-flags: " + respFlags);
@@ -425,14 +425,14 @@ namespace Ch.Elca.Iiop.MessageHandling {
                     m_argSerFactory.Create(serverRequest.ServerTypeType);
                 MethodInfo called =
                     argSer.GetMethodInfoFor(serverRequest.RequestMethodName);
-                serverRequest.ResolveCalledMethod(called); // set target method and handle special cases                                                
+                serverRequest.ResolveCalledMethod(called); // set target method and handle special cases
                 IDictionary contextElements;
-                DeserialiseRequestBody(cdrStream, version, serverRequest, argSer, out contextElements);                
+                DeserialiseRequestBody(cdrStream, version, serverRequest, argSer, out contextElements);
                 methodCallInfo = new MethodCall(serverRequest.Request);
                 if (contextElements != null) {
                     AddContextElementsToCallContext(methodCallInfo.LogicalCallContext, contextElements);
                 }
-                serverRequest.UpdateWithFinalRequest(methodCallInfo);                
+                serverRequest.UpdateWithFinalRequest(methodCallInfo);
                 serverRequest.InterceptReceiveRequest(); // all information now available
                 return methodCallInfo;
             } catch (Exception e) {
@@ -460,16 +460,16 @@ namespace Ch.Elca.Iiop.MessageHandling {
             result[0] = objectUri; // this argument is passed to all standard operations
             Array.Copy((Array)args, 0, result, 1, args.Length);
             return result;
-        }                                                
+        }
 
         /// <summary>deserialise the request body</summary>
-        /// <param name="contextElements">the deserialised context elements, if any or null</param>        
+        /// <param name="contextElements">the deserialised context elements, if any or null</param>
         private void DeserialiseRequestBody(CdrInputStream cdrStream, GiopVersion version,
                                             GiopServerRequest request,
                                             ArgumentsSerializer ser,
                                             out IDictionary contextElements) {
             // clarification from CORBA 2.6, chapter 15.4.1: no padding, when no arguments/no context elements
-            // are serialised, i.e. body empty            
+            // are serialised, i.e. body empty
             // ignores, if not enough bytes because no args/context; because in this case, no more bytes follow
             TryAlignBodyIfNeeded(cdrStream, version);
 
@@ -481,7 +481,7 @@ namespace Ch.Elca.Iiop.MessageHandling {
             if (request.IsStandardCorbaOperation) {
                 args = AdaptArgsForStandardOp(args, request.RequestUri);
             }
-            request.RequestArgs = args;            
+            request.RequestArgs = args;
         }
 
         #endregion Requests
@@ -491,8 +491,8 @@ namespace Ch.Elca.Iiop.MessageHandling {
         /// <param name="requestId">the requestId of the request, this response belongs to</param>
         internal void SerialiseReply(GiopServerRequest request, CdrOutputStream targetStream, 
                                    GiopVersion version,
-                                   GiopConnectionDesc conDesc) {            
-            Trace.WriteLine("serializing response for method: " + request.GetRequestedMethodNameInternal());            
+                                   GiopConnectionDesc conDesc) {
+            Trace.WriteLine("serializing response for method: " + request.GetRequestedMethodNameInternal());
             try {
                 bool isExceptionReply = request.IsExceptionReply;
                 Exception exceptionToSend = null;
@@ -567,13 +567,13 @@ namespace Ch.Elca.Iiop.MessageHandling {
             // clarification form CORBA 2.6, chapter 15.4.2: no padding, when no arguments are serialised  -->
             // for backward compatibility, do it nevertheless
             AlignBodyIfNeeded(targetStream, version);
-            // marshal the parameters            
+            // marshal the parameters
             
             ArgumentsSerializer ser =
                 m_argSerFactory.Create(request.CalledMethod.DeclaringType);
             ser.SerializeResponseArgs(request.RequestMethodName, request.ReturnValue, request.OutArgs,
-                                      targetStream);            
-        }                
+                                      targetStream);
+        }
 
         /// <summary>serialize the exception as a CORBA System exception</summary>
         private bool SerialiseAsSystemException(Exception e) {
@@ -595,8 +595,8 @@ namespace Ch.Elca.Iiop.MessageHandling {
             ser.Serialize(corbaEx, targetStream);
         }
 
-        private void SerialiseUserException(CdrOutputStream targetStream, AbstractUserException userEx) {            
-            Type exceptionType = userEx.GetType();            
+        private void SerialiseUserException(CdrOutputStream targetStream, AbstractUserException userEx) {
+            Type exceptionType = userEx.GetType();
             // serialize a user exception
             Serializer ser =
                 m_serFactory.Create(exceptionType, Util.AttributeExtCollection.EmptyCollection);
@@ -631,7 +631,7 @@ namespace Ch.Elca.Iiop.MessageHandling {
                     cntxColl = DeserialiseContext(cdrStream); // deserialize the service contexts
                 }
                 // set codeset for stream
-                SetCodeSet(cdrStream, conDesc);                
+                SetCodeSet(cdrStream, conDesc);
                 switch (responseStatus) {
                     case 0 :
                         Trace.WriteLine("deserializing normal reply for methodCall: " + request.MethodToCall);
@@ -646,7 +646,7 @@ namespace Ch.Elca.Iiop.MessageHandling {
                         response = new ReturnMessage(userEx, request.Request); // definitive exception only available here, because interception chain may change exception
                         break;
                     case 2 :
-                        Exception systemEx = DeserialiseSystemError(cdrStream, version); // the error .NET message for this exception is created in the formatter                        
+                        Exception systemEx = DeserialiseSystemError(cdrStream, version); // the error .NET message for this exception is created in the formatter
                         UpdateClientRequestWithReplyData(request, new ReturnMessage(systemEx, request.Request), cntxColl);
                         systemEx = request.InterceptReceiveException(systemEx);
                         response = new ReturnMessage(systemEx, request.Request); // definitive exception only available here, because interception chain may change exception
@@ -665,7 +665,7 @@ namespace Ch.Elca.Iiop.MessageHandling {
                             throw new MARSHAL(2401, CompletionStatus.Completed_MayBe);
                 }
             } catch (Exception ex) {
-                Trace.WriteLine("exception while deserialising reply: " + ex);                
+                Trace.WriteLine("exception while deserialising reply: " + ex);
                 try {
                     cdrStream.SkipRest();
                 } catch (Exception) {
@@ -692,14 +692,14 @@ namespace Ch.Elca.Iiop.MessageHandling {
             // clarification from CORBA 2.6, chapter 15.4.2: no padding, when no arguments are serialised
             TryAlignBodyIfNeeded(cdrStream, version); // read alignement, if present
             
-            // read the parameters                            
+            // read the parameters
             object[] outArgs;
             object retVal = null;
 
             ArgumentsSerializer ser =
                 m_argSerFactory.Create(request.MethodToCall.DeclaringType);
             retVal = ser.DeserializeResponseArgs(request.RequestMethodName, out outArgs,
-                                                 cdrStream);            
+                                                 cdrStream);
             ReturnMessage response = new ReturnMessage(retVal, outArgs, outArgs.Length, null, 
                                                        request.Request);
             return response;
@@ -712,8 +712,8 @@ namespace Ch.Elca.Iiop.MessageHandling {
 
             Serializer ser =
                 m_serFactory.Create(typeof(omg.org.CORBA.AbstractCORBASystemException), 
-                                    Util.AttributeExtCollection.EmptyCollection);            
-            Exception result = (Exception) ser.Deserialize(cdrStream);            
+                                    Util.AttributeExtCollection.EmptyCollection);
+            Exception result = (Exception) ser.Deserialize(cdrStream);
             if (result == null) { 
                 return new Exception("received system error from peer orb, but error was not deserializable");
             } else {
@@ -727,7 +727,7 @@ namespace Ch.Elca.Iiop.MessageHandling {
 
             Serializer ser =
                 m_serFactory.Create(typeof(AbstractUserException), 
-                                    Util.AttributeExtCollection.EmptyCollection);            
+                                    Util.AttributeExtCollection.EmptyCollection);
             Exception result = (Exception) ser.Deserialize(cdrStream);
             if (result == null) {
                 return new Exception("user exception received from peer orb, but was not deserializable");
@@ -752,7 +752,7 @@ namespace Ch.Elca.Iiop.MessageHandling {
             if (newProxy == null) {
                 throw new OBJECT_NOT_EXIST(2402, CompletionStatus.Completed_No);
             }
-            return new LocationForwardMessage(newProxy);            
+            return new LocationForwardMessage(newProxy);
         }
                     
         #endregion Replys
@@ -789,7 +789,7 @@ namespace Ch.Elca.Iiop.MessageHandling {
                 default:
                     Debug.WriteLine("Locate reply status not supported");
                     throw new NotSupportedException("not supported");
-            }            
+            }
         }
 
         #endregion Locate
@@ -828,24 +828,24 @@ namespace Ch.Elca.Iiop.Tests {
     }
     
     public class TestStringInterfaceImpl : MarshalByRefObject, TestStringInterface {
-                    	
+
         [return: StringValue()]
-        [return: WideChar(false)]        		
-		public string EchoString([StringValue] [WideChar(true)] string arg) {
-			return arg;
-		}
-    	
+        [return: WideChar(false)]
+        public string EchoString([StringValue] [WideChar(true)] string arg) {
+            return arg;
+        }
+
         [return: StringValue()]
-        [return: WideChar(false)]        		
-		public string EchoWString([StringValue] [WideChar(true)] string arg) {
-		    return arg;
-		}
+        [return: WideChar(false)]
+        public string EchoWString([StringValue] [WideChar(true)] string arg) {
+            return arg;
+        }
     }
 
     /// <summary>
     /// Unit-tests for testing request/reply serialisation/deserialisation
     /// </summary>
-    [TestFixture]    
+    [TestFixture]
     public class MessageBodySerialiserTest {
         
         private IiopUrlUtil m_iiopUrlUtil;
@@ -854,12 +854,12 @@ namespace Ch.Elca.Iiop.Tests {
         [SetUp]
         public void SetUp() {
             m_serFactory =
-    	        new SerializerFactory();
+                new SerializerFactory();
             CodecFactory codecFactory =
                 new CodecFactoryImpl(m_serFactory);
             Codec codec = 
                 codecFactory.create_codec(
-                    new Encoding(ENCODING_CDR_ENCAPS.ConstVal, 1, 2));            
+                    new Encoding(ENCODING_CDR_ENCAPS.ConstVal, 1, 2));
             m_iiopUrlUtil = 
                 IiopUrlUtil.Create(codec, new object[] { 
                     Services.CodeSetService.CreateDefaultCodesetComponent(codec)});
@@ -891,11 +891,11 @@ namespace Ch.Elca.Iiop.Tests {
         }
         
         [Test]
-        [ExpectedException(typeof(BAD_PARAM))]        
+        [ExpectedException(typeof(BAD_PARAM))]
         public void TestWCharSetNotDefinedClient() {
             MethodInfo methodToCall =
                 typeof(TestStringInterface).GetMethod("EchoWString");
-            object[] args = new object[] { "test" };            
+            object[] args = new object[] { "test" };
             string uri = 
                 "IOR:000000000000000100000000000000010000000000000020000102000000000A6C6F63616C686F73740004D2000000047465737400000000";
             Ior target = m_iiopUrlUtil.CreateIorForUrl(uri, "");
@@ -906,7 +906,7 @@ namespace Ch.Elca.Iiop.Tests {
             
             // prepare connection context
             GiopClientConnectionDesc conDesc = new GiopClientConnectionDesc(null, null, 
-                                                                            new GiopRequestNumberGenerator(), null);            
+                                                                            new GiopRequestNumberGenerator(), null);
             
             GiopMessageBodySerialiser ser = new GiopMessageBodySerialiser(
                                                 new ArgumentsSerializerFactory(m_serFactory));
@@ -933,7 +933,7 @@ namespace Ch.Elca.Iiop.Tests {
             
             // prepare connection context
             GiopClientConnectionDesc conDesc = new GiopClientConnectionDesc(null, null, 
-                                                                            new GiopRequestNumberGenerator(), null);            
+                                                                            new GiopRequestNumberGenerator(), null);
                         
             GiopMessageBodySerialiser ser = new GiopMessageBodySerialiser(
                                                 new ArgumentsSerializerFactory(m_serFactory));
@@ -955,11 +955,11 @@ namespace Ch.Elca.Iiop.Tests {
                              87, 83, 116, 114, 105, 110, 103, 0,
                              0, 0, 0, 1, 0, 0, 0, 1,
                              0, 0, 0, 12, 0, 0, 0, 0,
-                             0, 1, 0, 1, 0, 1, 1, 9,                              
+                             0, 1, 0, 1, 0, 1, 1, 9,
                              0, 0, 0, 8, 0, 116, 0, 101,
                              0, 115, 0, 116},
                 baseStream.ToArray(),"serialised message");
-        }        
+        }
         
         
         [Test]
@@ -974,9 +974,9 @@ namespace Ch.Elca.Iiop.Tests {
                              87, 83, 116, 114, 105, 110, 103, 0,
                              0, 0, 0, 1, 0, 0, 0, 1,
                              0, 0, 0, 12, 0, 0, 0, 0,
-                             0, 1, 0, 1, 0, 1, 1, 9,                              
+                             0, 1, 0, 1, 0, 1, 1, 9,
                              0, 0, 0, 8, 0, 116, 0, 101,
-                             0, 115, 0, 116};            
+                             0, 115, 0, 116};
             MemoryStream sourceStream =
                 new MemoryStream(sourceContent);
             
@@ -1014,7 +1014,7 @@ namespace Ch.Elca.Iiop.Tests {
             Assert.IsTrue(args != null, "args is null");
             Assert.AreEqual(1, args.Length);
             Assert.AreEqual("test", args[0]);
-        }  
+        }
         
         [Test]
         public void TestWCharSetNotDefinedServer() {
@@ -1063,8 +1063,8 @@ namespace Ch.Elca.Iiop.Tests {
             } finally {
                 RemotingServices.Disconnect(service);
             }
-        }                
-                
+        }
+
     }
     
 }

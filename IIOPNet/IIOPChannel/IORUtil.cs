@@ -43,7 +43,7 @@ namespace Ch.Elca.Iiop.Util {
     /// <summary>
     /// Class, containing methods for working with IOR and
     /// object keys.
-    /// </summary>    
+    /// </summary>
     internal static class IorUtil {
          
         #region SMethods
@@ -65,7 +65,7 @@ namespace Ch.Elca.Iiop.Util {
         internal static string GetObjectUriForObjectKey(byte[] objectKey) {
             string result = Encoding.ASCII.GetString(objectKey);
             return UnescapeNonAscii(result);
-        }        
+        }
          
         /// <summary>
         /// escape characters, which are not part of the ASCII set
@@ -217,7 +217,7 @@ namespace Ch.Elca.Iiop.Util {
                     if (!Char.IsDigit(uri, i)) {
                         return false;
                     }
-                }              
+                }
             } else {
                 return false;
             }
@@ -231,14 +231,14 @@ namespace Ch.Elca.Iiop.Util {
         /// <returns></returns>
         internal static byte[] GetObjectKeyForObj(MarshalByRefObject mbr) {
             string objectUri = RemotingServices.GetObjectUri(mbr);
-            if (objectUri == null) { 
+            if (objectUri == null) {
                 throw new INTERNAL(57, CompletionStatus.Completed_MayBe);
             }
 
             int startIndex = 0;
             if (!IsSystemGeneratedId(objectUri))
             {
-                // remove appdomain-id in front of uri which is automatically appended 
+                // remove appdomain-id in front of uri which is automatically appended
                 // (see comment for RemotingServices.SetObjectUriForMarshal);
                 // to support user-id policy, this appdomain-guid must be removed!
                 if (objectUri.StartsWith("/")) {
@@ -254,13 +254,13 @@ namespace Ch.Elca.Iiop.Util {
                 }
             }
             // For System-id policy, don't remove the appdomain id, because after
-            // a restart of the application, appdomain id-guid prevents the 
+            // a restart of the application, appdomain id-guid prevents the
             // generation of the same ids
             
             // use ASCII-encoder + unicode escaped to encode uri string
             objectUri = EscapeNonAscii(objectUri, ref startIndex);
             return Encoding.ASCII.GetBytes(objectUri.ToCharArray(startIndex, objectUri.Length - startIndex));
-        }      
+        }
         
         /// <summary>
         /// creates an IOR for an object hosted in the local appdomain.
@@ -274,15 +274,15 @@ namespace Ch.Elca.Iiop.Util {
             if (serverData != null) {
                 string host = serverData.HostName;
                 int port = serverData.Port;
-                if ((objectKey == null) || (host == null)) { 
+                if ((objectKey == null) || (host == null)) {
                     // the objRef: " + refToTarget + ", uri: " +
-                    // refToTarget.URI + is not serialisable, because connection data is missing 
+                    // refToTarget.URI + is not serialisable, because connection data is missing
                     // hostName=host, objectKey=objectKey
                     throw new INV_OBJREF(1961, CompletionStatus.Completed_MayBe);
                 }
-                string repositoryID = obj.GetType().Equals(ReflectionHelper.MarshalByRefObjectType)
-                    ? Repository.GetRepositoryID(obj.GetType())
-                    : "";
+                string repositoryID = obj.GetType() == ReflectionHelper.MarshalByRefObjectType
+                    ? "" // CORBA::Object has "" repository id
+                    : Repository.GetRepositoryID(obj.GetType());
                 // this server support GIOP 1.2 --> create an GIOP 1.2 profile
                 InternetIiopProfile profile = new InternetIiopProfile(new GiopVersion(1, 2), host,
                                                                       (short)port, objectKey);
@@ -292,7 +292,7 @@ namespace Ch.Elca.Iiop.Util {
                 AddProfileComponentsFromIorInterceptors(profile);
                 
                 Ior ior = new Ior(repositoryID, new IorProfile[] { profile });
-                return ior;                
+                return ior;
             } else {
                 Debug.WriteLine("ERROR: no server-channel information found!");
                 Debug.WriteLine("Please make sure, that an IIOPChannel has been created with specifying a listen port number (0 for automatic)!");
@@ -304,8 +304,8 @@ namespace Ch.Elca.Iiop.Util {
         /// <summary>gets the IIOPchannel-data from an ObjRef.</summary>
         private static IiopChannelData GetIiopChannelData(ObjRef objRef) {
             IChannelInfo info = objRef.ChannelInfo;
-            if ((info == null) || (info.ChannelData == null)) { 
-                return null; 
+            if ((info == null) || (info.ChannelData == null)) {
+                return null;
             }
             
             foreach (object chanData in info.ChannelData) {
@@ -315,7 +315,7 @@ namespace Ch.Elca.Iiop.Util {
                 }
             }
             // no IIOPChannelData found
-            return null; 
+            return null;
         }
         
         private static void AddProfileComponentsFromIorInterceptors(InternetIiopProfile profile) {
@@ -323,7 +323,7 @@ namespace Ch.Elca.Iiop.Util {
             if (interceptors.Length > 0) {
                 IORInfo info = new IORInfoImpl(profile);
                 for (int i = 0; i < interceptors.Length; i++) {
-                    try {                    
+                    try {
                         interceptors[i].establish_components(info);
                     } catch (ThreadAbortException) {
                         throw;
@@ -334,7 +334,7 @@ namespace Ch.Elca.Iiop.Util {
                 }
             }
         }
-        #endregion SMethods    
+        #endregion SMethods
     }
 }
 

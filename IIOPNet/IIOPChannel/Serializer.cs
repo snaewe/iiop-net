@@ -166,7 +166,7 @@ namespace Ch.Elca.Iiop.Marshalling {
                                        CdrOutputStream targetStream) {
             sbyte toSer = (sbyte)actual;
             targetStream.WriteOctet(
-				unchecked((byte)toSer)); // do an unchecked cast, overflow no issue here
+                unchecked((byte)toSer)); // do an unchecked cast, overflow no issue here
         }
 
         internal override object Deserialize(CdrInputStream sourceStream) {
@@ -408,7 +408,6 @@ namespace Ch.Elca.Iiop.Marshalling {
             sourceStream.ReadDoubleArray((double[])toFill);
         }
 
-
         #endregion IMethods
 
     }
@@ -559,7 +558,7 @@ namespace Ch.Elca.Iiop.Marshalling {
                 }
                 // get the repository id for the type of this MarshalByRef object
                 string repositoryID = actualType == ReflectionHelper.MarshalByRefObjectType
-                    ? string.Empty // CORBA::Object has "" repository id
+                    ? "" // CORBA::Object has "" repository id
                     : Repository.GetRepositoryID(actualType);
                 ior = m_iiopUrlUtil.CreateIorForUrl(url, repositoryID);
             } else {
@@ -1088,7 +1087,7 @@ namespace Ch.Elca.Iiop.Marshalling {
         #region IFields
 
         private Serializer[] m_fieldSerializers;
-		private FieldInfo[] m_fields;
+        private FieldInfo[] m_fields;
         private Type m_forType;
         private bool m_initalized = false;
         private SerializerFactory m_serFactory;
@@ -2433,24 +2432,24 @@ namespace Ch.Elca.Iiop.Tests {
 
     }
 
-	/// <summary>
-	/// Serializer tests for enum / flags.
-	/// </summary>
-	[TestFixture]
+    /// <summary>
+    /// Serializer tests for enum / flags.
+    /// </summary>
+    [TestFixture]
     public class SerializerTestEnumFalgs : AbstractSerializerTest {
 
-	    private SerializerFactory m_serFactory;
+        private SerializerFactory m_serFactory;
 
-	    [SetUp]
-	    public void SetUp() {
-	        m_serFactory = new SerializerFactory();
+        [SetUp]
+        public void SetUp() {
+            m_serFactory = new SerializerFactory();
             omg.org.IOP.CodecFactory codecFactory =
                 new Ch.Elca.Iiop.Interception.CodecFactoryImpl(m_serFactory);
             omg.org.IOP.Codec codec = 
                 codecFactory.create_codec(
                     new omg.org.IOP.Encoding(omg.org.IOP.ENCODING_CDR_ENCAPS.ConstVal, 1, 2));
             m_serFactory.Initalize(new SerializerFactoryConfig(), IiopUrlUtil.Create(codec));
-	    }
+        }
 
         private void FlagsGenericSerTest(Type flagsType, object actual, byte[] expected) {
             GenericSerTest(new FlagsSerializer(flagsType, m_serFactory),
@@ -2733,23 +2732,22 @@ namespace Ch.Elca.Iiop.Tests {
             FlagsGenericDeserTest(typeof(TestFlagsBUI64), new byte[] { 0, 0, 0, 0, 0, 0, 0, 1}, TestFlagsBUI64.b8);
             FlagsGenericDeserTest(typeof(TestFlagsBUI64), new byte[] { 0, 0, 0, 0, 0, 0, 0, 2}, TestFlagsBUI64.c8);
         }
+    }
 
-	}
-	
-	/// <summary>
-	/// SerializerTests for obj ref.
-	/// </summary>
-	[TestFixture]
-	public class SerializerTestObjRef : AbstractSerializerTest {
+    /// <summary>
+    /// SerializerTests for obj ref.
+    /// </summary>
+    [TestFixture]
+    public class SerializerTestObjRef : AbstractSerializerTest {
 
-	    private omg.org.IOP.Codec m_codec;
-	    private SerializerFactory m_serFactory;
-	    private IiopUrlUtil m_iiopUrlUtil;
+        private omg.org.IOP.Codec m_codec;
+        private SerializerFactory m_serFactory;
+        private IiopUrlUtil m_iiopUrlUtil;
 
-    	[SetUp]
-    	public void SetUp() {
-    	    m_serFactory =
-    	        new SerializerFactory();
+        [SetUp]
+        public void SetUp() {
+            m_serFactory = 
+                new SerializerFactory();
             omg.org.IOP.CodecFactory codecFactory =
                 new Ch.Elca.Iiop.Interception.CodecFactoryImpl(m_serFactory);
             m_codec = 
@@ -2760,37 +2758,37 @@ namespace Ch.Elca.Iiop.Tests {
                 IiopUrlUtil.Create(m_codec, new object[] { 
                     Services.CodeSetService.CreateDefaultCodesetComponent(m_codec)});
             m_serFactory.Initalize(new SerializerFactoryConfig(), m_iiopUrlUtil);
-    	}
+        }
 
-		[Test]
+        [Test]
         public void TestIorDeserialisation() {
             IiopClientChannel testChannel = new IiopClientChannel();
             ChannelServices.RegisterChannel(testChannel, false);
 
             try {
                 byte[] testIor = new byte[] {
-                0x00, 0x00, 0x00, 0x28, 0x49, 0x44, 0x4C, 0x3A,
-                0x6F, 0x6D, 0x67, 0x2E, 0x6F, 0x72, 0x67, 0x2F,
-                0x43, 0x6F, 0x73, 0x4E, 0x61, 0x6D, 0x69, 0x6E,
-                0x67, 0x2F, 0x4E, 0x61, 0x6D, 0x69, 0x6E, 0x67,
-                0x43, 0x6F, 0x6E, 0x74, 0x65, 0x78, 0x74, 0x3A,
-                0x31, 0x2E, 0x30, 0x00, 0x00, 0x00, 0x00, 0x01,
-                0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x74,
-                0x00, 0x01, 0x02, 0x00, 0x00, 0x00, 0x00, 0x0A,
-                0x31, 0x32, 0x37, 0x2E, 0x30, 0x2E, 0x30, 0x2E,
-                0x31, 0x00, 0x04, 0x19, 0x00, 0x00, 0x00, 0x30,
-                0xAF, 0xAB, 0xCB, 0x00, 0x00, 0x00, 0x00, 0x22,
-                0x00, 0x00, 0x03, 0xE8, 0x00, 0x00, 0x00, 0x01,
-                0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01,
-                0x00, 0x00, 0x00, 0x0C, 0x4E, 0x61, 0x6D, 0x65,
-                0x53, 0x65, 0x72, 0x76, 0x69, 0x63, 0x65, 0x00,
-                0x00, 0x00, 0x00, 0x03, 0x4E, 0x43, 0x30, 0x0A,
-                0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x01,
-                0x00, 0x00, 0x00, 0x20, 0x00, 0x00, 0x00, 0x00,
-                0x00, 0x01, 0x00, 0x01, 0x00, 0x00, 0x00, 0x02,
-                0x05, 0x01, 0x00, 0x01, 0x00, 0x01, 0x00, 0x20,
-                0x00, 0x01, 0x01, 0x09, 0x00, 0x00, 0x00, 0x01,
-                0x00, 0x01, 0x01, 0x00
+                    0x00, 0x00, 0x00, 0x28, 0x49, 0x44, 0x4C, 0x3A,
+                    0x6F, 0x6D, 0x67, 0x2E, 0x6F, 0x72, 0x67, 0x2F,
+                    0x43, 0x6F, 0x73, 0x4E, 0x61, 0x6D, 0x69, 0x6E,
+                    0x67, 0x2F, 0x4E, 0x61, 0x6D, 0x69, 0x6E, 0x67,
+                    0x43, 0x6F, 0x6E, 0x74, 0x65, 0x78, 0x74, 0x3A,
+                    0x31, 0x2E, 0x30, 0x00, 0x00, 0x00, 0x00, 0x01,
+                    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x74,
+                    0x00, 0x01, 0x02, 0x00, 0x00, 0x00, 0x00, 0x0A,
+                    0x31, 0x32, 0x37, 0x2E, 0x30, 0x2E, 0x30, 0x2E,
+                    0x31, 0x00, 0x04, 0x19, 0x00, 0x00, 0x00, 0x30,
+                    0xAF, 0xAB, 0xCB, 0x00, 0x00, 0x00, 0x00, 0x22,
+                    0x00, 0x00, 0x03, 0xE8, 0x00, 0x00, 0x00, 0x01,
+                    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01,
+                    0x00, 0x00, 0x00, 0x0C, 0x4E, 0x61, 0x6D, 0x65,
+                    0x53, 0x65, 0x72, 0x76, 0x69, 0x63, 0x65, 0x00,
+                    0x00, 0x00, 0x00, 0x03, 0x4E, 0x43, 0x30, 0x0A,
+                    0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x01,
+                    0x00, 0x00, 0x00, 0x20, 0x00, 0x00, 0x00, 0x00,
+                    0x00, 0x01, 0x00, 0x01, 0x00, 0x00, 0x00, 0x02,
+                    0x05, 0x01, 0x00, 0x01, 0x00, 0x01, 0x00, 0x20,
+                    0x00, 0x01, 0x01, 0x09, 0x00, 0x00, 0x00, 0x01,
+                    0x00, 0x01, 0x01, 0x00
                 };
                 MemoryStream inStream = new MemoryStream(testIor);
                 CdrInputStreamImpl cdrIn = new CdrInputStreamImpl(inStream);
@@ -2811,20 +2809,20 @@ namespace Ch.Elca.Iiop.Tests {
 
         }
 
-	}
-	
-	/// <summary>
-	/// Serializer tests for any.
-	/// </summary>
-	[TestFixture]
-	public class SerializerTestAny : AbstractSerializerTest {
+    }
 
-	    private SerializerFactory m_serFactory;
+    /// <summary>
+    /// Serializer tests for any.
+    /// </summary>
+    [TestFixture]
+    public class SerializerTestAny : AbstractSerializerTest {
 
-    	[SetUp]
-    	public void SetUp() {
-    	    m_serFactory =
-    	        new SerializerFactory();
+        private SerializerFactory m_serFactory;
+
+        [SetUp]
+        public void SetUp() {
+            m_serFactory =
+                new SerializerFactory();
             omg.org.IOP.CodecFactory codecFactory =
                 new Ch.Elca.Iiop.Interception.CodecFactoryImpl(m_serFactory);
             omg.org.IOP.Codec codec = 
@@ -2835,9 +2833,9 @@ namespace Ch.Elca.Iiop.Tests {
                 IiopUrlUtil.Create(codec, new object[] { 
                     Services.CodeSetService.CreateDefaultCodesetComponent(codec)});
             m_serFactory.Initalize(new SerializerFactoryConfig(), iiopUrlUtil);
-    	}
+        }
 
-		[Test]
+        [Test]
         public void TestSerLongAsAnyNoAnyContainer() {
             int val = 2;
             AnySerializer anySer = new AnySerializer(m_serFactory, false);
@@ -2895,18 +2893,18 @@ namespace Ch.Elca.Iiop.Tests {
                                                        0,   0,   0,  72,                     // encap length
                                                        0,   0,   0,   0,                     // flags
                                                        0,   0,   0,  35,  73,  68,  76,  58, // rep-id:          <35>"IDL:"
-                                                     111, 109, 103,  46, 111, 114, 103,  47, //                  "omg.org/"  
-                                                      67,  79,  82,  66,  65,  47,  87,  83, //                  "CORBA/WS"  
-                                                     116, 114, 105, 110, 103,  86,  97, 108, //                  "tringVal"  
+                                                     111, 109, 103,  46, 111, 114, 103,  47, //                  "omg.org/"
+                                                      67,  79,  82,  66,  65,  47,  87,  83, //                  "CORBA/WS"
+                                                     116, 114, 105, 110, 103,  86,  97, 108, //                  "tringVal"
                                                      117, 101,  58,  49,  46,  48,   0,   0, //                  "ue:1.0\0"<padding>
                                                        0,   0,   0,  13,  87,  83, 116, 114, // name
                                                      105, 110, 103,  86,  97, 108, 117, 101,
                                                        0,   0,   0,   0,   0,   0,   0,  27, // boxed value tc for wstring
                                                        0,   0,   0,   0, 127, 255, 255,   2, // bound, value
                                                        0,   0,   0,  35,  73,  68,  76,  58, // rep-id of value: <35>"IDL:"
-                                                     111, 109, 103,  46, 111, 114, 103,  47, //                  "omg.org/"  
-                                                      67,  79,  82,  66,  65,  47,  87,  83, //                  "CORBA/WS"  
-                                                     116, 114, 105, 110, 103,  86,  97, 108, //                  "tringVal"  
+                                                     111, 109, 103,  46, 111, 114, 103,  47, //                  "omg.org/"
+                                                      67,  79,  82,  66,  65,  47,  87,  83, //                  "CORBA/WS"
+                                                     116, 114, 105, 110, 103,  86,  97, 108, //                  "tringVal"
                                                      117, 101,  58,  49,  46,  48,   0,   0, //                  "ue:1.0\0"<padding>
                                                        0,   0,   0,   8,   0, 116,   0, 101, // value:           <8>"test"
                                                        0, 115,   0, 116 });                  // "For GIOP version 1.2 and 1.3 a wstring is not terminated by a null character"
@@ -2934,9 +2932,9 @@ namespace Ch.Elca.Iiop.Tests {
                                                        0,   0,   0,  18,                     // boxed value tc for string
                                                        0,   0,   0,   0, 127, 255, 255,   2, // bound, value
                                                        0,   0,   0,  34,  73,  68,  76,  58, // rep-id of value: <34>"IDL:"
-                                                     111, 109, 103,  46, 111, 114, 103,  47, //                  "omg.org/"  
-                                                      67,  79,  82,  66,  65,  47,  83, 116, //                  "CORBA/S"  
-                                                     114, 105, 110, 103,  86,  97, 108, 117, //                  "tringVal"  
+                                                     111, 109, 103,  46, 111, 114, 103,  47, //                  "omg.org/"
+                                                      67,  79,  82,  66,  65,  47,  83, 116, //                  "CORBA/S"
+                                                     114, 105, 110, 103,  86,  97, 108, 117, //                  "tringVal"
                                                      101,  58,  49,  46,  48,   0,   0,   0, //                  "ue:1.0\0"<padding>
                                                        0,   0,   0,   5, 116, 101, 115, 116, // value:           <4>"test"
                                                        0                                     //                  "\0"
@@ -2953,18 +2951,18 @@ namespace Ch.Elca.Iiop.Tests {
                                                        0,   0,   0,  72,                     // encap length
                                                        0,   0,   0,   0,                     // flags
                                                        0,   0,   0,  35,  73,  68,  76,  58, // rep-id:          <35>"IDL:"
-                                                     111, 109, 103,  46, 111, 114, 103,  47, //                  "omg.org/"  
-                                                      67,  79,  82,  66,  65,  47,  87,  83, //                  "CORBA/WS"  
-                                                     116, 114, 105, 110, 103,  86,  97, 108, //                  "tringVal"  
+                                                     111, 109, 103,  46, 111, 114, 103,  47, //                  "omg.org/"
+                                                      67,  79,  82,  66,  65,  47,  87,  83, //                  "CORBA/WS"
+                                                     116, 114, 105, 110, 103,  86,  97, 108, //                  "tringVal"
                                                      117, 101,  58,  49,  46,  48,   0,   0, //                  "ue:1.0\0"<padding>
                                                        0,   0,   0,  13,  87,  83, 116, 114, // name
                                                      105, 110, 103,  86,  97, 108, 117, 101,
                                                        0,   0,   0,   0,   0,   0,   0,  27, // boxed value tc for wstring
                                                        0,   0,   0,   0, 127, 255, 255,   2, // bound, value
                                                        0,   0,   0,  35,  73,  68,  76,  58, // rep-id of value: <35>"IDL:"
-                                                     111, 109, 103,  46, 111, 114, 103,  47, //                  "omg.org/"  
-                                                      67,  79,  82,  66,  65,  47,  87,  83, //                  "CORBA/WS"  
-                                                     116, 114, 105, 110, 103,  86,  97, 108, //                  "tringVal"  
+                                                     111, 109, 103,  46, 111, 114, 103,  47, //                  "omg.org/"
+                                                      67,  79,  82,  66,  65,  47,  87,  83, //                  "CORBA/WS"
+                                                     116, 114, 105, 110, 103,  86,  97, 108, //                  "tringVal"
                                                      117, 101,  58,  49,  46,  48,   0,   0, //                  "ue:1.0\0"<padding>
                                                        0,   0,   0,   8,   0, 116,   0, 101, // value:           <8>"test"
                                                        0, 115,   0, 116 },                  // "For GIOP version 1.2 and 1.3 a wstring is not terminated by a null character"
@@ -2991,9 +2989,9 @@ namespace Ch.Elca.Iiop.Tests {
                                                        0,   0,   0,  18,                     // boxed value tc for string
                                                        0,   0,   0,   0, 127, 255, 255,   2, // bound, value
                                                        0,   0,   0,  34,  73,  68,  76,  58, // rep-id of value: <34>"IDL:"
-                                                     111, 109, 103,  46, 111, 114, 103,  47, //                  "omg.org/"  
-                                                      67,  79,  82,  66,  65,  47,  83, 116, //                  "CORBA/S"  
-                                                     114, 105, 110, 103,  86,  97, 108, 117, //                  "tringVal"  
+                                                     111, 109, 103,  46, 111, 114, 103,  47, //                  "omg.org/"
+                                                      67,  79,  82,  66,  65,  47,  83, 116, //                  "CORBA/S"
+                                                     114, 105, 110, 103,  86,  97, 108, 117, //                  "tringVal"
                                                      101,  58,  49,  46,  48,   0,   0,   0, //                  "ue:1.0\0"<padding>
                                                        0,   0,   0,   5, 116, 101, 115, 116, // value:           <4>"test"
                                                        0                                     //                  "\0"
@@ -3085,18 +3083,18 @@ namespace Ch.Elca.Iiop.Tests {
                                                        0,   0,   0,  72,                     // encap length
                                                        0,   0,   0,   0,                     // flags
                                                        0,   0,   0,  35,  73,  68,  76,  58, // rep-id:          <35>"IDL:"
-                                                     111, 109, 103,  46, 111, 114, 103,  47, //                  "omg.org/"  
-                                                      67,  79,  82,  66,  65,  47,  87,  83, //                  "CORBA/WS"  
-                                                     116, 114, 105, 110, 103,  86,  97, 108, //                  "tringVal"  
+                                                     111, 109, 103,  46, 111, 114, 103,  47, //                  "omg.org/"
+                                                      67,  79,  82,  66,  65,  47,  87,  83, //                  "CORBA/WS"
+                                                     116, 114, 105, 110, 103,  86,  97, 108, //                  "tringVal"
                                                      117, 101,  58,  49,  46,  48,   0,   0, //                  "ue:1.0\0"<padding>
                                                        0,   0,   0,  13,  87,  83, 116, 114, // name
                                                      105, 110, 103,  86,  97, 108, 117, 101,
                                                        0,   0,   0,   0,   0,   0,   0,  27, // boxed value tc for wstring
                                                        0,   0,   0,   0, 127, 255, 255,   2, // bound, value
                                                        0,   0,   0,  35,  73,  68,  76,  58, // rep-id of value: <35>"IDL:"
-                                                     111, 109, 103,  46, 111, 114, 103,  47, //                  "omg.org/"  
-                                                      67,  79,  82,  66,  65,  47,  87,  83, //                  "CORBA/WS"  
-                                                     116, 114, 105, 110, 103,  86,  97, 108, //                  "tringVal"  
+                                                     111, 109, 103,  46, 111, 114, 103,  47, //                  "omg.org/"
+                                                      67,  79,  82,  66,  65,  47,  87,  83, //                  "CORBA/WS"
+                                                     116, 114, 105, 110, 103,  86,  97, 108, //                  "tringVal"
                                                      117, 101,  58,  49,  46,  48,   0,   0, //                  "ue:1.0\0"<padding>
                                                        0,   0,   0,   8,   0, 116,   0, 101, // value:           <8>"test"
                                                        0, 115,   0, 116 });                  // "For GIOP version 1.2 and 1.3 a wstring is not terminated by a null character"
@@ -3124,9 +3122,9 @@ namespace Ch.Elca.Iiop.Tests {
                                                        0,   0,   0,  18,                     // boxed value tc for string
                                                        0,   0,   0,   0, 127, 255, 255,   2, // bound, value
                                                        0,   0,   0,  34,  73,  68,  76,  58, // rep-id of value: <34>"IDL:"
-                                                     111, 109, 103,  46, 111, 114, 103,  47, //                  "omg.org/"  
-                                                      67,  79,  82,  66,  65,  47,  83, 116, //                  "CORBA/S"  
-                                                     114, 105, 110, 103,  86,  97, 108, 117, //                  "tringVal"  
+                                                     111, 109, 103,  46, 111, 114, 103,  47, //                  "omg.org/"
+                                                      67,  79,  82,  66,  65,  47,  83, 116, //                  "CORBA/S"
+                                                     114, 105, 110, 103,  86,  97, 108, 117, //                  "tringVal"
                                                      101,  58,  49,  46,  48,   0,   0,   0, //                  "ue:1.0\0"<padding>
                                                        0,   0,   0,   5, 116, 101, 115, 116, // value:           <4>"test"
                                                        0                                     //                  "\0"
@@ -3144,18 +3142,18 @@ namespace Ch.Elca.Iiop.Tests {
                                                            0,   0,   0,  72,                     // encap length
                                                            0,   0,   0,   0,                     // flags
                                                            0,   0,   0,  35,  73,  68,  76,  58, // rep-id:          <35>"IDL:"
-                                                         111, 109, 103,  46, 111, 114, 103,  47, //                  "omg.org/"  
-                                                          67,  79,  82,  66,  65,  47,  87,  83, //                  "CORBA/WS"  
-                                                         116, 114, 105, 110, 103,  86,  97, 108, //                  "tringVal"  
+                                                         111, 109, 103,  46, 111, 114, 103,  47, //                  "omg.org/"
+                                                          67,  79,  82,  66,  65,  47,  87,  83, //                  "CORBA/WS"
+                                                         116, 114, 105, 110, 103,  86,  97, 108, //                  "tringVal"
                                                          117, 101,  58,  49,  46,  48,   0,   0, //                  "ue:1.0\0"<padding>
                                                            0,   0,   0,  13,  87,  83, 116, 114, // name
                                                          105, 110, 103,  86,  97, 108, 117, 101,
                                                            0,   0,   0,   0,   0,   0,   0,  27, // boxed value tc for wstring
                                                            0,   0,   0,   0, 127, 255, 255,   2, // bound, value
                                                            0,   0,   0,  35,  73,  68,  76,  58, // rep-id of value: <35>"IDL:"
-                                                         111, 109, 103,  46, 111, 114, 103,  47, //                  "omg.org/"  
-                                                          67,  79,  82,  66,  65,  47,  87,  83, //                  "CORBA/WS"  
-                                                         116, 114, 105, 110, 103,  86,  97, 108, //                  "tringVal"  
+                                                         111, 109, 103,  46, 111, 114, 103,  47, //                  "omg.org/"
+                                                          67,  79,  82,  66,  65,  47,  87,  83, //                  "CORBA/WS"
+                                                         116, 114, 105, 110, 103,  86,  97, 108, //                  "tringVal"
                                                          117, 101,  58,  49,  46,  48,   0,   0, //                  "ue:1.0\0"<padding>
                                                            0,   0,   0,   8,   0, 116,   0, 101, // value:           <8>"test"
                                                            0, 115,   0, 116 });                  // "For GIOP version 1.2 and 1.3 a wstring is not terminated by a null character"
@@ -3184,9 +3182,9 @@ namespace Ch.Elca.Iiop.Tests {
                                                            0,   0,   0,  18,                     // boxed value tc for string
                                                            0,   0,   0,   0, 127, 255, 255,   2, // bound, value
                                                            0,   0,   0,  34,  73,  68,  76,  58, // rep-id of value: <34>"IDL:"
-                                                         111, 109, 103,  46, 111, 114, 103,  47, //                  "omg.org/"  
-                                                          67,  79,  82,  66,  65,  47,  83, 116, //                  "CORBA/S"  
-                                                         114, 105, 110, 103,  86,  97, 108, 117, //                  "tringVal"  
+                                                         111, 109, 103,  46, 111, 114, 103,  47, //                  "omg.org/"
+                                                          67,  79,  82,  66,  65,  47,  83, 116, //                  "CORBA/S"
+                                                         114, 105, 110, 103,  86,  97, 108, 117, //                  "tringVal"
                                                          101,  58,  49,  46,  48,   0,   0,   0, //                  "ue:1.0\0"<padding>
                                                            0,   0,   0,   5, 116, 101, 115, 116, // value:           <4>"test"
                                                            0                                     //                  "\0"
@@ -3200,68 +3198,68 @@ namespace Ch.Elca.Iiop.Tests {
 
     }
 
-	[Serializable]
-	[ExplicitSerializationOrdered()]
-	[RepositoryID("IDL:Ch/Elca/Iiop/Tests/SimpleValueTypeWith2Ints")]
-	public class SimpleValueTypeWith2Ints {
+    [Serializable]
+    [ExplicitSerializationOrdered()]
+    [RepositoryID("IDL:Ch/Elca/Iiop/Tests/SimpleValueTypeWith2Ints")]
+    public class SimpleValueTypeWith2Ints {
 
-		[ExplicitSerializationOrderNr(0)]
-	    private int m_val1;
-		[ExplicitSerializationOrderNr(1)]
-	    private int m_val2;
+        [ExplicitSerializationOrderNr(0)]
+        private int m_val1;
+        [ExplicitSerializationOrderNr(1)]
+        private int m_val2;
 
-		public SimpleValueTypeWith2Ints() {
-		}
+        public SimpleValueTypeWith2Ints() {
+        }
 
-		public SimpleValueTypeWith2Ints(int val1, int val2) {
-			Val1 = val1;
-			Val2 = val2;
-		}
+        public SimpleValueTypeWith2Ints(int val1, int val2) {
+            Val1 = val1;
+            Val2 = val2;
+        }
 
-		public int Val1 {
-			get {
-				return m_val1;
-			}
-			set {
-				m_val1 = value;
-			}
-		}
+        public int Val1 {
+            get {
+                return m_val1;
+            }
+            set {
+                m_val1 = value;
+            }
+        }
 
-		public int Val2 {
-			get {
-				return m_val2;
-			}
-			set {
-				m_val2 = value;
-			}
-		}
+        public int Val2 {
+            get {
+                return m_val2;
+            }
+            set {
+                m_val2 = value;
+            }
+        }
 
-		public override bool Equals(object obj) {
-			SimpleValueTypeWith2Ints other = 
-				obj as SimpleValueTypeWith2Ints;
-			if (other == null) {
-				return false;
-			}
-			return other.Val1 == Val1 &&
-				   other.Val2 == Val2;
-		}
+        public override bool Equals(object obj) {
+            SimpleValueTypeWith2Ints other =
+                obj as SimpleValueTypeWith2Ints;
+            if (other == null) {
+                return false;
+            }
+            return other.Val1 == Val1 &&
+                   other.Val2 == Val2;
+        }
 
-		public override int GetHashCode() {
-			return Val1.GetHashCode() ^
-				Val2.GetHashCode();
-		}
+        public override int GetHashCode() {
+            return Val1.GetHashCode() ^
+                Val2.GetHashCode();
+        }
 
-	}
-	
-	[TestFixture]
-	public class SerializerTestValueTypes : AbstractSerializerTest {
+    }
 
-	    private SerializerFactory m_serFactory;
+    [TestFixture]
+    public class SerializerTestValueTypes : AbstractSerializerTest {
 
-    	[SetUp]
-    	public void SetUp() {
-    	    m_serFactory =
-    	        new SerializerFactory();
+        private SerializerFactory m_serFactory;
+
+        [SetUp]
+        public void SetUp() {
+            m_serFactory =
+                new SerializerFactory();
             omg.org.IOP.CodecFactory codecFactory =
                 new Ch.Elca.Iiop.Interception.CodecFactoryImpl(m_serFactory);
             omg.org.IOP.Codec codec = 
@@ -3270,12 +3268,12 @@ namespace Ch.Elca.Iiop.Tests {
                                              1, 2));
             m_serFactory.Initalize(new SerializerFactoryConfig(), 
                                    IiopUrlUtil.Create(codec));
-    	}
+        }
 
-		[Test]
-		public void TestSerWStringValue() {
-			Serializer ser = new ValueObjectSerializer(typeof(WStringValue),
-			                                           m_serFactory);
+        [Test]
+        public void TestSerWStringValue() {
+            Serializer ser = new ValueObjectSerializer(typeof(WStringValue),
+                                                       m_serFactory);
             string testVal = "test";
             WStringValue toSer = new WStringValue(testVal);
             GenericSerTest(ser, toSer, new byte[] { 127, 255, 255, 2, // start value tag
@@ -3287,15 +3285,15 @@ namespace Ch.Elca.Iiop.Tests {
                                               0, 0, 0, 8, 0, 116, 0, 101, // "test"
                                               0, 115, 0, 116 } );
 
-		}
+        }
 
-		[Test]
-		public void TestDeSerWStringValue() {
-			Serializer ser = new ValueObjectSerializer(typeof(WStringValue),
-			                                           m_serFactory);
+        [Test]
+        public void TestDeSerWStringValue() {
+            Serializer ser = new ValueObjectSerializer(typeof(WStringValue),
+                                                       m_serFactory);
             string testVal = "test";
             WStringValue deser = (WStringValue)
-	            GenericDeserForTest(ser, new byte[] { 127, 255, 255, 2, // start value tag
+                GenericDeserForTest(ser, new byte[] { 127, 255, 255, 2, // start value tag
                                               0, 0, 0, 35, 73, 68, 76, 58, // rep-id of value
                                               111, 109, 103, 46, 111, 114, 103, 47, 
                                               67, 79, 82, 66, 65, 47, 87, 83,
@@ -3303,16 +3301,16 @@ namespace Ch.Elca.Iiop.Tests {
                                               117, 101, 58, 49, 46, 48, 0, 0,
                                               0, 0, 0, 8, 0, 116, 0, 101, // "test"
                                               0, 115, 0, 116 } );
-			Assert.AreEqual(
+            Assert.AreEqual(
                                    testVal, deser.Unbox(), "deserialised value wrong");
-		}
+        }
 
-		[Test]
-		public void TestSerBasicContainingValueType() {
-			Serializer ser = new ValueObjectSerializer(typeof(SimpleValueTypeWith2Ints),
-			                                           m_serFactory);
+        [Test]
+        public void TestSerBasicContainingValueType() {
+            Serializer ser = new ValueObjectSerializer(typeof(SimpleValueTypeWith2Ints),
+                                                       m_serFactory);
 
-			SimpleValueTypeWith2Ints toSer = new SimpleValueTypeWith2Ints(1, 2);
+            SimpleValueTypeWith2Ints toSer = new SimpleValueTypeWith2Ints(1, 2);
 
             GenericSerTest(ser, toSer, new byte[] { 127, 255, 255, 2, // start value tag
                                               0, 0, 0, 48, 73, 68, 76, 58, // rep-id of value
@@ -3324,14 +3322,14 @@ namespace Ch.Elca.Iiop.Tests {
                                               110, 116, 115, 0,
                                               0, 0, 0, 1, // 1
                                               0, 0, 0, 2 } ); // 2
-		}
+        }
 
-		[Test]
-		public void TestDeserBasicContainingValueType() {
-			Serializer ser = new ValueObjectSerializer(typeof(SimpleValueTypeWith2Ints),
-			                                           m_serFactory);
+        [Test]
+        public void TestDeserBasicContainingValueType() {
+            Serializer ser = new ValueObjectSerializer(typeof(SimpleValueTypeWith2Ints),
+                                                       m_serFactory);
 
-			SimpleValueTypeWith2Ints toDeser = new SimpleValueTypeWith2Ints(1, 2);
+            SimpleValueTypeWith2Ints toDeser = new SimpleValueTypeWith2Ints(1, 2);
 
             GenericDeserTest(ser, new byte[] { 127, 255, 255, 2, // start value tag
                                               0, 0, 0, 48, 73, 68, 76, 58, // rep-id of value
@@ -3343,29 +3341,24 @@ namespace Ch.Elca.Iiop.Tests {
                                               110, 116, 115, 0,
                                               0, 0, 0, 1, // 1
                                               0, 0, 0, 2 }, // 2
-										      toDeser );
-		}
-
-
-
-
-
+                                              toDeser);
+        }
     }
 
-	/// <summary>
-	/// Serializer test for idl sequences
-	/// </summary>
-	[TestFixture]
-	public class SerializerTestSequence : AbstractSerializerTest {
+    /// <summary>
+    /// Serializer test for idl sequences
+    /// </summary>
+    [TestFixture]
+    public class SerializerTestSequence : AbstractSerializerTest {
 
-	    private SerializerFactory m_serFactory;
-	    private SerializerFactoryConfig m_config;
-	    private IiopUrlUtil m_iiopUrlUtil;
-	    private AttributeExtCollection m_seqAttributes;
+        private SerializerFactory m_serFactory;
+        private SerializerFactoryConfig m_config;
+        private IiopUrlUtil m_iiopUrlUtil;
+        private AttributeExtCollection m_seqAttributes;
 
-	    [SetUp]
-	    public void SetUp() {
-	        m_serFactory = new SerializerFactory();
+        [SetUp]
+        public void SetUp() {
+            m_serFactory = new SerializerFactory();
             omg.org.IOP.CodecFactory codecFactory =
                 new Ch.Elca.Iiop.Interception.CodecFactoryImpl(m_serFactory);
             omg.org.IOP.Codec codec = 
@@ -3378,14 +3371,14 @@ namespace Ch.Elca.Iiop.Tests {
                 AttributeExtCollection.
                     ConvertToAttributeCollection(
                         new object[] { new IdlSequenceAttribute(0) } );
-	    }
+        }
 
-	    private Serializer CreateSerializer(object forInstance) {
-	        Type seqType = typeof(int[]); // simplification for null test.
-	        if (forInstance != null) {
-	            seqType = forInstance.GetType();
-	        }
-	        m_serFactory.Initalize(m_config, m_iiopUrlUtil);
+        private Serializer CreateSerializer(object forInstance) {
+            Type seqType = typeof(int[]); // simplification for null test.
+            if (forInstance != null) {
+                seqType = forInstance.GetType();
+            }
+            m_serFactory.Initalize(m_config, m_iiopUrlUtil);
 
             Serializer ser =
                 m_serFactory.Create(seqType, m_seqAttributes);
@@ -3396,12 +3389,12 @@ namespace Ch.Elca.Iiop.Tests {
             return ser;
         }
 
-	    private void AssertSerialization(object actual, byte[] expected) {
-	        Serializer ser = CreateSerializer(actual);
+        private void AssertSerialization(object actual, byte[] expected) {
+            Serializer ser = CreateSerializer(actual);
             GenericSerTest(ser, actual, expected);
-	    }
+        }
 
-	    private void AssertDeserialization(byte[] actual, Array expected) {
+        private void AssertDeserialization(byte[] actual, Array expected) {
             Serializer ser = CreateSerializer(expected);
 
             object result = GenericDeserForTest(ser, actual);
@@ -3414,9 +3407,9 @@ namespace Ch.Elca.Iiop.Tests {
                 object elemIResult = resultArray.GetValue(i);
                 Assert.AreEqual(elemIExpected, elemIResult, "element i");
             }
-	    }
+        }
 
-	    [Test]
+        [Test]
         [ExpectedException(typeof(BAD_PARAM))]
         public void TestNotAllowNullIdlSeuqnece() {
             m_config.SequenceSerializationAllowNull = false;
@@ -3581,26 +3574,24 @@ namespace Ch.Elca.Iiop.Tests {
             AssertDeserialization(new byte[] { 0, 0, 0, 3, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 2 },
                                   new TestIdlEnumBI32[] { TestIdlEnumBI32.IDL_A, TestIdlEnumBI32.IDL_B, TestIdlEnumBI32.IDL_C });
         }
+    }
 
 
-	}
-	
-	
     /// <summary>
-	/// Serializer test for idl sequences
-	/// </summary>
-	[TestFixture]
-	public class SerializerTestArray : AbstractSerializerTest {
+    /// Serializer test for idl sequences
+    /// </summary>
+    [TestFixture]
+    public class SerializerTestArray : AbstractSerializerTest {
 
-	    private SerializerFactory m_serFactory;
-	    private SerializerFactoryConfig m_config;
-	    private IiopUrlUtil m_iiopUrlUtil;
-	    private Type m_arrayType;
-	    private AttributeExtCollection m_arrayAttributes;
+        private SerializerFactory m_serFactory;
+        private SerializerFactoryConfig m_config;
+        private IiopUrlUtil m_iiopUrlUtil;
+        private Type m_arrayType;
+        private AttributeExtCollection m_arrayAttributes;
 
-	    [SetUp]
-	    public void SetUp() {
-	        m_serFactory = new SerializerFactory();
+        [SetUp]
+        public void SetUp() {
+            m_serFactory = new SerializerFactory();
             omg.org.IOP.CodecFactory codecFactory =
                 new Ch.Elca.Iiop.Interception.CodecFactoryImpl(m_serFactory);
             omg.org.IOP.Codec codec = 
@@ -3721,45 +3712,45 @@ namespace Ch.Elca.Iiop.Tests {
 
     }
 
-	[IdlStruct]
-	public struct TestImplicitelyOrderedStruct {
+    [IdlStruct]
+    public struct TestImplicitelyOrderedStruct {
 
-	    public int FieldB;
+        public int FieldB;
 
-	    public int FieldC;
+        public int FieldC;
 
-	    public int FieldA;
+        public int FieldA;
 
-	    public int FieldD;
+        public int FieldD;
 
-	    public TestImplicitelyOrderedStruct(int a, int b, int c, int d) {
-	        FieldA = a;
-	        FieldB = b;
-	        FieldC = c;
-	        FieldD = d;
-	    }
+        public TestImplicitelyOrderedStruct(int a, int b, int c, int d) {
+            FieldA = a;
+            FieldB = b;
+            FieldC = c;
+            FieldD = d;
+        }
 
-	    public override string ToString() {
-			return "a: " + FieldA + "; b: " + FieldB + "; c: " + FieldC +
-			    ";d: " + FieldD;
-		}
+        public override string ToString() {
+            return "a: " + FieldA + "; b: " + FieldB + "; c: " + FieldC +
+                ";d: " + FieldD;
+        }
 
-	}
+    }
 
-	
-	/// <summary>
-	/// Serializer tests for idl structs.
-	/// </summary>
-	[TestFixture]
+
+    /// <summary>
+    /// Serializer tests for idl structs.
+    /// </summary>
+    [TestFixture]
     public class SerializerTestIdlStruct : AbstractSerializerTest {
 
-	    private SerializerFactory m_serFactory;
-	    private IdlStructSerializer m_explicitelyOrderedStructSer;
-	    private IdlStructSerializer m_implicitelyOrderedStructSer;
+        private SerializerFactory m_serFactory;
+        private IdlStructSerializer m_explicitelyOrderedStructSer;
+        private IdlStructSerializer m_implicitelyOrderedStructSer;
 
-	    [SetUp]
-	    public void SetUp() {
-	        m_serFactory = new SerializerFactory();
+        [SetUp]
+        public void SetUp() {
+            m_serFactory = new SerializerFactory();
             omg.org.IOP.CodecFactory codecFactory =
                 new Ch.Elca.Iiop.Interception.CodecFactoryImpl(m_serFactory);
             omg.org.IOP.Codec codec = 
@@ -3775,47 +3766,46 @@ namespace Ch.Elca.Iiop.Tests {
                 new IdlStructSerializer(typeof(TestImplicitelyOrderedStruct), 
                                         m_serFactory);
             m_implicitelyOrderedStructSer.Initalize();
-	    }
+        }
 
-	    [Test]
-	    public void TestExplicitelyOrderedStrutSer() {
+        [Test]
+        public void TestExplicitelyOrderedStrutSer() {
 
-	        TestExplicitelyOrderedStruct toSer = new TestExplicitelyOrderedStruct(1, 2, 3, 4);
-	        GenericSerTest(m_explicitelyOrderedStructSer,
-	                       toSer, new byte[] { 0, 0, 0, 1, 0, 0, 0, 2, 0, 0, 0, 3,
-	                           0, 0, 0, 4 });
-	    }
+            TestExplicitelyOrderedStruct toSer = new TestExplicitelyOrderedStruct(1, 2, 3, 4);
+            GenericSerTest(m_explicitelyOrderedStructSer,
+                           toSer, new byte[] { 0, 0, 0, 1, 0, 0, 0, 2, 0, 0, 0, 3,
+                               0, 0, 0, 4 });
+        }
 
-	    [Test]
-	    public void TestExplicitelyOrderedStructDeser() {
-	        TestExplicitelyOrderedStruct toDeser = new TestExplicitelyOrderedStruct(1, 2, 3, 4);
-	        GenericDeserTest(m_explicitelyOrderedStructSer,
-	                         new byte[] { 0, 0, 0, 1, 0, 0, 0, 2, 0, 0, 0, 3,
-	                                      0, 0, 0, 4 },
-	                         toDeser);
-	    }
+        [Test]
+        public void TestExplicitelyOrderedStructDeser() {
+            TestExplicitelyOrderedStruct toDeser = new TestExplicitelyOrderedStruct(1, 2, 3, 4);
+            GenericDeserTest(m_explicitelyOrderedStructSer,
+                             new byte[] { 0, 0, 0, 1, 0, 0, 0, 2, 0, 0, 0, 3,
+                                          0, 0, 0, 4 },
+                             toDeser);
+        }
 
-	    [Test]
-	    public void TestImplicitelyOrderedStrutSer() {
+        [Test]
+        public void TestImplicitelyOrderedStrutSer() {
 
-	        TestImplicitelyOrderedStruct toSer = new TestImplicitelyOrderedStruct(1, 2, 3, 4);
-	        GenericSerTest(m_implicitelyOrderedStructSer,
-	                       toSer, new byte[] { 0, 0, 0, 1, 0, 0, 0, 2, 0, 0, 0, 3,
-	                           0, 0, 0, 4 });
-	    }
+            TestImplicitelyOrderedStruct toSer = new TestImplicitelyOrderedStruct(1, 2, 3, 4);
+            GenericSerTest(m_implicitelyOrderedStructSer,
+                           toSer, new byte[] { 0, 0, 0, 1, 0, 0, 0, 2, 0, 0, 0, 3,
+                               0, 0, 0, 4 });
+        }
 
-	    [Test]
-	    public void TestImplicitelyOrderedStructDeser() {
-	        TestImplicitelyOrderedStruct toDeser = new TestImplicitelyOrderedStruct(1, 2, 3, 4);
-	        GenericDeserTest(m_implicitelyOrderedStructSer,
-	                         new byte[] { 0, 0, 0, 1, 0, 0, 0, 2, 0, 0, 0, 3,
-	                                      0, 0, 0, 4 },
-	                         toDeser);
-	    }
+        [Test]
+        public void TestImplicitelyOrderedStructDeser() {
+            TestImplicitelyOrderedStruct toDeser = new TestImplicitelyOrderedStruct(1, 2, 3, 4);
+            GenericDeserTest(m_implicitelyOrderedStructSer,
+                             new byte[] { 0, 0, 0, 1, 0, 0, 0, 2, 0, 0, 0, 3,
+                                          0, 0, 0, 4 },
+                             toDeser);
+        }
 
+    }
 
-	}
-	
 }
 
 #endif

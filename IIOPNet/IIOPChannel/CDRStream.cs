@@ -52,7 +52,7 @@ namespace Ch.Elca.Iiop.Cdr {
 
     /// <summary>the type of the entity pointed to by the indirection</summary>
     public enum IndirectionType {
-        IndirRepId, 
+        IndirRepId,
         IndirValue,
         CodeBaseUrl,
         TypeCode
@@ -68,7 +68,7 @@ namespace Ch.Elca.Iiop.Cdr {
     }
 
     /// <summary>
-    /// stores information about indirections; indirections are used in value type and typecode 
+    /// stores information about indirections; indirections are used in value type and typecode
     /// encodings.
     /// </summary>
     [CLSCompliant(false)]
@@ -94,14 +94,14 @@ namespace Ch.Elca.Iiop.Cdr {
         #region IProperties
 
         public uint StreamPos {
-            get { 
-                return m_streamPos; 
+            get {
+                return m_streamPos;
             }
         }
 
         public IndirectionType IndirType {
-            get { 
-                return m_indirType; 
+            get {
+                return m_indirType;
             }
         }
         
@@ -109,7 +109,7 @@ namespace Ch.Elca.Iiop.Cdr {
             get {
                 return m_indirUsage;
             }
-        }        
+        }
 
         #endregion IProperties
         #region IMethods
@@ -119,7 +119,7 @@ namespace Ch.Elca.Iiop.Cdr {
                 return false;
             }
             IndirectionInfo otherInfo = (IndirectionInfo)other;
-            return ((StreamPos == otherInfo.StreamPos) && 
+            return ((StreamPos == otherInfo.StreamPos) &&
                     (IndirType == otherInfo.IndirType) &&
                     (IndirUsage == otherInfo.IndirUsage));
         }
@@ -145,7 +145,7 @@ namespace Ch.Elca.Iiop.Cdr {
         #endregion IFields
         #region IConstructors
         
-        internal IndirectionStoreBase() {            
+        internal IndirectionStoreBase() {
         }
         
         #endregion IConsturctors
@@ -180,7 +180,7 @@ namespace Ch.Elca.Iiop.Cdr {
         #region IMethods
         
         /// <summary>returns true, if the value has been previously marshalled to the stream</summary>
-        internal bool IsPreviouslyMarshalled(object val, IndirectionType indirType, 
+        internal bool IsPreviouslyMarshalled(object val, IndirectionType indirType,
                                              IndirectionUsage indirUsage) {
             object indirInfo = GetIndirectionInfoFor(val);
             return ((indirInfo != null) && (((IndirectionInfo)indirInfo).IndirType == indirType) &&
@@ -189,7 +189,7 @@ namespace Ch.Elca.Iiop.Cdr {
         
         /// <summary>stores an indirection for the val at the next aligned position</summary>
         internal void StoreIndirection(object val, IndirectionInfo indirDesc) {
-             Store[val] = indirDesc;   
+             Store[val] = indirDesc;
         }
         
         internal IndirectionInfo GetIndirectionInfoFor(object forVal) {
@@ -205,14 +205,14 @@ namespace Ch.Elca.Iiop.Cdr {
     
         #region IMethods
         
-        internal void StoreIndirection(IndirectionInfo indirDesc, 
+        internal void StoreIndirection(IndirectionInfo indirDesc,
                                        object valueAtIndirPos) {
             Store[indirDesc] = valueAtIndirPos;
         }
         
         /// <summary>resolves indirection, if not possible throws marshal excpetion</summary>
-        internal object GetObjectForIndir(IndirectionInfo indirDesc, bool allowEncapBoundryCross) {            
-            if (!IsIndirectionResolvable(indirDesc, allowEncapBoundryCross)) {    
+        internal object GetObjectForIndir(IndirectionInfo indirDesc, bool allowEncapBoundryCross) {
+            if (!IsIndirectionResolvable(indirDesc, allowEncapBoundryCross)) {
                 // indirection not resolvable!
                 throw CreateIndirectionNotResolvableException();
             }
@@ -220,9 +220,9 @@ namespace Ch.Elca.Iiop.Cdr {
         }
    
         internal bool IsIndirectionResolvable(IndirectionInfo indirInfo, bool allowEncapBoundryCross) {
-            if (!Store.Contains(indirInfo)) { 
+            if (!Store.Contains(indirInfo)) {
                 Debug.WriteLine("indirection not found, streamPos: " + indirInfo.StreamPos +
-                                ", type: " + indirInfo.IndirType + 
+                                ", type: " + indirInfo.IndirType +
                                 ", usage: " + indirInfo.IndirUsage);
                 IEnumerator enumerator = Store.Keys.GetEnumerator();
                 while (enumerator.MoveNext()) {
@@ -238,9 +238,9 @@ namespace Ch.Elca.Iiop.Cdr {
                                 ", usage: " + indirInfo.IndirUsage);
                 if ((!allowEncapBoundryCross) && (IsEncapBoundryCrossed(indirInfo.StreamPos))) {
                     throw CreateIndirectionBoundryCrossException();
-                } 
+                }
                 return true;
-            }                
+            }
         }
         
         internal void CheckIndirectionResolvable(IndirectionInfo indirInfo, bool allowEncapBoundryCross) {
@@ -251,7 +251,7 @@ namespace Ch.Elca.Iiop.Cdr {
         
         private Exception CreateIndirectionNotResolvableException() {
             return new MARSHAL(951, CompletionStatus.Completed_MayBe);
-        }        
+        }
         
         private Exception CreateIndirectionBoundryCrossException() {
             return new MARSHAL(961, CompletionStatus.Completed_MayBe);
@@ -269,7 +269,7 @@ namespace Ch.Elca.Iiop.Cdr {
      
         #region IFields
  
-        private uint m_position = 0;        
+        private uint m_position = 0;
         private uint m_globalOffset = 0;
  
         #endregion IFields
@@ -285,7 +285,7 @@ namespace Ch.Elca.Iiop.Cdr {
         /// <param name="offsetFromCurrent">the offset to add to the current position</param>
         /// <param name="isNegativeOffset">specifies, if the offset should be in positive or negative direction</param>
         public StreamPosition(CdrStreamBase stream, uint offsetFromCurrent, bool isNegativeOffset) {
-            m_globalOffset = stream.GetGlobalOffset();            
+            m_globalOffset = stream.GetGlobalOffset();
             m_position = stream.GetPosition();
             if (isNegativeOffset) {
                 m_position -= offsetFromCurrent;
@@ -302,14 +302,14 @@ namespace Ch.Elca.Iiop.Cdr {
         /// </summary>
         /// <value></value>
         public uint LocalPosition {
-            get { 
-                return m_position; 
+            get {
+                return m_position;
             }
         }
 
         /// <summary>
         /// returns the global position (i.e. relative to the outermost stream)
-        /// </summary>       
+        /// </summary>
         public uint GlobalPosition {
             get {
                 return m_globalOffset + m_position;
@@ -320,7 +320,7 @@ namespace Ch.Elca.Iiop.Cdr {
  
     }
 
-    /// <summary>base interface for cdr input and output streams</summary>    
+    /// <summary>base interface for cdr input and output streams</summary>
     [CLSCompliant(false)]
     public interface CdrStreamBase {
         
@@ -329,7 +329,7 @@ namespace Ch.Elca.Iiop.Cdr {
         /// <summary>the charset to use</summary>
         /// <remarks>
         /// The CORBA standards uses LATIN1 charset, if no charset is specified
-        /// in IOR.        
+        /// in IOR.
         /// </remarks>
         int CharSet {
             get;
@@ -338,12 +338,12 @@ namespace Ch.Elca.Iiop.Cdr {
         
         /// <summary>the wcharset to use</summary>
         /// <remarks>
-        /// The CORBA standard defines, that there is no default. 
+        /// The CORBA standard defines, that there is no default.
         /// If this is not set, serializing/deserializing a wchar/wstring
         /// is not allowed.
         /// </remarks>
         int WCharSet {
-            get; 
+            get;
             set;
         }
         
@@ -351,11 +351,11 @@ namespace Ch.Elca.Iiop.Cdr {
         #region IMethods
         
         /// <summary>
-        /// the current position in the stream relative to the beginning of the stream;        
+        /// the current position in the stream relative to the beginning of the stream;
         /// </summary>
         uint GetPosition();
         
-        /// <summary>for the outermost (the marshal stream) this returns 0. 
+        /// <summary>for the outermost (the marshal stream) this returns 0.
         /// For streams embedded in othter streams, this returns the position of the current stream
         /// relative to the outermost stream beginning; e.g. used together with encapsulations</summary>
         uint GetGlobalOffset();
@@ -386,7 +386,7 @@ namespace Ch.Elca.Iiop.Cdr {
         /// <summary>reads an unsigned short from the stream</summary>
         ushort ReadUShort();
         /// <summary>reads multiple ushort elements from the stream</summary>
-        void ReadUShortArray(ushort[] array);        
+        void ReadUShortArray(ushort[] array);
         /// <summary>reads a long from the stream</summary>
         int ReadLong();
         /// <summary>reads multiple long elements from the stream</summary>
@@ -402,7 +402,7 @@ namespace Ch.Elca.Iiop.Cdr {
         /// <summary>reads an unsigned long long from the stream</summary>
         ulong ReadULongLong();
         /// <summary>reads multiple ulong long elements from the stream</summary>
-        void ReadULongLongArray(ulong[] array);        
+        void ReadULongLongArray(ulong[] array);
         /// <summary>reads a float from the stream</summary>
         float ReadFloat();
         /// <summary>reads multiple float elements from the stream</summary>
@@ -410,7 +410,7 @@ namespace Ch.Elca.Iiop.Cdr {
         /// <summary>reads a double from the stream</summary>
         double ReadDouble();
         /// <summary>reads multiple double elements from the stream</summary>
-        void ReadDoubleArray(double[] array);        
+        void ReadDoubleArray(double[] array);
         /// <summary>reads a wide character from the stream</summary>
         /// <remarks>this is endian dependant, in contrast to char: char is an array of byte, wchar is one fixed size mulitbyte value</remarks>
         char ReadWChar();
@@ -434,11 +434,11 @@ namespace Ch.Elca.Iiop.Cdr {
         /// <summary>reads an octet from the stream</summary>
         byte ReadOctet();
         /// <summary>reads multiple octets from the stream</summary>
-        void ReadOctetArray(byte[] array);        
+        void ReadOctetArray(byte[] array);
         /// <summary>reads a boolean from the stream</summary>
         bool ReadBool();
         /// <summary>reads multiple bools from the stream</summary>
-        void ReadBoolArray(bool[] array);        
+        void ReadBoolArray(bool[] array);
         /// <summary>reads a character from the stream</summary>
         char ReadChar();
         /// <summary>reads a string from the stream</summary>
@@ -481,11 +481,11 @@ namespace Ch.Elca.Iiop.Cdr {
         ///<summary>stores an indirection described by indirDesc</summary>
         void StoreIndirection(IndirectionInfo indirDesc, object valueAtIndirPos);
         
-        /// <summary>get the indirection matching the given desc; 
+        /// <summary>get the indirection matching the given desc;
         /// throws MarshalException, if not present</summary>
-        /// <param name="reolveGlobal">specify, if indirection should be reolved 
+        /// <param name="reolveGlobal">specify, if indirection should be reolved
         /// relative to the local stream or to the outermost (global) stream</param>
-        object GetObjectForIndir(IndirectionInfo indirInfo, bool resolveGlobal); 
+        object GetObjectForIndir(IndirectionInfo indirInfo, bool resolveGlobal);
         
         /// <summary>
         /// reads an indirection tag or instance start tag and returns:
@@ -494,18 +494,18 @@ namespace Ch.Elca.Iiop.Cdr {
         /// - a bool specifying, if a indirection tag has been read
         /// </summary>
         /// <returns></returns>
-        uint ReadInstanceOrIndirectionTag(out StreamPosition instanceStartPosition, 
+        uint ReadInstanceOrIndirectionTag(out StreamPosition instanceStartPosition,
                                           out bool isIndirection);
 
         /// <summary>
         /// read a string, which may be indirected; the arguments indirType, indirUsage, resolveGlobal are
         /// used for resolving an indirection.
-        /// </summary>        
+        /// </summary>
         string ReadIndirectableString(IndirectionType indirType, IndirectionUsage indirUsage,
                                       bool resolveGlobal);
 
-        /// <summary> 
-        /// tells the stream, that a new valuetype is starting now       
+        /// <summary>
+        /// tells the stream, that a new valuetype is starting now
         /// </summary>
         /// <remarks>needed to handle chunking correctly</remarks>
         void BeginReadNewValue();
@@ -539,35 +539,35 @@ namespace Ch.Elca.Iiop.Cdr {
         /// <summary>writes a short to the stream</summary>
         void WriteShort(short data);
         /// <summary>writes multiple short elements to the stream</summary>
-        void WriteShortArray(short[] array);        
+        void WriteShortArray(short[] array);
         /// <summary>writes an unsigned short to the stream</summary>
         void WriteUShort(ushort data);
         /// <summary>writes multiple ushort elements to the stream</summary>
-        void WriteUShortArray(ushort[] array);        
+        void WriteUShortArray(ushort[] array);
         /// <summary>writes a long to the stream</summary>
         void WriteLong(int data);
         /// <summary>writes multiple long elements to the stream</summary>
-        void WriteLongArray(int[] array);        
+        void WriteLongArray(int[] array);
         /// <summary>writes an unsigned long to the stream</summary>
         void WriteULong(uint data);
         /// <summary>writes multiple ulong elements to the stream</summary>
-        void WriteULongArray(uint[] array);        
+        void WriteULongArray(uint[] array);
         /// <summary>writes a long long to the stream</summary>
         void WriteLongLong(long data);
         /// <summary>writes multiple long long elements to the stream</summary>
-        void WriteLongLongArray(long[] array);        
+        void WriteLongLongArray(long[] array);
         /// <summary>writes an unsigned long long to the stream</summary>
         void WriteULongLong(ulong data);
         /// <summary>writes multiple ulong long elements to the stream</summary>
-        void WriteULongLongArray(ulong[] array);        
+        void WriteULongLongArray(ulong[] array);
         /// <summary>writes a float to the stream</summary>
         void WriteFloat(float data);
         /// <summary>writes multiple float elements to the stream</summary>
         void WriteFloatArray(float[] array);
         /// <summary>writes a double to the stream</summary>
-        void WriteDouble(double data); 
+        void WriteDouble(double data);
         /// <summary>writes multiple double elements to the stream</summary>
-        void WriteDoubleArray(double[] array);                
+        void WriteDoubleArray(double[] array);
         /// <summary>writes a wide character to the stream</summary>
         /// <remarks>
         /// this is endian depdendant in contrast to char:
@@ -603,7 +603,7 @@ namespace Ch.Elca.Iiop.Cdr {
         /// <summary>writes a string to the stream</summary>
         void WriteString(string data);
 
-        /// <summary>writes opaque data to the stream</summary>        
+        /// <summary>writes opaque data to the stream</summary>
         void WriteOpaque(byte[] data);
 
         void WriteBytes(byte[] data, int offset, int count);
@@ -621,9 +621,9 @@ namespace Ch.Elca.Iiop.Cdr {
         /// <summary>writes an encapsulation to this stream</summary>
         void WriteEncapsulation(CdrEncapsulationOutputStream encap);
 
-        /// <summary> 
+        /// <summary>
         /// writes a tag for an instance, which is indirectable;
-        /// returns the StreamPosition to store for the instance for later indirections.       
+        /// returns the StreamPosition to store for the instance for later indirections.
         /// </summary>
         /// <remarks>if an direction should be written, use WriteIndirection</remarks>
         /// <param name="tag">the tag to write; must be != INDIRECTION_TAG</param>
@@ -632,7 +632,7 @@ namespace Ch.Elca.Iiop.Cdr {
         /// <summary>
         /// writes either an indirection to a string or the string value itself, if not previously marshalled.
         /// </summary>
-        /// <param name="val">the string to write; 
+        /// <param name="val">the string to write;
         /// if already marshalled, write a indirection to the already marshalled string</param>
         /// <param name="indirType">a value describing how the string is used</param>
         /// <param name="indirUsage">a value describing by whom the string is used</param>
@@ -642,15 +642,15 @@ namespace Ch.Elca.Iiop.Cdr {
         void WriteIndirection(object forVal);
         
         /// <summary>returns true, if the value has been previously marshalled to the stream</summary>
-        bool IsPreviouslyMarshalled(object val, IndirectionType indirType, 
+        bool IsPreviouslyMarshalled(object val, IndirectionType indirType,
                                     IndirectionUsage indirUsage);
         
         /// <summary>stores an indirection for the val at the next aligned position</summary>
-        void StoreIndirection(object val, IndirectionInfo indirDesc);                              
+        void StoreIndirection(object val, IndirectionInfo indirDesc);
         
         /// <summary>calculates the indirection offset for the given indirInfo;
         /// this method assumes, that the current stream position is directly after the
-        /// indirection tag! 
+        /// indirection tag!
         /// !!! before indirection tag is difficult, because of alignement: don't really know,
         /// how much alignement bytes are before indirection tag</summary>
         long CalculateIndirectionOffset(IndirectionInfo indirInfo);
@@ -739,7 +739,7 @@ namespace Ch.Elca.Iiop.Cdr {
     
     /// <summary>
     /// this class represents a stream for reading a message from an underlaying stream
-    /// </summary>    
+    /// </summary>
     internal class CdrMessageInputStream {
 
         #region IFields
@@ -767,13 +767,13 @@ namespace Ch.Elca.Iiop.Cdr {
             get {
                 return m_inputStream.BackingStream;
             }
-        }        
+        }
         
         internal GiopHeader Header {
-            get { 
-                return m_header; 
+            get {
+                return m_header;
             }
-        }               
+        }
         
         #endregion IProperties
         #region IMethods
@@ -787,7 +787,7 @@ namespace Ch.Elca.Iiop.Cdr {
         }
 
         #endregion IMethods
-    }    
+    }
 
        
     /// <summary>
@@ -798,7 +798,7 @@ namespace Ch.Elca.Iiop.Cdr {
         
         #region Constants
         
-        internal const uint INDIRECTION_TAG = 0xffffffff;           
+        internal const uint INDIRECTION_TAG = 0xffffffff;
         internal const uint MIN_VALUE_TAG = 0x7fffff00;
         internal const uint MAX_VALUE_TAG = 0x7fffffff;
         
@@ -808,7 +808,7 @@ namespace Ch.Elca.Iiop.Cdr {
         #region IFields
 
         /// <summary>the underlying stream</summary>
-        private Stream m_stream;                
+        private Stream m_stream;
 
         private uint m_index = 0;
 
@@ -832,16 +832,16 @@ namespace Ch.Elca.Iiop.Cdr {
         #region IProperties
 
         protected Stream BaseStream {
-            get { 
-                return m_stream; 
+            get {
+                return m_stream;
             }
         }
 
         public int CharSet {
-            get { 
+            get {
                 return m_charSet;
             }
-            set { 
+            set {
                 m_charSet = value;
             }
         }
@@ -1058,10 +1058,10 @@ namespace Ch.Elca.Iiop.Cdr {
         #endregion IConstructors
         #region IProperties
         
-        /// <summary>gets the stream, which was used to construct the stream</summary>        
+        /// <summary>gets the stream, which was used to construct the stream</summary>
         internal Stream BackingStream {
             get {
-                return m_backingStream;                
+                return m_backingStream;
             }
         }
 
@@ -1081,7 +1081,7 @@ namespace Ch.Elca.Iiop.Cdr {
         /// before GIOP-Version is not set, no version dependant operation are possible (e.g. reading wstring)
         /// </remarks>
         private void SetGiopVersion(GiopVersion version) {
-            if (m_version != null) { 
+            if (m_version != null) {
                 // giop version already set before
                 throw new INTERNAL(1201, CompletionStatus.Completed_MayBe);
             }
@@ -1164,11 +1164,11 @@ namespace Ch.Elca.Iiop.Cdr {
         }
                 
         /// <summary>
-        /// check reading past end of stream; in case of chunked valuetypes, 
+        /// check reading past end of stream; in case of chunked valuetypes,
         /// check also reading over chunk border
         /// </summary>
         /// <param name="bytesToRead"></param>
-        private void CheckStreamPosition(uint bytesToRead) {            
+        private void CheckStreamPosition(uint bytesToRead) {
             if (m_bytesToFollowSet) {
                 if (GetPosition() + bytesToRead > m_indexForBytesToF + m_bytesToFollow) {
                     // no more bytes readable in this message
@@ -1177,16 +1177,16 @@ namespace Ch.Elca.Iiop.Cdr {
                 }
             }
             UpdateAndCheckChunking(bytesToRead);
-        }                
+        }
         
         /// <summary>read padding for an aligned read with the requiredAlignement</summary>
         /// <param name="requiredAlignment">align to which size</param>
         protected void AlignRead(byte requiredAlignment) {
             // do a chunk-start check here, because it's possible, that
-            // the value, for which we align, is in a new chunk 
+            // the value, for which we align, is in a new chunk
             // -> therefore a chunk length tag could be in between ->
             // the alignement must be check after the chunk-length tag.
-            UpdateAndCheckChunking(0); 
+            UpdateAndCheckChunking(0);
 
             // nr of bytes the index is after the last aligned index
             uint align = GetAlignBytes(requiredAlignment);
@@ -1202,10 +1202,10 @@ namespace Ch.Elca.Iiop.Cdr {
         protected bool TryAlignRead(byte requiredAlignment) {
             bool hadEnoughToRead = false;
             // do a chunk-start check here, because it's possible, that
-            // the value, for which we align, is in a new chunk 
+            // the value, for which we align, is in a new chunk
             // -> therefore a chunk length tag could be in between ->
             // the alignement must be check after the chunk-length tag.
-            UpdateAndCheckChunking(0); 
+            UpdateAndCheckChunking(0);
 
             // nr of bytes the index is after the last aligned index
             uint align = GetAlignBytes(requiredAlignment);
@@ -1217,13 +1217,13 @@ namespace Ch.Elca.Iiop.Cdr {
                 } else {
                     SkipRest(); // read the remaining
                 }
-            }       
+            }
             return hadEnoughToRead;
         }
 
         /// <summary>reads a nr of padding bytes</summary>
         public void ReadPadding(uint nrOfBytes) {
-            for (uint i = 0; i < nrOfBytes; i++) { 
+            for (uint i = 0; i < nrOfBytes; i++) {
                 ReadOctet();
             }
         }
@@ -1243,13 +1243,13 @@ namespace Ch.Elca.Iiop.Cdr {
 
         public bool ReadBool() {
             byte read = ReadOctet();
-            if (read == 0) { 
-                return false; 
+            if (read == 0) {
+                return false;
             }
-            else if (read == 1) { 
-                return true; 
+            else if (read == 1) {
+                return true;
             }
-            else { 
+            else {
                 // invalid data for boolean: read
                 throw new BAD_PARAM(10030, CompletionStatus.Completed_MayBe);
             }
@@ -1260,7 +1260,7 @@ namespace Ch.Elca.Iiop.Cdr {
                 array[i] = ReadBool();
             }
         }
-        
+
         public char ReadChar() {
             // char is a multibyte format with not fixed length characters, but in IDL one char is one byte
             Encoding encoding = CodeSetService.GetCharEncoding(CharSet, false);
@@ -1271,58 +1271,58 @@ namespace Ch.Elca.Iiop.Cdr {
 
         #region the following read methods are subject to byte ordering
 
-        public short ReadShort() {            
+        public short ReadShort() {
             return m_endianOp.ReadShort();
         }
         public void ReadShortArray(short[] array) {
             m_endianOp.ReadShortArray(array);
         }
-        public ushort ReadUShort() {            
+        public ushort ReadUShort() {
             return m_endianOp.ReadUShort();
         }
         public void ReadUShortArray(ushort[] array) {
             m_endianOp.ReadUShortArray(array);
-        }        
-        public int ReadLong() {            
+        }
+        public int ReadLong() {
             return m_endianOp.ReadLong();
         }
         public void ReadLongArray(int[] array) {
             m_endianOp.ReadLongArray(array);
-        }        
-        public uint ReadULong() {            
+        }
+        public uint ReadULong() {
             return m_endianOp.ReadULong();
         }
         public void ReadULongArray(uint[] array) {
             m_endianOp.ReadULongArray(array);
-        }       
-        public long ReadLongLong() {            
+        }
+        public long ReadLongLong() {
             return m_endianOp.ReadLongLong();
         }
         public void ReadLongLongArray(long[] array) {
             m_endianOp.ReadLongLongArray(array);
-        }       
-        public ulong ReadULongLong() {            
+        }
+        public ulong ReadULongLong() {
             return m_endianOp.ReadULongLong();
         }
         public void ReadULongLongArray(ulong[] array) {
             m_endianOp.ReadULongLongArray(array);
-        }        
-        public float ReadFloat() {            
-            return m_endianOp.ReadFloat();    
+        }
+        public float ReadFloat() {
+            return m_endianOp.ReadFloat();
         }
         public void ReadFloatArray(float[] array) {
             m_endianOp.ReadFloatArray(array);
-        }        
-        public double ReadDouble() {            
+        }
+        public double ReadDouble() {
             return m_endianOp.ReadDouble();
         }
         public void ReadDoubleArray(double[] array) {
             m_endianOp.ReadDoubleArray(array);
-        }        
-        public char ReadWChar() {            
+        }
+        public char ReadWChar() {
             return m_endianOp.ReadWChar();
         }
-        public string ReadWString() {            
+        public string ReadWString() {
             return m_endianOp.ReadWString();
         }
 
@@ -1375,13 +1375,13 @@ namespace Ch.Elca.Iiop.Cdr {
         }
 
         public void SkipRest() {
-            if (!m_bytesToFollowSet) { 
+            if (!m_bytesToFollowSet) {
                 // only possible to call skipRest, if nrOfBytes set
                 throw new INTERNAL(976, CompletionStatus.Completed_MayBe);
             }
             try {
                 // disable chunk checking, because skip-rest should ignore the rest of the stream -> don't want chunk cross exceptions
-                m_skipChunkCheck = true;                 
+                m_skipChunkCheck = true;
                 ReadPadding(GetBytesToFollow());
             } finally {
                 m_skipChunkCheck = false;
@@ -1391,7 +1391,7 @@ namespace Ch.Elca.Iiop.Cdr {
         #region ValueTypeHandling
 
         private void UpdateAndCheckChunking(uint nrOfBytesToRead) {
-            // only do something, if chunking is active            
+            // only do something, if chunking is active
             // ignore chunking, if in peeking mode or if chunking check deactivated while in this method
             if ((IsChunkActive()) && !IsPeeking() && !m_skipChunkCheck) {
                 try {
@@ -1407,18 +1407,18 @@ namespace Ch.Elca.Iiop.Cdr {
                             chunkInfo.IsContinuationExpected = false;
                             // set chunk to start after tag and contains tag bytes
                             chunkInfo.SetContinuationLength((uint)tagOrChunkLength);
-                        } else if ((tagOrChunkLength >= MIN_VALUE_TAG) && 
+                        } else if ((tagOrChunkLength >= MIN_VALUE_TAG) &&
                                    (tagOrChunkLength <= MAX_VALUE_TAG)) {
                             // a value type starting here -> current chunk is deactived while nested val type is read
-                            chunkInfo.IsContinuationExpected = true;                    
+                            chunkInfo.IsContinuationExpected = true;
                         }
                     }
                     // for non-valuetypes following, we need to check, if the chunk border is not crossed
                     // embedded valuetypes deactivate the current chunk, therefore no checking
                     if ((!chunkInfo.IsContinuationExpected) &&
-                        (chunkInfo.WillBorderBeCrossed((int)nrOfBytesToRead))) {                              
+                        (chunkInfo.WillBorderBeCrossed((int)nrOfBytesToRead))) {
                         // invlaid serialized value-type, try to read over the chunk border
-                        throw new MARSHAL(901, CompletionStatus.Completed_MayBe);                        
+                        throw new MARSHAL(901, CompletionStatus.Completed_MayBe);
                     }
                 } finally {
                     m_skipChunkCheck = false;
@@ -1426,10 +1426,10 @@ namespace Ch.Elca.Iiop.Cdr {
             }
         }
 
-        /// <summary>check if a chunk is active</summary>        
+        /// <summary>check if a chunk is active</summary>
         private bool IsChunkActive() {
-            if (m_chunkStack.Count == 0) { 
-                return false; 
+            if (m_chunkStack.Count == 0) {
+                return false;
             }
             ChunkInfo info = (ChunkInfo)m_chunkStack.Peek(); // chunks are not nested -> check only topmost
             if (info.IsContinuationExpected || info.IsFinished) { // not active
@@ -1458,15 +1458,15 @@ namespace Ch.Elca.Iiop.Cdr {
                 // store chunk-info
                 m_chunkStack.Push(info);
 
-            }               
+            }
         }
 
         public void EndReadValue(uint valueTag) {
             if (IsChunked(valueTag)) {
-                EndChunk(); 
+                EndChunk();
                 if (m_chunkLevel == 1) {
                     // outermost value: no chunks must be on the stack
-                    if (m_chunkStack.Count > 0) { 
+                    if (m_chunkStack.Count > 0) {
                         // not all chunks closed at the ending of the value-type
                         throw new MARSHAL(911, CompletionStatus.Completed_MayBe);
                     }
@@ -1508,7 +1508,7 @@ namespace Ch.Elca.Iiop.Cdr {
                 // was a nested value, continue chunk if no val type follows ...
                 ChunkInfo continuation = (ChunkInfo)enumerator.Current;
                 continuation.IsContinuationExpected = false; // inner value has ended here, reactivate outer chunk
-                // set chunk start position to current position, length 0 
+                // set chunk start position to current position, length 0
                 // -> either a chunk length or a embedded valuetype must follow now!
                 continuation.SetContinuationLength(0);
             }
@@ -1562,15 +1562,15 @@ namespace Ch.Elca.Iiop.Cdr {
             }
         }
 
-        public StreamPosition ReadIndirectionOffset() {            
+        public StreamPosition ReadIndirectionOffset() {
             int indirectionOffset = ReadLong();
-            if (indirectionOffset >= -4) { 
+            if (indirectionOffset >= -4) {
                 // indirection-offset is not ok: indirectionOffset
                throw new MARSHAL(949, CompletionStatus.Completed_MayBe);
             }
-            // indirection-offset is negative --> therefore add to stream-position; 
+            // indirection-offset is negative --> therefore add to stream-position;
             // -4, because indirectionoffset itself doesn't count --> stream-pos too high
-            StreamPosition result = new StreamPosition(this, (uint)Math.Abs(indirectionOffset) + 4, 
+            StreamPosition result = new StreamPosition(this, (uint)Math.Abs(indirectionOffset) + 4,
                                                        true);
             return result;
         }
@@ -1591,7 +1591,7 @@ namespace Ch.Elca.Iiop.Cdr {
     }
 
 
-    /// <summary>the base class for streams, writing CDR data</summary>    
+    /// <summary>the base class for streams, writing CDR data</summary>
     [CLSCompliant(false)]
     public class CdrOutputStreamImpl : CdrStreamHelper, CdrOutputStream {
         
@@ -1683,7 +1683,7 @@ namespace Ch.Elca.Iiop.Cdr {
         public void WriteOctetArray(byte[] array) {
             WriteBytes(array, 0, array.Length);
         }
-        
+
         public void WriteBool(bool data) {
             if (data) {
                 WriteOctet(1);
@@ -1691,7 +1691,7 @@ namespace Ch.Elca.Iiop.Cdr {
                 WriteOctet(0);
             }
         }
-        
+
         public void WriteBoolArray(bool[] array) {
             for (int i = 0; i < array.Length; i++) {
                 WriteBool(array[i]);
@@ -1701,7 +1701,7 @@ namespace Ch.Elca.Iiop.Cdr {
         public void WriteChar(char data) {
             Encoding encoding = CodeSetService.GetCharEncoding(CharSet, false);
             byte[] toSend = encoding.GetBytes(new char[] { data });
-            if (toSend.Length > 1) { 
+            if (toSend.Length > 1) {
                 // character can't be sent: only one byte representation allowed
                 throw new DATA_CONVERSION(10001, CompletionStatus.Completed_MayBe);
             } // is this correct ?
@@ -1720,19 +1720,19 @@ namespace Ch.Elca.Iiop.Cdr {
         }
         public void WriteUShortArray(ushort[] data) {
             m_endianOp.WriteUShortArray(data);
-        }        
+        }
         public void WriteLong(int data) {
             m_endianOp.WriteLong(data);
         }
         public void WriteLongArray(int[] data) {
             m_endianOp.WriteLongArray(data);
-        }                
+        }
         public void WriteULong(uint data) {
             m_endianOp.WriteULong(data);
         }
         public void WriteULongArray(uint[] data) {
             m_endianOp.WriteULongArray(data);
-        }                        
+        }
         public void WriteLongLong(long data) {
             m_endianOp.WriteLongLong(data);
         }
@@ -1778,8 +1778,8 @@ namespace Ch.Elca.Iiop.Cdr {
         }
 
         public void WriteBytes(byte[] data, int offset, int count) {
-            if (data == null) { 
-                return; 
+            if (data == null) {
+                return;
             }
             BaseStream.Write(data, offset, count);
             IncrementPosition((uint)count);
@@ -1809,7 +1809,7 @@ namespace Ch.Elca.Iiop.Cdr {
             } else {
                 // prepare to add repId to indirection table
                 ForceWriteAlign(Aligns.Align4);
-                StreamPosition indirPos = new StreamPosition(this); 
+                StreamPosition indirPos = new StreamPosition(this);
                 WriteString(val);
 
                 IndirectionInfo indirInfo = new IndirectionInfo(indirPos.GlobalPosition,
@@ -1821,7 +1821,7 @@ namespace Ch.Elca.Iiop.Cdr {
 
         public void WriteIndirection(object forVal) {
             object indirInfo = GetIndirectionInfoFor(forVal);
-            if (indirInfo != null) {                
+            if (indirInfo != null) {
                 WriteULong(INDIRECTION_TAG);
                 // remark: indirection offset must be calculated after indir tag has been written!
                 int indirOffset = (int)CalculateIndirectionOffset((IndirectionInfo)indirInfo);
@@ -1850,16 +1850,16 @@ namespace Ch.Elca.Iiop.Cdr {
         }
         
         protected virtual bool IsAllowedToStore(object val, IndirectionInfo indirInfo) {
-            return GetIndirectionInfoFor(val) == null;            
+            return GetIndirectionInfoFor(val) == null;
         }
         
         public virtual IndirectionInfo GetIndirectionInfoFor(object forVal) {
             return m_indirections.GetIndirectionInfoFor(forVal);
-        }                
+        }
         
         public virtual long CalculateIndirectionOffset(IndirectionInfo indirInfo) {
             return -1 * (long)(GetPosition() - indirInfo.StreamPos);
-        }        
+        }
         
         internal Exception CreateWriteInexistentIndirectionException() {
             return new MARSHAL(958, CompletionStatus.Completed_MayBe);
@@ -1890,7 +1890,7 @@ namespace Ch.Elca.Iiop.Cdr {
         /// </summary>
         /// <remarks>should only be called from inside CdrInputStreamImpl</remarks>
         internal CdrEncapsulationInputStream(CdrInputStream stream,
-                                             IndirectionStoreIndirKey indirStore) : base(indirStore) {            
+                                             IndirectionStoreIndirKey indirStore) : base(indirStore) {
             uint encapsLength = stream.ReadULong();
             // read the encapsulation from the input stream
             StreamPosition streamPos = new StreamPosition(stream); // also include encaps length in global offset, because not in GetPosition() considered
@@ -1923,7 +1923,7 @@ namespace Ch.Elca.Iiop.Cdr {
             // now set the stream
             SetStream(baseStream);
             byte flags = ReadOctet(); // read the flags out of the encapsulation
-            ConfigStream(flags, version); 
+            ConfigStream(flags, version);
             SetMaxLength(((uint)data.Length)-1); // flags are already read --> minus 1
         }
         
@@ -1966,21 +1966,21 @@ namespace Ch.Elca.Iiop.Cdr {
             this(GiopHeader.GetDefaultHeaderFlagsForPlatform(), version, null) {
         }
         
-        public CdrEncapsulationOutputStream(CdrOutputStream targetStream) : 
+        public CdrEncapsulationOutputStream(CdrOutputStream targetStream) :
             this(targetStream.Flags, new GiopVersion(1, 2), targetStream) {
         }
 
-        private CdrEncapsulationOutputStream(byte flags, GiopVersion version, 
+        private CdrEncapsulationOutputStream(byte flags, GiopVersion version,
                                              CdrOutputStream targetStream) :
             base(new MemoryStream(), flags, version) {
             m_targetStream = targetStream;
             if (targetStream != null) {
                 // store target position:
                 m_targetPosition = targetStream.GetPosition();
-                // encapsulation is stored 4 aligned, 
+                // encapsulation is stored 4 aligned,
                 // 4 bytes length following before encap content start
-                m_indirectionOffsetPosition = 
-                    targetStream.GetGlobalOffset() + 
+                m_indirectionOffsetPosition =
+                    targetStream.GetGlobalOffset() +
                     targetStream.GetNextAlignedPosition(Aligns.Align4) + 4;
             }
             WriteOctet(flags); // the flag is the first byte in the encapsulation --> has influence on alignement
@@ -2004,7 +2004,7 @@ namespace Ch.Elca.Iiop.Cdr {
         
         /// <summary>this method is used, if encapsulation is targeted for a specific stream</summary>
         public void WriteToTargetStream() {
-            if ((m_targetStream != null) && 
+            if ((m_targetStream != null) &&
                 (m_targetStream.GetPosition() == m_targetPosition)) {
                 WriteToStreamInternal(m_targetStream);
             } else {
@@ -2030,7 +2030,7 @@ namespace Ch.Elca.Iiop.Cdr {
                                                     IndirectionUsage indirUsage) {
             bool result = base.IsPreviouslyMarshalled(val, indirType, indirUsage);
             if (m_targetStream != null) {
-                result = result || 
+                result = result ||
                          m_targetStream.IsPreviouslyMarshalled(val, indirType, indirUsage);
             }
             return result;
@@ -2047,7 +2047,7 @@ namespace Ch.Elca.Iiop.Cdr {
                 result = m_targetStream.GetIndirectionInfoFor(forVal);
             }
             return result;
-        }                
+        }
         
         public override long CalculateIndirectionOffset(IndirectionInfo indirInfo) {
             return -1 * (long)(GetGlobalOffset() + GetPosition() - indirInfo.StreamPos);
@@ -2055,7 +2055,7 @@ namespace Ch.Elca.Iiop.Cdr {
         
         /// <summary>
         /// returns the encapsulation sequence data of this encapsulation as a byte[].
-        /// </summary>        
+        /// </summary>
         /// <remarks>not included is the length of the encapsulated data; it starts with the
         /// endian flag.</remarks>
         public byte[] GetEncapsulationData() {
@@ -2064,6 +2064,6 @@ namespace Ch.Elca.Iiop.Cdr {
         }
 
         #endregion IMethods
-    }            
+    }
 
 }
