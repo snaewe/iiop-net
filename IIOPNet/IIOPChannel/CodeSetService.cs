@@ -203,7 +203,7 @@ namespace Ch.Elca.Iiop.Services {
                         }
                     }
                 }
-                return s_defaultWCharSet;                
+                return s_defaultWCharSet;
             }
         }
         

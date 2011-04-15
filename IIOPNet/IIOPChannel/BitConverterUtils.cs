@@ -244,7 +244,7 @@ namespace Ch.Elca.Iiop.Cdr {
                         }
                         break;
                     default: {
-	                    throw new NotImplementedException();
+                        throw new NotImplementedException();
                             // byte* s = (byte*)src;
                             // byte* d = (byte*)dst;
                             //  

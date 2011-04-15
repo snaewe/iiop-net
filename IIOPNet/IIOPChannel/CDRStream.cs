@@ -782,9 +782,9 @@ namespace Ch.Elca.Iiop.Cdr {
         private uint m_index = 0;
 
         // default for this is latin1
-        private int m_charSet = Ch.Elca.Iiop.Services.CodeSetService.DefaultCharSet;
+        private int m_charSet = (int)Ch.Elca.Iiop.Services.CharSet.LATIN1;
         // no default for this available
-        private int m_wcharSet = Ch.Elca.Iiop.Services.CodeSetService.DefaultWCharSet;
+        private int m_wcharSet = WCHARSET_NOT_SET;
         
         #endregion IFields
         #region IConstructors
