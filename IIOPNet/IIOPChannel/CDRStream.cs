@@ -381,42 +381,30 @@ namespace Ch.Elca.Iiop.Cdr {
         
         /// <summary>reads a short from the stream</summary>
         short ReadShort();
-        /// <summary>reads multiple short elements from the stream</summary>
-        void ReadShortArray(short[] array);
         /// <summary>reads an unsigned short from the stream</summary>
         ushort ReadUShort();
-        /// <summary>reads multiple ushort elements from the stream</summary>
-        void ReadUShortArray(ushort[] array);
         /// <summary>reads a long from the stream</summary>
         int ReadLong();
-        /// <summary>reads multiple long elements from the stream</summary>
-        void ReadLongArray(int[] array);
         /// <summary>reads an unsigned long from the stream</summary>
         uint ReadULong();
-        /// <summary>reads multiple ulong elements from the stream</summary>
-        void ReadULongArray(uint[] array);
         /// <summary>reads a long long from the stream</summary>
         long ReadLongLong();
-        /// <summary>reads multiple long long elements from the stream</summary>
-        void ReadLongLongArray(long[] array);
         /// <summary>reads an unsigned long long from the stream</summary>
         ulong ReadULongLong();
-        /// <summary>reads multiple ulong long elements from the stream</summary>
-        void ReadULongLongArray(ulong[] array);
         /// <summary>reads a float from the stream</summary>
         float ReadFloat();
-        /// <summary>reads multiple float elements from the stream</summary>
-        void ReadFloatArray(float[] array);
         /// <summary>reads a double from the stream</summary>
         double ReadDouble();
-        /// <summary>reads multiple double elements from the stream</summary>
-        void ReadDoubleArray(double[] array);
         /// <summary>reads a wide character from the stream</summary>
         /// <remarks>this is endian dependant, in contrast to char: char is an array of byte, wchar is one fixed size mulitbyte value</remarks>
         char ReadWChar();
         /// <summary>reads a wide string from the stream</summary>
         /// <remarks>this is endian depandant, in contrast to string</remarks>
         string ReadWString();
+        /// <summary>reads multiple elements of primitive type to array</summary>
+        /// <param name="arrayType">Type of array</param>
+        /// <param name="elemCount">Number of elements to read</param>
+        T[] ReadPrimitiveTypeArray<T>(int elemCount);
         
         #endregion IMethods
 
@@ -433,12 +421,8 @@ namespace Ch.Elca.Iiop.Cdr {
         
         /// <summary>reads an octet from the stream</summary>
         byte ReadOctet();
-        /// <summary>reads multiple octets from the stream</summary>
-        void ReadOctetArray(byte[] array);
         /// <summary>reads a boolean from the stream</summary>
         bool ReadBool();
-        /// <summary>reads multiple bools from the stream</summary>
-        void ReadBoolArray(bool[] array);
         /// <summary>reads a character from the stream</summary>
         char ReadChar();
         /// <summary>reads a string from the stream</summary>
@@ -538,36 +522,25 @@ namespace Ch.Elca.Iiop.Cdr {
         
         /// <summary>writes a short to the stream</summary>
         void WriteShort(short data);
-        /// <summary>writes multiple short elements to the stream</summary>
-        void WriteShortArray(short[] array);
         /// <summary>writes an unsigned short to the stream</summary>
         void WriteUShort(ushort data);
-        /// <summary>writes multiple ushort elements to the stream</summary>
-        void WriteUShortArray(ushort[] array);
         /// <summary>writes a long to the stream</summary>
         void WriteLong(int data);
-        /// <summary>writes multiple long elements to the stream</summary>
-        void WriteLongArray(int[] array);
         /// <summary>writes an unsigned long to the stream</summary>
         void WriteULong(uint data);
-        /// <summary>writes multiple ulong elements to the stream</summary>
-        void WriteULongArray(uint[] array);
         /// <summary>writes a long long to the stream</summary>
         void WriteLongLong(long data);
-        /// <summary>writes multiple long long elements to the stream</summary>
-        void WriteLongLongArray(long[] array);
         /// <summary>writes an unsigned long long to the stream</summary>
         void WriteULongLong(ulong data);
-        /// <summary>writes multiple ulong long elements to the stream</summary>
-        void WriteULongLongArray(ulong[] array);
         /// <summary>writes a float to the stream</summary>
         void WriteFloat(float data);
-        /// <summary>writes multiple float elements to the stream</summary>
-        void WriteFloatArray(float[] array);
         /// <summary>writes a double to the stream</summary>
         void WriteDouble(double data);
-        /// <summary>writes multiple double elements to the stream</summary>
-        void WriteDoubleArray(double[] array);
+        
+        /// <summary>writes multiple elements of primitive type</summary>
+        /// <param name="data">array of elements to write to the stream</param>
+        void WritePrimitiveTypeArray<T>(T[] data);
+        
         /// <summary>writes a wide character to the stream</summary>
         /// <remarks>
         /// this is endian depdendant in contrast to char:
@@ -592,12 +565,8 @@ namespace Ch.Elca.Iiop.Cdr {
 
         /// <summary>writes an octet to the stream</summary>
         void WriteOctet(byte data);
-        /// <summary>writes multiple octets to the stream</summary>
-        void WriteOctetArray(byte[] data);
         /// <summary>writes a boolean to the stream</summary>
         void WriteBool(bool data);
-        /// <summary>writes multiple bools to the stream</summary>
-        void WriteBoolArray(bool[] array);
         /// <summary>writes a character to the stream</summary>
         void WriteChar(char data);
         /// <summary>writes a string to the stream</summary>
@@ -1236,10 +1205,6 @@ namespace Ch.Elca.Iiop.Cdr {
             IncrementPosition(1);
             return read;
         }
-        
-        public void ReadOctetArray(byte[] array) {
-            ReadBytes(array, 0, array.Length);
-        }
 
         public bool ReadBool() {
             byte read = ReadOctet();
@@ -1255,12 +1220,6 @@ namespace Ch.Elca.Iiop.Cdr {
             }
         }
         
-        public void ReadBoolArray(bool[] array) {
-            for (int i = 0; i < array.Length; i++) {
-                array[i] = ReadBool();
-            }
-        }
-
         public char ReadChar() {
             // char is a multibyte format with not fixed length characters, but in IDL one char is one byte
             Encoding encoding = CodeSetService.GetCharEncoding(CharSet, false);
@@ -1274,50 +1233,26 @@ namespace Ch.Elca.Iiop.Cdr {
         public short ReadShort() {
             return m_endianOp.ReadShort();
         }
-        public void ReadShortArray(short[] array) {
-            m_endianOp.ReadShortArray(array);
-        }
         public ushort ReadUShort() {
             return m_endianOp.ReadUShort();
-        }
-        public void ReadUShortArray(ushort[] array) {
-            m_endianOp.ReadUShortArray(array);
         }
         public int ReadLong() {
             return m_endianOp.ReadLong();
         }
-        public void ReadLongArray(int[] array) {
-            m_endianOp.ReadLongArray(array);
-        }
         public uint ReadULong() {
             return m_endianOp.ReadULong();
-        }
-        public void ReadULongArray(uint[] array) {
-            m_endianOp.ReadULongArray(array);
         }
         public long ReadLongLong() {
             return m_endianOp.ReadLongLong();
         }
-        public void ReadLongLongArray(long[] array) {
-            m_endianOp.ReadLongLongArray(array);
-        }
         public ulong ReadULongLong() {
             return m_endianOp.ReadULongLong();
-        }
-        public void ReadULongLongArray(ulong[] array) {
-            m_endianOp.ReadULongLongArray(array);
         }
         public float ReadFloat() {
             return m_endianOp.ReadFloat();
         }
-        public void ReadFloatArray(float[] array) {
-            m_endianOp.ReadFloatArray(array);
-        }
         public double ReadDouble() {
             return m_endianOp.ReadDouble();
-        }
-        public void ReadDoubleArray(double[] array) {
-            m_endianOp.ReadDoubleArray(array);
         }
         public char ReadWChar() {
             return m_endianOp.ReadWChar();
@@ -1325,7 +1260,10 @@ namespace Ch.Elca.Iiop.Cdr {
         public string ReadWString() {
             return m_endianOp.ReadWString();
         }
-
+        public T[] ReadPrimitiveTypeArray<T>(int elemCount) {
+            return m_endianOp.ReadPrimitiveTypeArray<T>(elemCount);
+        }
+        
         #endregion the following read methods are subject to byte ordering
 
         public string ReadString() {
@@ -1680,21 +1618,11 @@ namespace Ch.Elca.Iiop.Cdr {
             IncrementPosition(1);
         }
 
-        public void WriteOctetArray(byte[] array) {
-            WriteBytes(array, 0, array.Length);
-        }
-
         public void WriteBool(bool data) {
             if (data) {
                 WriteOctet(1);
             } else {
                 WriteOctet(0);
-            }
-        }
-
-        public void WriteBoolArray(bool[] array) {
-            for (int i = 0; i < array.Length; i++) {
-                WriteBool(array[i]);
             }
         }
 
@@ -1712,38 +1640,20 @@ namespace Ch.Elca.Iiop.Cdr {
         public void WriteShort(short data) {
             m_endianOp.WriteShort(data);
         }
-        public void WriteShortArray(short[] data) {
-            m_endianOp.WriteShortArray(data);
-        }
         public void WriteUShort(ushort data) {
             m_endianOp.WriteUShort(data);
-        }
-        public void WriteUShortArray(ushort[] data) {
-            m_endianOp.WriteUShortArray(data);
         }
         public void WriteLong(int data) {
             m_endianOp.WriteLong(data);
         }
-        public void WriteLongArray(int[] data) {
-            m_endianOp.WriteLongArray(data);
-        }
         public void WriteULong(uint data) {
             m_endianOp.WriteULong(data);
-        }
-        public void WriteULongArray(uint[] data) {
-            m_endianOp.WriteULongArray(data);
         }
         public void WriteLongLong(long data) {
             m_endianOp.WriteLongLong(data);
         }
-        public void WriteLongLongArray(long[] data) {
-            m_endianOp.WriteLongLongArray(data);
-        }
         public void WriteULongLong(ulong data) {
             m_endianOp.WriteULongLong(data);
-        }
-        public void WriteULongLongArray(ulong[] data) {
-            m_endianOp.WriteULongLongArray(data);
         }
         public void WriteFloat(float data) {
             m_endianOp.WriteFloat(data);
@@ -1751,11 +1661,8 @@ namespace Ch.Elca.Iiop.Cdr {
         public void WriteDouble(double data) {
             m_endianOp.WriteDouble(data);
         }
-        public void WriteDoubleArray(double[] array) {
-            m_endianOp.WriteDoubleArray(array);
-        }
-        public void WriteFloatArray(float[] array) {
-            m_endianOp.WriteFloatArray(array);
+        public void WritePrimitiveTypeArray<T>(T[] data) {
+            m_endianOp.WritePrimitiveTypeArray(data);
         }
         public void WriteWChar(char data) {
             m_endianOp.WriteWChar(data);

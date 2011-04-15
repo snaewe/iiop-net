@@ -380,15 +380,15 @@ namespace Ch.Elca.Iiop.Benchmarks {
             tc.ExecuteTest(false, "(int_sq)int_sq", new TestProcedure(tc.CallIntSeqEcho));
             tc.ExecuteTest(false, "(EnumA)EnumA", new TestProcedure(tc.CallEnumEcho));
             tc.ExecuteTest(false, "(IdlStructA)IdlStructA", new TestProcedure(tc.CallIdlStructEcho));
-            tc.ExecuteTest(false, "(IdlStruct[])IdlStruct[]", new TestProcedure(tc.CallIdlStructSeqEcho), 10);
-            tc.ExecuteTest(false, "(any[])any[]", new TestProcedure(tc.CallIdlAnySeqEcho), 10);
+            tc.ExecuteTest(false, "(IdlStruct[])IdlStruct[]", new TestProcedure(tc.CallIdlStructSeqEcho), 100);
+            tc.ExecuteTest(false, "(any[])any[]", new TestProcedure(tc.CallIdlAnySeqEcho), 100);
             tc.ExecuteTest(false, "(enum_sq)enum_sq", new TestProcedure(tc.CallEnumSeqEcho));
             tc.ExecuteTest(false, "(int_ar2d)int_ar2d", new TestProcedure(tc.CallIdlArrayEcho));
             
-            tc.ExecuteTest(false, "(sng_seq)sng_seq", new TestProcedure(tc.CallBigSingleSeqEcho), 100);
-            tc.ExecuteTest(false, "(sng_ar2d)sng_ar2d", new TestProcedure(tc.CallIdlArrayBigSingleEcho), 100);
-            tc.ExecuteTest(false, "(int_sq)int_sq", new TestProcedure(tc.CallBigIntSeqEcho), 100);
-            tc.ExecuteTest(false, "(byte_sq)byte_sq", new TestProcedure(tc.CallIdlArrayBigByteEcho), 100);
+            tc.ExecuteTest(false, "(sng_seq)sng_seq", new TestProcedure(tc.CallBigSingleSeqEcho), 1000);
+            tc.ExecuteTest(false, "(sng_ar2d)sng_ar2d", new TestProcedure(tc.CallIdlArrayBigSingleEcho), 1000);
+            tc.ExecuteTest(false, "(int_sq)int_sq", new TestProcedure(tc.CallBigIntSeqEcho), 1000);
+            tc.ExecuteTest(false, "(byte_sq)byte_sq", new TestProcedure(tc.CallIdlArrayBigByteEcho), 1000);
 
             tc.TearDownEnvironment();
 

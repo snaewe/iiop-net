@@ -30,17 +30,17 @@ $(bin)$(CLSFORIDL): $(IDL)$(ServiceIDLFileName)
     $(IDLTOCLSCOMP) -o ..\$(bin) client $(ServiceIDLFileName)
     cd ..
 
-        
+
 build-client: $(bin)IIOPChannel.dll $(bin)$(CLSFORIDL) *.cs
     $(CSC) $(CSFLAGS) /t:exe /r:$(bin)$(CLSFORIDL) /r:$(bin)IIOPChannel.dll /out:bin\ClientTest.exe TestClient.cs ValueTypeImpls.cs
 
 start-client:
     @echo "Benchmark .NET <-> .NET"
-    $(bin)ClientTest.exe
+    $(bin)ClientTest.exe 1000
     
     
     
-clean:    
+clean:
     if exist $(bin) rmdir /s /q $(bin)
     if exist $(IDL) rmdir /s /q $(IDL)
 

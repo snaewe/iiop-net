@@ -1322,6 +1322,28 @@ namespace Ch.Elca.Iiop.IntegrationTests {
             Assert.AreEqual(argVal, result.Getval0(), "wrong union val returned");
         }
 
+
+        /// regression for bug 2355283
+        [Test]
+        public void TestEmptySeqAlign() {
+            int a = 0;
+            long[] b, c;
+            string[] d;
+
+            m_testIdlTypesService.TestEmptySeqAlignment(ref a, out b, out c, out d);
+            Assert.AreEqual(42, a, "Wrong a val returned");
+            Assert.AreEqual(0, b.Length, "Wrong array b val returned");
+            Assert.AreEqual(0, c.Length, "Wrong array c val returned");
+            Assert.AreEqual(0, d.Length, "Wrong array d val returned");
+
+            a = 1;
+            m_testIdlTypesService.TestEmptySeqAlignment(ref a, out b, out c, out d);
+            Assert.AreEqual(42, a, "Wrong a val returned");
+            Assert.AreEqual(1, b.Length, "Wrong array b val returned");
+            Assert.AreEqual(1, c.Length, "Wrong array c val returned");
+            Assert.AreEqual(1, d.Length, "Wrong array d val returned");
+        }
+
         [Test]
         public void TestDetectIncompatibleTargetIf() {
             // get the reference to the test-service

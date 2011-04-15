@@ -39,7 +39,12 @@ module IntegrationTests {
 
         TestUnionLD EchoLDUnion(in TestUnionLD arg);
 
-        ValidListSeq EchoBoxedSeq(in ValidListSeq arg);        
+        ValidListSeq EchoBoxedSeq(in ValidListSeq arg);
+
+        // Regression for bug #2355283
+        typedef sequence<long long> LongLongSeq;
+        typedef sequence<string> StringSeq;
+        void TestEmptySeqAlignment(inout long num, out LongLongSeq A, out LongLongSeq B, out StringSeq C);
 
     };
 

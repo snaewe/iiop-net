@@ -236,8 +236,7 @@ namespace Ch.Elca.Iiop.Util {
             }
 
             int startIndex = 0;
-            if (!IsSystemGeneratedId(objectUri))
-            {
+            if (!IsSystemGeneratedId(objectUri)) {
                 // remove appdomain-id in front of uri which is automatically appended
                 // (see comment for RemotingServices.SetObjectUriForMarshal);
                 // to support user-id policy, this appdomain-guid must be removed!

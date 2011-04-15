@@ -794,6 +794,20 @@ namespace Ch.Elca.Iiop.IntegrationTests {
         public TestUnionLD EchoLDUnion(TestUnionLD arg) {
             return arg;
         }
+
+        public void TestEmptySeqAlignment(ref int a, out long[] b, out long[] c, out string[] d) {
+            b = new long[a];
+            c = new long[a];
+            d = new string[a];
+
+            for(int i = 0; i < a; ++i) {
+                b[i] = 0x797065656c536d49l;
+                c[i] = 0x002da715A900dDa7l;
+                d[i] = i.ToString();
+            }
+
+            a = 42;
+        }
         
         public override object InitializeLifetimeService() {
             // live forever
@@ -801,7 +815,6 @@ namespace Ch.Elca.Iiop.IntegrationTests {
         }
         
     }
-
 
 
     [SupportedInterface(typeof(TestOneWayService))]
@@ -834,7 +847,5 @@ namespace Ch.Elca.Iiop.IntegrationTests {
         }
         
     }
-
-
 
 }

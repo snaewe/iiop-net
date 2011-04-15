@@ -12,6 +12,7 @@ key:
     set KEY=$(MAKEDIR)\Key.snk
 
 build-base: key
+#    set CSFLAGS=/o /d:USE_UNSAFE_CODE /unsafe /keyfile:"%KEY%"
     set CSFLAGS=/o /keyfile:"%KEY%"
     cd IIOPChannel
     $(MAKE) build
@@ -27,6 +28,7 @@ build-base: key
     cd ..
 
 build-base-debug:
+#    set CSFLAGS=/debug+ /d:USE_UNSAFE_CODE /unsafe /d:DEBUG /d:TRACE /d:DEBUG_LOGFILE
     set CSFLAGS=/debug+ /d:DEBUG /d:TRACE /d:DEBUG_LOGFILE
     cd IIOPChannel
     $(MAKE) build
