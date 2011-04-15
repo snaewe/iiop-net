@@ -69,6 +69,7 @@ build-tests-ssl: build-tests
     cd ..
 
 test:
+#    set CSFLAGS=/o /d:USE_UNSAFE_CODE /unsafe
     cd IIOPChannel
     $(MAKE) test
     cd ..
