@@ -64,6 +64,7 @@
     <Compile Include="AssemblyCache.cs" />
     <Compile Include="AssemblyInfo.cs" />
     <Compile Include="AttributeExtCollection.cs" />
+    <Compile Include="BitConverterUtils.cs" />
     <Compile Include="BoxedArrayHelper.cs" />
     <Compile Include="BoxedValue.cs" />
     <Compile Include="BoxedValueTypeGenerator.cs" />
@@ -139,7 +140,6 @@
     <Compile Include="TestUtil.cs" />
     <Compile Include="CdrStreamTests.cs" />
     <Compile Include="IORUtil.cs" />
-    <Compile Include="SystemWireBitConverter.cs" />
     <Compile Include="SerializationOrderFieldinfoComparer.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
