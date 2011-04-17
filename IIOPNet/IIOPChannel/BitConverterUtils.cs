@@ -254,7 +254,6 @@ namespace Ch.Elca.Iiop.Cdr {
                             //     d += elSize;
                             // }
                         }
-                        break;
                 }
             }
         }
