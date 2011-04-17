@@ -75,19 +75,13 @@ namespace Ch.Elca.Iiop.Tests
         }
 
         [Test]
+        [ExpectedException(typeof(BAD_PARAM))]
         public void TestReadWStringCodeSetNotSet()
         {
-            try
-            {
-                byte[] testData = new byte[] { 0, 0, 0, 8, 0, 65, 0, 66, 0, 67, 0, 68 };
-                CdrInputStream inputStream = PrepareStream(testData);
-                string result = inputStream.ReadWString();
-                Assert.Fail("no exception, although no wchar code set set");
-            }
-            catch (BAD_PARAM)
-            {
-                // ok, expected
-            }
+            byte[] testData = new byte[] { 0, 0, 0, 8, 0, 65, 0, 66, 0, 67, 0, 68 };
+            CdrInputStream inputStream = PrepareStream(testData);
+            string result = inputStream.ReadWString();
+            Assert.Fail("no exception, although no wchar code set set");
         }
 
     }
@@ -141,23 +135,19 @@ namespace Ch.Elca.Iiop.Tests
         }
 
         [Test]
+        [ExpectedException(typeof(BAD_PARAM))]
         public void TestWriteWStringCodeSetNotSet()
         {
-            try
+
+            byte[] expectedSerData = new byte[] { 0, 0, 0, 8, 0, 65, 0, 66, 0, 67, 0, 68 };
+            string testData = "ABCD";
+            using (MemoryStream outBase = new MemoryStream())
             {
-                byte[] expectedSerData = new byte[] { 0, 0, 0, 8, 0, 65, 0, 66, 0, 67, 0, 68 };
-                string testData = "ABCD";
-                using (MemoryStream outBase = new MemoryStream())
-                {
-                    CdrOutputStream outputStream = PrepareStream(outBase);
-                    outputStream.WriteWString(testData);
-                    Assert.Fail("no exception, although no wchar code set set");
-                }
+                CdrOutputStream outputStream = PrepareStream(outBase);
+                outputStream.WriteWString(testData);
+                Assert.Fail("no exception, although no wchar code set set");
             }
-            catch (BAD_PARAM)
-            {
-                // ok, expected
-            }
+
         }
 
     }
