@@ -48,7 +48,8 @@ using omg.org.IOP;
 using System.IO;
 #endif
 
-namespace Ch.Elca.Iiop {
+namespace Ch.Elca.Iiop
+{
 
     /// <summary>
     /// This class represents a .NET Remoting channel for IIOP.
@@ -57,7 +58,8 @@ namespace Ch.Elca.Iiop {
     /// It delegates most of the work to the IiopChannelSender, 
     /// IiopChannelReceiver classes
     /// </remarks>
-    public class IiopChannel : IChannelSender, IChannelReceiver {
+    public class IiopChannel : IChannelSender, IChannelReceiver
+    {
 
         #region Constants
 
@@ -100,52 +102,61 @@ namespace Ch.Elca.Iiop {
         #endregion IFields
         #region IConstructors
 
-        public IiopChannel() {
+        public IiopChannel()
+        {
             m_clientChannel = new IiopClientChannel();
             // because no port is specified, server part is not used
         }
 
-        public IiopChannel(int port) : this() {
+        public IiopChannel(int port)
+            : this()
+        {
             m_serverChannel = new IiopServerChannel(port);
         }
 
-        public IiopChannel(IDictionary properties) : this(properties, 
-                                                          new IiopClientFormatterSinkProvider(),
-                                                          new IiopServerFormatterSinkProvider()) {
+        public IiopChannel(IDictionary properties)
+            : this(properties,
+                   new IiopClientFormatterSinkProvider(),
+                   new IiopServerFormatterSinkProvider())
+        {
         }
 
         /// <summary>this constructor is used by configuration</summary>
-        public IiopChannel(IDictionary properties, 
-                           IClientChannelSinkProvider clientSinkProvider, 
-                           IServerChannelSinkProvider serverSinkProvider) {
+        public IiopChannel(IDictionary properties,
+                           IClientChannelSinkProvider clientSinkProvider,
+                           IServerChannelSinkProvider serverSinkProvider)
+        {
             IDictionary clientProp = new Hashtable();
             IDictionary serverProp = new Hashtable();
             bool isServer = false;
             bool isBidir = false;
             // prepare properties for client channel and server channel
-            if (properties != null) {
-                foreach (DictionaryEntry entry in properties) {
-                    switch ((string)entry.Key) {
-                        case CHANNEL_NAME_KEY: 
-                            m_channelName = (string)entry.Value; 
+            if (properties != null)
+            {
+                foreach (DictionaryEntry entry in properties)
+                {
+                    switch ((string)entry.Key)
+                    {
+                        case CHANNEL_NAME_KEY:
+                            m_channelName = (string)entry.Value;
                             clientProp[CHANNEL_NAME_KEY] = m_channelName;
                             serverProp[CHANNEL_NAME_KEY] = m_channelName;
                             break;
-                        case PRIORITY_KEY: 
-                            m_channelPriority = Convert.ToInt32(entry.Value); 
+                        case PRIORITY_KEY:
+                            m_channelPriority = Convert.ToInt32(entry.Value);
                             clientProp[PRIORITY_KEY] = m_channelPriority;
                             serverProp[PRIORITY_KEY] = m_channelPriority;
                             break;
                         case ENDIAN_KEY:
                             clientProp[ENDIAN_KEY] = entry.Value;
-                            serverProp[ENDIAN_KEY] = entry.Value; 
+                            serverProp[ENDIAN_KEY] = entry.Value;
                             break;
-                        case IiopServerChannel.PORT_KEY: 
-                            serverProp[IiopServerChannel.PORT_KEY] = Convert.ToInt32(entry.Value); 
+                        case IiopServerChannel.PORT_KEY:
+                            serverProp[IiopServerChannel.PORT_KEY] = Convert.ToInt32(entry.Value);
                             isServer = true;
                             break;
-                        case IiopServerChannel.USE_IPADDRESS_KEY: 
-                            serverProp[IiopServerChannel.USE_IPADDRESS_KEY] = Convert.ToBoolean(entry.Value); 
+                        case IiopServerChannel.USE_IPADDRESS_KEY:
+                            serverProp[IiopServerChannel.USE_IPADDRESS_KEY] = Convert.ToBoolean(entry.Value);
                             break;
                         case IiopServerChannel.BIND_TO_KEY:
                             serverProp[IiopServerChannel.BIND_TO_KEY] = entry.Value; // don't convert here, because conversion is also done in server channel constructor
@@ -193,7 +204,7 @@ namespace Ch.Elca.Iiop {
                             isBidir = Convert.ToBoolean(entry.Value);
                             clientProp[BIDIR_KEY] = isBidir;
                             break;
-                        default: 
+                        default:
                             Debug.WriteLine("unknown property found for IIOP channel: " +
                                             entry.Key);
                             // pass non-default options further on to the client and server-channel for handling by the e.g. transport-factory
@@ -204,9 +215,11 @@ namespace Ch.Elca.Iiop {
                 }
             }
             m_clientChannel = new IiopClientChannel(clientProp, clientSinkProvider);
-            if (isServer) { 
-                if (isBidir) {
-                    serverProp[IiopServerChannel.BIDIR_CONNECTION_MANAGER] = 
+            if (isServer)
+            {
+                if (isBidir)
+                {
+                    serverProp[IiopServerChannel.BIDIR_CONNECTION_MANAGER] =
                         m_clientChannel.ConnectionManager;
                 }
                 // only create server if port is specified
@@ -217,23 +230,32 @@ namespace Ch.Elca.Iiop {
         #endregion IConstructors
         #region IProperties
 
-        public string ChannelName {
-            get { 
+        public string ChannelName
+        {
+            get
+            {
                 return m_channelName;
             }
         }
 
-        public int ChannelPriority {
-            get { 
-                return m_channelPriority; 
+        public int ChannelPriority
+        {
+            get
+            {
+                return m_channelPriority;
             }
         }
 
-        public object ChannelData {
-            get {
-                if (m_serverChannel != null) {
+        public object ChannelData
+        {
+            get
+            {
+                if (m_serverChannel != null)
+                {
                     return m_serverChannel.ChannelData;
-                } else {
+                }
+                else
+                {
                     return null;
                 }
             }
@@ -242,9 +264,10 @@ namespace Ch.Elca.Iiop {
         #endregion IProperties
         #region IMethods
         #region Implementation of IChannelSender
-        public IMessageSink CreateMessageSink(string url, 
-                                              object remoteChannelData, 
-                                              out string objectURI) {
+        public IMessageSink CreateMessageSink(string url,
+                                              object remoteChannelData,
+                                              out string objectURI)
+        {
             Debug.WriteLine("create message sink for client channel");
             return m_clientChannel.CreateMessageSink(url, remoteChannelData,
                                                      out objectURI);
@@ -252,7 +275,8 @@ namespace Ch.Elca.Iiop {
 
         #endregion Implementation of IChannelSender
         #region Implementation of IChannel
-        public string Parse(string url, out string objectURI) {
+        public string Parse(string url, out string objectURI)
+        {
             Debug.WriteLine("called parse with url: " + url);
             return m_clientChannel.Parse(url, out objectURI);
         }
@@ -260,22 +284,30 @@ namespace Ch.Elca.Iiop {
         #endregion Implementation of IChannel
         #region Implementation of IChannelReceiver
 
-        public void StartListening(object data) {
-            if (m_serverChannel != null) {
+        public void StartListening(object data)
+        {
+            if (m_serverChannel != null)
+            {
                 m_serverChannel.StartListening(data);
             }
         }
 
-        public void StopListening(object data) {
-            if (m_serverChannel != null) {
+        public void StopListening(object data)
+        {
+            if (m_serverChannel != null)
+            {
                 m_serverChannel.StopListening(data);
             }
         }
 
-        public string[] GetUrlsForUri(string objectURI) {
-            if (m_serverChannel != null) {
+        public string[] GetUrlsForUri(string objectURI)
+        {
+            if (m_serverChannel != null)
+            {
                 return m_serverChannel.GetUrlsForUri(objectURI);
-            } else {
+            }
+            else
+            {
                 return null;
             }
         }
@@ -289,7 +321,8 @@ namespace Ch.Elca.Iiop {
     /// <summary>
     /// class used to configure the retry mechanism.
     /// </summary>
-    internal class RetryConfig {
+    internal class RetryConfig
+    {
 
         #region IFields
 
@@ -299,7 +332,8 @@ namespace Ch.Elca.Iiop {
         #endregion IFields
         #region IConstructors
 
-        internal RetryConfig(int maxNumberOfRetries, int retryDelay) {
+        internal RetryConfig(int maxNumberOfRetries, int retryDelay)
+        {
             m_maxNumberOfRetries = maxNumberOfRetries;
             m_retryDelay = TimeSpan.FromMilliseconds(retryDelay);
         }
@@ -307,14 +341,18 @@ namespace Ch.Elca.Iiop {
         #endregion IConstructors
         #region IProperties
 
-        internal int MaxNumberOfRetries {
-            get {
-               return m_maxNumberOfRetries; 
+        internal int MaxNumberOfRetries
+        {
+            get
+            {
+                return m_maxNumberOfRetries;
             }
         }
 
-        internal TimeSpan RetryDelay {
-            get {
+        internal TimeSpan RetryDelay
+        {
+            get
+            {
                 return m_retryDelay;
             }
         }
@@ -322,9 +360,11 @@ namespace Ch.Elca.Iiop {
         #endregion IProperties
         #region IMethods
 
-        internal void DelayNextRetryIfNeeded() {
+        internal void DelayNextRetryIfNeeded()
+        {
             int totalMillis = (int)m_retryDelay.TotalMilliseconds;
-            if (totalMillis > 0) {
+            if (totalMillis > 0)
+            {
                 Thread.Sleep(totalMillis);
             }
         }
@@ -336,7 +376,8 @@ namespace Ch.Elca.Iiop {
     /// <summary>
     /// this is the client side part of the IiopChannel
     /// </summary>
-    public class IiopClientChannel : IChannelSender {
+    public class IiopClientChannel : IChannelSender
+    {
 
         #region Constants
 
@@ -443,7 +484,7 @@ namespace Ch.Elca.Iiop {
         #endregion IFields
         #region SConstructor
 
-        #if DEBUG_LOGFILE
+#if DEBUG_LOGFILE
         static IiopClientChannel() {
             Stream log = File.Create("IIOPNET_DebugOutputClientChannel_"+
                              DateTime.Now.ToString("yyyyMMdd_HHmmss")+
@@ -455,24 +496,28 @@ namespace Ch.Elca.Iiop {
             Trace.AutoFlush = true;
             Debug.AutoFlush = true;
         }
-        #endif
+#endif
 
         #endregion SConstructor
         #region IConstructors
 
-        public IiopClientChannel() {
+        public IiopClientChannel()
+        {
             InitChannel();
         }
 
-        public IiopClientChannel(IDictionary properties) : 
-            this(properties, new IiopClientFormatterSinkProvider()) {
+        public IiopClientChannel(IDictionary properties) :
+            this(properties, new IiopClientFormatterSinkProvider())
+        {
         }
 
         /// <summary>the constructor used by the config file</summary>
-        public IiopClientChannel(IDictionary properties, IClientChannelSinkProvider sinkProvider) {
-            if (!CheckSinkProviderChain(sinkProvider)) { 
+        public IiopClientChannel(IDictionary properties, IClientChannelSinkProvider sinkProvider)
+        {
+            if (!CheckSinkProviderChain(sinkProvider))
+            {
                 throw new ArgumentException(
-                     "IIOPClientSideFormatter provider not found in chain, this channel is only usable with the IIOPFormatters"); 
+                     "IIOPClientSideFormatter provider not found in chain, this channel is only usable with the IIOPFormatters");
             }
             m_providerChain = sinkProvider;
             IDictionary nonDefaultOptions = new Hashtable();
@@ -482,13 +527,16 @@ namespace Ch.Elca.Iiop {
             int maxNumberOfRetries = MAX_NUMBER_OF_RETRIES;
             int retryDelay = RETRY_DELAY;
 
-            if (properties != null) {
-                foreach (DictionaryEntry entry in properties) {
-                    switch ((string)entry.Key) {
-                        case IiopChannel.CHANNEL_NAME_KEY: 
-                            m_channelName = (string)entry.Value; 
+            if (properties != null)
+            {
+                foreach (DictionaryEntry entry in properties)
+                {
+                    switch ((string)entry.Key)
+                    {
+                        case IiopChannel.CHANNEL_NAME_KEY:
+                            m_channelName = (string)entry.Value;
                             break;
-                        case IiopChannel.PRIORITY_KEY: 
+                        case IiopChannel.PRIORITY_KEY:
                             m_channelPriority = Convert.ToInt32(entry.Value);
                             break;
                         case IiopChannel.TRANSPORT_FACTORY_KEY:
@@ -529,11 +577,11 @@ namespace Ch.Elca.Iiop {
                             interceptionOptions.Add(new BiDirIiopInterceptionOption());
                             break;
                         case IiopChannel.ENDIAN_KEY:
-                            Endian endian = 
+                            Endian endian =
                                 (Endian)Enum.Parse(typeof(Endian), (string)entry.Value);
                             m_headerFlags = GiopHeader.GetDefaultHeaderFlagsForEndian(endian);
                             break;
-                        default: 
+                        default:
                             Debug.WriteLine("non-default property found for IIOPClient channel: " + entry.Key);
                             nonDefaultOptions[entry.Key] = entry.Value;
                             break;
@@ -552,23 +600,29 @@ namespace Ch.Elca.Iiop {
         #endregion IConstructors
         #region IProperties
 
-        public string ChannelName {
-            get { 
-                return m_channelName; 
+        public string ChannelName
+        {
+            get
+            {
+                return m_channelName;
             }
         }
 
-        public int ChannelPriority {
-            get {
-                return m_channelPriority; 
+        public int ChannelPriority
+        {
+            get
+            {
+                return m_channelPriority;
             }
         }
 
         /// <summary>
         /// the connection manager, which is reponsible for assigning outgoing connections.
         /// </summary>
-        internal GiopClientConnectionManager ConnectionManager {
-            get {
+        internal GiopClientConnectionManager ConnectionManager
+        {
+            get
+            {
                 return m_conManager;
             }
         }
@@ -580,13 +634,17 @@ namespace Ch.Elca.Iiop {
         /// check if the custom provided provider chain contains the IIOPClientsideFormatter. This channel is not
         /// usable with another formatter ...
         /// </summary>
-        private bool CheckSinkProviderChain(IClientChannelSinkProvider prov) {
-            if (prov == null) { 
-                return true; 
+        private bool CheckSinkProviderChain(IClientChannelSinkProvider prov)
+        {
+            if (prov == null)
+            {
+                return true;
             }
-            while (prov != null) {
-                if (prov is IiopClientFormatterSinkProvider) { 
-                    return true; 
+            while (prov != null)
+            {
+                if (prov is IiopClientFormatterSinkProvider)
+                {
+                    return true;
                 }
                 prov = prov.Next;
             }
@@ -600,10 +658,13 @@ namespace Ch.Elca.Iiop {
         private void ConfigureSinkProviderChain(GiopClientConnectionManager conManager,
                                                 GiopMessageHandler messageHandler,
                                                 IiopUrlUtil iiopUrlUtil,
-                                                RetryConfig retries) {
+                                                RetryConfig retries)
+        {
             IClientChannelSinkProvider prov = m_providerChain;
-            while (prov != null) {
-                if (prov is IiopClientFormatterSinkProvider) {
+            while (prov != null)
+            {
+                if (prov is IiopClientFormatterSinkProvider)
+                {
                     ((IiopClientFormatterSinkProvider)prov).Configure(conManager, messageHandler, iiopUrlUtil,
                                                                       retries);
                     break;
@@ -613,7 +674,8 @@ namespace Ch.Elca.Iiop {
         }
 
         /// <summary>initalize this channel</summary>
-        private void InitChannel() {
+        private void InitChannel()
+        {
             Ch.Elca.Iiop.Marshalling.ArgumentsSerializerFactory argumentSerializerFactory =
                 omg.org.CORBA.OrbServices.GetSingleton().ArgumentsSerializerFactory;
             CodecFactory codecFactory =
@@ -622,34 +684,40 @@ namespace Ch.Elca.Iiop {
                     new omg.org.IOP.Encoding(omg.org.IOP.ENCODING_CDR_ENCAPS.ConstVal,
                                              1, 2));
             m_transportFactory.Codec = codec;
-            m_iiopUrlUtil = 
+            m_iiopUrlUtil =
                 omg.org.CORBA.OrbServices.GetSingleton().IiopUrlUtil;
 
-            if (!m_isBidir) {
+            if (!m_isBidir)
+            {
                 m_conManager = new GiopClientConnectionManager(m_transportFactory, m_requestTimeOut,
                                                                m_unusedClientConnectionTimeOut, m_maxNumberOfConnections,
-                                                               m_allowMultiplex, m_maxNumberOfMultplexedRequests, 
+                                                               m_allowMultiplex, m_maxNumberOfMultplexedRequests,
                                                                m_headerFlags);
-            } else {
+            }
+            else
+            {
                 m_conManager = new GiopBidirectionalConnectionManager(m_transportFactory, m_requestTimeOut,
                                                                       m_unusedClientConnectionTimeOut, m_maxNumberOfConnections,
-                                                                      m_allowMultiplex, m_maxNumberOfMultplexedRequests, 
+                                                                      m_allowMultiplex, m_maxNumberOfMultplexedRequests,
                                                                       m_headerFlags);
             }
             IiopClientTransportSinkProvider transportProvider =
                 new IiopClientTransportSinkProvider(m_conManager);
-            if (m_providerChain != null) {
+            if (m_providerChain != null)
+            {
                 // append transport provider to the chain
                 IClientChannelSinkProvider prov = m_providerChain;
                 while (prov.Next != null) { prov = prov.Next; }
                 prov.Next = transportProvider; // append the transport provider at the end
-            } else {
+            }
+            else
+            {
                 // create the default provider chain
                 IClientFormatterSinkProvider formatterProv = new IiopClientFormatterSinkProvider();
                 formatterProv.Next = transportProvider;
                 m_providerChain = formatterProv;
             }
-            GiopMessageHandler messageHandler = 
+            GiopMessageHandler messageHandler =
                 new GiopMessageHandler(argumentSerializerFactory,
                                        m_headerFlags, m_interceptionOptions);
             ConfigureSinkProviderChain(m_conManager, messageHandler, m_iiopUrlUtil,
@@ -661,43 +729,54 @@ namespace Ch.Elca.Iiop {
         /// <summary>
         /// create the sink chain for the url and return a reference to the first sink in the chain
         /// </summary>
-        public IMessageSink CreateMessageSink(string url, object remoteChannelData, out string objectURI) {
+        public IMessageSink CreateMessageSink(string url, object remoteChannelData, out string objectURI)
+        {
             objectURI = null;
-            if ((url != null) && IiopUrlUtil.IsUrl(url) && 
-                (m_conManager.CanConnectToIor(m_iiopUrlUtil.CreateIorForUrl(url, "")))) {
+            if ((url != null) && IiopUrlUtil.IsUrl(url) &&
+                (m_conManager.CanConnectToIor(m_iiopUrlUtil.CreateIorForUrl(url, ""))))
+            {
                 GiopVersion version = new GiopVersion(1, 0);
                 m_iiopUrlUtil.ParseUrl(url, out objectURI, out version);
 
                 IClientChannelSink sink = m_providerChain.CreateSink(this, url, remoteChannelData);
-                if (!(sink is IMessageSink)) { 
-                    throw new Exception("first sink in the client side channel must be a message-sink"); 
+                if (!(sink is IMessageSink))
+                {
+                    throw new Exception("first sink in the client side channel must be a message-sink");
                 }
-                return (IMessageSink) sink;
-            } else if ((url == null) && (remoteChannelData is IiopChannelData)) {
+                return (IMessageSink)sink;
+            }
+            else if ((url == null) && (remoteChannelData is IiopChannelData))
+            {
                 // check remoteChannelData
                 Trace.WriteLine("url null, remote channel data: " + remoteChannelData);
-//                IiopChannelData chanData = (IiopChannelData)remoteChannelData;
-//                IClientChannelSink sink = m_providerChain.CreateSink(this, url, chanData);
-//                if (!(sink is IMessageSink)) { 
-//                    throw new Exception("first sink in the client side channel must be a message-sink"); 
-//                }
-//                return (IMessageSink) sink;
+                //                IiopChannelData chanData = (IiopChannelData)remoteChannelData;
+                //                IClientChannelSink sink = m_providerChain.CreateSink(this, url, chanData);
+                //                if (!(sink is IMessageSink)) { 
+                //                    throw new Exception("first sink in the client side channel must be a message-sink"); 
+                //                }
+                //                return (IMessageSink) sink;
                 return null; // TODO
-            } else {
+            }
+            else
+            {
                 return null;
             }
         }
 
         #endregion Implementation of IChannelSender
         #region Implementation of IChannel
-        public string Parse(string url, out string objectURI) {
+        public string Parse(string url, out string objectURI)
+        {
             string result;
-            if (IiopUrlUtil.IsUrl(url) && (m_conManager.CanConnectToIor(m_iiopUrlUtil.CreateIorForUrl(url, "")))) {
+            if (IiopUrlUtil.IsUrl(url) && (m_conManager.CanConnectToIor(m_iiopUrlUtil.CreateIorForUrl(url, ""))))
+            {
                 GiopVersion version;
                 objectURI = null;
                 Uri uri = m_iiopUrlUtil.ParseUrl(url, out objectURI, out version);
                 result = uri.ToString();
-            } else {
+            }
+            else
+            {
                 // is either no corba url or is not usable by transport factory, 
                 // because it doesn't support the transport protocol
                 objectURI = null;
@@ -715,7 +794,8 @@ namespace Ch.Elca.Iiop {
     /// <summary>
     /// this is the server side of the IiopChannel
     /// </summary>
-    public class IiopServerChannel : IChannelReceiver {
+    public class IiopServerChannel : IChannelReceiver
+    {
 
         #region Constants
 
@@ -775,7 +855,7 @@ namespace Ch.Elca.Iiop {
 
         private IServerConnectionListener m_connectionListener;
 
-        private IList /* GiopClientServerMessageHandler */ m_activeClients = 
+        private IList /* GiopClientServerMessageHandler */ m_activeClients =
             new ArrayList(); // the active clients represented by the transport handlers
 
         private GiopBidirectionalConnectionManager m_bidirConnectionManager = null;
@@ -798,7 +878,7 @@ namespace Ch.Elca.Iiop {
         #endregion IFields
         #region SConstructor
 
-        #if DEBUG_LOGFILE
+#if DEBUG_LOGFILE
         static IiopServerChannel() {
             Stream log = File.Create("IIOPNET_DebugOutputServerChannel_"+
                                      DateTime.Now.ToString("yyyyMMdd_HHmmss")+
@@ -810,27 +890,34 @@ namespace Ch.Elca.Iiop {
             Trace.AutoFlush = true;
             Debug.AutoFlush = true;
         }
-        #endif
+#endif
 
         #endregion SConstructor
         #region IConstructors
 
-        public IiopServerChannel() : this(0) {
+        public IiopServerChannel()
+            : this(0)
+        {
         }
 
-        public IiopServerChannel(int port) {
+        public IiopServerChannel(int port)
+        {
             m_port = port;
             InitChannel();
         }
 
-        public IiopServerChannel(IDictionary properties) : this(properties, new IiopServerFormatterSinkProvider()) {
+        public IiopServerChannel(IDictionary properties)
+            : this(properties, new IiopServerFormatterSinkProvider())
+        {
         }
 
         /// <summary>Constructor used by configuration</summary>
-        public IiopServerChannel(IDictionary properties, IServerChannelSinkProvider sinkProvider) {
-            if (!CheckSinkProviderChain(sinkProvider)) {
+        public IiopServerChannel(IDictionary properties, IServerChannelSinkProvider sinkProvider)
+        {
+            if (!CheckSinkProviderChain(sinkProvider))
+            {
                 throw new ArgumentException(
-                    "IIOPServerSideFormatter provider not found in chain, this channel is only usable with the IIOPFormatters"); 
+                    "IIOPServerSideFormatter provider not found in chain, this channel is only usable with the IIOPFormatters");
             }
 
             m_providerChain = sinkProvider;
@@ -838,23 +925,26 @@ namespace Ch.Elca.Iiop {
             ArrayList interceptionOptions = new ArrayList();
 
             // parse properties
-            if (properties != null) {
-                foreach (DictionaryEntry entry in properties) {
-                    switch ((string)entry.Key) {
-                        case IiopChannel.CHANNEL_NAME_KEY: 
-                            m_channelName = (string)entry.Value; 
+            if (properties != null)
+            {
+                foreach (DictionaryEntry entry in properties)
+                {
+                    switch ((string)entry.Key)
+                    {
+                        case IiopChannel.CHANNEL_NAME_KEY:
+                            m_channelName = (string)entry.Value;
                             break;
-                        case IiopChannel.PRIORITY_KEY: 
-                            m_channelPriority = Convert.ToInt32(entry.Value); 
+                        case IiopChannel.PRIORITY_KEY:
+                            m_channelPriority = Convert.ToInt32(entry.Value);
                             break;
-                        case PORT_KEY: 
-                            m_port = Convert.ToInt32(entry.Value); 
+                        case PORT_KEY:
+                            m_port = Convert.ToInt32(entry.Value);
                             break;
                         case BIND_TO_KEY:
                             m_forcedBind = IPAddress.Parse((string)entry.Value);
                             break;
-                        case USE_IPADDRESS_KEY: 
-                            m_useIpAddr = Convert.ToBoolean(entry.Value); 
+                        case USE_IPADDRESS_KEY:
+                            m_useIpAddr = Convert.ToBoolean(entry.Value);
                             break;
                         case MACHINE_NAME_KEY:
                             m_forcedHostNameToUse = (string)entry.Value;
@@ -872,11 +962,11 @@ namespace Ch.Elca.Iiop {
                             interceptionOptions.Add(new BiDirIiopInterceptionOption());
                             break;
                         case IiopChannel.ENDIAN_KEY:
-                            Endian endian = 
+                            Endian endian =
                                 (Endian)Enum.Parse(typeof(Endian), (string)entry.Value);
                             m_headerFlags = GiopHeader.GetDefaultHeaderFlagsForEndian(endian);
                             break;
-                        default: 
+                        default:
                             Debug.WriteLine("non-default property found for IIOPServer channel: " + entry.Key);
                             nonDefaultOptions[entry.Key] = entry.Value;
                             break;
@@ -893,20 +983,26 @@ namespace Ch.Elca.Iiop {
         #endregion IConstructors
         #region IProperties
 
-        public string ChannelName {
-            get { 
-                return m_channelName; 
+        public string ChannelName
+        {
+            get
+            {
+                return m_channelName;
             }
         }
 
-        public int ChannelPriority {
-            get {
-                return m_channelPriority; 
+        public int ChannelPriority
+        {
+            get
+            {
+                return m_channelPriority;
             }
         }
 
-        public object ChannelData {
-            get { 
+        public object ChannelData
+        {
+            get
+            {
                 return m_channelData;
             }
         }
@@ -918,13 +1014,17 @@ namespace Ch.Elca.Iiop {
         /// check if the custom provided provider chain contains the IIOPServersideFormatter. This channel is not
         /// usable with another formatter!
         /// </summary>
-        private bool CheckSinkProviderChain(IServerChannelSinkProvider prov) {
-            if (prov == null) { 
-                return true; 
+        private bool CheckSinkProviderChain(IServerChannelSinkProvider prov)
+        {
+            if (prov == null)
+            {
+                return true;
             }
-            while (prov != null) {
-                if (prov is IiopServerFormatterSinkProvider) { 
-                    return true; 
+            while (prov != null)
+            {
+                if (prov is IiopServerFormatterSinkProvider)
+                {
+                    return true;
                 }
                 prov = prov.Next;
             }
@@ -934,10 +1034,13 @@ namespace Ch.Elca.Iiop {
         /// <summary>
         /// Configures the installed IIOPServerSideFormatterProivder
         /// </summary>
-        private void ConfigureSinkProviderChain(GiopMessageHandler messageHandler) {
+        private void ConfigureSinkProviderChain(GiopMessageHandler messageHandler)
+        {
             IServerChannelSinkProvider prov = m_providerChain;
-            while (prov != null) {
-                if (prov is IiopServerFormatterSinkProvider) {
+            while (prov != null)
+            {
+                if (prov is IiopServerFormatterSinkProvider)
+                {
                     ((IiopServerFormatterSinkProvider)prov).Configure(messageHandler);
                     break;
                 }
@@ -946,9 +1049,11 @@ namespace Ch.Elca.Iiop {
         }
 
         /// <summary>initalize the channel</summary>
-        private void InitChannel() {
-            if (m_port < 0) {
-                throw new ArgumentException("illegal port to listen on: " + m_port); 
+        private void InitChannel()
+        {
+            if (m_port < 0)
+            {
+                throw new ArgumentException("illegal port to listen on: " + m_port);
             }
             Ch.Elca.Iiop.Marshalling.ArgumentsSerializerFactory argumentSerializerFactory =
                 omg.org.CORBA.OrbServices.GetSingleton().ArgumentsSerializerFactory;
@@ -965,10 +1070,11 @@ namespace Ch.Elca.Iiop {
                 m_transportFactory.CreateConnectionListener(new ClientAccepted(this.ProcessClientMessages));
 
             // create the default provider chain, if no chain specified
-            if (m_providerChain == null) {
+            if (m_providerChain == null)
+            {
                 m_providerChain = new IiopServerFormatterSinkProvider();
             }
-            GiopMessageHandler messageHandler = 
+            GiopMessageHandler messageHandler =
                 new GiopMessageHandler(argumentSerializerFactory,
                                        m_headerFlags, m_interceptionOptions);
             ConfigureSinkProviderChain(messageHandler);
@@ -976,9 +1082,10 @@ namespace Ch.Elca.Iiop {
             IServerChannelSink sinkChain = ChannelServices.CreateServerChannelSinkChain(m_providerChain, this);
             m_transportSink = new IiopServerTransportSink(sinkChain);
 
-            if (m_bidirConnectionManager != null) {
+            if (m_bidirConnectionManager != null)
+            {
                 // bidirectional entry point into server channel sink chain.
-                m_bidirConnectionManager.RegisterMessageReceptionHandler(m_transportSink, 
+                m_bidirConnectionManager.RegisterMessageReceptionHandler(m_transportSink,
                                                                          m_serverThreadsMaxPerConnection);
             }
 
@@ -990,23 +1097,39 @@ namespace Ch.Elca.Iiop {
             StandardCorbaOps.SetUpHandler();
         }
 
-        private string DetermineMachineNameToUse() {
+        private string DetermineMachineNameToUse()
+        {
             string hostNameToUse;
-            if (m_forcedHostNameToUse != null) {
+            if (m_forcedHostNameToUse != null)
+            {
                 hostNameToUse = m_forcedHostNameToUse;
-            } else if (m_forcedBind != null) {
+            }
+            else if (m_forcedBind != null)
+            {
                 hostNameToUse = m_forcedBind.ToString();
-            } else {
+            }
+            else
+            {
                 string hostName = Dns.GetHostName();
-                if (m_useIpAddr) {
-                    IPHostEntry ipEntry = Dns.GetHostByName(hostName);
-//                    IPHostEntry ipEntry = Dns.GetHostEntry(hostName); !!! this does strange things: on win7 it tends to return IPv6 address
-                    IPAddress[] ipAddrs = ipEntry.AddressList;
-                    if ((ipAddrs == null) || (ipAddrs.Length == 0)) { 
-                        throw new ArgumentException("can't determine ip-addr of local machine, abort channel creation"); 
+                if (m_useIpAddr)
+                {
+                    IPAddress[] ipAddrs = null;
+                    try
+                    {
+                        ipAddrs = Array.FindAll(Dns.GetHostEntry(hostName).AddressList, a => a.AddressFamily == AddressFamily.InterNetwork);
+                    }
+                    catch (Exception e)
+                    {
+                        throw new ArgumentException("can't determine ip-addr of local machine, abort channel creation", e);
+                    }
+                    if ((ipAddrs == null) || (ipAddrs.Length == 0))
+                    {
+                        throw new ArgumentException("can't determine ip-addr of local machine, abort channel creation");
                     }
                     hostNameToUse = ipAddrs[0].ToString();
-                } else {
+                }
+                else
+                {
                     hostNameToUse = hostName;
                 }
             }
@@ -1014,27 +1137,32 @@ namespace Ch.Elca.Iiop {
         }
 
         private void SetupChannelData(string hostName, int port, omg.org.IOP.Codec codec,
-                                      TaggedComponent[] additionalComponents) {
+                                      TaggedComponent[] additionalComponents)
+        {
             IiopChannelData newChannelData = new IiopChannelData(hostName, port);
             newChannelData.AddAdditionalTaggedComponent(
                 Services.CodeSetService.CreateDefaultCodesetComponent(codec));
-            if ((additionalComponents != null) && (additionalComponents.Length > 0)){
+            if ((additionalComponents != null) && (additionalComponents.Length > 0))
+            {
                 newChannelData.AddAdditionalTaggedComponents(additionalComponents);
             }
             m_channelData = newChannelData;
         }
 
         #region Implementation of IChannelReceiver
-        public void StartListening(object data) {
+        public void StartListening(object data)
+        {
             // start Listening
-            if (!m_connectionListener.IsListening()) {
+            if (!m_connectionListener.IsListening())
+            {
                 TaggedComponent[] additionalComponents;
                 // use IPAddress.Any and not a specific ip-address, to allow connections to loopback and normal ip; but if forcedBind use the specified one
                 IPAddress bindTo = (m_forcedBind == null ? IPAddress.Any : m_forcedBind);
                 int listeningPort = m_connectionListener.StartListening(bindTo, m_port, out additionalComponents);
                 SetupChannelData(m_hostNameToUse, listeningPort, m_codec, additionalComponents);
                 // register endpoints for bidirectional connections (if bidir enabled)
-                if (m_bidirConnectionManager != null) {
+                if (m_bidirConnectionManager != null)
+                {
                     object[] listenPoints = m_transportFactory.GetListenPoints(m_channelData);
                     m_bidirConnectionManager.SetOwnListenPoints(listenPoints);
                 }
@@ -1045,14 +1173,16 @@ namespace Ch.Elca.Iiop {
         /// this method handles the incoming messages from one client; 
         /// it's called by the IServerListener
         /// </summary>
-        private void ProcessClientMessages(IServerTransport transport) {
-            GiopTransportMessageHandler handler = 
+        private void ProcessClientMessages(IServerTransport transport)
+        {
+            GiopTransportMessageHandler handler =
                 new GiopTransportMessageHandler(transport, m_headerFlags);
             GiopConnectionDesc conDesc = new GiopConnectionDesc(m_bidirConnectionManager, handler);
             handler.InstallReceiver(m_transportSink, conDesc, m_serverThreadsMaxPerConnection);
-            handler.ConnectionClosed += 
+            handler.ConnectionClosed +=
                 new GiopTransportMessageHandler.ConnectionClosedDelegate(EndClientMessages);
-            lock(m_activeClients.SyncRoot) {
+            lock (m_activeClients.SyncRoot)
+            {
                 m_activeClients.Add(handler);
                 Debug.WriteLine("added client; peer addr: " + handler.Transport.GetPeerAddress());
                 Debug.WriteLine("added client; new number of active: " + m_activeClients.Count);
@@ -1063,68 +1193,95 @@ namespace Ch.Elca.Iiop {
         /// <summary>
         /// informs the channel, that the message handling for a specific client has ended.
         /// </summary>
-        private void EndClientMessages(GiopTransportMessageHandler sender, EventArgs args) {
+        private void EndClientMessages(GiopTransportMessageHandler sender, EventArgs args)
+        {
             // the client is represented by the GiopTransportMessageHandler
-            lock(m_activeClients.SyncRoot) {
+            lock (m_activeClients.SyncRoot)
+            {
                 m_activeClients.Remove(sender); // remove from active clients.
                 Debug.WriteLine("removed client; new number of active: " + m_activeClients.Count);
             }
         }
 
-        public void StopListening(object data) {
-            if (m_connectionListener.IsListening()) {
+        public void StopListening(object data)
+        {
+            if (m_connectionListener.IsListening())
+            {
                 // don't accept new connections any more.
-                try {
+                try
+                {
                     m_connectionListener.StopListening();
-                } catch (Exception ex) {
+                }
+                catch (Exception ex)
+                {
                     Debug.WriteLine("exception while stopping accept: " + ex);
                 }
                 // close connections to this server endpoint
-                try {
+                try
+                {
                     IList toClose;
-                    lock(m_activeClients.SyncRoot) {
+                    lock (m_activeClients.SyncRoot)
+                    {
                         // new elements are no longer inserted, but make sure,
                         // that during iteration a connection close message from a client
                         // does not break the iteration.
                         toClose = new ArrayList(m_activeClients);
                     }
-                    foreach (GiopTransportMessageHandler handler in toClose) {
-                        try {
-                            try {
+                    foreach (GiopTransportMessageHandler handler in toClose)
+                    {
+                        try
+                        {
+                            try
+                            {
                                 handler.SendConnectionCloseMessage();
-                            } finally {
+                            }
+                            finally
+                            {
                                 handler.ForceCloseConnection();
                             }
-                        } catch (Exception ex) {
+                        }
+                        catch (Exception ex)
+                        {
                             Debug.WriteLine("exception while trying to close connection: " + ex);
                         }
                     }
-                } finally {
-                    lock(m_activeClients.SyncRoot) {
+                }
+                finally
+                {
+                    lock (m_activeClients.SyncRoot)
+                    {
                         m_activeClients.Clear();
                     }
                 }
                 // bidir connection data no longer usable/used -> clean up at the end
-                if (m_bidirConnectionManager != null) {
-                    try {
+                if (m_bidirConnectionManager != null)
+                {
+                    try
+                    {
                         // for bidir use case (1), no more connections initiated by a client to this server endpoint
                         // should be used for callbacks
                         m_bidirConnectionManager.RemoveAllBidirInitiated();
-                    } catch (Exception ex) {
+                    }
+                    catch (Exception ex)
+                    {
                         Debug.WriteLine("exception while trying to remove registered bidir connections: " + ex);
                     }
-                    try {
+                    try
+                    {
                         // for bidir use case (2), don't send any more listen points to server, because no longer listening -> 
                         // server can't connect back using the bidir connections registered
                         m_bidirConnectionManager.SetOwnListenPoints(new object[0]);
-                    } catch (Exception ex) {
+                    }
+                    catch (Exception ex)
+                    {
                         Debug.WriteLine("exception while trying to remove registered bidir connections: " + ex);
                     }
                 }
             }
         }
 
-        public string[] GetUrlsForUri(string objectURI) {
+        public string[] GetUrlsForUri(string objectURI)
+        {
             return new string[] {
                 IiopUrlUtil.GetUrl(m_channelData.HostName, m_channelData.Port, objectURI) };
         }
@@ -1132,7 +1289,8 @@ namespace Ch.Elca.Iiop {
         #endregion Implementation of IChannelReceiver
         #region Implementation of IChannel
 
-        public string Parse(string url, out string objectURI) {
+        public string Parse(string url, out string objectURI)
+        {
             objectURI = null;
             GiopVersion version;
             return m_iiopUrlUtil.ParseUrl(url, out objectURI, out version).ToString();
@@ -1152,7 +1310,8 @@ namespace Ch.Elca.Iiop {
     /// The IIOPChannel returns an instance of this class.
     /// </remarks>
     [Serializable] // must be serializable for the .NET framework
-    public class IiopChannelData : ChannelDataStore {
+    public class IiopChannelData : ChannelDataStore
+    {
 
         #region SFields
 
@@ -1167,24 +1326,30 @@ namespace Ch.Elca.Iiop {
         #endregion IFields
         #region IConstructors
 
-        public IiopChannelData(string hostName, int port) : base(new String[] { "iiop://"+hostName+":"+port } ) {
+        public IiopChannelData(string hostName, int port)
+            : base(new String[] { "iiop://" + hostName + ":" + port })
+        {
             m_hostName = hostName;
             m_port = port;
         }
         #endregion IConstructors
         #region IProperties
 
-        public string HostName {
+        public string HostName
+        {
             get { return m_hostName; }
         }
 
-        public int Port {
+        public int Port
+        {
             get { return m_port; }
         }
 
         /// <summary>allows to add additional tagged component to an IOR marshalled over this channel.</summary>
-        public TaggedComponent[] AdditionalTaggedComponents {
-            get {
+        public TaggedComponent[] AdditionalTaggedComponents
+        {
+            get
+            {
                 return (TaggedComponent[])m_additionTaggedComponents.ToArray(s_taggedComponentType);
             }
         }
@@ -1192,23 +1357,27 @@ namespace Ch.Elca.Iiop {
         #endregion
         #region IMethods
 
-        public override String ToString() {
+        public override String ToString()
+        {
             StringBuilder result = new StringBuilder();
             result.Append("IIOP-channel data, hostname: " + m_hostName +
                           ", port: " + m_port);
-            foreach (TaggedComponent taggedComp in m_additionTaggedComponents) {
+            foreach (TaggedComponent taggedComp in m_additionTaggedComponents)
+            {
                 result.Append("; tagged component with id: " + taggedComp.tag);
             }
             return result.ToString();
         }
 
         /// <summary>add passed additional tagged component to all IOR for objects hosted by this appdomain.</summary>
-        public void AddAdditionalTaggedComponent(TaggedComponent taggedComponent) {
+        public void AddAdditionalTaggedComponent(TaggedComponent taggedComponent)
+        {
             m_additionTaggedComponents.Add(taggedComponent);
         }
 
         /// <summary>adds passed additional tagged components to all IOR for objects hosted by this appdomain.</summary>
-        public void AddAdditionalTaggedComponents(TaggedComponent[] newTaggedComponents) {
+        public void AddAdditionalTaggedComponents(TaggedComponent[] newTaggedComponents)
+        {
             m_additionTaggedComponents.AddRange(newTaggedComponents);
         }
 
@@ -1220,7 +1389,8 @@ namespace Ch.Elca.Iiop {
 
 #if UnitTest
 
-namespace Ch.Elca.Iiop.Tests {
+namespace Ch.Elca.Iiop.Tests
+{
 
     using System.Runtime.Remoting.Channels;
     using System.Runtime.Remoting;
@@ -1235,7 +1405,8 @@ namespace Ch.Elca.Iiop.Tests {
     /// Unit-test for class IiopChannelData
     /// </summary>
     [TestFixture]
-    public class IiopChannelDataTest {
+    public class IiopChannelDataTest
+    {
 
         private const string HOST = "localhost";
         private const int PORT = 8087;
@@ -1245,12 +1416,13 @@ namespace Ch.Elca.Iiop.Tests {
         private Codec m_codec;
 
         [SetUp]
-        public void Setup() {
+        public void Setup()
+        {
             m_channelData = new IiopChannelData(HOST, PORT);
             m_serFactory = new Ch.Elca.Iiop.Marshalling.SerializerFactory();
             CodecFactory codecFactory =
                 new CodecFactoryImpl(m_serFactory);
-            m_codec = 
+            m_codec =
                 codecFactory.create_codec(
                     new omg.org.IOP.Encoding(ENCODING_CDR_ENCAPS.ConstVal, 1, 2));
             IiopUrlUtil iiopUrlUtil =
@@ -1261,20 +1433,22 @@ namespace Ch.Elca.Iiop.Tests {
         }
 
         [Test]
-        public void TestCorrectCreation() {
+        public void TestCorrectCreation()
+        {
             Assert.AreEqual(HOST, m_channelData.HostName, "Host");
             Assert.AreEqual(PORT, m_channelData.Port, "Port");
             Assert.AreEqual(0,
                                    m_channelData.AdditionalTaggedComponents.Length, "No components by default");
-            Assert.AreEqual( 1,
+            Assert.AreEqual(1,
                                    m_channelData.ChannelUris.Length, "chan uris length");
             Assert.AreEqual("iiop://" + HOST + ":" + PORT,
                                    m_channelData.ChannelUris[0], "chan uri 1");
         }
 
         [Test]
-        public void AddComponent() {
-            TaggedComponent comp = 
+        public void AddComponent()
+        {
+            TaggedComponent comp =
                 new TaggedComponent(TAG_CODE_SETS.ConstVal,
                                     m_codec.encode_value(
                                         new Services.CodeSetComponentData(10000,
@@ -1290,20 +1464,24 @@ namespace Ch.Elca.Iiop.Tests {
 
     }
 
-    public interface ISimpleCallTestOnChannel {
+    public interface ISimpleCallTestOnChannel
+    {
 
         byte EchoByte(byte arg);
 
     }
 
     [SupportedInterface(typeof(ISimpleCallTestOnChannel))]
-    public class SimpleCallTestOnChannelImpl : MarshalByRefObject, ISimpleCallTestOnChannel {
+    public class SimpleCallTestOnChannelImpl : MarshalByRefObject, ISimpleCallTestOnChannel
+    {
 
-        public byte EchoByte(byte arg) {
+        public byte EchoByte(byte arg)
+        {
             return arg;
         }
 
-        public override object InitializeLifetimeService() {
+        public override object InitializeLifetimeService()
+        {
             return null;
         }
 
@@ -1314,38 +1492,46 @@ namespace Ch.Elca.Iiop.Tests {
     /// Simple Unit-test for whole Channel functionality.
     /// </summary>
     [TestFixture]
-    public class SimpleCallTests {
+    public class SimpleCallTests
+    {
 
         private const int TEST_PORT = 8090;
 
         private IiopChannel m_channel;
 
         [SetUp]
-        public void SetUp() {
+        public void SetUp()
+        {
             m_channel = new IiopChannel(TEST_PORT);
             ChannelServices.RegisterChannel(m_channel, false);
         }
 
         [TearDown]
-        public void TearDown() {
-            if (m_channel != null) {
+        public void TearDown()
+        {
+            if (m_channel != null)
+            {
                 ChannelServices.UnregisterChannel(m_channel);
             }
             m_channel = null;
         }
 
         [Test]
-        public void TestSimpleCall() {
+        public void TestSimpleCall()
+        {
             MarshalByRefObject mbr = new SimpleCallTestOnChannelImpl();
             string uri = "TestSimpleCallOnChannel";
-            try {
+            try
+            {
                 RemotingServices.Marshal(mbr, uri);
                 ISimpleCallTestOnChannel proxy = (ISimpleCallTestOnChannel)
                     RemotingServices.Connect(typeof(ISimpleCallTestOnChannel),
                                              "iiop://localhost:" + TEST_PORT + "/" + uri);
                 byte arg = 1;
                 Assert.AreEqual(1, proxy.EchoByte(arg));
-            } finally {
+            }
+            finally
+            {
                 RemotingServices.Disconnect(mbr);
             }
         }
@@ -1357,7 +1543,8 @@ namespace Ch.Elca.Iiop.Tests {
     /// exception conditions.
     /// </summary>
     [TestFixture]
-    public class ChannelExceptionTests {
+    public class ChannelExceptionTests
+    {
 
         private const int TEST_PORT = 8090;
 
@@ -1365,7 +1552,8 @@ namespace Ch.Elca.Iiop.Tests {
         private MarshalByRefObject m_mbr;
 
         [SetUp]
-        public void SetUp() {
+        public void SetUp()
+        {
             m_channel = new IiopChannel(TEST_PORT);
             ChannelServices.RegisterChannel(m_channel, false);
 
@@ -1375,32 +1563,42 @@ namespace Ch.Elca.Iiop.Tests {
         }
 
         [TearDown]
-        public void TearDown() {
-            if (m_mbr != null) {
-                try {
+        public void TearDown()
+        {
+            if (m_mbr != null)
+            {
+                try
+                {
                     RemotingServices.Disconnect(m_mbr);
-                } catch {
+                }
+                catch
+                {
                     // ignore
                 }
                 m_mbr = null;
             }
-            if (m_channel != null) {
+            if (m_channel != null)
+            {
                 ChannelServices.UnregisterChannel(m_channel);
             }
             m_channel = null;
         }
 
         [Test]
-        public void TestUnreachableServer() {
-            try {
+        public void TestUnreachableServer()
+        {
+            try
+            {
                 string url = "iiop://localhost:8091/TestSimpleCallOnChannel";
                 ISimpleCallTestOnChannel proxy = (ISimpleCallTestOnChannel)
                     RemotingServices.Connect(typeof(ISimpleCallTestOnChannel),
                                              url);
                 proxy.EchoByte(1); // should fail
                 Assert.Fail("not detected, that connectivity to server is not available");
-            } catch (TRANSIENT tEx) {
-                Assert.AreEqual( 
+            }
+            catch (TRANSIENT tEx)
+            {
+                Assert.AreEqual(
                                        CorbaSystemExceptionCodes.TRANSIENT_CANTCONNECT,
                                        tEx.Minor, "minor code");
             }
@@ -1413,39 +1611,48 @@ namespace Ch.Elca.Iiop.Tests {
     /// Unit-test for testing channel retry functionality.
     /// </summary>
     [TestFixture]
-    public class IiopClientChannelRetryTest {
+    public class IiopClientChannelRetryTest
+    {
 
         /// <summary>
         /// class used to inject errors after formatter sink.
         /// </summary>
-        private class RetryingClientTransportTesterProvider : IClientChannelSinkProvider {
+        private class RetryingClientTransportTesterProvider : IClientChannelSinkProvider
+        {
 
             private IClientChannelSinkProvider m_nextProvider;
             private int m_forceNumberOfErrorCount;
 
 
-            public IClientChannelSinkProvider Next {
-                get {
+            public IClientChannelSinkProvider Next
+            {
+                get
+                {
                     return m_nextProvider;
                 }
-                set {
+                set
+                {
                     m_nextProvider = value;
                 }
             }
 
-            public int ForceNumberOfErrorCount {
-                get {
+            public int ForceNumberOfErrorCount
+            {
+                get
+                {
                     return m_forceNumberOfErrorCount;
                 }
-                set {
+                set
+                {
                     m_forceNumberOfErrorCount = value;
                 }
             }
 
-            public IClientChannelSink CreateSink(IChannelSender channel, string url, object remoteChannelData) {
+            public IClientChannelSink CreateSink(IChannelSender channel, string url, object remoteChannelData)
+            {
                 IClientChannelSink nextSink =
                     m_nextProvider.CreateSink(channel, url, remoteChannelData);
-                return new RetryingClientTransportTester(nextSink, 
+                return new RetryingClientTransportTester(nextSink,
                                                          m_forceNumberOfErrorCount);
             }
         }
@@ -1454,7 +1661,8 @@ namespace Ch.Elca.Iiop.Tests {
         /// <summary>
         /// class used to inject errors after formatter sink.
         /// </summary>
-        private class RetryingClientTransportTester : IClientChannelSink {
+        private class RetryingClientTransportTester : IClientChannelSink
+        {
 
             private const string MESSAGE_RETRY_COUNT =
                 "MessageRetryCount";
@@ -1464,58 +1672,73 @@ namespace Ch.Elca.Iiop.Tests {
             private int m_forceNumberOfErrorCount;
 
             public RetryingClientTransportTester(IClientChannelSink nextSink,
-                                                 int forceNumberOfErrorCount) {
+                                                 int forceNumberOfErrorCount)
+            {
                 m_nextSink = nextSink;
                 m_forceNumberOfErrorCount = forceNumberOfErrorCount;
             }
 
-            public IClientChannelSink NextChannelSink {
-                get {
+            public IClientChannelSink NextChannelSink
+            {
+                get
+                {
                     return m_nextSink;
                 }
             }
 
-            public IDictionary Properties {
-                get {
+            public IDictionary Properties
+            {
+                get
+                {
                     return m_properties;
                 }
             }
 
-            private void ForceRetryIfNeeded(IMessage msg) {
+            private void ForceRetryIfNeeded(IMessage msg)
+            {
                 int numberOfForcedRetrys = 0;
-                if (msg.Properties[MESSAGE_RETRY_COUNT] != null) {
+                if (msg.Properties[MESSAGE_RETRY_COUNT] != null)
+                {
                     numberOfForcedRetrys = (int)msg.Properties[MESSAGE_RETRY_COUNT];
                 }
-                try {
-                    if (numberOfForcedRetrys < m_forceNumberOfErrorCount) {
+                try
+                {
+                    if (numberOfForcedRetrys < m_forceNumberOfErrorCount)
+                    {
                         numberOfForcedRetrys++;
-                        throw new TRANSIENT(CorbaSystemExceptionCodes.TRANSIENT_CONNECTION_DROPPED, 
+                        throw new TRANSIENT(CorbaSystemExceptionCodes.TRANSIENT_CONNECTION_DROPPED,
                                             CompletionStatus.Completed_No);
                     }
-                } finally {
-                    msg.Properties[MESSAGE_RETRY_COUNT] = 
+                }
+                finally
+                {
+                    msg.Properties[MESSAGE_RETRY_COUNT] =
                         numberOfForcedRetrys;
                 }
             }
 
-            public void ProcessMessage(IMessage msg, ITransportHeaders requestHeaders, Stream requestStream, 
-                                       out ITransportHeaders responseHeaders, out Stream responseStream) {
+            public void ProcessMessage(IMessage msg, ITransportHeaders requestHeaders, Stream requestStream,
+                                       out ITransportHeaders responseHeaders, out Stream responseStream)
+            {
                 ForceRetryIfNeeded(msg);
                 m_nextSink.ProcessMessage(msg, requestHeaders, requestStream,
                                           out responseHeaders, out responseStream);
             }
 
-            public void AsyncProcessRequest(IClientChannelSinkStack sinkStack, IMessage msg, 
-                                            ITransportHeaders headers, Stream stream) {
+            public void AsyncProcessRequest(IClientChannelSinkStack sinkStack, IMessage msg,
+                                            ITransportHeaders headers, Stream stream)
+            {
                 ForceRetryIfNeeded(msg);
                 m_nextSink.AsyncProcessRequest(sinkStack, msg, headers, stream);
             }
 
-            public void AsyncProcessResponse(IClientResponseChannelSinkStack sinkStack, object state, ITransportHeaders headers, Stream stream) {
+            public void AsyncProcessResponse(IClientResponseChannelSinkStack sinkStack, object state, ITransportHeaders headers, Stream stream)
+            {
                 throw new NotSupportedException(); // this should not be called, because this sink is the first in the chain, receiving the response
             }
 
-            public Stream GetRequestStream(IMessage msg, ITransportHeaders headers) {
+            public Stream GetRequestStream(IMessage msg, ITransportHeaders headers)
+            {
                 return null;
             }
         }
@@ -1526,36 +1749,43 @@ namespace Ch.Elca.Iiop.Tests {
         private IiopChannel m_channel;
         private RetryingClientTransportTesterProvider m_testerProvider;
         private MarshalByRefObject m_mbr;
-        private Ior m_targetIor; 
+        private Ior m_targetIor;
         private string m_targetIiopLoc;
 
         [TearDown]
-        public void TearDown() {
-            if (m_mbr != null) {
-                try {
+        public void TearDown()
+        {
+            if (m_mbr != null)
+            {
+                try
+                {
                     RemotingServices.Disconnect(m_mbr);
-                } catch {
+                }
+                catch
+                {
                     // ignore
                 }
                 m_mbr = null;
             }
-            if (m_channel != null) {
+            if (m_channel != null)
+            {
                 ChannelServices.UnregisterChannel(m_channel);
             }
             m_channel = null;
         }
 
-        private void Setup(string idSuffix, int retryNumber) {
+        private void Setup(string idSuffix, int retryNumber)
+        {
             IDictionary props = new Hashtable();
             props[IiopServerChannel.PORT_KEY] = TEST_PORT.ToString();
             props[IiopClientChannel.MAX_NUMBER_OF_RETRIES_KEY] = "1";
             props[IiopClientChannel.RETRY_DELAY_KEY] = "10";
-            IClientChannelSinkProvider clientSinkProvider = 
+            IClientChannelSinkProvider clientSinkProvider =
                 new IiopClientFormatterSinkProvider();
             m_testerProvider = new RetryingClientTransportTesterProvider();
             m_testerProvider.ForceNumberOfErrorCount = retryNumber;
             clientSinkProvider.Next = m_testerProvider;
-            IServerChannelSinkProvider serverSinkProvider = 
+            IServerChannelSinkProvider serverSinkProvider =
                 new IiopServerFormatterSinkProvider();
             m_channel = new IiopChannel(props,
                                         clientSinkProvider,
@@ -1568,13 +1798,14 @@ namespace Ch.Elca.Iiop.Tests {
                                                             "localhost", (short)TEST_PORT,
                                                             IorUtil.GetKeyBytesForId(TEST_URI + idSuffix))
                                   });
-            m_targetIiopLoc = "iiop://localhost:" + TEST_PORT + "/" + TEST_URI + idSuffix; 
+            m_targetIiopLoc = "iiop://localhost:" + TEST_PORT + "/" + TEST_URI + idSuffix;
             m_mbr = new SimpleCallTestOnChannelImpl();
             RemotingServices.Marshal(m_mbr, TEST_URI + idSuffix);
         }
 
         [Test]
-        public void TestNoRetryForcedSync() {
+        public void TestNoRetryForcedSync()
+        {
             Setup("NoRt", 0);
             ISimpleCallTestOnChannel proxy = (ISimpleCallTestOnChannel)
                 RemotingServices.Connect(typeof(ISimpleCallTestOnChannel),
@@ -1584,7 +1815,8 @@ namespace Ch.Elca.Iiop.Tests {
         }
 
         [Test]
-        public void TestOneRetryForcedSync() {
+        public void TestOneRetryForcedSync()
+        {
             Setup("OneRt", 1);
             ISimpleCallTestOnChannel proxy = (ISimpleCallTestOnChannel)
                 RemotingServices.Connect(typeof(ISimpleCallTestOnChannel),
@@ -1595,7 +1827,8 @@ namespace Ch.Elca.Iiop.Tests {
 
         [Test]
         [ExpectedException(typeof(TRANSIENT))]
-        public void TestExceededRetryForcedSync() {
+        public void TestExceededRetryForcedSync()
+        {
             Setup("ExceededRt", 5);
             ISimpleCallTestOnChannel proxy = (ISimpleCallTestOnChannel)
                 RemotingServices.Connect(typeof(ISimpleCallTestOnChannel),
@@ -1607,13 +1840,14 @@ namespace Ch.Elca.Iiop.Tests {
         delegate System.Byte TestEchoByteDelegate(System.Byte arg);
 
         [Test]
-        public void TestNoRetryForcedASync() {
+        public void TestNoRetryForcedASync()
+        {
             Setup("NoRtAsync", 0);
             ISimpleCallTestOnChannel proxy = (ISimpleCallTestOnChannel)
                 RemotingServices.Connect(typeof(ISimpleCallTestOnChannel),
                                         m_targetIor.ToString());
             byte arg = 1;
-            TestEchoByteDelegate ebd = 
+            TestEchoByteDelegate ebd =
                 new TestEchoByteDelegate(proxy.EchoByte);
             // async call
             IAsyncResult ar = ebd.BeginInvoke(arg, null, null);
@@ -1623,13 +1857,14 @@ namespace Ch.Elca.Iiop.Tests {
         }
 
         [Test]
-        public void TestOneRetryForcedASync() {
+        public void TestOneRetryForcedASync()
+        {
             Setup("OneRtAsync", 1);
             ISimpleCallTestOnChannel proxy = (ISimpleCallTestOnChannel)
                 RemotingServices.Connect(typeof(ISimpleCallTestOnChannel),
                                         m_targetIor.ToString());
             byte arg = 1;
-            TestEchoByteDelegate ebd = 
+            TestEchoByteDelegate ebd =
                 new TestEchoByteDelegate(proxy.EchoByte);
             // async call
             IAsyncResult ar = ebd.BeginInvoke(arg, null, null);
@@ -1640,13 +1875,14 @@ namespace Ch.Elca.Iiop.Tests {
 
         [Test]
         [ExpectedException(typeof(TRANSIENT))]
-        public void TestExceededRetryForcedASync() {
+        public void TestExceededRetryForcedASync()
+        {
             Setup("ExceededRtAsync", 5);
             ISimpleCallTestOnChannel proxy = (ISimpleCallTestOnChannel)
                 RemotingServices.Connect(typeof(ISimpleCallTestOnChannel),
                                         m_targetIor.ToString());
             byte arg = 1;
-            TestEchoByteDelegate ebd = 
+            TestEchoByteDelegate ebd =
                 new TestEchoByteDelegate(proxy.EchoByte);
             // async call
             IAsyncResult ar = ebd.BeginInvoke(arg, null, null);
@@ -1657,7 +1893,8 @@ namespace Ch.Elca.Iiop.Tests {
 
 
         [Test]
-        public void TestOneRetryForcedSyncIsA() {
+        public void TestOneRetryForcedSyncIsA()
+        {
             Setup("OneRtIsA", 1);
             ISimpleCallTestOnChannel proxy = (ISimpleCallTestOnChannel)
                 RemotingServices.Connect(typeof(ISimpleCallTestOnChannel),
