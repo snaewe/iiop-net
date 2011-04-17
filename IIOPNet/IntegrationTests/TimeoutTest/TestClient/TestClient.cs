@@ -84,22 +84,20 @@ namespace Ch.Elca.Iiop.IntegrationTests {
         public void TestWithoutTimeout() {
             System.Byte arg = 1;
             System.Byte result = m_testService.TestIncByte(arg);
-            Assertion.AssertEquals((System.Byte)(arg + 1), result);
+            Assert.AreEqual((System.Byte)(arg + 1), result);
 
             System.Byte arg2 = 3;
             System.Byte result2 = m_testService.TestIncByteWithSleep(arg2, 100);
-            Assertion.AssertEquals((System.Byte)(arg2 + 1), result2);
+            Assert.AreEqual((System.Byte)(arg2 + 1), result2);
         }
 
         [Test]
+        [ExpectedException(typeof(TIMEOUT))]
         public void TestWithTimeout() {
             System.Byte arg = 1;
-            try {
+
                 System.Byte result = m_testService.TestIncByteWithSleep(arg, 20000);
-                Assertion.Fail("timeout excpetion not thrown");
-            } catch (omg.org.CORBA.TIMEOUT) {
-                // expected
-            }
+                Assert.Fail("timeout excpetion not thrown");
 
         }
 
