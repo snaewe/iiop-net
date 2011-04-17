@@ -264,7 +264,7 @@ namespace omg.org.CosNaming {
         private MarshalByRefObject GetObjectRegisteredAtUri(string uri, NameComponent[] nameComponents) {
             // this is not nice, because it does circument internal on IdentityHolder-class
             Debug.WriteLine("get registeredObject: " + uri);
-            Assembly remotingAssembly = Assembly.LoadWithPartialName("mscorlib");
+            Assembly remotingAssembly = Assembly.Load("mscorlib");
             if (remotingAssembly == null) { 
                 throw new INTERNAL(16001, CompletionStatus.Completed_MayBe); 
             }
