@@ -1113,20 +1113,21 @@ namespace Ch.Elca.Iiop
                 string hostName = Dns.GetHostName();
                 if (m_useIpAddr)
                 {
-                    IPAddress[] ipAddrs = null;
-                    try
-                    {
-                        ipAddrs = Array.FindAll(Dns.GetHostEntry(hostName).AddressList, a => a.AddressFamily == AddressFamily.InterNetwork);
-                    }
-                    catch (Exception e)
-                    {
-                        throw new ArgumentException("can't determine ip-addr of local machine, abort channel creation", e);
-                    }
+                    IPAddress[] ipAddrs = Dns.GetHostEntry(hostName).AddressList;
                     if ((ipAddrs == null) || (ipAddrs.Length == 0))
                     {
                         throw new ArgumentException("can't determine ip-addr of local machine, abort channel creation");
                     }
-                    hostNameToUse = ipAddrs[0].ToString();
+                    int i;
+                    for (i = 0; i != ipAddrs.Length; ++i)
+                    {
+                        // We prefer IP V4 if any
+                        if (ipAddrs[i].AddressFamily == AddressFamily.InterNetwork)
+                        {
+                            break;
+                        }
+                    }
+                    hostNameToUse = ipAddrs[i == ipAddrs.Length ? 0 : i].ToString();
                 }
                 else
                 {
