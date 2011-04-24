@@ -54,7 +54,7 @@ namespace Ch.Elca.Iiop.Security.Ssl {
                 System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Public |
                 System.Reflection.BindingFlags.Instance);
         
-        #endregion SFields                        
+        #endregion SFields
         #region IFields
         
         protected SecureNetworkStream m_stream;
@@ -80,7 +80,7 @@ namespace Ch.Elca.Iiop.Security.Ssl {
         
         /// <summary><see cref="Ch.Elca.Iiop.ITranport.CloseConnection/></summary>
         public void CloseConnection() {
-            try {                
+            try {
                 if (m_socket != null) {
                     m_socket.Close();
                 }
@@ -116,17 +116,17 @@ namespace Ch.Elca.Iiop.Security.Ssl {
         
         public int Read(byte[] buffer, int offset, int size) {
             return m_stream.Read(buffer, offset, size);
-        }        
+        }
         
         public void Write(byte[] buffer, int offset, int size) {
             m_stream.Write(buffer, offset, size);
-        }        
+        }
         
         /// <summary><see cref="Ch.Elca.Iiop.ITransport.GetPeerAddress"/></summary>
         public IPAddress GetPeerAddress() {
             SecureSocket secureSocket = (SecureSocket)s_secureTcpClientClientPropertyInfo.GetValue(m_socket, null);
             return ((IPEndPoint)secureSocket.RemoteEndPoint).Address;
-        }        
+        }
         
         /// <summary><see cref="Ch.Elca.Iiop.ITranport.IsConnectionOpen/></summary>
         public bool IsConnectionOpen() {
@@ -137,10 +137,10 @@ namespace Ch.Elca.Iiop.Security.Ssl {
                     m_socket.GetStream(); // TODO, search a better way to do this
                 } catch (Exception) {
                     return false;
-                }                                
-                return true; 
+                }
+                return true;
             }
-        }        
+        }
         
         #endregion IMethods
         
@@ -169,7 +169,7 @@ namespace Ch.Elca.Iiop.Security.Ssl {
         
         /// <summary>
         /// create a transport wrapper to host with ip-address hostAddr and port port.
-        /// </summary>        
+        /// </summary>
         public SslClientTransport(IPAddress hostIp, int port, SecurityOptions options) {
             m_targetHostIp = hostIp;
             m_port = port;
@@ -203,7 +203,7 @@ namespace Ch.Elca.Iiop.Security.Ssl {
         
         /// <summary><see cref="Ch.Elca.Iiop.IClientTranport.OpenConnection/></summary>
         public void OpenConnection() {
-            if (IsConnectionOpen()) { 
+            if (IsConnectionOpen()) {
                 return; // already open
             }
             m_socket = new SecureTcpClient(m_options);
@@ -213,10 +213,10 @@ namespace Ch.Elca.Iiop.Security.Ssl {
                 m_socket.Connect(m_targetHost, m_port);
             } else {
                 throw new INTERNAL(547, CompletionStatus.Completed_No);
-            }                        
+            }
             m_socket.NoDelay = true; // send immediately; (TODO: what is better here?)
             m_socket.ReceiveTimeout = m_receiveTimeOut;
-            m_socket.SendTimeout = m_sendTimeOut;            
+            m_socket.SendTimeout = m_sendTimeOut;
             m_stream = m_socket.GetStream();
         }
                         
@@ -244,12 +244,12 @@ namespace Ch.Elca.Iiop.Security.Ssl {
                         
         /// <summary><see cref="Ch.Elca.Iiop.IServerTransport.IsConnectionCloseException"/></summary>
         public bool IsConnectionCloseException(Exception e) {
-            return s_socketExType.IsInstanceOfType(e.InnerException);            
+            return s_socketExType.IsInstanceOfType(e.InnerException);
         }
                         
         #endregion IMethods
         
-    }        
+    }
     
     /// <summary>
     /// creates Ssl transports
@@ -261,7 +261,7 @@ namespace Ch.Elca.Iiop.Security.Ssl {
         public const string SERVER_REQUIRED_OPTS = "ServerRequiredSecurityAssoc";
         public const string SERVER_SUPPORTED_OPTS = "ServerSupportedSecurityAssoc";
         
-        public const string CLIENT_AUTHENTICATION = "ClientAuthentication";        
+        public const string CLIENT_AUTHENTICATION = "ClientAuthentication";
         public const string SERVER_AUTHENTICATION = "ServerAuthentication";
         
         #endregion Constants
@@ -283,10 +283,10 @@ namespace Ch.Elca.Iiop.Security.Ssl {
         
         private omg.org.IOP.Codec m_codec;
         
-        #endregion IFields        
+        #endregion IFields
         #region IConstructors
         
-        public SslTransportFactory() {            
+        public SslTransportFactory() {
         }
         
         #endregion IConstructors
@@ -299,7 +299,7 @@ namespace Ch.Elca.Iiop.Security.Ssl {
             }
         }
         
-        #endregion IProperties        
+        #endregion IProperties
         #region IMethods
         
         /// <summary><see cref="Ch.Elca.Iiop.IClientTransportFactory.CreateTransport(IIorProfile)"/></summary>
@@ -307,35 +307,33 @@ namespace Ch.Elca.Iiop.Security.Ssl {
             if (profile.ProfileId != TAG_INTERNET_IOP.ConstVal) {
                 throw new INTERNAL(734, CompletionStatus.Completed_No);
             }
-            object sslComponentDataObject = GetSSLComponent(profile, m_codec);            
+            object sslComponentDataObject = GetSSLComponent(profile, m_codec);
             if (sslComponentDataObject == null) {
                 throw new INTERNAL(734, CompletionStatus.Completed_No);
             }
             SSLComponentData sslComponent = (SSLComponentData)sslComponentDataObject;
             IInternetIiopProfile targetProfile = (IInternetIiopProfile)profile;
-            IPAddress asIpAddress = ConvertToIpAddress(targetProfile.HostName);
             int port = sslComponent.GetPort();
             SecurityOptions options = CreateClientSecurityOptions(sslComponent);
-            IClientTransport result;
-            if (asIpAddress == null) {
-                result = new SslClientTransport(targetProfile.HostName, port, options);
-            } else {
-                result = new SslClientTransport(asIpAddress, port, options);
-            }
+            IPAddress asIpAddress;
+            IClientTransport result =
+                IPAddress.TryParse(targetProfile.HostName, out asIpAddress)
+                    ? new SslClientTransport(asIpAddress, port, options)
+                    : new SslClientTransport(targetProfile.HostName, port, options);
             result.ReceiveTimeOut = m_receiveTimeOut;
             result.SendTimeOut = m_sendTimeOut;
             return result;
         }
         
-        private SecurityOptions CreateClientSecurityOptions(SSLComponentData sslData) {                                                            
+        private SecurityOptions CreateClientSecurityOptions(SSLComponentData sslData) {
             CertVerifyEventHandler serverCertificateCheckHandler = null;
             CertRequestEventHandler clientCertificateRequestHandler = null;
             CredentialVerification credentialVerification = CredentialVerification.Auto;
             SecureProtocol protocol = SecureProtocol.None;
-            SslAlgorithms sslAlgs = SslAlgorithms.ALL;            
+            SslAlgorithms sslAlgs = SslAlgorithms.ALL;
             
 
-            if (((sslData.TargetRequiredOptions & SecurityAssociationOptions.EstablishTrustInTarget) > 0) || 
+            if (((sslData.TargetRequiredOptions & SecurityAssociationOptions.EstablishTrustInTarget) > 0) ||
                 ((sslData.TargetRequiredOptions & SecurityAssociationOptions.EstablishTrustInClient) > 0)) {
                 protocol = SecureProtocol.Tls1 | SecureProtocol.Ssl3;
                 sslAlgs = SslAlgorithms.SECURE_CIPHERS;
@@ -343,15 +341,15 @@ namespace Ch.Elca.Iiop.Security.Ssl {
                 credentialVerification = CredentialVerification.Manual;
                 serverCertificateCheckHandler = new CertVerifyEventHandler(this.CheckServerCertAtClient);
                 clientCertificateRequestHandler = new CertRequestEventHandler(this.GetClientCertAtClient);
-            }            
+            }
             
             SecurityOptions result =
                 new SecurityOptions(protocol,
                                     null, ConnectionEnd.Client,
-                                    credentialVerification, serverCertificateCheckHandler, 
-                                    null, SecurityFlags.Default, sslAlgs, 
+                                    credentialVerification, serverCertificateCheckHandler,
+                                    null, SecurityFlags.Default, sslAlgs,
                                     clientCertificateRequestHandler);
-            return result;            
+            return result;
         }
         
         private void CheckServerCertAtClient(SecureSocket socket, Certificate cert, CertificateChain chain, VerifyEventArgs args) {
@@ -359,8 +357,8 @@ namespace Ch.Elca.Iiop.Security.Ssl {
             args.Valid = m_clientAuth.IsValidServerCertificate(cert, chain, ((IPEndPoint)socket.RemoteEndPoint).Address);
         }
         
-        private void GetClientCertAtClient(SecureSocket socket, DistinguishedNameList acceptable, RequestEventArgs e) {                        
-            Debug.WriteLine("server requested client certificate");            
+        private void GetClientCertAtClient(SecureSocket socket, DistinguishedNameList acceptable, RequestEventArgs e) {
+            Debug.WriteLine("server requested client certificate");
             e.Certificate = m_clientAuth.GetClientCertificate(acceptable);
         }
         
@@ -389,7 +387,7 @@ namespace Ch.Elca.Iiop.Security.Ssl {
             }
         }
         
-        private bool HasSSLComponent(IIorProfile profile) {            
+        private bool HasSSLComponent(IIorProfile profile) {
             if (profile.ProfileId == TAG_INTERNET_IOP.ConstVal) {
                 if (profile.TaggedComponents.ContainsTaggedComponent(TAG_SSL_SEC_TRANS.ConstVal)) {
                     return true;
@@ -401,7 +399,7 @@ namespace Ch.Elca.Iiop.Security.Ssl {
         private SSLComponentData GetSSLComponent(Ior ior, Codec codec) {
             object result = null;
             for (int i = 0; i < ior.Profiles.Length; i++) {
-                result = GetSSLComponent(ior.Profiles[i], codec);                    
+                result = GetSSLComponent(ior.Profiles[i], codec);
                 if (result != null) {
                     break;
                 }
@@ -419,20 +417,7 @@ namespace Ch.Elca.Iiop.Security.Ssl {
                                                                  SSLComponentData.TypeCode);
             } else {
                 return null;
-            }            
-        }
-        
-        /// <summary>
-        /// returns the IPAddress if hostName is a valid ipAdress, otherwise returns null.
-        /// </summary>
-        private IPAddress ConvertToIpAddress(string hostName) {
-            // is there a good way to tell if hostName represents an IpAddress or not?
-            try {
-                return IPAddress.Parse(hostName);
-            } catch (Exception) {
-                // not parsable
-                return null;
-            }            
+            }
         }
         
         /// <summary><see cref="Ch.Elca.Iiop.IClientTransportFactory.GetEndpointKey(IIorProfile)"/></summary>
@@ -440,36 +425,36 @@ namespace Ch.Elca.Iiop.Security.Ssl {
             if (target.ProfileId ==  TAG_INTERNET_IOP.ConstVal) {
                 object sslComponent = GetSSLComponent(target, m_codec);
                 IInternetIiopProfile prof = (IInternetIiopProfile)target;
-                return "iiop-ssl" + prof.Version.Major + "." + 
+                return "iiop-ssl" + prof.Version.Major + "." +
                        prof.Version.Minor + "://"+prof.HostName+":"+((SSLComponentData)sslComponent).Port;
             } else {
                 return String.Empty;
-            }                        
+            }
         }
         
         /// <summary><see cref="Ch.Elca.Iiop.IClientTransportFactory.GetEndPointKeyForBidirEndpoint(object)"/></summary>
         public string GetEndPointKeyForBidirEndpoint(object endPoint) {
             if (endPoint is omg.org.IIOP.ListenPoint) {
-                return "iiop-ssl://"+((omg.org.IIOP.ListenPoint)endPoint).ListenHost + ":" + 
+                return "iiop-ssl://"+((omg.org.IIOP.ListenPoint)endPoint).ListenHost + ":" +
                                  ((omg.org.IIOP.ListenPoint)endPoint).ListenPort;
             } else {
                 return null;
             }
         }
 
-        /// <summary><see cref="Ch.Elca.Iiop.IServerTransportFactory.GetListenPoints(object)"/></summary>        
-        public object[] GetListenPoints(Ch.Elca.Iiop.IiopChannelData chanData) {            
-            ArrayList listenpoints = new ArrayList();            
+        /// <summary><see cref="Ch.Elca.Iiop.IServerTransportFactory.GetListenPoints(object)"/></summary>
+        public object[] GetListenPoints(Ch.Elca.Iiop.IiopChannelData chanData) {
+            ArrayList listenpoints = new ArrayList();
             for (int i = 0; i < chanData.AdditionalTaggedComponents.Length; i++) {
                 if (chanData.AdditionalTaggedComponents[i].tag == TAG_SSL_SEC_TRANS.ConstVal) {
-                    SSLComponentData sslComp = 
+                    SSLComponentData sslComp =
                         (SSLComponentData)m_codec.decode_value(chanData.AdditionalTaggedComponents[i].component_data,
                                                                SSLComponentData.TypeCode);
                     listenpoints.Add(new omg.org.IIOP.ListenPoint(chanData.HostName, sslComp.Port));
                 }
             }
             return listenpoints.ToArray();
-        }        
+        }
         
         /// <summary><see cref="Ch.Elca.Iiop.IServerTransportFactory.CreateConnectionListener"/></summary>
         public IServerConnectionListener CreateConnectionListener(ClientAccepted clientAcceptCallBack) {
@@ -511,7 +496,7 @@ namespace Ch.Elca.Iiop.Security.Ssl {
                     case CLIENT_AUTHENTICATION:
                         // instantiate client side authentication instance
                         string type = (string)entry.Value;
-                        m_clientAuth = (IClientSideAuthentication)Activator.CreateInstance(Type.GetType(type, true));                        
+                        m_clientAuth = (IClientSideAuthentication)Activator.CreateInstance(Type.GetType(type, true));
                         m_clientAuth.SetupClientOptions(properties);
                         break;
                     default:
@@ -538,14 +523,14 @@ namespace Ch.Elca.Iiop.Security.Ssl {
         
         private ClientAccepted m_clientAcceptCallback;
         
-        private Thread m_listenerThread;        
+        private Thread m_listenerThread;
         private SecureTcpListener m_listener;
         private SecurityOptions m_sslOpts;
         
         private bool m_listenerActive = false;
         private bool m_isInitalized = false;
                 
-        private bool m_isSecured = false;        
+        private bool m_isSecured = false;
         private IServerSideAuthentication m_serverAuth;
         private SecurityAssociationOptions m_supportedOptions;
         private SecurityAssociationOptions m_requiredOptions;
@@ -555,13 +540,13 @@ namespace Ch.Elca.Iiop.Security.Ssl {
         #endregion IFields
         #region IConstructors
         
-        internal SslConnectionListener(SecurityAssociationOptions requiredOptions, 
+        internal SslConnectionListener(SecurityAssociationOptions requiredOptions,
                                        SecurityAssociationOptions supportedOptions,
                                        IServerSideAuthentication serverAuth,
                                        omg.org.IOP.Codec codec) {
             m_codec = codec;
             
-            if (((requiredOptions & SecurityAssociationOptions.NoProtection) > 0) && 
+            if (((requiredOptions & SecurityAssociationOptions.NoProtection) > 0) &&
                 (((supportedOptions & SecurityAssociationOptions.EstablishTrustInTarget) > 0) ||
                  ((supportedOptions & SecurityAssociationOptions.EstablishTrustInClient) > 0))) {
                 throw new ArgumentException("unsupported options combination: required no protection and supported EstablishTrustInTarget/Client");
@@ -586,9 +571,9 @@ namespace Ch.Elca.Iiop.Security.Ssl {
             }
             if ((requiredOptions & SecurityAssociationOptions.EstablishTrustInClient) > 0) {
                 authFlags = SecurityFlags.MutualAuthentication;
-            }            
+            }
                                                                                                   
-            m_sslOpts = new SecurityOptions(protocol, serverAuth.GetServerCertificate(), ConnectionEnd.Server, 
+            m_sslOpts = new SecurityOptions(protocol, serverAuth.GetServerCertificate(), ConnectionEnd.Server,
                                             clientVerification, verifyClient,
                                             null, authFlags, allowedCiphers, null);
             m_serverAuth = serverAuth;
@@ -597,13 +582,13 @@ namespace Ch.Elca.Iiop.Security.Ssl {
         }
         
         #endregion IConstructors
-        #region IMethods        
+        #region IMethods
         
-        private void CheckClientCertAtServer(SecureSocket socket, Certificate clientCertificate, CertificateChain allClientCertificates, 
+        private void CheckClientCertAtServer(SecureSocket socket, Certificate clientCertificate, CertificateChain allClientCertificates,
                                              VerifyEventArgs args) {
             Debug.WriteLine("check the client certificate event");
             if (allClientCertificates != null) {
-                args.Valid = m_serverAuth.IsValidClientCertificate(clientCertificate, 
+                args.Valid = m_serverAuth.IsValidClientCertificate(clientCertificate,
                                                                    allClientCertificates, ((IPEndPoint)socket.RemoteEndPoint).Address);
             } else {
                 args.Valid = !((m_requiredOptions & SecurityAssociationOptions.EstablishTrustInClient) > 0);
@@ -633,8 +618,8 @@ namespace Ch.Elca.Iiop.Security.Ssl {
                     }
                 } catch (Exception e) {
                     Debug.WriteLine("Exception in server listener thread: " + e);
-                    if (client != null)  { 
-                        client.Close(); 
+                    if (client != null)  {
+                        client.Close();
                     }
                 }
             }
@@ -647,7 +632,7 @@ namespace Ch.Elca.Iiop.Security.Ssl {
             }
             m_isInitalized = true;
             m_clientAcceptCallback = clientAcceptCallback;
-            SetupListenerThread();            
+            SetupListenerThread();
         }
         
         /// <summary><see cref="Ch.Elca.Iiop.IServerConnectionListener.IsInitalized"</summary>
@@ -665,15 +650,15 @@ namespace Ch.Elca.Iiop.Security.Ssl {
             }
             int resultPort = listeningPortSuggestion;
                         
-            m_listener = new SecureTcpListener(bindTo, listeningPortSuggestion, m_sslOpts);            
+            m_listener = new SecureTcpListener(bindTo, listeningPortSuggestion, m_sslOpts);
             // start TCP-Listening
             m_listener.Start();
-            if (listeningPortSuggestion == 0) { 
+            if (listeningPortSuggestion == 0) {
                 // auto-assign port selected
-                resultPort = ((IPEndPoint)m_listener.LocalEndpoint).Port; 
+                resultPort = ((IPEndPoint)m_listener.LocalEndpoint).Port;
             }
             
-            if (m_isSecured) {                
+            if (m_isSecured) {
                 // create ssl tagged component
                 SSLComponentData sslData = new SSLComponentData(Convert.ToInt16(m_supportedOptions),
                                                                 Convert.ToInt16(m_requiredOptions),
@@ -694,7 +679,7 @@ namespace Ch.Elca.Iiop.Security.Ssl {
         
         /// <summary><see cref="Ch.Elca.Iiop.IServerConnectionListener.IsListening"</summary>
         public bool IsListening() {
-            return m_listenerActive;    
+            return m_listenerActive;
         }
         
         /// <summary><see cref="Ch.Elca.Iiop.IServerConnectionListener.StopListening"</summary>
@@ -703,12 +688,12 @@ namespace Ch.Elca.Iiop.Security.Ssl {
                 throw CreateNotListeningException();
             }
             m_listenerActive = false;
-            if (m_listenerThread != null) { 
+            if (m_listenerThread != null) {
                 try {
-                    m_listenerThread.Interrupt(); m_listenerThread.Abort(); 
+                    m_listenerThread.Interrupt(); m_listenerThread.Abort();
                 } catch (Exception) { }
             }
-            if (m_listener != null) { 
+            if (m_listener != null) {
                 m_listener.Stop();
             }
         }
@@ -717,11 +702,11 @@ namespace Ch.Elca.Iiop.Security.Ssl {
         #region Exceptions
         
         private Exception CreateNotListeningException() {
-            return new InvalidOperationException("Listener is not listening");    
+            return new InvalidOperationException("Listener is not listening");
         }
         
         private Exception CreateAlreadyListeningException() {
-            return new InvalidOperationException("Listener is already listening");    
+            return new InvalidOperationException("Listener is already listening");
         }
         
         private Exception CreateNotInitalizedException() {
@@ -732,7 +717,7 @@ namespace Ch.Elca.Iiop.Security.Ssl {
             return new InvalidOperationException("Listener already initalized");
         }
         
-        #endregion Exceptions        
+        #endregion Exceptions
         #endregion IMethods
         
     }
