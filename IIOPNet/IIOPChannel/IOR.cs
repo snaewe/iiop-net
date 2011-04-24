@@ -446,12 +446,12 @@ namespace Ch.Elca.Iiop.CorbaObjRef
         #region IFields
 
         private string m_hostName;
-        private short m_port;
+        private ushort m_port;
 
         #endregion IFields
         #region IConstructors
 
-        public InternetIiopProfile(GiopVersion version, string hostName, short port, byte[] objectKey)
+        public InternetIiopProfile(GiopVersion version, string hostName, ushort port, byte[] objectKey)
             : base(version, objectKey)
         {
             m_hostName = hostName;
@@ -492,8 +492,7 @@ namespace Ch.Elca.Iiop.CorbaObjRef
         {
             get
             {
-                // do an unchecked cast, overflow no issue here
-                return unchecked((ushort)m_port); // m_port is mapped from an unsigned short -> cast back to ushort, before return
+                return m_port;
             }
         }
 
@@ -512,8 +511,7 @@ namespace Ch.Elca.Iiop.CorbaObjRef
             Debug.WriteLine("giop-verion: " + m_giopVersion);
             m_hostName = encapsulation.ReadString();
             Debug.WriteLine("hostname: " + m_hostName);
-            m_port = unchecked(
-                (short)encapsulation.ReadUShort()); // do an unchecked cast, overflow no issue here
+            m_port = encapsulation.ReadUShort();
             Debug.WriteLine("port: " + m_port);
             uint objectKeyLength = encapsulation.ReadULong();
             m_objectKey = new byte[objectKeyLength];
@@ -553,7 +551,7 @@ namespace Ch.Elca.Iiop.CorbaObjRef
             encapStream.WriteOctet(m_giopVersion.Major);
             encapStream.WriteOctet(m_giopVersion.Minor);
             encapStream.WriteString(m_hostName);
-            encapStream.WriteUShort((ushort)m_port);
+            encapStream.WriteUShort(m_port);
             encapStream.WriteULong((uint)m_objectKey.Length);
             encapStream.WriteOpaque(m_objectKey);
             // the tagged components
@@ -904,7 +902,7 @@ namespace Ch.Elca.Iiop.Tests
 
         private InternetIiopProfile m_profile;
         private string m_hostName;
-        private short m_port;
+        private ushort m_port;
         private byte[] m_objectKey;
         private GiopVersion m_version;
         private Codec m_codec;

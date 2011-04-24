@@ -2158,7 +2158,7 @@ namespace Ch.Elca.Iiop.Tests {
             Serializer ser = new Int16Serializer();
             GenericSerTest(ser, (short)0, new byte[] { 0, 0 });
             GenericSerTest(ser, (short)225, new byte[] { 0, 225 });
-            GenericSerTest(ser, (short)-1, new byte[] { 0xFF, 0xFF });
+            GenericSerTest(ser, unchecked((short)-1), new byte[] { 0xFF, 0xFF });
             GenericSerTest(ser, Int16.MaxValue, new byte[] { 0x7F, 0xFF });
             GenericSerTest(ser, Int16.MinValue, new byte[] { 0x80, 0x00 });
         }
@@ -2168,7 +2168,7 @@ namespace Ch.Elca.Iiop.Tests {
             Serializer ser = new Int16Serializer();
             GenericDeserTest(ser, new byte[] { 0, 0 }, (short)0);
             GenericDeserTest(ser, new byte[] { 0, 225 }, (short)225);
-            GenericDeserTest(ser, new byte[] { 0xFF, 0xFF }, (short)-1);
+            GenericDeserTest(ser, new byte[] { 0xFF, 0xFF }, unchecked((short)-1));
             GenericDeserTest(ser, new byte[] { 0x7F, 0xFF }, Int16.MaxValue);
             GenericDeserTest(ser, new byte[] { 0x80, 0x00 }, Int16.MinValue);
         }
@@ -2194,7 +2194,7 @@ namespace Ch.Elca.Iiop.Tests {
             Serializer ser = new Int32Serializer();
             GenericSerTest(ser, (int)0, new byte[] { 0, 0, 0, 0 });
             GenericSerTest(ser, (int)225, new byte[] { 0, 0, 0, 225 });
-            GenericSerTest(ser, (int)-1, new byte[] { 0xFF, 0xFF, 0xFF, 0xFF });
+            GenericSerTest(ser, unchecked((int)-1), new byte[] { 0xFF, 0xFF, 0xFF, 0xFF });
             GenericSerTest(ser, Int32.MaxValue, new byte[] { 0x7F, 0xFF, 0xFF, 0xFF });
             GenericSerTest(ser, Int32.MinValue, new byte[] { 0x80, 0x00, 0x00, 0x00 });
         }
@@ -2204,7 +2204,7 @@ namespace Ch.Elca.Iiop.Tests {
             Serializer ser = new Int32Serializer();
             GenericDeserTest(ser, new byte[] { 0, 0, 0, 0 }, (int)0);
             GenericDeserTest(ser, new byte[] { 0, 0, 0, 225 }, (int)225);
-            GenericDeserTest(ser, new byte[] { 0xFF, 0xFF, 0xFF, 0xFF }, (int)-1);
+            GenericDeserTest(ser, new byte[] { 0xFF, 0xFF, 0xFF, 0xFF }, unchecked((int)-1));
             GenericDeserTest(ser, new byte[] { 0x7F, 0xFF, 0xFF, 0xFF }, Int32.MaxValue);
             GenericDeserTest(ser, new byte[] { 0x80, 0x00, 0x00, 0x00 }, Int32.MinValue);
         }
@@ -2230,7 +2230,7 @@ namespace Ch.Elca.Iiop.Tests {
             Serializer ser = new Int64Serializer();
             GenericSerTest(ser, (long)0, new byte[] { 0, 0, 0, 0, 0, 0, 0, 0 });
             GenericSerTest(ser, (long)225, new byte[] { 0, 0, 0, 0, 0, 0, 0, 225 });
-            GenericSerTest(ser, (long)-1, new byte[] { 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF });
+            GenericSerTest(ser, unchecked((long)-1), new byte[] { 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF });
             GenericSerTest(ser, Int64.MaxValue, new byte[] { 0x7F, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF });
             GenericSerTest(ser, Int64.MinValue, new byte[] { 0x80, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 });
         }
@@ -2240,7 +2240,7 @@ namespace Ch.Elca.Iiop.Tests {
             Serializer ser = new Int64Serializer();
             GenericDeserTest(ser, new byte[] { 0, 0, 0, 0, 0, 0, 0, 0 }, (long)0);
             GenericDeserTest(ser, new byte[] { 0, 0, 0, 0, 0, 0, 0, 225 }, (long)225);
-            GenericDeserTest(ser, new byte[] { 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF }, (long)-1);
+            GenericDeserTest(ser, new byte[] { 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF }, unchecked((long)-1));
             GenericDeserTest(ser, new byte[] { 0x7F, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF }, Int64.MaxValue);
             GenericDeserTest(ser, new byte[] { 0x80, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 }, Int64.MinValue);
         }

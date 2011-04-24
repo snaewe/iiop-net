@@ -293,7 +293,7 @@ namespace Ch.Elca.Iiop.Util {
                     : Repository.GetRepositoryID(forType);
                 // this server support GIOP 1.2 --> create an GIOP 1.2 profile
                 InternetIiopProfile profile = new InternetIiopProfile(new GiopVersion(1, 2), host,
-                                                                      (short)port, objectKey);
+                                                                      (ushort)port, objectKey);
                 // add additional tagged components according to the channel options, e.g. for SSL
                 profile.AddTaggedComponents(serverData.AdditionalTaggedComponents);
                 // add additional tagged components according to registered interceptors:

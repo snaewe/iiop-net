@@ -1796,7 +1796,7 @@ namespace Ch.Elca.Iiop.Tests
             m_targetIor = new Ior(Repository.GetRepositoryID(typeof(ISimpleCallTestOnChannel)),
                                   new IorProfile[] {
                                       new InternetIiopProfile(new GiopVersion(1,2),
-                                                            "localhost", (short)TEST_PORT,
+                                                            "localhost", (ushort)TEST_PORT,
                                                             IorUtil.GetKeyBytesForId(TEST_URI + idSuffix))
                                   });
             m_targetIiopLoc = "iiop://localhost:" + TEST_PORT + "/" + TEST_URI + idSuffix;

@@ -284,15 +284,15 @@ namespace Ch.Elca.Iiop.Cdr {
         }
 
         internal static Int16 Reverse(Int16 v) {
-            return (Int16)Reverse((UInt16)v);
+            return unchecked((Int16)Reverse((UInt16)v));
         }
         
         internal static Int32 Reverse(Int32 v) {
-            return (Int32)Reverse((UInt32)v);
+            return unchecked((Int32)Reverse((UInt32)v));
         }
         
         internal static Int64 Reverse(Int64 v) {
-            return (Int64)Reverse((UInt64)v);
+            return unchecked((Int64)Reverse((UInt64)v));
         }
 
 #if USE_UNSAFE_CODE
@@ -319,8 +319,10 @@ namespace Ch.Elca.Iiop.Cdr {
         }
 
         internal static Double Reverse(Double v) {
-            UInt64 r = Reverse((UInt64)BitConverter.DoubleToInt64Bits(v));
-            return BitConverter.Int64BitsToDouble((Int64)r);
+            unchecked {
+                UInt64 r = Reverse((UInt64)BitConverter.DoubleToInt64Bits(v));
+                return BitConverter.Int64BitsToDouble((Int64)r);
+            }
         }
 #endif
 

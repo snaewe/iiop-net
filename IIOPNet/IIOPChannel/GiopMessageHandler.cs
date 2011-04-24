@@ -53,13 +53,13 @@ namespace Ch.Elca.Iiop.MessageHandling {
     /// This class is a helper class for the formatter.
     /// </remarks>
     internal class GiopMessageHandler {
-        
+ 
         #region IFields
-        
+ 
         private GiopMessageBodySerialiser m_ser;
         private byte m_headerFlags;
         private IInterceptionOption[] m_interceptionOptions;
-        
+ 
         #endregion IFields
         #region IConstructors
 
@@ -71,10 +71,10 @@ namespace Ch.Elca.Iiop.MessageHandling {
         /// </summary>
         internal GiopMessageHandler(ArgumentsSerializerFactory argSerFactory,
                                     byte headerFlags) : this
-            (argSerFactory, headerFlags, 
-             InterceptorManager.EmptyInterceptorOptions) {            
+            (argSerFactory, headerFlags,
+             InterceptorManager.EmptyInterceptorOptions) {
         }
-    
+ 
         /// <summary>
         /// Constructs a giop message handler, which uses the given
         /// ArgumentsSerializerFactory for serializing/deserializing
@@ -82,9 +82,9 @@ namespace Ch.Elca.Iiop.MessageHandling {
         /// used header flags for messages initiated by this handler.
         /// The interceptionOptions[] provides the information on
         /// channel level interceptors.
-        /// </summary>        
+        /// </summary>
         internal GiopMessageHandler(ArgumentsSerializerFactory argSerFactory,
-                                    byte headerFlags, 
+                                    byte headerFlags,
                                     IInterceptionOption[] interceptionOptions) {
             m_ser = new GiopMessageBodySerialiser(argSerFactory);
             m_headerFlags = headerFlags;
@@ -98,11 +98,11 @@ namespace Ch.Elca.Iiop.MessageHandling {
         internal static bool IsOneWayCall(IMethodCallMessage msg) {
             return RemotingServices.IsOneWay(msg.MethodBase);
         }
-        
+ 
         /// <summary>
         /// Checks, if the result message is a location forward.
         /// </summary>
-        internal static bool IsLocationForward(IMessage resultMessage, 
+        internal static bool IsLocationForward(IMessage resultMessage,
                                                out MarshalByRefObject fwdTarget) {
             fwdTarget = null;
             bool result = false;
@@ -120,21 +120,21 @@ namespace Ch.Elca.Iiop.MessageHandling {
         /// <summary>reads an incoming Giop reply message from the Stream sourceStream</summary>
         /// <remarks>Precondition: sourceStream contains a Giop reply Msg</remarks>
         /// <returns>the .NET reply Msg created from the Giop Reply</returns>
-        internal IMessage ParseIncomingReplyMessage(Stream sourceStream, 
+        internal IMessage ParseIncomingReplyMessage(Stream sourceStream,
                                                   IMethodCallMessage requestMessage,
                                                   GiopClientConnectionDesc conDesc) {
             CdrMessageInputStream msgInput = new CdrMessageInputStream(sourceStream);
             return ParseIncomingReplyMessage(msgInput, requestMessage, conDesc);
         }
-        
+ 
         /// <summary>reads an incoming Giop reply message from the Message input stream msgInput</summary>
         /// <remarks>Precondition: sourceStream contains a Giop reply Msg</remarks>
         /// <returns>the .NET reply Msg created from the Giop Reply</returns>
-        internal IMessage ParseIncomingReplyMessage(CdrMessageInputStream msgInput, 
+        internal IMessage ParseIncomingReplyMessage(CdrMessageInputStream msgInput,
                                                   IMethodCallMessage requestMessage,
                                                   GiopClientConnectionDesc conDesc) {
-            Debug.WriteLine("receive reply message at client side");            
-            
+            Debug.WriteLine("receive reply message at client side");
+ 
             CdrInputStream msgBody = msgInput.GetMessageContentReadingStream();
             GiopClientRequest request = new GiopClientRequest(requestMessage, conDesc, m_interceptionOptions);
             if (request.IsAsyncRequest) {
@@ -152,12 +152,12 @@ namespace Ch.Elca.Iiop.MessageHandling {
                     }
                 }
             }
-            // deserialize message body            
+            // deserialize message body
             IMessage result = m_ser.DeserialiseReply(msgBody, msgInput.Header.Version, request,
                                                      conDesc);
             return result;
         }
-        
+ 
         /// <summary>
         /// creates a return message for a return value and possible out/ref args among the sent arguments
         /// </summary>
@@ -170,7 +170,7 @@ namespace Ch.Elca.Iiop.MessageHandling {
             bool outArgFound = false;
             ArrayList outArgsList = new ArrayList();
             for (int i = 0; i < parameters.Length; i++) {
-                if (ReflectionHelper.IsOutParam(parameters[i]) || 
+                if (ReflectionHelper.IsOutParam(parameters[i]) ||
                     ReflectionHelper.IsRefParam(parameters[i])) {
                     outArgsList.Add(reqArgs[i]); // i-th argument is an out/ref param
                     outArgFound = true;
@@ -178,42 +178,42 @@ namespace Ch.Elca.Iiop.MessageHandling {
                     outArgsList.Add(null); // for an in param null must be added to out-args
                 }
             }
-            
+ 
             object[] outArgs = outArgsList.ToArray();
-            if ((!outArgFound) || (outArgs == null)) { 
-                outArgs = new object[0]; 
+            if ((!outArgFound) || (outArgs == null)) {
+                outArgs = new object[0];
             }
             // create the return message
-            return new ReturnMessage(retVal, outArgs, outArgs.Length, null, request); 
-        }               
-        
+            return new ReturnMessage(retVal, outArgs, outArgs.Length, null, request);
+        }
+ 
         /// <summary>
         /// Forward a request, after repeception of a forward request message.
         /// </summary>
         /// <param name="reuest">the original request</param>
         /// <param name="fwdToTarget">the forward target</param>
         internal IMessage ForwardRequest(IMethodCallMessage request,
-                                         MarshalByRefObject fwdToTarget) {            
+                                         MarshalByRefObject fwdToTarget) {
             object[] reqArgs = new object[request.Args.Length];
             request.Args.CopyTo(reqArgs, 0);
             object retVal = request.MethodBase.Invoke(fwdToTarget, reqArgs);
-            return CreateReturnMsgForValues(retVal, reqArgs, 
+            return CreateReturnMsgForValues(retVal, reqArgs,
                                             request);
-        }        
+        }
 
         /// <summary>reads an incoming Giop request-message from the Stream sourceStream</summary>
         /// <returns>the .NET request message created from this Giop-message</returns>
-        internal IMessage ParseIncomingRequestMessage(Stream sourceStream, 
+        internal IMessage ParseIncomingRequestMessage(Stream sourceStream,
                                                     GiopConnectionDesc conDesc) {
             CdrMessageInputStream msgInput = new CdrMessageInputStream(sourceStream);
             return ParseIncomingRequestMessage(msgInput, conDesc);
         }
-        
+ 
         /// <summary>reads an incoming Giop request-message from the message input stream msgInput</summary>
         /// <returns>the .NET request message created from this Giop-message</returns>
-        internal IMessage ParseIncomingRequestMessage(CdrMessageInputStream msgInput, 
+        internal IMessage ParseIncomingRequestMessage(CdrMessageInputStream msgInput,
                                                     GiopConnectionDesc conDesc) {
-            
+ 
             CdrInputStream msgBody = msgInput.GetMessageContentReadingStream();
             // deserialize the message body (the GIOP-request id is included in this message)
             return m_ser.DeserialiseRequest(msgBody, msgInput.Header.Version,
@@ -236,12 +236,12 @@ namespace Ch.Elca.Iiop.MessageHandling {
                 msg.Properties[SimpleGiopMsg.REQUEST_ID_KEY] = requestId; // set request-id
                 msg.Properties[SimpleGiopMsg.TARGET_PROFILE_KEY] = target;
                 GiopClientRequest request = new GiopClientRequest((IMethodCallMessage)msg, conDesc, m_interceptionOptions);
-                m_ser.SerialiseRequest(request, 
+                m_ser.SerialiseRequest(request,
                                        msgOutput.GetMessageContentWritingStream(),
                                        target, conDesc);
                 msgOutput.CloseStream();
                 if ((request.IsAsyncRequest) || (request.IsOneWayCall)) {
-                    // after successful serialisation, call for oneway and async requests receive other, 
+                    // after successful serialisation, call for oneway and async requests receive other,
                     // see corba 2.6, page 21-12.
                     request.InterceptReceiveOther();
                 }
@@ -258,11 +258,11 @@ namespace Ch.Elca.Iiop.MessageHandling {
                 // write a CORBA response message into the stream targetStream
                 GiopHeader header = new GiopHeader(version.Major, version.Minor, m_headerFlags, GiopMsgTypes.Reply);
                 CdrMessageOutputStream msgOutput = new CdrMessageOutputStream(targetStream, header);
-                GiopServerRequest request = new GiopServerRequest(requestMsg, 
-                                                                  (ReturnMessage)replyMsg, conDesc, 
+                GiopServerRequest request = new GiopServerRequest(requestMsg,
+                                                                  (ReturnMessage)replyMsg, conDesc,
                                                                   m_interceptionOptions);
                 // serialize the message
-                m_ser.SerialiseReply(request, msgOutput.GetMessageContentWritingStream(), 
+                m_ser.SerialiseReply(request, msgOutput.GetMessageContentWritingStream(),
                                      version, conDesc);
                 msgOutput.CloseStream(); // write to the stream
             } else {
@@ -270,7 +270,7 @@ namespace Ch.Elca.Iiop.MessageHandling {
                                                   replyMsg.GetType());
             }
         }
-        
+ 
         /// <summary>
         /// reads a locate-request message.
         /// </summary>
@@ -278,35 +278,35 @@ namespace Ch.Elca.Iiop.MessageHandling {
             CdrMessageInputStream msgInput = new CdrMessageInputStream(sourceStream);
             return ParseIncomingLocateRequestMessage(msgInput);
         }
-        
+ 
         /// <summary>
         /// reads a locate-request message.
         /// </summary>
         internal LocateRequestMessage ParseIncomingLocateRequestMessage(CdrMessageInputStream msgInput) {
             CdrInputStream msgBody = msgInput.GetMessageContentReadingStream();
-            // deserialize message body                        
+            // deserialize message body
             LocateRequestMessage result = m_ser.DeserialiseLocateRequest(msgBody, msgInput.Header.Version);
             Debug.WriteLine("locate request for target-uri: " + result.TargetUri);
             return result;
-        }                
-        
+        }
+ 
         /// <summary>
-        /// reads a locate-request message from the message input stream msgInput 
+        /// reads a locate-request message from the message input stream msgInput
         /// and formulates an answer.
-        /// </summary>        
+        /// </summary>
         /// <returns></returns>
         internal Stream SerialiseOutgoingLocateReplyMessage(LocateReplyMessage replyMsg, LocateRequestMessage requestMsg,
                                                             GiopVersion version,
-                                                            Stream targetStream, GiopConnectionDesc conDesc) {            
+                                                            Stream targetStream, GiopConnectionDesc conDesc) {
             GiopHeader header = new GiopHeader(version.Major, version.Minor, m_headerFlags, GiopMsgTypes.LocateReply);
             CdrMessageOutputStream msgOutput = new CdrMessageOutputStream(targetStream, header);
             // serialize the message
-            m_ser.SerialiseLocateReply(msgOutput.GetMessageContentWritingStream(), version, 
+            m_ser.SerialiseLocateReply(msgOutput.GetMessageContentWritingStream(), version,
                                        requestMsg.RequestId, replyMsg);
             msgOutput.CloseStream(); // write to the stream
             return targetStream;
-        }            
-        
+        }
+ 
         #endregion IMethods
 
     }
@@ -316,7 +316,7 @@ namespace Ch.Elca.Iiop.MessageHandling {
 #if UnitTest
 
 namespace Ch.Elca.Iiop.Tests {
-    
+ 
     using System.Reflection;
     using System.Collections;
     using System.IO;
@@ -332,61 +332,61 @@ namespace Ch.Elca.Iiop.Tests {
 
 
     public class TestService : MarshalByRefObject {
-    
+ 
         public int Add(Int32 arg1, Int32 arg2) {
             return arg1 + arg2;
         }
-    
+ 
     }
 
     public class TestMessage : IMethodCallMessage {
-    
+ 
         private IDictionary m_props = new Hashtable();
 
         private MethodInfo m_methodToCall;
-        
+ 
         private string m_uri;
-        
+ 
         private object[] m_args;
-        
+ 
         private bool m_hasVarArgs = false;
-    
+ 
         public TestMessage(MethodInfo methodToCall, object[] args, string uri) {
             m_methodToCall = methodToCall;
             m_uri = uri;
             m_args = args;
         }
-        
+ 
         public IDictionary Properties {
             get {
                 return m_props;
             }
         }
-        
+ 
         public string Uri {
             get {
                 return m_uri;
             }
         }
-        
+ 
         public string TypeName {
             get {
                 return m_methodToCall.DeclaringType.FullName;
             }
         }
-        
+ 
         public string MethodName {
             get {
                 return m_methodToCall.Name;
             }
         }
-               
+ 
         public MethodBase MethodBase {
             get {
                 return m_methodToCall;
             }
         }
-        
+ 
         public object MethodSignature {
             get {
                 if (MethodBase != null) {
@@ -394,34 +394,34 @@ namespace Ch.Elca.Iiop.Tests {
                 } else {
                     return null;
                 }
-                    
+ 
             }
         }
-        
+ 
         public int ArgCount {
             get {
                 return m_args.Length;
             }
         }
-        
+ 
         public int InArgCount {
             get {
                 throw new NotImplementedException();
             }
         }
-        
+ 
         public object[] Args {
             get {
                 return m_args;
             }
         }
-        
+ 
         public object[] InArgs {
             get {
                 throw new NotImplementedException();
             }
         }
-        
+ 
         public bool HasVarArgs {
             get {
                 return m_hasVarArgs;
@@ -430,29 +430,29 @@ namespace Ch.Elca.Iiop.Tests {
                 m_hasVarArgs = value;
             }
         }
-        
+ 
         public LogicalCallContext LogicalCallContext {
             get {
                 return null;
             }
         }
-        
+ 
         public object GetArg(int nr) {
             return m_args[nr];
         }
-        
+ 
         public object GetInArg(int nr) {
             throw new NotImplementedException();
         }
-        
+ 
         public string GetArgName(int nr) {
             throw new NotImplementedException();
         }
-        
+ 
         public string GetInArgName(int nr) {
             throw new NotImplementedException();
         }
-                                    
+ 
     }
 
 
@@ -461,34 +461,33 @@ namespace Ch.Elca.Iiop.Tests {
     /// </summary>
     [TestFixture]
     public class RequestReplySerialisationTest {
-    
-        private byte[] m_giopMagic = { 71, 73, 79, 80 };    
-        
+ 
+        private byte[] m_giopMagic = { 71, 73, 79, 80 };
+ 
         private IiopUrlUtil m_iiopUrlUtil;
         private SerializerFactory m_serFactory;
         private omg.org.IOP.Codec m_codec;
         private GiopMessageHandler m_handler;
-        
+ 
         [SetUp]
         public void SetUp() {
-            m_serFactory =
-    	        new SerializerFactory();
+            m_serFactory = new SerializerFactory();
             omg.org.IOP.CodecFactory codecFactory =
                 new Ch.Elca.Iiop.Interception.CodecFactoryImpl(m_serFactory);
-            m_codec = 
+            m_codec =
                 codecFactory.create_codec(
                     new omg.org.IOP.Encoding(omg.org.IOP.ENCODING_CDR_ENCAPS.ConstVal,
                                              1, 2));
-            m_iiopUrlUtil = 
-                IiopUrlUtil.Create(m_codec, new object[] { 
+            m_iiopUrlUtil =
+                IiopUrlUtil.Create(m_codec, new object[] {
                     Services.CodeSetService.CreateDefaultCodesetComponent(m_codec)});
             m_serFactory.Initalize(new SerializerFactoryConfig(), m_iiopUrlUtil);
-            m_handler = 
+            m_handler =
                 new GiopMessageHandler(
                     new ArgumentsSerializerFactory(m_serFactory),
                     GiopHeader.GetDefaultHeaderFlagsForEndian(Endian.BigEndian));
         }
-                
+ 
         /// <summary>
         /// asserts that the expected byte sequence is following in the stream
         /// </summary>
@@ -498,20 +497,20 @@ namespace Ch.Elca.Iiop.Tests {
                 Assert.AreEqual(expected[i], data);
             }
         }
-        
+ 
         /// <summary>
         /// skips the service contexts in a request / reply msg
         /// </summary>
         private void SkipServiceContexts(CdrInputStream cdrIn) {
             uint nrOfContexts = cdrIn.ReadULong();
-            // Skip service contexts: not part of this test            
+            // Skip service contexts: not part of this test
             for (uint i = 0; i < nrOfContexts; i++) {
                 uint contextId = cdrIn.ReadULong();
                 uint lengthOfContext = cdrIn.ReadULong();
                 cdrIn.ReadPadding(lengthOfContext);
             }
         }
-        
+ 
         [Test]
         public void TestRequestSerialisation() {
             // prepare message
@@ -521,22 +520,22 @@ namespace Ch.Elca.Iiop.Tests {
             Ior target = m_iiopUrlUtil.CreateIorForUrl(uri, "");
             TestMessage msg = new TestMessage(methodToCall, args, uri);
             // prepare connection context
-            GiopClientConnectionDesc conDesc = new GiopClientConnectionDesc(null, null, 
+            GiopClientConnectionDesc conDesc = new GiopClientConnectionDesc(null, null,
                                                                             new GiopRequestNumberGenerator(), null);
 
-            // serialise            
+            // serialise
             MemoryStream targetStream = new MemoryStream();
-            
+ 
             uint reqId = 5;
             m_handler.SerialiseOutgoingRequestMessage(msg, target.Profiles[0], conDesc, targetStream, reqId);
-            
+ 
             // check to serialised stream
             targetStream.Seek(0, SeekOrigin.Begin);
-            
+ 
             CdrInputStreamImpl cdrIn = new CdrInputStreamImpl(targetStream);
             cdrIn.ConfigStream(0, new GiopVersion(1, 2));
-            
-            // first is Giop-magic                        
+ 
+            // first is Giop-magic
             byte data;
             AssertBytesFollowing(m_giopMagic, cdrIn);
             // Giop version
@@ -564,7 +563,7 @@ namespace Ch.Elca.Iiop.Tests {
             // target must be testuri encoded as ascii-characters
             Assert.AreEqual(7 , cdrIn.ReadULong());
             AssertBytesFollowing(
-                new byte[] { 116, 101, 115, 116, 117, 114, 105 }, 
+                new byte[] { 116, 101, 115, 116, 117, 114, 105 },
                 cdrIn);
             // now the target method follows: Add (string is terminated by a zero)
             Assert.AreEqual(4, cdrIn.ReadULong());
@@ -577,7 +576,7 @@ namespace Ch.Elca.Iiop.Tests {
             Assert.AreEqual(1, cdrIn.ReadLong());
             Assert.AreEqual(2, cdrIn.ReadLong());
         }
-        
+ 
         [Test]
         public void TestReplySerialisation() {
             // request msg the reply is for
@@ -594,19 +593,19 @@ namespace Ch.Elca.Iiop.Tests {
             GiopConnectionDesc conDesc = new GiopConnectionDesc(null, null);
 
             // create the reply
-            ReturnMessage retMsg = new ReturnMessage((Int32) 3, new object[0], 0, null, msg);            
-            
+            ReturnMessage retMsg = new ReturnMessage((Int32) 3, new object[0], 0, null, msg);
+ 
             MemoryStream targetStream = new MemoryStream();
-            
-            m_handler.SerialiseOutgoingReplyMessage(retMsg, msg, version, 
+ 
+            m_handler.SerialiseOutgoingReplyMessage(retMsg, msg, version,
                                                     targetStream, conDesc);
-            
+ 
             // check to serialised stream
             targetStream.Seek(0, SeekOrigin.Begin);
 
             CdrInputStreamImpl cdrIn = new CdrInputStreamImpl(targetStream);
             cdrIn.ConfigStream(0, new GiopVersion(1, 2));
-            
+ 
             // first is Giop-magic
             byte data;
             AssertBytesFollowing(m_giopMagic, cdrIn);
@@ -635,9 +634,9 @@ namespace Ch.Elca.Iiop.Tests {
             // now return value is following
             Assert.AreEqual(3, cdrIn.ReadLong());
         }
-        
+ 
         [Test]
-        public void TestRequestDeserialisation() {          
+        public void TestRequestDeserialisation() {
             MemoryStream sourceStream = new MemoryStream();
             // prepare msg
             uint requestId = 5;
@@ -647,7 +646,7 @@ namespace Ch.Elca.Iiop.Tests {
             int arg1 = 1;
             int arg2 = 2;
             GiopVersion version = new GiopVersion(1, 2);
-            CdrOutputStreamImpl cdrOut = new CdrOutputStreamImpl(sourceStream, 0, 
+            CdrOutputStreamImpl cdrOut = new CdrOutputStreamImpl(sourceStream, 0,
                                                                  version);
             cdrOut.WriteOpaque(m_giopMagic);
             // version
@@ -690,9 +689,9 @@ namespace Ch.Elca.Iiop.Tests {
                 string uri = "testobject";
                 RemotingServices.Marshal(service, uri);
 
-                // deserialise request message                
+                // deserialise request message
                 result = m_handler.ParseIncomingRequestMessage(sourceStream, conDesc);
-            } catch (RequestDeserializationException e) {                
+            } catch (RequestDeserializationException e) {
                 throw e;
             } finally {
                 RemotingServices.Disconnect(service);
@@ -712,7 +711,7 @@ namespace Ch.Elca.Iiop.Tests {
             Assert.AreEqual(arg1, args[0]);
             Assert.AreEqual(arg2, args[1]);
         }
-        
+ 
         [Test]
         public void TestReplyDeserialisation() {
             // request msg the reply is for
@@ -743,26 +742,26 @@ namespace Ch.Elca.Iiop.Tests {
             // no service contexts
             cdrOut.WriteULong(0);
             // body: 8 aligned
-            cdrOut.ForceWriteAlign(Aligns.Align8); 
+            cdrOut.ForceWriteAlign(Aligns.Align8);
             // result
             cdrOut.WriteLong(3);
             // check deser of msg:
-            sourceStream.Seek(0, SeekOrigin.Begin);            
+            sourceStream.Seek(0, SeekOrigin.Begin);
             ReturnMessage result = (ReturnMessage) m_handler.ParseIncomingReplyMessage(sourceStream, requestMsg, conDesc);
             Assert.AreEqual(3, result.ReturnValue);
             Assert.AreEqual(0, result.OutArgCount);
-        }                
-                
+        }
+ 
         //[Ignore("can prevent the test domain from unloading, find a solution for this before adding definitively")]
-        [Test]  
+        [Test]
         public void TestLocationForward() {
             IiopChannel chan = new IiopChannel(8090);
             ChannelServices.RegisterChannel(chan, false);
             // publish location fwd target
-            TestService target = new TestService();            
+            TestService target = new TestService();
             string fwdTargetUri = "testuriFwd";
             RemotingServices.Marshal(target, fwdTargetUri);
-            
+ 
             // request msg the reply is for
             MethodInfo methodToCall = typeof(TestService).GetMethod("Add");
             object[] args = new object[] { ((Int32) 1), ((Int32) 2) };
@@ -770,11 +769,11 @@ namespace Ch.Elca.Iiop.Tests {
             TestMessage requestMsg = new TestMessage(methodToCall, args, origUrl);
             // prepare connection desc
             GiopClientConnectionDesc conDesc = new GiopClientConnectionDesc(null, null, new GiopRequestNumberGenerator(), null);
-            
+ 
             try {
                 Stream locFwdStream = PrepareLocationFwdStream("localhost", 8090,
-                                                               target);                
-                IMessage resultMsg = 
+                                                               target);
+                IMessage resultMsg =
                     (IMessage) m_handler.ParseIncomingReplyMessage(locFwdStream, requestMsg, conDesc);
                 MarshalByRefObject fwdToTarget;
                 bool isFwd = GiopMessageHandler.IsLocationForward(resultMsg, out fwdToTarget);
@@ -783,26 +782,26 @@ namespace Ch.Elca.Iiop.Tests {
                 ReturnMessage result = (ReturnMessage)
                     m_handler.ForwardRequest(requestMsg, fwdToTarget);
                 Assert.AreEqual(3, result.ReturnValue);
-                Assert.AreEqual(0, result.OutArgCount);                
+                Assert.AreEqual(0, result.OutArgCount);
             } finally {
                 // unpublish target + channel
                 RemotingServices.Disconnect(target);
                 chan.StopListening(null);
-                ChannelServices.UnregisterChannel(chan);            
+                ChannelServices.UnregisterChannel(chan);
             }
         }
-                
+ 
         //[Ignore("can prevent the test domain from unloading, find a solution for this before adding definitively")]
-        [Test]          
+        [Test]
         public void TestLocationForwardOnIsA() {
-            // tests location forward, if we forward on is_a call            
+            // tests location forward, if we forward on is_a call
             IiopChannel chan = new IiopChannel(8090);
             ChannelServices.RegisterChannel(chan, false);
             // publish location fwd target
-            TestService target = new TestService();            
+            TestService target = new TestService();
             string fwdTargetUri = "testuriFwdForIsA";
             RemotingServices.Marshal(target, fwdTargetUri);
-            
+ 
             // request msg the reply is for
             MethodInfo methodToCall = typeof(omg.org.CORBA.IObject).GetMethod("_is_a");
             object[] args = new object[] { "IDL:Ch/Elca/Iiop/Tests/TestService:1.0" };
@@ -810,34 +809,34 @@ namespace Ch.Elca.Iiop.Tests {
             TestMessage requestMsg = new TestMessage(methodToCall, args, origUrl);
             // prepare connection desc
             GiopClientConnectionDesc conDesc = new GiopClientConnectionDesc(null, null, new GiopRequestNumberGenerator(), null);
-            
+ 
             try {
                 Stream locFwdStream = PrepareLocationFwdStream("localhost", 8090,
                                                                target);
-               
-                IMessage resultMsg = 
-                    m_handler.ParseIncomingReplyMessage(locFwdStream, requestMsg, conDesc);                
+ 
+                IMessage resultMsg =
+                    m_handler.ParseIncomingReplyMessage(locFwdStream, requestMsg, conDesc);
                 MarshalByRefObject fwdToTarget;
                 bool isFwd = GiopMessageHandler.IsLocationForward(resultMsg, out fwdToTarget);
                 Assert.IsTrue(isFwd, "is a forward?");
                 Assert.NotNull(fwdToTarget,"new target reference null?");
                 ReturnMessage result = (ReturnMessage)
-                    m_handler.ForwardRequest(requestMsg, fwdToTarget);                
+                    m_handler.ForwardRequest(requestMsg, fwdToTarget);
                 Assert.AreEqual(true, result.ReturnValue);
-                Assert.AreEqual(0, result.OutArgCount);                
+                Assert.AreEqual(0, result.OutArgCount);
             } finally {
                 // unpublish target + channel
                 RemotingServices.Disconnect(target);
                 chan.StopListening(null);
-                ChannelServices.UnregisterChannel(chan);            
+                ChannelServices.UnregisterChannel(chan);
             }
 
-            
-            
+ 
+ 
         }
-        
-        private Stream PrepareLocationFwdStream(string host, short port,
-                                                MarshalByRefObject target) {           
+ 
+        private Stream PrepareLocationFwdStream(string host, ushort port,
+                                                MarshalByRefObject target) {
             // loc fwd ior
             byte[] objectKey = IorUtil.GetObjectKeyForObj(target);
             string repositoryID = Repository.GetRepositoryID(target.GetType());
@@ -846,11 +845,11 @@ namespace Ch.Elca.Iiop.Tests {
                                                                   port, objectKey);
             profile.AddTaggedComponent(Services.CodeSetService.CreateDefaultCodesetComponent(m_codec));
             Ior locFwdTarget = new Ior(repositoryID, new IorProfile[] { profile });
-            CdrOutputStreamImpl iorStream = new CdrOutputStreamImpl(new MemoryStream(), 
+            CdrOutputStreamImpl iorStream = new CdrOutputStreamImpl(new MemoryStream(),
                                                                     0, new GiopVersion(1, 2));
-            locFwdTarget.WriteToStream(iorStream);            
+            locFwdTarget.WriteToStream(iorStream);
             uint encodedIorLength = (uint)iorStream.GetPosition();
-            
+ 
             // create the location fwd reply
             MemoryStream sourceStream = new MemoryStream();
             CdrOutputStreamImpl cdrOut = new CdrOutputStreamImpl(sourceStream, 0, new GiopVersion(1, 2));
@@ -862,7 +861,7 @@ namespace Ch.Elca.Iiop.Tests {
             cdrOut.WriteOctet(0);
             // msg-type: reply
             cdrOut.WriteOctet(1);
-            
+ 
             // msg-length
             cdrOut.WriteULong(28 + encodedIorLength);
             // request-id
@@ -874,24 +873,24 @@ namespace Ch.Elca.Iiop.Tests {
             cdrOut.WriteULong(162739); // service context id
             cdrOut.WriteULong(2); // length of svc context
             cdrOut.WriteBool(true);
-            cdrOut.WriteBool(false);            
-            // svc context end            
+            cdrOut.WriteBool(false);
+            // svc context end
             // body: 8 aligned
             cdrOut.ForceWriteAlign(Aligns.Align8);
 
             locFwdTarget.WriteToStream(cdrOut);
-                
-            sourceStream.Seek(0, SeekOrigin.Begin);                
-            return sourceStream;            
+ 
+            sourceStream.Seek(0, SeekOrigin.Begin);
+            return sourceStream;
         }
 
-        [Test]        
+        [Test]
         public void TestLocateRequestDeserialisation() {
             MemoryStream sourceStream = new MemoryStream();
             // prepare msg
-            uint requestId = 5;            
+            uint requestId = 5;
             GiopVersion version = new GiopVersion(1, 2);
-            CdrOutputStreamImpl cdrOut = new CdrOutputStreamImpl(sourceStream, 0, 
+            CdrOutputStreamImpl cdrOut = new CdrOutputStreamImpl(sourceStream, 0,
                                                                  version);
             cdrOut.WriteOpaque(m_giopMagic);
             // version
@@ -909,25 +908,25 @@ namespace Ch.Elca.Iiop.Tests {
             cdrOut.WriteULong(0);
             cdrOut.WriteULong(10); // key length
             byte[] objectKey = new byte[] { 116, 101, 115, 116, 111, 98, 106, 101, 99, 116 }; // testobject
-            cdrOut.WriteOpaque(objectKey); 
+            cdrOut.WriteOpaque(objectKey);
 
             // create a connection context: this is needed for request deserialisation
             GiopConnectionDesc conDesc = new GiopConnectionDesc(null, null);
 
             // go to stream begin
-            sourceStream.Seek(0, SeekOrigin.Begin);            
-            
-            // deserialise request message            
+            sourceStream.Seek(0, SeekOrigin.Begin);
+ 
+            // deserialise request message
             LocateRequestMessage result = m_handler.ParseIncomingLocateRequestMessage(sourceStream);
 
             // now check if values are correct
             Assert.IsTrue(result != null, "deserialised message is null");
             Assert.AreEqual(requestId, result.RequestId);
             Assert.NotNull(result.ObjectKey);
-            Assert.NotNull(result.TargetUri);            
+            Assert.NotNull(result.TargetUri);
             Assert.AreEqual("testobject", result.TargetUri);
         }
-        
+ 
         [Test]
         public void TestLocateReplySerialisation() {
             uint requestId = 5;
@@ -941,17 +940,17 @@ namespace Ch.Elca.Iiop.Tests {
             // create the reply
             LocateStatus replyStatus = LocateStatus.OBJECT_HERE;
             LocateReplyMessage locReply = new LocateReplyMessage(replyStatus);
-            
+ 
             MemoryStream targetStream = new MemoryStream();
-            
+ 
             m_handler.SerialiseOutgoingLocateReplyMessage(locReply, locReq, version, targetStream, conDesc);
-            
+ 
             // check to serialised stream
             targetStream.Seek(0, SeekOrigin.Begin);
 
             CdrInputStreamImpl cdrIn = new CdrInputStreamImpl(targetStream);
             cdrIn.ConfigStream(0, version);
-            
+ 
             // first is Giop-magic
             byte data;
             AssertBytesFollowing(m_giopMagic, cdrIn);
@@ -975,7 +974,7 @@ namespace Ch.Elca.Iiop.Tests {
             Assert.AreEqual((uint)replyStatus, cdrIn.ReadULong());
         }
 
-    
+ 
     }
 
 }

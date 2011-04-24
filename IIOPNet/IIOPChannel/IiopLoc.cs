@@ -250,7 +250,7 @@ namespace Ch.Elca.Iiop.CorbaObjRef {
         }
 
         public override IorProfile GetProfileForAddr(byte[] objectKey, Codec codec) {
-            InternetIiopProfile result = new InternetIiopProfile(Version, Host, (short)Port, objectKey);
+            InternetIiopProfile result = new InternetIiopProfile(Version, Host, (ushort)Port, objectKey);
             return result;
         }
 
