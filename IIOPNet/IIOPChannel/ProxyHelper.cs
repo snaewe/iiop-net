@@ -39,7 +39,7 @@ namespace Ch.Elca.Iiop {
 
     public sealed class ProxyHelper {
 
-        #region IConstructors        
+        #region IConstructors
 
         private ProxyHelper() {
         }
@@ -53,8 +53,8 @@ namespace Ch.Elca.Iiop {
         [Obsolete("use object_to_string from OrbServices instead")]
         public static string GetIorForProxy(object proxy) {
             OrbServices orbSvc = OrbServices.GetSingleton();
-        	return orbSvc.object_to_string(proxy);
-        }                
+            return orbSvc.object_to_string(proxy);
+        }
 
         #endregion SMethods
 

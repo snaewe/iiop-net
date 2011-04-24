@@ -102,14 +102,11 @@ namespace Ch.Elca.Iiop.Idl {
         }
         
         public override string ToString() {
-        	return "Type: " + Type + "; nr of attributes: " + Attributes.Count;
+            return "Type: " + Type + "; nr of attributes: " + Attributes.Count;
         }
 
         #endregion IMethods
 
     }
-
-
-
 
 }

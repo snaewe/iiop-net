@@ -37,61 +37,61 @@ namespace javax.ejb {
 
     [Serializable]
     public class CreateExceptionImpl : CreateException {
-        
+ 
         #region IFields
 
-	private ThrowableData m_data = new ThrowableData();
+        private ThrowableData m_data = new ThrowableData();
 
         #endregion IFields
 
         public CreateExceptionImpl() : base() {
         }
-		
-	public override void Deserialise(Corba.DataInputStream stream) {
+ 
+        public override void Deserialise(Corba.DataInputStream stream) {
             m_data.Deserialise(stream);
-	}
-			
-	public override void Serialize(Corba.DataOutputStream stream) {
+        }
+ 
+        public override void Serialize(Corba.DataOutputStream stream) {
             m_data.Serialise(stream);
-	}
+        }
 
-	public override Throwable initCause(Throwable arg) {
+        public override Throwable initCause(Throwable arg) {
             return null;
-	}
-			
-	public override string toString() {
-	    return ToString();
-	}
+        }
+ 
+        public override string toString() {
+            return ToString();
+        }
 
-	public override Throwable fillInStackTrace() {
+        public override Throwable fillInStackTrace() {
             return null;
-	}
+        }
 
-	public override Throwable cause {
+        public override Throwable cause {
             get { return m_data.Cause; }
-	}
+        }
 
-	public override string localizedMessage {
+        public override string localizedMessage {
             get { return m_data.Msg; }
-	}
+        }
 
-	public override string message {
+        public override string message {
             get { return m_data.Msg; }
-	}
+        }
 
-        public override void printStackTrace__() {			
+        public override void printStackTrace__() {
         }
 
         public override void printStackTrace__java_io_PrintStream(java.io.PrintStream arg) {
         }
 
-	public override void printStackTrace__java_io_PrintWriter(java.io.PrintWriter arg) {
-	}
+        public override void printStackTrace__java_io_PrintWriter(java.io.PrintWriter arg) {
+        }
 
-	public override StackTraceElement[] stackTrace {
+        public override StackTraceElement[] stackTrace {
             get { return m_data.Trace; }
-	    set { }
-	}
+            set { }
+        }
 
         public override string ToString() {
             return base.ToString() + "; msg: " + m_data.Msg;
@@ -105,58 +105,58 @@ namespace javax.ejb {
 
         #region IFields
 
-	private ThrowableData m_data = new ThrowableData();
+        private ThrowableData m_data = new ThrowableData();
 
         #endregion IFields
 
         public RemoveExceptionImpl() : base() {
         }
-		
-	public override void Deserialise(Corba.DataInputStream stream) {
+ 
+        public override void Deserialise(Corba.DataInputStream stream) {
             m_data.Deserialise(stream);
-	}
-			
-	public override void Serialize(Corba.DataOutputStream stream) {
+        }
+ 
+        public override void Serialize(Corba.DataOutputStream stream) {
             m_data.Serialise(stream);
-	}
+        }
 
-	public override Throwable initCause(Throwable arg) {
+        public override Throwable initCause(Throwable arg) {
             return null;
-	}
-			
-	public override string toString() {
-	    return ToString();
-	}
+        }
+ 
+        public override string toString() {
+            return ToString();
+        }
 
-	public override Throwable fillInStackTrace() {
+        public override Throwable fillInStackTrace() {
             return null;
-	}
+        }
 
-	public override Throwable cause {
+        public override Throwable cause {
             get { return m_data.Cause; }
-	}
+        }
 
-	public override string localizedMessage {
+        public override string localizedMessage {
             get { return m_data.Msg; }
-	}
+        }
 
-	public override string message {
+        public override string message {
             get { return m_data.Msg; }
-	}
+        }
 
-        public override void printStackTrace__() {			
+        public override void printStackTrace__() {
         }
 
         public override void printStackTrace__java_io_PrintStream(java.io.PrintStream arg) {
         }
 
-	public override void printStackTrace__java_io_PrintWriter(java.io.PrintWriter arg) {
-	}
+        public override void printStackTrace__java_io_PrintWriter(java.io.PrintWriter arg) {
+        }
 
-	public override StackTraceElement[] stackTrace {
+        public override StackTraceElement[] stackTrace {
             get { return m_data.Trace; }
-	    set { }
-	}
+            set { }
+        }
 
         public override string ToString() {
             return base.ToString() + "; msg: " + m_data.Msg;
@@ -178,83 +178,83 @@ namespace java.lang {
     public class ThrowableData {
 
         private java.lang.Throwable m_cause;
-	private string m_msg;
-	private java.lang.StackTraceElement[] m_trace;
+        private string m_msg;
+        private java.lang.StackTraceElement[] m_trace;
 
-	public java.lang.Throwable Cause {
-            get { 
-                return m_cause; 
+        public java.lang.Throwable Cause {
+            get {
+                return m_cause;
             }
-	}
+        }
 
-	public string Msg {
-            get { 
-                return m_msg; 
+        public string Msg {
+            get {
+                return m_msg;
             }
-	}
+        }
 
-	public java.lang.StackTraceElement[] Trace {
-            get { 
-                return m_trace; 
+        public java.lang.StackTraceElement[] Trace {
+            get {
+                return m_trace;
             }
-	}
+        }
 
-	public void Deserialise(Corba.DataInputStream stream) {
+        public void Deserialise(Corba.DataInputStream stream) {
             stream.read_octet(); // ignore format version: java RMI specific
             stream.read_boolean(); // ignore default read object: java RMI specific
-			
+ 
             m_cause = (java.lang.Throwable)stream.read_ValueOfType(typeof(java.lang.Throwable));
             m_msg = stream.read_WStringValue();
 
-	    object boxedTrace = stream.read_Value();
-	    if (boxedTrace != null) {
-	        m_trace = (StackTraceElement[])((BoxedValueBase) boxedTrace).Unbox();
+            object boxedTrace = stream.read_Value();
+            if (boxedTrace != null) {
+                m_trace = (StackTraceElement[])((BoxedValueBase) boxedTrace).Unbox();
             }
 
-	}
+        }
 
-	public void Serialise(Corba.DataOutputStream stream) {
+        public void Serialise(Corba.DataOutputStream stream) {
             throw new omg.org.CORBA.NO_IMPLEMENT(2876, omg.org.CORBA.CompletionStatus.Completed_MayBe);
-	}
+        }
 
     }
 
-    
+ 
     public class StackTraceElementImpl : StackTraceElement {
 
         public override int hashCode() {
-	    return GetHashCode();
-        }			
-		
-	public override string toString() {
-            return "StackTraceElement:\n" + "in class: " + m_declaringClass + 
+            return GetHashCode();
+        }
+ 
+        public override string toString() {
+            return "StackTraceElement:\n" + "in class: " + m_declaringClass +
                    " (file: " + m_fileName + "); method: " + m_methodName;
-	}
+        }
 
-	public override bool equals([ObjectIdlTypeAttribute(IdlTypeObject.Any)]  object arg) {
+        public override bool equals([ObjectIdlTypeAttribute(IdlTypeObject.Any)]  object arg) {
             return this.Equals(arg);
-	}
+        }
 
-	public override string className {
+        public override string className {
             get { return m_declaringClass; }
-	}
+        }
 
         public override string fileName {
-	    get { return m_fileName; }
-	}
+            get { return m_fileName; }
+        }
 
-	public override int lineNumber {
+        public override int lineNumber {
             get { return m_lineNumber; }
-	}
+        }
 
-	public override string methodName {
+        public override string methodName {
             get { return m_methodName; }
-	}
+        }
 
-	public override bool nativeMethod {
+        public override bool nativeMethod {
             get { return false; }
-	}
-		
+        }
+ 
     }
 
     /// <summary>
@@ -265,58 +265,58 @@ namespace java.lang {
 
         #region IFields
 
-	private ThrowableData m_data = new ThrowableData();
+        private ThrowableData m_data = new ThrowableData();
 
         #endregion IFields
 
         public _ExceptionImpl() : base() {
         }
-		
-	public override void Deserialise(Corba.DataInputStream stream) {
+ 
+        public override void Deserialise(Corba.DataInputStream stream) {
             m_data.Deserialise(stream);
-	}
-			
-	public override void Serialize(Corba.DataOutputStream stream) {
+        }
+ 
+        public override void Serialize(Corba.DataOutputStream stream) {
             m_data.Serialise(stream);
-	}
+        }
 
-	public override Throwable initCause(Throwable arg) {
+        public override Throwable initCause(Throwable arg) {
             return null;
-	}
-			
-	public override string toString() {
-	    return ToString();
-	}
+        }
+ 
+        public override string toString() {
+            return ToString();
+        }
 
-	public override Throwable fillInStackTrace() {
+        public override Throwable fillInStackTrace() {
             return null;
-	}
+        }
 
-	public override Throwable cause {
+        public override Throwable cause {
             get { return m_data.Cause; }
-	}
+        }
 
-	public override string localizedMessage {
+        public override string localizedMessage {
             get { return m_data.Msg; }
-	}
+        }
 
-	public override string message {
+        public override string message {
             get { return m_data.Msg; }
-	}
+        }
 
-        public override void printStackTrace__() {			
+        public override void printStackTrace__() {
         }
 
         public override void printStackTrace__java_io_PrintStream(java.io.PrintStream arg) {
         }
 
-	public override void printStackTrace__java_io_PrintWriter(java.io.PrintWriter arg) {
-	}
+        public override void printStackTrace__java_io_PrintWriter(java.io.PrintWriter arg) {
+        }
 
-	public override StackTraceElement[] stackTrace {
+        public override StackTraceElement[] stackTrace {
             get { return m_data.Trace; }
-	    set { }
-	}
+            set { }
+        }
 
         public override string ToString() {
             return base.ToString() + "; msg: " + m_data.Msg;
@@ -330,58 +330,58 @@ namespace java.lang {
 
         #region IFields
 
-	private ThrowableData m_data = new ThrowableData();
+        private ThrowableData m_data = new ThrowableData();
 
         #endregion IFields
 
         public ThrowableImpl() : base() {
         }
-		
-	public override void Deserialise(Corba.DataInputStream stream) {
+ 
+        public override void Deserialise(Corba.DataInputStream stream) {
             m_data.Deserialise(stream);
-	}
-			
-	public override void Serialize(Corba.DataOutputStream stream) {
+        }
+ 
+        public override void Serialize(Corba.DataOutputStream stream) {
             m_data.Serialise(stream);
-	}
+        }
 
-	public override Throwable initCause(Throwable arg) {
+        public override Throwable initCause(Throwable arg) {
             return null;
-	}
-			
-	public override string toString() {
-	    return ToString();
-	}
+        }
+ 
+        public override string toString() {
+            return ToString();
+        }
 
-	public override Throwable fillInStackTrace() {
+        public override Throwable fillInStackTrace() {
             return null;
-	}
+        }
 
-	public override Throwable cause {
+        public override Throwable cause {
             get { return m_data.Cause; }
-	}
+        }
 
-	public override string localizedMessage {
+        public override string localizedMessage {
             get { return m_data.Msg; }
-	}
+        }
 
-	public override string message {
+        public override string message {
             get { return m_data.Msg; }
-	}
+        }
 
-        public override void printStackTrace__() {			
+        public override void printStackTrace__() {
         }
 
         public override void printStackTrace__java_io_PrintStream(java.io.PrintStream arg) {
         }
 
-	public override void printStackTrace__java_io_PrintWriter(java.io.PrintWriter arg) {
-	}
+        public override void printStackTrace__java_io_PrintWriter(java.io.PrintWriter arg) {
+        }
 
-	public override StackTraceElement[] stackTrace {
+        public override StackTraceElement[] stackTrace {
             get { return m_data.Trace; }
-	    set { }
-	}
+            set { }
+        }
 
         public override string ToString() {
             return base.ToString() + "; msg: " + m_data.Msg;

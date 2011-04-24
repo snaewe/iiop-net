@@ -106,7 +106,7 @@ namespace java.lang {
         #region unneeded methods (for mapper)
 /*
         public override System.Int32 compareTo(object arg) {
-        	return 0;
+            return 0;
         }
         
         public override System.Int32 compareTo__java_lang_Byte(java.lang._Byte arg) {
@@ -272,7 +272,7 @@ namespace java.lang {
         }
         
         public _LongImpl(System.Int64 val) : base() {
-	        m_value = val;
+            m_value = val;
         }
         
         public System.Int64 longValue() {
@@ -297,7 +297,7 @@ namespace java.lang {
 /*
 
         public override System.Int32 compareTo(object arg) {
-        	return 0;
+            return 0;
         }
         
         public override System.Int32 compareTo__java_lang_Integer(java.lang.Integer arg) {
@@ -337,7 +337,7 @@ namespace java.lang {
         }
         
         public override java.lang.Integer getInteger__CORBA_WStringValue(string arg0) {
-        	return null;
+            return null;
         }
         
         public override java.lang.Integer getInteger__CORBA_WStringValue__java_lang_Integer(string arg0, java.lang.Integer arg1) {
@@ -348,7 +348,7 @@ namespace java.lang {
             return null;
         }
         
-	  // new in java 1.4.2?
+      // new in java 1.4.2?
 //        public override void appendTo(System.Int32 arg0, java.lang.StringBuffer arg1) {
 //        }
 
@@ -438,7 +438,7 @@ namespace java.lang {
         }
         
         public override System.Int32 compareTo(object arg) {
-        	return 0;
+            return 0;
         }
         
         public override System.Int32 compareTo__java_lang_Double(java.lang._Double arg) {
@@ -553,7 +553,7 @@ namespace java.lang {
         }
         
         public override System.Int32 compareTo(object arg) {
-        	return 0;
+            return 0;
         }
         
         public override System.Int32 compareTo__java_lang_Float(java.lang._Float arg) {
@@ -649,7 +649,7 @@ namespace java.lang {
 /*
 
         public override System.Int32 compareTo(object arg) {
-        	return 0;
+            return 0;
         }
         
         public override System.Int32 compareTo__java_lang_Character(java.lang.Character arg) {
@@ -681,79 +681,79 @@ namespace java.lang {
         }
         
         public override bool isDefined(char arg0) {
-        	return true;
+            return true;
         }
 
         public override bool isDigit(char arg0) {
-        	return false;
+            return false;
         }
         
         public override bool isISOControl(char arg0) {
-        	return false;
+            return false;
         }
 
         public override bool isIdentifierIgnorable(char arg0) {
-        	return false;
+            return false;
         }
 
         public override bool isJavaIdentifierPart(char arg0) {
-        	return false;
+            return false;
         }
 
         public override bool isJavaIdentifierStart(char arg0) {
-        	return false;
+            return false;
         }
 
         public override bool isJavaLetter(char arg0) {
-        	return false;
+            return false;
         }
 
         public override bool isJavaLetterOrDigit(char arg0) {
-        	return false;
+            return false;
         }
 
         public override bool isLetter(char arg0) {
-        	return false;
+            return false;
         }
 
         public override bool isLetterOrDigit(char arg0) {
-        	return false;
+            return false;
         }
 
         public override bool isLowerCase(char arg0) {
-        	return false;
+            return false;
         }
 
         public override bool isMirrored(char arg0) {
-        	return false;
+            return false;
         }
 
         public override bool isSpace(char arg0) {
-        	return false;
+            return false;
         }
 
         public override bool isSpaceChar(char arg0) {
-        	return false;
+            return false;
         }
 
         public override bool isTitleCase(char arg0) {
-        	return false;
+            return false;
         }
 
         public override bool isUnicodeIdentifierPart(char arg0) {
-        	return false;
+            return false;
         }
 
         public override bool isUnicodeIdentifierStart(char arg0) {
-        	return false;
+            return false;
         }
         
         public override bool isUpperCase(char arg0) {
-        	return false;
+            return false;
         }
                 
         public override bool isWhitespace(char arg0) {
-        	return false;
+            return false;
         }
         
         public override char toTitleCase(char arg0) {
@@ -761,11 +761,11 @@ namespace java.lang {
         }
         
         public override char toUpperCase(char arg0) {
-        	return ' ';
+            return ' ';
         }
         
         public override char toLowerCase(char arg0) {
-        	return ' ';
+            return ' ';
         }
         
         public override char[] toUpperCaseCharArray(char arg0) {
@@ -800,6 +800,5 @@ namespace java.lang {
         }
 
     }
-
 
 }

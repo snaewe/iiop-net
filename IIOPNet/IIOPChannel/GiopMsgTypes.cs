@@ -29,7 +29,7 @@
 
 namespace Ch.Elca.Iiop {
 
-	/// <summary>
+    /// <summary>
     /// the message types in the IIOP Protocol
     /// </summary>
     public enum GiopMsgTypes {

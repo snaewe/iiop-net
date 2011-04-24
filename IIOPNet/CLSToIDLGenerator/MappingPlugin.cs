@@ -138,9 +138,9 @@ namespace Ch.Elca.Iiop.Idl {
             GeneratorCustomMappingDesc desc = new GeneratorCustomMappingDesc(clsType, idlType, idlFileName);
             m_mappingTable[clsType] = desc;           
             m_inverseMappingTable[idlType] = desc;
-        	// add also to the channel custom mapper reg for CLS to IDL mapper
-        	CustomMapperRegistry reg = CustomMapperRegistry.GetSingleton();
-        	reg.AddMapping(clsType, idlType, null);
+            // add also to the channel custom mapper reg for CLS to IDL mapper
+            CustomMapperRegistry reg = CustomMapperRegistry.GetSingleton();
+            reg.AddMapping(clsType, idlType, null);
         }
         
         /// <summary>

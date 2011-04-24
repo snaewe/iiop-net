@@ -49,7 +49,7 @@ namespace Tutorial.GettingStarted {
                 double sum1 = Double.Parse(Console.ReadLine());
                 Console.WriteLine("sum2:");
                 double sum2 = Double.Parse(Console.ReadLine());
-			
+
                 // register the channel
                 IiopClientChannel channel = new IiopClientChannel();
                 ChannelServices.RegisterChannel(channel, false);
@@ -60,7 +60,7 @@ namespace Tutorial.GettingStarted {
                 NameComponent[] name = new NameComponent[] { new NameComponent("adder", "") };
                 // get the reference to the adder
                 Adder adder = (Adder)nameService.resolve(name);
-		    // call add
+                // call add
                 double result = adder.add(sum1, sum2);
                 Console.WriteLine("result: " + result);
             } catch (Exception e) {

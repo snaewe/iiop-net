@@ -57,7 +57,7 @@ namespace Ch.Elca.Iiop.Idl {
                 Debug.WriteLine("assembly: " + args.Name);
                 string asmSimpleName = args.Name;
                 if (asmSimpleName.IndexOf(",") > 0) {
-                	asmSimpleName = asmSimpleName.Substring(0, asmSimpleName.IndexOf(",")).Trim();
+                    asmSimpleName = asmSimpleName.Substring(0, asmSimpleName.IndexOf(",")).Trim();
                 }
                 
                 Assembly found = LoadByRelativePath(asmSimpleName + ".dll");
@@ -106,19 +106,19 @@ namespace Ch.Elca.Iiop.Idl {
         /// </summary>
         [STAThread]
         public static void Main(string[] args) {
-        	try {
-	        	Type typeToMap = ParseArgs(args);
+            try {
+                Type typeToMap = ParseArgs(args);
 
-    	        Console.WriteLine("emitting Predef.idl");
-        	    EmitPredefIdl();
-            	Console.WriteLine("generating IDL for type: " + typeToMap.FullName);
-            	Console.WriteLine("destination: " + s_destination);
-            	ClsToIdlMapper mapper = ClsToIdlMapper.GetSingleton();
-            	mapper.MapClsType(typeToMap, 
-                	AttributeExtCollection.EmptyCollection, new GenerationActionDefineTypes(s_destination));
-        	} catch (Exception e) {
-        		Console.WriteLine("error while running generator: " + e);
-        	}
+                Console.WriteLine("emitting Predef.idl");
+                EmitPredefIdl();
+                Console.WriteLine("generating IDL for type: " + typeToMap.FullName);
+                Console.WriteLine("destination: " + s_destination);
+                ClsToIdlMapper mapper = ClsToIdlMapper.GetSingleton();
+                mapper.MapClsType(typeToMap, 
+                    AttributeExtCollection.EmptyCollection, new GenerationActionDefineTypes(s_destination));
+            } catch (Exception e) {
+                Console.WriteLine("error while running generator: " + e);
+            }
         }
 
         public static void HowTo() {
@@ -196,8 +196,8 @@ namespace Ch.Elca.Iiop.Idl {
 
             if (configFile != null) {
                 // add custom mappings from file
-       	        GeneratorMappingPlugin plugin = GeneratorMappingPlugin.GetSingleton();
-       	        plugin.AddMappingsFromFile(configFile);
+                GeneratorMappingPlugin plugin = GeneratorMappingPlugin.GetSingleton();
+                plugin.AddMappingsFromFile(configFile);
             }
 
             return type;

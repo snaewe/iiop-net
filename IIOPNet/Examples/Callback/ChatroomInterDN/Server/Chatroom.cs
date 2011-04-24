@@ -41,8 +41,8 @@ namespace Ch.Elca.Iiop.Demo.Chatroom {
          /// register a client, interested in chatroom messages 
          /// </summary>
          void RegisterMe(MessageListener listener, String forUser);
-    			                 
-                                         
+
+
          /// <summary>
          /// unregisters the clien with the name userName.
          /// </summary>

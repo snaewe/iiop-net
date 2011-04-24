@@ -40,23 +40,23 @@ namespace Tutorial.GettingStarted {
     /// </summary>
     public class NAdderServer {
 
-		/// <summary>
-		/// The main entry point for the application.
-		/// </summary>
-		[STAThread]
-		public static void Main(string[] args) {
-			// register the channel
-			int port = 8087;
-			IiopChannel chan = new IiopChannel(port);
-			ChannelServices.RegisterChannel(chan, false);
-		
-			AdderImpl adder = new AdderImpl();
-			string objectURI = "adder";
-			RemotingServices.Marshal(adder, objectURI);
-			
-			Console.WriteLine("server running");
-			Console.ReadLine();
-		}
+        /// <summary>
+        /// The main entry point for the application.
+        /// </summary>
+        [STAThread]
+        public static void Main(string[] args) {
+            // register the channel
+            int port = 8087;
+            IiopChannel chan = new IiopChannel(port);
+            ChannelServices.RegisterChannel(chan, false);
+        
+            AdderImpl adder = new AdderImpl();
+            string objectURI = "adder";
+            RemotingServices.Marshal(adder, objectURI);
+            
+            Console.WriteLine("server running");
+            Console.ReadLine();
+        }
     }
 
 }

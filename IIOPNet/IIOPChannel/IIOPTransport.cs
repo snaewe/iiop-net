@@ -42,9 +42,9 @@ using Ch.Elca.Iiop.Cdr;
 using Ch.Elca.Iiop.MessageHandling;
 using Ch.Elca.Iiop.Util;
 
-namespace Ch.Elca.Iiop {   
+namespace Ch.Elca.Iiop {
 
-    
+
     /// <summary>this delegate is used to call back the ClientTransportSink, when response message is available</summary>
     /// <param name="resultStream">the response message, if everything went ok, otherwise null</param>
     /// <param name="resultException">the exception, if something was not ok, othersise null</param>
@@ -76,7 +76,7 @@ namespace Ch.Elca.Iiop {
         #region IProperties
 
         public IClientChannelSink NextChannelSink {
-        	get {
+            get {
                 return null; // no more sinks
             }
         }

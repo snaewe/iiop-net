@@ -32,8 +32,8 @@ using System;
 
 public class CurrentTime {
 
-	public static void Main(String[] args) {
-                Console.WriteLine(DateTime.Now);
-	}
+    public static void Main(String[] args) {
+        Console.WriteLine(DateTime.Now);
+    }
 
 }

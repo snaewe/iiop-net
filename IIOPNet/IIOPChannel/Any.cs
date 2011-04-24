@@ -97,7 +97,7 @@ namespace omg.org.CORBA
 
         /// <summary>
         /// The value assignable to the typecode -> i.e. the internal representation.
-        /// </summary>		
+        /// </summary>
         internal object ValueInternalRepresenation
         {
             get

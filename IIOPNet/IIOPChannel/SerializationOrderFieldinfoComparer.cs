@@ -42,99 +42,99 @@ namespace Ch.Elca.Iiop.Util {
     public sealed class ExplicitOrderFieldInfoComparer : IComparer {
 
         #region SFields
-        
+ 
         private static ExplicitOrderFieldInfoComparer s_instance =
             new ExplicitOrderFieldInfoComparer();
-        
-        #endregion SFields 
+ 
+        #endregion SFields
         #region IConstructor
-        
-        private ExplicitOrderFieldInfoComparer() {        
+ 
+        private ExplicitOrderFieldInfoComparer() {
         }
-        
-        #endregion IConstructor        
+ 
+        #endregion IConstructor
         #region SProperties
-        
+ 
         /// <summary>
         /// the singleton instance of the comparer.
         /// </summary>
         public static ExplicitOrderFieldInfoComparer Instance {
             get {
                 return s_instance;
-            }                
+            }
         }
-        
+ 
         #endregion SProperties
         #region IMethods
-        
-    	/// <summary>
-    	/// Compare the two given FieldInfos concerning 
-    	/// their serializationOrder
-    	/// </summary>
-		public int Compare(object x, object y) {
-    	    FieldInfo xF = (FieldInfo)x;
-    	    FieldInfo yF = (FieldInfo)y;
-    	    
-    	    object[] xAttrs =
-    	        xF.GetCustomAttributes(ReflectionHelper.ExplicitSerializationOrderNrType, false);
-    	    object[] yAttrs = 
-    	        yF.GetCustomAttributes(ReflectionHelper.ExplicitSerializationOrderNrType, false);    	    
-    	    
-    	    if (xAttrs.Length <= 0 || yAttrs.Length <= 0) {
-    	        throw new BAD_PARAM(945, CompletionStatus.Completed_MayBe);
-    	    }
-    	    int xOrder = ((ExplicitSerializationOrderNr)xAttrs[0]).OrderNr;
-    	    int yOrder = ((ExplicitSerializationOrderNr)yAttrs[0]).OrderNr;
-    	    
-    	    return xOrder - yOrder; // result of compare should be positive, if x > y, else negative
-		}
-    	
-    	#endregion IMethods
+ 
+        /// <summary>
+        /// Compare the two given FieldInfos concerning
+        /// their serializationOrder
+        /// </summary>
+        public int Compare(object x, object y) {
+            FieldInfo xF = (FieldInfo)x;
+            FieldInfo yF = (FieldInfo)y;
+ 
+            object[] xAttrs =
+                xF.GetCustomAttributes(ReflectionHelper.ExplicitSerializationOrderNrType, false);
+            object[] yAttrs =
+                yF.GetCustomAttributes(ReflectionHelper.ExplicitSerializationOrderNrType, false);
+ 
+            if (xAttrs.Length <= 0 || yAttrs.Length <= 0) {
+                throw new BAD_PARAM(945, CompletionStatus.Completed_MayBe);
+            }
+            int xOrder = ((ExplicitSerializationOrderNr)xAttrs[0]).OrderNr;
+            int yOrder = ((ExplicitSerializationOrderNr)yAttrs[0]).OrderNr;
+ 
+            return xOrder - yOrder; // result of compare should be positive, if x > y, else negative
+        }
+ 
+        #endregion IMethods
     }
-    
+ 
     /// <summary>
     /// Compares two FieldInfos based on their Name
     /// </summary>
     public sealed class ImplicitOrderFieldInfoComparer : IComparer {
 
         #region SFields
-        
+ 
         private static ImplicitOrderFieldInfoComparer s_instance =
             new ImplicitOrderFieldInfoComparer();
-        
+ 
         #endregion SFields
         #region IConstructor
-        
-        private ImplicitOrderFieldInfoComparer() {        
+ 
+        private ImplicitOrderFieldInfoComparer() {
         }
-        
+ 
         #endregion IConstructor
         #region SProperties
-        
+ 
         /// <summary>
         /// the singleton instance of the comparer.
         /// </summary>
         public static ImplicitOrderFieldInfoComparer Instance {
             get {
                 return s_instance;
-            }                
+            }
         }
-        
-        #endregion SProperties        
+ 
+        #endregion SProperties
         #region IMethods
-        
-    	/// <summary>
-    	/// Compare the two given FieldInfos concerning 
-    	/// their field name
-    	/// </summary>
-		public int Compare(object x, object y) {
-    	    FieldInfo xF = (FieldInfo)x;
-    	    FieldInfo yF = (FieldInfo)y;
-    	    
-    	    return String.CompareOrdinal(xF.Name, yF.Name);
-		}
-    	
-    	#endregion IMethods
+ 
+        /// <summary>
+        /// Compare the two given FieldInfos concerning
+        /// their field name
+        /// </summary>
+        public int Compare(object x, object y) {
+            FieldInfo xF = (FieldInfo)x;
+            FieldInfo yF = (FieldInfo)y;
+ 
+            return String.CompareOrdinal(xF.Name, yF.Name);
+        }
+ 
+        #endregion IMethods
     }
-    
+ 
 }

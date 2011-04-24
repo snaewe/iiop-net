@@ -104,9 +104,9 @@ namespace Ch.Elca.Iiop {
         
         /// <summary>the length of the header in bytes</summary>
         internal const int HEADER_LENGTH = 12;
-    	
-    	internal const byte FRAGMENT_MASK = 0x02;
-    	private const byte ENDIAN_MASK = 0x01;
+    
+        internal const byte FRAGMENT_MASK = 0x02;
+        private const byte ENDIAN_MASK = 0x01;
         
         #endregion Constants
         #region SFields
@@ -234,10 +234,10 @@ namespace Ch.Elca.Iiop {
         /// </summary>
         /// <returns>the outputstream used, positioned just after the header</returns>
         internal CdrOutputStream WriteToStream(Stream stream, uint msgLength) {
-        	CdrOutputStream target = new CdrOutputStreamImpl(stream, GiopFlags,
-        	                                                 Version);
-        	WriteToStream(target, msgLength);
-        	return target;
+            CdrOutputStream target = new CdrOutputStreamImpl(stream, GiopFlags,
+                                                             Version);
+            WriteToStream(target, msgLength);
+            return target;
         }        
 
         private GiopMsgTypes ConvertType(int type) {            

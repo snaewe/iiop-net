@@ -74,13 +74,13 @@ namespace omg.org.CosNaming {
         #region IProperties
 
         public string id {
-            get { 
-                return m_id; 
+            get {
+                return m_id;
             }
         }
         public string kind {
-            get { 
-                return m_kind; 
+            get {
+                return m_kind;
             }
         }
 
@@ -151,26 +151,26 @@ namespace omg.org.CosNaming {
         [FromIdlName("rebind")]
         [ThrowsIdlException(typeof(omg.org.CosNaming.NamingContext_package.NotFound))]
         [ThrowsIdlException(typeof(omg.org.CosNaming.NamingContext_package.CannotProceed))]
-        [ThrowsIdlException(typeof(omg.org.CosNaming.NamingContext_package.InvalidName))]        
+        [ThrowsIdlException(typeof(omg.org.CosNaming.NamingContext_package.InvalidName))]
         void rebind([IdlSequenceAttribute(0L)] NameComponent[] nameComponents, MarshalByRefObject obj);
     
         [FromIdlName("bind_context")]
         [ThrowsIdlException(typeof(omg.org.CosNaming.NamingContext_package.NotFound))]
         [ThrowsIdlException(typeof(omg.org.CosNaming.NamingContext_package.CannotProceed))]
         [ThrowsIdlException(typeof(omg.org.CosNaming.NamingContext_package.InvalidName))]
-        [ThrowsIdlException(typeof(omg.org.CosNaming.NamingContext_package.AlreadyBound))]        
+        [ThrowsIdlException(typeof(omg.org.CosNaming.NamingContext_package.AlreadyBound))]
         void  bind_context([IdlSequenceAttribute(0L)] NameComponent[] nameComponents, NamingContext toBind);
     
         [FromIdlName("rebind_context")]
         [ThrowsIdlException(typeof(omg.org.CosNaming.NamingContext_package.NotFound))]
         [ThrowsIdlException(typeof(omg.org.CosNaming.NamingContext_package.CannotProceed))]
-        [ThrowsIdlException(typeof(omg.org.CosNaming.NamingContext_package.InvalidName))]        
+        [ThrowsIdlException(typeof(omg.org.CosNaming.NamingContext_package.InvalidName))]
         void  rebind_context([IdlSequenceAttribute(0L)] NameComponent[] nameComponents, NamingContext toRebind);
     
         [FromIdlName("unbind")]
         [ThrowsIdlException(typeof(omg.org.CosNaming.NamingContext_package.NotFound))]
         [ThrowsIdlException(typeof(omg.org.CosNaming.NamingContext_package.CannotProceed))]
-        [ThrowsIdlException(typeof(omg.org.CosNaming.NamingContext_package.InvalidName))]        
+        [ThrowsIdlException(typeof(omg.org.CosNaming.NamingContext_package.InvalidName))]
         void  unbind([IdlSequenceAttribute(0L)] NameComponent[] nameComponents);
     
         [FromIdlName("new_context")]
@@ -180,11 +180,11 @@ namespace omg.org.CosNaming {
         [ThrowsIdlException(typeof(omg.org.CosNaming.NamingContext_package.NotFound))]
         [ThrowsIdlException(typeof(omg.org.CosNaming.NamingContext_package.CannotProceed))]
         [ThrowsIdlException(typeof(omg.org.CosNaming.NamingContext_package.InvalidName))]
-        [ThrowsIdlException(typeof(omg.org.CosNaming.NamingContext_package.AlreadyBound))]        
+        [ThrowsIdlException(typeof(omg.org.CosNaming.NamingContext_package.AlreadyBound))]
         NamingContext bind_new_context([IdlSequenceAttribute(0L)] NameComponent[] nameComponents);
         
         [FromIdlName("destroy")]
-        [ThrowsIdlException(typeof(omg.org.CosNaming.NamingContext_package.NotEmpty))]        
+        [ThrowsIdlException(typeof(omg.org.CosNaming.NamingContext_package.NotEmpty))]
         void destroy();
         
         [FromIdlName("list")]
@@ -211,19 +211,19 @@ namespace omg.org.CosNaming {
         [return: StringValue]
         [return: WideChar(false)]
         [FromIdlName("to_string")]
-        [ThrowsIdlException(typeof(omg.org.CosNaming.NamingContext_package.InvalidName))]        
+        [ThrowsIdlException(typeof(omg.org.CosNaming.NamingContext_package.InvalidName))]
         string  to_string([IdlSequenceAttribute(0L)]NameComponent[] name);
         
         [return: IdlSequenceAttribute(0L)]
         [FromIdlName("to_name")]
-        [ThrowsIdlException(typeof(omg.org.CosNaming.NamingContext_package.InvalidName))]        
+        [ThrowsIdlException(typeof(omg.org.CosNaming.NamingContext_package.InvalidName))]
         NameComponent[] to_name([StringValue][WideChar(false)] string name);
 
     }
     
     
     /// <summary>
-    /// This is an implementation of the COSNamingContext. 
+    /// This is an implementation of the COSNamingContext.
     /// </summary>
     /// <remarks>
     /// specify, that the NamingContext interface is implemented ->
@@ -239,7 +239,7 @@ namespace omg.org.CosNaming {
         #endregion IFields
         #region IConstructors
 
-        public COSNamingContextImpl() {            
+        public COSNamingContextImpl() {
         }
 
         #endregion IConstructors
@@ -247,7 +247,7 @@ namespace omg.org.CosNaming {
         
         public MarshalByRefObject resolve([IdlSequenceAttribute(0L)] NameComponent[] nameComponents) {
             // create uri for name-components:
-            string name = CreateNameForNameComponents(nameComponents);        
+            string name = CreateNameForNameComponents(nameComponents);
             
             lock(m_nameTable.SyncRoot) {
                 if (m_nameTable.ContainsKey(name)) {
@@ -265,42 +265,42 @@ namespace omg.org.CosNaming {
             // this is not nice, because it does circument internal on IdentityHolder-class
             Debug.WriteLine("get registeredObject: " + uri);
             Assembly remotingAssembly = Assembly.Load("mscorlib");
-            if (remotingAssembly == null) { 
-                throw new INTERNAL(16001, CompletionStatus.Completed_MayBe); 
+            if (remotingAssembly == null) {
+                throw new INTERNAL(16001, CompletionStatus.Completed_MayBe);
             }
             Type identityHolderType = remotingAssembly.GetType("System.Runtime.Remoting.IdentityHolder");
-            if (identityHolderType == null) { 
-                throw new INTERNAL(16002, CompletionStatus.Completed_MayBe); 
+            if (identityHolderType == null) {
+                throw new INTERNAL(16002, CompletionStatus.Completed_MayBe);
             }
             // identityHolder class, manages the published remote objects
             // get the resolveUri-method to get the Identity for the URI
-            MethodInfo resolveIdMethod = identityHolderType.GetMethod("ResolveIdentity", 
+            MethodInfo resolveIdMethod = identityHolderType.GetMethod("ResolveIdentity",
                                                                       BindingFlags.Static | BindingFlags.NonPublic);
-            if (resolveIdMethod == null) { 
-                throw new INTERNAL(16003, CompletionStatus.Completed_MayBe); 
+            if (resolveIdMethod == null) {
+                throw new INTERNAL(16003, CompletionStatus.Completed_MayBe);
             }
             
             // now call resolve-method:
             object identity = resolveIdMethod.Invoke(null, new object[] { uri } );
-            if (identity == null) { 
-                throw new NamingContext_package.NotFound(NamingContext_package.NotFoundReason.missing_node, nameComponents); 
+            if (identity == null) {
+                throw new NamingContext_package.NotFound(NamingContext_package.NotFoundReason.missing_node, nameComponents);
             }
 
             // now get the object from the identity
             Type identityType = remotingAssembly.GetType("System.Runtime.Remoting.Identity");
-            if (identityType == null) { 
-                throw new INTERNAL(16004, CompletionStatus.Completed_MayBe); 
+            if (identityType == null) {
+                throw new INTERNAL(16004, CompletionStatus.Completed_MayBe);
             }
             
             // property TPOrObject holds the object, therefor access this property
-            PropertyInfo tpOrObjProp = identityType.GetProperty("TPOrObject", 
+            PropertyInfo tpOrObjProp = identityType.GetProperty("TPOrObject",
                                                                 BindingFlags.Instance | BindingFlags.NonPublic);
-            if (tpOrObjProp == null) { 
-                throw new INTERNAL(16005, CompletionStatus.Completed_MayBe); 
+            if (tpOrObjProp == null) {
+                throw new INTERNAL(16005, CompletionStatus.Completed_MayBe);
             }
             MarshalByRefObject result = (MarshalByRefObject)tpOrObjProp.GetValue(identity, null);
-            if (result == null) { 
-                throw new INTERNAL(16006, CompletionStatus.Completed_MayBe); 
+            if (result == null) {
+                throw new INTERNAL(16006, CompletionStatus.Completed_MayBe);
             }
             return result;
         }
@@ -325,8 +325,8 @@ namespace omg.org.CosNaming {
             
             // register it in the nametable
             lock(m_nameTable.SyncRoot) {
-                if (m_nameTable.ContainsKey(name)) { 
-                    throw new NamingContext_package.AlreadyBound(); 
+                if (m_nameTable.ContainsKey(name)) {
+                    throw new NamingContext_package.AlreadyBound();
                 }
                 m_nameTable.Add(name, obj);
             }
@@ -335,8 +335,8 @@ namespace omg.org.CosNaming {
         public void unbind([IdlSequenceAttribute(0L)] NameComponent[] nameComponents) {
             string name = CreateNameForNameComponents(nameComponents);
             lock(m_nameTable.SyncRoot) {
-                if (!(m_nameTable.ContainsKey(name))) { 
-                    throw new NamingContext_package.NotFound(NamingContext_package.NotFoundReason.missing_node, nameComponents); 
+                if (!(m_nameTable.ContainsKey(name))) {
+                    throw new NamingContext_package.NotFound(NamingContext_package.NotFoundReason.missing_node, nameComponents);
                 }
                 m_nameTable.Remove(name);
             }
@@ -441,12 +441,12 @@ namespace omg.org.CosNaming.NamingContext_package {
         }
         
         protected NotFound(System.Runtime.Serialization.SerializationInfo info,
-                           System.Runtime.Serialization.StreamingContext context) : base(info, context) {            
+                           System.Runtime.Serialization.StreamingContext context) : base(info, context) {
             this.why = (NotFoundReason)info.GetValue("why", typeof(NotFoundReason));
-            this.rest_of_name = (NameComponent[])info.GetValue("rest_of_name", typeof(NameComponent[]));            
-        }                
+            this.rest_of_name = (NameComponent[])info.GetValue("rest_of_name", typeof(NameComponent[]));
+        }
 
-        #endregion IConstructors 
+        #endregion IConstructors
         #region IMethods
         
         public override void GetObjectData(System.Runtime.Serialization.SerializationInfo info,
@@ -454,11 +454,11 @@ namespace omg.org.CosNaming.NamingContext_package {
             base.GetObjectData(info, context);
             info.AddValue("why", why);
             info.AddValue("rest_of_name", rest_of_name);
-        }        
+        }
         
-        #endregion IMethods        
+        #endregion IMethods
 
-    } 
+    }
 
     [RepositoryIDAttribute("IDL:omg.org/CosNaming/NamingContext/CannotProceed:1.0")]
     [Serializable]
@@ -480,10 +480,10 @@ namespace omg.org.CosNaming.NamingContext_package {
         public CannotProceed() { }
         
         protected CannotProceed(System.Runtime.Serialization.SerializationInfo info,
-                                System.Runtime.Serialization.StreamingContext context) : base(info, context) {            
+                                System.Runtime.Serialization.StreamingContext context) : base(info, context) {
             this.cxt = (NamingContext)info.GetValue("context", typeof(NamingContext));
-            this.rest_of_name = (NameComponent[])info.GetValue("rest_of_name", typeof(NameComponent[]));            
-        }        
+            this.rest_of_name = (NameComponent[])info.GetValue("rest_of_name", typeof(NameComponent[]));
+        }
 
         #endregion IConstructors
         #region IMethods
@@ -493,11 +493,11 @@ namespace omg.org.CosNaming.NamingContext_package {
             base.GetObjectData(info, context);
             info.AddValue("context", cxt);
             info.AddValue("rest_of_name", rest_of_name);
-        }        
+        }
         
-        #endregion IMethods        
+        #endregion IMethods
 
-    } 
+    }
 
     [RepositoryIDAttribute("IDL:omg.org/CosNaming/NamingContext/InvalidName:1.0")]
     [Serializable]
@@ -513,12 +513,12 @@ namespace omg.org.CosNaming.NamingContext_package {
         }
         
         protected InvalidName(System.Runtime.Serialization.SerializationInfo info,
-                              System.Runtime.Serialization.StreamingContext context) : base(info, context) {            
-        }                        
+                              System.Runtime.Serialization.StreamingContext context) : base(info, context) {
+        }
 
         #endregion IConstructors
 
-    } 
+    }
 
     [RepositoryIDAttribute("IDL:omg.org/CosNaming/NamingContext/AlreadyBound:1.0")]
     [Serializable]
@@ -534,8 +534,8 @@ namespace omg.org.CosNaming.NamingContext_package {
         }
         
         protected AlreadyBound(System.Runtime.Serialization.SerializationInfo info,
-                               System.Runtime.Serialization.StreamingContext context) : base(info, context) {            
-        }                                
+                               System.Runtime.Serialization.StreamingContext context) : base(info, context) {
+        }
 
         #endregion IConstructors
 
@@ -555,8 +555,8 @@ namespace omg.org.CosNaming.NamingContext_package {
         }
         
         protected NotEmpty(System.Runtime.Serialization.SerializationInfo info,
-                           System.Runtime.Serialization.StreamingContext context) : base(info, context) {            
-        }        
+                           System.Runtime.Serialization.StreamingContext context) : base(info, context) {
+        }
 
         #endregion IConstructors
     }

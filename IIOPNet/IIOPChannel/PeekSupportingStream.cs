@@ -52,7 +52,7 @@ namespace Ch.Elca.Iiop.Util {
 
         #endregion IFields
         #region IConstructors
-        
+ 
         public PeekSupportingStream(Stream stream) {
             m_stream = stream;
         }
@@ -62,35 +62,35 @@ namespace Ch.Elca.Iiop.Util {
 
         public override bool CanRead {
             get {
-                return true; 
+                return true;
             }
         }
 
         /// <summary>can seek, if underlying stream can seek, but only if not peeking at the moment</summary>
         public override bool CanSeek {
             get {
-                return m_stream.CanSeek; 
+                return m_stream.CanSeek;
             }
         }
 
         public override bool CanWrite {
             get {
-                return m_stream.CanWrite; 
+                return m_stream.CanWrite;
             }
         }
 
         public override long Length {
-            get { 
-                return m_stream.Length; 
+            get {
+                return m_stream.Length;
             }
         }
 
         public override long Position {
-            get { 
-                throw new NotSupportedException(); 
+            get {
+                throw new NotSupportedException();
             }
             set {
-                throw new NotSupportedException(); 
+                throw new NotSupportedException();
             }
         }
 
@@ -102,19 +102,19 @@ namespace Ch.Elca.Iiop.Util {
         }
 
         /// <returns>
-        /// count, 
-        /// if possible to read the requested nr of bytes 
-        /// (end of stream not reached in the middle), 
+        /// count,
+        /// if possible to read the requested nr of bytes
+        /// (end of stream not reached in the middle),
         /// otherwise
         /// throws an IOException
         /// </returns>
         public override int Read(byte[] buffer, int offset, int count) {
             lock(this) {
-                
-                if (offset + count > buffer.Length) { 
-                    throw new ArgumentException("buffer is not large enough"); 
+ 
+                if (offset + count > buffer.Length) {
+                    throw new ArgumentException("buffer is not large enough");
                 }
-                
+ 
                 if (m_isPeeking) {
                     // not efficient, but ok for small number of reads in peeking mode
                     for (int i = 0; i < count; i++) {
@@ -133,7 +133,7 @@ namespace Ch.Elca.Iiop.Util {
                             readTotal++;
                             currentOffset++;
                         } else {
-                            IoUtil.ReadExactly(m_stream, buffer, currentOffset, 
+                            IoUtil.ReadExactly(m_stream, buffer, currentOffset,
                                                count - readTotal); // throws Exception, if not available
                             break; // read completed
                         }
@@ -146,12 +146,12 @@ namespace Ch.Elca.Iiop.Util {
 
         public override int ReadByte() {
             int result = 0;
-            lock(this) 
+            lock(this)
                 result = m_isPeeking ? PeekByte() : InternalReadByte();
 
             if (result < 0)
-                throw new IOException("underlying stream has not enough data"); 
-            
+                throw new IOException("underlying stream has not enough data");
+ 
             return result;
         }
 
@@ -167,9 +167,9 @@ namespace Ch.Elca.Iiop.Util {
             } else {
                 // no data in peek buffer, read from stream
                 return m_stream.ReadByte();
-            }            
+            }
         }
-        
+ 
         private int PeekByte() {
             if (m_peekBuffer.Position == m_peekBuffer.Length) {
                 int result = m_stream.ReadByte();
@@ -194,7 +194,7 @@ namespace Ch.Elca.Iiop.Util {
                 m_isPeeking = true;
                 if (m_peekBuffer == null) {
                     m_upToPosInPeekBufferRead = 0; // nothing in peek-buffer distributed
-                    m_peekBuffer = new MemoryStream(); 
+                    m_peekBuffer = new MemoryStream();
                 }
             }
         }
@@ -202,13 +202,13 @@ namespace Ch.Elca.Iiop.Util {
         /// <summary>stops peeking, next read-operation advanced position in the stream.</summary>
         public void EndPeeking() {
             lock(this) {
-                if (!m_isPeeking) { 
-                    throw new InvalidOperationException("not in peeking mode"); 
+                if (!m_isPeeking) {
+                    throw new InvalidOperationException("not in peeking mode");
                 }
                 m_isPeeking = false;
                 m_peekBuffer.Seek(m_upToPosInPeekBufferRead, SeekOrigin.Begin); // reset the buffer to the current position for reading
-                if (m_peekBuffer.Length == 0) { 
-                    m_peekBuffer = null; 
+                if (m_peekBuffer.Length == 0) {
+                    m_peekBuffer = null;
                 }
             }
         }
@@ -274,14 +274,14 @@ namespace Ch.Elca.Iiop.Util {
 #if UnitTest
 
 namespace Ch.Elca.Iiop.Tests {
-	
+
     using NUnit.Framework;
     using Ch.Elca.Iiop.Util;
 
     /// <summary>
     /// Unit test for PeekSupportingStrem
     /// </summary>
-    [TestFixture]    
+    [TestFixture]
     public class TestPeekSupport {
 
         public TestPeekSupport() {
@@ -290,57 +290,57 @@ namespace Ch.Elca.Iiop.Tests {
         [Test]
         public void TestPeekSupportReadByteNoPeek() {
             MemoryStream stream = new MemoryStream();
-            for (int i = 0; i < 10; i++) { 
-                stream.WriteByte((byte)i); 
+            for (int i = 0; i < 10; i++) {
+                stream.WriteByte((byte)i);
             }
             stream.Seek(0, SeekOrigin.Begin);
 
             PeekSupportingStream peekSup = new PeekSupportingStream(stream);
-            for (int i = 0; i < 10; i++) { 
-                Assert.AreEqual(i, peekSup.ReadByte()); 
+            for (int i = 0; i < 10; i++) {
+                Assert.AreEqual(i, peekSup.ReadByte());
             }
         }
 
         [Test]
         public void TestPeekSupportReadBytePeek() {
             MemoryStream stream = new MemoryStream();
-            for (int i = 0; i < 10; i++) { 
-                stream.WriteByte((byte)i); 
+            for (int i = 0; i < 10; i++) {
+                stream.WriteByte((byte)i);
             }
             stream.Seek(0, SeekOrigin.Begin);
-			
+
             PeekSupportingStream peekSup = new PeekSupportingStream(stream);
             peekSup.StartPeeking();
             for (int i = 0; i < 7; i++) {
-			    Assert.AreEqual(i, peekSup.ReadByte()); 			
+                Assert.AreEqual(i, peekSup.ReadByte());
             }
             peekSup.EndPeeking();
 
             // read the whole content after end of peeking
-            for (int i = 0; i < 10; i++) { 
-                Assert.AreEqual(i, peekSup.ReadByte()); 
+            for (int i = 0; i < 10; i++) {
+                Assert.AreEqual(i, peekSup.ReadByte());
             }
         }
 
         [Test]
         public void TestPeekSupportMulitplePeek() {
             MemoryStream stream = new MemoryStream();
-            for (int i = 0; i < 10; i++) { 
-                stream.WriteByte((byte)i); 
+            for (int i = 0; i < 10; i++) {
+                stream.WriteByte((byte)i);
             }
             stream.Seek(0, SeekOrigin.Begin);
-			
+
             PeekSupportingStream peekSup = new PeekSupportingStream(stream);
             peekSup.StartPeeking();
             for (int i = 0; i < 7; i++) {
-                Assert.AreEqual(i, peekSup.ReadByte()); 			
+                Assert.AreEqual(i, peekSup.ReadByte());
             }
             peekSup.EndPeeking();
 
             // now read something, then peek anew
             // read the whole content after end of peeking
-            for (int i = 0; i < 3; i++) { 
-                Assert.AreEqual(i, peekSup.ReadByte()); 
+            for (int i = 0; i < 3; i++) {
+                Assert.AreEqual(i, peekSup.ReadByte());
             }
 
             peekSup.StartPeeking();
@@ -350,33 +350,33 @@ namespace Ch.Elca.Iiop.Tests {
             peekSup.EndPeeking();
 
             // now read the rest of the stream
-            for (int i = 3; i < 10; i++) { 
-                Assert.AreEqual(i, peekSup.ReadByte()); 
+            for (int i = 3; i < 10; i++) {
+                Assert.AreEqual(i, peekSup.ReadByte());
             }
         }
 
         [Test]
         public void TestPeekSupportReadArrayNoPeek() {
             MemoryStream stream = new MemoryStream();
-            for (int i = 0; i < 10; i++) { 
-                stream.WriteByte((byte)i); 
+            for (int i = 0; i < 10; i++) {
+                stream.WriteByte((byte)i);
             }
             stream.Seek(0, SeekOrigin.Begin);
-			
+
             PeekSupportingStream peekSup = new PeekSupportingStream(stream);
             byte[] result = new byte[10];
             peekSup.Read(result, 0, 10);
 
-            for (int i = 0; i < 10; i++) { 
-                Assert.AreEqual(i, result[i]); 
+            for (int i = 0; i < 10; i++) {
+                Assert.AreEqual(i, result[i]);
             }
         }
-        
+ 
         [Test]
         public void TestEmptyPeek() {
             MemoryStream stream = new MemoryStream();
-            for (int i = 0; i < 10; i++) { 
-                stream.WriteByte((byte)i); 
+            for (int i = 0; i < 10; i++) {
+                stream.WriteByte((byte)i);
             }
             stream.Seek(0, SeekOrigin.Begin);
             PeekSupportingStream peekSup = new PeekSupportingStream(stream);

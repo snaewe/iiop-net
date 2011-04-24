@@ -160,7 +160,7 @@ namespace Ch.Elca.Iiop.Idl {
             // need to convert
             int nestLevel = DetermineNestLevel(toConv);
             if (nestLevel == 1) { 
-            	return toConv; 
+                return toConv; 
             } // nothing to do
             
             // create an array of the length of the dimensions smaller than the biggest one
@@ -270,7 +270,7 @@ namespace Ch.Elca.Iiop.Idl {
         
         private static int[] DetermineDimensionLengthOfArrayElems(Array arrOfArr) {
             if (arrOfArr.Length == 0) { 
-            	return new int[arrOfArr.GetType().GetElementType().GetArrayRank()]; 
+                return new int[arrOfArr.GetType().GetElementType().GetArrayRank()]; 
             }
             int[] result = FillLengthArray(((Array)arrOfArr.GetValue(0)));
             for (int i = 1; i < arrOfArr.Length; i++) {
@@ -278,7 +278,7 @@ namespace Ch.Elca.Iiop.Idl {
                 int[] thisElemDim = FillLengthArray((Array)arrOfArr.GetValue(i));
                 for (int j = 0; j < thisElemDim.Length; j++) {
                     if (thisElemDim[j] != result[j]) { 
-                    	throw new MARSHAL(10037, CompletionStatus.Completed_MayBe); 
+                        throw new MARSHAL(10037, CompletionStatus.Completed_MayBe); 
                     }
                 }
             }
@@ -289,7 +289,7 @@ namespace Ch.Elca.Iiop.Idl {
         private static int[] FillLengthArray(Array arrayElem) {
             // a null element is not allowed here, because in a matrix, no part should be missing
             if (arrayElem == null) { 
-            	throw new MARSHAL(10038, CompletionStatus.Completed_MayBe); 
+                throw new MARSHAL(10038, CompletionStatus.Completed_MayBe); 
             }
             int rank = arrayElem.GetType().GetArrayRank();
             int[] result = new int[rank];

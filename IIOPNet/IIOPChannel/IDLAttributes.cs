@@ -62,35 +62,35 @@ namespace Ch.Elca.Iiop.Idl {
     public interface IIdlEntity {
     }
 
-    
+ 
     public interface IIdlAttribute {
-        
+ 
         #region IMethods
-        
+ 
         CustomAttributeBuilder CreateAttributeBuilder();
-        
+ 
         #endregion IMethods
 
     }
-    
+ 
     /// <summary>
     /// for attributes, which can be present multiple times on the same construct,
     /// this number specifies, in which order the attributes should be considered
     /// by the serialiser / deserialiser.
     /// </summary>
     public interface IOrderedAttribute {
-        
+ 
         #region IProperties
-        
+ 
         /// <summary>
         /// the number in the ordered collection of these attributes.
         /// </summary>
         long OrderNr {
             get;
         }
-        
+ 
         #endregion IProperties
-        
+ 
     }
 
 
@@ -98,15 +98,15 @@ namespace Ch.Elca.Iiop.Idl {
     public interface IAssociatedAttribute {
 
         #region IProperties
-        
+ 
         /// <summary>
         /// the key number of the attribute, this one is associated to.
         /// </summary>
         long AssociatedToAttributeWithKey {
             get;
-        }        
-        
-        #endregion IProperties        
+        }
+ 
+        #endregion IProperties
 
     }
 
@@ -114,12 +114,12 @@ namespace Ch.Elca.Iiop.Idl {
     /// <summary>
     /// this attribute specifies the repository id used in the IDL.
     /// </summary>
-    [AttributeUsage(AttributeTargets.Class | AttributeTargets.Interface | AttributeTargets.Struct | AttributeTargets.Enum, 
+    [AttributeUsage(AttributeTargets.Class | AttributeTargets.Interface | AttributeTargets.Struct | AttributeTargets.Enum,
                     AllowMultiple = false)]
     public sealed class RepositoryIDAttribute : Attribute, IIdlAttribute {
-        
+ 
         #region IFields
-        
+ 
         private string m_id;
 
         #endregion
@@ -133,8 +133,8 @@ namespace Ch.Elca.Iiop.Idl {
         #region IProperties
 
         public string Id {
-            get { 
-                return m_id; 
+            get {
+                return m_id;
             }
         }
 
@@ -149,25 +149,25 @@ namespace Ch.Elca.Iiop.Idl {
             return result;
         }
 
-		/// <summary>
-		/// See <see cref="System.Attribute.Equals"/>.
-		/// </summary>
+        /// <summary>
+        /// See <see cref="System.Attribute.Equals"/>.
+        /// </summary>
         public override bool Equals(object obj) {
-			RepositoryIDAttribute other = obj as RepositoryIDAttribute;
-			if (other == null) {
-			    return false;
-			}
-			return other.m_id == m_id;
-		}
-		
-		/// <summary>
-		/// See <see cref="System.Attribute.GetHashCode"/>.
-		/// </summary>		
-		public override int GetHashCode() {
-		    return m_id.GetHashCode();
-		}
-        
-        #endregion IMethods        
+            RepositoryIDAttribute other = obj as RepositoryIDAttribute;
+            if (other == null) {
+                return false;
+            }
+            return other.m_id == m_id;
+        }
+ 
+        /// <summary>
+        /// See <see cref="System.Attribute.GetHashCode"/>.
+        /// </summary>
+        public override int GetHashCode() {
+            return m_id.GetHashCode();
+        }
+ 
+        #endregion IMethods
 
     }
 
@@ -180,24 +180,24 @@ namespace Ch.Elca.Iiop.Idl {
     /// </remarks>
     [AttributeUsage(AttributeTargets.Class)]
     public sealed class SupportedInterfaceAttribute : Attribute, IIdlAttribute {
-        
+ 
         #region IFields
-        
+ 
         private Type m_type;
-        
+ 
         #endregion IFields
         #region IConstructors
-       
+ 
         public SupportedInterfaceAttribute(Type type) {
             m_type = type;
         }
 
         #endregion IConstructors
         #region IProperties
-        
+ 
         public Type FromType {
-            get { 
-                return m_type; 
+            get {
+                return m_type;
             }
         }
 
@@ -211,24 +211,24 @@ namespace Ch.Elca.Iiop.Idl {
             CustomAttributeBuilder result = new CustomAttributeBuilder(attrConstr, new Object[] { m_type });
             return result;
         }
-        
+ 
         /// <summary>
-		/// See <see cref="System.Attribute.Equals"/>.
-		/// </summary>
+        /// See <see cref="System.Attribute.Equals"/>.
+        /// </summary>
         public override bool Equals(object obj) {
-			SupportedInterfaceAttribute other = obj as SupportedInterfaceAttribute;
-			if (other == null) {
-			    return false;
-			}
-			return (m_type != null ? m_type.Equals(other.m_type) : other.m_type == null);
-		}
-		
-		/// <summary>
-		/// See <see cref="System.Attribute.GetHashCode"/>.
-		/// </summary>		
-		public override int GetHashCode() {
-		    return (m_type != null ? m_type.GetHashCode() : 0);
-		}
+            SupportedInterfaceAttribute other = obj as SupportedInterfaceAttribute;
+            if (other == null) {
+                return false;
+            }
+            return (m_type != null ? m_type.Equals(other.m_type) : other.m_type == null);
+        }
+ 
+        /// <summary>
+        /// See <see cref="System.Attribute.GetHashCode"/>.
+        /// </summary>
+        public override int GetHashCode() {
+            return (m_type != null ? m_type.GetHashCode() : 0);
+        }
 
         #endregion IMethods
 
@@ -240,24 +240,24 @@ namespace Ch.Elca.Iiop.Idl {
     /// </summary>
     [AttributeUsage(AttributeTargets.Class, AllowMultiple = false)]
     public sealed class ImplClassAttribute : Attribute, IIdlAttribute {
-        
+ 
         #region IFields
-        
+ 
         private string m_implClass;
-        
+ 
         #endregion IFields
         #region IConstructors
-        
+ 
         public ImplClassAttribute(string implClass) {
-            m_implClass = implClass;    
+            m_implClass = implClass;
         }
 
         #endregion IConstructors
         #region IProperties
 
         public string ImplClass {
-            get { 
-                return m_implClass; 
+            get {
+                return m_implClass;
             }
         }
 
@@ -271,24 +271,24 @@ namespace Ch.Elca.Iiop.Idl {
             CustomAttributeBuilder result = new CustomAttributeBuilder(attrConstr, new Object[] { m_implClass });
             return result;
         }
-        
+ 
         /// <summary>
-		/// See <see cref="System.Attribute.Equals"/>.
-		/// </summary>
+        /// See <see cref="System.Attribute.Equals"/>.
+        /// </summary>
         public override bool Equals(object obj) {
-			ImplClassAttribute other = obj as ImplClassAttribute;
-			if (other == null) {
-			    return false;
-			}
-			return (m_implClass != null ? m_implClass == other.m_implClass : other.m_implClass == null);
-		}
-		
-		/// <summary>
-		/// See <see cref="System.Attribute.GetHashCode"/>.
-		/// </summary>		
-		public override int GetHashCode() {
-		    return (m_implClass != null ? m_implClass.GetHashCode() : 0);
-		}
+            ImplClassAttribute other = obj as ImplClassAttribute;
+            if (other == null) {
+                return false;
+            }
+            return (m_implClass != null ? m_implClass == other.m_implClass : other.m_implClass == null);
+        }
+ 
+        /// <summary>
+        /// See <see cref="System.Attribute.GetHashCode"/>.
+        /// </summary>
+        public override int GetHashCode() {
+            return (m_implClass != null ? m_implClass.GetHashCode() : 0);
+        }
 
         #endregion IMethods
     }
@@ -298,7 +298,7 @@ namespace Ch.Elca.Iiop.Idl {
     /// </summary>
     [AttributeUsage(AttributeTargets.Struct, AllowMultiple = false)]
     public sealed class IdlStructAttribute : Attribute, IIdlAttribute {
-        
+ 
         #region IMethods
 
         /// <summary>creates an attribute builder for this custom attribute</summary>
@@ -308,21 +308,21 @@ namespace Ch.Elca.Iiop.Idl {
             CustomAttributeBuilder result = new CustomAttributeBuilder(attrConstr, new Object[0]);
             return result;
         }
-        
+ 
         /// <summary>
-		/// See <see cref="System.Attribute.Equals"/>.
-		/// </summary>
+        /// See <see cref="System.Attribute.Equals"/>.
+        /// </summary>
         public override bool Equals(object obj) {
-			IdlStructAttribute other = obj as IdlStructAttribute;
-			return (other != null); // all instances considered equal			
-		}
-		
-		/// <summary>
-		/// See <see cref="System.Attribute.GetHashCode"/>.
-		/// </summary>		
-		public override int GetHashCode() {
-		    return 100; // all instances have the same value.
-		}        
+            IdlStructAttribute other = obj as IdlStructAttribute;
+            return (other != null); // all instances considered equal
+        }
+ 
+        /// <summary>
+        /// See <see cref="System.Attribute.GetHashCode"/>.
+        /// </summary>
+        public override int GetHashCode() {
+            return 100; // all instances have the same value.
+        }
 
         #endregion IMethods
 
@@ -333,7 +333,7 @@ namespace Ch.Elca.Iiop.Idl {
     /// </summary>
     [AttributeUsage(AttributeTargets.Enum, AllowMultiple = false)]
     public sealed class IdlEnumAttribute : Attribute, IIdlAttribute {
-        
+ 
         #region IMethods
 
         /// <summary>creates an attribute builder for this custom attribute</summary>
@@ -343,32 +343,32 @@ namespace Ch.Elca.Iiop.Idl {
             CustomAttributeBuilder result = new CustomAttributeBuilder(attrConstr, new Object[0]);
             return result;
         }
-        
+ 
         /// <summary>
-		/// See <see cref="System.Attribute.Equals"/>.
-		/// </summary>
+        /// See <see cref="System.Attribute.Equals"/>.
+        /// </summary>
         public override bool Equals(object obj) {
-			IdlEnumAttribute other = obj as IdlEnumAttribute;
-			return (other != null); // all instances considered equal			
-		}
-		
-		/// <summary>
-		/// See <see cref="System.Attribute.GetHashCode"/>.
-		/// </summary>		
-		public override int GetHashCode() {
-		    return 200; // all instances have the same value.
-		}                
+            IdlEnumAttribute other = obj as IdlEnumAttribute;
+            return (other != null); // all instances considered equal
+        }
+ 
+        /// <summary>
+        /// See <see cref="System.Attribute.GetHashCode"/>.
+        /// </summary>
+        public override int GetHashCode() {
+            return 200; // all instances have the same value.
+        }
 
         #endregion IMethods
 
     }
-    
+ 
     /// <summary>
     /// this attribute is used to specify, that a struct is mapped from the IDL-union type
     /// </summary>
     [AttributeUsage(AttributeTargets.Struct, AllowMultiple = false)]
     public sealed class IdlUnionAttribute : Attribute, IIdlAttribute {
-        
+ 
         #region IMethods
 
         /// <summary>creates an attribute builder for this custom attribute</summary>
@@ -378,40 +378,40 @@ namespace Ch.Elca.Iiop.Idl {
             CustomAttributeBuilder result = new CustomAttributeBuilder(attrConstr, new Object[0]);
             return result;
         }
-        
+ 
         /// <summary>
-		/// See <see cref="System.Attribute.Equals"/>.
-		/// </summary>
+        /// See <see cref="System.Attribute.Equals"/>.
+        /// </summary>
         public override bool Equals(object obj) {
-			IdlUnionAttribute other = obj as IdlUnionAttribute;
-			return (other != null); // all instances considered equal			
-		}
-		
-		/// <summary>
-		/// See <see cref="System.Attribute.GetHashCode"/>.
-		/// </summary>		
-		public override int GetHashCode() {
-		    return 300; // all instances have the same value.
-		}                        
+            IdlUnionAttribute other = obj as IdlUnionAttribute;
+            return (other != null); // all instances considered equal
+        }
+ 
+        /// <summary>
+        /// See <see cref="System.Attribute.GetHashCode"/>.
+        /// </summary>
+        public override int GetHashCode() {
+            return 300; // all instances have the same value.
+        }
 
         #endregion IMethods
 
     }
-    
+ 
     /// <summary>
     /// this attribute is used to indicate a mapping from an IDL boxed value type
     /// </summary>
-    [AttributeUsage(AttributeTargets.Parameter | AttributeTargets.ReturnValue | AttributeTargets.Field | AttributeTargets.Property, 
+    [AttributeUsage(AttributeTargets.Parameter | AttributeTargets.ReturnValue | AttributeTargets.Field | AttributeTargets.Property,
                     AllowMultiple = false)]
     public sealed class BoxedValueAttribute : Attribute, IIdlAttribute {
-        
+ 
         #region IFields
-        
+ 
         private string m_repositoryId = null;
-        
+ 
         #endregion IFields
         #region IConstructors
-        
+ 
         /// <summary>
         /// Associate the CLS type with the outermost boxed value type, the mapping is done from
         /// </summary>
@@ -422,10 +422,10 @@ namespace Ch.Elca.Iiop.Idl {
 
         #endregion IConstructors
         #region IProperties
-        
+ 
         public string RepositoryId {
-            get { 
-                return m_repositoryId; 
+            get {
+                return m_repositoryId;
             }
         }
 
@@ -436,28 +436,28 @@ namespace Ch.Elca.Iiop.Idl {
         public CustomAttributeBuilder CreateAttributeBuilder() {
             Type attrType = this.GetType();
             ConstructorInfo attrConstr = attrType.GetConstructor(new Type[] { ReflectionHelper.StringType } );
-            CustomAttributeBuilder result = new CustomAttributeBuilder(attrConstr, 
+            CustomAttributeBuilder result = new CustomAttributeBuilder(attrConstr,
                                                                        new Object[] { m_repositoryId });
             return result;
         }
-        
+ 
         /// <summary>
-		/// See <see cref="System.Attribute.Equals"/>.
-		/// </summary>
+        /// See <see cref="System.Attribute.Equals"/>.
+        /// </summary>
         public override bool Equals(object obj) {
-			BoxedValueAttribute other = obj as BoxedValueAttribute;
-			if (other == null) {
-			    return false;
-			}
-			return (m_repositoryId != null ? m_repositoryId == other.m_repositoryId : other.m_repositoryId == null);
-		}
-		
-		/// <summary>
-		/// See <see cref="System.Attribute.GetHashCode"/>.
-		/// </summary>		
-		public override int GetHashCode() {
-		    return (m_repositoryId != null ? m_repositoryId.GetHashCode() : 0);
-		}        
+            BoxedValueAttribute other = obj as BoxedValueAttribute;
+            if (other == null) {
+                return false;
+            }
+            return (m_repositoryId != null ? m_repositoryId == other.m_repositoryId : other.m_repositoryId == null);
+        }
+ 
+        /// <summary>
+        /// See <see cref="System.Attribute.GetHashCode"/>.
+        /// </summary>
+        public override int GetHashCode() {
+            return (m_repositoryId != null ? m_repositoryId.GetHashCode() : 0);
+        }
 
         #endregion IMethods
 
@@ -473,17 +473,17 @@ namespace Ch.Elca.Iiop.Idl {
     /// For sequences of sequences, this means, that a sequence attribute is added for the sequence itself and also
     /// for the inner sequence.
     /// </remarks>
-    [AttributeUsage(AttributeTargets.Parameter | AttributeTargets.ReturnValue | AttributeTargets.Field | AttributeTargets.Property, 
+    [AttributeUsage(AttributeTargets.Parameter | AttributeTargets.ReturnValue | AttributeTargets.Field | AttributeTargets.Property,
                     AllowMultiple = true)]
     public sealed class IdlSequenceAttribute : Attribute, IIdlAttribute, IOrderedAttribute {
-        
+ 
         #region IFields
 
         /// <summary>
         /// for bounded sequences > 0 (max number of elements), for unbounded = 0
         /// </summary>
         private long m_bound = 0;
-        
+ 
         private long m_orderNr;
 
         #endregion IFields
@@ -492,7 +492,7 @@ namespace Ch.Elca.Iiop.Idl {
         /// <summary>
         /// Constructor for unbounded sequences
         /// </summary>
-        public IdlSequenceAttribute(long orderNr) : this(orderNr, 0) {            
+        public IdlSequenceAttribute(long orderNr) : this(orderNr, 0) {
         }
 
         /// <summary>
@@ -512,7 +512,7 @@ namespace Ch.Elca.Iiop.Idl {
                 return m_bound;
             }
         }
-        
+ 
         public long OrderNr {
             get {
                 return m_orderNr;
@@ -529,7 +529,7 @@ namespace Ch.Elca.Iiop.Idl {
                 ConstructorInfo attrConstr = attrType.GetConstructor(new Type[] { ReflectionHelper.Int64Type });
                 return new CustomAttributeBuilder(attrConstr, new Object[] { m_orderNr });
             } else {
-                ConstructorInfo attrConstr = attrType.GetConstructor(new Type[] { ReflectionHelper.Int64Type, 
+                ConstructorInfo attrConstr = attrType.GetConstructor(new Type[] { ReflectionHelper.Int64Type,
                                                                                   ReflectionHelper.Int64Type });
                 return new CustomAttributeBuilder(attrConstr, new Object[] { m_orderNr, m_bound } );
             }
@@ -542,29 +542,29 @@ namespace Ch.Elca.Iiop.Idl {
         public bool IsBounded() {
             return IsBounded(m_bound);
         }
-        
+ 
         /// <summary>
-		/// See <see cref="System.Attribute.Equals"/>.
-		/// </summary>
+        /// See <see cref="System.Attribute.Equals"/>.
+        /// </summary>
         public override bool Equals(object obj) {
-			IdlSequenceAttribute other = obj as IdlSequenceAttribute;
-			if (other == null) {
-			    return false;
-			}
-			return (m_bound == other.m_bound && m_orderNr == other.m_orderNr);
-		}
-		
-		/// <summary>
-		/// See <see cref="System.Attribute.GetHashCode"/>.
-		/// </summary>		
-		public override int GetHashCode() {
-		    return (m_bound.GetHashCode() ^ m_orderNr.GetHashCode());
-		}        
+            IdlSequenceAttribute other = obj as IdlSequenceAttribute;
+            if (other == null) {
+                return false;
+            }
+            return (m_bound == other.m_bound && m_orderNr == other.m_orderNr);
+        }
+ 
+        /// <summary>
+        /// See <see cref="System.Attribute.GetHashCode"/>.
+        /// </summary>
+        public override int GetHashCode() {
+            return (m_bound.GetHashCode() ^ m_orderNr.GetHashCode());
+        }
 
         #endregion IMethods
         #region SMethods
-        
-        public static long DetermineSequenceAttributeOrderNr(AttributeExtCollection elemTypeAttributes) {            
+ 
+        public static long DetermineSequenceAttributeOrderNr(AttributeExtCollection elemTypeAttributes) {
             Attribute idlorderAttr = elemTypeAttributes.GetHighestOrderAttribute();
             if (idlorderAttr != null) {
                 return ((IOrderedAttribute)idlorderAttr).OrderNr + 1;
@@ -579,7 +579,7 @@ namespace Ch.Elca.Iiop.Idl {
         public static bool IsBounded(long bound) {
             return bound > 0;
         }
-        
+ 
         #endregion SMethods
 
     }
@@ -595,17 +595,17 @@ namespace Ch.Elca.Iiop.Idl {
     /// For array of arrays, this means, that a array attribute is added for the array itself and also
     /// for the inner array.
     /// </remarks>
-    [AttributeUsage(AttributeTargets.Parameter | AttributeTargets.ReturnValue | AttributeTargets.Field | AttributeTargets.Property, 
+    [AttributeUsage(AttributeTargets.Parameter | AttributeTargets.ReturnValue | AttributeTargets.Field | AttributeTargets.Property,
                     AllowMultiple = true)]
     public sealed class IdlArrayAttribute : Attribute, IIdlAttribute, IOrderedAttribute {
-        
+ 
         #region IFields
         /// <summary>
         /// the first array dimension
         /// </summary>
         private int m_firstDimensionSize;
-        
-        private long m_orderNr;        
+ 
+        private long m_orderNr;
 
         #endregion IFields
         #region IConsturctors
@@ -615,7 +615,7 @@ namespace Ch.Elca.Iiop.Idl {
         /// </summary>
         /// <param name="firstDimension">the size of the first dimension of the array</param>
         public IdlArrayAttribute(long orderNr, int firstDimensionSize) {
-            m_firstDimensionSize = firstDimensionSize;        
+            m_firstDimensionSize = firstDimensionSize;
             m_orderNr = orderNr;
         }
 
@@ -626,8 +626,8 @@ namespace Ch.Elca.Iiop.Idl {
             get {
                 return m_firstDimensionSize;
             }
-        }        
-        
+        }
+ 
         public long OrderNr {
             get {
                 return m_orderNr;
@@ -644,37 +644,37 @@ namespace Ch.Elca.Iiop.Idl {
                                                                               ReflectionHelper.Int32Type });
             return new CustomAttributeBuilder(attrConstr, new Object[] { m_orderNr, m_firstDimensionSize } );
         }
-        
+ 
         /// <summary>
-		/// See <see cref="System.Attribute.Equals"/>.
-		/// </summary>
+        /// See <see cref="System.Attribute.Equals"/>.
+        /// </summary>
         public override bool Equals(object obj) {
-			IdlArrayAttribute other = obj as IdlArrayAttribute;
-			if (other == null) {
-			    return false;
-			}
-			return (m_firstDimensionSize == other.m_firstDimensionSize && m_orderNr == other.m_orderNr);
-		}
-		
-		/// <summary>
-		/// See <see cref="System.Attribute.GetHashCode"/>.
-		/// </summary>		
-		public override int GetHashCode() {
-		    return (m_firstDimensionSize.GetHashCode() ^ m_orderNr.GetHashCode());
-		}        
+            IdlArrayAttribute other = obj as IdlArrayAttribute;
+            if (other == null) {
+                return false;
+            }
+            return (m_firstDimensionSize == other.m_firstDimensionSize && m_orderNr == other.m_orderNr);
+        }
+ 
+        /// <summary>
+        /// See <see cref="System.Attribute.GetHashCode"/>.
+        /// </summary>
+        public override int GetHashCode() {
+            return (m_firstDimensionSize.GetHashCode() ^ m_orderNr.GetHashCode());
+        }
 
         #endregion IMethods
         #region SMethods
-        
-        public static long DetermineArrayAttributeOrderNr(AttributeExtCollection elemTypeAttributes) {            
+ 
+        public static long DetermineArrayAttributeOrderNr(AttributeExtCollection elemTypeAttributes) {
             Attribute idlorderAttr = elemTypeAttributes.GetHighestOrderAttribute();
             if (idlorderAttr != null) {
                 return ((IOrderedAttribute)idlorderAttr).OrderNr + 1;
             } else {
                 return 0;
             }
-        }        
-        
+        }
+ 
         #endregion SMethods
 
     }
@@ -683,10 +683,10 @@ namespace Ch.Elca.Iiop.Idl {
     /// this attribute is used to provide the size of a dimension for a fixed size idl array
     /// </summary>
     /// <remarks>
-    /// For multi dimension idl arrays, the higher dimension size can't be directly added to IdlArrayAttribute, 
+    /// For multi dimension idl arrays, the higher dimension size can't be directly added to IdlArrayAttribute,
     /// because the constructor of .NET attributes may not take an array for CLS Compliance.
     /// </remarks>
-    [AttributeUsage(AttributeTargets.Parameter | AttributeTargets.ReturnValue | AttributeTargets.Field | AttributeTargets.Property, 
+    [AttributeUsage(AttributeTargets.Parameter | AttributeTargets.ReturnValue | AttributeTargets.Field | AttributeTargets.Property,
                     AllowMultiple = true)]
     public sealed class IdlArrayDimensionAttribute : Attribute, IIdlAttribute, IAssociatedAttribute {
 
@@ -707,7 +707,7 @@ namespace Ch.Elca.Iiop.Idl {
 
         #endregion IConstructors
         #region IProperties
-        
+ 
         /// <summary>
         /// the key number of the attribute, this one is associated to.
         /// </summary>
@@ -715,7 +715,7 @@ namespace Ch.Elca.Iiop.Idl {
             get {
                 return m_associatedTo;
             }
-        }    
+        }
 
         /// <summary>
         /// the dimension, this attribute describes
@@ -733,8 +733,8 @@ namespace Ch.Elca.Iiop.Idl {
             get {
                 return m_dimensionSize;
             }
-        }    
-        
+        }
+ 
         #endregion IProperties
         #region IMethods
 
@@ -746,27 +746,27 @@ namespace Ch.Elca.Iiop.Idl {
                                                                               ReflectionHelper.Int32Type });
             return new CustomAttributeBuilder(attrConstr, new Object[] { m_associatedTo, m_dimensionNr, m_dimensionSize } );
         }
-        
+ 
         /// <summary>
-		/// See <see cref="System.Attribute.Equals"/>.
-		/// </summary>
+        /// See <see cref="System.Attribute.Equals"/>.
+        /// </summary>
         public override bool Equals(object obj) {
-			IdlArrayDimensionAttribute other = obj as IdlArrayDimensionAttribute;
-			if (other == null) {
-			    return false;
-			}
-			return (m_dimensionSize == other.m_dimensionSize && m_dimensionNr == other.m_dimensionNr &&
-			        m_associatedTo == other.m_associatedTo);
-		}
-		
-		/// <summary>
-		/// See <see cref="System.Attribute.GetHashCode"/>.
-		/// </summary>		
-		public override int GetHashCode() {
-		    return (m_dimensionSize.GetHashCode() ^ m_dimensionNr.GetHashCode() ^ m_associatedTo.GetHashCode());
-		}                
+            IdlArrayDimensionAttribute other = obj as IdlArrayDimensionAttribute;
+            if (other == null) {
+                return false;
+            }
+            return (m_dimensionSize == other.m_dimensionSize && m_dimensionNr == other.m_dimensionNr &&
+                    m_associatedTo == other.m_associatedTo);
+        }
+ 
+        /// <summary>
+        /// See <see cref="System.Attribute.GetHashCode"/>.
+        /// </summary>
+        public override int GetHashCode() {
+            return (m_dimensionSize.GetHashCode() ^ m_dimensionNr.GetHashCode() ^ m_associatedTo.GetHashCode());
+        }
 
-        #endregion IMethods    
+        #endregion IMethods
 
     }
 
@@ -776,14 +776,14 @@ namespace Ch.Elca.Iiop.Idl {
     /// </summary>
     [AttributeUsage(AttributeTargets.Interface, AllowMultiple = false)]
     public sealed class InterfaceTypeAttribute : Attribute, IIdlAttribute {
-        
+ 
         #region IFields
-        
+ 
         private IdlTypeInterface m_idlType;
 
         #endregion IFields
         #region IConstructors
-        
+ 
         public InterfaceTypeAttribute(IdlTypeInterface idlType) {
             m_idlType = idlType;
         }
@@ -792,11 +792,11 @@ namespace Ch.Elca.Iiop.Idl {
         #region IProperties
 
         public IdlTypeInterface IdlType {
-            get { 
-                return m_idlType; 
+            get {
+                return m_idlType;
             }
         }
-        
+ 
         #endregion IProperties
         #region IMethods
 
@@ -807,60 +807,60 @@ namespace Ch.Elca.Iiop.Idl {
             CustomAttributeBuilder result = new CustomAttributeBuilder(attrConstr, new Object[] { m_idlType });
             return result;
         }
-        
+ 
         /// <summary>
-		/// See <see cref="System.Attribute.Equals"/>.
-		/// </summary>
+        /// See <see cref="System.Attribute.Equals"/>.
+        /// </summary>
         public override bool Equals(object obj) {
-			InterfaceTypeAttribute other = obj as InterfaceTypeAttribute;
-			if (other == null) {
-			    return false;
-			}
-			return (m_idlType == other.m_idlType);
-		}
-		
-		/// <summary>
-		/// See <see cref="System.Attribute.GetHashCode"/>.
-		/// </summary>		
-		public override int GetHashCode() {
-		    return m_idlType.GetHashCode();
-		}                        
+            InterfaceTypeAttribute other = obj as InterfaceTypeAttribute;
+            if (other == null) {
+                return false;
+            }
+            return (m_idlType == other.m_idlType);
+        }
+ 
+        /// <summary>
+        /// See <see cref="System.Attribute.GetHashCode"/>.
+        /// </summary>
+        public override int GetHashCode() {
+            return m_idlType.GetHashCode();
+        }
 
         #endregion IMethods
 
     }
-    
+ 
 
     /// <summary>
     /// this attribute is used to describe the IDL-type from which a parameter, field, retval of type object is mapped from
     /// </summary>
-    [AttributeUsage(AttributeTargets.Parameter | AttributeTargets.ReturnValue | AttributeTargets.Field | AttributeTargets.Property, 
+    [AttributeUsage(AttributeTargets.Parameter | AttributeTargets.ReturnValue | AttributeTargets.Field | AttributeTargets.Property,
                     AllowMultiple = false)]
     public sealed class ObjectIdlTypeAttribute : Attribute, IIdlAttribute {
-        
+ 
         #region IFields
-        
+ 
         private IdlTypeObject m_idlType;
 
         #endregion IFields
         #region IConstructors
-        
+ 
         public ObjectIdlTypeAttribute(IdlTypeObject idlType) {
             m_idlType = idlType;
         }
 
         #endregion IConstructors
         #region IProperties
-        
+ 
         public IdlTypeObject IdlType {
-            get { 
-                return m_idlType; 
+            get {
+                return m_idlType;
             }
         }
-        
+ 
         #endregion IProperties
         #region IMethods
-        
+ 
         /// <summary>creates an attribute builder for this custom attribute</summary>
         public CustomAttributeBuilder CreateAttributeBuilder() {
             Type attrType = this.GetType();
@@ -870,23 +870,23 @@ namespace Ch.Elca.Iiop.Idl {
         }
 
         /// <summary>
-		/// See <see cref="System.Attribute.Equals"/>.
-		/// </summary>
+        /// See <see cref="System.Attribute.Equals"/>.
+        /// </summary>
         public override bool Equals(object obj) {
-			ObjectIdlTypeAttribute other = obj as ObjectIdlTypeAttribute;
-			if (other == null) {
-			    return false;
-			}
-			return (m_idlType == other.m_idlType);
-		}
-		
-		/// <summary>
-		/// See <see cref="System.Attribute.GetHashCode"/>.
-		/// </summary>		
-		public override int GetHashCode() {
-		    return m_idlType.GetHashCode();
-		}                                
-        
+            ObjectIdlTypeAttribute other = obj as ObjectIdlTypeAttribute;
+            if (other == null) {
+                return false;
+            }
+            return (m_idlType == other.m_idlType);
+        }
+ 
+        /// <summary>
+        /// See <see cref="System.Attribute.GetHashCode"/>.
+        /// </summary>
+        public override int GetHashCode() {
+            return m_idlType.GetHashCode();
+        }
+ 
         #endregion IMethods
 
     }
@@ -901,24 +901,24 @@ namespace Ch.Elca.Iiop.Idl {
     /// IDL-type char and wchar are both mapped to System.Char, which is a wide char -->
     /// wide-chars are not alloewed for IDL-type char.
     /// </remarks>
-    [AttributeUsage(AttributeTargets.Parameter | AttributeTargets.ReturnValue | AttributeTargets.Field | AttributeTargets.Property, 
+    [AttributeUsage(AttributeTargets.Parameter | AttributeTargets.ReturnValue | AttributeTargets.Field | AttributeTargets.Property,
                     AllowMultiple = false)]
     public sealed class WideCharAttribute : Attribute, IIdlAttribute {
-        
+ 
         #region IFields
 
         private bool m_isAllowed;
 
         #endregion IFields
         #region IConstructors
-        
+ 
         public WideCharAttribute(bool isAllowed) {
             m_isAllowed = isAllowed;
         }
 
         #endregion IConstructors
         #region IProperties
-        
+ 
         public bool IsAllowed {
             get { return m_isAllowed; }
         }
@@ -933,24 +933,24 @@ namespace Ch.Elca.Iiop.Idl {
             CustomAttributeBuilder result = new CustomAttributeBuilder(attrConstr, new Object[] { m_isAllowed });
             return result;
         }
-        
+ 
         /// <summary>
-		/// See <see cref="System.Attribute.Equals"/>.
-		/// </summary>
+        /// See <see cref="System.Attribute.Equals"/>.
+        /// </summary>
         public override bool Equals(object obj) {
-			WideCharAttribute other = obj as WideCharAttribute;
-			if (other == null) {
-			    return false;
-			}
-			return (m_isAllowed == other.m_isAllowed);
-		}
-		
-		/// <summary>
-		/// See <see cref="System.Attribute.GetHashCode"/>.
-		/// </summary>		
-		public override int GetHashCode() {
-		    return m_isAllowed.GetHashCode();
-		}                                        
+            WideCharAttribute other = obj as WideCharAttribute;
+            if (other == null) {
+                return false;
+            }
+            return (m_isAllowed == other.m_isAllowed);
+        }
+ 
+        /// <summary>
+        /// See <see cref="System.Attribute.GetHashCode"/>.
+        /// </summary>
+        public override int GetHashCode() {
+            return m_isAllowed.GetHashCode();
+        }
 
         #endregion IMethods
 
@@ -965,7 +965,7 @@ namespace Ch.Elca.Iiop.Idl {
     /// For preventing this standard mapping (is needed if mapping from IDL-string / IDL-wstring to .NET), this
     /// attribute is used.
     /// </summary>
-    [AttributeUsage(AttributeTargets.Parameter | AttributeTargets.ReturnValue | AttributeTargets.Field | AttributeTargets.Property, 
+    [AttributeUsage(AttributeTargets.Parameter | AttributeTargets.ReturnValue | AttributeTargets.Field | AttributeTargets.Property,
                     AllowMultiple = false)]
     public sealed class StringValueAttribute : Attribute, IIdlAttribute {
 
@@ -975,40 +975,40 @@ namespace Ch.Elca.Iiop.Idl {
         public CustomAttributeBuilder CreateAttributeBuilder() {
             Type attrType = this.GetType();
             ConstructorInfo attrConstr = attrType.GetConstructor(Type.EmptyTypes);
-            CustomAttributeBuilder result = new CustomAttributeBuilder(attrConstr, 
+            CustomAttributeBuilder result = new CustomAttributeBuilder(attrConstr,
                                                                        new Object[0]);
             return result;
         }
-        
+ 
         /// <summary>
-		/// See <see cref="System.Attribute.Equals"/>.
-		/// </summary>
+        /// See <see cref="System.Attribute.Equals"/>.
+        /// </summary>
         public override bool Equals(object obj) {
-			StringValueAttribute other = obj as StringValueAttribute;
-			return (other != null); // all instances considered equal			
-		}
-		
-		/// <summary>
-		/// See <see cref="System.Attribute.GetHashCode"/>.
-		/// </summary>		
-		public override int GetHashCode() {
-		    return 400; // all instances have the same value.
-		}                                
+            StringValueAttribute other = obj as StringValueAttribute;
+            return (other != null); // all instances considered equal
+        }
+ 
+        /// <summary>
+        /// See <see cref="System.Attribute.GetHashCode"/>.
+        /// </summary>
+        public override int GetHashCode() {
+            return 400; // all instances have the same value.
+        }
 
         #endregion IMethods
     }
 
-    
+ 
     /// <summary>
     /// this attribute specifies the name of the idl entity mapped to the idl entity;
     /// this is used currently for properties/methods
     /// </summary>
-    [AttributeUsage(AttributeTargets.Method | AttributeTargets.Property, 
+    [AttributeUsage(AttributeTargets.Method | AttributeTargets.Property,
                     AllowMultiple = false)]
     public sealed class FromIdlNameAttribute : Attribute, IIdlAttribute {
-        
+ 
         #region IFields
-        
+ 
         private string m_idlName;
 
         #endregion
@@ -1025,8 +1025,8 @@ namespace Ch.Elca.Iiop.Idl {
         /// the name of the idl entity, the cls entity is mapped from
         /// </summary>
         public string IdlName {
-            get { 
-                return m_idlName; 
+            get {
+                return m_idlName;
             }
         }
 
@@ -1040,40 +1040,40 @@ namespace Ch.Elca.Iiop.Idl {
             CustomAttributeBuilder result = new CustomAttributeBuilder(attrConstr, new Object[] { m_idlName });
             return result;
         }
-        
+ 
         /// <summary>
-		/// See <see cref="System.Attribute.Equals"/>.
-		/// </summary>
+        /// See <see cref="System.Attribute.Equals"/>.
+        /// </summary>
         public override bool Equals(object obj) {
-			FromIdlNameAttribute other = obj as FromIdlNameAttribute;
-			if (other == null) {
-			    return false;
-			}
-			return (m_idlName != null ? m_idlName == other.m_idlName : other.m_idlName == null);
-		}
-		
-		/// <summary>
-		/// See <see cref="System.Attribute.GetHashCode"/>.
-		/// </summary>		
-		public override int GetHashCode() {
-		    return (m_idlName != null ? m_idlName.GetHashCode() : 0);
-		}                
+            FromIdlNameAttribute other = obj as FromIdlNameAttribute;
+            if (other == null) {
+                return false;
+            }
+            return (m_idlName != null ? m_idlName == other.m_idlName : other.m_idlName == null);
+        }
+ 
+        /// <summary>
+        /// See <see cref="System.Attribute.GetHashCode"/>.
+        /// </summary>
+        public override int GetHashCode() {
+            return (m_idlName != null ? m_idlName.GetHashCode() : 0);
+        }
 
         #endregion IMethods
 
     }
-    
+ 
     /// <summary>
-    /// this attribute specifies what exceptions may be thrown by a method; 
+    /// this attribute specifies what exceptions may be thrown by a method;
     /// not usable for properties, because properties are mapped to idl attributes and attributes can
     /// only return system exceptions. (CORBA 2.6; chapter 3.13)
     /// </summary>
-    [AttributeUsage(AttributeTargets.Method, 
+    [AttributeUsage(AttributeTargets.Method,
                     AllowMultiple = true)]
     public sealed class ThrowsIdlExceptionAttribute : Attribute, IIdlAttribute {
-        
+ 
         #region IFields
-        
+ 
         private Type m_exceptionType;
 
         #endregion
@@ -1090,7 +1090,7 @@ namespace Ch.Elca.Iiop.Idl {
         /// the type of the exception, which may be thrown
         /// </summary>
         public Type ExceptionType {
-            get { 
+            get {
                 return m_exceptionType;
             }
         }
@@ -1105,24 +1105,24 @@ namespace Ch.Elca.Iiop.Idl {
             CustomAttributeBuilder result = new CustomAttributeBuilder(attrConstr, new Object[] { m_exceptionType });
             return result;
         }
-        
+ 
         /// <summary>
-		/// See <see cref="System.Attribute.Equals"/>.
-		/// </summary>
+        /// See <see cref="System.Attribute.Equals"/>.
+        /// </summary>
         public override bool Equals(object obj) {
-			ThrowsIdlExceptionAttribute other = obj as ThrowsIdlExceptionAttribute;
-			if (other == null) {
-			    return false;
-			}
-			return (m_exceptionType != null ? m_exceptionType == other.m_exceptionType : other.m_exceptionType == null);
-		}
-		
-		/// <summary>
-		/// See <see cref="System.Attribute.GetHashCode"/>.
-		/// </summary>		
-		public override int GetHashCode() {
-		    return (m_exceptionType != null ? m_exceptionType.GetHashCode() : 0);
-		}                        
+            ThrowsIdlExceptionAttribute other = obj as ThrowsIdlExceptionAttribute;
+            if (other == null) {
+                return false;
+            }
+            return (m_exceptionType != null ? m_exceptionType == other.m_exceptionType : other.m_exceptionType == null);
+        }
+ 
+        /// <summary>
+        /// See <see cref="System.Attribute.GetHashCode"/>.
+        /// </summary>
+        public override int GetHashCode() {
+            return (m_exceptionType != null ? m_exceptionType.GetHashCode() : 0);
+        }
 
         #endregion IMethods
 
@@ -1162,30 +1162,30 @@ namespace Ch.Elca.Iiop.Idl {
             CustomAttributeBuilder result = new CustomAttributeBuilder(attrConstr, new Object[] { m_contextElementKey });
             return result;
         }
-        
+ 
         /// <summary>
-		/// See <see cref="System.Attribute.Equals"/>.
-		/// </summary>
+        /// See <see cref="System.Attribute.Equals"/>.
+        /// </summary>
         public override bool Equals(object obj) {
-			ContextElementAttribute other = obj as ContextElementAttribute;
-			if (other == null) {
-			    return false;
-			}
-			return (m_contextElementKey != null ? m_contextElementKey == other.m_contextElementKey : other.m_contextElementKey == null);
-		}
-		
-		/// <summary>
-		/// See <see cref="System.Attribute.GetHashCode"/>.
-		/// </summary>		
-		public override int GetHashCode() {
-		    return (m_contextElementKey != null ? m_contextElementKey.GetHashCode() : 0);
-		}                        
+            ContextElementAttribute other = obj as ContextElementAttribute;
+            if (other == null) {
+                return false;
+            }
+            return (m_contextElementKey != null ? m_contextElementKey == other.m_contextElementKey : other.m_contextElementKey == null);
+        }
+ 
+        /// <summary>
+        /// See <see cref="System.Attribute.GetHashCode"/>.
+        /// </summary>
+        public override int GetHashCode() {
+            return (m_contextElementKey != null ? m_contextElementKey.GetHashCode() : 0);
+        }
 
         #endregion IMethods
 
     }
-    
-    
+ 
+ 
     /// <summary>
     /// Specifies, that a type defines explict serialization order for its fields.
     /// </summary>
@@ -1201,27 +1201,27 @@ namespace Ch.Elca.Iiop.Idl {
             CustomAttributeBuilder result = new CustomAttributeBuilder(attrConstr, new Object[0]);
             return result;
         }
-        
+ 
         /// <summary>
-		/// See <see cref="System.Attribute.Equals"/>.
-		/// </summary>
+        /// See <see cref="System.Attribute.Equals"/>.
+        /// </summary>
         public override bool Equals(object obj) {
-			ExplicitSerializationOrdered other = obj as ExplicitSerializationOrdered;
-			return (other != null); // all instances considered equal			
-		}
-		
-		/// <summary>
-		/// See <see cref="System.Attribute.GetHashCode"/>.
-		/// </summary>		
-		public override int GetHashCode() {
-		    return 500; // all instances have the same value.
-		}                                
-        
+            ExplicitSerializationOrdered other = obj as ExplicitSerializationOrdered;
+            return (other != null); // all instances considered equal
+        }
+ 
+        /// <summary>
+        /// See <see cref="System.Attribute.GetHashCode"/>.
+        /// </summary>
+        public override int GetHashCode() {
+            return 500; // all instances have the same value.
+        }
+ 
         #endregion IMethods
-        
+ 
     }
-    
-    
+ 
+ 
         /// <summary>
     /// Specifies, that a type defines explict serialization order for its fields.
     /// </summary>
@@ -1229,19 +1229,19 @@ namespace Ch.Elca.Iiop.Idl {
     public sealed class ExplicitSerializationOrderNr : Attribute, IIdlAttribute {
 
         #region IFields
-        
-        private int m_orderNr;        
-        
+ 
+        private int m_orderNr;
+ 
         #endregion IFields
         #region IConstructors
-        
+ 
         /// <summary>
         /// constructor taking the order nr of the tagged field.
-        /// </summary>        
-        public ExplicitSerializationOrderNr(int orderNr) {               
+        /// </summary>
+        public ExplicitSerializationOrderNr(int orderNr) {
             m_orderNr = orderNr;
-        }        
-        
+        }
+ 
         #endregion IConstructors
         #region IProperties
 
@@ -1254,7 +1254,7 @@ namespace Ch.Elca.Iiop.Idl {
             }
         }
 
-        #endregion IProperties        
+        #endregion IProperties
         #region IMethods
 
         /// <summary>creates an attribute builder for this custom attribute</summary>
@@ -1262,31 +1262,29 @@ namespace Ch.Elca.Iiop.Idl {
             Type attrType = this.GetType();
             ConstructorInfo attrConstr = attrType.GetConstructor(new Type[] { ReflectionHelper.Int32Type } );
             CustomAttributeBuilder result = new CustomAttributeBuilder(attrConstr, new Object[] { m_orderNr });
-            return result;            
+            return result;
         }
-        
+ 
         /// <summary>
-		/// See <see cref="System.Attribute.Equals"/>.
-		/// </summary>
+        /// See <see cref="System.Attribute.Equals"/>.
+        /// </summary>
         public override bool Equals(object obj) {
-			ExplicitSerializationOrderNr other = obj as ExplicitSerializationOrderNr;
-			if (other == null) {
-			    return false;
-			}
-			return (m_orderNr == other.m_orderNr);
-		}
-		
-		/// <summary>
-		/// See <see cref="System.Attribute.GetHashCode"/>.
-		/// </summary>		
-		public override int GetHashCode() {
-		    return m_orderNr.GetHashCode();
-		}                                                
+            ExplicitSerializationOrderNr other = obj as ExplicitSerializationOrderNr;
+            if (other == null) {
+                return false;
+            }
+            return (m_orderNr == other.m_orderNr);
+        }
+ 
+        /// <summary>
+        /// See <see cref="System.Attribute.GetHashCode"/>.
+        /// </summary>
+        public override int GetHashCode() {
+            return m_orderNr.GetHashCode();
+        }
 
         #endregion IMethods
 
-        
     }
-
 
 }

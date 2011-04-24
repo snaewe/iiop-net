@@ -76,7 +76,7 @@ namespace ch.elca.iiop.integrationTests {
                 m_test = null;
             }
             m_nameService = null;
-            // unregister the channel            
+            // unregister the channel
             ChannelServices.UnregisterChannel(m_channel);
         }
 
@@ -93,7 +93,7 @@ namespace ch.elca.iiop.integrationTests {
             System.Single result = m_test.TestIncFloat(arg);
             Assertion.AssertEquals((System.Single)(arg + 1), result);
         }
-        
+ 
         [Test]
         public void TestByte() {
             System.Byte arg = 1;
@@ -142,7 +142,7 @@ namespace ch.elca.iiop.integrationTests {
         public void TestVoid() {
             m_test.TestVoid();
         }
-        
+ 
         [Test]
         public void TestChar() {
             System.Char arg = 'a';
@@ -152,7 +152,7 @@ namespace ch.elca.iiop.integrationTests {
             result = m_test.TestEchoChar(arg);
             Assertion.AssertEquals(arg, result);
         }
-        
+ 
         [Test]
         public void TestString() {
             System.String arg = "test";
@@ -163,7 +163,7 @@ namespace ch.elca.iiop.integrationTests {
             toAppend = null;
             result = m_test.TestAppendString(arg, toAppend);
             Assertion.AssertEquals(arg, result);
-        }       
+        }
 
         [Test]
         public void TestByteArray() {
@@ -183,13 +183,13 @@ namespace ch.elca.iiop.integrationTests {
         }
 
         [Test]
-        public void TestStringArray() {            
+        public void TestStringArray() {
             System.String arg1 = "abc";
             System.String arg2 = "def";
             System.String[] result = m_test.CreateTwoElemStringArray(arg1, arg2);
             Assertion.AssertEquals(arg1, result[0]);
             Assertion.AssertEquals(arg2, result[1]);
-            
+ 
             System.String[] arg = new System.String[1];
             arg[0] = "abc";
             System.String toAppend = "def";
@@ -204,9 +204,9 @@ namespace ch.elca.iiop.integrationTests {
             Assertion.AssertEquals(1, result.Length);
             Assertion.AssertEquals("hik", result[0]);
         }
-        
+ 
         // jagged array are not correctly mapped to IDL by Weblogic java to IDL compiler!
-        // work only, if correct idl is also mapped from IDL to CLS 
+        // work only, if correct idl is also mapped from IDL to CLS
         [Test]
         public void TestJaggedArrays() {
             System.Int32[][] arg1 = new System.Int32[2][];
@@ -219,7 +219,7 @@ namespace ch.elca.iiop.integrationTests {
             Assertion.AssertEquals(arg1[0][0], result1[0][0]);
             Assertion.AssertEquals(arg1[1][0], result1[1][0]);
             Assertion.AssertEquals(arg1[1][1], result1[1][1]);
-            
+ 
             System.Byte[][][] arg2 = new System.Byte[3][][];
             arg2[0] = new System.Byte[][] { new System.Byte[] { 1 } };
             arg2[1] = new System.Byte[][] { new System.Byte[0] };
@@ -234,7 +234,7 @@ namespace ch.elca.iiop.integrationTests {
 
         [Test]
         public void TestJaggedArraysWithNullElems() {
-	    System.Int32[][] arg1 = null;
+            System.Int32[][] arg1 = null;
             System.Int32[][] result1 = m_test.EchoJaggedIntArray(arg1);
             Assertion.AssertEquals(arg1, result1);
 
@@ -255,7 +255,7 @@ namespace ch.elca.iiop.integrationTests {
             Assertion.AssertEquals(result4[1][1], arg4[1][1]);
         }
 
-        
+ 
         [Test]
         public void TestJaggedStringArrays() {
             System.String[][] arg1 = new System.String[2][];
@@ -267,9 +267,9 @@ namespace ch.elca.iiop.integrationTests {
             Assertion.AssertNotNull(result1[1]);
             Assertion.AssertEquals(arg1[0][0], result1[0][0]);
             Assertion.AssertEquals(arg1[1][0], result1[1][0]);
-            Assertion.AssertEquals(arg1[1][1], result1[1][1]);                        
+            Assertion.AssertEquals(arg1[1][1], result1[1][1]);
         }
-        
+ 
         [Test]
         public void TestGetAndUseRemoteObject() {
             IntAdder adder = m_test.RetrieveAdder();
@@ -277,7 +277,7 @@ namespace ch.elca.iiop.integrationTests {
             System.Int32 arg1 = 1;
             System.Int32 arg2 = 2;
             System.Int32 result = adder.add(1, 2);
-            Assertion.AssertEquals((System.Int32) arg1 + arg2, result);            
+            Assertion.AssertEquals((System.Int32) arg1 + arg2, result);
         }
 
         [Test]
@@ -294,17 +294,17 @@ namespace ch.elca.iiop.integrationTests {
         }
 
         /// <summary>
-        /// Checks, if the repository id of the value-type itself is used and not the rep-id 
+        /// Checks, if the repository id of the value-type itself is used and not the rep-id
         /// for the implementation class
         /// </summary>
         [Test]
         public void TestTypeOfValueTypePassed() {
             TestSerializableClassB2Impl arg = new TestSerializableClassB2Impl();
-            arg.Msg = "msg";            
+            arg.Msg = "msg";
             TestSerializableClassB2 result = m_test.TestChangeSerializableB2(arg, arg.DetailedMsg);
             Assertion.AssertEquals(result.Msg, arg.Msg);
         }
-        
+ 
         /// <summary>
         /// Checks, if the fields of a super-type are serilised too
         /// </summary>
@@ -364,7 +364,7 @@ namespace ch.elca.iiop.integrationTests {
             omg.org.CORBA.TypeCode arrayTypeCode1 = orb.create_value_box_tc("RMI:[Ljava.lang.String;:071DA8BE7F971128:A0F0A4387A3BB342",
                                                              "seq1_WStringValue",
                                                              orb.create_tc_for_type(typeof(string)));
-            Any arg1 = new Any(argArray, 
+            Any arg1 = new Any(argArray,
                               arrayTypeCode1);
             string[] result1 = (string[]) m_test.EchoAnything(arg1);
             Assertion.AssertNotNull(result1);
@@ -379,13 +379,13 @@ namespace ch.elca.iiop.integrationTests {
             string[] argArray = new string[] { "a", "b", "c" };
 
             org.omg.boxedRMI.CORBA.seq1_WStringValue arg3 =
-                new org.omg.boxedRMI.CORBA.seq1_WStringValue(argArray);                        
+                new org.omg.boxedRMI.CORBA.seq1_WStringValue(argArray);
             string[] result3 = (string[]) m_test.EchoAnything(arg3);
             Assertion.AssertNotNull(result3);
             Assertion.AssertEquals(argArray.Length, result3.Length);
             Assertion.AssertEquals(argArray[0], result3[0]);
             Assertion.AssertEquals(argArray[1], result3[1]);
-            Assertion.AssertEquals(argArray[2], result3[2]);            
+            Assertion.AssertEquals(argArray[2], result3[2]);
         }
 
 

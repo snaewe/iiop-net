@@ -45,10 +45,10 @@ namespace Ch.Elca.Iiop.Idl {
     public interface ICustomMapper {
 
         /// <summary>
-        /// Creates the instance to marshal for the CLS instance.    
+        /// Creates the instance to marshal for the CLS instance.
         /// Example: For a CLS ArrayList, which is mapped to a java ArrayList, this method must return an ArrayListImpl
         /// for the CLS ArrayList. This ArrayListImpl will then be marshalled.
-        /// </summary>    
+        /// </summary>
         /// <param name="clsObject">the cls instance to convert</param>
         /// <returns>the converted instance used for serialisation</returns>
         object CreateIdlForClsInstance(object clsObject);
@@ -64,9 +64,9 @@ namespace Ch.Elca.Iiop.Idl {
 
     }
 
-    
+ 
     /// <summary>
-    /// mangages the plugged mappings. The registry is used to find out, if a custom mapping is 
+    /// mangages the plugged mappings. The registry is used to find out, if a custom mapping is
     /// defined and it is used to retrieve the information needed to perform this mapping.
     /// </summary>
     public class CustomMapperRegistry {
@@ -82,7 +82,7 @@ namespace Ch.Elca.Iiop.Idl {
 
         #endregion SFields
         #region IFields
-        
+ 
         private Hashtable m_mappingsCls = new Hashtable();
 
         private Hashtable m_mappingsIdl = new Hashtable();
@@ -150,20 +150,20 @@ namespace Ch.Elca.Iiop.Idl {
         /// <param name="clsType">the native cls type, e.g. ArrayList</param>
         /// <param name="idlType">the idl type (mapped from idl to CLS) used to describe serialisation / deserialisation, e.g. java.util.ArrayListImpl</param>
         /// <param name="mapper">the mapper, knowing how to map instances of CLS ArrayList to java.util.ArrayListImpl and in the other direction</param>
-        public void AddMapping(Type clsType, Type idlType, ICustomMapper mapper) {            
-            // check that idlType implements IIdlEntity:            
+        public void AddMapping(Type clsType, Type idlType, ICustomMapper mapper) {
+            // check that idlType implements IIdlEntity:
             if (!(ReflectionHelper.IIdlEntityType.IsAssignableFrom(idlType))) {
                 throw new Exception("illegal type for custom mapping encountered: " + idlType.FullName);
             }
             // be aware: mapping is not bijektive, because of impl classes; however for an idl type only one
             // cls type is allowed
             if (m_mappingsIdl.ContainsKey(idlType) && (!((CustomMappingDesc)m_mappingsIdl[idlType]).ClsType.Equals(clsType))) {
-                throw new Exception("mapping constraint violated, tried to insert another cls type " + clsType + 
+                throw new Exception("mapping constraint violated, tried to insert another cls type " + clsType +
                                      "mapped to the idl type " + idlType);
             }
 
             CustomMappingDesc desc = new CustomMappingDesc(clsType, idlType, mapper);
-            m_mappingsCls[clsType] = desc;           
+            m_mappingsCls[clsType] = desc;
             m_mappingsIdl[idlType] = desc;
             // check for impl class attribute, if present: add impl class here too
             object[] implAttr = idlType.GetCustomAttributes(ReflectionHelper.ImplClassAttributeType, false);
@@ -177,7 +177,7 @@ namespace Ch.Elca.Iiop.Idl {
                 }
             }
         }
-        
+ 
         /// <summary>
         /// adds special mappings from a config stream
         /// </summary>
@@ -196,7 +196,7 @@ namespace Ch.Elca.Iiop.Idl {
                 doc.Load(validatingReader);
                 // process the file
                 XmlNodeList elemList = doc.GetElementsByTagName("mapping");
-                foreach (XmlNode elem in elemList) {                 
+                foreach (XmlNode elem in elemList) {
                     XmlElement idlTypeName = elem["idlTypeName"];
                     XmlElement idlTypeAsm = elem["idlTypeAssembly"];
                     XmlElement clsTypeAsqName = elem["clsType"];
@@ -210,7 +210,7 @@ namespace Ch.Elca.Iiop.Idl {
                     ICustomMapper customMapper = null;
                     if (customMapperElem != null) {
                         Type customMapperType = Type.GetType(customMapperElem.InnerText, true);
-                        customMapper = (ICustomMapper)Activator.CreateInstance(customMapperType);                     
+                        customMapper = (ICustomMapper)Activator.CreateInstance(customMapperType);
                     }
                     AddMapping(clsType, idlType, customMapper);
                 }
@@ -219,14 +219,14 @@ namespace Ch.Elca.Iiop.Idl {
             }
 
         }
-        
+ 
         /// <summary>
         /// adds special mappings from a config file
         /// </summary>
         public void AddMappingsFromFile(FileInfo configFile) {
             // load the xml-file
             FileStream stream = new FileStream(configFile.FullName, FileMode.Open);
-        	AddMappingFromStream(stream);
+            AddMappingFromStream(stream);
         }
 
         /// <summary>
@@ -246,7 +246,7 @@ namespace Ch.Elca.Iiop.Idl {
         public CustomMappingDesc GetMappingForIdl(Type idlType) {
             return (CustomMappingDesc)m_mappingsIdl[idlType];
         }
-        
+ 
         /// <summary>
         /// takes an instance deserialised from a cdr stream and maps it to the instance
         /// used in .NET. The mapped instance must be assignable to formalSig.
@@ -268,7 +268,7 @@ namespace Ch.Elca.Iiop.Idl {
             }
             return result;
         }
-        
+ 
         /// <summary>
         /// takes a .NET instance and maps it to the instance, which should be serialised into
         /// the CDR stream. The mapped instance must be assignable to the formal type specified in idl.
@@ -288,9 +288,9 @@ namespace Ch.Elca.Iiop.Idl {
             // check, if mapped is instance is assignable to formal -> otherwise will not work on other side ...
             if (!formal.IsAssignableFrom(actual.GetType())) {
                 throw new BAD_PARAM(12310, CompletionStatus.Completed_MayBe);
-            }            
+            }
             return actual;
-        }        
+        }
 
         #endregion IMethods
 
@@ -300,17 +300,17 @@ namespace Ch.Elca.Iiop.Idl {
     /// stores information on how the custom mapping should be done.
     /// </summary>
     public class CustomMappingDesc {
-        
+ 
         #region IFields
 
         private Type m_clsType;
         private Type m_idlType;
         private ICustomMapper m_mapper;
-        
+ 
         #endregion IFields
         #region IConstructors
         /// <summary>
-        /// 
+        ///
         /// </summary>
         /// <param name="clsType"></param>
         /// <param name="idlType"></param>
@@ -329,7 +329,7 @@ namespace Ch.Elca.Iiop.Idl {
         /// the idl type the mapper maps from/to.
         /// </summary>
         public Type IdlType {
-            get { 
+            get {
                 return m_idlType;
             }
         }
@@ -338,7 +338,7 @@ namespace Ch.Elca.Iiop.Idl {
         /// the cls type the mapper maps from/to.
         /// </summary>
         public Type ClsType {
-            get { 
+            get {
                 return m_clsType;
             }
         }
@@ -363,48 +363,48 @@ namespace Ch.Elca.Iiop.Idl {
     /// configuration singleton, which allows to configure certain aspects of mapping
     /// </summary>
     public class MappingConfiguration {
-        
+ 
         #region IFields
-                
+ 
         private bool m_useBoxedInAny;
         private bool m_useWideCharByDefault;
-        
+ 
         #endregion IFields
         #region SFields
-        
+ 
         private static MappingConfiguration s_instance = new MappingConfiguration();
-        
+ 
         #endregion SFields
         #region IConstructors
-        
+ 
         private MappingConfiguration() {
             m_useBoxedInAny = true; // default is optimal for java rmi/iiop
             m_useWideCharByDefault = true; // default is optimal for java rmi/iiop
         }
-        
+ 
         #endregion IConstructors
         #region IProperties
-        
+ 
         /// <summary>
-        /// use the boxed form of .NET string, .NET arrays 
+        /// use the boxed form of .NET string, .NET arrays
         /// when passing them in any.
-        /// Default is true. 
+        /// Default is true.
         /// </summary>
         /// <remarks>for JacORB, OmniORB, ... disable this property to simplify any usage:
-        /// No need to create any wrapper objects; e.g. with string typecode to prevent passing 
+        /// No need to create any wrapper objects; e.g. with string typecode to prevent passing
         /// a boxed string.</remarks>
         public bool UseBoxedInAny {
             get { return m_useBoxedInAny; }
             set { m_useBoxedInAny = value; }
         }
-        
+ 
         /// <summary>
-        /// gets or sets value indicating wether wide char should be used by default 
+        /// gets or sets value indicating wether wide char should be used by default
         /// when no WideCharAttribute is specified
         /// Default is true.
         /// </summary>
         /// <remarks>for ACE+TAO, ... disable this property to simplify any usage:
-        /// No need to create any wrapper objects; e.g. with string typecode to prevent passing 
+        /// No need to create any wrapper objects; e.g. with string typecode to prevent passing
         /// a wstring.</remarks>
         public bool UseWideCharByDefault {
             get { return m_useWideCharByDefault; }
@@ -413,7 +413,7 @@ namespace Ch.Elca.Iiop.Idl {
 
         #endregion IProperties
         #region SProperties
-        
+ 
         /// <summary>
         /// the singleton instance.
         /// </summary>
@@ -422,9 +422,9 @@ namespace Ch.Elca.Iiop.Idl {
                 return s_instance;
             }
         }
-        
+ 
         #endregion SProperties
-        
+ 
     }
 
 }

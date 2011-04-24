@@ -40,7 +40,7 @@ namespace Ch.Elca.Iiop.IntegrationTests.MappingPlugin {
 
         public static void Main(String[] args) {
             InitCustomMapping();
-        	
+
             // register the channel
             int port = 8087;
             IiopChannel chan = new IiopChannel(port);
@@ -57,21 +57,21 @@ namespace Ch.Elca.Iiop.IntegrationTests.MappingPlugin {
         /// <summary>
         /// initalizes the custom mapping from assembly manifest stream
         /// </summary>
-        private static void InitCustomMapping() {              
+        private static void InitCustomMapping() {
             string resourceName = "customMapping.xml";
             // load from asm
             Assembly asm = (typeof(TestServer)).Assembly;
             Stream configStream = asm.GetManifestResourceStream(resourceName);
             if (configStream == null) {
                 Console.WriteLine("custom mapper not loadable, {0} not found in assembly", resourceName);
-            	Environment.Exit(2);
+                Environment.Exit(2);
             }
             try {
                 CustomMapperRegistry reg = CustomMapperRegistry.GetSingleton();
                 reg.AddMappingFromStream(configStream);
             } catch (Exception e) {
-            	Console.WriteLine("custom mapper not loadable, exception: {0}", e);
-            	Environment.Exit(2);				                
+                Console.WriteLine("custom mapper not loadable, exception: {0}", e);
+                Environment.Exit(2);
             }        
         }
 

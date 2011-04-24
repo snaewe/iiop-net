@@ -53,13 +53,13 @@ namespace Ch.Elca.Iiop.Demo.Chatroom {
         }
     
         public void RegisterMe(MessageListener listener, String forUser) {
-		    ChatroomServer server = ChatroomServer.GetSingleton();
-		    server.AddClient(listener, forUser);
+            ChatroomServer server = ChatroomServer.GetSingleton();
+            server.AddClient(listener, forUser);
         }    
     
         public void UnregisterMe(String userName) {
-        	ChatroomServer server = ChatroomServer.GetSingleton();
-    	    server.RemoveClient(userName);    
+            ChatroomServer server = ChatroomServer.GetSingleton();
+            server.RemoveClient(userName);
         }
     
     }

@@ -485,8 +485,8 @@ namespace Ch.Elca.Iiop.Tests {
 
         [SetUp]
         public void SetUp() {
-    	    m_serFactory =
-    	        new SerializerFactory();
+            m_serFactory =
+                new SerializerFactory();
             CodecFactory codecFactory =
                 new CodecFactoryImpl(m_serFactory);
             Codec codec = 

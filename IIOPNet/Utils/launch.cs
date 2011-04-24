@@ -33,7 +33,7 @@ using System.Diagnostics;
 using System.IO;
 
 public class Launch {
-	public static void Main(String[] args) {        
+    public static void Main(String[] args) {        
         try {
             ProcessStartInfo startInfo = ParseArgs(args);
         
@@ -42,12 +42,12 @@ public class Launch {
         } catch (Exception e) {
             Console.WriteLine("Exception while trying to start app: " + e);
         }
-	}
-	
-	public static ProcessStartInfo ParseArgs(String[] args) {
+    }
+    
+    public static ProcessStartInfo ParseArgs(String[] args) {
         int i = 0;
         ProcessStartInfo startInfo = new ProcessStartInfo();
-		startInfo.WindowStyle = ProcessWindowStyle.Minimized;
+        startInfo.WindowStyle = ProcessWindowStyle.Minimized;
 
         while ((i < args.Length) && (args[i].StartsWith("-"))) {
             if (args[i].Equals("-h")) {
@@ -56,32 +56,32 @@ public class Launch {
             } else if (args[i].Equals("-d")) {
                 i++;
                 if (i == args.Length) {
-                	Error("Error: option argument missing for -d option");
+                    Error("Error: option argument missing for -d option");
                 }
                 startInfo.WorkingDirectory = new DirectoryInfo(args[i++]).FullName;
             } else if (args[i].Equals("-w")) {
                 startInfo.WindowStyle = ProcessWindowStyle.Normal;
                 i++;
             } else {
-            	Error(String.Format("Error: invalid option {0}", args[i]));
+                Error(String.Format("Error: invalid option {0}", args[i]));
             }
         }
 
-   		if (args.Length - i <= 0) {
-   			Error("Error: programm to launch is missing");
-   		} else if (args.Length - i == 1) {
-   		    startInfo.FileName = args[i];
-   		} else {
-   		    startInfo.FileName = args[i];
-   		    i++;
-   		    String parameters = String.Join(" ", args, i, (args.Length-i));
-   		    startInfo.Arguments = parameters;
-   		}
+        if (args.Length - i <= 0) {
+            Error("Error: programm to launch is missing");
+        } else if (args.Length - i == 1) {
+            startInfo.FileName = args[i];
+        } else {
+            startInfo.FileName = args[i];
+            i++;
+            String parameters = String.Join(" ", args, i, (args.Length-i));
+            startInfo.Arguments = parameters;
+        }
 
         return startInfo;
-	
-	}
-	
+    
+    }
+    
     public static void HowTo() {
         Console.WriteLine("Usage:");
         Console.WriteLine("Lauch [options] name [args]");

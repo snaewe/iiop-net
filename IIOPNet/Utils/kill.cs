@@ -32,21 +32,21 @@ using System;
 using System.Diagnostics;
 
 public class Kill {
-	public static int Main(String[] args) {
-		if (args.Length != 1) {
-			Console.WriteLine("Usage:");
-			Console.WriteLine("Kill pid");
-			return 2;
-		}
-		try {
-			Process p = Process.GetProcessById(Int32.Parse(args[0]));
-			p.Kill();
-		} catch (FormatException) {
-			// ignore, caused by text in pid file
-			// Console.WriteLine("FormatException for >{0}<: {1}", args[0], e.ToString());
-		} catch (Exception e) {
-			Console.WriteLine("Exception: {0}", e);
-		}
-		return 0;
-	}
+    public static int Main(String[] args) {
+        if (args.Length != 1) {
+            Console.WriteLine("Usage:");
+            Console.WriteLine("Kill pid");
+            return 2;
+        }
+        try {
+            Process p = Process.GetProcessById(Int32.Parse(args[0]));
+            p.Kill();
+        } catch (FormatException) {
+            // ignore, caused by text in pid file
+            // Console.WriteLine("FormatException for >{0}<: {1}", args[0], e.ToString());
+        } catch (Exception e) {
+            Console.WriteLine("Exception: {0}", e);
+        }
+        return 0;
+    }
 }

@@ -229,7 +229,7 @@ namespace ch.elca.iiop.integrationTests {
 
         [Test]
         public void TestJaggedArraysWithNullElems() {
-	    System.Int32[][] arg1 = null;
+            System.Int32[][] arg1 = null;
             System.Int32[][] result1 = m_test.EchoJaggedIntArray(arg1);
             Assertion.AssertEquals(arg1, result1);
 
@@ -338,7 +338,6 @@ namespace ch.elca.iiop.integrationTests {
             Assertion.AssertEquals(result.val1, result.val2);
             Assertion.AssertEquals(result.val1.Msg, result.val2.Msg);
         }
-
 
     }
 
