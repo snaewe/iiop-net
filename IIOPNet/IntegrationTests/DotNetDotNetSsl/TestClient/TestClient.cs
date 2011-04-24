@@ -89,7 +89,7 @@ namespace Ch.Elca.Iiop.IntegrationTests {
         [TearDown]
         public void TearDownEnvironment() {
             m_testService = null;
-            // unregister the channel            
+            // unregister the channel
             ChannelServices.UnregisterChannel(m_channel);
         }
 
@@ -98,10 +98,10 @@ namespace Ch.Elca.Iiop.IntegrationTests {
             System.String arg = "test";
             System.String toAppend = "toAppend";
             System.String result = m_testService.TestAppendString(arg, toAppend);
-            Assertion.AssertEquals(arg + toAppend, result);
+            Assert.AreEqual(arg + toAppend, result);
 
             System.String result2 = m_newTestService.TestAppendString(arg, toAppend);
-            Assertion.AssertEquals(arg + toAppend, result2);
+            Assert.AreEqual(arg + toAppend, result2);
         }
 
         [Test]
@@ -109,15 +109,15 @@ namespace Ch.Elca.Iiop.IntegrationTests {
             IOrbServices orb = OrbServices.GetSingleton();
             string iorString = orb.object_to_string(m_newTestService);
             Ior ior = new Ior(iorString);
-            Assertion.Assert("nr of profiles", ior.Profiles.Length > 0);
+            Assert.IsTrue(ior.Profiles.Length > 0, "nr of profiles");
             IIorProfile profile = ior.Profiles[0];
             omg.org.IOP.CodecFactory codecFactory = (omg.org.IOP.CodecFactory)
                 orb.resolve_initial_references("CodecFactory");
             object sslData = 
                 profile.TaggedComponents.GetComponentData(20, codecFactory.create_codec(new omg.org.IOP.Encoding(omg.org.IOP.ENCODING_CDR_ENCAPS.ConstVal, 1, 2)),
                                                           SSLComponentData.TypeCode);
-            Assertion.AssertNotNull(sslData);
-            Assertion.AssertEquals((int)8087, ((SSLComponentData)sslData).GetPort());
+            Assert.NotNull(sslData);
+            Assert.AreEqual((int)8087, ((SSLComponentData)sslData).GetPort());
         }
 
 

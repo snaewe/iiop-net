@@ -45,6 +45,7 @@ $(bin)Org.Mentalis.Security.dll: $(bin) $(MENTALIS)
 
 $(bin)ClientTest.dll: $(bin)IIOPChannel.dll $(bin)SslPlugin.dll $(bin)Org.Mentalis.Security.dll $(bin)Client.dll *.cs
     $(CSC) $(CSFLAGS) /t:library /r:$(NUNIT_FRAMEWORK_DLL) /r:$(bin)IIOPChannel.dll /r:$(bin)SSLPlugin.dll /r:$(bin)Client.dll /out:$(bin)ClientTest.dll TestClient.cs
+    copy $(NUNIT_FRAMEWORK_DLL) $(bin)
 
 
 start-client:

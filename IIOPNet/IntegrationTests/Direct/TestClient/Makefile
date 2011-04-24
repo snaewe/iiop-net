@@ -26,6 +26,7 @@ $(bin)TestServiceCommon.dll: $(TestService)
 
 $(bin)ClientTest.dll: $(bin)IIOPChannel.dll $(bin)TestUnion.dll $(bin)TestServiceCommon.dll *.cs
 	$(CSC) $(CSFLAGS) /t:library /r:$(NUNIT_FRAMEWORK_DLL) /r:$(bin)TestUnion.dll /r:$(bin)TestServiceCommon.dll /r:$(bin)IIOPChannel.dll /out:bin\ClientTest.dll TestClient.cs
+	copy $(NUNIT_FRAMEWORK_DLL) $(bin)
 
 start-client:
 	@echo "Direct IntegrationTest"

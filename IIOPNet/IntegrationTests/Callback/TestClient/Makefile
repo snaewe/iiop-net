@@ -31,7 +31,7 @@ $(bin)IIOPChannel.dll: $(IIOPCHANNEL)
 
 $(bin)ClientTest.dll: $(bin)IIOPChannel.dll $(bin)Client.dll *.cs
     $(CSC) $(CSFLAGS) /t:library /r:$(NUNIT_FRAMEWORK_DLL) /r:$(bin)IIOPChannel.dll /r:$(bin)Client.dll /out:$(bin)ClientTest.dll TestClient.cs
-
+    copy $(NUNIT_FRAMEWORK_DLL) $(bin)
 
 start-client:
     @echo "Callback IntegrationTest"

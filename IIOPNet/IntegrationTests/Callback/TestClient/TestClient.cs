@@ -66,16 +66,16 @@ namespace Ch.Elca.Iiop.IntegrationTests {
         }
 
         [TearDown]
-        public void TearDownEnvironment() {            
-            m_testService = null;          
-            ChannelServices.UnregisterChannel(m_channel);  
+        public void TearDownEnvironment() {
+            m_testService = null;
+            ChannelServices.UnregisterChannel(m_channel);
         }
         
         [Test]
         public void TestWithoutCallback() {
             System.Byte arg = 1;
             System.Byte result = m_testService.TestIncByte(arg);
-            Assertion.AssertEquals((System.Byte)(arg + 1), result);
+            Assert.AreEqual(arg + 1, result);
         }
 
         [Test]
@@ -85,7 +85,7 @@ namespace Ch.Elca.Iiop.IntegrationTests {
             
             System.Int32 arg = 1;
             System.Int32 result = m_testService.IncrementWithCallbackIncrementer(arg);
-            Assertion.AssertEquals((System.Int32)(arg + 1), result);                
+            Assert.AreEqual(arg + 1, result);
         }
 
         #endregion IMethods
@@ -103,7 +103,7 @@ namespace Ch.Elca.Iiop.IntegrationTests {
         public override object InitializeLifetimeService() {
             // live forever
             return null;
-        }        
+        }
 
     }
 
