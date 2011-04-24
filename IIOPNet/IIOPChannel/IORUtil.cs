@@ -1,4 +1,4 @@
-/* IORUtil.cs
+ï»¿/* IORUtil.cs
  * 
  * Project: IIOP.NET
  * IIOPChannel
@@ -363,10 +363,10 @@ namespace Ch.Elca.Iiop.Tests
             string result = IorUtil.EscapeNonAscii("foo", ref startIndex);
             Assert.AreEqual(0, startIndex);
             Assert.AreEqual("foo", result);
-            Assert.AreEqual(@"fran\u00E7ois", IorUtil.EscapeNonAscii("françois", ref startIndex));
-            Assert.AreEqual("françois", IorUtil.UnescapeNonAscii(@"fran\u00E7ois"));
-            Assert.AreEqual(@"fran\u00E7\\u00B9ois", IorUtil.EscapeNonAscii(@"franç\u00B9ois", ref startIndex));
-            Assert.AreEqual(@"franç\u00B9ois", IorUtil.UnescapeNonAscii(@"fran\u00E7\\u00B9ois"));
+            Assert.AreEqual(@"fran\u00E7ois", IorUtil.EscapeNonAscii("franÃ§ois", ref startIndex));
+            Assert.AreEqual("franÃ§ois", IorUtil.UnescapeNonAscii(@"fran\u00E7ois"));
+            Assert.AreEqual(@"fran\u00E7\\u00B9ois", IorUtil.EscapeNonAscii(@"franÃ§\u00B9ois", ref startIndex));
+            Assert.AreEqual(@"franÃ§\u00B9ois", IorUtil.UnescapeNonAscii(@"fran\u00E7\\u00B9ois"));
         }
     }
 }

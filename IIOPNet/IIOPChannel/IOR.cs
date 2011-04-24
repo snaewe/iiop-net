@@ -94,7 +94,7 @@ namespace Ch.Elca.Iiop.CorbaObjRef
 
         /// <summary>
         /// creates an IOR from the typeName and the profiles
-        /// </summary>        
+        /// </summary>
         internal Ior(string typeName, IorProfile[] profiles)
         {
             m_profiles = profiles ?? new IorProfile[0];
@@ -321,7 +321,7 @@ namespace Ch.Elca.Iiop.CorbaObjRef
 
 
     /// <summary>This class represents a profile in a CORBA-IOR</summary>
-    /// <remarks>This class is non CLS compliant</remarks>    
+    /// <remarks>This class is non CLS compliant</remarks>
     internal abstract class IorProfile : IIorProfile
     {
 
@@ -577,7 +577,7 @@ namespace Ch.Elca.Iiop.CorbaObjRef
     }
 
     /// <summary>
-    /// The multiple component profile.    
+    /// The multiple component profile.
     /// </summary>
     /// <remarks>
     /// This class is not CLSCompliant.
@@ -679,7 +679,7 @@ namespace Ch.Elca.Iiop.CorbaObjRef
 
         /// <summary>
         /// reads an unsupported profile from an encapsulation (created with the method readEncapsulation in
-        /// CDRStream) 
+        /// CDRStream)
         /// </summary>
         /// <param name="encapsulation"></param>
         public UnsupportedIorProfile(CdrInputStream inputStream, int profileId)
@@ -774,7 +774,7 @@ namespace Ch.Elca.Iiop.Tests
                 codecFactory.create_codec(
                     new omg.org.IOP.Encoding(ENCODING_CDR_ENCAPS.ConstVal, 1, 2));
             IiopUrlUtil iiopUrlUtil =
-                IiopUrlUtil.Create(m_codec, new object[] { 
+                IiopUrlUtil.Create(m_codec, new object[] {
                     Services.CodeSetService.CreateDefaultCodesetComponent(m_codec)});
             m_serFactory.Initalize(new SerializerFactoryConfig(), iiopUrlUtil);
         }
@@ -859,7 +859,7 @@ namespace Ch.Elca.Iiop.Tests
         [Test]
         public void TestParseAndRecreate()
         {
-            string iorString = BitConverter.IsLittleEndian 
+            string iorString = BitConverter.IsLittleEndian
                                 ? "IOR:0000000000000024524d493a48656c6c6f496e746572666163653a3030303030303030303030303030303000000000010000000000000050010102000c00000031302e34302e32302e353100951f00000800000053617948656c6c6f0100000001000000200000000000000000010001000000020501000100010020000101090000000100010100"
                                 : "IOR:0000000000000024524d493a48656c6c6f496e746572666163653a3030303030303030303030303030303000000000010000000000000050000102000000000c31302e34302e32302e3531001f9500000000000853617948656C6C6F0000000100000001000000200000000000010001000000020501000100010020000101090000000100010100";
             Ior ior = new Ior(iorString);
@@ -927,7 +927,7 @@ namespace Ch.Elca.Iiop.Tests
                 codecFactory.create_codec(
                     new omg.org.IOP.Encoding(ENCODING_CDR_ENCAPS.ConstVal, 1, 2));
             IiopUrlUtil iiopUrlUtil =
-                IiopUrlUtil.Create(m_codec, new object[] { 
+                IiopUrlUtil.Create(m_codec, new object[] {
                     Services.CodeSetService.CreateDefaultCodesetComponent(m_codec)});
             m_serFactory.Initalize(new SerializerFactoryConfig(), iiopUrlUtil);
         }
