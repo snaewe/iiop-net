@@ -28,6 +28,7 @@
 
 using System;
 using System.Runtime.Remoting.Messaging;
+using System.Threading;
 using Ch.Elca.Iiop.Idl;
 using omg.org.CORBA;
 
@@ -801,8 +802,8 @@ namespace Ch.Elca.Iiop.IntegrationTests {
             d = new string[a];
 
             for(int i = 0; i < a; ++i) {
-                b[i] = 0x797065656c536d49l;
-                c[i] = 0x002da715A900dDa7l;
+                b[i] = 0x797065656c536d49L;
+                c[i] = 0x002da715A900dDa7L;
                 d[i] = i.ToString();
             }
 
@@ -848,4 +849,36 @@ namespace Ch.Elca.Iiop.IntegrationTests {
         
     }
 
+    public class TestServiceWithCallbackImpl : MarshalByRefObject, TestServiceWithCallback1
+                                                                 /*, TestServiceWithCallback2 */ {
+        private Timer asyncPingTimer;
+
+        public void Ping1(int code, Callback1 callback) {
+            callback.Pong(code);
+        }
+        
+        // void TestServiceWithCallback2.Ping1(int code, Callback1 callback) {
+            // callback.Pong(code * 2);
+        // }
+
+        public void Ping2(int code, Callback2 callback) {
+            callback.Pong(code);
+        }
+
+        public void AsyncPing(int delayInSecs, Callback1 callback) {
+            if (this.asyncPingTimer == null) {
+                this.asyncPingTimer = new Timer(this.OnAsyncPingTime, callback, delayInSecs * 1000, Timeout.Infinite);
+            }
+        }
+
+        private void OnAsyncPingTime(object state) {
+            Callback1 callback = (Callback1)state;
+            callback.Pong(0);
+        }
+
+        public override object InitializeLifetimeService() {
+            // live forever
+            return null;
+        }
+    }
 }

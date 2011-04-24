@@ -52,19 +52,18 @@ namespace Ch.Elca.Iiop.Util {
         /// </summary>
         /// <param name="array">the array to be converted</param>
         /// <returns>the result</returns>
-        public static String Stringify(byte[] array) {
-            Char[] res = new Char[array.Length*2];
+        public static string Stringify(string header, byte[] array, int count) {
+            StringBuilder builder = new StringBuilder(header, header.Length + count * 2);
 
-            for (int i = 0; i < array.Length; i++) {
+            for (int i = 0; i < count; ++i) {
                 int val = array[i];
-                res[i*2] = s_hexMap[val >> 4];
-                res[i*2+1] = s_hexMap[val % 16];
+                builder.Append(s_hexMap[val >> 4]);
+                builder.Append(s_hexMap[val % 16]);
             }
-            return new String(res);
+            return builder.ToString();
         }
 
-        public static int Parse(string s, int startIndex, int length)
-        {
+        public static int Parse(string s, int startIndex, int length) {
             int result = 0;
             for (int i = 0; i != length; ++i) {
                 char c = s[startIndex + i];
@@ -89,8 +88,7 @@ namespace Ch.Elca.Iiop.Util {
         /// </summary>
         /// <param name="s">String to be parsed</param>
         /// <returns></returns>
-        public static byte[] Destringify(string s, int startIndex)
-        {
+        public static byte[] Destringify(string s, int startIndex) {
             int count = s.Length - startIndex;
             if (count % 2 == 1) {
                 throw new ArgumentException("String length must be even");
@@ -103,6 +101,14 @@ namespace Ch.Elca.Iiop.Util {
             return res;
         }
 
+        public static bool IsBlank(string s) {
+            for (int i = 0; i != s.Length; ++i) {
+                if (!Char.IsWhiteSpace(s[i])) {
+                    return false;
+                }
+            }
+            return true;
+        }
         #endregion SMethods
     }    
 }

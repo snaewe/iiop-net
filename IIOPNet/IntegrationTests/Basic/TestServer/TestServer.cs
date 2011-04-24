@@ -67,6 +67,9 @@ namespace Ch.Elca.Iiop.IntegrationTests {
             TestOneWayServiceImpl testOneWayService = new TestOneWayServiceImpl();
             RemotingServices.Marshal(testOneWayService, "testOneWayService");
 
+            TestServiceWithCallbackImpl testServiceWithCallback = new TestServiceWithCallbackImpl();
+            RemotingServices.Marshal(testServiceWithCallback, "testServiceWithCallback");
+
             Console.WriteLine("server running");
             Thread.Sleep(Timeout.Infinite);
         }

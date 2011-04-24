@@ -1,27 +1,26 @@
-
 module Ch {
 module Elca {
 module Iiop { 
-module IntegrationTests {    
+module IntegrationTests {
 
-    valuetype boxed_string string; 
+    valuetype boxed_string string;
     #pragma ID boxed_string "IDL:Ch.Elca.Iiop.IntegrationTests.boxed_string:1.0"
  
-    struct TestStructWB 
-    { 
-        boxed_string a; 
-        boxed_string b; 
+    struct TestStructWB
+    {
+        boxed_string a;
+        boxed_string b;
     }; 
 
     #pragma ID Test "IDL:Ch/Elca/Iiop/IntegrationTests/Test:1.0"
  
-    valuetype boxed_TestStruct TestStructWB; 
+    valuetype boxed_TestStruct TestStructWB;
 
     #pragma ID boxed_TestStruct "IDL:Ch.Elca.Iiop.IntegrationTests.boxed_TestStruct:1.0"
     
     union TestUnionLD switch (long) {
         case 0: short val0;
-        case 1: 
+        case 1:
         case 2: long val1;
         default: boolean val2;
     };
@@ -29,8 +28,8 @@ module IntegrationTests {
     #pragma ID TestUnionLD "IDL:Ch/Elca/Iiop/IntegrationTests/TestUnionLD:1.0"
 
 
-    typedef unsigned long ValidList;  
-    valuetype ValidListSeq sequence<ValidList> ; 
+    typedef unsigned long ValidList;
+    valuetype ValidListSeq sequence<ValidList>;
 
     interface TestIdlTypesService {
 
@@ -58,6 +57,25 @@ module IntegrationTests {
 
     };
 
+    interface Callback1 {
+        void Pong(in long code);
+    };
+
+    interface Callback2 {
+        void Pong(in long code);
+    };
+
+    interface TestServiceWithCallback1 {
+        void Ping1(in long code, in Callback1 callback);
+
+        void Ping2(in long code, in Callback2 callback);
+        
+        void AsyncPing(in long delayInSecs, in Callback1 callback);
+    };
+    
+    interface TestServiceWithCallback2 {
+        void Ping1(in long code, in Callback1 callback);
+    };
 
 };
 };

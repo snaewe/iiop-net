@@ -32,6 +32,8 @@ using System.Runtime.Remoting;
 using System.Runtime.Remoting.Channels;
 using System.Runtime.Remoting.Messaging;
 using System.Collections;
+using System.Collections.Generic;
+using System.Threading;
 using NUnit.Framework;
 using Ch.Elca.Iiop;
 using Ch.Elca.Iiop.Idl;
@@ -63,11 +65,15 @@ namespace Ch.Elca.Iiop.IntegrationTests {
         private NamingContext GetNameService() {
             // access COS nameing service
             CorbaInit init = CorbaInit.GetInit();
-            NamingContext nameService = init.GetNameService("localhost", 8087);            
+            NamingContext nameService = init.GetNameService("localhost", 8087);
             return nameService;
         }
 
-        [SetUp]
+        private static T Connect<T>(string uri) {
+            return (T)RemotingServices.Connect(typeof(T), uri);
+        }
+
+        [TestFixtureSetUp]
         public void SetupEnvironment() {
             // register the channel
             IDictionary properties = new Hashtable();
@@ -76,23 +82,20 @@ namespace Ch.Elca.Iiop.IntegrationTests {
             ChannelServices.RegisterChannel(m_channel, false);
 
             // get the reference to the test-service
-            m_testService = (TestService)RemotingServices.Connect(typeof(TestService), "corbaloc:iiop:1.2@localhost:8087/test");
-            m_testExService = (TestExceptionService)RemotingServices.Connect(typeof(TestExceptionService), "corbaloc:iiop:1.2@localhost:8087/testExService");
+            m_testService = Connect<TestService>("corbaloc:iiop:1.2@localhost:8087/test");
+            m_testExService = Connect<TestExceptionService>("corbaloc:iiop:1.2@localhost:8087/testExService");
 
-            m_svcSingleCall = 
-                (ISimpleTestInterface)RemotingServices.Connect(typeof(ISimpleTestInterface), "corbaloc:iiop:1.2@localhost:8087/testSingleCall");
-            m_svcSingletonCall = 
-                (ISimpleTestInterface)RemotingServices.Connect(typeof(ISimpleTestInterface), "corbaloc:iiop:1.2@localhost:8087/testSingletonCall");
-            m_contextBound = 
-                (ISimpleTestInterface)RemotingServices.Connect(typeof(ISimpleTestInterface), "corbaloc:iiop:1.2@localhost:8087/testContextBound");
-            m_testIdlTypesService = (TestIdlTypesService)RemotingServices.Connect(typeof(TestIdlTypesService), "corbaloc:iiop:1.2@localhost:8087/testIdlTypesService");
-            m_testOneWayService = (TestOneWayService)RemotingServices.Connect(typeof(TestOneWayService), "corbaloc:iiop:1.2@localhost:8087/testOneWayService");
+            m_svcSingleCall = Connect<ISimpleTestInterface>("corbaloc:iiop:1.2@localhost:8087/testSingleCall");
+            m_svcSingletonCall = Connect<ISimpleTestInterface>("corbaloc:iiop:1.2@localhost:8087/testSingletonCall");
+            m_contextBound = Connect<ISimpleTestInterface>("corbaloc:iiop:1.2@localhost:8087/testContextBound");
+            m_testIdlTypesService = Connect<TestIdlTypesService>("corbaloc:iiop:1.2@localhost:8087/testIdlTypesService");
+            m_testOneWayService = Connect<TestOneWayService>("corbaloc:iiop:1.2@localhost:8087/testOneWayService");
         }
 
-        [TearDown]
+        [TestFixtureTearDown]
         public void TearDownEnvironment() {
             m_testService = null;
-            // unregister the channel            
+            // unregister the channel
             ChannelServices.UnregisterChannel(m_channel);
         }
 
@@ -1415,4 +1418,137 @@ namespace Ch.Elca.Iiop.IntegrationTests {
 
     }
 
+    [TestFixture]
+    public class TestClientWithCallback {
+
+        #region IFields
+
+        private IiopChannel m_channel;
+
+        private TestServiceWithCallback1 m_testServiceWithCallback1;
+        // private TestServiceWithCallback2 m_testServiceWithCallback2;
+
+        #endregion IFields
+
+        private static T Connect<T>(string uri) {
+            return (T)RemotingServices.Connect(typeof(T), uri);
+        }
+
+        [TestFixtureSetUp]
+        public void SetupEnvironment() {
+            // register the channel
+            m_channel = new IiopChannel(0);
+            ChannelServices.RegisterChannel(m_channel, false);
+
+            // get the reference to the test-service
+            m_testServiceWithCallback1 = Connect<TestServiceWithCallback1>("corbaloc:iiop:1.2@localhost:8087/testServiceWithCallback");
+            // m_testServiceWithCallback2 = Connect<TestServiceWithCallback2>("corbaloc:iiop:1.2@localhost:8087/testServiceWithCallback");
+        }
+
+        [TestFixtureTearDown]
+        public void TearDownEnvironment() {
+            // unregister the channel
+            ChannelServices.UnregisterChannel(m_channel);
+        }
+
+        [Ignore("This test relies on the patch from Francois Dumont, which cannot be completely integrated due to problems with other tests")]
+        [Test]
+        public void TestServiceWithCallback() {
+            CallbackImpl callback = new CallbackImpl();
+            m_testServiceWithCallback1.Ping1(3, callback);
+            int result;
+            Assert.IsTrue(callback.Pop(TimeSpan.Zero, out result));
+            Assert.AreEqual(3, result);
+            m_testServiceWithCallback1.AsyncPing(1, callback);
+            Assert.IsTrue(callback.Pop(TimeSpan.FromSeconds(2), out result));
+            Assert.AreEqual(0, result);
+            
+            CallbackNestedImpl nestedCallback = new CallbackNestedImpl();
+            m_testServiceWithCallback1.Ping1(3, nestedCallback);
+            Assert.IsTrue(nestedCallback.Pop1(out result));
+            Assert.AreEqual(3, result);
+            Assert.IsFalse(nestedCallback.Pop2(out result));
+            
+            m_testServiceWithCallback1.Ping2(5, nestedCallback);
+            Assert.IsFalse(nestedCallback.Pop1(out result));
+            Assert.IsTrue(nestedCallback.Pop2(out result));
+            Assert.AreEqual(5, result);
+            
+            // m_testServiceWithCallback2.Ping1(3, nestedCallback);
+            // Assert.IsTrue(nestedCallback.Pop1(out result));
+            // Assert.AreEqual(6, result);
+        }
+        
+        private sealed class CallbackNestedImpl : MarshalByRefObject, Callback1, Callback2 {
+            private readonly Queue<int> pongs1;
+            private readonly Queue<int> pongs2;
+
+            public CallbackNestedImpl() {
+                this.pongs1 = new Queue<int>();
+                this.pongs2 = new Queue<int>();
+            }
+
+            void Callback1.Pong(int code) {
+                this.pongs1.Enqueue(code);
+            }
+
+            void Callback2.Pong(int code) {
+                this.pongs2.Enqueue(code);
+            }
+            
+            public bool Pop1(out int code) {
+                return Pop(this.pongs1, out code);
+            }
+            
+            public bool Pop2(out int code) {
+                return Pop(this.pongs2, out code);
+            }
+            
+            private static bool Pop(Queue<int> pongs, out int code) {
+                if (pongs.Count == 0) {
+                    code = 0;
+                    return false;
+                }
+                code = pongs.Dequeue();
+                return true;
+            }
+
+            public override object InitializeLifetimeService() {
+                // live forever
+                return null;
+            }
+        }
+    }
+    
+    internal sealed class CallbackImpl : MarshalByRefObject, Callback1 {
+        private readonly Queue<int> pongs;
+
+        public CallbackImpl() {
+            this.pongs = new Queue<int>();
+        }
+
+        public void Pong(int code) {
+            lock (this.pongs) {
+                this.pongs.Enqueue(code);
+                Monitor.Pulse(this.pongs);
+            }
+        }
+
+        public bool Pop(TimeSpan timeout, out int code) {
+            lock (this.pongs) {
+                if (this.pongs.Count == 0 &&
+                    !Monitor.Wait(this.pongs, timeout)) {
+                    code = 0;
+                    return false;
+                }
+                code = this.pongs.Dequeue();
+                return true;
+            }
+        }
+
+        public override object InitializeLifetimeService() {
+            // live forever
+            return null;
+        }
+    }
 }

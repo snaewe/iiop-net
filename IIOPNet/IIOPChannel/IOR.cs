@@ -40,6 +40,7 @@ using Ch.Elca.Iiop.Idl;
 using Ch.Elca.Iiop.Marshalling;
 using omg.org.CORBA;
 using omg.org.IOP;
+using System.Collections.Generic;
 
 namespace Ch.Elca.Iiop.CorbaObjRef
 {
@@ -53,8 +54,8 @@ namespace Ch.Elca.Iiop.CorbaObjRef
 
         #region IFields
 
-        private IorProfile[] m_profiles;
-        private string m_typId;
+        private readonly IorProfile[] m_profiles;
+        private readonly string m_typId;
 
         #endregion IFields
         #region IConstructors
@@ -71,7 +72,9 @@ namespace Ch.Elca.Iiop.CorbaObjRef
                 CdrInputStreamImpl cdrStream = new CdrInputStreamImpl(memStream);
                 byte flags = cdrStream.ReadOctet();
                 cdrStream.ConfigStream(flags, new GiopVersion(1, 2)); // giop dep operation are not used for IORs
-                ParseIOR(cdrStream);
+                List<IorProfile> profiles = new List<IorProfile>();
+                ParseIOR(cdrStream, out m_typId, profiles);
+                m_profiles = profiles.ToArray();
             }
             else
             {
@@ -84,7 +87,9 @@ namespace Ch.Elca.Iiop.CorbaObjRef
         /// </summary>
         internal Ior(CdrInputStream cdrStream)
         {
-            ParseIOR(cdrStream);
+            List<IorProfile> profiles = new List<IorProfile>();
+            ParseIOR(cdrStream, out m_typId, profiles);
+            m_profiles = profiles.ToArray();
         }
 
         /// <summary>
@@ -92,11 +97,7 @@ namespace Ch.Elca.Iiop.CorbaObjRef
         /// </summary>        
         internal Ior(string typeName, IorProfile[] profiles)
         {
-            if (profiles == null)
-            {
-                profiles = new IorProfile[0];
-            }
-            m_profiles = profiles;
+            m_profiles = profiles ?? new IorProfile[0];
             m_typId = typeName;
         }
 
@@ -140,17 +141,16 @@ namespace Ch.Elca.Iiop.CorbaObjRef
         /// <returns>true, if a IOR represents null reference, otherwise false</returns>
         public bool IsNullReference()
         {
-            return (m_typId.Equals("") && (m_profiles.Length == 0));
+            return (m_typId.Length == 0 && m_profiles.Length == 0);
         }
 
-        private void ParseIOR(CdrInputStream cdrStream)
+        private static void ParseIOR(CdrInputStream cdrStream, out string typId, List<IorProfile> profiles)
         {
-            m_typId = cdrStream.ReadString();
+            typId = cdrStream.ReadString();
             ulong nrOfProfiles = cdrStream.ReadULong();
-            m_profiles = new IorProfile[nrOfProfiles];
             for (ulong i = 0; i < nrOfProfiles; i++)
             {
-                m_profiles[i] = ParseProfile(cdrStream);
+                profiles.Add(ParseProfile(cdrStream));
             }
         }
 
@@ -159,7 +159,7 @@ namespace Ch.Elca.Iiop.CorbaObjRef
         /// </summary>
         /// <param name="cdrStream"></param>
         /// <returns></returns>
-        private IorProfile ParseProfile(CdrInputStream cdrStream)
+        private static IorProfile ParseProfile(CdrInputStream cdrStream)
         {
             int profileType = (int)cdrStream.ReadULong();
             switch (profileType)
@@ -178,22 +178,20 @@ namespace Ch.Elca.Iiop.CorbaObjRef
         /// <summary>gets a stringified representation</summary>
         public override string ToString()
         {
-            // encode the IOR to a CDR-strem, afterwards write it to the iorStream
-            MemoryStream content = new MemoryStream();
-            byte flags = 0;
-            CdrOutputStream stream = new CdrOutputStreamImpl(content, flags);
-            stream.WriteOctet(flags); // writing the flags before the IOR
-            WriteToStream(stream);
+            // encode the IOR to a CDR-stream, afterwards write it to the iorStream
+            using (MemoryStream content = new MemoryStream()) {
+                byte flags = 0;
+                CdrOutputStream stream = new CdrOutputStreamImpl(content, flags);
+                stream.WriteOctet(flags); // writing the flags before the IOR
+                // write content to the IORStream
+                WriteToStream(stream);
 
-            // write content to the IORStream
-            content.Close();
-            string result = "IOR:" + StringConversions.Stringify(content.ToArray());
-
-            return result;
+                return StringConversions.Stringify("IOR:", content.GetBuffer(), (int)content.Length);
+            }
         }
 
         /// <summary>
-        /// write this IOR to a CDR-Stream in non-strignified form
+        /// write this IOR to a CDR-Stream in non-stringified form
         /// </summary>
         internal void WriteToStream(CdrOutputStream cdrStream)
         {
@@ -203,6 +201,15 @@ namespace Ch.Elca.Iiop.CorbaObjRef
             {
                 m_profiles[i].WriteToStream(cdrStream);
             }
+        }
+
+        /// <summary>
+        /// write a null IOR instance to a CDR-Stream in non-stringified form
+        /// </summary>
+        internal static void WriteNullToStream(CdrOutputStream cdrStream)
+        {
+            cdrStream.WriteString(string.Empty);
+            cdrStream.WriteULong(0);
         }
 
         /// <summary>

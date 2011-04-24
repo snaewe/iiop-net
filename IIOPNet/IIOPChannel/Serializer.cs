@@ -436,8 +436,8 @@ namespace Ch.Elca.Iiop.Marshalling {
         #region IMethods
 
         internal override void Serialize(object actual, CdrOutputStream targetStream) {
-            if (actual == null) { 
-                WriteNullReference(targetStream); // null must be handled specially
+            if (actual == null) {
+                Ior.WriteNullToStream(targetStream); // null must be handled specially
                 return;
             }
             MarshalByRefObject target = (MarshalByRefObject) actual; // this could be a proxy or the server object
@@ -473,11 +473,6 @@ namespace Ch.Elca.Iiop.Marshalling {
 
             // now write the IOR to the stream
             ior.WriteToStream(targetStream);
-        }
-
-        private void WriteNullReference(CdrOutputStream targetStream) {
-            Ior ior = new Ior("", new IorProfile[0]);
-            ior.WriteToStream(targetStream); // write the null reference to the stream
         }
 
         internal override object Deserialize(CdrInputStream sourceStream) {
