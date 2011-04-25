@@ -13,6 +13,7 @@ key:
 
 build-base: key
 #    set CSFLAGS=/o /d:USE_UNSAFE_CODE /unsafe /keyfile:"%KEY%"
+#    set CSFLAGS=/o /d:USE_UNSAFE_CODE /unsafe /checked+ /keyfile:"%KEY%"
     set CSFLAGS=/o /keyfile:"%KEY%"
     cd IIOPChannel
     $(MAKE) build
@@ -29,6 +30,7 @@ build-base: key
 
 build-base-debug:
 #    set CSFLAGS=/debug+ /d:USE_UNSAFE_CODE /unsafe /d:DEBUG /d:TRACE /d:DEBUG_LOGFILE
+#    set CSFLAGS=/debug+ /d:USE_UNSAFE_CODE /unsafe /checked+ /d:DEBUG /d:TRACE /d:DEBUG_LOGFILE
     set CSFLAGS=/debug+ /d:DEBUG /d:TRACE /d:DEBUG_LOGFILE
     cd IIOPChannel
     $(MAKE) build

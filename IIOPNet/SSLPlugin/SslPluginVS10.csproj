@@ -48,6 +48,9 @@
   <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
     <DebugSymbols>True</DebugSymbols>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Testing|AnyCPU'">
+    <OutputPath>bin\Testing\</OutputPath>
+  </PropertyGroup>
   <ItemGroup>
     <Reference Include="Org.Mentalis.Security, Version=1.0.13.718, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
