@@ -141,12 +141,7 @@ namespace Ch.Elca.Iiop {
             
             Debug.WriteLine("test if : " + serverType + " _is_a " + repositoryId);
             Type toCheck = Repository.GetTypeForId(repositoryId);
-            if (toCheck == null) { return false; }
-            if (toCheck.IsAssignableFrom(serverType)) { 
-                return true;
-            } else {
-                return false;
-            }
+            return toCheck != null && toCheck.IsAssignableFrom(serverType);
         }
 
         /// <summary>this method has no implementation, is does only specify the interface of the _is_a method</summary>

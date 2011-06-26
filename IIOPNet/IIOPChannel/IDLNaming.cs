@@ -28,8 +28,10 @@
  */
 
 using System;
-using System.Reflection;
 using System.Collections;
+using System.Collections.Generic;
+using System.Reflection;
+using System.Text;
 using Ch.Elca.Iiop.Util;
 
 namespace Ch.Elca.Iiop.Idl {
@@ -39,12 +41,12 @@ namespace Ch.Elca.Iiop.Idl {
     /// This class is responsible for realising the identifier (name) mapping
     ///  in the IDL to .NET and .NET to IDL mapping.
     /// </summary>
-    public sealed class IdlNaming {
+    public static class IdlNaming {
 
         #region SFields
         
         private static ArrayList s_clsKeywordList = new ArrayList();
-        private static Hashtable s_clsMapSpecial = new Hashtable();
+        private static IDictionary<Type, string> s_clsMapSpecial = new Dictionary<Type, string>();
         
         private static ArrayList s_idlKeywordList = new ArrayList();
 
@@ -66,12 +68,6 @@ namespace Ch.Elca.Iiop.Idl {
         }
 
         #endregion SConstructor
-        #region IConstructors
-
-        private IdlNaming() {
-        }
-
-        #endregion IConstructors
         #region SMethods
 
         #region simple unqualified name mapping
@@ -270,20 +266,20 @@ namespace Ch.Elca.Iiop.Idl {
         /// <returns></returns>
         internal static string MapIdlRepIdTypePartToClsName(string idlName, bool assumeMappedFromIdl) {
             string[] parts = idlName.Split('/');
-            string result = "";
-            foreach (string part in parts) {                
+            StringBuilder result = new StringBuilder();
+            foreach (string part in parts) {
+                if (result.Length != 0) {
+                    result.Append('.');
+                }
                 if (!assumeMappedFromIdl) {
                     // standard case: type from rep-id represents a CLS type, which was mapped from CLS to IDL.
-                    result = result + "." + ReverseClsToIdlNameMapping(part);
+                    result.Append(ReverseClsToIdlNameMapping(part));
                 } else {
                     // a type mapped from IDL to CLS -> map type name to CLS too
-                    result = result + "." + MapIdlNameToClsName(part);
+                    result.Append(MapIdlNameToClsName(part));
                 }
             }
-            if (result.StartsWith(".")) {
-                result = result.Substring(1);
-            }
-            return result;
+            return result.ToString();
         }
 
 
@@ -294,15 +290,15 @@ namespace Ch.Elca.Iiop.Idl {
         /// <returns>the cls name for rmi-Name</returns>
         internal static string MapRmiNameToClsName(string rmiName) {
             string[] parts = rmiName.Split('.');
-            string result = "";
-            foreach (string part in parts) {                
+            StringBuilder result = new StringBuilder();
+            foreach (string part in parts) {
+                if (result.Length != 0) {
+                    result.Append('.');
+                }
                 // a type mapped from IDL to CLS -> map type name to CLS too                                
-                result = result + "." + MapIdlNameToClsName(ApplyRmiIdlClashEscape(part));
+                result.Append(MapIdlNameToClsName(ApplyRmiIdlClashEscape(part)));
             }
-            if (result.StartsWith(".")) {
-                result = result.Substring(1);
-            }
-            return result;
+            return result.ToString();
         }
         
         internal static string ApplyRmiIdlClashEscape(string rmiIdPart) {
@@ -339,7 +335,7 @@ namespace Ch.Elca.Iiop.Idl {
         /// </summary>
         private static string MapTypeNameToIdlRepId(string shortTypeName, string namepsaceName) {
             string nameSpaceInIdl = MapNamespaceNameToIdl(namepsaceName, "/", false);
-            if (!nameSpaceInIdl.Equals("")) {
+            if (nameSpaceInIdl.Length != 0) {
                 nameSpaceInIdl += "/";
             }
             return "IDL:" + nameSpaceInIdl + MapClsNameToIdlName(shortTypeName) + ":1.0";            
@@ -369,12 +365,12 @@ namespace Ch.Elca.Iiop.Idl {
         /// <param name="forType"></param>
         /// <returns></returns>
         public static string MapShortTypeNameToIdl(Type forType) {
-            if (s_clsMapSpecial.ContainsKey(forType)) {
+            string idl;
+            if (s_clsMapSpecial.TryGetValue(forType, out idl)) {
                 // special
-                return (string)s_clsMapSpecial[forType];
-            } else {
-                return MapClsNameToIdlName(forType.Name);
+                return idl;
             }
+            return MapClsNameToIdlName(forType.Name);
         }
         
         /// <summary>
@@ -382,21 +378,21 @@ namespace Ch.Elca.Iiop.Idl {
         /// </summary>
         /// <param name="separator">separator between module parts, e.g. / or ::</param>        
         private static string MapNamespaceNameToIdl(string namespaceName, string separator, 
-                                                bool isMappedFromIdlToCls) {            
-            string result = "";
+                                                    bool isMappedFromIdlToCls) {            
             if (namespaceName == null) { 
-                return result;
+                return string.Empty;
             }
+
+            StringBuilder result = new StringBuilder(); ;
             string[] parts = namespaceName.Split('.');
             foreach (string part in parts) {
-                result = result + separator + 
-                             ((!isMappedFromIdlToCls) ? MapClsNameToIdlName(part) :
-                                                        ReverseIdlToClsNameMapping(part));
+                if (result.Length != 0) {
+                    result.Append(separator);
+                }
+                result.Append(!isMappedFromIdlToCls ? MapClsNameToIdlName(part) :
+                                                      ReverseIdlToClsNameMapping(part));
             }
-            if (result.StartsWith(separator)) {
-                result = result.Substring(separator.Length);
-            }
-            return result;
+            return result.ToString();
         }
 
         /// <summary>
@@ -413,8 +409,8 @@ namespace Ch.Elca.Iiop.Idl {
         // used for generator
         public static string[] MapNamespaceNameToIdlModules(string clsNamespace) {            
             string[] modules;
-            if ((clsNamespace != null) && (!clsNamespace.Trim().Equals(""))) {
-                modules = clsNamespace.Split(new char[] { Char.Parse(".") } );
+            if ((clsNamespace != null) && !StringConversions.IsBlank(clsNamespace)) {
+                modules = clsNamespace.Split('.');
             } else {
                 modules = new string[0];
             }

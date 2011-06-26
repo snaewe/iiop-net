@@ -294,6 +294,17 @@ namespace Ch.Elca.Iiop.Marshalling {
         }
 
         private void DetermineTypeMapping(Type forType, SerializerFactory serFactory) {
+            DetermineMapping(forType, serFactory);
+
+            // Lets also check implemented interfaces that might be explicitely implemented
+            // making methods/properties invisible to previous research
+            foreach (Type interfaceType in forType.GetInterfaces())
+            {
+                DetermineMapping(interfaceType, serFactory);
+            }
+        }
+
+        private void DetermineMapping(Type forType, SerializerFactory serFactory) {
             MethodInfo[] methods =
                 forType.GetMethods(BindingFlags.Public | BindingFlags.Instance);
             for (int i = 0; i < methods.Length; i++) {

@@ -53,7 +53,7 @@ namespace Ch.Elca.Iiop.IntegrationTests {
 
         #endregion IFields
 
-        [SetUp]
+        [TestFixtureSetUp]
         public void SetupEnvironment() {
             // register the channel
             m_channel = new IiopClientChannel();
@@ -63,7 +63,7 @@ namespace Ch.Elca.Iiop.IntegrationTests {
             m_testService = (TestService)RemotingServices.Connect(typeof(TestService), "corbaloc:iiop:1.2@localhost:8087/test");
         }
 
-        [TearDown]
+        [TestFixtureTearDown]
         public void TearDownEnvironment() {
             m_testService = null;
             // unregister the channel
@@ -1048,23 +1048,23 @@ namespace Ch.Elca.Iiop.IntegrationTests {
         public void TestIsACall() {
             omg.org.CORBA.IObject proxy1 = (omg.org.CORBA.IObject)m_testService.GetSimpleService1();
             Assert.NotNull(proxy1, "testSimpleService1 ref not received");
-            Assert.AreEqual(true, proxy1._is_a("IDL:Ch/Elca/Iiop/IntegrationTests/TestSimpleInterface1:1.0"));
+            Assert.IsTrue(proxy1._is_a("IDL:Ch/Elca/Iiop/IntegrationTests/TestSimpleInterface1:1.0"));
             
             omg.org.CORBA.IObject proxy2 = (omg.org.CORBA.IObject)m_testService.GetSimpleService2();
             Assert.NotNull(proxy2, "testSimpleService2 ref not received");
-            Assert.AreEqual(true, proxy2._is_a("IDL:Ch/Elca/Iiop/IntegrationTests/TestSimpleInterface2:1.0"));
+            Assert.IsTrue(proxy2._is_a("IDL:Ch/Elca/Iiop/IntegrationTests/TestSimpleInterface2:1.0"));
             
             
             // test using ORBServices
             omg.org.CORBA.OrbServices orb = omg.org.CORBA.OrbServices.GetSingleton();
-            Assert.AreEqual(true, orb.is_a(proxy1, typeof(TestSimpleInterface1)));
-            Assert.AreEqual(true, orb.is_a(proxy2, typeof(TestSimpleInterface2)));
+            Assert.IsTrue(orb.is_a(proxy1, typeof(TestSimpleInterface1)));
+            Assert.IsTrue(orb.is_a(proxy2, typeof(TestSimpleInterface2)));
             // target object implements both interfaces
-            Assert.AreEqual(true, orb.is_a(proxy1, typeof(TestSimpleInterface2)));
-            Assert.AreEqual(true, orb.is_a(proxy2, typeof(TestSimpleInterface1)));
+            Assert.IsTrue(orb.is_a(proxy1, typeof(TestSimpleInterface2)));
+            Assert.IsTrue(orb.is_a(proxy2, typeof(TestSimpleInterface1)));
             
-            Assert.AreEqual(false, orb.is_a(m_testService, typeof(TestSimpleInterface1)));
-            Assert.AreEqual(false, orb.is_a(m_testService, typeof(TestSimpleInterface2)));
+            Assert.IsFalse(orb.is_a(m_testService, typeof(TestSimpleInterface1)));
+            Assert.IsFalse(orb.is_a(m_testService, typeof(TestSimpleInterface2)));
         }
         
         [Test]

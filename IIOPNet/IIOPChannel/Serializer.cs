@@ -423,13 +423,16 @@ namespace Ch.Elca.Iiop.Marshalling {
 
         private Type m_forType;
         private IiopUrlUtil m_iiopUrlUtil;
+        private bool m_serializeUsingConcreteType;
 
         #endregion IFields
         #region IConstructors
 
-        public ObjRefSerializer(Type forType, IiopUrlUtil iiopUrlUtil) {
+        public ObjRefSerializer(Type forType, IiopUrlUtil iiopUrlUtil,
+                                bool serializeUsingConcreteType) {
             m_forType = forType;
             m_iiopUrlUtil = iiopUrlUtil;
+            m_serializeUsingConcreteType = serializeUsingConcreteType;
         }
 
         #endregion IConstructors
@@ -466,7 +469,12 @@ namespace Ch.Elca.Iiop.Marshalling {
                 ior = m_iiopUrlUtil.CreateIorForUrl(url, repositoryID);
             } else {
                 // server object
-                ior = IorUtil.CreateIorForObjectFromThisDomain(target);
+                // If an interface is expected we are going to make the target looks like the interface
+                // so that it can be used even if this interface is explicitely implemented or if the
+                // implementing type is not public.
+                ior = IorUtil.CreateIorForObjectFromThisDomain(target,
+                                                               m_forType.IsInterface ? m_forType : target.GetType(),
+                                                               m_forType.IsInterface && !m_serializeUsingConcreteType);
             }
 
             Debug.WriteLine("connection information for objRef, nr of profiles: " + ior.Profiles.Length);
@@ -493,7 +501,11 @@ namespace Ch.Elca.Iiop.Marshalling {
                                               ior.TypID, m_forType.FullName));
             }
             // create a proxy
+            //Console.WriteLine("Type for IOR with URL {0} is {1} ({2}), interface type: {3}",
+            //                  url, ior.Type, ior.TypID, interfaceType);
             object proxy = RemotingServices.Connect(interfaceType, url);
+            //Console.WriteLine("Connected to proxy of type {0} with type {1} from {2}",
+            //                  proxy.GetType(), interfaceType, new StackTrace());
             return proxy;
         }
 
@@ -1887,9 +1899,10 @@ namespace Ch.Elca.Iiop.Marshalling {
         #region IConstructors
 
         internal AbstractInterfaceSerializer(Type forType, SerializerFactory serFactory,
-                                             IiopUrlUtil iiopUrlUtil) {
+                                             IiopUrlUtil iiopUrlUtil,
+                                             bool objSerializeUsingConcreteType) {
             m_forType = forType;
-            m_objRefSer = new ObjRefSerializer(forType, iiopUrlUtil);
+            m_objRefSer = new ObjRefSerializer(forType, iiopUrlUtil, objSerializeUsingConcreteType);
             m_valueSer = new ValueObjectSerializer(forType, serFactory);
         }
 
@@ -2726,7 +2739,7 @@ namespace Ch.Elca.Iiop.Tests {
                 cdrIn.ConfigStream(0, new GiopVersion(1, 2));
 
                 Serializer ser = new ObjRefSerializer(typeof(omg.org.CosNaming.NamingContext),
-                                                      m_iiopUrlUtil);
+                                                      m_iiopUrlUtil, false);
                 object result = ser.Deserialize(cdrIn);
                 Assert.NotNull(result, "not correctly deserialised proxy for ior");
                 Assert.IsTrue(RemotingServices.IsTransparentProxy(result));

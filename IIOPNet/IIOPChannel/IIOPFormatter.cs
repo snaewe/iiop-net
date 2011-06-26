@@ -1,17 +1,17 @@
 /* Formatter.cs
- * 
+ *
  * Project: IIOP.NET
  * IIOPChannel
- * 
+ *
  * WHEN      RESPONSIBLE
  * 14.01.03  Dominic Ullmann (DUL), dominic.ullmann -at- elca.ch
- * 
+ *
  * Copyright 2003 Dominic Ullmann
  *
  * Copyright 2003 ELCA Informatique SA
  * Av. de la Harpe 22-24, 1000 Lausanne 13, Switzerland
  * www.elca.ch
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -48,72 +48,70 @@ namespace Ch.Elca.Iiop {
 
     /// <summary>used to store relevant data for async response processing</summary>
     internal class AsyncProcessingData {
-            
+
         private GiopConnectionDesc m_conDesc;
         private IMessage m_reqMsg;
-            
+
         internal AsyncProcessingData(IMessage reqMsg,
                                      GiopConnectionDesc conDesc) {
-            m_reqMsg = reqMsg;                
+            m_reqMsg = reqMsg;
             m_conDesc = conDesc;
         }
-            
+
         internal IMessage RequestMsg {
             get {
                 return m_reqMsg;
             }
         }
-            
+
         internal GiopConnectionDesc ConDesc {
             get {
                 return m_conDesc;
             }
         }
-                        
+
     }
-    
+
     /// <summary>
     /// async data for the server side.
     /// </summary>
     internal class AsyncServerProcessingData : AsyncProcessingData {
-        
+
         private GiopServerConnection m_serverCon;
-        
+
         internal AsyncServerProcessingData(IMessage reqMsg, GiopServerConnection serverCon) :
             base(reqMsg, serverCon.ConDesc) {
             m_serverCon = serverCon;
         }
-        
+
         internal GiopServerConnection ServerCon {
             get {
                 return m_serverCon;
             }
-        }            
-        
+        }
+
     }
-        
+
     /// <summary>
     /// this class is a client side formatter for IIOP-messages in the IIOP-channel
     /// </summary>
     internal class IiopClientFormatterSink : IClientFormatterSink {
-    
+
         #region IFields
 
-        private IDictionary m_properties = new Hashtable();
-        
-        private IClientChannelSink m_nextSink;
-        
-        private GiopClientConnectionManager m_conManager;
-        
-        private GiopMessageHandler m_messageHandler;
-        
-        private IiopUrlUtil m_iiopUrlUtil;
-                
-        private RetryConfig m_retries;
-        
-        private Hashtable m_typesVerified = new Hashtable(); // contains the verified types for this proxy
-        
-        delegate bool Is_a_delegate(string repId);
+        private readonly IDictionary m_properties = new Hashtable();
+
+        private readonly IClientChannelSink m_nextSink;
+
+        private readonly GiopClientConnectionManager m_conManager;
+
+        private readonly GiopMessageHandler m_messageHandler;
+
+        private readonly IiopUrlUtil m_iiopUrlUtil;
+
+        private readonly RetryConfig m_retries;
+
+        private readonly Hashtable m_typesVerified = new Hashtable(); // contains the verified types for this proxy
 
         #endregion IFields
         #region IConstructors
@@ -122,9 +120,9 @@ namespace Ch.Elca.Iiop {
         /// IiopClientTransportSink must be present.</param>
         internal IiopClientFormatterSink(IClientChannelSink nextSink, GiopClientConnectionManager conManager,
                                          GiopMessageHandler messageHandler,
-                                         IiopUrlUtil iiopUrlUtil,                                         
+                                         IiopUrlUtil iiopUrlUtil,
                                          RetryConfig retries) {
-            m_nextSink = nextSink;            
+            m_nextSink = nextSink;
             m_conManager = conManager;
             m_messageHandler = messageHandler;
             m_iiopUrlUtil = iiopUrlUtil;
@@ -135,8 +133,8 @@ namespace Ch.Elca.Iiop {
         #region IProperties
 
         public System.Runtime.Remoting.Messaging.IMessageSink NextSink {
-            get { 
-                throw new NotSupportedException(); 
+            get {
+                throw new NotSupportedException();
             } // this sink serialises the message, therefore no other message sinks possible
         }
 
@@ -154,7 +152,7 @@ namespace Ch.Elca.Iiop {
 
         #endregion IProperties
         #region IMethods
-                
+
         /// <summary>serialises the .NET msg to a GIOP-message</summary>
         private void SerialiseRequest(IMessage msg, IIorProfile target, GiopClientConnectionDesc conDesc,
                                       uint reqId,
@@ -166,36 +164,33 @@ namespace Ch.Elca.Iiop {
             stream = m_nextSink.GetRequestStream(msg, headers);
             if (stream == null) { // the next sink delegated the decision to which stream the message should be serialised to this sink
                 stream = new MemoryStream(); // create a new stream
-            }            
+            }
             m_messageHandler.SerialiseOutgoingRequestMessage(msg, target, conDesc, stream, reqId);
         }
 
         /// <summary>deserialises an IIOP-msg from the response stream</summary>
         /// <returns> the .NET message created from the IIOP-msg</returns>
-        internal IMessage DeserialiseResponse(Stream responseStream, 
+        internal IMessage DeserialiseResponse(Stream responseStream,
                                               ITransportHeaders headers,
                                               IMessage requestMsg,
                                               GiopClientConnectionDesc conDesc) {
-            
-            IMessage result;
-            try {                
-                result = m_messageHandler.ParseIncomingReplyMessage(responseStream, 
+            // stream won't be needed any more
+            using (responseStream) {
+                IMessage result = m_messageHandler.ParseIncomingReplyMessage(responseStream,
                                               (IMethodCallMessage) requestMsg,
                                               conDesc);
                 MarshalByRefObject fwdToTarget;
                 if (GiopMessageHandler.IsLocationForward(result, out fwdToTarget)) {
                     // location-fwd
                     // reissue request to new target
-                    result = m_messageHandler.ForwardRequest((IMethodCallMessage) requestMsg, 
+                    result = m_messageHandler.ForwardRequest((IMethodCallMessage) requestMsg,
                                                              fwdToTarget);
-                }                
-            } finally {
-                responseStream.Close(); // stream not needed any more                
-            }            
-            return result;
+                }
+                return result;
+            }
         }
-        
-        /// <summary>allocates a connection and adds 
+
+        /// <summary>allocates a connection and adds
         /// the connectionDesc to the message</summary>
         private GiopClientConnectionDesc AllocateConnection(IMessage msg, Ior target, out IIorProfile selectedProfile,
                                                             out uint reqId) {
@@ -210,10 +205,10 @@ namespace Ch.Elca.Iiop {
                     }
                 }
             }
-            throw new TRANSIENT(CorbaSystemExceptionCodes.TRANSIENT_CANTCONNECT, 
+            throw new TRANSIENT(CorbaSystemExceptionCodes.TRANSIENT_CANTCONNECT,
                                 CompletionStatus.Completed_No, "Unable to connect to target."); // can't connect to ior at the moment.
         }
-        
+
         private Ior DetermineTarget(IMessage msg) {
             IMethodMessage methodMsg = msg as IMethodMessage;
             if ((methodMsg == null) || (methodMsg.Uri == null)){
@@ -228,43 +223,39 @@ namespace Ch.Elca.Iiop {
             }
             return target;
         }
-        
+
         /// <summary>if compatibility is not checkable with type information included in
         /// IOR, call _is_a method to check.</summary>
         private bool CheckAssignableRemote(Type formal, string url) {
             IObject proxy = (IObject)RemotingServices.Connect(ReflectionHelper.IObjectType, url);
-            Is_a_delegate checkDelegate = new Is_a_delegate(proxy._is_a);                            
-            string requiredTypeId = Repository.GetRepositoryID(formal);
-            return checkDelegate(requiredTypeId);
-        }        
-        
+            return proxy._is_a(Repository.GetRepositoryID(formal));
+        }
+
         private bool IsInterfaceCompatible(Ior target, Type neededTargetType, string targetUrl) {
             Type interfaceType;
-            if (Repository.IsInterfaceCompatible(neededTargetType, target.TypID, out interfaceType)) {
-                return true; // local check was ok
-            } else {
-                return CheckAssignableRemote(neededTargetType, targetUrl);
-            }                        
+            // local check first otherwise remote
+            return Repository.IsInterfaceCompatible(neededTargetType, target.TypID, out interfaceType) ||
+                   CheckAssignableRemote(neededTargetType, targetUrl);
         }
-        
+
         private void VerifyInterfaceCompatible(Ior target, IMessage msg) {
             if (msg is IMethodMessage) {
                 IMethodMessage methodCall = (IMethodMessage)msg;
-                Type targetType = methodCall.MethodBase.DeclaringType;                
+                Type targetType = methodCall.MethodBase.DeclaringType;
                 lock(m_typesVerified.SyncRoot) {
                     if (m_typesVerified.ContainsKey(targetType)) {
                         return;
                     } else {
                         if (IsInterfaceCompatible(target, targetType, methodCall.Uri)) {
                             // this sink chain is assigned to a remote proxy for the
-                            // methodCall.Uri; for a destinct target url, a different 
+                            // methodCall.Uri; for a distinct target url, a different
                             // formatter instance is used -> therefore, don't need to
                             // distinguish for different uris.
                             m_typesVerified[targetType] = true;
                         } else {
                             throw new BAD_PARAM(20010, CompletionStatus.Completed_No,
                                                 "The target object with the uri: " + methodCall.Uri +
-                                                " doesn't support the interface: " + 
+                                                " doesn't support the interface: " +
                                                 targetType.AssemblyQualifiedName);
                         }
                     }
@@ -274,9 +265,9 @@ namespace Ch.Elca.Iiop {
                 throw new INTERNAL(319, CompletionStatus.Completed_No);
             }
         }
-            
+
         #region Implementation of IMessageSink
-        
+
         private bool CanRetryOnException(Exception ex, int numberOfRetriesDone) {
             TRANSIENT tEx = ex as TRANSIENT;
             if (tEx == null || tEx.Status != CompletionStatus.Completed_No) {
@@ -290,15 +281,15 @@ namespace Ch.Elca.Iiop {
             }
             return true;
         }
-        
+
         private IMessage SyncProcessMessageOnce(IMessage msg,
                                                 Ior target) {
-            
+
             IIorProfile selectedProfile;
-            uint reqId;            
+            uint reqId;
             try {
                 // allocate (reserve) connection
-                GiopClientConnectionDesc conDesc = 
+                GiopClientConnectionDesc conDesc =
                     AllocateConnection(msg, target, out selectedProfile, out reqId);
                 ITransportHeaders requestHeaders;
                 Stream requestStream;
@@ -307,20 +298,20 @@ namespace Ch.Elca.Iiop {
 
                 // pass the serialised GIOP-request to the first stream handling sink
                 // when the call returns, the response message has been received
-                ITransportHeaders responseHeaders;                                
+                ITransportHeaders responseHeaders;
                 Stream responseStream;
-                m_nextSink.ProcessMessage(msg, requestHeaders, requestStream, 
+                m_nextSink.ProcessMessage(msg, requestHeaders, requestStream,
                                           out responseHeaders, out responseStream);
 
                 // now deserialise the response
-                return DeserialiseResponse(responseStream, 
+                return DeserialiseResponse(responseStream,
                                            responseHeaders, msg, conDesc);
             } finally {
                 m_conManager.RequestOnConnectionCompleted(msg); // release the connection, because this interaction is complete
             }
-        }                
-        
-        public IMessage SyncProcessMessage(IMessage msg) {            
+        }
+
+        public IMessage SyncProcessMessage(IMessage msg) {
             Ior target = DetermineTarget(msg);
             VerifyInterfaceCompatible(target, msg);
             // serialise
@@ -330,8 +321,8 @@ namespace Ch.Elca.Iiop {
                 try {
                     result = SyncProcessMessageOnce(msg, target);
                     break;
-                } catch (Exception e) {                    
-                    if (!CanRetryOnException(e, numberOfRetries)) {                        
+                } catch (Exception e) {
+                    if (!CanRetryOnException(e, numberOfRetries)) {
                         result = new ReturnMessage(e, (IMethodCallMessage) msg);
                         break;
                     }
@@ -341,7 +332,7 @@ namespace Ch.Elca.Iiop {
             }
             return result;
         }
-        
+
         private void AsyncProcessMessageOnce(IMessage msg,
                                                  Ior target, IMessageSink replySink) {
             IIorProfile selectedProfile;
@@ -373,7 +364,7 @@ namespace Ch.Elca.Iiop {
             }
         }
 
-        public IMessageCtrl AsyncProcessMessage(IMessage msg, IMessageSink replySink) {            
+        public IMessageCtrl AsyncProcessMessage(IMessage msg, IMessageSink replySink) {
             Ior target = DetermineTarget(msg);
             VerifyInterfaceCompatible(target, msg);
             int numberOfRetries = 0;
@@ -384,13 +375,12 @@ namespace Ch.Elca.Iiop {
                 } catch (Exception e) {
                     if (!CanRetryOnException(e, numberOfRetries)) {
                         // formulate an exception reply for an non-oneway call
-                        if ( ((msg is IMethodCallMessage) && (!GiopMessageHandler.IsOneWayCall((IMethodCallMessage)msg))) ||
-                             (!(msg is IMethodCallMessage))) {
-                
-                            IMessage retMsg = new ReturnMessage(e, (IMethodCallMessage) msg);
-                            if (replySink != null) {
-                                replySink.SyncProcessMessage(retMsg); // process the return message in the reply sink chain
-                            }
+                        IMethodCallMessage methodCallMsg = msg as IMethodCallMessage;
+                        if (replySink != null &&
+                            methodCallMsg != null && !GiopMessageHandler.IsOneWayCall(methodCallMsg)) {
+
+                            IMessage retMsg = new ReturnMessage(e, methodCallMsg);
+                            replySink.SyncProcessMessage(retMsg); // process the return message in the reply sink chain
                         }
                         break;
                     }
@@ -400,12 +390,12 @@ namespace Ch.Elca.Iiop {
             }
             return null;  // TODO, it would be possible to return a possiblity to cancel a message ...
         }
-        
+
         #endregion
 
         #region Implementation of IClientChannelSink
-        public void AsyncProcessRequest(IClientChannelSinkStack sinkStack, 
-                                        IMessage msg, ITransportHeaders headers, 
+        public void AsyncProcessRequest(IClientChannelSinkStack sinkStack,
+                                        IMessage msg, ITransportHeaders headers,
                                         System.IO.Stream stream) {
             throw new NotSupportedException(); // not supported, because client side formatter is the first sink in the chain, using the serialized msg.
         }
@@ -415,12 +405,12 @@ namespace Ch.Elca.Iiop {
             throw new NotSupportedException(); // not supported, because client side formatter is the first sink in the chain, using the serialized msg.
         }
 
-        public void AsyncProcessResponse(IClientResponseChannelSinkStack sinkStack, object state, 
+        public void AsyncProcessResponse(IClientResponseChannelSinkStack sinkStack, object state,
                                          ITransportHeaders headers, Stream stream) {
             // client side formatter is the last sink in the chain accessing the serialised message, therefore this method is called on the return path
             AsyncProcessingData asyncData = (AsyncProcessingData) state; // retrieve the request msg stored on the channelSinkStack
-            IMessage requestMsg = asyncData.RequestMsg;             
-            try {                
+            IMessage requestMsg = asyncData.RequestMsg;
+            try {
                 IMessage responseMsg;
                 try {
                     GiopClientConnectionDesc conDesc = (GiopClientConnectionDesc)asyncData.ConDesc;
@@ -431,17 +421,16 @@ namespace Ch.Elca.Iiop {
                 }
                 sinkStack.DispatchReplyMessage(responseMsg); // dispatch the result message to the message handling reply sink chain
             } catch (Exception e) {
-                sinkStack.DispatchException(e); // dispatch the exception to the message handling reply sink chain        
+                sinkStack.DispatchException(e); // dispatch the exception to the message handling reply sink chain
             }
         }
 
         public Stream GetRequestStream(IMessage msg, ITransportHeaders headers) {
             throw new NotSupportedException(); // this operation is not useful on client side formatter sink, because previous message sinks, can't produce a serialise msg
-
         }
 
         #endregion
-    
+
         #endregion IMethods
 
     }
@@ -450,38 +439,38 @@ namespace Ch.Elca.Iiop {
     /// this class is a server side formater for IIOP-messages in the IIOP-Channel
     /// </summary>
     public class IiopServerFormatterSink : IServerChannelSink {
-        
+
         #region Types
-        
+
         /// <summary>
         /// exception thrown by NotifyDeserialiseRequestComplete handler, if a problem occurs and processing
         /// should be stopped.
         /// </summary>
         internal class NotifyReadRequestException : Exception {
-        
-            public NotifyReadRequestException() : base() {            
+
+            public NotifyReadRequestException() : base() {
             }
-        
-            public NotifyReadRequestException(string msg) : base(msg) {            
+
+            public NotifyReadRequestException(string msg) : base(msg) {
             }
-        
+
             public NotifyReadRequestException(string msg, Exception inner) : base(msg, inner) {
-            }        
-        
-            protected NotifyReadRequestException(System.Runtime.Serialization.SerializationInfo info,
-                                                 System.Runtime.Serialization.StreamingContext context) : base(info, context) {        
             }
-        
-        }        
-        
-        #endregion Types                          
+
+            protected NotifyReadRequestException(System.Runtime.Serialization.SerializationInfo info,
+                                                 System.Runtime.Serialization.StreamingContext context) : base(info, context) {
+            }
+
+        }
+
+        #endregion Types
         #region IFields
 
         private IServerChannelSink m_nextSink;
 
         private IDictionary m_properties = new Hashtable();
-        
-        private GiopMessageHandler m_messageHandler;        
+
+        private GiopMessageHandler m_messageHandler;
 
         #endregion IFields
         #region IConstructors
@@ -496,20 +485,20 @@ namespace Ch.Elca.Iiop {
         #region IProperties
 
         public IServerChannelSink NextChannelSink {
-            get { 
-                return m_nextSink; 
+            get {
+                return m_nextSink;
             }
         }
 
         public System.Collections.IDictionary Properties {
             get {
-                return m_properties; 
+                return m_properties;
             }
         }
 
         #endregion IProperties
         #region IMethods
-        
+
         private void PrepareResponseHeaders(ref ITransportHeaders headers,
                                             GiopServerConnection con) {
             if (headers == null) {
@@ -517,11 +506,11 @@ namespace Ch.Elca.Iiop {
             }
             headers[GiopServerConnection.SERVER_TR_HEADER_KEY] = con;
         }
-        
+
         private Stream GetResponseStreamFor(IServerResponseChannelSinkStack sinkStack,
                                             IMessage responseMsg, ITransportHeaders headers) {
             Stream stream = sinkStack.GetResponseStream(responseMsg, headers);
-            if (stream == null) { 
+            if (stream == null) {
                 // the previous stream-handling sinks delegated the decision to which stream the message should be serialised to this sink
                 stream = new MemoryStream(); // create a new stream
             }
@@ -530,13 +519,13 @@ namespace Ch.Elca.Iiop {
 
         /// <summary>serialises the .NET msg to a GIOP reply message</summary>
         private void SerialiseResponse(IServerResponseChannelSinkStack sinkStack, IMessage requestMsg,
-                                       GiopServerConnection con, IMessage responseMsg, 
-                                       ref ITransportHeaders headers, out Stream stream) {            
+                                       GiopServerConnection con, IMessage responseMsg,
+                                       ref ITransportHeaders headers, out Stream stream) {
             GiopVersion version = (GiopVersion)requestMsg.Properties[SimpleGiopMsg.GIOP_VERSION_KEY];
             PrepareResponseHeaders(ref headers, con);
             // get the stream into which the message should be serialied from a stream handling
             // sink in the stream handling chain
-            stream = GetResponseStreamFor(sinkStack, responseMsg, headers);            
+            stream = GetResponseStreamFor(sinkStack, responseMsg, headers);
             m_messageHandler.SerialiseOutgoingReplyMessage(responseMsg, requestMsg, version, stream, con.ConDesc);
         }
 
@@ -544,13 +533,13 @@ namespace Ch.Elca.Iiop {
         private void SerialiseExceptionResponse(IServerResponseChannelSinkStack sinkStack,
                                                 IMessage requestMsg,
                                                 GiopServerConnection con,
-                                                IMessage responseMsg,                                                                                                
+                                                IMessage responseMsg,
                                                 ref ITransportHeaders headers, out Stream stream) {
             // serialise an exception response
             headers = new TransportHeaders();
             SerialiseResponse(sinkStack, requestMsg, con, responseMsg, ref headers, out stream);
-        }        
-    
+        }
+
         #region Implementation of IServerChannelSink
         public Stream GetResponseStream(IServerResponseChannelSinkStack sinkStack, object state,
                                         IMessage msg, ITransportHeaders headers) {
@@ -559,7 +548,7 @@ namespace Ch.Elca.Iiop {
 
         /// <summary>
         /// process a giop request message.
-        /// </summary>        
+        /// </summary>
         private ServerProcessing ProcessRequestMessage(IServerChannelSinkStack sinkStack,
                                                        ITransportHeaders requestHeaders,
                                                        CdrMessageInputStream msgInput,
@@ -570,8 +559,8 @@ namespace Ch.Elca.Iiop {
             responseHeaders = null;
             try {
                 try {
-                    // deserialise the request                    
-                    deserReqMsg = m_messageHandler.ParseIncomingRequestMessage(msgInput, 
+                    // deserialise the request
+                    deserReqMsg = m_messageHandler.ParseIncomingRequestMessage(msgInput,
                                                        serverCon.ConDesc);
                 } finally {
                     //request deserialised -> safe to read next request while processing request in servant
@@ -580,15 +569,15 @@ namespace Ch.Elca.Iiop {
                         serverCon.NotifyDeserialiseRequestComplete();
                     } catch (Exception ne) {
                         // unexpected exception. Abort message processing, problem with transport.
-                        throw new NotifyReadRequestException("Problem while trying to inform transport about request deserialistion.", 
+                        throw new NotifyReadRequestException("Problem while trying to inform transport about request deserialistion.",
                                                              ne);
                     }
                 }
-                
+
                 // processing may be done asynchronous, therefore push this sink on the stack to process a response async
-                AsyncServerProcessingData asyncData = 
+                AsyncServerProcessingData asyncData =
                     new AsyncServerProcessingData(deserReqMsg, serverCon);
-                sinkStack.Push(this, asyncData);                
+                sinkStack.Push(this, asyncData);
                 ServerProcessing processingResult;
                 try {
                     // forward the call to the next message handling sink
@@ -604,7 +593,7 @@ namespace Ch.Elca.Iiop {
                         sinkStack.Pop(this); // not async
                         // send the response
                         SerialiseResponse(sinkStack, deserReqMsg, serverCon, responseMsg,
-                                          ref responseHeaders, out responseStream);                        
+                                          ref responseHeaders, out responseStream);
                         break;
                     case ServerProcessing.Async:
                         sinkStack.Store(this, asyncData); // this sink want's to process async response
@@ -615,12 +604,12 @@ namespace Ch.Elca.Iiop {
                         break;
                 }
                 return processingResult;
-            
+
             } catch (MessageHandling.RequestDeserializationException deserEx) {
                 // exception from DeserialisRequest
                 responseMsg = deserEx.ResponseMessage;
                 // an exception was thrown during deserialization
-                SerialiseExceptionResponse(sinkStack, 
+                SerialiseExceptionResponse(sinkStack,
                                            deserEx.RequestMessage, serverCon, responseMsg,
                                            ref responseHeaders, out responseStream);
                 return ServerProcessing.Complete;
@@ -635,48 +624,48 @@ namespace Ch.Elca.Iiop {
                     } else {
                         responseMsg = new ReturnMessage(e, null); // no usable information present
                     }
-                    SerialiseExceptionResponse(sinkStack, 
+                    SerialiseExceptionResponse(sinkStack,
                                                deserReqMsg, serverCon, responseMsg,
                                                ref responseHeaders, out responseStream);
                 } else {
                     throw e;
                 }
                 return ServerProcessing.Complete; // send back an error msg
-            }            
+            }
         }
-        
+
         /// <summary>
         /// process a giop locate request message.
-        /// </summary>        
+        /// </summary>
         private ServerProcessing ProcessLocateRequestMessage(IServerChannelSinkStack sinkStack,
                                                              ITransportHeaders requestHeaders,
                                                              CdrMessageInputStream msgInput,
                                                              GiopServerConnection serverCon,
                                                              out IMessage responseMsg, out ITransportHeaders responseHeaders,
-                                                             out Stream responseStream) {            
-            responseHeaders = null;            
-            LocateRequestMessage deserReqMsg = 
+                                                             out Stream responseStream) {
+            responseHeaders = null;
+            LocateRequestMessage deserReqMsg =
                 m_messageHandler.ParseIncomingLocateRequestMessage(msgInput);
-            
+
             // TODO: dummy implementation, don't check yet
-            LocateReplyMessage response = new LocateReplyMessage(LocateStatus.OBJECT_HERE);            
-            
+            LocateReplyMessage response = new LocateReplyMessage(LocateStatus.OBJECT_HERE);
+
             responseMsg = response;
             PrepareResponseHeaders(ref responseHeaders, serverCon);
             // get the stream into which the message should be serialied from a stream handling
             // sink in the stream handling chain
-            responseStream = GetResponseStreamFor(sinkStack, responseMsg, responseHeaders);            
-            
-            m_messageHandler.SerialiseOutgoingLocateReplyMessage(response, deserReqMsg, 
+            responseStream = GetResponseStreamFor(sinkStack, responseMsg, responseHeaders);
+
+            m_messageHandler.SerialiseOutgoingLocateReplyMessage(response, deserReqMsg,
                                                                  msgInput.Header.Version,
                                                                  responseStream, serverCon.ConDesc);
             return ServerProcessing.Complete;
         }
-        
+
         public ServerProcessing ProcessMessage(IServerChannelSinkStack sinkStack, IMessage requestMsg,
-                                               ITransportHeaders requestHeaders, Stream requestStream, 
+                                               ITransportHeaders requestHeaders, Stream requestStream,
                                                out IMessage responseMsg, out ITransportHeaders responseHeaders,
-                                               out Stream responseStream) {            
+                                               out Stream responseStream) {
             responseMsg = null;
             responseHeaders = null;
             responseStream = null;
@@ -689,12 +678,12 @@ namespace Ch.Elca.Iiop {
                                                  out responseMsg, out responseHeaders, out responseStream);
                 } else if (msgInput.Header.GiopType == GiopMsgTypes.LocateRequest) {
                     return ProcessLocateRequestMessage(sinkStack, requestHeaders,
-                                                       msgInput, serverCon, 
+                                                       msgInput, serverCon,
                                                        out responseMsg, out responseHeaders, out responseStream);
                 } else {
-                    Trace.WriteLine("Processing problem on server connection after unexpected message of type " + 
+                    Trace.WriteLine("Processing problem on server connection after unexpected message of type " +
                                     msgInput.Header.GiopType);
-                    throw new NotSupportedException("wrong message type in server side formatter: " + 
+                    throw new NotSupportedException("wrong message type in server side formatter: " +
                                                     msgInput.Header.GiopType);
                 }
             } finally {
@@ -710,11 +699,11 @@ namespace Ch.Elca.Iiop {
                                          IMessage msg, ITransportHeaders headers, Stream stream) {
             // headers, stream are null, because formatting is first sink to create these two
             AsyncServerProcessingData asyncData = (AsyncServerProcessingData) state;
-            try {                
+            try {
                 IMessage requestMsg = asyncData.RequestMsg;
-                SerialiseResponse(sinkStack, requestMsg, asyncData.ServerCon, msg, 
+                SerialiseResponse(sinkStack, requestMsg, asyncData.ServerCon, msg,
                                   ref headers, out stream);
-            } 
+            }
             catch (Exception e) {
                 if (asyncData.RequestMsg is IMethodCallMessage) {
                     msg = new ReturnMessage(e, (IMethodCallMessage) asyncData.RequestMsg);
@@ -727,43 +716,43 @@ namespace Ch.Elca.Iiop {
             }
             sinkStack.AsyncProcessResponse(msg, headers, stream); // pass further on to the stream handling sinks
         }
-        
+
         #endregion
-        
+
         #endregion IMethods
-        
+
     }
 
     /// <summary>
     /// this class is a provider for the IIOPClientFormatterSink.
     /// </summary>
     public class IiopClientFormatterSinkProvider : IClientFormatterSinkProvider {
-    
+
         #region IFields
 
         /// <summary>the next provider in the provider chain</summary>
-        private IClientChannelSinkProvider m_nextProvider; // next provider is set during channel creating with the set method on the property      
+        private IClientChannelSinkProvider m_nextProvider; // next provider is set during channel creating with the set method on the property
 
         /// <summary>
         /// the client side connection Manager
         /// </summary>
         private GiopClientConnectionManager m_conManager;
-        
+
         /// <summary>
         /// the giop message handler responsible for serializing/deserializing Giop messages.
         /// </summary>
         private GiopMessageHandler m_messageHandler;
-        
+
         /// <summary>
         /// helper class to convert from url to ior.
         /// </summary>
-        private IiopUrlUtil m_iiopUrlUtil;       
-        
+        private IiopUrlUtil m_iiopUrlUtil;
+
         private RetryConfig m_retries;
-        
+
         #endregion IFields
         #region IConstructors
-        
+
         public IiopClientFormatterSinkProvider() {
         }
 
@@ -777,11 +766,11 @@ namespace Ch.Elca.Iiop {
         #region IProperties
 
         public IClientChannelSinkProvider Next {
-            get { 
-                return m_nextProvider; 
+            get {
+                return m_nextProvider;
             }
-            set { 
-                m_nextProvider = value; 
+            set {
+                m_nextProvider = value;
             }
         }
 
@@ -800,7 +789,7 @@ namespace Ch.Elca.Iiop {
             if (m_nextProvider != null) {
                 nextSink = m_nextProvider.CreateSink(channel, url, remoteChannelData);
             }
-            
+
             return new IiopClientFormatterSink(nextSink, m_conManager, m_messageHandler,
                                                m_iiopUrlUtil,
                                                m_retries);
@@ -815,8 +804,8 @@ namespace Ch.Elca.Iiop {
             m_messageHandler = messageHandler;
             m_iiopUrlUtil = iiopUrlUtil;
             m_retries = retries;
-        }        
-        
+        }
+
         #endregion IMethods
 
     }
@@ -825,15 +814,15 @@ namespace Ch.Elca.Iiop {
     /// this class is a provider for the IIOPServerFormatterSink.
     /// </summary>
     public class IiopServerFormatterSinkProvider : IServerFormatterSinkProvider {
-    
+
         #region IFields
-        
+
         private IServerChannelSinkProvider m_nextProvider; // is set during channel creation with the set accessor of the property
-        
+
         /// <summary>
         /// the giop message handler responsible for serializing/deserializing Giop messages.
         /// </summary>
-        private GiopMessageHandler m_messageHandler;        
+        private GiopMessageHandler m_messageHandler;
 
         #endregion IFields
         #region IConstructors
@@ -852,16 +841,16 @@ namespace Ch.Elca.Iiop {
 
         public System.Runtime.Remoting.Channels.IServerChannelSinkProvider Next {
             get {
-                return m_nextProvider; 
+                return m_nextProvider;
             }
             set {
-                m_nextProvider = value; 
+                m_nextProvider = value;
             }
         }
 
         #endregion IProperties
         #region IMethods
-        
+
         #region Implementation of IServerChannelSinkProvider
 
         public IServerChannelSink CreateSink(IChannelReceiver channel) {
@@ -870,20 +859,20 @@ namespace Ch.Elca.Iiop {
                                             channel);
             }
             Debug.WriteLine("create an IIOP server formatter sink");
-            
+
             IServerChannelSink next = null;
             if (m_nextProvider != null) {
                 next = m_nextProvider.CreateSink(channel); // create the rest of the sink chain
             }
             return new IiopServerFormatterSink(next, m_messageHandler);
         }
-        
+
         public void GetChannelData(IChannelDataStore channelData) {
             // not useful for this provider
         }
 
         #endregion
-        
+
         internal void Configure(GiopMessageHandler messageHandler) {
             m_messageHandler = messageHandler;
         }

@@ -163,18 +163,18 @@ namespace Ch.Elca.Iiop.CorbaObjRef {
         
         #region IFields
         
-        private GiopVersion m_version;
+        private readonly GiopVersion m_version;
         
-        private string m_host;
-        private int m_port;
+        private readonly string m_host;        
+        private readonly int m_port;
         
         #endregion IFields
         #region IConstructors
         
-        public IiopLocIiopAddrBase(string scheme, string host, int port) {
+        protected IiopLocIiopAddrBase(string scheme, string host, int port, int protocolPrefixLength) {
             m_host = host;
             m_port = port;
-            ParseIiopScheme(scheme);
+            m_version = ParseIiopScheme(scheme, protocolPrefixLength);
         }
         
         #endregion IConstructors
@@ -201,28 +201,21 @@ namespace Ch.Elca.Iiop.CorbaObjRef {
         #endregion IProperties
         #region IMethods
 
-        /// <summary>
-        /// returns the length of the protocol prefix, e.g. 4 for iiop
-        /// </summary>
-        protected abstract int ProtocolPrefixLength(string scheme);
-        
         /// <summary>parses a scheme inside an iiop-url</summary>
-        private void ParseIiopScheme(string scheme) {
-            // cut off protocol part
-            string specificPart = scheme.Substring(ProtocolPrefixLength(scheme));
-            // version part
-            if (specificPart.Length > 0) {
+        private static GiopVersion ParseIiopScheme(string scheme, int protocolPrefixLength) {
+            // cut off protocol part, version part
+            if (scheme.Length > protocolPrefixLength) {
                 // version spec
                 try {
                     // parse version string
-                    byte major = Byte.Parse(specificPart[0].ToString());
-                    byte minor = Byte.Parse(specificPart[2].ToString());
-                    m_version = new GiopVersion(major, minor);
+                    byte major = Byte.Parse(scheme[protocolPrefixLength].ToString());
+                    byte minor = Byte.Parse(scheme[protocolPrefixLength + 2].ToString());
+                    return new GiopVersion(major, minor);
                 } catch (Exception) {
                     throw new BAD_PARAM(9, CompletionStatus.Completed_No);
                 }
             } else {
-                m_version = new GiopVersion(1,2); // default
+                return new GiopVersion(1,2); // default
             }
         }
         
@@ -236,19 +229,18 @@ namespace Ch.Elca.Iiop.CorbaObjRef {
     
     /// <summary>represents an iiop addr</summary>
     internal class IiopLocIiopAddr : IiopLocIiopAddrBase {
-        
+
+        private const string iiopPrefix = "iiop";
+
         #region IConstructors
 
-        public IiopLocIiopAddr(string scheme, string host, int port) : base(scheme, host, port) {
+        public IiopLocIiopAddr(string scheme, string host, int port)
+            : base(scheme, host, port, iiopPrefix.Length) {
         }
         
         #endregion IConstructors
         #region IMethods
     
-        protected override int ProtocolPrefixLength(string scheme) {
-            return 4;
-        }
-
         public override IorProfile GetProfileForAddr(byte[] objectKey, Codec codec) {
             InternetIiopProfile result = new InternetIiopProfile(Version, Host, (ushort)Port, objectKey);
             return result;
@@ -256,7 +248,7 @@ namespace Ch.Elca.Iiop.CorbaObjRef {
 
         public override Uri ParseUrl(string objectUri, out GiopVersion version) {
             version = Version;
-            return new Uri("iiop" +
+            return new Uri(iiopPrefix +
                            version.Major + "." + version.Minor +
                            Uri.SchemeDelimiter + Host + ":" + Port);
         }
@@ -268,7 +260,7 @@ namespace Ch.Elca.Iiop.CorbaObjRef {
         /// returns true, if this class can handle the specified protocol in the address scheme
         /// </summary>
         public static bool IsResponsibleForProtocol(string scheme) {
-            return scheme.StartsWith("iiop") && (!scheme.StartsWith("iiop-"));
+            return scheme.StartsWith(iiopPrefix) && (!scheme.StartsWith("iiop-"));
         }
 
         #endregion SMethods
@@ -280,19 +272,17 @@ namespace Ch.Elca.Iiop.CorbaObjRef {
     /// <summary>represents an iiop ssl addr</summary>
     internal class IiopLocIiopSslAddr : IiopLocIiopAddrBase {
 
+        private const string iiopsslPrefix = "iiop-ssl";
         #region IConstructors
 
-        public IiopLocIiopSslAddr(string scheme, string host, int port) : base(scheme, host, port) {
+            // cut off iiop-ssl
+        public IiopLocIiopSslAddr(string scheme, string host, int port)
+            : base(scheme, host, port, iiopsslPrefix.Length) {
         }
 
         #endregion IConstructors
         #region IMethods
     
-        protected override int ProtocolPrefixLength(string addr) {
-            // cut off iiop-ssl
-            return 8;
-        }
-        
         public override IorProfile GetProfileForAddr(byte[] objectKey, Codec codec) {
             InternetIiopProfile result = new InternetIiopProfile(Version, Host, 0, objectKey);
             SSLComponentData sslComp =
@@ -308,7 +298,7 @@ namespace Ch.Elca.Iiop.CorbaObjRef {
     
         public override Uri ParseUrl(string objectUri, out GiopVersion version) {
             version = Version;
-            return new Uri("iiop-ssl" +
+            return new Uri(iiopsslPrefix +
                            version.Major + "." + version.Minor +
                            Uri.SchemeDelimiter + Host + ":" + Port);
     
@@ -321,16 +311,11 @@ namespace Ch.Elca.Iiop.CorbaObjRef {
         /// returns true, if this class can handle the specified protocol in the address scheme
         /// </summary>
         public static bool IsResponsibleForProtocol(string scheme) {
-            return scheme.StartsWith("iiop-ssl");
+            return scheme.StartsWith(iiopsslPrefix);
         }
 
         #endregion SMethods
-
-
-
     }
-
-
 }
 
 

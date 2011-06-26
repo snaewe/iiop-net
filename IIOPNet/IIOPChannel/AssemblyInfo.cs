@@ -62,8 +62,8 @@ using System.Security.Permissions;
 
 
 // needed CAS for IIOP.NET
-[assembly:ReflectionPermissionAttribute(SecurityAction.RequestMinimum, Unrestricted=true)] // refleciton 
-[assembly:SecurityPermissionAttribute(SecurityAction.RequestMinimum, Infrastructure=true)] // remoting infrastructure
-[assembly:SecurityPermissionAttribute(SecurityAction.RequestMinimum, RemotingConfiguration=true)] // remoting infrastructure
+//[assembly:ReflectionPermissionAttribute(SecurityAction.RequestMinimum, Unrestricted=true)] // refleciton 
+//[assembly:SecurityPermissionAttribute(SecurityAction.RequestMinimum, Infrastructure=true)] // remoting infrastructure
+//[assembly:SecurityPermissionAttribute(SecurityAction.RequestMinimum, RemotingConfiguration=true)] // remoting infrastructure
 
 // FileIOPermission, DnsPermission, SocketPermission also needed; should be configured

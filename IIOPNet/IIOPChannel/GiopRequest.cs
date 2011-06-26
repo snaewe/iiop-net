@@ -485,105 +485,61 @@ namespace Ch.Elca.Iiop.MessageHandling {
         
         #endregion IConstructors
         #region IProperties
-        
+
+        private object Get(string propertyName, int minor) {
+            object ret = m_requestMessage.Properties[propertyName];
+            if (ret != null) {
+                return ret;
+            }
+            throw new BAD_INV_ORDER(minor, CompletionStatus.Completed_MayBe);
+        }
+
+        private void Set(string propertyName, object value, int minor) {
+            if (m_requestCallMessage == null) {
+                m_requestMessage.Properties[propertyName] = value;
+            } else {
+                throw new BAD_OPERATION(minor, CompletionStatus.Completed_MayBe);
+            }
+        }
+
         /// <summary>
         /// see <see cref="Ch.Elca.Iiop.MessageHandling.AbstractGiopRequest.RequestId"/>.
         /// </summary>
         internal override uint RequestId {
-            get {
-                if (m_requestMessage.Properties[SimpleGiopMsg.REQUEST_ID_KEY] != null) {
-                    return (uint)m_requestMessage.Properties[SimpleGiopMsg.REQUEST_ID_KEY];
-                } else {
-                    throw new BAD_INV_ORDER(200, CompletionStatus.Completed_MayBe);
-                }
-            }
-            set {
-                if (m_requestCallMessage == null) {
-                    m_requestMessage.Properties[SimpleGiopMsg.REQUEST_ID_KEY] = value;
-                } else {
-                    throw new BAD_OPERATION(200, CompletionStatus.Completed_MayBe);
-                }
-            }
+            get { return (uint)Get(SimpleGiopMsg.REQUEST_ID_KEY, 200); }
+            set { Set(SimpleGiopMsg.REQUEST_ID_KEY, value, 200); }
         }        
                 
         /// <summary>
         /// the giop version this message is encoded with
         /// </summary>
         internal GiopVersion Version {
-            get {
-                if (m_requestMessage.Properties[SimpleGiopMsg.GIOP_VERSION_KEY] != null) {
-                    return (GiopVersion)m_requestMessage.Properties[SimpleGiopMsg.GIOP_VERSION_KEY];
-                } else {
-                    throw new BAD_INV_ORDER(201, CompletionStatus.Completed_MayBe);
-                }
-            }
-            set {
-                if (m_requestCallMessage == null) {
-                    m_requestMessage.Properties[SimpleGiopMsg.GIOP_VERSION_KEY] = value;
-                } else {
-                    throw new BAD_OPERATION(201, CompletionStatus.Completed_MayBe);
-                }
-            }
+            get { return (GiopVersion)Get(SimpleGiopMsg.GIOP_VERSION_KEY, 201); }
+            set { Set(SimpleGiopMsg.GIOP_VERSION_KEY, value, 201); }
         }
         
         /// <summary>
         /// the response flags for this request
         /// </summary>
         internal byte ResponseFlags {
-            get {
-                if (m_requestMessage.Properties[SimpleGiopMsg.RESPONSE_FLAGS_KEY] != null) {
-                    return (byte)m_requestMessage.Properties[SimpleGiopMsg.RESPONSE_FLAGS_KEY];
-                } else {
-                    throw new BAD_INV_ORDER(202, CompletionStatus.Completed_MayBe);
-                }                
-            }
-            set {
-                if (m_requestCallMessage == null) {
-                    m_requestMessage.Properties[SimpleGiopMsg.RESPONSE_FLAGS_KEY] = value;
-                } else {
-                    throw new BAD_OPERATION(202, CompletionStatus.Completed_MayBe);
-                }
-            }
+            get { return (byte)Get(SimpleGiopMsg.RESPONSE_FLAGS_KEY, 202); }
+            set { Set(SimpleGiopMsg.RESPONSE_FLAGS_KEY, value, 202); }
         }
         
         /// <summary>
         /// see <see cref="Ch.Elca.Iiop.MessageHandling.AbstractGiopRequest.RequestMethodName"/>.
         /// </summary>
         internal override string RequestMethodName {
-            get {
-                if (m_requestMessage.Properties[SimpleGiopMsg.IDL_METHOD_NAME_KEY] != null) {
-                    return GetRequestedMethodNameInternal();
-                } else {
-                    throw new BAD_INV_ORDER(203, CompletionStatus.Completed_MayBe);
-                }                                                
-            }
-            set {
-                if (m_requestCallMessage == null) {
-                    m_requestMessage.Properties[SimpleGiopMsg.IDL_METHOD_NAME_KEY] = value;
-                } else {
-                    throw new BAD_OPERATION(203, CompletionStatus.Completed_MayBe);
-                }
-            }
+            get { return (string)Get(SimpleGiopMsg.IDL_METHOD_NAME_KEY, 203); }
+            set { Set(SimpleGiopMsg.IDL_METHOD_NAME_KEY, value, 203); }
         }
         
         /// <summary>
         /// the key of the target object
         /// </summary>
         internal byte[] ObjectKey {
-            get {
-                if (m_requestMessage.Properties[SimpleGiopMsg.REQUESTED_OBJECT_KEY] != null) {
-                    return (byte[])m_requestMessage.Properties[SimpleGiopMsg.REQUESTED_OBJECT_KEY];
-                } else {
-                    throw new BAD_INV_ORDER(10, CompletionStatus.Completed_MayBe);
-                }                                                
-            }
-            set {
-                if (m_requestCallMessage == null) {
-                    m_requestMessage.Properties[SimpleGiopMsg.REQUESTED_OBJECT_KEY] = value;
-                } else {
-                    throw new BAD_OPERATION(216, CompletionStatus.Completed_MayBe);
-                }
-            }
+            get { return (byte[])Get(SimpleGiopMsg.REQUESTED_OBJECT_KEY, 10); }
+            set { Set(SimpleGiopMsg.REQUESTED_OBJECT_KEY, value, 216); }
         }        
         
         /// <summary>
@@ -591,20 +547,8 @@ namespace Ch.Elca.Iiop.MessageHandling {
         /// (because of redirections of some request to other objects).
         /// </summary>
         internal string RequestUri {
-            get {
-                if (m_requestMessage.Properties[SimpleGiopMsg.REQUESTED_URI_KEY] != null) {
-                    return (string)m_requestMessage.Properties[SimpleGiopMsg.REQUESTED_URI_KEY];
-                } else {
-                    throw new BAD_INV_ORDER(204, CompletionStatus.Completed_MayBe);
-                }                
-            }
-            set {
-                if (m_requestCallMessage == null) {
-                    m_requestMessage.Properties[SimpleGiopMsg.REQUESTED_URI_KEY] = value;                
-                } else {
-                    throw new BAD_OPERATION(204, CompletionStatus.Completed_MayBe);
-                }
-            }
+            get { return (string)Get(SimpleGiopMsg.REQUESTED_URI_KEY, 204); }
+            set { Set(SimpleGiopMsg.REQUESTED_URI_KEY, value, 204); }
         }
         
         /// <summary>
@@ -613,22 +557,12 @@ namespace Ch.Elca.Iiop.MessageHandling {
         internal override string CalledUri {
             get {
                 if (m_requestCallMessage == null) {
-                    if (m_requestMessage.Properties[SimpleGiopMsg.URI_KEY] != null) {
-                        return (string)m_requestMessage.Properties[SimpleGiopMsg.URI_KEY];
-                    } else {
-                        throw new BAD_INV_ORDER(205, CompletionStatus.Completed_MayBe);
-                    }                                
+                    return (string)Get(SimpleGiopMsg.URI_KEY, 205);
                 } else {
                     return m_requestCallMessage.Uri;
                 }
             }
-            set {                
-                if (m_requestCallMessage == null) {
-                    m_requestMessage.Properties[SimpleGiopMsg.URI_KEY] = value;
-                } else {
-                    throw new BAD_OPERATION(205, CompletionStatus.Completed_MayBe);
-                }
-            }
+            set { Set(SimpleGiopMsg.URI_KEY, value, 205); }
         }
         
         /// <summary>
@@ -637,82 +571,38 @@ namespace Ch.Elca.Iiop.MessageHandling {
         private Type[] CalledMethodSignature {
             get {
                 if (m_requestCallMessage == null) {
-                    if (m_requestMessage.Properties[SimpleGiopMsg.METHOD_SIG_KEY] != null) {
-                        return (Type[])m_requestMessage.Properties[SimpleGiopMsg.METHOD_SIG_KEY];
-                    } else {
-                        throw new BAD_INV_ORDER(206, CompletionStatus.Completed_MayBe);
-                    }                                                                                
+                    return (Type[])Get(SimpleGiopMsg.METHOD_SIG_KEY, 206);
                 } else {
                     return (Type[])m_requestCallMessage.MethodSignature;
                 }
             }
-            set {
-                if (m_requestCallMessage == null) {
-                    m_requestMessage.Properties[SimpleGiopMsg.METHOD_SIG_KEY] = value;
-                } else {
-                    throw new BAD_OPERATION(206, CompletionStatus.Completed_MayBe);
-                }
-            }
+            set { Set(SimpleGiopMsg.METHOD_SIG_KEY, value, 206); }
         }
         
         /// <summary>the name of the called .net method; can be different from RequestMethodName.</summary>
         internal string CalledMethodName {
             get {
                 if (m_requestCallMessage == null) {
-                    if (m_requestMessage.Properties[SimpleGiopMsg.METHODNAME_KEY] != null) {
-                        return (string)m_requestMessage.Properties[SimpleGiopMsg.METHODNAME_KEY];
-                    } else {
-                        throw new BAD_INV_ORDER(207, CompletionStatus.Completed_MayBe);
-                    }                
+                    return (string)Get(SimpleGiopMsg.METHODNAME_KEY, 207);
                 } else {
                     return m_requestCallMessage.MethodName;
                 }
             }
-            set {
-                if (m_requestCallMessage == null) {
-                    m_requestMessage.Properties[SimpleGiopMsg.METHODNAME_KEY] = value;                
-                } else {
-                    throw new BAD_OPERATION(207, CompletionStatus.Completed_MayBe);
-                }
-            }
+            set { Set(SimpleGiopMsg.METHODNAME_KEY, value, 207); }
         }
         
         /// <summary>the info of the called .net method.</summary>
         internal MethodInfo CalledMethod {
-            get {                
-                if (m_requestMessage.Properties[SimpleGiopMsg.CALLED_METHOD_KEY] != null) {
-                    return GetCalledMethodInternal();
-                } else {
-                    throw new BAD_INV_ORDER(208, CompletionStatus.Completed_MayBe);
-                }                
-            }
-            set {
-                if (m_requestCallMessage == null) {
-                    m_requestMessage.Properties[SimpleGiopMsg.CALLED_METHOD_KEY] = value;
-                } else {
-                    throw new BAD_OPERATION(208, CompletionStatus.Completed_MayBe);
-                }
-            }
+            get { return (MethodInfo)Get(SimpleGiopMsg.CALLED_METHOD_KEY, 208); }
+            set { Set(SimpleGiopMsg.CALLED_METHOD_KEY, value, 208); }
         }        
         
         /// <summary>
         /// is one of the standard corba operaton like is_a called, or a regular operation.
         /// </summary>
         internal bool IsStandardCorbaOperation {
-            get {
-                if (m_requestMessage.Properties[SimpleGiopMsg.IS_STANDARD_CORBA_OP_KEY] != null) {
-                    return (bool)m_requestMessage.Properties[SimpleGiopMsg.IS_STANDARD_CORBA_OP_KEY];
-                } else {
-                    throw new BAD_INV_ORDER(209, CompletionStatus.Completed_MayBe);
-                }                                
-            }
-            set {
-                if (m_requestCallMessage == null) {
-                    m_requestMessage.Properties[SimpleGiopMsg.IS_STANDARD_CORBA_OP_KEY] = value;
-                } else {
-                    throw new BAD_OPERATION(209, CompletionStatus.Completed_MayBe);
-                }
-            }            
+            get { return (bool)Get(SimpleGiopMsg.IS_STANDARD_CORBA_OP_KEY, 209); }
+            set { Set(SimpleGiopMsg.IS_STANDARD_CORBA_OP_KEY, value, 209); }
         }
         
         /// <summary>
@@ -721,42 +611,20 @@ namespace Ch.Elca.Iiop.MessageHandling {
         internal string ServerTypeName {
             get {
                 if (m_requestCallMessage == null) {
-                    if (m_requestMessage.Properties[SimpleGiopMsg.TYPENAME_KEY] != null) {
-                        return (string)m_requestMessage.Properties[SimpleGiopMsg.TYPENAME_KEY];
-                    } else {
-                        throw new BAD_INV_ORDER(210, CompletionStatus.Completed_MayBe);
-                    }
+                    return (string)Get(SimpleGiopMsg.TYPENAME_KEY, 210);
                 } else {
                     return m_requestCallMessage.TypeName;
                 }
             }
-            set {
-                if (m_requestCallMessage == null) {
-                    m_requestMessage.Properties[SimpleGiopMsg.TYPENAME_KEY] = value;
-                } else {
-                    throw new BAD_OPERATION(210, CompletionStatus.Completed_MayBe);
-                }
-            }
+            set { Set(SimpleGiopMsg.TYPENAME_KEY, value, 210); }
         }
         
         /// <summary>
         /// the type of .NET object, servicing this request.
         /// </summary>
         internal Type ServerTypeType {
-            get {
-                if (m_requestMessage.Properties[SimpleGiopMsg.TARGET_TYPE_KEY] != null) {
-                    return (Type)m_requestMessage.Properties[SimpleGiopMsg.TARGET_TYPE_KEY];
-                } else {
-                    throw new BAD_INV_ORDER(210, CompletionStatus.Completed_MayBe);
-                }
-            }
-            set {
-                if (m_requestCallMessage == null) {
-                    m_requestMessage.Properties[SimpleGiopMsg.TARGET_TYPE_KEY] = value;
-                } else {
-                    throw new BAD_OPERATION(210, CompletionStatus.Completed_MayBe);
-                }
-            }
+            get { return (Type)Get(SimpleGiopMsg.TARGET_TYPE_KEY, 210); }
+            set { Set(SimpleGiopMsg.TARGET_TYPE_KEY, value, 210); }
         }        
         
         /// <summary>
@@ -765,22 +633,12 @@ namespace Ch.Elca.Iiop.MessageHandling {
         internal object[] RequestArgs {
             get {
                 if (m_requestCallMessage == null) {
-                    if (m_requestMessage.Properties[SimpleGiopMsg.ARGS_KEY] != null) {
-                        return (object[])m_requestMessage.Properties[SimpleGiopMsg.ARGS_KEY];
-                    } else {
-                        throw new BAD_INV_ORDER(211, CompletionStatus.Completed_MayBe);
-                    }                                
+                    return (object[])Get(SimpleGiopMsg.ARGS_KEY, 211);
                 } else {
                     return m_requestCallMessage.Args;
                 }
             }
-            set {
-                if (m_requestCallMessage == null) {
-                    m_requestMessage.Properties[SimpleGiopMsg.ARGS_KEY] = value;
-                } else {
-                    throw new BAD_OPERATION(211, CompletionStatus.Completed_MayBe);
-                }
-            }
+            set { Set(SimpleGiopMsg.ARGS_KEY, value, 211); }
         }
         
         /// <summary>
@@ -1064,6 +922,12 @@ namespace Ch.Elca.Iiop.MessageHandling {
             MethodInfo callForMethod = forRequestMethodName;
             string internalMethodName; // the implementation method name
             if (!IsStandardCorbaOperation) {
+                // The called might be on an explicitely implemented interface, it is this
+                // interface type that must be presented to RemotingServices for method call
+                // to work:
+                ServerTypeName = callForMethod.DeclaringType.FullName;
+                ServerTypeType = callForMethod.DeclaringType;
+
                 // handle object specific-ops
                 internalMethodName = callForMethod.Name;
                 // to handle overloads correctly, add signature info:

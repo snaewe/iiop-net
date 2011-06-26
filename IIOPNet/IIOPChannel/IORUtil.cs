@@ -235,6 +235,10 @@ namespace Ch.Elca.Iiop.Util {
                 throw new INTERNAL(57, CompletionStatus.Completed_MayBe);
             }
 
+            return GetObjectKeyForUri(objectUri);
+        }
+
+        private static byte[] GetObjectKeyForUri(string objectUri) {
             int startIndex = 0;
             if (!IsSystemGeneratedId(objectUri)) {
                 // remove appdomain-id in front of uri which is automatically appended
@@ -255,7 +259,7 @@ namespace Ch.Elca.Iiop.Util {
             // For System-id policy, don't remove the appdomain id, because after
             // a restart of the application, appdomain id-guid prevents the
             // generation of the same ids
-            
+
             // use ASCII-encoder + unicode escaped to encode uri string
             objectUri = EscapeNonAscii(objectUri, ref startIndex);
             return Encoding.ASCII.GetBytes(objectUri.ToCharArray(startIndex, objectUri.Length - startIndex));
@@ -267,7 +271,7 @@ namespace Ch.Elca.Iiop.Util {
         /// <param name="obj"></param>
         /// <returns></returns>
         internal static Ior CreateIorForObjectFromThisDomain(MarshalByRefObject obj) {
-            return CreateIorForObjectFromThisDomain(obj, obj.GetType());
+            return CreateIorForObjectFromThisDomain(obj, obj.GetType(), false);
         }
 
         /// <summary>
@@ -275,9 +279,12 @@ namespace Ch.Elca.Iiop.Util {
         /// </summary>
         /// <param name="obj"></param>
         /// <returns></returns>
-        internal static Ior CreateIorForObjectFromThisDomain(MarshalByRefObject obj, Type forType) {
-            ObjRef objRef = RemotingServices.Marshal(obj, null, forType); // make sure, the object is marshalled and get obj-ref
-            byte[] objectKey = GetObjectKeyForObj(obj);
+        internal static Ior CreateIorForObjectFromThisDomain(MarshalByRefObject obj, Type forType, bool marshalUsingForType) {
+            Console.WriteLine("Marshalling using for type: {0}", marshalUsingForType);
+            ObjRef objRef = 
+                marshalUsingForType ? RemotingServices.Marshal(obj, null, forType)
+                                    : RemotingServices.Marshal(obj); // make sure, the object is marshalled and get obj-ref
+            byte[] objectKey = GetObjectKeyForUri(objRef.URI);
             IiopChannelData serverData = GetIiopChannelData(objRef);
             if (serverData != null) {
                 string host = serverData.HostName;

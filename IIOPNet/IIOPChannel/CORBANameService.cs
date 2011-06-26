@@ -36,6 +36,8 @@ using Ch.Elca.Iiop;
 using System.Reflection;
 using System.Diagnostics;
 using omg.org.CORBA;
+using System.Text;
+using System.Collections.Generic;
 
 namespace omg.org.CosNaming {
 
@@ -234,7 +236,7 @@ namespace omg.org.CosNaming {
 
         #region IFields
 
-        private Hashtable m_nameTable = new Hashtable();
+        private readonly IDictionary<string, MarshalByRefObject> m_nameTable = new Dictionary<string, MarshalByRefObject>();
 
         #endregion IFields
         #region IConstructors
@@ -249,19 +251,19 @@ namespace omg.org.CosNaming {
             // create uri for name-components:
             string name = CreateNameForNameComponents(nameComponents);
             
-            lock(m_nameTable.SyncRoot) {
-                if (m_nameTable.ContainsKey(name)) {
+            lock(m_nameTable) {
+                MarshalByRefObject result;
+                if (m_nameTable.TryGetValue(name, out result)) {
                     // is in the own name-table
-                    return (MarshalByRefObject)m_nameTable[name];
+                    return result;
                 }
             }
             
-            // Type serverType = RemotingServices.GetServerTypeForUri(uri);
             // get it from the .NET name service
             return GetObjectRegisteredAtUri(name, nameComponents);
         }
 
-        private MarshalByRefObject GetObjectRegisteredAtUri(string uri, NameComponent[] nameComponents) {
+        private static MarshalByRefObject GetObjectRegisteredAtUri(string uri, NameComponent[] nameComponents) {
             // this is not nice, because it does circument internal on IdentityHolder-class
             Debug.WriteLine("get registeredObject: " + uri);
             Assembly remotingAssembly = Assembly.Load("mscorlib");
@@ -306,17 +308,16 @@ namespace omg.org.CosNaming {
         }
 
         /// <summary>create a name for the name-components</summary>
-        private string CreateNameForNameComponents(NameComponent[] nameComponents) {
-            string name = "";
+        private static string CreateNameForNameComponents(NameComponent[] nameComponents) {
+            StringBuilder builder = new StringBuilder();
             foreach (NameComponent component in nameComponents) {
-                if (!name.Equals("")) { name = name + "/"; }
-                if (component.kind != null && (!component.kind.Equals(""))) {
-                    name = name + component.id + "." + component.kind;
-                } else {
-                    name = name + component.id;
+                if (builder.Length != 0) { builder.Append('/'); }
+                builder.Append(component.id);
+                if (!string.IsNullOrEmpty(component.kind)) {
+                    builder.Append('.').Append(component.kind);
                 }
             }
-            return name;
+            return builder.ToString();
         }
         
         public void bind([IdlSequenceAttribute(0L)] NameComponent[] nameComponents, MarshalByRefObject obj) {
@@ -324,7 +325,7 @@ namespace omg.org.CosNaming {
             // bind the object to the name
             
             // register it in the nametable
-            lock(m_nameTable.SyncRoot) {
+            lock(m_nameTable) {
                 if (m_nameTable.ContainsKey(name)) {
                     throw new NamingContext_package.AlreadyBound();
                 }
@@ -334,11 +335,10 @@ namespace omg.org.CosNaming {
 
         public void unbind([IdlSequenceAttribute(0L)] NameComponent[] nameComponents) {
             string name = CreateNameForNameComponents(nameComponents);
-            lock(m_nameTable.SyncRoot) {
-                if (!(m_nameTable.ContainsKey(name))) {
+            lock(m_nameTable) {
+                if (!m_nameTable.Remove(name)) {
                     throw new NamingContext_package.NotFound(NamingContext_package.NotFoundReason.missing_node, nameComponents);
                 }
-                m_nameTable.Remove(name);
             }
         }
 

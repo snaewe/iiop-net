@@ -225,12 +225,14 @@ namespace Ch.Elca.Iiop.Marshalling {
         public object MapToIdlAbstractInterface(System.Type clsType) {
             // could be cached ...
             return new AbstractInterfaceSerializer(clsType, this, 
-                                                   m_iiopUrlUtil);
+                                                   m_iiopUrlUtil,
+                                                   m_config.ObjSerializationUseConcreteType);
         }
         public object MapToIdlConcreteInterface(System.Type clsType) {
              // can be cached, but because not expensive to create not (yet?) done
             return new ObjRefSerializer(clsType, 
-                                        m_iiopUrlUtil);
+                                        m_iiopUrlUtil,
+                                        m_config.ObjSerializationUseConcreteType);
         }
         public object MapToIdlLocalInterface(System.Type clsType) {
             // local interfaces are non-marshable
@@ -399,6 +401,7 @@ namespace Ch.Elca.Iiop.Marshalling {
         private bool m_stringSerializationAllowNull; // = false
         private bool m_sequenceSerializationAllowNull; // = false
         private bool m_arraySerializationAllowNull; // = false
+        private bool m_objSerializationUseConcreteType; // = false;
 
         #endregion IFields
         #region IConstructors
@@ -457,6 +460,17 @@ namespace Ch.Elca.Iiop.Marshalling {
             }
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        public bool ObjSerializationUseConcreteType {
+            get {
+                return m_objSerializationUseConcreteType;
+            }
+            set {
+                m_objSerializationUseConcreteType = value;
+            }
+        }
         #endregion IProperties
 
     }

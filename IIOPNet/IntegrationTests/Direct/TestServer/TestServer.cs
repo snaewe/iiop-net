@@ -37,6 +37,9 @@ namespace Ch.Elca.Iiop.IntegrationTests {
     public class TestServer {
 
         public static void Main(String[] args) {
+            // Some tests on client side like TestIsACall require marshalling to be done using concrete type and not
+            // exposed interface:
+            omg.org.CORBA.OrbServices.GetSingleton().SerializerFactoryConfig.ObjSerializationUseConcreteType = true;
             // register the channel
             int port = 8087;
             IiopChannel chan = new IiopChannel(port);
