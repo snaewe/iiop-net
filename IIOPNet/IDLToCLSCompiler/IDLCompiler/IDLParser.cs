@@ -34,30 +34,96 @@ public class IDLParser{/*@bgen(jjtree)*/
     private ASTdefinition m_defForPrefix = null;
 
 
-        private Char ParseCharLiteral(String charLiteral) {
-            if (!charLiteral.StartsWith("\\")) {
-                return charLiteral[0];
-            } else if (charLiteral.StartsWith("\\0x")) {
-                Int32 charValHex = Int32.Parse(charLiteral.Substring(3), NumberStyles.AllowHexSpecifier);
-                return Convert.ToChar(charValHex);
-            } else if (charLiteral.Equals("\\0")) {
-                return Convert.ToChar(0);
-            } else if (!charLiteral.StartsWith("\\0")) {
-                Int32 charValDec = Int32.Parse(charLiteral.Substring(1));
-                return Convert.ToChar(charValDec);
-            } else {
-                throw new NotSupportedException("unsupported escape in character literal: " + charLiteral);
-            }
+    // from The Common Object Request Broker: Architecture and Specification, v2.3 (98-12-01.pdf)
+    //
+    // Table 3-5 The Formatting Characters
+    // Description       Abbreviation     ISO 646 Octal Value
+    // alert             BEL              007
+    // backspace         BS               010
+    // horizontal tab    HT               011
+    // newline           NL, LF           012
+    // vertical tab      VT               013
+    // form feed         FF               014
+    // carriage return   CR               015
+    //
+    // Table 3-9 Escape Sequences
+    // Description           Escape Sequence
+    // newline               \n
+    // horizontal tab        \t
+    // vertical tab          \v
+    // backspace             \b
+    // carriage return       \r
+    // form feed             \f
+    // alert                 \a
+    // backslash             \\
+    // question mark         \?
+    // single quote          \'
+    // double quote          \"
+    // octal number          \ooo
+    // hexadecimal number    \xhh
+    // unicode character     \\uhhhh                    - handled in ParseWideCharLiteral
+    //
+    private Char ParseCharLiteral(String charLiteral) {
+        if (!charLiteral.StartsWith("\\"))
+            return charLiteral[0];
+
+        if (charLiteral == "\\n")
+            return '\n';
+
+        if (charLiteral == "\\t")
+            return '\t';
+
+        if (charLiteral == "\\v")
+            return Convert.ToChar(11);                            // JavaCCCS doesn't know '\v' and '\xHH' notations
+
+        if (charLiteral == "\\b")
+            return '\b';
+
+        if (charLiteral == "\\r")
+            return '\r';
+
+        if (charLiteral == "\\f")
+            return '\f';
+
+        if (charLiteral == "\\a")
+            return Convert.ToChar(7);                            // JavaCCCS doesn't know '\v' and '\xHH' notations
+
+        if (charLiteral == "\\\\")
+            return '\\';
+
+        if (charLiteral == "\\?")
+            return '?';
+
+        if (charLiteral == "\\'")
+            return '\'';
+
+        if (charLiteral == "\\\"")
+            return '\"';
+
+        if (charLiteral.StartsWith("\\x") && (charLiteral.Length > 2 && charLiteral.Length < 5)) {
+            Int32 charValHex = Int32.Parse(charLiteral.Substring(2), NumberStyles.AllowHexSpecifier);
+            return Convert.ToChar(charValHex);
         }
 
-        private Char ParseWideCharLiteral(String wideCharLiteral) {
-            if (!wideCharLiteral.StartsWith("\\u")) {
-                return ParseCharLiteral(wideCharLiteral);
-            } else {
-                Int32 charVal = Int32.Parse(wideCharLiteral.Substring(2), NumberStyles.AllowHexSpecifier);
-                return Convert.ToChar(charVal);
-            }
+        if (charLiteral.Equals("\\0"))                            // non-standard literal
+            return Convert.ToChar(0);
+
+        if (charLiteral.Length > 1 && charLiteral.Length < 5) {
+            Int32 charValDec = Convert.ToInt32(charLiteral.Substring(1), 8);
+            return Convert.ToChar(charValDec);
         }
+
+        throw new NotSupportedException("unsupported escape in character literal: " + charLiteral);
+    }
+
+    private Char ParseWideCharLiteral(String wideCharLiteral) {
+        if (!wideCharLiteral.StartsWith("\\u")) {
+            return ParseCharLiteral(wideCharLiteral);
+        } else {
+            Int32 charVal = Int32.Parse(wideCharLiteral.Substring(2), NumberStyles.AllowHexSpecifier);
+            return Convert.ToChar(charVal);
+        }
+    }
 
   public String repIdVal() {
   Token repIdValToken; String result;
@@ -4419,165 +4485,6 @@ public class IDLParser{/*@bgen(jjtree)*/
     finally { jj_save(21, xla); }
   }
 
-  private bool jj_3R_84() {
-    if (jj_3R_107()) return true;
-    return false;
-  }
-
-  private bool jj_3R_72() {
-    if (jj_scan_token(85)) return true;
-    return false;
-  }
-
-  private bool jj_3R_56() {
-    Token xsp;
-    while (true) {
-      xsp = jj_scanpos;
-      if (jj_3R_84()) { jj_scanpos = xsp; break; }
-    }
-    return false;
-  }
-
-  private bool jj_3_16() {
-    if (jj_3R_43()) return true;
-    return false;
-  }
-
-  private bool jj_3R_120() {
-    if (jj_scan_token(62)) return true;
-    if (jj_3R_58()) return true;
-    return false;
-  }
-
-  private bool jj_3_15() {
-    if (jj_3R_42()) return true;
-    return false;
-  }
-
-  private bool jj_3R_71() {
-    if (jj_scan_token(33)) return true;
-    return false;
-  }
-
-  private bool jj_3_14() {
-    if (jj_3R_41()) return true;
-    return false;
-  }
-
-  private bool jj_3R_109() {
-    if (jj_scan_token(18)) return true;
-    return false;
-  }
-
-  private bool jj_3R_108() {
-    if (jj_scan_token(17)) return true;
-    return false;
-  }
-
-  private bool jj_3R_85() {
-    Token xsp;
-    xsp = jj_scanpos;
-    if (jj_3R_108()) {
-    jj_scanpos = xsp;
-    if (jj_3R_109()) return true;
-    }
-    return false;
-  }
-
-  private bool jj_3_13() {
-    if (jj_3R_40()) return true;
-    return false;
-  }
-
-  private bool jj_3_12() {
-    if (jj_3R_39()) return true;
-    return false;
-  }
-
-  private bool jj_3R_70() {
-    Token xsp;
-    xsp = jj_scanpos;
-    if (jj_scan_token(93)) {
-    jj_scanpos = xsp;
-    if (jj_scan_token(94)) return true;
-    }
-    return false;
-  }
-
-  private bool jj_3R_82() {
-    if (jj_3R_85()) return true;
-    return false;
-  }
-
-  private bool jj_3R_43() {
-    Token xsp;
-    xsp = jj_scanpos;
-    if (jj_3R_70()) {
-    jj_scanpos = xsp;
-    if (jj_3R_71()) {
-    jj_scanpos = xsp;
-    if (jj_3R_72()) return true;
-    }
-    }
-    return false;
-  }
-
-  private bool jj_3R_55() {
-    Token xsp;
-    xsp = jj_scanpos;
-    if (jj_3R_82()) jj_scanpos = xsp;
-    if (jj_scan_token(16)) return true;
-    if (jj_3R_58()) return true;
-    xsp = jj_scanpos;
-    if (jj_3R_83()) jj_scanpos = xsp;
-    return false;
-  }
-
-  private bool jj_3R_119() {
-    if (jj_scan_token(61)) return true;
-    if (jj_3R_58()) return true;
-    return false;
-  }
-
-  private bool jj_3R_41() {
-    if (jj_scan_token(IDLParserConstants.WIDECHARACTER)) return true;
-    return false;
-  }
-
-  private bool jj_3R_185() {
-    if (jj_scan_token(60)) return true;
-    return false;
-  }
-
-  private bool jj_3R_57() {
-    if (jj_3R_85()) return true;
-    return false;
-  }
-
-  private bool jj_3R_33() {
-    Token xsp;
-    xsp = jj_scanpos;
-    if (jj_3R_57()) jj_scanpos = xsp;
-    if (jj_scan_token(16)) return true;
-    if (jj_3R_58()) return true;
-    return false;
-  }
-
-  private bool jj_3R_184() {
-    if (jj_scan_token(59)) return true;
-    return false;
-  }
-
-  private bool jj_3R_40() {
-    if (jj_scan_token(IDLParserConstants.WIDESTRING)) return true;
-    return false;
-  }
-
-  private bool jj_3R_157() {
-    if (jj_scan_token(58)) return true;
-    return false;
-  }
-
   private bool jj_3R_152() {
     if (jj_scan_token(57)) return true;
     return false;
@@ -5701,6 +5608,165 @@ public class IDLParser{/*@bgen(jjtree)*/
 
   private bool jj_3R_42() {
     if (jj_scan_token(IDLParserConstants.FIXED)) return true;
+    return false;
+  }
+
+  private bool jj_3R_84() {
+    if (jj_3R_107()) return true;
+    return false;
+  }
+
+  private bool jj_3R_72() {
+    if (jj_scan_token(85)) return true;
+    return false;
+  }
+
+  private bool jj_3R_56() {
+    Token xsp;
+    while (true) {
+      xsp = jj_scanpos;
+      if (jj_3R_84()) { jj_scanpos = xsp; break; }
+    }
+    return false;
+  }
+
+  private bool jj_3_16() {
+    if (jj_3R_43()) return true;
+    return false;
+  }
+
+  private bool jj_3R_120() {
+    if (jj_scan_token(62)) return true;
+    if (jj_3R_58()) return true;
+    return false;
+  }
+
+  private bool jj_3_15() {
+    if (jj_3R_42()) return true;
+    return false;
+  }
+
+  private bool jj_3R_71() {
+    if (jj_scan_token(33)) return true;
+    return false;
+  }
+
+  private bool jj_3_14() {
+    if (jj_3R_41()) return true;
+    return false;
+  }
+
+  private bool jj_3R_109() {
+    if (jj_scan_token(18)) return true;
+    return false;
+  }
+
+  private bool jj_3R_108() {
+    if (jj_scan_token(17)) return true;
+    return false;
+  }
+
+  private bool jj_3R_85() {
+    Token xsp;
+    xsp = jj_scanpos;
+    if (jj_3R_108()) {
+    jj_scanpos = xsp;
+    if (jj_3R_109()) return true;
+    }
+    return false;
+  }
+
+  private bool jj_3_13() {
+    if (jj_3R_40()) return true;
+    return false;
+  }
+
+  private bool jj_3_12() {
+    if (jj_3R_39()) return true;
+    return false;
+  }
+
+  private bool jj_3R_70() {
+    Token xsp;
+    xsp = jj_scanpos;
+    if (jj_scan_token(93)) {
+    jj_scanpos = xsp;
+    if (jj_scan_token(94)) return true;
+    }
+    return false;
+  }
+
+  private bool jj_3R_82() {
+    if (jj_3R_85()) return true;
+    return false;
+  }
+
+  private bool jj_3R_43() {
+    Token xsp;
+    xsp = jj_scanpos;
+    if (jj_3R_70()) {
+    jj_scanpos = xsp;
+    if (jj_3R_71()) {
+    jj_scanpos = xsp;
+    if (jj_3R_72()) return true;
+    }
+    }
+    return false;
+  }
+
+  private bool jj_3R_55() {
+    Token xsp;
+    xsp = jj_scanpos;
+    if (jj_3R_82()) jj_scanpos = xsp;
+    if (jj_scan_token(16)) return true;
+    if (jj_3R_58()) return true;
+    xsp = jj_scanpos;
+    if (jj_3R_83()) jj_scanpos = xsp;
+    return false;
+  }
+
+  private bool jj_3R_119() {
+    if (jj_scan_token(61)) return true;
+    if (jj_3R_58()) return true;
+    return false;
+  }
+
+  private bool jj_3R_41() {
+    if (jj_scan_token(IDLParserConstants.WIDECHARACTER)) return true;
+    return false;
+  }
+
+  private bool jj_3R_185() {
+    if (jj_scan_token(60)) return true;
+    return false;
+  }
+
+  private bool jj_3R_57() {
+    if (jj_3R_85()) return true;
+    return false;
+  }
+
+  private bool jj_3R_33() {
+    Token xsp;
+    xsp = jj_scanpos;
+    if (jj_3R_57()) jj_scanpos = xsp;
+    if (jj_scan_token(16)) return true;
+    if (jj_3R_58()) return true;
+    return false;
+  }
+
+  private bool jj_3R_184() {
+    if (jj_scan_token(59)) return true;
+    return false;
+  }
+
+  private bool jj_3R_40() {
+    if (jj_scan_token(IDLParserConstants.WIDESTRING)) return true;
+    return false;
+  }
+
+  private bool jj_3R_157() {
+    if (jj_scan_token(58)) return true;
     return false;
   }
 

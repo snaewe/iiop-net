@@ -48,30 +48,96 @@ public class IDLParser {
     private ASTdefinition m_defForPrefix = null;
 
 
-        private Char ParseCharLiteral(String charLiteral) {
-            if (!charLiteral.StartsWith("\\")) {
-                return charLiteral[0];
-            } else if (charLiteral.StartsWith("\\0x")) {
-                Int32 charValHex = Int32.Parse(charLiteral.Substring(3), NumberStyles.AllowHexSpecifier);
-                return Convert.ToChar(charValHex);            
-            } else if (charLiteral.Equals("\\0")) {
-                return Convert.ToChar(0);
-            } else if (!charLiteral.StartsWith("\\0")) {
-                Int32 charValDec = Int32.Parse(charLiteral.Substring(1));
-                return Convert.ToChar(charValDec);
-            } else {
-                throw new NotSupportedException("unsupported escape in character literal: " + charLiteral);
-            }
+    // from The Common Object Request Broker: Architecture and Specification, v2.3 (98-12-01.pdf)
+    //
+    // Table 3-5 The Formatting Characters
+    // Description       Abbreviation     ISO 646 Octal Value
+    // alert             BEL              007
+    // backspace         BS               010
+    // horizontal tab    HT               011
+    // newline           NL, LF           012
+    // vertical tab      VT               013
+    // form feed         FF               014
+    // carriage return   CR               015
+    //
+    // Table 3-9 Escape Sequences
+    // Description           Escape Sequence
+    // newline               \n
+    // horizontal tab        \t
+    // vertical tab          \v
+    // backspace             \b
+    // carriage return       \r
+    // form feed             \f
+    // alert                 \a
+    // backslash             \\
+    // question mark         \?
+    // single quote          \'
+    // double quote          \"
+    // octal number          \ooo
+    // hexadecimal number    \xhh
+    // unicode character     \\uhhhh                    - handled in ParseWideCharLiteral
+    //
+    private Char ParseCharLiteral(String charLiteral) {
+        if (!charLiteral.StartsWith("\\"))
+            return charLiteral[0];
+
+        if (charLiteral == "\\n")
+            return '\n';
+
+        if (charLiteral == "\\t")
+            return '\t';
+
+        if (charLiteral == "\\v")
+            return Convert.ToChar(11);                            // JavaCCCS doesn't know '\v' and '\xHH' notations
+
+        if (charLiteral == "\\b")
+            return '\b';
+
+        if (charLiteral == "\\r")
+            return '\r';
+
+        if (charLiteral == "\\f")
+            return '\f';
+
+        if (charLiteral == "\\a")
+            return Convert.ToChar(7);                            // JavaCCCS doesn't know '\v' and '\xHH' notations
+
+        if (charLiteral == "\\\\")
+            return '\\';
+
+        if (charLiteral == "\\?")
+            return '?';
+
+        if (charLiteral == "\\'")
+            return '\'';
+
+        if (charLiteral == "\\\"")
+            return '\"';
+
+        if (charLiteral.StartsWith("\\x") && (charLiteral.Length > 2 && charLiteral.Length < 5)) {
+            Int32 charValHex = Int32.Parse(charLiteral.Substring(2), NumberStyles.AllowHexSpecifier);
+            return Convert.ToChar(charValHex);            
+        }
+        
+        if (charLiteral.Equals("\\0"))                            // non-standard literal
+            return Convert.ToChar(0);
+        
+        if (charLiteral.Length > 1 && charLiteral.Length < 5) {
+            Int32 charValDec = Convert.ToInt32(charLiteral.Substring(1), 8);
+            return Convert.ToChar(charValDec);
         }
 
-        private Char ParseWideCharLiteral(String wideCharLiteral) {
-            if (!wideCharLiteral.StartsWith("\\u")) {
-                return ParseCharLiteral(wideCharLiteral);
-            } else {
-                Int32 charVal = Int32.Parse(wideCharLiteral.Substring(2), NumberStyles.AllowHexSpecifier);
-                return Convert.ToChar(charVal);
-            }
+        throw new NotSupportedException("unsupported escape in character literal: " + charLiteral);
+    }
+
+    private Char ParseWideCharLiteral(String wideCharLiteral) {
+        if (!wideCharLiteral.StartsWith("\\u")) {
+            return ParseCharLiteral(wideCharLiteral);
+        } else {
+            Int32 charVal = Int32.Parse(wideCharLiteral.Substring(2), NumberStyles.AllowHexSpecifier);
+            return Convert.ToChar(charVal);
         }
+    }
 
 
 }
@@ -1563,11 +1629,9 @@ TOKEN :
    | ("\\" (
              ["n","t","v","b","r","f","a","\\","?","'","\""]
             |
-             "0" (["0"-"7"])*
+             (["0"-"7"])+
             |
-             ["1"-"9"] (["0"-"9"])*
-            |
-             ("0x" | "0X") (["0"-"9","a"-"f","A"-"F"])+
+             "x" (["0"-"9","a"-"f","A"-"F"])+
            )
      )
    )
@@ -1577,11 +1641,9 @@ TOKEN :
    | ("\\" (
              ["n","t","v","b","r","f","a","\\","?","'","\""]
             |
-             "0" (["0"-"7"])*
+             (["0"-"7"])+
             |
-             ["1"-"9"] (["0"-"9"])*
-            |
-             ("0x" | "0X") (["0"-"9","a"-"f","A"-"F"])+
+             "x" (["0"-"9","a"-"f","A"-"F"])+
             | 
              "u" (["0"-"9","a"-"f","A"-"F"])+ 
            )
@@ -1593,11 +1655,9 @@ TOKEN :
    | ("\\" (
              ["n","t","v","b","r","f","a","\\","?","'","\""]
             |
-             "0" (["0"-"7"])*
+             (["0"-"7"])+
             |
-             ["1"-"9"] (["0"-"9"])*
-            |
-             ("0x" | "0X") (["0"-"9","a"-"f","A"-"F"])+
+             "x" (["0"-"9","a"-"f","A"-"F"])+
            )
      )
    )*
@@ -1609,9 +1669,7 @@ TOKEN :
             |
              "0" (["0"-"7"])*
             |
-             ["1"-"9"] (["0"-"9"])*
-            |
-             ("0x" | "0X") (["0"-"9","a"-"f","A"-"F"])+
+             "x" (["0"-"9","a"-"f","A"-"F"])+
             |
              // unicode
              "u" (["0"-"9","a"-"f","A"-"F"])+

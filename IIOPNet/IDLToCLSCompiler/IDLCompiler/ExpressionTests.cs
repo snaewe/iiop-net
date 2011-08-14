@@ -601,10 +601,103 @@ namespace Ch.Elca.Iiop.IdlCompiler.Tests
 
             CheckConstantValue("testmod.TestFloatInifinity_Plus", result, Double.PositiveInfinity);
             CheckConstantValue("testmod.TestFloatInifinity_Minus", result, Double.NegativeInfinity);
-
-
-
         }
+
+        private static char OctChar(string s)
+        {
+            return Convert.ToChar(Convert.ToInt32(s, 8));
+        }
+
+        [Test]
+        public void TestCharLiterals()
+        {
+            // idl:
+            m_writer.WriteLine(@"module testmod {");
+            m_writer.WriteLine(@"const char TestCharLiterals_Backslash      = '\\';");
+            m_writer.WriteLine(@"const char TestCharLiterals_QuestionMark   = '\?';");
+            m_writer.WriteLine(@"const char TestCharLiterals_SingleQuote    = '\'';");
+            m_writer.WriteLine(@"const char TestCharLiterals_DoubleQuote    = '\""';");
+            m_writer.WriteLine(@"const char TestCharLiterals_DoubleQuote2   = '""';");
+            m_writer.WriteLine(@"const char TestCharLiterals_NewLine        = '\n';");
+            m_writer.WriteLine(@"const char TestCharLiterals_HTab           = '\t';");
+            m_writer.WriteLine(@"const char TestCharLiterals_VTab           = '\v';");
+            m_writer.WriteLine(@"const char TestCharLiterals_Backspace      = '\b';");
+            m_writer.WriteLine(@"const char TestCharLiterals_CarriageReturn = '\r';");
+            m_writer.WriteLine(@"const char TestCharLiterals_FormFeed       = '\f';");
+            m_writer.WriteLine(@"const char TestCharLiterals_Alert          = '\a';");
+
+            m_writer.WriteLine(@"const char TestCharLiterals_Hex_0          = '\x0';");
+            m_writer.WriteLine(@"const char TestCharLiterals_Hex_1          = '\x1';");
+            m_writer.WriteLine(@"const char TestCharLiterals_Hex_a          = '\xa';");
+            m_writer.WriteLine(@"const char TestCharLiterals_Hex_A          = '\xA';");
+            m_writer.WriteLine(@"const char TestCharLiterals_Hex_F          = '\xF';");
+            m_writer.WriteLine(@"const char TestCharLiterals_Hex_00         = '\x00';");
+            m_writer.WriteLine(@"const char TestCharLiterals_Hex_01         = '\x01';");
+            m_writer.WriteLine(@"const char TestCharLiterals_Hex_a1         = '\xa1';");
+            m_writer.WriteLine(@"const char TestCharLiterals_Hex_1A         = '\x1A';");
+            m_writer.WriteLine(@"const char TestCharLiterals_Hex_F0         = '\xF0';");
+            m_writer.WriteLine(@"const char TestCharLiterals_Hex_EC         = '\xEC';");
+            m_writer.WriteLine(@"const char TestCharLiterals_Hex_fF         = '\xfF';");
+
+            m_writer.WriteLine(@"const char TestCharLiterals_Oct_0          = '\0';");
+            m_writer.WriteLine(@"const char TestCharLiterals_Oct_1          = '\1';");
+            m_writer.WriteLine(@"const char TestCharLiterals_Oct_7          = '\7';");
+            m_writer.WriteLine(@"const char TestCharLiterals_Oct_00         = '\00';");
+            m_writer.WriteLine(@"const char TestCharLiterals_Oct_01         = '\01';");
+            m_writer.WriteLine(@"const char TestCharLiterals_Oct_31         = '\31';");
+            m_writer.WriteLine(@"const char TestCharLiterals_Oct_77         = '\77';");
+            m_writer.WriteLine(@"const char TestCharLiterals_Oct_000        = '\000';");
+            m_writer.WriteLine(@"const char TestCharLiterals_Oct_001        = '\001';");
+            m_writer.WriteLine(@"const char TestCharLiterals_Oct_123        = '\123';");
+            m_writer.WriteLine(@"const char TestCharLiterals_Oct_765        = '\765';");
+            m_writer.WriteLine(@"const char TestCharLiterals_Oct_777        = '\777';");
+            m_writer.WriteLine(@"};");
+            m_writer.Flush();
+            m_writer.BaseStream.Seek(0, SeekOrigin.Begin);
+            Assembly result =
+                CreateIdl(m_writer.BaseStream, GetAssemblyName("ExpressionTest_TestCharLiterals"));
+
+            CheckConstantValue("testmod.TestCharLiterals_Backslash",      result, '\\');
+            CheckConstantValue("testmod.TestCharLiterals_QuestionMark",   result, '?');
+            CheckConstantValue("testmod.TestCharLiterals_SingleQuote",    result, '\'');
+            CheckConstantValue("testmod.TestCharLiterals_DoubleQuote",    result, '"');
+            CheckConstantValue("testmod.TestCharLiterals_DoubleQuote2",   result, '"');
+            CheckConstantValue("testmod.TestCharLiterals_NewLine",        result, '\n');
+            CheckConstantValue("testmod.TestCharLiterals_HTab",           result, '\t');
+            CheckConstantValue("testmod.TestCharLiterals_VTab",           result, '\v');
+            CheckConstantValue("testmod.TestCharLiterals_Backspace",      result, '\b');
+            CheckConstantValue("testmod.TestCharLiterals_CarriageReturn", result, '\r');
+            CheckConstantValue("testmod.TestCharLiterals_FormFeed",       result, '\f');
+            CheckConstantValue("testmod.TestCharLiterals_Alert",          result, '\a');
+
+            CheckConstantValue("testmod.TestCharLiterals_Hex_0",          result, '\x0');
+            CheckConstantValue("testmod.TestCharLiterals_Hex_1",          result, '\x1');
+            CheckConstantValue("testmod.TestCharLiterals_Hex_a",          result, '\xa');
+            CheckConstantValue("testmod.TestCharLiterals_Hex_A",          result, '\xA');
+            CheckConstantValue("testmod.TestCharLiterals_Hex_F",          result, '\xF');
+            CheckConstantValue("testmod.TestCharLiterals_Hex_00",         result, '\x00');
+            CheckConstantValue("testmod.TestCharLiterals_Hex_01",         result, '\x01');
+            CheckConstantValue("testmod.TestCharLiterals_Hex_a1",         result, '\xa1');
+            CheckConstantValue("testmod.TestCharLiterals_Hex_1A",         result, '\x1A');
+            CheckConstantValue("testmod.TestCharLiterals_Hex_F0",         result, '\xF0');
+            CheckConstantValue("testmod.TestCharLiterals_Hex_EC",         result, '\xEC');
+            CheckConstantValue("testmod.TestCharLiterals_Hex_fF",         result, '\xfF');
+
+            CheckConstantValue("testmod.TestCharLiterals_Oct_0",          result, OctChar("0"));
+            CheckConstantValue("testmod.TestCharLiterals_Oct_1",          result, OctChar("1"));
+            CheckConstantValue("testmod.TestCharLiterals_Oct_7",          result, OctChar("7"));
+            CheckConstantValue("testmod.TestCharLiterals_Oct_00",         result, OctChar("00"));
+            CheckConstantValue("testmod.TestCharLiterals_Oct_01",         result, OctChar("01"));
+            CheckConstantValue("testmod.TestCharLiterals_Oct_31",         result, OctChar("31"));
+            CheckConstantValue("testmod.TestCharLiterals_Oct_77",         result, OctChar("77"));
+            CheckConstantValue("testmod.TestCharLiterals_Oct_000",        result, OctChar("000"));
+            CheckConstantValue("testmod.TestCharLiterals_Oct_001",        result, OctChar("001"));
+            CheckConstantValue("testmod.TestCharLiterals_Oct_123",        result, OctChar("123"));
+            CheckConstantValue("testmod.TestCharLiterals_Oct_765",        result, OctChar("765"));
+            CheckConstantValue("testmod.TestCharLiterals_Oct_777",        result, OctChar("777"));
+        }
+
+
 
     }
 
