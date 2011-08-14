@@ -91,7 +91,7 @@ namespace Ch.Elca.Iiop.IdlPreprocessor {
                 get {
                     return m_isConditionTrue;
                 }
-            }            
+            }
         
         }
         
@@ -169,7 +169,7 @@ namespace Ch.Elca.Iiop.IdlPreprocessor {
         }
 
         #endregion IConstructors
-        #region SMethods        
+        #region SMethods
         
         /// <summary>defines a preprocessor symbol</summary>
         public static void AddDefine(String define) {
@@ -187,7 +187,7 @@ namespace Ch.Elca.Iiop.IdlPreprocessor {
         /// <summary>initalizes input and output streams</summary>
         /// <exception cref="System.IO.IOException">Problem with IO, e.g file not found</exception>
         private void Init(FileInfo toProcess) {
-            // for IDL files, latin 1 is used            
+            // for IDL files, latin 1 is used
             if (!toProcess.Exists) {
                 Console.WriteLine("File not found error: " + toProcess.Name);
                 Environment.Exit(2);
@@ -212,28 +212,105 @@ namespace Ch.Elca.Iiop.IdlPreprocessor {
                 return false;
             }
         }
+        
+        private enum CommentTrimmerState {
+            Normal, InStringLiteral, AfterSlash, AfterStar, InBlockComment, InLineComment
+        }
+
+        private CommentTrimmerState state = CommentTrimmerState.Normal;
+
+        private string TrimComments(string line) {
+            if(line == null) {
+                if(state != CommentTrimmerState.Normal) {
+                    throw new PreprocessingException("unterminated block comment");
+                }
+                return line;
+            }
+
+            StringBuilder output = new StringBuilder(line.Length);
+            for (int i = 0; i <= line.Length; ++i) {
+                char c = i < line.Length ? line[i] : '\0';
+                // Console.WriteLine("'{0}' {1} <{2}>", c, state, output);
+                switch(state) {
+                    case CommentTrimmerState.Normal:
+                        if (c == '/') {
+                            state = CommentTrimmerState.AfterSlash;
+                        } else if (c == '"') {
+                            state = CommentTrimmerState.InStringLiteral;
+                            output.Append(c);
+                        } else if (c == '\0') {
+                            // nothing
+                        } else {
+                            output.Append(c);
+                        }
+                        break;
+                    case CommentTrimmerState.InStringLiteral:
+                        if (c == '"') {
+                            state = CommentTrimmerState.Normal;
+                            output.Append(c);
+                        } else if (c == '\0') {
+                            state = CommentTrimmerState.Normal;
+                            // btw, this means unterminated string literal
+                        } else {
+                            output.Append(c);
+                        }
+                        break;
+                    case CommentTrimmerState.AfterSlash:
+                        if (c == '/') {
+                            state = CommentTrimmerState.InLineComment;
+                        } else if (c == '*') {
+                            state = CommentTrimmerState.InBlockComment;
+                        } else if (c == '\0') {
+                            output.Append('/');
+                            state = CommentTrimmerState.Normal;
+                        } else {
+                            output.Append('/');
+                            output.Append(c);
+                            state = CommentTrimmerState.Normal;
+                        }
+                        break;
+                    case CommentTrimmerState.InBlockComment:
+                        if (c == '*') {
+                            state = CommentTrimmerState.AfterStar;
+                        }
+                        break;
+                    case CommentTrimmerState.AfterStar:
+                        if (c == '/') {
+                            state = CommentTrimmerState.Normal;
+                        } else {
+                            state = CommentTrimmerState.InBlockComment;
+                        }
+                        break;
+                    case CommentTrimmerState.InLineComment:
+                        if (c == '\0') {
+                            state = CommentTrimmerState.Normal;
+                        }
+                        break;
+                }
+            }
+            return output.ToString();
+        }
 
         /// <summary>reads one line of text, handling backslash as continuation mark</summary>
         private string ReadInputLine() {
             string result = m_fileStream.ReadLine();
             if (result != null) {
-                result = result.Trim();
                 while (result.EndsWith("\\")) { // continuation
                     result = result.Substring(0, result.Length - 1); // remove trailing \                    
                     string nextLine = m_fileStream.ReadLine();
                     if (nextLine == null) {
-                        throw new PreprocessingException("not allowed to have a \\ as last non-whitespace character in file");
+                        throw new PreprocessingException("backslash (\\) can not be the last character in file");
                     }
-                    result = result + " " + nextLine.Trim();
+                    result = result + " " + nextLine;
                 }
             }
-            return result;
+            return TrimComments(result).Trim();
         }
 
-        /// <summary>preprocess the file</summary>        
+        /// <summary>preprocess the file</summary>
         public void Process() {
             String currentLine = ReadInputLine();
-            while (currentLine != null) {                
+            while (currentLine != null) {
                 if (currentLine.StartsWith("#include")) {
                     ProcessInclude(currentLine);
                 } else if (currentLine.StartsWith("#define")) {
@@ -260,7 +337,7 @@ namespace Ch.Elca.Iiop.IdlPreprocessor {
                 } else {
                     // write the current line to the output stream
                     m_outputStream.WriteLine(currentLine);
-                }                                       
+                }
                 currentLine = ReadInputLine();
             }
             m_fileStream.Close();
@@ -285,7 +362,7 @@ namespace Ch.Elca.Iiop.IdlPreprocessor {
                 fi = new FileInfo(Path.Combine(di.FullName, name));
                 if (fi.Exists) {
                     return fi;
-                }        
+                }
             }
             if (File.Exists(Path.Combine(m_thisFileDirectory.FullName, name))) {
                 // search also in the same directory, then the file containing the include directive
@@ -339,7 +416,7 @@ namespace Ch.Elca.Iiop.IdlPreprocessor {
                 currentLine = resultReader.ReadLine();
             }
             resultReader.Close();
-        }    
+        }
     
         /// <summary>processes a define directive</summary>
         /// <exception cref="Ch.Elca.Iiop.IdlPreprocessor.IllegalPreprocDirectiveException">
@@ -357,7 +434,7 @@ namespace Ch.Elca.Iiop.IdlPreprocessor {
                 throw new IllegalPreprocDirectiveException(currentLine,
                                                   "too much tokens in define directive");
 
-            }            
+            }
             String define = tokens[1];
                 
             String val = "";
@@ -371,17 +448,17 @@ namespace Ch.Elca.Iiop.IdlPreprocessor {
             Debug.WriteLine("defined symbol in preproc: " + define);
         }    
     
-        private void ProcessIfNDef(String currentLine) {        
+        private void ProcessIfNDef(String currentLine) {
             currentLine = currentLine.Trim();
             // split by whitespaces
             String[] tokens = s_tokenSplitEx.Split(currentLine);
             if (tokens.Length <= 1) { 
                 throw new IllegalPreprocDirectiveException(currentLine,
-                                                  "ifndef missing argument");            
+                                                  "ifndef missing argument");
             }
             if (tokens.Length > 2) {
                 throw new IllegalPreprocDirectiveException(currentLine,
-                                                  "too much tokens in ifndef directive");            
+                                                  "too much tokens in ifndef directive");
             }
             String define = tokens[1];
             if (m_defined.ContainsKey(define)) { // throw everything in block away
@@ -398,11 +475,11 @@ namespace Ch.Elca.Iiop.IdlPreprocessor {
             String[] tokens = s_tokenSplitEx.Split(currentLine);
             if (tokens.Length <= 1) { 
                 throw new IllegalPreprocDirectiveException(currentLine,
-                                                  "ifdef missing argument");            
+                                                  "ifdef missing argument");
             }
             if (tokens.Length > 2) {
                 throw new IllegalPreprocDirectiveException(currentLine,
-                                                  "too much tokens in ifdef directive");            
+                                                  "too much tokens in ifdef directive");
             }
             String define = tokens[1];
             if (!m_defined.ContainsKey(define)) { // throw everything in block away
@@ -416,7 +493,7 @@ namespace Ch.Elca.Iiop.IdlPreprocessor {
 
         private void ProcessElse(String currentLine) {
             if (m_ifBlockStack.Count > 0) {
-                IfBlock block = (IfBlock) m_ifBlockStack.Peek();            
+                IfBlock block = (IfBlock) m_ifBlockStack.Peek();
                 if (block.IsConditionTrue) {
                     // if true -> skip else block
                     ReadToEndif();
@@ -431,7 +508,7 @@ namespace Ch.Elca.Iiop.IdlPreprocessor {
                 IfBlock block = (IfBlock) m_ifBlockStack.Pop();        
             } else {
                 throw new PreprocessingException("too much endif's encountered"); 
-            }                
+            }
         }
 
         /// <summary>
