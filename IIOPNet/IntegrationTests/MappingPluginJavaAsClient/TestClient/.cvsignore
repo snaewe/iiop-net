@@ -1,9 +1,0 @@
-bin
-IDL
-org
-Ch
-*.class
-*.jar
-.project
-.classpath
-

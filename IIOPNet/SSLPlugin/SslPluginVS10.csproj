@@ -52,10 +52,6 @@
     <OutputPath>bin\Testing\</OutputPath>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Org.Mentalis.Security, Version=1.0.13.718, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\thirdparty\Org.Mentalis.Security.dll</HintPath>
-    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Xml" />
   </ItemGroup>
@@ -68,6 +64,10 @@
     <ProjectReference Include="..\IIOPChannel\IIOPChannelVS10.csproj">
       <Project>{06B8BCFF-7887-4DCE-B451-0DCA831D4A2D}</Project>
       <Name>IIOPChannel</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\thirdparty\SSL\seclib\SecurityLibraryVS10.csproj">
+      <Project>{5BFA5A70-D384-4417-AFCC-5C744485A85F}</Project>
+      <Name>SecurityLibraryVS10</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />

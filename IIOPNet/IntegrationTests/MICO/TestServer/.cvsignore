@@ -1,5 +1,0 @@
-*.obj
-*.exe
-*.ilk
-service.cc
-service.h

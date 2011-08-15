@@ -1,7 +1,0 @@
-bin
-binSD
-obj
-*.csproj.user
-.#*
-*.bak
-*.old
