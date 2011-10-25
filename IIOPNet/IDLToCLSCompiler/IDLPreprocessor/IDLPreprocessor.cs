@@ -288,7 +288,7 @@ namespace Ch.Elca.Iiop.IdlPreprocessor {
                         break;
                 }
             }
-            return output.ToString();
+            return output.ToString().Trim();
         }
 
         /// <summary>reads one line of text, handling backslash as continuation mark</summary>
@@ -304,7 +304,7 @@ namespace Ch.Elca.Iiop.IdlPreprocessor {
                     result = result + " " + nextLine;
                 }
             }
-            return TrimComments(result).Trim();
+            return TrimComments(result);
         }
 
         /// <summary>preprocess the file</summary>
