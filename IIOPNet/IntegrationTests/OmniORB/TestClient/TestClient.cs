@@ -95,22 +95,22 @@ namespace Ch.Elca.Iiop.IntegrationTests {
             short case0Val = 11;
             arg.Setval0(case0Val);
             TestUnion result = m_testService.EchoTestUnion(arg);
-            Assertion.AssertEquals(case0Val, result.Getval0());
-            Assertion.AssertEquals(0, result.Discriminator);
+            Assert.AreEqual(case0Val, result.Getval0());
+            Assert.AreEqual(0, result.Discriminator);
 
             TestUnion arg2 = new TestUnion();
             int case1Val = 12;
             arg2.Setval1(case1Val, 2);
             TestUnion result2 = m_testService.EchoTestUnion(arg2);
-            Assertion.AssertEquals(case1Val, result2.Getval1());
-            Assertion.AssertEquals(2, result2.Discriminator);
+            Assert.AreEqual(case1Val, result2.Getval1());
+            Assert.AreEqual(2, result2.Discriminator);
 
             TestUnion arg3 = new TestUnion();
             bool case2Val = true;
             arg3.Setval2(case2Val, 7);
             TestUnion result3 = m_testService.EchoTestUnion(arg3);
-            Assertion.AssertEquals(case2Val, result3.Getval2());
-            Assertion.AssertEquals(7, result3.Discriminator);            
+            Assert.AreEqual(case2Val, result3.Getval2());
+            Assert.AreEqual(7, result3.Discriminator);            
         }
 
         [Test]
@@ -119,15 +119,15 @@ namespace Ch.Elca.Iiop.IntegrationTests {
             short case0Val = 11;
             arg.SetvalE0(case0Val);
             TestUnionE result = m_testService.EchoTestUnionE(arg);
-            Assertion.AssertEquals(case0Val, result.GetvalE0());
-            Assertion.AssertEquals(TestEnumForU.A, result.Discriminator);
+            Assert.AreEqual(case0Val, result.GetvalE0());
+            Assert.AreEqual(TestEnumForU.A, result.Discriminator);
 
             TestUnionE arg2 = new TestUnionE();
             TestEnumForU case1Val = TestEnumForU.A;
             arg2.SetvalE1(case1Val, TestEnumForU.B);
             TestUnionE result2 = m_testService.EchoTestUnionE(arg2);
-            Assertion.AssertEquals(case1Val, result2.GetvalE1());
-            Assertion.AssertEquals(TestEnumForU.B, result2.Discriminator);
+            Assert.AreEqual(case1Val, result2.GetvalE1());
+            Assert.AreEqual(TestEnumForU.B, result2.Discriminator);
         }
 
         [Test]
@@ -136,15 +136,15 @@ namespace Ch.Elca.Iiop.IntegrationTests {
             short case0Val = 11;
             arg.Setval0(case0Val);
             TestUnion result = (TestUnion)m_testService.EchoAny(arg);
-            Assertion.AssertEquals(case0Val, result.Getval0());
-            Assertion.AssertEquals(0, result.Discriminator);
+            Assert.AreEqual(case0Val, result.Getval0());
+            Assert.AreEqual(0, result.Discriminator);
 
             TestUnionE arg2 = new TestUnionE();
             TestEnumForU case1Val = TestEnumForU.A;
             arg2.SetvalE1(case1Val, TestEnumForU.B);
             TestUnionE result2 = (TestUnionE)m_testService.EchoAny(arg2);
-            Assertion.AssertEquals(case1Val, result2.GetvalE1());
-            Assertion.AssertEquals(TestEnumForU.B, result2.Discriminator);
+            Assert.AreEqual(case1Val, result2.GetvalE1());
+            Assert.AreEqual(TestEnumForU.B, result2.Discriminator);
         }
 
         [Test]
@@ -156,15 +156,15 @@ namespace Ch.Elca.Iiop.IntegrationTests {
             Any any = new Any(arg, wstringTC);
             
             string result = (string)m_testService.EchoAny(any);
-            Assertion.AssertEquals(arg, result);
+            Assert.AreEqual(arg, result);
 
             // improved implicit mapping (in case of any, don't map to boxed wstringvalue.
             string result2 = (string)m_testService.EchoAny(arg);
-            Assertion.AssertEquals(arg, result2);
+            Assert.AreEqual(arg, result2);
 
             // check extraction on server side with implicit mapping
             string result3 = m_testService.ExtractFromWStringAny(arg);
-            Assertion.AssertEquals(arg, result3);
+            Assert.AreEqual(arg, result3);
         }
 
         [Test]
@@ -176,11 +176,11 @@ namespace Ch.Elca.Iiop.IntegrationTests {
             Any any = new Any(arg, stringTC);
             
             string result = (string)m_testService.EchoAny(any);
-            Assertion.AssertEquals(arg, result);
+            Assert.AreEqual(arg, result);
 
             // check extraction on server side with explicit mapping
             string result3 = m_testService.ExtractFromStringAny(any);
-            Assertion.AssertEquals(arg, result3);
+            Assert.AreEqual(arg, result3);
         }
 
 
@@ -188,17 +188,17 @@ namespace Ch.Elca.Iiop.IntegrationTests {
         public void TestReceivingWStringAsAny() {
             string arg = "test";
             string result = (string)m_testService.RetrieveWStringAsAny(arg);
-            Assertion.AssertEquals(arg, result);
+            Assert.AreEqual(arg, result);
         }
 
         [Test]
         public void TestReceivingStringAsAny() {
             string arg = "test";
             string result = (string)m_testService.RetrieveStringAsAny(arg);
-            Assertion.AssertEquals(arg, result);
+            Assert.AreEqual(arg, result);
             string arg2 = "test2";
             string result2 = (string)m_testService.RetrieveStringAsAny(arg2);
-            Assertion.AssertEquals(arg2, result2);
+            Assert.AreEqual(arg2, result2);
         }
 
         [Test]
@@ -208,27 +208,27 @@ namespace Ch.Elca.Iiop.IntegrationTests {
             arg[1] = new byte[] { 2 };
 
             byte[][] result = (byte[][])m_testService.EchoAny(arg);
-            Assertion.AssertNotNull(result);
-            Assertion.AssertEquals(arg.Length, result.Length);
-            Assertion.AssertEquals(arg[0].Length, result[0].Length);
-            Assertion.AssertEquals(arg[1].Length, result[1].Length);
-            Assertion.AssertEquals(arg[0][0], result[0][0]);
-            Assertion.AssertEquals(arg[1][0], result[1][0]);
+            Assert.IsNotNull(result);
+            Assert.AreEqual(arg.Length, result.Length);
+            Assert.AreEqual(arg[0].Length, result[0].Length);
+            Assert.AreEqual(arg[1].Length, result[1].Length);
+            Assert.AreEqual(arg[0][0], result[0][0]);
+            Assert.AreEqual(arg[1][0], result[1][0]);
 
             byte[][] result2 = m_testService.ExtractFromOctetOfOctetSeqAny(arg);
-            Assertion.AssertNotNull(result2);
-            Assertion.AssertEquals(arg.Length, result2.Length);
-            Assertion.AssertEquals(arg[0].Length, result2[0].Length);
-            Assertion.AssertEquals(arg[1].Length, result2[1].Length);
-            Assertion.AssertEquals(arg[0][0], result2[0][0]);
-            Assertion.AssertEquals(arg[1][0], result2[1][0]);
+            Assert.IsNotNull(result2);
+            Assert.AreEqual(arg.Length, result2.Length);
+            Assert.AreEqual(arg[0].Length, result2[0].Length);
+            Assert.AreEqual(arg[1].Length, result2[1].Length);
+            Assert.AreEqual(arg[0][0], result2[0][0]);
+            Assert.AreEqual(arg[1][0], result2[1][0]);
         }
 
         [Test]
         public void TestPassingSimpleAsAny() {
             int arg = 21;
             int result = (int)m_testService.EchoAny(arg);
-            Assertion.AssertEquals(arg, result);
+            Assert.AreEqual(arg, result);
         }
         
         [Test]
@@ -237,15 +237,15 @@ namespace Ch.Elca.Iiop.IntegrationTests {
             TestEnumForU3 case0Val = TestEnumForU3.A3;
             arg.SetvalE0(case0Val);
             TestUnionE3 result = (TestUnionE3)m_testService.EchoAny(arg);
-            Assertion.AssertEquals(case0Val, result.GetvalE0());
-            Assertion.AssertEquals(TestEnumForU3.A3, result.Discriminator);            
+            Assert.AreEqual(case0Val, result.GetvalE0());
+            Assert.AreEqual(TestEnumForU3.A3, result.Discriminator);            
         }
 
         [Test]
         public void TestReceivingUnknownUnionsAsAny() {
             object result = m_testService.RetrieveUnknownUnion();
-            Assertion.AssertNotNull("union not retrieved", result);
-            Assertion.AssertEquals("type name", "TestUnionE2", result.GetType().FullName);
+            Assert.IsNotNull(result, "union not retrieved");
+            Assert.AreEqual("TestUnionE2", result.GetType().FullName, "type name");
         }
         
         [Test]
@@ -253,16 +253,16 @@ namespace Ch.Elca.Iiop.IntegrationTests {
             int memberElem = 5;
             object result = 
                 m_testService.RetrieveStructWithTypedefMember(memberElem);
-            Assertion.AssertNotNull("test struct with typedef null", result);
-            Assertion.AssertEquals(typeof(StructWithTypedefMember), result.GetType());            
-            Assertion.AssertEquals(memberElem, ((StructWithTypedefMember)result).longtdField);
+            Assert.IsNotNull(result, "test struct with typedef null");
+            Assert.AreEqual(typeof(StructWithTypedefMember), result.GetType());            
+            Assert.AreEqual(memberElem, ((StructWithTypedefMember)result).longtdField);
             // test to receive a typedefed type directly
             int nrOfElems = 1;
             object result2 = m_testService.RetrieveTypedefedSeq(nrOfElems, memberElem);
-            Assertion.AssertNotNull("typedefed seq null", result2);
-            Assertion.AssertEquals(typeof(int[]), result2.GetType());
-            Assertion.AssertEquals(nrOfElems, ((int[])result2).Length);
-            Assertion.AssertEquals(memberElem, ((int[])result2)[0]);
+            Assert.IsNotNull(result2, "typedefed seq null");
+            Assert.AreEqual(typeof(int[]), result2.GetType());
+            Assert.AreEqual(nrOfElems, ((int[])result2).Length);
+            Assert.AreEqual(memberElem, ((int[])result2)[0]);
         }
 
         [Test]
@@ -271,19 +271,18 @@ namespace Ch.Elca.Iiop.IntegrationTests {
             int nrOfElems = 5;
 
             string[] retrieved = m_testService.RetrieveWstringSeq(elem, nrOfElems);
-            Assertion.AssertNotNull("wstring seq not retrieved", retrieved);            
-            Assertion.AssertEquals(nrOfElems, retrieved.Length);
+            Assert.IsNotNull(retrieved, "wstring seq not retrieved");            
+            Assert.AreEqual(nrOfElems, retrieved.Length);
             for (int i = 0; i < retrieved.Length; i++) {
-                Assertion.AssertEquals("array element i:" + i + " not ok; " + retrieved[i],
-                                       elem, retrieved[i]);            
+                Assert.AreEqual(elem, retrieved[i], "array element i:" + i + " not ok; " + retrieved[i]);            
             }
 
             string[] arg = new string[] { "Nr1", "Nr2", "Nr3" };
             string[] result = m_testService.EchoWstringSeq(arg);
-            Assertion.AssertNotNull("wstring seq not retrieved", result);
-            Assertion.AssertEquals(arg.Length, result.Length);
+            Assert.IsNotNull(result, "wstring seq not retrieved");
+            Assert.AreEqual(arg.Length, result.Length);
             for (int i = 0; i < arg.Length; i++) {
-                Assertion.AssertEquals("array element i:" + i + " not ok; " + result[i], arg[i], result[i]);
+                Assert.AreEqual(arg[i], result[i], "array element i:" + i + " not ok; " + result[i]);
             }
         }
 
@@ -300,13 +299,13 @@ namespace Ch.Elca.Iiop.IntegrationTests {
                 }
             }
             string[][] result = m_testService.EchoSeqOfWStringSeq(arg);
-            Assertion.AssertNotNull(result);
-            Assertion.AssertEquals(arg.Length, result.Length);
+            Assert.IsNotNull(result);
+            Assert.AreEqual(arg.Length, result.Length);
             for (int i = 0; i < nrOfOuterElems; i++) {
-                Assertion.AssertNotNull(result[i]);
-                Assertion.AssertEquals(arg[i].Length, result[i].Length);
+                Assert.IsNotNull(result[i]);
+                Assert.AreEqual(arg[i].Length, result[i].Length);
                 for (int j = 0; j < nrOfInnerElems; j++) {
-                    Assertion.AssertEquals(arg[i][j], result[i][j]);
+                    Assert.AreEqual(arg[i][j], result[i][j]);
                 }
             }
             
@@ -316,18 +315,18 @@ namespace Ch.Elca.Iiop.IntegrationTests {
         public void TestBoundedSeq() {
             int[] lengthOk = new int[] { 1, 2, 3 };
             int[] result = m_testService.EchoBoundedSeq(lengthOk);
-            Assertion.AssertNotNull(result);
-            Assertion.AssertEquals(lengthOk.Length, result.Length);
+            Assert.IsNotNull(result);
+            Assert.AreEqual(lengthOk.Length, result.Length);
             for (int i = 0; i < result.Length; i++) {
-                Assertion.AssertEquals(lengthOk[i], result[i]);
+                Assert.AreEqual(lengthOk[i], result[i]);
             }
             
             int[] tooLong = new int[] { 1, 2, 3, 4 };
             try {
                 m_testService.EchoBoundedSeq(tooLong);
-                Assertion.Fail("expected BAD_PARAM exception, because sequence too long, but not thrown");
+                Assert.Fail("expected BAD_PARAM exception, because sequence too long, but not thrown");
             } catch (BAD_PARAM badParamE) {
-                Assertion.AssertEquals(badParamE.Minor, 3434);
+                Assert.AreEqual(badParamE.Minor, 3434);
             }
 
         }
@@ -340,12 +339,12 @@ namespace Ch.Elca.Iiop.IntegrationTests {
                 arg[i] = innerSeqLengthOk;
             }
             byte[][] result = m_testService.EchoUuids(arg);
-            Assertion.AssertNotNull(result);
-            Assertion.AssertEquals(arg.Length, result.Length);
+            Assert.IsNotNull(result);
+            Assert.AreEqual(arg.Length, result.Length);
             for (int i = 0; i < result.Length; i++) {
-                Assertion.AssertEquals(arg[i].Length, result[i].Length);
+                Assert.AreEqual(arg[i].Length, result[i].Length);
                 for (int j = 0; j < result[i].Length; j++) {
-                    Assertion.AssertEquals(arg[i][j], result[i][j]);
+                    Assert.AreEqual(arg[i][j], result[i][j]);
                 }
             }          
 
@@ -357,9 +356,9 @@ namespace Ch.Elca.Iiop.IntegrationTests {
             }
             try {
                 byte[][] result2 = m_testService.EchoUuids(argNotOk);
-                Assertion.Fail("expected BAD_PARAM exception, because sequence too long, but not thrown");
+                Assert.Fail("expected BAD_PARAM exception, because sequence too long, but not thrown");
             } catch(BAD_PARAM badParamE) {
-                Assertion.AssertEquals(badParamE.Minor, 3434);
+                Assert.AreEqual(badParamE.Minor, 3434);
             }
         }
 
@@ -369,12 +368,12 @@ namespace Ch.Elca.Iiop.IntegrationTests {
             int innerLength = 4;
             byte elemVal = 2;
             byte[][] result = (byte[][])m_testService.RetrieveUuidAsAny(outerLength, innerLength, elemVal);
-            Assertion.AssertNotNull(result);
-            Assertion.AssertEquals("wrong nr of Uuid elements", outerLength, result.Length);
+            Assert.IsNotNull(result);
+            Assert.AreEqual(outerLength, result.Length, "wrong nr of Uuid elements");
             for (int i = 0; i < result.Length; i++) {
-                Assertion.AssertEquals(innerLength, result[i].Length);
+                Assert.AreEqual(innerLength, result[i].Length);
                 for (int j = 0; j < result[i].Length; j++) {
-                    Assertion.AssertEquals(elemVal, result[i][j]);
+                    Assert.AreEqual(elemVal, result[i][j]);
                 }
             }
         }
@@ -384,8 +383,8 @@ namespace Ch.Elca.Iiop.IntegrationTests {
             TestService_package.InnerStruct arg = new TestService_package.InnerStruct();
             arg.Field1 = 21;
             TestService_package.InnerStruct result = m_testService.EchoInnerStruct(arg);
-            Assertion.AssertNotNull(result);
-            Assertion.AssertEquals(arg.Field1, result.Field1);
+            Assert.IsNotNull(result);
+            Assert.AreEqual(arg.Field1, result.Field1);
         }
 
         [Test]
@@ -394,10 +393,10 @@ namespace Ch.Elca.Iiop.IntegrationTests {
             arg.seq = new RecStruct[1];
             arg.seq[0].seq = new RecStruct[0]; // a null sequence is not allowed
             RecStruct result = m_testService.EchoRecStruct(arg);
-            Assertion.AssertNotNull(result);
-            Assertion.AssertNotNull(result.seq);
-            Assertion.AssertEquals(arg.seq.Length, result.seq.Length);
-            Assertion.AssertNotNull(result.seq[0]);
+            Assert.IsNotNull(result);
+            Assert.IsNotNull(result.seq);
+            Assert.AreEqual(arg.seq.Length, result.seq.Length);
+            Assert.IsNotNull(result.seq[0]);
         }
 
         [Test]
@@ -407,14 +406,14 @@ namespace Ch.Elca.Iiop.IntegrationTests {
             st1.msg = "msg";
             st1.sType = SimpleEnum.S2;
             SimpleStruct res1 = m_testService.EchoSimpleStruct(st1);
-            Assertion.AssertEquals("st1.code", st1.code, res1.code);
-            Assertion.AssertEquals("st1.msg", st1.msg, res1.msg);
-            Assertion.AssertEquals("st1.sType", st1.sType, res1.sType);
+            Assert.AreEqual(st1.code, res1.code, "st1.code");
+            Assert.AreEqual(st1.msg, res1.msg, "st1.msg");
+            Assert.AreEqual(st1.sType, res1.sType, "st1.sType");
             SimpleStruct st2 = new SimpleStruct(2, "msg2", SimpleEnum.S3);
             SimpleStruct res2 = m_testService.EchoSimpleStruct(st2);
-            Assertion.AssertEquals("st2.code", st2.code, res2.code);
-            Assertion.AssertEquals("st2.msg", st2.msg, res2.msg);
-            Assertion.AssertEquals("st2.sType", st2.sType, res2.sType);            
+            Assert.AreEqual(st2.code, res2.code, "st2.code");
+            Assert.AreEqual(st2.msg, res2.msg, "st2.msg");
+            Assert.AreEqual(st2.sType, res2.sType, "st2.sType");            
         }
 
 
@@ -422,21 +421,21 @@ namespace Ch.Elca.Iiop.IntegrationTests {
         public void TestWChar() {
             char arg = 'a';
             char result = m_testService.EchoWChar(arg);
-            Assertion.AssertEquals(arg, result);
+            Assert.AreEqual(arg, result);
         }
 
         [Test]
         public void TestWString() {
             string arg = "test";
             string result = m_testService.EchoWString(arg);
-            Assertion.AssertEquals(arg, result);
+            Assert.AreEqual(arg, result);
         }
 
         [Test]
         public void TestString() {
             string arg = "test";
             string result = m_testService.EchoString(arg);
-            Assertion.AssertEquals(arg, result);
+            Assert.AreEqual(arg, result);
         }
         
         [Test]
@@ -444,10 +443,10 @@ namespace Ch.Elca.Iiop.IntegrationTests {
             int[] argSeq = new int[] { 1, 2, 3 };
             m_testService._sequence = argSeq;
             int[] resultSeq = m_testService._sequence;
-            Assertion.AssertNotNull("property int seq null", resultSeq);
-            Assertion.AssertEquals(argSeq.Length, resultSeq.Length);
+            Assert.IsNotNull(resultSeq, "property int seq null");
+            Assert.AreEqual(argSeq.Length, resultSeq.Length);
             for (int i = 0; i < argSeq.Length; i++) {
-                Assertion.AssertEquals("wrong seq entry", argSeq[i], resultSeq[i]);
+                Assert.AreEqual(argSeq[i], resultSeq[i], "wrong seq entry");
             }            
         }
         
@@ -455,21 +454,21 @@ namespace Ch.Elca.Iiop.IntegrationTests {
         public void TestIdlKeyWordMethodNames() {
             byte arg = 39;
             byte result = m_testService._octet(arg);
-            Assertion.AssertEquals("wrong result octet-call", arg, result);
+            Assert.AreEqual(arg, result, "wrong result octet-call");
         }
 
         [Test]
         public void TestULongAsAny() {
             int arg = 74;
             int result = (int) m_testService.RetrieveULongAsAny(arg);
-            Assertion.AssertEquals("wrong result of retrieveULongAsAny", arg, result);
+            Assert.AreEqual(arg, result, "wrong result of retrieveULongAsAny");
             
             OrbServices orb = OrbServices.GetSingleton();
             int arg2 = 89;
             omg.org.CORBA.TypeCode ulongTC = orb.create_ulong_tc();
             Any any = new Any(arg2, ulongTC);
             int result2 = m_testService.ExtractFromULongAny(any);
-            Assertion.AssertEquals("wrong result of ExtractFromULongAny", arg2, result2);
+            Assert.AreEqual(arg2, result2, "wrong result of ExtractFromULongAny");
         }
 
         [Test]
@@ -477,20 +476,20 @@ namespace Ch.Elca.Iiop.IntegrationTests {
             OrbServices orb = OrbServices.GetSingleton();
             int arg = 74;
             int result = (int)m_testService.RetrieveLongTypeDefAsAny(arg);
-            Assertion.AssertEquals("result of RetrieveLongTypeDefAsAny", arg, result);
+            Assert.AreEqual(arg, result, "result of RetrieveLongTypeDefAsAny");
 
             int arg2 = 91;
             omg.org.CORBA.TypeCode argTC = orb.create_tc_for(arg2);
             omg.org.CORBA.TypeCode longTD_TC = orb.create_alias_tc("IDL:longTD:1.0", "longTD", argTC);
             Any any = new Any(arg2, longTD_TC);
             int result2 = m_testService.ExtractFromLongTypeDef(any);
-            Assertion.AssertEquals("result of ExtractFromLongTypeDef", arg2, result2);
+            Assert.AreEqual(arg2, result2, "result of ExtractFromLongTypeDef");
         }
 
         [Test]
         public void TestNullAsAny() {
             object result = m_testService.EchoAny(null);
-            Assertion.AssertNull("result not null", result);
+            Assert.IsNull(result, "result not null");
         }
 
         [Test]
@@ -499,11 +498,11 @@ namespace Ch.Elca.Iiop.IntegrationTests {
             omg.org.CORBA.TypeCode nilRefTC = orb.create_tc_for_type(typeof(System.MarshalByRefObject));
             Any nilRefAny = new Any(null, nilRefTC);
             object result = m_testService.EchoAny(nilRefAny);
-            Assertion.AssertNull("result not null", result);
+            Assert.IsNull(result, "result not null");
 
             Any nilRefAny2 = new Any(null, orb.create_interface_tc(String.Empty, String.Empty));
             object result2 = m_testService.EchoAny(nilRefAny2);
-            Assertion.AssertNull("result not null", result2);
+            Assert.IsNull(result2, "result not null");
         }
 
         [Test]
@@ -513,7 +512,7 @@ namespace Ch.Elca.Iiop.IntegrationTests {
             Binding[] bindings;
             BindingIterator bindingIterator;
             nameService.list(10, out bindings, out bindingIterator);
-            Assertion.Assert("nr of bindings too small", (bindings.Length > 0));
+            Assert.IsTrue((bindings.Length > 0), "nr of bindings too small");
 
             bool found  = false;
             foreach (Binding binding in bindings) {
@@ -523,16 +522,16 @@ namespace Ch.Elca.Iiop.IntegrationTests {
                     break;
                 }
             }
-            Assertion.Assert("service not found", found);
+            Assert.IsTrue(found, "service not found");
         }
 
         [Test]
         public void TestOneDimIdlIntArray() {
             int[] arg = new int[] { 1, 2, 3, 4, 5 };
             int[] result = m_testService.EchoIntList5(arg);
-            Assertion.AssertEquals(arg.Length, result.Length);
+            Assert.AreEqual(arg.Length, result.Length);
             for (int i = 0; i < arg.Length; i++) {
-                Assertion.AssertEquals(arg[i], result[i]);
+                Assert.AreEqual(arg[i], result[i]);
             }            
         }
 
@@ -540,9 +539,9 @@ namespace Ch.Elca.Iiop.IntegrationTests {
         public void TestOneDimIdlStringArray() {
             string[] arg = new string[] { "1", "2", "3", "4", "5" };
             string[] result = m_testService.EchoStringList5(arg);
-            Assertion.AssertEquals(arg.Length, result.Length);
+            Assert.AreEqual(arg.Length, result.Length);
             for (int i = 0; i < arg.Length; i++) {
-                Assertion.AssertEquals(arg[i], result[i]);
+                Assert.AreEqual(arg[i], result[i]);
             }            
         }
 
@@ -550,11 +549,11 @@ namespace Ch.Elca.Iiop.IntegrationTests {
         public void TestTwoDimIdlIntArray() {
             int[,] arg = new int[,] { {1, 2}, {3, 4} };
             int[,] result = m_testService.EchoInt2Dim2x2(arg);
-            Assertion.AssertEquals(arg.GetLength(0), result.GetLength(0));
-            Assertion.AssertEquals(arg.GetLength(1), result.GetLength(1));
+            Assert.AreEqual(arg.GetLength(0), result.GetLength(0));
+            Assert.AreEqual(arg.GetLength(1), result.GetLength(1));
             for (int i = 0; i < arg.GetLength(0); i++) {
                 for (int j = 0; j < arg.GetLength(1); j++) {
-                    Assertion.AssertEquals(arg[i,j], result[i,j]);
+                    Assert.AreEqual(arg[i,j], result[i,j]);
                 }
             }            
         }
@@ -565,10 +564,10 @@ namespace Ch.Elca.Iiop.IntegrationTests {
             arg.ident = 1;
             arg.data = new int[] { 1, 2, 3 };
             BlobData result = m_testService.EchoBlobData(arg);    
-            Assertion.AssertEquals(arg.ident, result.ident);
-            Assertion.AssertEquals(arg.data.Length, result.data.Length);
+            Assert.AreEqual(arg.ident, result.ident);
+            Assert.AreEqual(arg.data.Length, result.data.Length);
             for (int i = 0; i < arg.data.Length; i++) {
-                Assertion.AssertEquals(arg.data[i], result.data[i]);
+                Assert.AreEqual(arg.data[i], result.data[i]);
             }            
         }
 
@@ -577,42 +576,42 @@ namespace Ch.Elca.Iiop.IntegrationTests {
             TestService_package.InnerStruct arg = new TestService_package.InnerStruct(1);
             TestService_package.InnerStruct result = 
                 (TestService_package.InnerStruct)m_testService.EchoAny(arg);
-            Assertion.AssertEquals("arg.Field1", arg.Field1, result.Field1);
+            Assert.AreEqual(arg.Field1, result.Field1, "arg.Field1");
 
             TestService_package.InnerStruct result2 = 
                 (TestService_package.InnerStruct)m_testService.RetrieveInnerStructAsAny(arg);
-            Assertion.AssertEquals("arg.Field1", arg.Field1, result2.Field1);
+            Assert.AreEqual(arg.Field1, result2.Field1, "arg.Field1");
 
             TestService_package._Event argEvent = new TestService_package._Event(1);
             TestService_package._Event resultEvent = 
                 (TestService_package._Event)m_testService.EchoAny(argEvent);
-            Assertion.AssertEquals("argEvent.EventId", argEvent.EventId, resultEvent.EventId);
+            Assert.AreEqual(argEvent.EventId, resultEvent.EventId, "argEvent.EventId");
 
             TestService_package._Event resultEvent2 = 
                 (TestService_package._Event)m_testService.RetrieveEventAsAny(argEvent);
-            Assertion.AssertEquals("argEvent.EventId", argEvent.EventId, resultEvent2.EventId);            
+            Assert.AreEqual(argEvent.EventId, resultEvent2.EventId, "argEvent.EventId");            
         }
         
         [Test]
         public void TestMBRTypesWithReservedNameCollisions() {
             CCE._Assembly asm = m_testService.CreateAsm();
-            Assertion.AssertNotNull("asm not created", asm);
+            Assert.IsNotNull(asm, "asm not created");
 
 /*            CCE.N_Assembly _asm = m_testService.Create_Asm();
-            Assertion.AssertNotNull("_asm not created", _asm); */
+            Assert.IsNotNull("_asm not created", _asm); */
         }
 
         [Test]
         public void TestIsAServiceWithServerSideIf() {
             // most specific interface of the remote object is known on 
             // the server side only
-            Assertion.Assert("wrong public type info",
+            Assert.IsTrue(
                       m_orb.is_a(m_testServiceInternalIf,
-                                 "IDL:TestSimpleServicePublic:1.0"));
+                                 "IDL:TestSimpleServicePublic:1.0"), "wrong public type info");
 
-            Assertion.Assert("wrong server only type info",
+            Assert.IsTrue(
                       m_orb.is_a(m_testServiceInternalIf,
-                                 "IDL:TestSimpleServicePublic:1.0"));
+                                 "IDL:TestSimpleServicePublic:1.0"), "wrong server only type info");
 
         }
 
@@ -623,7 +622,7 @@ namespace Ch.Elca.Iiop.IntegrationTests {
             int arg = 1;
             int result = 
                 m_testServiceInternalIf.EchoLong(arg);
-            Assertion.AssertEquals(arg, result);
+            Assert.AreEqual(arg, result);
         }
 
         [Test]
@@ -632,7 +631,7 @@ namespace Ch.Elca.Iiop.IntegrationTests {
                 m_orb.object_to_string(m_testServiceInternalIf);
             Ch.Elca.Iiop.CorbaObjRef.Ior forObj = new 
                 Ch.Elca.Iiop.CorbaObjRef.Ior(objToString);
-            Assertion.AssertEquals("IDL:Internal/TestSimpleServiceInternal:1.0",
+            Assert.AreEqual("IDL:Internal/TestSimpleServiceInternal:1.0",
                                    forObj.TypID);
         }
 
