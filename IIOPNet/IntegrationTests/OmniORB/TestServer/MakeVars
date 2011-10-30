@@ -9,7 +9,7 @@ OMNI_DYNAMIC_LIB = omniDynamic$(OMNIORB_VERSION)_rt.lib
 
 
 CORBA_CPPFLAGS = -D__WIN32__ -D_WIN32_WINNT=0x0400 -D__x86__ -D__NT__ \
-                 -D__OSVERSION__=4
+                 -D__OSVERSION__=4 /Zc:wchar_t- 
 CORBA_LIB      = omniORB$(OMNIORB_VERSION)_rt.lib omnithread$(OMNITHREAD_VERSION)_rt.lib \
                  $(OMNI_DYNAMIC_LIB) \
                  ws2_32.lib mswsock.lib advapi32.lib \
