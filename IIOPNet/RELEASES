@@ -1,3 +1,6 @@
+version 1.9.3 (22 february 2012)
+- fixed compilation issue
+
 version 1.9.2 (24 september 2011)
 - updated solution files to Visual Studio 2010
 - updated nunit version to 2.5.10
