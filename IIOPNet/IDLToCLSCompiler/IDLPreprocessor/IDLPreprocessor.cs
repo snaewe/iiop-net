@@ -277,6 +277,8 @@ namespace Ch.Elca.Iiop.IdlPreprocessor {
                     case CommentTrimmerState.AfterStar:
                         if (c == '/') {
                             state = CommentTrimmerState.Normal;
+                        } else if (c == '*') {
+                            state = CommentTrimmerState.AfterStar;
                         } else {
                             state = CommentTrimmerState.InBlockComment;
                         }
